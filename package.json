@@ -1,0 +1,67 @@
+{
+  "name": "petya-desktop",
+  "version": "0.8.3",
+  "private": true,
+  "description": "Контекстный голосовой помощник для macOS и Windows",
+  "author": "Petya",
+  "main": "src/main.cjs",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node tests/service-access.cjs && node tests/media.cjs && node tests/telegram.cjs && node tests/company-integrations.cjs && node tests/companies.cjs && node tests/team.cjs && node tests/build-repair.cjs && node tests/build-question.cjs && node tests/review-assistant.cjs && node tests/context-reference.cjs && node tests/slack-log.cjs && node tests/attachments.cjs && node tests/web-search.cjs && node tests/gmail-accounts.cjs && node tests/mail-skills.cjs && node tests/assistant-next.cjs && node tests/personal-dictionary.cjs && node tests/task-progress.cjs && node tests/interpretation.cjs && node tests/audio-onset.cjs && node tests/learning.cjs && node tests/dialogue.cjs && node tests/agent-delivery.cjs && node tests/do-command.cjs && node tests/voice-turn.cjs && node tests/jira-routing.cjs && node tests/modules.cjs && node tests/core.cjs && node tests/workspace.cjs && node tests/history.cjs && node tests/notion.cjs && node tests/connections.cjs && node tests/speech.cjs && node tests/agents.cjs && node tests/context-monitor.cjs && node tests/slack-selectors.cjs && node tests/capture.cjs && node tests/ollama.cjs && node tests/atlassian-oauth.cjs && node oauth/server/test.cjs && node tests/service-oauth.cjs && node oauth/server/test-providers.cjs && node tests/ollama-install.cjs && node tests/zoom-permission.cjs && node tests/ollama-ready.cjs && node tests/permissions.cjs && node tests/asana.cjs && node tests/jira-selection.cjs && node tests/meeting-context.cjs",
+    "pack": "python3 scripts/build.py --mac",
+    "dist:mac": "python3 scripts/build.py --mac",
+    "dist:win": "python3 scripts/build.py --win",
+    "icons:mac": "node scripts/build-icons.cjs",
+    "build:native:mac": "mkdir -p assets/native && xcrun swiftc native/watch-macos.swift -o assets/native/watch-macos",
+    "build": "python3 scripts/build.py"
+  },
+  "devDependencies": {
+    "electron": "43.8.6",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.petya.desktop",
+    "productName": "Petya",
+    "files": [
+      "src/**/*",
+      "assets/**/*"
+    ],
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.productivity",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Петя слушает голосовые команды и контекст встречи, когда вы включаете микрофон.",
+        "NSAudioCaptureUsageDescription": "Петя расшифровывает звук встречи для контекста команд.",
+        "NSScreenCaptureUsageDescription": "Петя использует системный захват для звука встречи. Изображение не сохраняется.",
+        "LSUIElement": true
+      },
+      "icon": "assets/app-icon.icns",
+      "forceCodeSigning": true
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/app-icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "assets/app-icon.ico",
+      "uninstallerIcon": "assets/app-icon.ico",
+      "include": "scripts/installer.nsh",
+      "allowElevation": false,
+      "artifactName": "Petya-Setup.exe"
+    },
+    "asarUnpack": [
+      "assets/native/*",
+      "src/watch-windows.ps1",
+      "src/slack-view.ps1"
+    ]
+  }
+}

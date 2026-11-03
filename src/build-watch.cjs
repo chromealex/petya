@@ -1,0 +1,28 @@
+const {createHash,randomUUID}=require('node:crypto');
+const {threadURL}=require('./slack-log.cjs');
+const hash=text=>createHash('sha256').update(text).digest('hex');
+function messageText(m){return [m.text,...(m.attachments||[]).flatMap(a=>[a.title,a.text,a.fallback]),...(m.blocks||[]).flatMap(b=>[b.text?.text,...(b.fields||[]).map(f=>f.text)])].filter(Boolean).join('\n').slice(0,30000);}
+function buildIds(text){return [...new Set([...text.matchAll(/(?:build|билд(?:ом|а)?|сборк[а-иу]|pipeline)\s*(?:#|№|id\s*[:=]?\s*)?([\w.-]*\d[\w.-]*)/giu)].map(m=>m[1]))];}
+function terminal(m,build){if(!m.bot_id&&m.subtype!=='bot_message')return '';const text=messageText(m);if(!buildIds(text).includes(build))return '';const pass=/(?:build|pipeline|сборк[аи]|билд)[^\n]{0,100}(?:succeeded|successful|passed|успешн)|BUILD SUCCESS(?:FUL)?/iu.test(text);const fail=/(?:build|pipeline|сборк[аи]|билд)[^\n]{0,100}(?:failed|failure|упал|упала|провален)|BUILD FAILED/iu.test(text);return pass===fail?'':pass?'completed':'failed';}
+class BuildWatch {
+ constructor({state,save,request,settings,enabled,notify,now=Date.now}){Object.assign(this,{state,save,request,settings,enabled,notify,now});this.busy=false;this.next=0;this.epoch=0;}
+ reset(){this.epoch++;}
+ async page(url,cursor=''){const u=new URL(threadURL(url)||'invalid'),p=u.pathname.split('/'),digits=p[3].slice(1);const query={channel:p[2],ts:digits.slice(0,-6)+'.'+digits.slice(-6),limit:'15',...cursor?{cursor}:{}};const data=await this.request('https://slack.com/api/conversations.replies?'+new URLSearchParams(query),{headers:{Authorization:'Bearer '+(this.settings().slackToken||'')}});if(!data.ok)throw Error(data.error||'Slack недоступен');if(data.has_more&&!data.response_metadata?.next_cursor)throw Error('Slack не вернул курсор следующей страницы');return data;}
+ async start(topic,build){if(!this.enabled())throw Error('Включите Slack и подключите аккаунт.');if(!threadURL(topic?.slackSource?.url))throw Error('Не удалось определить ссылку на тред. Сначала откройте и разберите нужный тред Slack.');if(!build||build.length>100)throw Error('Укажите номер билда: «следи за билдом 123».');const existing=this.state.watches.find(w=>w.url===topic.slackSource.url&&w.build===build&&w.status==='watching');if(existing)return existing;if(this.state.watches.filter(w=>w.status==='watching').length>=10)throw Error('Уже отслеживаются десять билдов. Остановите ненужные наблюдения.');
+ const row={id:randomUUID(),topicId:topic.id,url:topic.slackSource.url,build,status:'watching',account:hash(this.settings().slackCredential||this.settings().slackToken||''),at:this.now(),expires:this.now()+86400000,seen:{},results:{},baseline:true,cursor:'',pages:0,lastPoll:0,error:''};this.state.watches.push(row);this.save();return row;}
+ stop(topicId){let count=0;for(const row of this.state.watches)if(row.status==='watching'&&(!topicId||row.topicId===topicId)){row.status='cancelled';count++;}this.reset();this.save();return count;}
+ async tick(){if(this.busy||!this.enabled()||this.now()<this.next)return;this.busy=true;const epoch=this.epoch;
+ try{const rows=this.state.watches.filter(w=>w.status==='watching');for(const row of rows)if(row.account!==hash(this.settings().slackCredential||this.settings().slackToken||'')){row.status='paused';this.save();this.notify('Наблюдение за билдом '+row.build+' остановлено: аккаунт Slack изменён.');}for(const row of rows)if(row.status==='watching'&&row.expires<=this.now()){row.status='expired';this.save();this.notify('Билд '+row.build+': за сутки результат в треде Slack не найден. Наблюдение завершено.');}
+ const row=rows.filter(w=>w.status==='watching').sort((a,b)=>a.lastPoll-b.lastPoll)[0];if(!row)return;row.lastPoll=this.now();this.next=this.now()+61000;this.save();
+ try{const data=await this.page(row.url,row.cursor);if(epoch!==this.epoch||!this.enabled()||row.status!=='watching'||!this.state.watches.includes(row))return;
+ const messages=data.messages||[];let outcome;
+ for(const m of messages){if(!/^\d+\.\d+$/.test(m.ts||''))continue;const content=messageText(m),signature=hash(content),old=row.seen[m.ts];row.seen[m.ts]=signature;const status=terminal(m,row.build);row.results ||= {};const previousStatus=row.results[m.ts]||'';row.results[m.ts]=status;if(status&&(old?old!==signature&&previousStatus!==status:Number(m.ts)*1000>=row.at))outcome={status,text:content,url:row.url.replace(/p\d+/,'p'+m.ts.replace('.',''))};}
+ row.error='';row.cursor=(data.response_metadata?.next_cursor||'').trim();row.pages++;
+ if(outcome){row.status=outcome.status;row.result=outcome;row.cursor='';this.save();this.notify('Билд '+row.build+': '+(outcome.status==='completed'?'успешно завершён':'упал')+' — по сообщению бота в Slack.');return;}
+ if(row.cursor&&row.pages>=100){row.status='paused';row.error='Тред слишком длинный: наблюдение требует уточнения.';this.save();this.notify('Билд '+row.build+': '+row.error);return;}
+ if(!row.cursor){row.baseline=false;row.pages=0;const ids=Object.keys(row.seen).sort((a,b)=>Number(b)-Number(a));row.seen=Object.fromEntries(ids.slice(0,1500).map(id=>[id,row.seen[id]]));row.results=Object.fromEntries(ids.slice(0,1500).map(id=>[id,row.results?.[id]||'']));}
+ this.save();
+ }catch(e){if(epoch!==this.epoch||row.status!=='watching')return;this.next=this.now()+Math.max(61000,Number(e.retryAfter||0)*1000);const error=String(e.message).slice(0,300);const first=!row.error;row.error=error;this.save();if(first&&e.status!==429)this.notify('Билд '+row.build+': не могу проверить Slack. '+error);}
+ }finally{this.busy=false;}}
+}
+module.exports={BuildWatch,buildIds,terminal,messageText};

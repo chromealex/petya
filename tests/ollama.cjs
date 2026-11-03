@@ -1,0 +1,10 @@
+const assert = require('node:assert/strict');
+const { findOllamaApp } = require('../src/ollama.cjs');
+const home = 'C:\\Users\\Test User';
+const app = home + '\\AppData\\Local\\Programs\\Ollama\\ollama app.exe';
+assert.equal(findOllamaApp('win32', home, {}, p => p === app), app);
+assert.equal(findOllamaApp('win32', home, { PATH: 'D:\\Custom Ollama;relative' }, p => p === 'D:\\Custom Ollama\\ollama app.exe'), 'D:\\Custom Ollama\\ollama app.exe');
+assert.equal(findOllamaApp('win32', home, {}, () => false), undefined);
+assert.equal(findOllamaApp('darwin', '/Users/test', {}, p => p === '/Applications/Ollama.app'), '/Applications/Ollama.app');
+assert.equal(findOllamaApp('linux', '/home/test', {}, () => true), undefined);
+console.log('Ollama application discovery passed.');

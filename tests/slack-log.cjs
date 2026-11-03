@@ -1,0 +1,24 @@
+const assert=require('node:assert/strict');
+const {SlackLogs,isLogQuestion,downloadLog,threadURL,excerpt}=require('../src/slack-log.cjs');
+const {ContextStore}=require('../src/context-store.cjs');
+(async()=>{
+ assert(isLogQuestion('почему билд падает в этом логе'));assert(isLogQuestion('разбери лог в слаке'));assert(!isLogQuestion('сколько багов по последней версии'));
+ assert(!threadURL('https://evil.slack.com.evil.test/archives/C123/p1234567890123456'));
+ let now=1700000000000,view={thread:true,title:'Threads',text:'Thread\nCI build\nError: Cannot find module ./modules.cjs',urls:[]};
+ const store=new ContextStore({now:()=>now,save:()=>{}});let requests=0;
+ const reader=new SlackLogs({store,now:()=>now,settings:()=>({}),read:async()=>view,request:async()=>{requests++;return {ok:true,messages:[]}},token:async()=>''});
+ let result=await reader.collect();assert.match(result.attachments[0].text,/Cannot find module/);assert.equal(requests,0);
+ now+=5000;view={thread:true,text:'Thread\nHello unrelated discussion'};await reader.observe();result=await reader.collect();assert.match(result.attachments[0].text,/Cannot find module/);
+ view={thread:false,text:'Error: channel history is not an opened thread'};await reader.observe();assert.equal(store.items.length,2);
+ store.clear();await assert.rejects(()=>reader.collect(),/Нет сохранённых/);
+ view={thread:true,text:'Thread\nPlease inspect release.log',urls:[]};store.put([{id:'slack:C123:1700000000.000000',source:'Slack',url:'https://app.slack.com/archives/C123/p1700000000000000',at:now,text:'upload',messages:[{at:now,ts:'1700000000.000000',text:'release.log',files:[{id:'F1',name:'release.log',is_external:true}]}]}]);result=await reader.collect();assert.equal(requests,1);assert.equal(result.url,'https://app.slack.com/archives/C123/p1700000000000000');assert.match(result.notes.join(),/Внешний файл/);
+ let calls=0;const fetcher=async()=>{calls++;return new Response('FAILURE: build failed\nCaused by: missing module',{headers:{'content-type':'text/plain'}})};
+ const file={name:'build.log',url_private:'https://files.slack.com/files-pri/test'};
+ assert.match(await downloadLog(file,'secret',fetcher),/missing module/);
+ await assert.rejects(()=>downloadLog({...file,url_private:'https://evil.test/a'},'secret',fetcher),/вне защищённого/);
+ await assert.rejects(()=>downloadLog({...file,is_external:true},'secret',fetcher),/Внешний/);
+ await assert.rejects(()=>downloadLog({...file,size:3000000},'secret',fetcher),/2 МБ/);assert.equal(calls,1);
+ await assert.rejects(()=>downloadLog(file,'secret',async()=>new Response('<html>login',{headers:{'content-type':'text/html'}})),/страницу входа/);
+ assert.match(excerpt('padding\n'.repeat(10000)+'Error: actual root cause'),/actual root cause/);
+ console.log('Slack log tests passed');
+})().catch(e=>{console.error(e);process.exitCode=1});

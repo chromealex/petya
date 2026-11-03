@@ -1,0 +1,16 @@
+const assert=require('node:assert/strict');const {Learning}=require('../src/learning.cjs');const {TaskMonitor}=require('../src/task-monitor.cjs');const {dailyBrief}=require('../src/daily-brief.cjs');
+(async()=>{
+ let now=100000,saved;const l=new Learning({now:()=>now,save:s=>saved=structuredClone(s)});
+ const r=l.putRule({from:'мобилка',to:'Alpha'});const first=l.undoInfo();l.putRule({...r,to:'Beta'});assert.equal(l.list().dictionary[0].to,'Beta');l.undo(l.undoInfo().id);assert.equal(l.list().dictionary[0].to,'Alpha');l.undo(first.id);assert.equal(l.list().dictionary.length,0);
+ l.put({name:'Ответ',patterns:['привет'],action:'answer',output:'Здравствуйте'});const record=l.undoInfo();const restored=new Learning({state:saved});restored.undo(record.id);assert.equal(restored.list().skills.length,0);
+ l.put({name:'Таймер',patterns:['через {delay} напомни {message}'],action:'reminder'});l.execute('через 2 секунды напомни тест');l.undo(l.undoInfo().id);assert.equal(l.list().reminders.length,0);
+ l.execute('через 1 секунду напомни тест');now+=2000;l.tick();assert.throws(()=>l.undo(l.undoInfo().id),/изменились/);
+ let notices=[],calls=0;const row={id:'a',target:'codex',state:'submitted',threadId:'t',turnId:'u',keys:['A-1']};let result={status:'inProgress',answer:''};
+ const monitor=new TaskMonitor({records:()=>[row],save:()=>{},status:async()=>{calls++;return result;},notify:s=>notices.push(s),now:()=>now});await monitor.tick();assert.equal(calls,1);assert.equal(notices.length,0);await monitor.tick();assert.equal(calls,1);
+ monitor.update(row,{status:'needsAttention'});monitor.update(row,{status:'needsAttention'});assert.equal(notices.length,1);now+=60001;await monitor.tick();assert.equal(row.executionState,'needsAttention');assert.equal(notices.length,1);
+ monitor.update(row,{status:'completed',answer:'Готово'});monitor.update(row,{status:'completed'});assert.equal(notices.length,2);monitor.update(row,{status:'inProgress',answer:''});assert.equal(row.executionState,'completed');assert.equal(row.resultText,'Готово');now+=60001;await monitor.tick();assert.equal(calls,2,'completed work must not poll');
+ const reboot=new TaskMonitor({records:()=>[row],save:()=>{},status:async()=>result,notify:s=>notices.push(s),now:()=>now});await reboot.tick();assert.equal(notices.length,2);
+ const broken={...row,executionState:'inProgress',noticeState:'inProgress',lastPoll:0,pollError:''};const failed=new TaskMonitor({records:()=>[broken],save:()=>{},status:async()=>{throw new Error('offline');},notify:s=>notices.push(s),now:()=>now});await failed.tick();now+=60001;await failed.tick();assert.equal(notices.length,3,'same outage not repeated');
+ const morning=new Date(2026,10,3,10).getTime();const brief=dailyBrief({now:morning,records:[row],reminders:[{state:'pending',due:morning+60000,text:'Тест'}],slackEnabled:true,contexts:[{source:'Slack',title:'Канал',at:morning,text:'Сегодня'},{source:'Slack',at:morning-86400000,text:'Вчера'}]});assert(brief.text.includes('Сегодня'));assert(!brief.text.includes('Вчера'));assert(brief.text.includes('по сохранённым данным'));assert(brief.text.includes('календаря'));
+ console.log('Next features: persistent undo, stale protection, reminder delivery, quiet monitoring, restart deduplication, bounded polling and dated brief passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -1,0 +1,43 @@
+// These badges mirror the latest connection check, not continuous availability.
+function connectionBadge(message, classes, service) {
+  if (service === 'ollama' && classes.includes('setup')) return { state: 'setup', label: 'Запустить' };
+  if (/Проверяю|Загружаю|Запускаю/.test(message)) return { state: 'checking', label: 'Проверка…' };
+  if (classes.includes('disconnected')) return { state: 'disconnected', label: 'Не подключено' };
+  if (classes.includes('setup')) return { state: 'setup', label: 'Настроить' };
+  if (classes.includes('error')) return { state: 'error', label: 'Ошибка' };
+  if (classes.includes('connected')) return { state: 'connected', label: service === 'zoom' ? 'Доступ есть' : 'Подключено' };
+  if (/Не подключено/.test(message)) return { state: 'disconnected', label: 'Не подключено' };
+  if (/изменены|Требуется настройка|Сначала укажите/.test(message)) return { state: 'setup', label: 'Настроить' };
+  return { state: 'unknown', label: 'Не проверено' };
+}
+function setupConnectionSidebar() {
+  const panel = document.getElementById('connection-sidebar');
+  const services = [ ['telegram','Telegram'], ['whisper', 'Whisper'], ['ollama', 'Ollama'], ['slack', 'Slack'], ['notion', 'Notion'], ['asana', 'Asana'], ['jira', 'Jira'], ['confluence', 'Confluence'], ['zoom', 'Звук встреч'], ['ai', 'ИИ'], ['googleplay', 'Google Play'], ['gmail','Gmail'], ['web','Интернет'] ];
+  for (const [id, title] of services) {
+    const card = document.querySelector(`[data-service="${id}"]`);
+    const status = card?.querySelector('.connection-status');
+    if (!status) continue;
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'connection-badge';
+    const dot = document.createElement('span'); dot.className = 'connection-dot'; dot.setAttribute('aria-hidden', 'true');
+    const name = document.createElement('span'); name.className = 'connection-name'; name.textContent = title;
+    const label = document.createElement('span'); label.className = 'connection-label';
+    button.append(dot, name, label); panel.append(button);
+    const update = () => {
+      button.hidden = !moduleEnabled(id);
+      const badge = connectionBadge(status.textContent, [...status.classList], id);
+      button.dataset.state = badge.state; label.textContent = badge.label;
+      button.title = `${title}: ${status.textContent}`;
+      button.setAttribute('aria-label', `${title}: ${badge.label}. Открыть настройки подключения`);
+    };
+    button.onclick = () => {
+      view('settings');
+      const details = card.querySelector('.connection-options'); if (details && id !== 'ollama') details.open = true;
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const heading = card.querySelector('h2'); heading.tabIndex = -1; heading.focus({ preventScroll: true });
+    };
+    new MutationObserver(update).observe(status, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    document.addEventListener('petya-modules-changed', update);
+    update();
+  }
+}
+setupConnectionSidebar();

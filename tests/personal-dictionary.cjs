@@ -1,0 +1,17 @@
+const assert=require('node:assert/strict');
+const {Learning}=require('../src/learning.cjs');const {rule,applyRules,correction}=require('../src/personal-dictionary.cjs');
+let saved;const learning=new Learning({state:{version:1,skills:[],reminders:[]},save:s=>saved=structuredClone(s)});
+const common=learning.putRule({from:'мобилка',to:'Общий клиент'});const scoped=learning.putRule({from:'мобилка',to:'Android Alpha',scope:'ALPHA'});
+assert.equal(applyRules('Проверь мобилка',learning.list().dictionary,'ALPHA').text,'Проверь Android Alpha');
+assert.equal(applyRules('Проверь мобилка',learning.list().dictionary,'BETA').text,'Проверь Общий клиент');
+assert.equal(applyRules('мобилками',learning.list().dictionary).text,'мобилками');
+assert.throws(()=>learning.putRule({from:'МОБИЛКА',to:'Другое'}),/уже есть/);
+learning.putRule({...scoped,enabled:false});assert.equal(applyRules('мобилка',learning.list().dictionary,'ALPHA').text,'Общий клиент');
+learning.removeRule(common.id);assert.equal(applyRules('мобилка',learning.list().dictionary,'BETA').text,'мобилка');
+assert.equal(new Learning({state:saved}).list().dictionary.length,1);
+const chain=[rule({from:'кот',to:'пёс'}),rule({from:'пёс',to:'тигр'})];assert.equal(applyRules('кот',chain).text,'пёс');
+assert.equal(applyRules('елка',[rule({from:'ёлка',to:'Дерево'})]).text,'Дерево');
+const proposal=correction('Ты неправильно понял — я имел в виду проверь дефекты',{jiraProject:'ALPHA',messages:[{role:'user',text:'проверь эффекты'}]});assert.equal(proposal.from,'проверь эффекты');assert.equal(proposal.to,'проверь дефекты');assert.equal(proposal.scope,'ALPHA');
+assert.equal(correction('что ты имел в виду?',{}),null);assert(correction('я имел в виду другой проект',{}).error);
+assert.equal(applyRules('проверь эффекты',[proposal],'ALPHA').text,'проверь дефекты');assert.equal(applyRules('проверь эффекты',[proposal],'BETA').text,'проверь эффекты');
+console.log('Dictionary: migration, scoped precedence, corrections, no cascading, Unicode, duplicates, persistence passed');

@@ -1,0 +1,54 @@
+"""Publish one current application/installer per platform; keep no archived builds."""
+import argparse
+import fcntl
+import os
+import pathlib
+import shutil
+import subprocess
+import sys
+import tempfile
+
+root = pathlib.Path(__file__).resolve().parent.parent
+parser = argparse.ArgumentParser()
+parser.add_argument('--mac', action='store_true')
+parser.add_argument('--win', action='store_true')
+args = parser.parse_args()
+platforms = ['mac', 'win'] if not (args.mac or args.win) else ([ 'mac' ] if args.mac else []) + ([ 'win' ] if args.win else [])
+with (root / '.build.lock').open('w') as lock:
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        raise SystemExit('Another Petya build is running; wait for it to finish.')
+    for platform in platforms:
+        if platform == 'mac':
+            env = dict(os.environ, PETYA_MANAGED_BUILD='1')
+            subprocess.run([sys.executable, str(root / 'scripts/local-mac.py')], cwd=root, env=env, check=True)
+            verify_env = dict(os.environ, PETYA_VERIFY_BUILD='1')
+            verify_env.pop('ELECTRON_RUN_AS_NODE', None)
+            subprocess.run([str(root/'Petya.app/Contents/MacOS/Electron')], cwd=root, env=verify_env, check=True, timeout=90)
+        else:
+            node = 'node'
+            node_env = dict(os.environ)
+            if sys.platform == 'darwin':
+                node = str(root/'node_modules/electron/dist/Electron.app/Contents/MacOS/Electron')
+                node_env['ELECTRON_RUN_AS_NODE'] = '1'
+            with tempfile.TemporaryDirectory(prefix='petya-win-build-') as temp:
+                output = pathlib.Path(temp)
+                subprocess.run([node, '-e', "process.noAsar = true; delete process.versions.electron; require(process.argv[1])", str(root / 'node_modules/electron-builder/cli.js'), '--win', '--x64',
+                    '-c.directories.output=' + str(output), '-c.nsis.artifactName=Petya-Setup.exe'], cwd=root, env=node_env, check=True)
+                extracted = output / 'verified-app'
+                subprocess.run([node, '-e', "process.noAsar = true; require('@electron/asar').extractAll(process.argv[1],process.argv[2])",
+                    str(output/'win-unpacked/resources/app.asar'), str(extracted)], cwd=root, env=node_env, check=True)
+                subprocess.run([sys.executable, str(root/'scripts/verify-package.py'), str(root/'src'), str(extracted/'src')], check=True)
+                installer = output/'Petya-Setup.exe'
+                if installer.stat().st_size < 1000000 or installer.read_bytes()[:2] != b'MZ':
+                    raise RuntimeError('Windows installer is incomplete')
+                shutil.copyfile(installer, root/'Petya-Setup.exe')
+                print(root/'Petya-Setup.exe', flush=True)
+    # Old build locations are never used for output again.
+    for path in root.glob('Petya*.app'):
+        if path.name != 'Petya.app': shutil.rmtree(path)
+    for pattern in ('Petya*.exe', 'Petya*.zip', 'Petya*.dmg', 'Petya*.blockmap'):
+        for path in root.glob(pattern):
+            if path.name != 'Petya-Setup.exe': path.unlink()
+    if (root/'dist').exists(): shutil.rmtree(root/'dist')

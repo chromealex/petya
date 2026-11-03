@@ -1,0 +1,36 @@
+const assert=require('node:assert/strict');
+const {Learning}=require('../src/learning.cjs');
+const {MailSkill,validate,defaults}=require('../src/mail-skill.cjs');
+const {Gmail,clientConfig}=require('../src/gmail.cjs');
+(async()=>{
+ let saved,reads=0;const learning=new Learning({save:s=>saved=structuredClone(s)});
+ const skill=new MailSkill({learning,gmail:{read:async()=>{reads++;return {at:Date.now(),messages:[{from:'Polina',subject:'Release',text:'Check tomorrow'}],partial:true};}},model:async(system,data,format)=>format?({...defaults,days:7,priority:['Полина'],unsupported:''}):'Polina — Release: проверить завтра.'});
+ assert.throws(()=>validate({...defaults,days:0}));assert.throws(()=>validate({...defaults,priority:['']}));
+ assert.match((await skill.turn('Научись проверять почту')).text,/Какие/);assert.equal(reads,0);
+ assert.match((await skill.turn('непрочитанные за три дня, Полина важная')).text,/3 дн/);
+ assert.match((await skill.turn('сохрани')).text,/Сначала/);assert.equal(skill.list().length,0);
+ assert.match((await skill.turn('попробуй')).text,/выборка/);assert.equal(reads,1);
+ await skill.turn('сохрани');assert.equal(skill.list().length,1);assert.equal(skill.draft(),null);
+ const restored=new Learning({state:saved});assert.equal(restored.list().recipes[0].days,3);
+ await skill.turn('Что там в почте');assert.equal(reads,2);
+ assert.equal(await skill.turn('не проверяй почту'),null);assert.equal(reads,2);
+ skill.put({...skill.list()[0],enabled:false});await skill.turn('Что там в почте');assert.equal(reads,2);
+ learning.undo(learning.undoInfo().id);assert.equal(skill.list()[0].enabled,true);
+ await skill.turn('Научись проверять почту');await skill.turn('отмени обучение');assert.equal(skill.draft(),null);
+ assert.match((await skill.turn('Научись управлять телевизором')).text,/инструмент/);
+ assert.throws(()=>clientConfig('{"web":{}}'));
+ const client=clientConfig(JSON.stringify({installed:{client_id:'123.apps.googleusercontent.com',client_secret:'secret'}}));
+ let state={client},opened='',enabled=true,calls=[];
+ const gmail=new Gmail({load:()=>state,save:s=>state=s,enabled:()=>enabled,open:async u=>opened=u,fetcher:async(url,options)=>{
+  calls.push({url,options});return {ok:true,json:async()=>url.includes('/token')?{access_token:'test',refresh_token:'refresh',expires_in:3600,scope:'https://www.googleapis.com/auth/gmail.readonly'}:url.endsWith('/profile')?{emailAddress:'first@gmail.com'}:url.includes('?q=')?{messages:[{id:'abc'}],nextPageToken:'next'}:{id:'abc',payload:{headers:[{name:'From',value:'Polina'},{name:'Subject',value:'Test'}],mimeType:'text/plain',body:{data:Buffer.from('body').toString('base64url')}}}};
+ }});
+ await gmail.start();const auth=new URL(opened);assert.equal(auth.searchParams.get('code_challenge_method'),'S256');assert.equal(auth.searchParams.get('scope'),'https://www.googleapis.com/auth/gmail.readonly');
+ const callback=auth.searchParams.get('redirect_uri');const bad=await fetch(callback+'?state=wrong&code=x');assert.equal(bad.status,400);assert.equal(calls.length,0);
+ await fetch(callback+'?'+new URLSearchParams({state:auth.searchParams.get('state'),code:'test'}));assert.equal(state.tokens.refresh_token,'refresh');
+ const data=await gmail.read({...defaults,priority:['polina']});assert.equal(data.messages[0].text,'body');assert.equal(data.messages[0].priority,true);assert.equal(data.partial,true);
+ assert(calls.filter(c=>c.url.includes('gmail.googleapis')).every(c=>!c.options.method));
+ enabled=false;await assert.rejects(()=>gmail.read(defaults),/Включите/);enabled=true;
+ state.tokens.expiresAt=0;await gmail.access();assert.equal(state.tokens.access_token,'test');
+ gmail.disconnect();assert.equal(state.tokens,undefined);await assert.rejects(()=>gmail.read(defaults),/Подключите/);
+ console.log('Mail skills: teaching, persistence, undo, trial, read-only Gmail, OAuth state/PKCE, refresh and disconnect passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

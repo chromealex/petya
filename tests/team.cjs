@@ -1,0 +1,17 @@
+const assert=require('node:assert/strict');
+const team=require('../src/team.cjs');
+const members=team.validate([{name:' Полина ',aliases:'Поля',role:'QA',projects:'GAME Android',responsibilities:'Релизные сборки',slackId:'U123ABC',jiraId:'abc-123'}]);
+assert.equal(members[0].name,'Полина');
+assert.match(team.context({teamMembers:JSON.stringify(members),teamRoles:'Иван — backend'}),/Релизные сборки/);
+assert.match(team.context({teamRoles:'Старые записи'}),/Старые записи/);
+assert.equal(team.context({teamMembers:'[]'}),'');
+assert.throws(()=>team.validate([{name:''}]));
+assert.throws(()=>team.validate([{name:'Поля',slackId:'@polina'}]));
+assert.throws(()=>team.validate([{name:'Поля',email:'invalid'}]));
+assert.throws(()=>team.validate(Array.from({length:101},()=>({name:'Иван'}))));
+assert.throws(()=>team.validate([{name:'Иван',responsibilities:'x'.repeat(1601)}]));
+assert.equal(team.validate([{name:'Иван',projects:'A'},{name:'Иван',projects:'B'}]).length,2,'Namesakes must remain distinct');
+const many=team.validate(Array.from({length:100},(_,i)=>({name:'Коллега '+i,responsibilities:'x'.repeat(1600)})));
+assert.ok(team.context({teamMembers:JSON.stringify(many)},'Коллега 99',2000).length<=2000);
+assert.match(team.context({teamMembers:JSON.stringify(many)},'Коллега 99',2000),/Коллега/);
+console.log('Team directory tests passed');

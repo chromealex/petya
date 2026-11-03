@@ -1,0 +1,40 @@
+const assert = require('node:assert/strict');
+const { JiraRouting, choose } = require('../src/jira-routing.cjs');
+const { Workspace } = require('../src/workspace.cjs');
+const projects = [{key:'WEB',name:'Веб-платформа',description:'Сайт и личный кабинет'}, {key:'MOB',name:'Мобильное приложение',description:'Приложение iOS и Android'}];
+(async () => {
+ assert.equal(choose('Создай задачу WEB', {text:'MOB-12'}, projects).project.key,'WEB');
+ assert.equal(choose('Создай задачу', {text:'Обсудили MOB-12 и авторизацию'}, projects).project.key,'MOB');
+ assert.equal(choose('Создай задачу', {title:'Веб-платформа',text:'Вход'}, projects).project.key,'WEB');
+ assert(!choose('Создай задачу', {text:'MOB-12 и WEB-3'}, projects).project);
+ assert(!choose('Создай задачу', {text:'Починить вход'}, projects).project);
+ assert(!choose('WEB и MOB', {text:'WEB'}, projects).project);
+ let settings = {jiraUrl:'https://test.atlassian.net',jiraEmail:'a@b.c',jiraToken:'fixture',jiraProjects:'WEB,MOB',jiraProject:'WEB',jiraIssueType:'old'};
+ let proposed = {}, writes = [];
+ const w = new Workspace({settings:()=>settings, request:async(address,options={})=>{
+  const u=new URL(address);
+  if(u.pathname==='/api/chat') return {message:{content:JSON.stringify(proposed)}};
+  if(u.pathname.endsWith('/project/search')) return {values:projects,isLast:true};
+  if(/\/project\/(WEB|MOB)$/.test(u.pathname)) return {issueTypes:[{id:u.pathname.endsWith('MOB')?'20':'10',name:'Task'},{id:'99',name:'Subtask',subtask:true}]};
+  if(u.pathname==='/rest/api/3/issue') {writes.push(JSON.parse(options.body));return {key:'MOB-1'};}
+  throw Error('Unsupported '+address);
+ }});
+ const router = new JiraRouting(w);
+ const ambiguous=await router.resolve('Создай задачу',{text:'Починить вход'}); assert.equal(ambiguous.ready,false);assert.equal(writes.length,0);
+ const chosen=await router.resolve('Создай задачу',{text:'MOB-12: исправить авторизацию'});
+ assert.equal(chosen.project,'MOB'); assert.equal(router.settings(chosen.id).jiraIssueType,'20');assert.equal(settings.jiraProject,'WEB');
+ await w.createSingle({id:'route-test',summary:'Исправить вход',description:'Описание'},router.settings(chosen.id));
+ assert.equal(w.actions.entry('route-test').s.jiraProject,'MOB');
+ assert.equal(writes[0].fields.project.key,'MOB'); assert.equal(writes[0].fields.issuetype.id,'20');
+ await assert.rejects(router.resolve('задача',{text:'вход'},'OTHER'),/разрешённый/);
+ settings={...settings,model:'local',ollamaUrl:'http://localhost:11434/api/chat'};
+ proposed={project:'MOB',confidence:0.95,evidence:'Ошибка входа на iOS',reason:'Ошибка мобильного приложения'};
+ assert.equal((await router.resolve('Создай задачу',{text:'Ошибка входа на iOS'})).project,'MOB');
+ proposed={...proposed,project:'OTHER'};assert.equal((await router.resolve('Создай задачу',{text:'Ошибка входа на iOS'})).ready,false);
+ proposed={...proposed,project:'MOB',evidence:'Выдуманная цитата'};assert.equal((await router.resolve('Создай задачу',{text:'Ошибка входа на iOS'})).ready,false);
+ proposed={...proposed,evidence:'Ошибка входа на iOS',confidence:0.6};assert.equal((await router.resolve('Создай задачу',{text:'Ошибка входа на iOS'})).ready,false);
+ const manual=await router.resolve('Создай задачу',{text:'Починить вход'},'MOB');assert.equal(manual.project,'MOB');
+ settings={...settings,jiraProjects:'WEB'};assert.throws(()=>router.settings(chosen.id),/устарел/);
+ settings={...settings,jiraProjects:'WEB,MOB',jiraUrl:'https://other.atlassian.net'};assert.throws(()=>router.settings(manual.id),/устарел/);
+ console.log('Jira routing: context, explicit command, ambiguity, model evidence, allowlist, scoped writes and stale routes passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

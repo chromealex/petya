@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('node:fs');
+const context=vm.createContext({});vm.runInContext(fs.readFileSync('src/ui/audio.js','utf8')+'\nthis.Gate=SpeechGate;',context);
+const frame=level=>new Float32Array(1600).fill(level);
+const gate=new context.Gate(16000);
+for(let i=0;i<20;i++)assert.equal(gate.feed(frame(0.0002),false).speaking,false);
+const onset=frame(0.0008);gate.feed(onset,false);
+const quietVoice=gate.feed(frame(0.004),false);
+assert(quietVoice.speaking,'quiet speech below the former 0.008 threshold is captured');
+assert(quietVoice.chunks.includes(onset),'quiet onset must survive until the first syllable');
+assert(quietVoice.chunks.reduce((n,c)=>n+c.length,0)>=5600,'350 ms pre-roll');
+const ongoing=gate.feed(frame(0.0009),true);assert.equal(ongoing.chunks.length,1,'quiet consonants inside speech kept');
+gate.reset();for(let i=0;i<10000;i++)gate.feed(frame(0),false);assert(gate.count<8000,'idle buffer bounded');
+const burst=gate.feed(frame(0.02),false);assert(burst.chunks.length<=4);
+console.log('Audio onset: quiet speech, pre-roll, consonants and bounded silence passed');

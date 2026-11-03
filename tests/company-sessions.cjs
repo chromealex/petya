@@ -1,0 +1,10 @@
+// Run with Electron, outside ELECTRON_RUN_AS_NODE.
+const {app,session}=require('electron');const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const assert=require('node:assert/strict');const {spawnSync}=require('node:child_process');const {Companies}=require('../src/companies.cjs');
+const root=process.env.PETYA_COMPANY_SESSION_ROOT;
+if(!root){
+ const temp=fs.mkdtempSync(path.join(os.tmpdir(),'petya-company-sessions-'));
+ let code=0;try{const c=new Companies(temp);const second=c.create('Second');for(const [index,id] of ['default',second.id,'default'].entries()){c.select(id);const result=spawnSync(process.execPath,[__filename],{env:{...process.env,PETYA_COMPANY_SESSION_ROOT:temp,PETYA_COMPANY_RETURN:String(index===2)},encoding:'utf8',timeout:30000});assert.equal(result.status,0,result.stderr+result.stdout);}console.log('Company browser sessions: cookies isolated across restart and retained on return');}catch(e){console.error(e);code=1;}finally{fs.rmSync(temp,{recursive:true,force:true});}app.exit(code);
+}else{
+ app.setPath('userData',root);const c=new Companies(root);const dir=c.directory(c.state.activeId);app.setPath('sessionData',dir);
+ app.whenReady().then(async()=>{try{const ses=session.fromPartition('persist:petya-web-search');assert.ok(ses.storagePath.startsWith(dir+path.sep));const cookies=await ses.cookies.get({url:'https://example.com'});if(process.env.PETYA_COMPANY_RETURN==='true')assert.ok(cookies.some(cookie=>cookie.value==='default'),'Original company cookie must survive restart');assert.ok(cookies.every(cookie=>cookie.value===c.state.activeId));await ses.cookies.set({url:'https://example.com',name:'company-test',value:c.state.activeId,expirationDate:Date.now()/1000+3600});await ses.cookies.flushStore();app.exit(0);}catch(e){console.error(e);app.exit(1);}});
+}

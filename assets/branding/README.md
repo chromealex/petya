@@ -1,0 +1,13 @@
+# Петя — иконки 0.2.1
+
+Стилизованы по рисунку пользователя встроенным imagegen. Мастер-изображения с прозрачностью: `petya-master.png` (цветное) и `petya-template-master.png` (монохромное). Наклон исходного персонажа исправлен; сохранены фуражка, улыбка, синий, красный и золотой цвета.
+
+Производные ассеты в `assets/`: `app-icon.png`, `petya.png`, `app-icon.icns`, `app-icon.ico`, `tray.png`/`tray@2x.png`, `trayTemplate.png`/`trayTemplate@2x.png`. Пересоздание форматов на macOS: `npm run icons:mac` (Node.js 22+). Скрипт только масштабирует готовые изображения и упаковывает ICNS/ICO, не перерисовывает их. В macOS меню-баре используется template alpha mask; ОС сама адаптирует цвет к теме.
+
+## Промпт цветного мастера
+
+Use case: style-transfer. Create ONE polished app mascot icon based on this reference character for desktop assistant Petya. Keep recognisable cheerful cartoon boy with blond hair, oversized blue peaked cap with black visor and one round gold button, rosy ivory face, joyful smile, red coat with gold collar. Redraw as clean professional flat vector-like artwork, smooth bold dark outlines, simplified large shapes, limited original blue red gold cream palette. Head-and-shoulders portrait ONLY, no hands, no full body, no cape extending sideways. Straighten the whole portrait: head upright, shoulders horizontal, cap crown mostly horizontal with just a slight jaunty tilt, balanced square composition, optical centre at canvas centre, equal margins, complete cap visible with no clipping. The head should occupy most of the design for recognisability at 24 pixels. True transparent background outside the mascot; no white square, no badge, no text, no shadow, no mockup, no gradients, no separate variations. Square 1024x1024 asset.
+
+## Промпт варианта для трея
+
+Use case: style-transfer. Make a matching monochrome macOS menu-bar icon from this exact mascot. Single icon only, square transparent canvas. Simplify to HEAD AND CAP ONLY, omit torso/collar completely. Keep the same upright smiling boy, wide peaked cap, black visor and circular cap button, optically centered with 10% equal margin. Pure black ink shapes and thick smooth outlines only; all face fill, eye highlights, inner cap area and smile negative spaces must be genuinely transparent (not white or gray pixels). Use very few broad shapes so it is readable at 18x18 pixels. Strong outer contour, minimal face: two simple curved eyes and one smile. No cheeks, no hair texture, no thin strokes, no background, no letters, no color, no drop shadow. This is a template alpha-mask icon, every opaque pixel is black; negative spaces are transparent.

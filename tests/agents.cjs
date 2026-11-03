@@ -1,0 +1,36 @@
+const assert = require('node:assert/strict');
+const { delegation, promptFor, linkFor, Agents, batchTasks } = require('../src/agents.cjs');
+(async () => {
+  assert.deepEqual(delegation('Петя, заведи таски в жира, все которые на меня — отдай клоду'), { target: 'claude', jira: true, mine: true });
+  assert.deepEqual(delegation('Заведи кодексу задачу, пусть это сделает'), { target: 'codex', jira: false, mine: false });
+  assert.equal(delegation('найди документацию'), null);
+  assert.throws(() => delegation('передай Claude и Codex задачу'));
+  const prompt = promptFor('сделай это', { source: 'Slack', title: 'Фича', at: 1, text: 'требования', url: 'https://slack.com/a' }, [{ source: 'Notion', title: 'Доки', text: 'все критерии', url: 'https://notion.so/a' }]);
+  assert.ok(prompt.includes('требования') && prompt.includes('все критерии'));
+  const short = linkFor('claude', 'привет & ?'); assert.equal(new URL(short.url).searchParams.get('q'), 'привет & ?');
+  assert.equal(new URL(linkFor('codex', 'текст').url).searchParams.get('prompt'), 'текст');
+  assert.equal(linkFor('claude', 'я'.repeat(15000)).clipboard, true);
+  assert.equal(linkFor('claude', 'я'.repeat(500), 'win32').clipboard, true);
+  assert.throws(() => linkFor('https', prompt));
+  let opened = [], copied = [], saved;
+  const agents = new Agents({ save: r => { saved = structuredClone(r); }, available: async () => true, open: async u => opened.push(u), copy: t => copied.push(t) });
+  const row = agents.create('claude', prompt, ['T-1'], 'batch');
+  assert.equal(agents.create('claude', prompt, ['T-1'], 'batch').id, row.id);
+  await agents.launch(row.id); assert.equal(row.state, 'send-required');
+  await assert.rejects(agents.launch(row.id)); assert.equal(opened.length, 1);
+  const long = agents.create('codex', 'я'.repeat(20000)); await agents.launch(long.id); assert.equal(long.state, 'paste-required'); assert.equal(copied[0].length, 20000);
+  const restored = new Agents({ records: saved, save: () => {}, available: async () => true, open: async () => assert.fail('duplicate'), copy: () => {} });
+  await assert.rejects(restored.launch(row.id));
+  const bad = new Agents({ save: () => {}, available: async () => true, open: async () => { throw new Error('open failure'); }, copy: () => {} });
+  const b = bad.create('codex', prompt); await assert.rejects(bad.launch(b.id)); assert.equal(b.state, 'unknown'); await assert.rejects(bad.launch(b.id));
+  const w = { settings: () => ({ jiraUrl: 'https://test.atlassian.net', jiraProject: 'T' }), api: async route => {
+    if (route.endsWith('/myself')) return { accountId: 'me' };
+    if (route.includes('/agile/')) return { fields: { sprint: { id: 1, name: 'Current', state: 'active' } } };
+    return { fields: { summary: 'Task', description: 'Actual description', assignee: { accountId: route.includes('T-1?') ? 'me' : 'other' }, updated: 'now', project: { key: 'T' }, fixVersions: [] } };
+  } };
+  const record = { project: 'T', url: 'https://test.atlassian.net', rows: [{ key: 'T-1', state: 'done' }, { key: 'T-2', state: 'done' }, { key: '', state: 'rejected' }] };
+  assert.deepEqual((await batchTasks(w, record, { mine: true })).map(t => t.key), ['T-1']);
+  assert.equal((await batchTasks(w, record, { mine: false })).length, 2);
+  await assert.rejects(batchTasks(w, { ...record, url: 'https://other.atlassian.net' }, { mine: true }));
+  console.log('Agents: parsing, payloads, protocol limits, duplicate/restart guards, uncertain delivery and Jira identity passed');
+})().catch(e => { console.error(e); process.exitCode = 1; });

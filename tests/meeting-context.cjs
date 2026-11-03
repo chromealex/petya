@@ -1,0 +1,21 @@
+const assert = require('node:assert/strict');
+const { resolve } = require('../src/core.cjs');
+const rows = [{ id: 'old', at: 10, text: 'backend', title: 'Slack', source: 'Slack' }, { id: 'live', at: 20, text: 'Новый экран оплаты', title: 'Zoom', source: 'Zoom', sessionId: 'call' }];
+assert.equal(resolve('создай задачу', rows, 30, 7, 'call').context.id, 'live');
+assert.equal(resolve('создай задачу по Slack', rows, 30, 7, 'call').options.length, 2);
+const fs = require('node:fs');
+assert.ok(!fs.readFileSync('src/ui/index.html', 'utf8').includes('inspect-zoom'));
+console.log('Meeting context: active session, explicit other sources, no window picker passed');
+const vm = require('node:vm');
+(async () => {
+  let release, saved = false;
+  const sandbox = { setTimeout, clearTimeout, Date, window: { petya: { transcribe: () => new Promise(r => release = r) } } };
+  vm.createContext(sandbox);
+  vm.runInContext(fs.readFileSync('src/ui/audio.js', 'utf8') + '\nthis.Listener = AudioListener;', sandbox);
+  const listener = new sandbox.Listener(async () => { saved = true; }, e => { throw e; });
+  listener.active = true; listener.queue = [{ wav: new ArrayBuffer(0), at: 1, endedAt: 2 }];
+  const flushing = listener.flushContext();
+  assert.equal(saved, false); release('Обсудили экран оплаты'); await flushing;
+  assert.equal(saved, true); assert.equal(listener.active, true);
+  console.log('Meeting context: pending transcription saved before command, capture stays active');
+})().catch(e => { console.error(e); process.exitCode = 1; });

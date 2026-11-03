@@ -1,0 +1,28 @@
+const assert=require('node:assert/strict');
+const {Agents}=require('../src/agents.cjs');
+const {chooseProject}=require('../src/agent-projects.cjs');
+const {CodexClient}=require('../src/codex-client.cjs');
+const {PassThrough}=require('node:stream');
+const {EventEmitter}=require('node:events');
+(async()=>{
+ const projects=[{id:'a',name:'Client'},{id:'b',name:'Server'}];
+ assert.equal((await chooseProject('делай в Client','Server',projects)).id,'a');
+ assert.equal((await chooseProject('делай','ошибка Server',projects)).id,'b');
+ assert.equal(await chooseProject('делай','Client и Server',projects),null);
+ assert.equal(await chooseProject('делай','неизвестная задача',[projects[0]]),null);
+ assert.equal(await chooseProject('делай','Clientele',projects),null);
+ let sent=0,saved,selected=null;
+ const agents=new Agents({save:r=>saved=structuredClone(r),available:async()=>true,delivery:{projects:async()=>projects,choose:async()=>selected,submit:async(row,project)=>{assert.equal(saved[0].state,'submitting');assert.equal(project.id,'b');sent++;return {state:'submitted',threadId:'thread'};}}});
+ const row=agents.create('codex','Задача');await agents.launch(row.id);assert.equal(row.state,'project-required');assert.equal(sent,0);
+ await assert.rejects(agents.selectProject(row.id,'forged'));
+ await agents.selectProject(row.id,'b');assert.equal(sent,1);assert.equal(row.state,'submitted');await assert.rejects(agents.launch(row.id));
+ const uncertain=new Agents({save:()=>{},available:async()=>true,delivery:{projects:async()=>projects,choose:async()=>projects[0],submit:async()=>{throw new Error('timeout');}}});
+ const bad=uncertain.create('claude','Задача');await assert.rejects(uncertain.launch(bad.id));assert.equal(bad.state,'unknown');await assert.rejects(uncertain.launch(bad.id));
+ const child=new EventEmitter();child.stdin=new PassThrough();child.stdout=new PassThrough();child.stderr=new PassThrough();const calls=[];
+ child.stdin.on('data',data=>{for(const line of data.toString().trim().split('\n')){const m=JSON.parse(line);calls.push(m);if(!m.id)continue;let result={};if(m.method==='thread/start')result={thread:{id:'t1'}};if(m.method==='turn/start')result={turn:{id:'u1'}};queueMicrotask(()=>child.stdout.write(JSON.stringify({id:m.id,result})+'\n'));}});
+ const client=new CodexClient({launch:()=>child});const task={prompt:'полный запрос'};let persisted=false;
+ const result=await client.submit(task,{cwd:process.cwd()},()=>{assert.equal(task.threadId,'t1');persisted=true;});
+ assert(persisted);assert.equal(result.state,'submitted');assert.equal(calls.find(c=>c.method==='thread/start').params.cwd,process.cwd());assert.equal(calls.find(c=>c.method==='thread/start').params.approvalPolicy,'on-request');assert.equal(calls.find(c=>c.method==='turn/start').params.input[0].text,'полный запрос');
+ child.emit('exit');
+ console.log('Agent delivery: project evidence, ambiguity, explicit selection, submitted receipts, uncertain duplicate guard, Codex protocol and persistence passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -1,0 +1,22 @@
+const assert = require('node:assert/strict');
+const { permissions } = require('../src/permissions.cjs');
+(async () => {
+  let state = 'not-determined', asks = 0, opened = [];
+  const systemPreferences = { getMediaAccessStatus: () => state, askForMediaAccess: async () => { asks++; state = 'granted'; return true; } };
+  const shell = { openExternal: async url => opened.push(url) };
+  const mac = permissions({ platform: 'darwin', systemPreferences, shell });
+  assert.equal(mac.status().items[0].state, 'not-determined'); assert.equal(asks, 0);
+  await mac.request('microphone'); assert.equal(asks, 1); assert.equal(opened.length, 0);
+  await mac.request('screen'); assert.equal(opened.length, 0);
+  state = 'not-determined'; let captures = 0;
+  const screen = permissions({ platform: 'darwin', systemPreferences, shell, desktopCapturer: { getSources: async () => { captures++; state = 'granted'; return []; } } });
+  screen.status(); assert.equal(captures, 0); await screen.request('screen'); assert.equal(captures, 1);
+  state = 'denied'; await mac.request('microphone'); assert.ok(opened.pop().endsWith('Privacy_Microphone'));
+  await mac.request('screen'); assert.ok(opened.pop().endsWith('Privacy_ScreenCapture'));
+  assert.equal(mac.status().items[1].state, 'denied');
+  state = 'restricted'; await assert.rejects(mac.request('screen'), /администратору/);
+  await assert.rejects(mac.request('camera'), /Неизвестное/);
+  state = 'denied'; await permissions({ platform: 'win32', systemPreferences, shell }).request('microphone');
+  assert.equal(opened.pop(), 'ms-settings:privacy-microphone'); assert.equal(asks, 1);
+  console.log('Permissions: read-only status, grants, denied/restricted access and OS settings passed');
+})().catch(error => { console.error(error); process.exitCode = 1; });

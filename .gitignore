@@ -1,0 +1,26 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+/Petya.app/
+
+/*.exe
+
+.env
+.env.*
+!.env.example
+/oauth/server.env
+/oauth/generated/
+
+/runtime/
+
+/oauth/local/
+/oauth/server/*.enc
+
+/.signing/
+
+/.build.lock
+
+# Downloaded dependency archives
+/*.tgz

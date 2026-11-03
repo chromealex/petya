@@ -1,0 +1,27 @@
+{
+  "display_information": {
+    "name": "Petya",
+    "description": "Контекст обсуждений для помощника Петя",
+    "background_color": "#171a1b"
+  },
+  "oauth_config": {
+    "redirect_urls": [
+      "https://auth.petya-app.ru/oauth/slack/callback"
+    ],
+    "scopes": {
+      "user": [
+        "channels:read",
+        "groups:read",
+        "channels:history",
+        "groups:history",
+        "im:history",
+        "mpim:history"
+      ]
+    }
+  },
+  "settings": {
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": false,
+    "token_rotation_enabled": true
+  }
+}
