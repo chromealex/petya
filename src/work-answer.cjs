@@ -61,6 +61,11 @@ function workEvidenceReply(command,topic={},members=[],notes='',supplementalCont
  }
  if(/^(?:а\s+)?(?:сколько|какое количество|каково число)/iu.test(text)&&/задач/iu.test(text)&&/скрыт|недоступ|не вид/iu.test(text)&&!supplementalContext&&!notes&&!statements.some(t=>/скрыт|недоступ|не вид/iu.test(t))&&!Number.isFinite(data?.hiddenIssueCount)&&!data?.accessAudit&&!/\d/iu.test(text.replace(/[«"“][^»"”]*[»"”]/gu,'')))return 'Не знаю, сколько задач скрыто от аккаунта. По списку доступных задач нельзя определить количество недоступных.';
  if(!data||!Array.isArray(data.issues))return null;
+ // Task assignment/status is not a worklog. Missing logged time is unknown,
+ // including when the person has no tasks in this partial snapshot.
+ const timeQuestion=/^сколько (?:времени|часов|минут) [^?!\n]+(?:потратил|потратила|затратил|затратила|отработал|отработала)[^?!\n]*[?!.]*$/iu.test(text);
+ const timeEvidence=/worklog|timeSpent|timespent|timetracking|трудозатрат|(?:потратил|затратил|отработал)[аи]?[^.!?]{0,40}\d|\d[^.!?]{0,20}(?:час|минут)/iu;
+ if(timeQuestion&&!timeEvidence.test(facts)&&!/[«»"“”]|если|допустим|представь/iu.test(text))return 'Нет данных об учёте времени. По списку задач нельзя определить трудозатраты; отсутствие записей не означает ноль часов.';
  // Exact counts over an explicitly scoped snapshot are arithmetic, not prose generation.
  if(/^сколько /iu.test(text)&&/незаверш[её]н|открытых/iu.test(text)&&/задач/iu.test(text)&&/предоставленном списке|этом списке|данной выборке/iu.test(text)&&!/(?:если|предполож|высок|низк|приоритет|просроч|дедлайн|срок|создан|обновл|сегодня|вчера|блок|подзадач)/iu.test(text)){
   const people=[...new Set(data.issues.map(i=>(i.fields||i).assignee?.displayName).filter(Boolean))].filter(contains);

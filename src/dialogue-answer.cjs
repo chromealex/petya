@@ -16,7 +16,7 @@ function greetingReply(command='') {
  const greeting=/^добр/iu.test(match[1])?match[1][0].toUpperCase()+match[1].slice(1).toLowerCase():'Привет';
  return greeting+'! Я на связи.';
 }
-async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',supplementalContext='',settings={},skills=[],request,clarify,uncertain,telegram=false}) {
+async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',supplementalContext='',settings={},skills=[],chooseKnowledgeModel,request,clarify,uncertain,telegram=false}) {
  const capability=require('./capabilities-reply.cjs').answer(command,topic,settings,skills);if(capability)return capability.text;
  const confirmation=require('./action-evidence.cjs').actionConfirmation(command,topic);if(confirmation)return confirmation;
  const roleReply=require('./role-facts.cjs').roleFactReply(command,topic);if(roleReply)return roleReply;
@@ -25,9 +25,11 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
  const calculation=require('./explicit-calculation.cjs').explicitCalculation(command);if(calculation!==null)return calculation;
  const evidence=require('./work-answer.cjs').workEvidenceReply(command,topic,teamMembers,teamNotes,supplementalContext);if(evidence)return evidence;
  if(!model)return {text:'Не выбрана локальная модель для ответов. Откройте «Подключения → Ollama» и подготовьте модель.',error:true};
+ let modelOverrides={};
+ if(chooseKnowledgeModel&&require('./knowledge-model.cjs').standaloneKnowledge(command,topic,supplementalContext)){const selected=await chooseKnowledgeModel();if(selected)modelOverrides={model:selected,think:false};}
  for(let attempt=0;attempt<2;attempt++){
   let response;
-  try { response=await request(attempt?{think:false}:{}); }
+  try { response=await request(attempt?{...modelOverrides,think:false}:modelOverrides); }
   catch(error){
    const status=Number(error.status);
    const reason=status===404?'Выбранная модель не найдена.':status===429?'Ollama вернула HTTP 429 — ограничение запросов.':status>=500?'Ollama не смогла обработать запрос.':error.name==='TimeoutError'||error.name==='AbortError'?'Ollama не ответила вовремя.':'Не удалось связаться с Ollama.';

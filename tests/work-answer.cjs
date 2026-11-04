@@ -60,3 +60,10 @@ assert.equal(workEvidenceReply('Как лучше обсудить с Анной
 assert.match(workEvidenceReply('Кто назначен на A-1?',{lastData:{issues:[{key:'A-1',fields:{assignee:{accountId:'u1'}}}]}}),/ID u1.*имя.*отсутствует/);
 const {localAnswer}=require(process.env.PETYA_ANSWER_MODULE||require('node:path').join(__dirname,'../src/dialogue-answer.cjs'));
 (async()=>{assert.match(await localAnswer({command:'Ты сейчас проверил это в подключённом сервисе?',topic,request:()=>assert.fail('No invented network check')}),/^Нет/);console.log('Work evidence guards: no claimed fresh read, dated snapshots, missing sprint scope, inaccessible issue counts; real facts, hypothetical arithmetic and compound requests preserved');})().catch(e=>{console.error(e);process.exitCode=1;});
+
+const timeQuestion='Сколько времени Борис потратил сегодня?';
+assert.match(workEvidenceReply(timeQuestion,{lastData:{issues:[]}}),/Нет данных.*учёте времени/);
+assert.equal(workEvidenceReply(timeQuestion,{lastData:{issues:[],worklogs:[{timeSpentSeconds:3600}]}}),null);
+assert.equal(workEvidenceReply(timeQuestion,{lastData:{issues:[{fields:{timespent:0}}]}}),null);
+assert.equal(workEvidenceReply(timeQuestion,{lastData:{issues:[]},messages:[{role:'user',text:'Борис потратил сегодня 2 часа.'}]}),null);
+assert.equal(workEvidenceReply('Сколько часов в сутках?',{lastData:{issues:[]}}),null);

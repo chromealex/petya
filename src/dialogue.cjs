@@ -36,7 +36,7 @@ class Dialogue {
  ensureProjects(migrate=false){
   this.state.projects ||= [];
   if(!this.state.projects.some(p=>p.id==='general'))this.state.projects.unshift({id:'general',name:'Общее'});
-  const general=this.state.projects.find(p=>p.id==='general');general.name='Общее';general.archived=false;delete general.folder;delete general.memoryId;this.state.projects=[general,...this.state.projects.filter(p=>p.id!=='general')];
+  const general=this.state.projects.find(p=>p.id==='general');general.name='Общее';general.archived=false;delete general.folder;delete general.folders;delete general.memoryId;this.state.projects=[general,...this.state.projects.filter(p=>p.id!=='general')];
   if(!this.state.projects.some(p=>p.id===this.state.activeProjectId))this.state.activeProjectId=this.state.projects[0].id;
   for(const t of this.state.topics)if(!this.state.projects.some(p=>p.id===t.projectId)){t.projectId=migrate?this.state.projects[0].id:this.state.activeProjectId;if(!migrate&&!t.projectMemoryId){const memoryId=this.state.projects.find(p=>p.id===t.projectId)?.memoryId;if(memoryId)t.projectMemoryId=memoryId;}}
   const active=this.active();if(active){this.state.activeProjectId=active.projectId;delete this.state.newChat;}

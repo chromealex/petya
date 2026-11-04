@@ -26,3 +26,8 @@ recordReceipt(topic,{id:'s2',action:'send',service:'slack',status:'rejected',cha
 for(const q of ['Объясни фразу «Ты уже отправил сообщение?»','Если ты отправил сообщение, что дальше?','Отправь сообщение в Slack','Ты уже отправил сообщение? Тогда создай задачу'])assert.equal(actionConfirmation(q,topic),null,q);
 const {localAnswer}=require('../src/dialogue-answer.cjs');
 (async()=>{assert.equal(await localAnswer({command:'Кто тестировщик? Ответь только именем.',topic,request:()=>assert.fail('No model for explicit role facts')}),'Никита');assert.match(await localAnswer({command:'Ты уже что-то отправил в Jira или Slack в этом диалоге?',topic:{messages:[]},request:()=>assert.fail('No guessed actions')}),/Нет подтверждения/);console.log('Role corrections, history, scope, quotations, verified receipts, rejection, unknown delivery and no-model paths passed');})().catch(e=>{console.error(e);process.exitCode=1;});
+
+assert.match(actionConfirmation('Ты уже отправил сообщение Анне?',topic),/нельзя сопоставить/);
+assert.match(roleFactReply('Кто тестировщик?',{messages:[...topic.messages,user('Никита больше не тестировщик.')]}),/нет подтверждённого назначения/);
+
+assert.match(actionConfirmation('Ты уже отправил письмо?',topic),/Нет подтверждения/);

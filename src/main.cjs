@@ -389,7 +389,7 @@ function setupHandlers() {
       const telegramQuestion=/(?:телеграм|telegram|(?:^|\s)тг(?:\s|$))/iu.test(command)||topic.telegram;
       const telegramContext=telegramQuestion?memory.prune().filter(c=>c.source==='Telegram').slice(-5).map(c=>({title:c.title,text:c.text.slice(-3000),at:c.at,url:c.url})):null;
       if(telegramQuestion){topic.telegram=true;if(!modules.enabled(settings,'telegram'))return 'Включите модуль Telegram в подключениях.';if(!telegramContext.length)return 'Сначала подключите Telegram, выберите чаты и нажмите «Обновить контекст».';if(!settings.model)return 'В памяти есть сообщения Telegram. Настройте локальную модель Ollama для ответа по их содержимому. Их можно посмотреть во вкладке «Контекст».';}
-      return require('./dialogue-answer.cjs').localAnswer({model:settings.model,command,topic,settings,skills:instructionSkills.list(),teamMembers:team.members(settings),teamNotes:settings.teamRoles||'',supplementalContext:[chatProject?.context,localProject&&JSON.stringify(localProject),telegramContext&&JSON.stringify(telegramContext)].filter(Boolean).join('\n'),telegram:telegramQuestion,uncertain,clarify:()=>topic.background?{text:'Уточни вопрос: что именно нужно выяснить?',question:true}:interpret(command,topic),request:(overrides={})=>request(core.localEndpoint(settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...require('./dialogue-request.cjs').dialogueRequest({model:settings.model,command,topic,company:companies.get(companyId).name,projectContext:chatProject?.context||'',localProject,telegramContext,teamContext:team.context(settings,command),speechStyle:settings.speechStyle}),...overrides,stream:true}),onAnswerChunk:require('./answer-stream.cjs').report})});
+      return require('./dialogue-answer.cjs').localAnswer({model:settings.model,command,topic,settings,chooseKnowledgeModel:()=>require('./knowledge-model.cjs').selectKnowledgeModel(settings,request),skills:instructionSkills.list(),teamMembers:team.members(settings),teamNotes:settings.teamRoles||'',supplementalContext:[chatProject?.context,localProject&&JSON.stringify(localProject),telegramContext&&JSON.stringify(telegramContext)].filter(Boolean).join('\n'),telegram:telegramQuestion,uncertain,clarify:()=>topic.background?{text:'Уточни вопрос: что именно нужно выяснить?',question:true}:interpret(command,topic),request:(overrides={})=>request(core.localEndpoint(settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...require('./dialogue-request.cjs').dialogueRequest({model:settings.model,command,topic,company:companies.get(companyId).name,projectContext:chatProject?.context||'',localProject,telegramContext,teamContext:team.context(settings,command),speechStyle:settings.speechStyle}),...overrides,stream:true}),onAnswerChunk:require('./answer-stream.cjs').report})});
     }
   });
   const reviewFile=path.join(dataRoot,'review-memory.json');
@@ -592,6 +592,15 @@ function setupHandlers() {
     }
   });
   handle('projectMemoryReply',command=>projectMemory.turn(text(command,4000),true));
+  const gitWorkspace=new (require('./git-workspace.cjs').GitWorkspace)({context:()=>{
+    const p=dialogue.state.projects.find(p=>p.id===dialogue.state.activeProjectId);
+    return p&&p.id!=='general'?{id:p.id,name:p.name,folders:require('./project-folders.cjs').projectFolders(p,projectMemory.get(p.memoryId))}:null;
+  }});
+  handle('gitDiscover',()=>gitWorkspace.discover());
+  handle('gitSelect',(root,projectId)=>gitWorkspace.select(root,projectId));
+  handle('gitInit',(folder,projectId)=>gitWorkspace.init(folder,projectId));
+  handle('gitStatus',()=>gitWorkspace.status());
+  handle('gitExecute',input=>gitWorkspace.execute(input));
   handle('localProjectStatus',()=>({projects:projectMemory.state.projects.map(p=>({id:p.id,name:p.name,folder:p.localFolder||''})),activeId:projectMemory.active()?.id||''}));
   handle('localProjectConnect',async id=>{
     const project=projectMemory.get(id);if(!project)throw Error('Сначала выберите рабочий проект.');
@@ -661,6 +670,14 @@ function setupHandlers() {
   app.on('will-quit',()=>localImages.stop());
   handle('converse',async(command,choice)=>{
     if(chatJobs.busy(dialogue.active()?.id))throw Error('В этом чате ещё выполняется запрос.');const original=text(command,4000);let value=original,applied=[];
+    const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
+    if(gitRoute){
+      if(gitRoute.action==='help')return {handled:true,text:'Git: «статус гита», «покажи diff», «история коммитов», «добавь в коммит путь/файл», «сделай коммит: описание», «создай ветку feature/name», «переключись на ветку main», «git fetch», «git pull», «git push». Git автоматически определяется по папкам текущего проекта. Панель открывается кнопкой Git в чате.'};
+      dialogue.rememberAction(original,'Выполняю Git…');const topic=dialogue.active(),message=topic.messages.at(-1);
+      try{requestProgress.report('Выполняю Git: '+gitRoute.action);const result=gitRoute.action==='init'?await gitWorkspace.init(null,(await gitWorkspace.discover()).projectId):await gitWorkspace.execute(gitRoute);message.text=result.text;}catch(error){message.text=error.message;message.error=true;if(error.gitDiscovery)message.gitDiscovery=error.gitDiscovery;}
+      if(!dialogue.state.topics.includes(topic))return {handled:true,text:message.text,error:!!message.error};
+      dialogue.persist();return {handled:true,text:message.text,error:!!message.error,gitDiscovery:message.gitDiscovery,gitCommand:original,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
+    }
     const drawing=!choice?require('./local-images.cjs').imagePrompt(original):null;
     if(drawing!==null){
       if(!drawing)return {handled:true,text:'Что нарисовать? Например: «Нарисуй кота-космонавта на Луне».'};
@@ -802,7 +819,7 @@ function setupHandlers() {
     if(applied.length&&reply.handled){const m=[...(dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user');if(m){m.originalText=original;dialogue.persist();}}
     return {...reply,resolvedCommand:value,appliedRules:applied};
   });
-  const chatJobs=new (require('./chat-jobs.cjs').ChatJobs)({dialogue,scope:projectId=>JSON.stringify([companyId,settings.model,settings.ollamaUrl,settings.jiraUrl,settings.jiraProjects,settings.module_jira,settings.jiraToken,settings.atlassianCredential,projectMemory.state.projects.filter(m=>dialogue.state.projects.find(p=>p.id===projectId)?.memoryId===m.id||dialogue.state.topics.some(t=>t.projectId===projectId&&t.projectMemoryId===m.id)),dialogue.state.projects.filter(p=>p.id===projectId).map(p=>({id:p.id,context:p.context,folder:p.folder,disabledServices:p.disabledServices}))]),emit:event=>{if(!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('chat-job',event);},run:(work,progress,projectId)=>modules.withProject(dialogue.state.projects.find(p=>p.id===projectId),()=>requestProgress.run('converse',progress,()=>require('./answer-stream.cjs').run(()=>{},work)))});
+  const chatJobs=new (require('./chat-jobs.cjs').ChatJobs)({dialogue,scope:projectId=>JSON.stringify([companyId,settings.model,settings.ollamaUrl,settings.jiraUrl,settings.jiraProjects,settings.module_jira,settings.jiraToken,settings.atlassianCredential,projectMemory.state.projects.filter(m=>dialogue.state.projects.find(p=>p.id===projectId)?.memoryId===m.id||dialogue.state.topics.some(t=>t.projectId===projectId&&t.projectMemoryId===m.id)),dialogue.state.projects.filter(p=>p.id===projectId).map(p=>({id:p.id,context:p.context,folder:p.folder,folders:p.folders,disabledServices:p.disabledServices}))]),emit:event=>{if(!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('chat-job',event);},run:(work,progress,projectId)=>modules.withProject(dialogue.state.projects.find(p=>p.id===projectId),()=>requestProgress.run('converse',progress,()=>require('./answer-stream.cjs').run(()=>{},work)))});
   handle('chatJobAcknowledge',(id,at)=>chatJobs.acknowledge(id,at));
   handle('chatJobStart',(id,projectId,command)=>chatJobs.start(id,projectId,command));
   handle('chatJobFinish',(id,state)=>{const t=dialogue.state.topics.find(t=>t.id===id);if(t?.chatJob&&!chatJobs.busy(id)&&['done','attention'].includes(state)){chatJobs.update(t,state,state==='done'?'Готово':'Нужно внимание');}return true;});
@@ -812,12 +829,12 @@ function setupHandlers() {
   const projectMutation=fn=>(...args)=>{if(activeOperations>1)throw Error('Дождитесь завершения текущей операции.');return fn(...args);};
   handle('chatProjectCreate',projectMutation(name=>dialogue.projectCreate(name)));
   const pickedProjectFolders=new Set();
-  handle('chatProjectSettings',id=>{const p=id?dialogue.state.projects.find(p=>p.id===id):null;if(id&&!p)throw Error('Проект не найден.');return {project:p?{...p,folder:p.id==='general'?'':p.folder||projectMemory.get(p.memoryId)?.localFolder||''}:null,services:require('./project-settings.cjs').services(settings)};});
+  handle('chatProjectSettings',id=>{const p=id?dialogue.state.projects.find(p=>p.id===id):null;if(id&&!p)throw Error('Проект не найден.');return {project:p?{...p,folders:require('./project-folders.cjs').projectFolders(p,projectMemory.get(p.memoryId)),folder:p.id==='general'?'':p.folder||projectMemory.get(p.memoryId)?.localFolder||''}:null,services:require('./project-settings.cjs').services(settings)};});
   handle('chatProjectPickFolder',async id=>{if(id==='general')throw Error('Общему проекту нельзя назначить папку.');const picked=await require('electron').dialog.showOpenDialog(win,{title:'Контекст проекта',properties:['openDirectory']});if(picked.canceled)return null;const folder=await require('./local-project.cjs').rootFolder(picked.filePaths[0]);pickedProjectFolders.add(folder);return folder;});
   handle('chatProjectSave',projectMutation(async input=>{
     const data=require('./project-settings.cjs').validate(input);let p=input.id?dialogue.state.projects.find(p=>p.id===input.id):null;if(input.id&&!p)throw Error('Проект не найден.');if(p?.id==='general'&&data.folder)throw Error('Общему проекту нельзя назначить папку.');if(p&&dialogue.state.topics.some(t=>t.projectId===p.id&&chatJobs.busy(t.id)))throw Error('Дождитесь ответов в проекте перед изменением контекста и сервисов.');
     const name=p?.id==='general'?'Общее':dialogue.projectName(input.name);if(dialogue.state.projects.some(row=>row.id!==p?.id&&row.name.toLocaleLowerCase()===name.toLocaleLowerCase()))throw Error('Проект с таким названием уже есть.');
-    const existing=p?.folder||projectMemory.get(p?.memoryId)?.localFolder||'';if(data.folder&&data.folder!==existing&&!pickedProjectFolders.has(data.folder))throw Error('Выберите папку кнопкой в окне настроек.');if(data.folder)data.folder=await require('./local-project.cjs').rootFolder(data.folder);
+    const existing=require('./project-folders.cjs').projectFolders(p,projectMemory.get(p?.memoryId));const folders=data.folders|| (data.folder?[data.folder]:[]);for(const folder of folders)if(!existing.includes(folder)&&!pickedProjectFolders.has(folder))throw Error('Выберите папку кнопкой в контексте проекта.');data.folders=await Promise.all(folders.map(folder=>require('./local-project.cjs').rootFolder(folder)));data.folder=data.folders[0]||'';
     if(!p){dialogue.projectCreate(name);p=dialogue.state.projects.find(p=>p.id===dialogue.state.activeProjectId);}p.name=name;Object.assign(p,data);dialogue.persist();return dialogue.list();
   }));
   handle('chatArchive',projectMutation((kind,id,archived)=>{if(!['project','chat'].includes(kind))throw Error('Неизвестный тип записи.');if(kind==='chat'&&chatJobs.busy(id)||kind==='project'&&dialogue.state.topics.some(t=>t.projectId===id&&chatJobs.busy(t.id)))throw Error('Дождитесь ответа перед архивированием.');return dialogue.archive(kind,id,archived);}));
