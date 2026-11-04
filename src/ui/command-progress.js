@@ -2,9 +2,10 @@
 class CommandProgress {
   constructor({ change = () => {}, now = Date.now } = {}) {
     this.change = change; this.now = now; this.state = 'idle'; this.busy = false;
-    this.failed = null; this.startedAt = 0; this.label = 'Готов к команде';
+    this.failed = null; this.startedAt = 0; this.label = 'Готов к команде'; this.steps = [];
   }
-  update(state, label) { this.state = state; this.label = label; this.change(this); }
+  // Steps of the current request, shown in the chat as an expandable list.
+  update(state, label) { if (state === 'working' && label && this.steps?.at(-1)?.label !== label) { const last = this.steps.at(-1); if (last) last.done = this.now(); this.steps.push({ label, at: this.now() }); } this.state = state; this.label = label; this.change(this); }
   reset() { if(this.busy)return false;this.failed=null;this.request=null;this.retryable=false;this.startedAt=0;this.update('idle','');return true; }
   cancel(){if(this.request)this.request.cancelled=true;this.failed=null;this.retryable=false;this.update('idle','Ответ остановлен');}
   async resume(request=this.request){if(this.busy||!request?.cancelled)return false;request.cancelled=false;return this.execute(request);}
@@ -15,7 +16,7 @@ class CommandProgress {
   }
   async execute(request) {
     if (this.busy) return false;
-    this.busy = true; this.request = request; this.startedAt = this.now(); this.retryable = false;
+    this.busy = true; this.request = request; this.startedAt = this.now(); this.retryable = false; this.steps = [];
     this.update('working', 'Разбираю запрос');
     try {
       await request.work(this);

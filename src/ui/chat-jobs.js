@@ -20,7 +20,7 @@
  });
  window.leaveBackgroundChat=()=>{if(window.backgroundClarification){window.backgroundClarification=false;voiceReply=null;commandProgress.update('idle','');}};
  window.finishForegroundChat=async result=>{const id=topicSelect.value;if(applying||!id||window.chatJobBusy(id)||!jobs.has(id))return;finishing.add(id);try{await window.petya.chatJobFinish(id,result.error||result.question||voiceReply?'attention':'done',result);const state=await window.petya.chatJobState(id);if(state?.job)jobs.set(id,state.job);paint();}finally{finishing.delete(id);}};
- new MutationObserver(()=>{if(!panel.hidden)window.placeChatProgress(panel);}).observe(dialogueMessages,{childList:true});setInterval(()=>{const job=jobs.get(topicSelect.value);elapsed.textContent=job?.startedAt?'Время: '+Math.max(0,Math.floor(((['queued','running'].includes(job.state)?Date.now():job.finishedAt||job.at)-job.startedAt)/1000))+' с':'';},1000);
+ new MutationObserver(()=>{if(!panel.hidden)window.placeChatProgress(panel);}).observe(dialogueMessages,{childList:true});setInterval(()=>{const job=jobs.get(topicSelect.value);elapsed.textContent=job?.startedAt?''+Math.max(0,Math.floor(((['queued','running'].includes(job.state)?Date.now():job.finishedAt||job.at)-job.startedAt)/1000))+' с':'';},1000);
  document.addEventListener('petya-dialogue-state',()=>{paint();});
  window.restoreChatJob(topicSelect.value).catch(()=>{});
 })();

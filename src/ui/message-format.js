@@ -1,4 +1,15 @@
 // Small, text-only Markdown renderer: model output never becomes executable HTML.
+// «Ход работы»: an expandable list of what Petya did (done) and is doing now (current).
+window.renderSteps = function(steps,{live=false,open=false}={}){
+ const rows=(Array.isArray(steps)?steps:[]).filter(s=>s&&typeof s.label==='string'&&s.label).slice(0,40);
+ const box=document.createElement('details');box.className='message-steps'+(live?' live':'');box.open=open;
+ const summary=document.createElement('summary');const seconds=ms=>ms>=1000?(ms/1000).toLocaleString('ru-RU',{maximumFractionDigits:1})+' с':ms+' мс';
+ const total=rows.reduce((sum,s)=>sum+(Number(s.ms)||0),0);
+ summary.textContent='Ход работы · '+rows.length+' '+(rows.length%10===1&&rows.length%100!==11?'шаг':rows.length%10>=2&&rows.length%10<=4&&(rows.length%100<10||rows.length%100>=20)?'шага':'шагов')+(total&&!live?' · '+seconds(total):'');
+ const list=document.createElement('ol');
+ rows.forEach((s,i)=>{const li=document.createElement('li');const current=live&&i===rows.length-1;li.className=current?'current':'done';li.setAttribute('aria-label',(current?'Выполняется: ':'Готово: ')+s.label);const mark=document.createElement('span');mark.className='step-mark';mark.setAttribute('aria-hidden','true');mark.textContent=current?'•':'✓';const text=document.createElement('span');text.textContent=s.label;li.append(mark,text);if(!current&&Number(s.ms)>=100){const time=document.createElement('span');time.className='step-time';time.textContent=seconds(Number(s.ms));li.append(time);}list.append(li);});
+ box.append(summary,list);return box;
+};
 window.renderMessage = function(message){
  const node=document.createElement('article');node.className=message.role==='user'?'message-user':'message-assistant';node.dataset.messageText=message.text||'';
  const role=document.createElement('span');role.className='sr-only';role.textContent=message.role==='user'?'Вы: ':'Петя: ';node.append(role);
@@ -10,6 +21,7 @@ window.renderMessage = function(message){
  const heading=line.match(/^(#{1,4})\s+(.+)/),p=document.createElement(heading?'h'+Math.min(4,heading[1].length+1):'p');inline(p,heading?heading[2]:line);node.append(p);
  }
  const content=document.createElement('div');content.className='message-content';content.append(...node.childNodes);node.append(content);
+ if(message.role!=='user'&&Array.isArray(message.steps)&&message.steps.length>1)node.insertBefore(window.renderSteps(message.steps),content);
  const files=document.createElement('div');files.className='message-attachments';for(const file of (message.attachments||[]).slice(0,5)){const item=document.createElement('div');item.className='message-attachment';const name=document.createElement('span');name.textContent=file.name||'Файл';item.append(name);if(typeof file.thumbnail==='string'&&file.thumbnail.length<2*1024*1024&&/^[A-Za-z0-9+/=]+$/.test(file.thumbnail)){const image=document.createElement('img');image.src='data:image/png;base64,'+file.thumbnail;image.alt=file.name||'Изображение';image.loading='lazy';const open=document.createElement('button');open.type='button';open.setAttribute('aria-label','Открыть изображение '+(file.name||''));open.append(image);open.onclick=()=>{const dialog=document.createElement('dialog');dialog.className='chat-image-preview';const close=document.createElement('button');close.textContent='Закрыть';close.onclick=()=>dialog.close();const full=image.cloneNode();dialog.append(close,full);document.body.append(dialog);dialog.onclose=()=>dialog.remove();dialog.showModal();};item.prepend(open);}else{item.classList.add('document');item.title=file.note||file.name||'';}files.append(item);}if(files.childElementCount)content.append(files);
  const meta=document.createElement('div');meta.className='message-meta';
  const at=message.at?new Date(message.at):null;

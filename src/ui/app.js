@@ -48,16 +48,21 @@ progressPanel.setAttribute('aria-label', 'Выполнение команды');
 const progressText = document.createElement('p'); progressText.setAttribute('role', 'status');
 const progressTime = document.createElement('span'); progressTime.className = 'small';
 const retryCommand = document.createElement('button'); retryCommand.type = 'button'; retryCommand.textContent = 'Повторить запрос';
+let progressSteps = null, progressStepsOpen = false;
 progressPanel.append(progressText, progressTime, retryCommand); $('notice').after(progressPanel);
 let progressTimer = null;
 window.petyaEvents.onRequestProgress?.(label=>{if(commandProgress.busy)commandProgress.update('working',label);});
 const commandProgress = new CommandProgress({ change: state => {
   progressPanel.hidden = state.state === 'done' || state.state === 'idle'; progressText.textContent = state.label;
   progressPanel.dataset.state = state.state;
+  // Live steps: what is done and what Petya is doing now; stays expanded if the user opened it.
+  if (progressSteps) { progressStepsOpen = progressSteps.open; progressSteps.remove(); progressSteps = null; }
+  if (state.busy && state.steps?.length) { const now = Date.now(); progressSteps = window.renderSteps(state.steps.map(s => ({ label: s.label, ms: (s.done || now) - s.at })), { live: true, open: progressStepsOpen }); progressTime.after(progressSteps); }
+  if (!state.busy) progressStepsOpen = false;
   chromeProgress={state:state.state,label:state.label};updateChromeStatus();
   retryCommand.hidden = !state.failed; retryCommand.disabled = state.busy;
   clearInterval(progressTimer); progressTimer = null;
-  const clock = () => { progressTime.hidden = !state.startedAt; progressTime.textContent = 'Время: ' + Math.floor((Date.now() - state.startedAt) / 1000) + ' с'; };
+  const clock = () => { progressTime.hidden = !state.startedAt; progressTime.textContent = Math.floor((Date.now() - state.startedAt) / 1000) + ' с'; progressTime.title = 'Время выполнения'; };
   clock(); if (state.busy) progressTimer = setInterval(clock, 1000);
 }});
 async function repeatCommand(spoken = false) {

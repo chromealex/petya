@@ -8,6 +8,8 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     // action («создай задачу, нет, не создавай») is not run at all.
     const correction=choice?{text:spoken,changed:false}:require('./self-correction.cjs').resolve(spoken);
     if(correction.cancelled){ctx.dialogue.rememberAction(spoken,correction.reply);const topic=ctx.dialogue.active(),last=topic?.messages?.at(-1);if(last?.role==='assistant')last.by='поправка во фразе';ctx.dialogue.persist();return {handled:true,text:correction.reply,by:'поправка во фразе',topicId:topic?.id,topicTitle:topic?.title,messages:topic?.messages};}
+    const step=label=>require('./request-progress.cjs').report(label);
+    if(correction.changed)step('Учёл поправку во фразе: «'+correction.text.slice(0,80)+'»');
     const original=correction.text;let value=original,applied=[];
     if(choice)ctx.draftAnswers.clear();else ctx.draftAnswers.commit(original,ctx.voicePreparationKey());
     const namePreference=!choice?require('./name-preference.cjs').preference(original,ctx.settings):null;
@@ -54,13 +56,14 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       const workRoute=require('./work-query-route.cjs');
       const report=async(command,workflow)=>{const offer=await ctx.serviceAccess.offer('Проверь Jira: '+command,null);if(offer)return offer;const skill=ctx.instructionSkills.list().find(s=>s.enabled&&s.workflow===workflow);if(!skill)return {handled:true,text:'Для этого отчёта включи скилл '+workflow+' в разделе «Скиллы».'};return ctx.workSkills.turn({skill,question:command,verified:true},command);};
       const selected=workRoute.classify(original,ctx.dialogue.active());
+      const routeStep={personal:'Смотрю твои задачи в Jira',workload:'Собираю задачи команды в Jira',status:'Собираю статус проекта',action:'Проверяю действие в Jira'}[selected?.kind];if(routeStep)step(routeStep);
       const workReply=await workRoute.dispatch(selected,original,{personal:async command=>{const offer=await ctx.serviceAccess.offer('Проверь Jira: '+command,null);return offer||ctx.dialogue.turn(command,undefined,'tasks');},workload:command=>report(command,'team-workload'),status:command=>report(command,'project-status'),chat:command=>ctx.dialogue.turn(command,undefined,'chat'),action:command=>require('./dialogue.cjs').actionRequest(command)?null:{handled:true,text:'Эта команда требует изменения Jira. Выполнить её напрямую этим способом пока не могу; открой задачу в Jira для изменения.'}});
       if(workReply)return selected?.kind==='chat'?workReply:via('рабочий запрос',workReply);
     }
     if(!choice){const presence=require('./ui/conversation-input.js').ConversationInput.presenceReply(original);if(presence)return via('шаблон: присутствие',presence);}
     if(!choice){const catalog=require('./project-catalog.cjs').projectCatalogReply(original,{projects:ctx.projectMemory.state.projects,activeId:ctx.projectMemory.active()?.id,settings:ctx.settings});if(catalog)return via('каталог проектов',catalog);}
     if(!choice){const remembered=await ctx.projectMemory.turn(original);if(remembered)return via('память проектов',remembered);const sent=await ctx.slackRequest.turn(original);if(sent)return via('Slack',sent);}
-    if(!choice){try{const controlled=require('./computer-control.cjs').parseCommand(original)||require('./computer-intent.cjs').candidate(original)?await ctx.computerLock(async()=>await ctx.computer.command(original)||await ctx.computerIntent.turn(original)):null;if(controlled)return via('управление компьютером',controlled);}catch(error){if(error.code==='COMPUTER_PERMISSION_REQUIRED')return ctx.computerApproval.request(original,error.action);throw error;}}
+    if(!choice){try{const controlled=require('./computer-control.cjs').parseCommand(original)||require('./computer-intent.cjs').candidate(original)?(step('Работаю с приложениями на компьютере'),await ctx.computerLock(async()=>await ctx.computer.command(original)||await ctx.computerIntent.turn(original))):null;if(controlled)return via('управление компьютером',controlled);}catch(error){if(error.code==='COMPUTER_PERMISSION_REQUIRED')return ctx.computerApproval.request(original,error.action);throw error;}}
     if(!choice){const filled=await ctx.teamFill.turn(original);if(filled)return via('заполнение команды',filled);}
     if(!choice&&!ctx.learning.preview(original).matched&&!ctx.attachments.list().length&&(!ctx.dialogue.active()?.attachments?.length||require('./service-access.cjs').detect(original,null).length)){const offer=await ctx.serviceAccess.offer(original.replace(/^петя[\s,:.!?-]*/iu,''),ctx.dialogue.active());if(offer)return offer;}
     if(!choice&&/(?:посмотри|разбери|проверь|объясни).*(?:скрин|картин|изображени|видео|ролик)/iu.test(original)&&/(?:телеграм|telegram|тг|slack|слак)/iu.test(original)){
@@ -98,7 +101,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     }
 
     if(!choice&&/^(?:посмотри|разбери|объясни|изучи) (?:вот )?(?:это|вложени[яе]|файл|скриншот)/iu.test(original)){const pending=ctx.attachments.list();if(pending.length)return ctx.inspectAttachments(pending.map(a=>a.id),original);if(!ctx.dialogue.active()?.attachments?.length)return {handled:true,text:'Прикрепите файл кнопкой «Показать файл», перетащите его в окно или вставьте скриншот из буфера.'};}
-    if(!choice){if(ctx.pendingWeb&&/^продолжи(?:ть)? поиск[.!?]*$/iu.test(original))return ctx.runWeb(ctx.pendingWeb.original,ctx.pendingWeb.search,true);const search=ctx.searchCommand(original,ctx.dialogue.active());if(search)return ctx.runWeb(original,search);}
+    if(!choice){if(ctx.pendingWeb&&/^продолжи(?:ть)? поиск[.!?]*$/iu.test(original))return ctx.runWeb(ctx.pendingWeb.original,ctx.pendingWeb.search,true);const search=ctx.searchCommand(original,ctx.dialogue.active());if(search){step('Ищу в интернете: «'+String(search.query||original).slice(0,80)+'»');return ctx.runWeb(original,search);}}
     if(!choice){const mail=await ctx.mailSkill.turn(original);if(mail){
       if(mail.mail||mail.mailTeaching){ctx.dialogue.prune();let topic=ctx.dialogue.state.topics.find(t=>t.mail);if(!topic){topic={id:ctx.randomUUID(),title:'Почта Gmail',kind:'chat',mail:true,messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);}ctx.dialogue.state.activeId=topic.id;}
       ctx.dialogue.rememberAction(original,mail.text);const topic=ctx.dialogue.active();return {...mail,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
@@ -140,6 +143,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
         const base=new URL(ctx.core.localEndpoint(ctx.settings.ollamaUrl));
         const info=await ctx.request(new URL('/api/show',base).href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:ctx.settings.model})});
         if(info.remote_host||info.remote_model||/cloud/i.test(ctx.settings.model))throw Error('Нужна локальная модель.');
+        step('Выбираю, чем ответить');
         preparedTopicRoute ||= ctx.dialogue.prepareRoute(value);
         const response=await ctx.request(base.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(semantic.routingRequest(ctx.settings.model,value,{company:ctx.companies.get(ctx.companyId).name,topic:ctx.dialogue.active(),recipes}))});
         route=semantic.parseRoute(response,recipes);
@@ -157,6 +161,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
         }
       });
       if(routed)return {...routed,selectedTool:route.tool};
+      step('Готовлю ответ');
     }
     const reply=await ctx.dialogue.turn(value,typeof choice==='string'?choice:undefined,undefined,preparedTopicRoute);
     if(applied.length&&reply.handled){const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user');if(m){m.originalText=original;ctx.dialogue.persist();}}
@@ -169,5 +174,8 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     // A complete answer resolves an older «Нужно уточнение» status of this chat.
     const chat=result?.topicId?ctx.dialogue.state.topics.find(t=>t.id===result.topicId):topic;
     if(!background&&chat&&['attention','cancelled'].includes(chat.chatJob?.state)&&result?.handled&&!result.error&&!require('./chat-jobs.cjs').needsUser(result)&&!ctx.chatJobs.busy(chat.id)){delete chat.lastChatResult;ctx.chatJobs.update(chat,'done','Готово');}
+    // Keep what Petya did with the answer, so the chat can show the steps later.
+    const steps=require('./request-progress.cjs').steps();
+    if(steps.length&&result&&typeof result==='object'){result.steps=steps;const last=chat?.messages?.at(-1);if(last?.role==='assistant'&&!last.steps&&result.handled){last.steps=steps;ctx.dialogue.persist();}}
     return result;};
 };

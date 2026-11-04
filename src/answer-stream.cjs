@@ -2,7 +2,7 @@ const {AsyncLocalStorage}=require('node:async_hooks');
 const {randomUUID}=require('node:crypto');
 const scope=new AsyncLocalStorage();
 async function run(emit,work){const state={id:randomUUID(),emit,started:false};try{const result=await scope.run(state,work);return state.started&&result&&typeof result==='object'?{...result,answerStreamId:state.id}:result;}finally{if(state.started)emit({id:state.id,end:true});}}
-function report(text){const s=scope.getStore();if(!s)return;if(!s.started){s.started=true;s.emit({id:s.id,start:true});}s.emit({id:s.id,text});}
+function report(text){const s=scope.getStore();if(!s)return;if(!s.started){s.started=true;require('./request-progress.cjs').report('Пишу ответ');s.emit({id:s.id,start:true});}s.emit({id:s.id,text});}
 // Only the answer of an explicitly understood response may be previewed.
 // Decode complete JSON escapes; never expose thinking or unfinished escapes.
 function preview(content){
