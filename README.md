@@ -49,6 +49,8 @@ Only via `python3 scripts/build.py` (`--mac`, `--win`, or both platforms without
 | Path | Contents |
 |---|---|
 | `src/main.cjs` | Electron main process: windows, IPC, routing of user requests |
+| `src/converse.cjs` | the request pipeline of one chat turn |
+| `src/*-setup.cjs` | groups of main-process services and their IPC handlers (agents, attachments, chats and projects, computer control, connections, dictation, Git, Jira, learning, mail, Ollama, skills, Slack, Telegram, voice, Asana); each takes a `ctx` with live getters for the state it shares with `main.cjs` |
 | `src/dialogue*.cjs`, `src/answer-*.cjs` | dialogue, model request, answer parsing and guards |
 | `src/*-routing.cjs`, `src/work-*.cjs` | intent detection and work scenarios (Jira, team) |
 | `src/slack*.cjs`, `src/gmail*.cjs`, `src/telegram.cjs`, … | integrations |
