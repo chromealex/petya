@@ -73,13 +73,13 @@ function scopedState(dialogue,target){
 // A background chat job shows the user's question at once as a pending message; the pipeline
 // takes it over instead of recording the question a second time.
 // One job runs per chat, so a pending question is this request's even if a correction changed its text.
-function takePlaceholder(topic,text){const last=topic?.messages?.at(-1);if(last?.role==='user'&&last.pending){if(last.attachments?.length)topic.pendingEditAttachments=last.attachments;topic.messages.pop();}}
-function userMessage(topic,text,at){const attachments=topic.pendingEditAttachments;delete topic.pendingEditAttachments;return {role:'user',text,at,...(attachments?.length?{attachments}:{})};}
+function takePlaceholder(topic,text){const last=topic?.messages?.at(-1);if(last?.role==='user'&&last.pending){if(last.replyTo)topic.nextQuote=last.replyTo;if(last.attachments?.length)topic.pendingEditAttachments=last.attachments;topic.messages.pop();}}
+function userMessage(topic,text,at){const attachments=topic.pendingEditAttachments,replyTo=topic.nextQuote;delete topic.nextQuote;delete topic.pendingEditAttachments;return {role:'user',text,at,...(replyTo?{replyTo}:{}),...(attachments?.length?{attachments}:{})};}
 class Dialogue {
  get state(){return this._state;}
  set state(value){this._state=scopedState(this,value||{topics:[],activeId:''});}
  // Run work as a request of chat `topicId` (empty for a new chat) in project `projectId`.
- within(topicId,projectId,work){const raw=this.state[RAW];return chatScope.run({dialogue:this,activeId:topicId||'',activeProjectId:projectId||raw.activeProjectId,newChat:!topicId},work);}
+ within(topicId,projectId,work){const raw=this.state[RAW];return chatScope.run({dialogue:this,excludedMaterials:raw.topics.find(t=>t.id===topicId)?.excludedMaterials,activeId:topicId||'',activeProjectId:projectId||raw.activeProjectId,newChat:!topicId},work);}
  scopedChat(){return chatScope.getStore()?.dialogue===this;}
  // True while a request of chat `id` is running (busy() without id: any chat).
  busyChat(id){return id===undefined?this.running.size>0:this.running.has(id||'new:'+this.state.activeProjectId);}

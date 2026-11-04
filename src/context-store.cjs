@@ -10,7 +10,9 @@ class ContextStore {
     const changed = JSON.stringify(next) !== JSON.stringify(this.items);
     if (changed) this.save(next);
     this.items = next;
-    return require('./modules.cjs').filterContext(this.items);
+    const visible = require('./modules.cjs').filterContext(this.items);
+    const excluded = require('./dialogue.cjs').chatScope.getStore()?.excludedMaterials;
+    return excluded?.length ? visible.filter(item => !excluded.includes(item.id)) : visible;
   }
   put(items) {
     const old = this.items;

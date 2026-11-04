@@ -32,7 +32,7 @@ module.exports=ctx=>{
         ]);
         if (JSON.stringify(snapshot) !== JSON.stringify(ctx.settings)) return { ready: false, state: 'setup', message: 'Настройки изменены · повторите проверку' };
         return { ...result, state: result.ready ? 'connected' : 'setup' };
-      } catch (error) { if (error.code === 'CONFLUENCE_NOT_GRANTED') return { ready: false, state: 'setup', action: 'reconnect', message: error.message }; throw service === 'whisper' ? ctx.speechError(error, snapshot.whisperUrl) : error; }
+      } catch (error) { if (error.code === 'CONFLUENCE_NOT_GRANTED') return { ready: false, state: 'setup', action: 'reconnect', message: error.message }; const problem=require('./connection-failure.cjs').classify(error);if(problem && !['ollama','whisper'].includes(service))return {ready:false,state:'error',...problem};throw service === 'whisper' ? ctx.speechError(error, snapshot.whisperUrl) : error; }
       finally { clearTimeout(timer); }
     })().finally(() => connectionChecks.delete(service));
     connectionChecks.set(service, check); return check;
@@ -43,7 +43,7 @@ module.exports=ctx=>{
     const snapshot = { ...ctx.settings };
     let result;
     try { result = service === 'whisper' ? await ctx.speech.ensure(snapshot) : await ctx.checkConnection(service, snapshot, (...args) => ctx.workspace.request(...args)); }
-    catch (error) { throw service === 'whisper' ? ctx.speechError(error, snapshot.whisperUrl) : error; }
+    catch (error) { const problem=require('./connection-failure.cjs').classify(error);if(problem && !['ollama','whisper'].includes(service))return {ready:false,state:'error',settings:current,...problem};throw service === 'whisper' ? ctx.speechError(error, snapshot.whisperUrl) : error; }
     if (JSON.stringify(snapshot) !== JSON.stringify(ctx.settings)) throw new Error('Настройки изменились во время проверки. Повторите подключение.');
     return { ...result, settings: current };
   });

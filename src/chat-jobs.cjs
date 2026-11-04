@@ -38,7 +38,7 @@ class ChatJobs{
   let topic=id?d.state.topics.find(t=>t.id===id):null;if(id&&(!topic||topic.archived||topic.projectId!==projectId))throw Error('Чат не найден в проекте.');
   if(!eligible(text,topic,!!this.converse))return {foreground:true};if(topic&&(this.busy(id)||d.running?.has(id)))throw Error('В этом чате уже выполняется запрос.');
   if(!topic){topic={id:randomUUID(),projectId,title:text.trim().slice(0,80),kind:'chat',messages:[],at:Date.now(),...(project.memoryId?{projectMemoryId:project.memoryId}:{})};d.state.topics.push(topic);if(d.state.activeProjectId===projectId&&!d.active()){d.state.activeId=topic.id;delete d.state.newChat;}}
-  const job={controller:new AbortController(),topic,scope:this.scope(projectId),command:text.trim(),snapshot:structuredClone(topic)};this.jobs.set(topic.id,job);job.created=!id;job.placeholder={role:'user',text:job.command,at:Date.now(),pending:true,...(topic.pendingEditAttachments?.length?{attachments:topic.pendingEditAttachments}:{})};delete topic.pendingEditAttachments;topic.messages.push(job.placeholder);topic.at=Date.now();topic.chatJob={command:job.command,startedAt:Date.now()};delete topic.lastChatResult;this.update(topic,'queued','В очереди');queueMicrotask(()=>this.pump());return {topicId:topic.id,messages:topic.messages,job:topic.chatJob};
+  const job={controller:new AbortController(),topic,scope:this.scope(projectId),command:text.trim(),snapshot:structuredClone(topic)};this.jobs.set(topic.id,job);job.created=!id;const replyTo=topic.nextQuote;delete topic.nextQuote;job.placeholder={role:'user',text:job.command,at:Date.now(),pending:true,...(replyTo?{replyTo}:{}),...(topic.pendingEditAttachments?.length?{attachments:topic.pendingEditAttachments}:{})};delete topic.pendingEditAttachments;topic.messages.push(job.placeholder);topic.at=Date.now();topic.chatJob={command:job.command,startedAt:Date.now()};delete topic.lastChatResult;this.update(topic,'queued','В очереди');queueMicrotask(()=>this.pump());return {topicId:topic.id,messages:topic.messages,job:topic.chatJob};
  }
  pump(){for(const job of this.jobs.values()){if(this.running>=this.limit)break;if(job.started)continue;job.started=true;this.running++;job.settled=require('./answer-cancel.cjs').run(job.controller.signal,()=>this.execute(job)).catch(error=>this.emit({topicId:job.topic.id,job:{state:'attention',label:error.message}})).finally(()=>{this.jobs.delete(job.topic.id);this.running--;this.pump();});}}
  async execute(job){const {topic,snapshot,command}=job,d=this.dialogue;
@@ -78,6 +78,7 @@ ChatJobs.prototype.executeFull=async function(job){
   else settle();
   if(!d.state.topics.includes(target))return;
   record(target);
+  if(placeholder.replyTo){const turn=target.messages.findLast(m=>m.role==='user'&&m.at>=placeholder.at);if(turn)turn.replyTo=placeholder.replyTo;}
   const last=target.messages.at(-1);if(result.error&&last?.role==='assistant'&&last.text===result.text)last.error=true;
   if(result.text&&!(last?.role==='assistant'&&last.text===result.text))target.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],at:Date.now(),...(result.by?{by:result.by}:{})});
   if(target.title==='Новый чат')target.title=command.slice(0,80);

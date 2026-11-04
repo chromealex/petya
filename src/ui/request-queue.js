@@ -4,6 +4,6 @@ class RequestQueue {
  edit(id,text){const item=this.items.find(i=>i.id===id);if(item&&text.trim())item.text=text.trim();this.change();}
  remove(id){this.items=this.items.filter(i=>i.id!==id);this.change();}
  first(id){const item=this.items.find(i=>i.id===id);if(item){this.items=this.items.filter(i=>i.id!==id);this.items.unshift(item);this.change();}}
- async drain(){if(this.active||this.paused||this.blocked()||!this.items.length)return;const item=this.items.shift();this.active=item;this.change();try{await this.execute(item.text);}catch(error){this.items.unshift(item);this.paused=true;throw error;}finally{this.active=null;this.change();}}
+ async drain(){if(this.active||this.paused||this.blocked()||!this.items.length)return;const item=this.items.shift();this.active=item;this.change();try{await this.execute(item.text,item);}catch(error){this.items.unshift(item);this.paused=true;throw error;}finally{this.active=null;this.change();}}
 }
 if(typeof module!=='undefined')module.exports={RequestQueue};

@@ -14,7 +14,10 @@ function connectionBadge(message, classes, service, phase) {
   if (/^Проверяю|^Проверка/.test(message)) return {state:'checking',label:'Проверка…'};
   if (classes.includes('disconnected')) return { state: 'disconnected', label: 'Не подключено' };
   if (classes.includes('setup')) return { state: 'setup', label: 'Настроить' };
-  if (classes.includes('error')) return { state: 'error', label: 'Ошибка' };
+  if(classes.includes('error')){
+    const reasons=[['Нет сети','Нет сети'],['Нужно войти','Нужен вход'],['Сервис ограничил','Лимит запросов'],['Сервис недоступен','Недоступен']];
+    return {state:'error',label:reasons.find(([prefix])=>message.startsWith(prefix))?.[1]||'Ошибка'};
+  }
   if (classes.includes('connected')) return { state: 'connected', label: service === 'zoom' ? 'Доступ есть' : 'Подключено' };
   if (/Не подключено/.test(message)) return { state: 'disconnected', label: 'Не подключено' };
   if (/изменены|Требуется настройка|Сначала укажите/.test(message)) return { state: 'setup', label: 'Настроить' };

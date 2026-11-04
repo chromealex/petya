@@ -1,6 +1,7 @@
 // Chats and projects: navigation, folders, archive, move, pin, reorder IPC.
 // Extracted from main.cjs: shared state comes through ctx (live getters/setters).
 module.exports=ctx=>{
+  require('./chat-workspace.cjs').register(ctx);
   ctx.handle('dialogueTopics',()=>ctx.dialogue.list());
   ctx.handle('chatNavigation',async query=>{const state=ctx.dialogue.list(),q=String(query||'').trim().toLocaleLowerCase().slice(0,200);const projects=await Promise.all(state.projects.map(async p=>({...p,icon:await require('./project-icon.cjs').projectIcon(p.id==='general'?null:(Object.hasOwn(p,'folder')?p.folder:ctx.projectMemory.get(p.memoryId)?.localFolder),require('electron').nativeImage)})));return {...state,projects,topics:ctx.dialogue.state.topics.flatMap(t=>{const index=q?t.messages.findIndex(m=>String(m.text).toLocaleLowerCase().includes(q)):-1;if(q&&!t.title.toLocaleLowerCase().includes(q)&&index<0)return [];const match=index>=0?String(t.messages[index].text):'';const pos=match.toLocaleLowerCase().indexOf(q);return [{id:t.id,title:t.title,projectId:t.projectId,at:t.at,archived:!!t.archived,pinned:!!t.pinned,order:t.order,job:t.chatJob||null,index,snippet:match?match.slice(Math.max(0,pos-35),Math.max(0,pos-35)+140):''}];}).sort((a,b)=>b.at-a.at)};});
   // Requests are scoped to their own chat, so navigating and organising chats never waits for them.
