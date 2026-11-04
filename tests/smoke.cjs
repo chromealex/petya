@@ -16,6 +16,7 @@ module.exports = async (win, workspace) => {
 
   await require('./team-fill-ui.cjs')(win);
   await require('./slack-request-ui.cjs')(win);
+  await require('./chat-stop-ui.cjs')(win);
   await require('./ux-review-ui.cjs')(win);
   await require('./ui-layout.cjs')(win);
   await require('./command-progress-ui.cjs')(win);
