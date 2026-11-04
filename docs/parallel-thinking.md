@@ -1,19 +1,19 @@
-# Параллельная подготовка ответа
+# Parallel Answer Preparation
 
-Петя запускает независимые части обработки одновременно с ограниченной конкуренцией:
+Petya runs independent parts of processing at the same time with limited concurrency:
 
-- После проверки локальности модели выбор инструмента и классификация темы выполняются параллельно. Предварительная классификация не читает сервисы, не выполняет действий и не записывает сообщения в историю. Результат используется только для того же экземпляра диалога, исходной фразы и неизменившегося состояния. При смене контекста выполняется новая классификация. Действия, уточнения, явный выбор темы и вложения сохраняют прежний путь.
-- Веб-поиск читает до трёх страниц одновременно в отдельных скрытых окнах. Результаты и ссылки сохраняют порядок поисковой выдачи. Неудачные источники заменяются следующими. Итоговая модель получает не больше трёх прочитанных страниц. Выключение модуля останавливает дальнейшую обработку.
-- Пересказ почты разных аккаунтов выполняется максимум двумя запросами модели одновременно. Каждому запросу передаются только письма его аккаунта. Итоговые разделы сохраняют порядок аккаунтов; ошибка пересказа использует прежний запасной вариант с выдержками писем.
+- After checking that the model is local, tool selection and topic classification run in parallel. The preliminary classification does not read services, does not perform actions and does not write messages to history. The result is used only for the same dialogue instance, the same original phrase and an unchanged state. When the context changes, a new classification is performed. Actions, clarifications, explicit topic selection and attachments keep the previous path.
+- Web search reads up to three pages at the same time in separate hidden windows. Results and links keep the order of the search results. Failed sources are replaced with the next ones. The final model receives no more than three read pages. Disabling the module stops further processing.
+- Mail summaries for different accounts run with at most two model requests at the same time. Each request receives only the messages of its own account. The final sections keep the order of the accounts; a summary error uses the previous fallback with message excerpts.
 
-Обычный ответ одной модели не разбивается по словам на независимые задачи. Скорость параллельных запросов зависит от возможностей и настроек работающего Ollama, нагрузки и доступной памяти. Приложение не перезапускает чужой Ollama и не меняет его глобальные настройки. Подтверждения и операции записи не распараллеливаются.
+A regular single-model answer is not split word by word into independent tasks. The speed of parallel requests depends on the capabilities and settings of the running Ollama, the load and the available memory. The app does not restart someone else's Ollama and does not change its global settings. Confirmations and write operations are not parallelized.
 
-Проверки: tests/parallel-thinking.cjs, tests/dialogue.cjs, tests/semantic-tools.cjs, tests/web-search.cjs, tests/mail-skills.cjs.
+Tests: tests/parallel-thinking.cjs, tests/dialogue.cjs, tests/semantic-tools.cjs, tests/web-search.cjs, tests/mail-skills.cjs.
 
-Замер 4 ноября 2026, установленная qwen3:4b на M3 Ultra: два классификатора после прогрева, три повтора. Последовательно 865/855/865 мс, одновременно 865/859/877 мс. В журнале работающего Ollama указан один слот (`n_slots = 1`), поэтому реального ускорения вычислений от двух запросов нет. Классификаторам установлен одинаковый `num_ctx: 8192`: до этого второй использовал автоматически выбранные 262144 и вызывал повторные загрузки модели. Это исправление касается коротких шагов маршрутизации; контекст основного ответа и документов не урезается.
+Measurement on November 4, 2026, installed qwen3:4b on M3 Ultra: two classifiers after warm-up, three repetitions. Sequential 865/855/865 ms, concurrent 865/859/877 ms. The running Ollama's log shows a single slot (`n_slots = 1`), so two requests give no real compute speedup. The classifiers have been given the same `num_ctx: 8192`: before that, the second one used the automatically chosen 262144 and caused repeated model reloads. This fix concerns the short routing steps; the context of the main answer and documents is not reduced.
 
-## Приоритет текущего вопроса
+## Priority of the current question
 
-Исправлен воспроизводимый сбой: при старом диалоге «кгдер» классификатор на новый запрос «Ты тут?» повторял старое уточнение «Костя где?». В запросе классификации текущая реплика теперь передаётся последним отдельным сообщением; инструкции отделяют самостоятельный вопрос от продолжения истории. На той же локальной qwen3:4b контрольный запрос после исправления даёт `chat` вместо старого `clarify`.
+A reproducible bug has been fixed: with an old dialogue «кгдер» (a garbled input), the classifier repeated the old clarification «Костя где?» (Where's Kostya?) in response to the new request «Ты тут?» (Are you there?). In the classification request, the current utterance is now passed as the last separate message; the instructions distinguish a standalone question from a continuation of the history. On the same local qwen3:4b, the control request after the fix gives `chat` instead of the old `clarify`.
 
-Проверки присутствия «ты тут», «ты здесь», «ты на связи», «ты меня слышишь» обрабатываются точным коротким правилом до маршрутизаторов, вложений, ожидания встречи и модели. Они не возобновляют старый выбор даже без вопросительного знака. Расширенные команды и цитаты под это правило не попадают. История и ожидающие действия не удаляются. Тесты: current-question.cjs и current-question-ui.cjs.
+Presence checks «ты тут» (are you there), «ты здесь» (are you here), «ты на связи» (are you on the line), «ты меня слышишь» (can you hear me) are handled by an exact short rule before the routers, attachments, meeting waiting and the model. They do not resume an old choice even without a question mark. Extended commands and quotes do not fall under this rule. History and pending actions are not deleted. Tests: current-question.cjs and current-question-ui.cjs.

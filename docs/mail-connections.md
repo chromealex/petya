@@ -1,24 +1,24 @@
-# Почта и простой вход Telegram
+# Mail and Simple Telegram Sign-in
 
-В Пете общий раздел «Почта»: Google / Gmail (включая Google Workspace), личные Outlook.com / Hotmail и рабочие / учебные Microsoft 365. Поддерживается до 20 аккаунтов каждого провайдера. Локальный Exchange и национальные облака Microsoft пока не поддерживаются.
+Petya has a shared «Почта» (Mail) section: Google / Gmail (including Google Workspace), personal Outlook.com / Hotmail and work / school Microsoft 365. Up to 20 accounts per provider are supported. On-premises Exchange and Microsoft national clouds are not supported yet.
 
-Почтовый навык выбирает конкретные ящики или все подключённые аккаунты. Старые идентификаторы и токены Gmail сохраняются; Microsoft использует отдельное зашифрованное хранилище в профиле компании. Новый профиль не получает чужие токены. Результаты разных ящиков подписаны отдельно, ошибка одного не скрывает результаты других. Только чтение, до 20 писем из входящих за запуск, текстовые фрагменты без вложений. Gmail исключает категории promotions/social и List-Unsubscribe, Microsoft — только List-Unsubscribe.
+A mail skill selects specific mailboxes or all connected accounts. Old Gmail identifiers and tokens are kept; Microsoft uses a separate encrypted storage in the company profile. A new profile does not receive other profiles' tokens. Results from different mailboxes are labeled separately, and an error in one does not hide the results of the others. Read-only, up to 20 inbox messages per run, text fragments without attachments. Gmail excludes the promotions/social categories and List-Unsubscribe, Microsoft only List-Unsubscribe.
 
-## Что ещё требуется для входа одной кнопкой
+## What else is required for one-click sign-in
 
-Google зарегистрирован: проект Petya Desktop (`metal-bonus-513622-h9`), OAuth-клиент Desktop app, Gmail API включён, единственное заявленное право — `gmail.readonly`. Конфигурация встроена в `src/integration-clients.json`. Приложение остаётся External / Testing; тестовый пользователь — chrome.alex@gmail.com. Другие ящики перед входом нужно добавить в тестовые пользователи Google. Публичная проверка Google не пройдена.
+Google is registered: project Petya Desktop (`metal-bonus-513622-h9`), a Desktop app OAuth client, Gmail API enabled, the only declared permission is `gmail.readonly`. The configuration is embedded in `src/integration-clients.json`. The app remains External / Testing; the test user is chrome.alex@gmail.com. Other mailboxes must be added to Google's test users before signing in. Google's public verification has not been passed.
 
-Microsoft отложен по решению пользователя: текущий личный аккаунт не имеет доступа к каталогу Entra для регистрации. Telegram не зарегистрирован: my.telegram.org вернул «Too many attempts. Please try again later». Для этих провайдеров пока доступны дополнительные ручные настройки. Пароли и пользовательские токены в `src/integration-clients.json` не записываются.
+Microsoft is postponed by the user's decision: the current personal account has no access to an Entra directory for registration. Telegram is not registered: my.telegram.org returned «Too many attempts. Please try again later». For these providers, additional manual settings are available for now. Passwords and user tokens are not written to `src/integration-clients.json`.
 
-- `google`: `{ "client_id": "...apps.googleusercontent.com", "client_secret": "..." }` — OAuth Desktop app, включить Gmail API, настроить consent screen и разрешение gmail.readonly. Client secret настольного клиента не является серверным секретом: он доступен в дистрибутиве. Для публичного выпуска выполнить требования проверки Google; в testing добавить тестовых пользователей.
-- `microsoft`: `{ "client_id": "UUID" }` — приложение с личными Microsoft accounts и аккаунтами любых организаций. Платформа Mobile and desktop applications, redirect `http://localhost/callback` (порт выбирается динамически); delegated User.Read и Mail.Read, offline_access. Секрет не нужен. Некоторые организации требуют согласие администратора.
-- `telegram`: `{ "apiId": 12345, "apiHash": "32 hex characters" }` — собственное приложение Пети в Telegram API development tools. Не использовать чужие или демонстрационные ключи.
+- `google`: `{ "client_id": "...apps.googleusercontent.com", "client_secret": "..." }` — OAuth Desktop app; enable the Gmail API, configure the consent screen and the gmail.readonly permission. The client secret of a desktop client is not a server secret: it is available in the distribution. For a public release, meet Google's verification requirements; in testing, add test users.
+- `microsoft`: `{ "client_id": "UUID" }` — an app with personal Microsoft accounts and accounts in any organization. Platform Mobile and desktop applications, redirect `http://localhost/callback` (the port is chosen dynamically); delegated User.Read and Mail.Read, offline_access. No secret is needed. Some organizations require admin consent.
+- `telegram`: `{ "apiId": 12345, "apiHash": "32 hex characters" }` — Petya's own app in Telegram API development tools. Do not use other people's or demo keys.
 
-Настройки Google и Microsoft также доступны в раскрывающемся разделе интерфейса для текущей компании. Telegram показывает кнопку подключения, затем телефон, код и при необходимости пароль 2FA / проверку email. При зарегистрированном приложении технические поля не нужны. Личный Telegram остаётся один на компанию; список выбранных чатов не меняется.
+Google and Microsoft settings are also available in a collapsible section of the interface for the current company. Telegram shows a connect button, then the phone number, the code and, if needed, the 2FA password / email verification. With a registered app, the technical fields are not needed. Personal Telegram remains one per company; the list of selected chats does not change.
 
-OAuth открывается в системном браузере, с PKCE и одноразовым state. Для Microsoft используются common endpoint и только Microsoft Graph. Токены не передаются стороннему брокеру. Реальный вход в почтовый аккаунт и чтение писем после регистрации Google ещё не проверены. Проверка интерфейса с встроенным клиентом Google прошла.
+OAuth opens in the system browser, with PKCE and a one-time state. For Microsoft, the common endpoint and only Microsoft Graph are used. Tokens are not passed to a third-party broker. A real sign-in to a mail account and reading messages after the Google registration have not been tested yet. The interface test with the embedded Google client passed.
 
-Документация провайдеров:
+Provider documentation:
 - https://developers.google.com/identity/protocols/oauth2/native-app
 - https://learn.microsoft.com/en-us/entra/identity-platform/scenario-desktop-app-registration
 - https://learn.microsoft.com/en-us/graph/api/user-list-messages?view=graph-rest-1.0
