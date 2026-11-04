@@ -3,6 +3,9 @@
 const POSSESSIVE={ваш:'твой',ваша:'твоя',ваше:'твоё',ваши:'твои',вашего:'твоего',вашей:'твоей',вашему:'твоему',вашим:'твоим',ваших:'твоих',вашими:'твоими',вашу:'твою',вашем:'твоём',вас:'тебя',вам:'тебе',вами:'тобой'};
 const IRREGULAR={хотите:'хочешь',можете:'можешь',будете:'будешь',даёте:'даёшь',даете:'даёшь',едите:'ешь',бежите:'бежишь'};
 const NOT_VERB=new Set(['сайте','лайте','мойте','майте','чайте']);
+// Past tense needs the user's gender: options.gender() returns 'f' or 'm' (set by the address feature).
+const options={gender:()=>'m'};
+const female=()=>{try{return options.gender()==='f';}catch{return false;}};
 const keepCase=(from,to)=>from[0]===from[0].toUpperCase()?to[0].toUpperCase()+to.slice(1):to;
 function verb(word){
  const w=word.toLowerCase();
@@ -10,8 +13,8 @@ function verb(word){
  if(/[её]тесь$/u.test(w)||/итесь$/u.test(w))return word.slice(0,-4)+'шься';
  if(/[её]те$/u.test(w)&&w.length>4)return word.slice(0,-2)+'шь';
  if(/ите$/u.test(w)&&w.length>4)return word.slice(0,-2)+'шь';
- if(/лись$/u.test(w)&&w.length>5)return word.slice(0,-4)+'лся';
- if(/ли$/u.test(w)&&w.length>3)return word.slice(0,-1);
+ if(/лись$/u.test(w)&&w.length>5)return word.slice(0,-4)+(female()?'лась':'лся');
+ if(/ли$/u.test(w)&&w.length>3)return word.slice(0,-1)+(female()?'а':'');
  return null;
 }
 function imperative(word){
@@ -36,4 +39,4 @@ function informal(text){
  // Leave code blocks, inline code and quotations untouched.
  return text.split(/(```[\s\S]*?```|`[^`]*`|«[^»]*»|"[^"]*")/u).map((part,i)=>i%2?part:line(part)).join('');
 }
-module.exports={informal};
+module.exports={informal,options};
