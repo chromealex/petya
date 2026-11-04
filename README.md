@@ -31,7 +31,14 @@ PETYA_TEST_MODEL=qwen3.5:9b node tests/long-dialogue-live.cjs
 npm run test:dialogues:live            # other live checks: see scripts in package.json
 ```
 
-GitHub Actions runs `npm test` on every push.
+GitHub Actions runs `npm test` on every push, plus the real app under a virtual display: the UI smoke test and 12 parallel chats with a fake Ollama. Locally on Linux:
+
+```sh
+xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci
+xvfb-run -a env PETYA_SMOKE_TEST=1 PETYA_E2E_PARALLEL=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci
+```
+
+On macOS: `PETYA_SMOKE_TEST=1 npm start` (add `PETYA_E2E_PARALLEL=1` for the parallel chats check).
 
 ## Building
 

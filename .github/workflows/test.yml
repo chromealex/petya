@@ -13,5 +13,24 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
-      # Unit and scenario tests only; live checks (Ollama, Electron) run locally.
+      # Unit and scenario tests; live checks (Ollama) run locally.
       - run: npm test
+  ui:
+    # The real Electron app under a virtual display: UI smoke test and 12 parallel chats
+    # through the full request pipeline with a fake Ollama.
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: sudo apt-get update && sudo apt-get install -y xvfb
+      - name: UI smoke test
+        timeout-minutes: 5
+        run: xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci
+      - name: Parallel chats end-to-end
+        timeout-minutes: 5
+        run: xvfb-run -a env PETYA_SMOKE_TEST=1 PETYA_E2E_PARALLEL=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci
