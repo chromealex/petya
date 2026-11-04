@@ -56,19 +56,20 @@ const CHOICES=['options','topicChoices','skillChoices','mediaChoices','repairCho
 const needsUser=result=>!!(result.question||result.computerApproval||CHOICES.some(key=>result[key]?.length));
 ChatJobs.prototype.executeFull=async function(job){
  const {topic,command,placeholder}=job,d=this.dialogue;
- const drop=()=>{const at=topic.messages.indexOf(placeholder);if(at>=0)topic.messages.splice(at,1);return at;};
- // The pipeline records the request itself; the placeholder only shows it while queued.
- const base=drop();
+ // The question stays visible while the job runs. The pipeline usually takes the placeholder over;
+ // otherwise it is kept as the recorded question (or dropped when the pipeline recorded its own).
+ const settle=()=>{const at=topic.messages.indexOf(placeholder);if(at<0)return -1;if(topic.messages.slice(at+1).some(m=>m.role==='user'&&m.text===command)){topic.messages.splice(at,1);return -1;}delete placeholder.pending;return at;};
+ const record=target=>{if(!target.messages.some(m=>m.role==='user'&&m.text===command&&m.at>=placeholder.at))target.messages.push({role:'user',text:command,at:placeholder.at});};
  try{
   const result=await this.run(()=>d.within(topic.id,topic.projectId,()=>this.converse(command)),label=>{if(d.state.topics.includes(topic))this.update(topic,'running',label);},topic.projectId);
   if(job.scope!==this.scope(topic.projectId))throw Error('Настройки или компания изменились. Повторите запрос с новым контекстом.');
   if(!result||!result.handled)throw Error('Для этого запроса нужно действие. Откройте чат и повторите запрос.');
-  // The pipeline may answer in another (new) chat, e.g. a Slack log or mail thread.
+  // The pipeline may answer in another chat, e.g. an existing «Баги в Jira» topic or a new Slack log.
   const target=result.topicId&&result.topicId!==topic.id?d.state.topics.find(t=>t.id===result.topicId)||topic:topic;
-  if(target!==topic&&job.created&&!topic.messages.length){d.state.topics.splice(d.state.topics.indexOf(topic),1);}
+  if(target!==topic){const at=topic.messages.indexOf(placeholder);if(at>=0)topic.messages.splice(at,1);if(job.created&&!topic.messages.length&&d.state.topics.includes(topic))d.state.topics.splice(d.state.topics.indexOf(topic),1);}
+  else settle();
   if(!d.state.topics.includes(target))return;
-  const start=target===topic?(base>=0?base:topic.messages.length):0;
-  if(!target.messages.slice(start).some(m=>m.role==='user'&&m.text===command))target.messages.splice(target===topic?(base>=0?base:topic.messages.length):target.messages.length,0,{role:'user',text:command,at:placeholder.at});
+  record(target);
   const last=target.messages.at(-1);
   if(result.text&&!(last?.role==='assistant'&&last.text===result.text))target.messages.push({role:'assistant',text:result.text,sources:result.sources||[],at:Date.now(),...(result.by?{by:result.by}:{})});
   if(target.title==='Новый чат')target.title=command.slice(0,80);
@@ -76,6 +77,6 @@ ChatJobs.prototype.executeFull=async function(job){
   target.lastChatResult={...result,question:result.question||waiting,topicId:target.id,topicTitle:target.title,messages:undefined,topics:undefined};
   if(target!==topic){target.chatJob={...topic.chatJob};if(d.state.topics.includes(topic))this.update(topic,'done','Ответ в чате «'+target.title+'»');}
   this.update(target,result.error||waiting?'attention':'done',result.error?'Ошибка — откройте чат':waiting?'Нужно уточнение':'Готово');
- }catch(e){if(d.state.topics.includes(topic)){if(!topic.messages.some(m=>m.role==='user'&&m.text===command&&m.at>=placeholder.at))topic.messages.splice((base>=0?base:topic.messages.length),0,{role:'user',text:command,at:placeholder.at});topic.messages.push({role:'assistant',text:e.message,at:Date.now(),error:true});this.update(topic,'attention',e.message);}}
+ }catch(e){settle();if(d.state.topics.includes(topic)){record(topic);topic.messages.push({role:'assistant',text:e.message,at:Date.now(),error:true});this.update(topic,'attention',e.message);}}
 };
 module.exports={ChatJobs,eligible,needsUser};

@@ -24,8 +24,9 @@ const tick=()=>new Promise(r=>setImmediate(r));const sleep=ms=>new Promise(r=>se
  // Navigation works while chats are answering; a running chat cannot be moved.
  let release;const slow=new Dialogue({answer:()=>new Promise(r=>release=r)});const slowJobs=new ChatJobs({dialogue:slow,scope:()=>'same',converse:text=>slow.turn(text,undefined,'chat')});
  const s=slowJobs.start('','general','Долгий вопрос');await tick();
+ const shown=slow.state.topics.find(t=>t.id===s.topicId).messages;assert.deepEqual(shown.map(m=>[m.role,m.text]),[['user','Долгий вопрос']],'the question is visible while the answer is prepared');
  slow.projectCreate('Второй');slow.projectSelect('general');slow.select(s.topicId);assert.throws(()=>slowJobs.start(s.topicId,'general','Ещё'),/уже выполняется/);
- release('Готово');for(let i=0;i<50&&slowJobs.jobs.size;i++)await sleep(5);assert.equal(slow.active().messages.at(-1).text,'Готово');
+ release('Готово');for(let i=0;i<50&&slowJobs.jobs.size;i++)await sleep(5);assert.equal(slow.active().messages.at(-1).text,'Готово');assert.deepEqual(slow.active().messages.map(m=>m.role),['user','assistant'],'no duplicated question');
  // A request that waits for the user is marked for attention with its choices kept.
  const ask=new Dialogue({answer:async()=>({text:'Какой проект?',question:true,clarificationOptions:['Альфа','Бета']})});const askJobs=new ChatJobs({dialogue:ask,scope:()=>'same',converse:text=>ask.turn(text,undefined,'chat')});
  const q=askJobs.start('','general','Покажи статус');for(let i=0;i<50&&askJobs.jobs.size;i++)await sleep(5);const qt=ask.state.topics.find(t=>t.id===q.topicId);

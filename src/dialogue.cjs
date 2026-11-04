@@ -68,6 +68,9 @@ function scopedState(dialogue,target){
   deleteProperty(t,key){const s=SCOPED.has(key)&&store();if(s)assign(t,s,key,undefined);else delete t[key];return true;}
  });
 }
+// A background chat job shows the user's question at once as a pending message; the pipeline
+// takes it over instead of recording the question a second time.
+function takePlaceholder(topic,text){const last=topic?.messages?.at(-1);if(last?.role==='user'&&last.pending&&last.text===text)topic.messages.pop();}
 class Dialogue {
  get state(){return this._state;}
  set state(value){this._state=scopedState(this,value||{topics:[],activeId:''});}
@@ -106,7 +109,7 @@ class Dialogue {
  select(id){this.prune();if(id&&!this.state.topics.some(t=>t.id===id))throw new Error('Тема больше недоступна.');this.state.activeId=id;if(!id)this.state.newChat=true;this.persist();return this.active()||null;}
  rememberAction(command,message,project='',receipt=null){
   this.prune();let t=this.active();if(!t){t={id:randomUUID(),title:'Задачи'+(project?' · '+project:''),kind:'work',messages:[],at:this.now()};this.state.topics.push(t);this.state.activeId=t.id;}
-  if(project)t.jiraProject=project;if(receipt)require('./action-evidence.cjs').recordReceipt(t,receipt);t.at=this.now();t.messages.push({role:'user',text:command,at:t.at},{role:'assistant',text:message,at:t.at});this.persist();
+  if(project)t.jiraProject=project;if(receipt)require('./action-evidence.cjs').recordReceipt(t,receipt);t.at=this.now();takePlaceholder(t,command);t.messages.push({role:'user',text:command,at:t.at},{role:'assistant',text:message,at:t.at});this.persist();
  }
  clear(){this.state={topics:[],activeId:''};this.persist();}
  actionContext(){const t=this.active();if(!t)return null;return {id:'dialogue-'+t.id,projectMemoryId:t.projectMemoryId,title:t.title,source:'Диалог',at:t.at,text:t.messages.map(m=>(m.role==='user'?'Пользователь: ':'Петя: ')+m.text).join('\n').slice(-30000)};}
@@ -123,7 +126,7 @@ class Dialogue {
   if(!text||this.busy||this.active()?.pending)return null;
   this.prune();let topic=this.active();
   if(!topic){topic={id:randomUUID(),title:'Разговор с Петей',kind:'chat',messages:[],at:this.now()};this.state.topics.push(topic);this.state.activeId=topic.id;}
-  topic.at=this.now();topic.messages.push({role:'user',text:command,at:topic.at},{role:'assistant',text,at:topic.at,by:'шаблон: приветствие'});this.persist();
+  topic.at=this.now();takePlaceholder(topic,command);topic.messages.push({role:'user',text:command,at:topic.at},{role:'assistant',text,at:topic.at,by:'шаблон: приветствие'});this.persist();
   return {handled:true,text,topicId:topic.id,topicTitle:topic.title,messages:topic.messages,topics:this.list()};
  }
  async turn(text,choice,forcedKind,preparedRoute){
@@ -149,7 +152,7 @@ class Dialogue {
     if(!this.state.topics.includes(active))this.state.topics.push(active);this.state.activeId=active.id;
    }
    const before=structuredClone(active);
-   active.at=this.now();active.messages.push({role:'user',text,at:this.now()});this.persist();
+   active.at=this.now();(takePlaceholder(active,text),active.messages.push({role:'user',text,at:this.now()}));this.persist();
    let result;
    try{
     // «Вернёмся к багам» shows the saved answer; «Вернёмся к книгам: посоветуй ещё одну» asks a new question in that topic.
@@ -165,7 +168,7 @@ class Dialogue {
     const changed={...active,id:randomUUID(),messages:[{role:'user',text,at:this.now()}]};
     Object.assign(active,before);
     active=this.scoped().find(t=>t.title===result.title&&t.kind===kind)||changed;
-    if(active!==changed)active.messages.push({role:'user',text,at:this.now()});else this.state.topics.push(active);
+    if(active!==changed)(takePlaceholder(active,text),active.messages.push({role:'user',text,at:this.now()}));else this.state.topics.push(active);
     this.state.activeId=active.id;
    }
    if(result.title)active.title=result.title;
