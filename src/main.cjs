@@ -502,6 +502,13 @@ function setupHandlers() {
       try{return JSON.parse(raw);}catch{return null;}},
     summarize:async(command,results)=>{requestProgress.report('Собираю общий ответ агентов');return agentModel('Ты Петя. Агенты выполнили части просьбы пользователя. Дай один общий ответ по-русски, на «ты»: сначала главное, затем коротко по каждой части. Опирайся только на ответы агентов, ничего не придумывай. Если агент не справился, ждёт уточнения или задача ждёт пользователя (state action), прямо скажи об этом.'+require('./speech-style.cjs').instruction(settings.speechStyle),{request:command,results},null,1500);}
   });
+  const stopChatMcp = require('./mcp-setup.cjs')({
+    handle, dialogue, attachments, chatJobs, memory, addContext,
+    check() { if (switchingCompany || quitting) throw Error('Компания закрывается.'); },
+    async run(work) { activeOperations++; try { return await work(); } finally { activeOperations--; } },
+    changed(event) { if (!win.isDestroyed()) win.webContents.send('mcp-chat-changed',event); }
+  });
+  app.once('before-quit', () => { void stopChatMcp(); });
   const chatTools=require('./chat-tools.cjs'),chatUndo=new chatTools.ChatUndo(dialogue,id=>chatJobs.busy(id)||dialogue.running.has(id)||dialogue.state.topics.some(t=>t.projectId===id&&(chatJobs.busy(t.id)||dialogue.running.has(t.id))));
   handle('chatQuickSearch',query=>chatTools.search(dialogue.state,query));
   handle('chatEditMessage',(id,index,value)=>chatTools.editBranch(dialogue,id,index,value,id=>chatJobs.busy(id)));

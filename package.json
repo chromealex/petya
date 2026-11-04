@@ -17,6 +17,7 @@
     "icons:mac": "node scripts/build-icons.cjs",
     "build:native:mac": "mkdir -p assets/native && xcrun swiftc native/watch-macos.swift -o assets/native/watch-macos",
     "build": "python3 scripts/build.py",
+    "test:mcp": "node tests/mcp.cjs",
     "test:chat-ux": "electron tests/chat-usability-run.cjs",
     "test:dialogues": "node tests/dialogue-scenarios.cjs",
     "test:dialogues:live": "node tests/dialogue-live.cjs",
@@ -87,5 +88,9 @@
       "src/computer-macos.js",
       "src/computer-windows.ps1"
     ]
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "zod": "^4.6.7"
   }
 }

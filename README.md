@@ -67,3 +67,12 @@ Tokens are stored with Electron safeStorage (Keychain / DPAPI). Dialogue history
 ## For agents
 
 Project rules are in [AGENTS.md](AGENTS.md): builds, integration icons, Slack context, answer quality, language, and working alongside other agents.
+
+### MCP access to chats
+
+Open **Подключения → Доступ к чатам через MCP**, enable access, then copy the connection into your MCP client. The local Streamable HTTP endpoint uses a session bearer token. Stopping access, restarting Petya or switching companies ends that connection. Copy the new configuration after enabling it again.
+
+- Discover projects and chat IDs with `list_chat_projects` and `list_chats`.
+- Read, replace or clear a composer draft with `get_chat_draft` and `set_chat_draft`. Supply the previous text to avoid overwriting a concurrent edit. Use the project draft owner for a new chat. Preview content with `read_draft_attachment`. Add or remove attachments with `add_draft_attachment` and `remove_draft_attachment` (base64 text files, DOCX or images up to 1 MiB).
+- Inspect versions with `list_chat_versions` and `read_chat_version`. Use `select_chat_version` to switch, or `prepare_chat_version` to stage an edited or repeated question. The user sends it from Petya; preparing a version runs no commands.
+- Use `list_chat_materials`, `read_chat_material` and `set_chat_material_enabled` to inspect and change the selected chat's context. `add_chat_note` saves a note in the company's shared memory.

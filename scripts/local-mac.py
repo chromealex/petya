@@ -48,6 +48,12 @@ subprocess.run(['xcrun', 'swiftc', '-module-cache-path', str(staging / 'swift-ca
 subprocess.run(['codesign', '--force', '--sign', identity, str(app_dir / 'assets/native/slack-view')], check=True)
 # Capture UI and application code after native compilation to minimize concurrent-edit races.
 shutil.copytree(root / 'src', app_dir / 'src')
+# Copy the exact production dependency tree, including nested versions.
+packages = json.loads((root / 'package-lock.json').read_text())['packages']
+for location, metadata in packages.items():
+    if location.startswith('node_modules/') and not metadata.get('dev'):
+        shutil.copytree(root / location, app_dir / location, dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns('node_modules'))
 subprocess.run([sys.executable, str(root / 'scripts/verify-package.py'), str(root / 'src'), str(app_dir / 'src')], check=True)
 # Ship the server, its libraries and the multilingual model with the app.
 voice = app_dir / 'runtime'
