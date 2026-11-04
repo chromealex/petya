@@ -464,6 +464,7 @@ function setupHandlers() {
   // Shared services: the request pipeline and feature modules read live state through these getters;
   // features add their own services here (see src/features.cjs) instead of editing main.cjs.
   const services={
+    get workspace(){return workspace;},
     get win(){return win;},get handle(){return handle;},get directRequest(){return directRequest;},get team(){return team;},get memory(){return memory;},get slackSync(){return slackSync;},
     get agents(){return agents;},
     get allowedMedia(){return allowedMedia;},

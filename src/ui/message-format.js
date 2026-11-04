@@ -22,6 +22,15 @@ window.renderMessage = function(message){
  }
  const content=document.createElement('div');content.className='message-content';content.append(...node.childNodes);node.append(content);
  const files=document.createElement('div');files.className='message-attachments';for(const file of (message.attachments||[]).slice(0,5)){const item=document.createElement('div');item.className='message-attachment';const name=document.createElement('span');name.textContent=file.name||'Файл';item.append(name);if(typeof file.thumbnail==='string'&&file.thumbnail.length<2*1024*1024&&/^[A-Za-z0-9+/=]+$/.test(file.thumbnail)){const image=document.createElement('img');image.src='data:image/png;base64,'+file.thumbnail;image.alt=file.name||'Изображение';image.loading='lazy';const open=document.createElement('button');open.type='button';open.setAttribute('aria-label','Открыть изображение '+(file.name||''));open.append(image);open.onclick=()=>{const dialog=document.createElement('dialog');dialog.className='chat-image-preview';const close=document.createElement('button');close.textContent='Закрыть';close.onclick=()=>dialog.close();const full=image.cloneNode();dialog.append(close,full);document.body.append(dialog);dialog.onclose=()=>dialog.remove();dialog.showModal();};item.prepend(open);}else{item.classList.add('document');item.title=file.note||file.name||'';}files.append(item);}if(files.childElementCount)content.append(files);
+ if (message.role === 'assistant' && Array.isArray(message.extensionImages)) {
+   for (const block of message.extensionImages) {
+     if (!['image/svg+xml','image/png','image/jpeg','image/webp'].includes(block?.mimeType) || typeof block.data !== 'string' || block.data.length > 8*1024*1024) continue;
+     const img = document.createElement('img');
+     img.className = 'extension-reply-image'; img.alt = '';
+     img.src = 'data:' + block.mimeType + ';base64,' + block.data;
+     content.append(img);
+   }
+ }
  const meta=document.createElement('div');meta.className='message-meta';
  const at=message.at?new Date(message.at):null;
  if(at&&!Number.isNaN(at.getTime())){const time=document.createElement('time');time.dateTime=at.toISOString();const today=at.toDateString()===new Date().toDateString();time.textContent=at.toLocaleString('ru-RU',today?{hour:'2-digit',minute:'2-digit'}:{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});time.title=at.toLocaleString('ru-RU');meta.append(time);}

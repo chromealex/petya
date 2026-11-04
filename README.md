@@ -82,3 +82,7 @@ New MCP connections default to the current project and read-only access. Select 
 In an open chat, Ctrl/Cmd+F searches all loaded and older messages in that version. The message menu copies a local petya:// link to its version and message. MCP clients can use the optional query in `read_chat_version`; assistant messages include their local links. `list_chats` includes the reason for pending attention. Links open chats stored in the company's local Petya profile.
 
 Chat drafts appear in the project sidebar. Hold Ctrl and press Tab or Shift+Tab to switch between recently visited chats. In chat search, select Files to open a matching line. The answer menu saves a reference in its project. MCP exposes the same data via `search_chat_files`, `list_saved_answers` and `bookmark_chat_answer`; bookmark writes require edit access.
+
+### Extension-rendered chat replies
+
+Ask “Сколько каких задач у меня в Jira?” to see counts by issue type, or ask for counts by status. Jira searches issues assigned to the connected account within the chat's authorized project scope. The provider supplies both the text and the image. Both stay on the assistant message when reopening a chat or viewing an older version. MCP clients may request saved visuals with `read_chat_version` and `includeImages: true` under the existing chat access scope.

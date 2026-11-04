@@ -74,16 +74,16 @@ function register(server, z, ctx) {
     const {index,count}=shared.chatWorkspaceInfo(t.id);
     return {index,count,revision:revision(ctx,t.id)};
   });
-  tool('read_chat_version','Прочитать сообщения любой версии без переключения.',{...chat,version:index.optional(),query:z.string().trim().max(300).optional(),...page},(a,t)=>{
+  tool('read_chat_version','Прочитать сообщения любой версии без переключения.',{...chat,version:index.optional(),includeImages:z.boolean().default(false),query:z.string().trim().max(300).optional(),...page},(a,t)=>{
     const {index,count}=shared.chatWorkspaceInfo(t.id), version=a.version ?? index;
     if(version>=count)throw Error('Версия недоступна.');
     const messages=(version===index?t:t.versions[version]).messages;
     const term=a.query?.toLowerCase();
     const hits=messages.flatMap((m,index)=>!term||String(m.text).toLowerCase().includes(term)?[index]:[]);
     return {total:hits.length,items:hits.slice(a.offset,a.offset+a.limit).map(index=>{
-      const {role,text,at,attachments,usedMaterials}=messages[index];
+      const {role,text,at,attachments,usedMaterials,extensionImages}=messages[index];
       const link=role==='assistant'&&ctx.companyId?require('./chat-location.cjs').link(ctx.companyId,t,version,index):undefined;
-      return {index,role,text,at,usedMaterials,files:attachments?.map(({id,name})=>({id,name})),link};
+      return {index,role,text,at,usedMaterials,...(a.includeImages && extensionImages?.length ? {extensionImages} : {}),files:attachments?.map(({id,name})=>({id,name})),link};
     })};
   });
   tool('select_chat_version','Переключить версию в чате Пети.',{...chat,revision:id,version:index},(a,t)=>shared.chatVersionSelect(t.id,a.version),true);
