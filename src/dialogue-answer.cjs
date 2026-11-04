@@ -27,6 +27,7 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
  if(!model)return {text:'Не выбрана локальная модель для ответов. Откройте «Подключения → Ollama» и подготовьте модель.',error:true};
  let modelOverrides={};
  if(chooseKnowledgeModel&&require('./knowledge-model.cjs').standaloneKnowledge(command,topic,supplementalContext)){const selected=await chooseKnowledgeModel();if(selected)modelOverrides={model:selected,think:false};}
+ const repeat=require('./answer-repeat.cjs');let repeatRetry=false;
  for(let attempt=0;attempt<2;attempt++){
   let response;
   try { response=await request(attempt?{...modelOverrides,think:false}:modelOverrides); }
@@ -44,6 +45,8 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
    return {text:'Локальная модель вернула некорректный ответ. Повторите запрос; если ошибка повторится, проверьте модель в «Подключения → Ollama».',error:true};
   }
   const answer=parsed.answer.trim().slice(0,12000);
+  // A repeated answer never helps: regenerate once with more variety, then admit the loop.
+  if(parsed.understood&&repeat.repeated(answer,topic)){if(!repeatRetry){repeatRetry=true;modelOverrides={...modelOverrides,think:false,options:{temperature:1,top_p:0.95,repeat_penalty:1.3,num_ctx:16384,num_predict:2048}};attempt--;continue;}return repeat.fallback(topic);}
   if(!parsed.understood||uncertain(answer))return telegram?'Уточните, что найти в сохранённых сообщениях Telegram.':clarify();
   return answer;
  }
