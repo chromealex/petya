@@ -7,6 +7,10 @@ const {Dialogue,intent,jiraHeard}=require('../src/dialogue.cjs');const {dialogue
  for(const q of ['Какие баги открыты?','Покажи баги','Сколько багов в версии 1.19?'])assert.equal(intent(q,null),'bugs',q);
  for(const q of ['Создай задачу в Jira','Как создать задачу в Jira?','Не смотри задачи','Закрой задачу BW-12','Что такое задача?','Объясни, что такое тикет','В жизни всякое бывает','Напиши в Slack про задачи','Назначь задачу на Анну','«покажи задачи»','Почему задачи не грузятся?'])assert.notEqual(intent(q,null),'tasks',q);
  assert.equal(jiraHeard('В жизни задачи посмотри'),'в jira задачи посмотри');assert.equal(jiraHeard('В жизни всякое бывает'),'в жизни всякое бывает');
+ // «Мои задачи» in any word order is the user's own open list, not the tasks of the current topic.
+ const {details}=require('../src/personal-tasks.cjs');
+ for(const q of ['А какие задачи открытые на мне?','Какие задачи открытые на мне?','А мои задачи?','Сколько задач на мне?','Покажи задачи, которые на мне висят','А какие задачи открыты у меня?'])assert.deepEqual(details(q),{status:'open',overdue:false},q);
+ assert.equal(details('Посмотри мои закрытые задачи').status,'done');for(const q of ['Закрой мои задачи','Создай мне задачу','Какие задачи у Ани?','Покажи мои задачи и отправь в Slack','Не показывай мои задачи'])assert.equal(details(q),null,q);
  let read=0,asked=0;const d=new Dialogue({answer:async()=>{asked++;return 'модель';},readers:{tasks:async()=>{read++;return {text:'Задачи: BW-1, BW-2'};}}});
  const r=await d.turn('В жизни задачи посмотри');assert.equal(read,1);assert.equal(asked,0);assert.match(r.text,/BW-1/);assert.equal(d.active().messages.at(-1).by,'Jira: задачи');
  // The model knows which services are connected and must not claim there is no access.
