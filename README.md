@@ -78,3 +78,5 @@ Open **Подключения → Доступ к чатам через MCP**, e
 - Use `list_chat_materials`, `read_chat_material` and `set_chat_material_enabled` to inspect and change the selected chat's context. `add_chat_note` saves a note in the company's shared memory.
 
 New MCP connections default to the current project and read-only access. Select draft editing or full editing before enabling the connection. Company-wide notes can only be created with full company access. A project-scoped client can read shared materials already referenced by messages in that project. Draft and version writes require the opaque `revision` from a fresh `get_chat_draft` or `list_chat_versions` call. On conflict, read again before proposing a new write.
+
+In an open chat, Ctrl/Cmd+F searches all loaded and older messages in that version. The message menu copies a local petya:// link to its version and message. MCP clients can use the optional query in `read_chat_version`; assistant messages include their local links. `list_chats` includes the reason for pending attention. Links open chats stored in the company's local Petya profile.

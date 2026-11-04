@@ -82,6 +82,7 @@ with info_path.open('rb') as stream:
 info.update(CFBundleName='Petya', CFBundleDisplayName='Петя', CFBundleIdentifier='com.petya.desktop', CFBundleShortVersionString=package['version'], CFBundleVersion=package['version'])
 info.update(package['build']['mac']['extendInfo'])
 shutil.copy2(root / 'assets/app-icon.icns', resources / 'petya.icns')
+info['CFBundleURLTypes'] = [{'CFBundleURLName': 'Petya chat messages', 'CFBundleURLSchemes': ['petya']}]
 info['CFBundleIconFile'] = 'petya.icns'
 with info_path.open('wb') as stream:
     plistlib.dump(info, stream)

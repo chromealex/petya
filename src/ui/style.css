@@ -826,3 +826,11 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .version-added{color:#c1e5b1;background:#243024}.version-removed{color:#e5b4aa;background:#352a28}
 .chat-composer .mcp-edit-feedback,.chat-composer .prepared-question{flex-basis:100%;max-width:100%;min-width:0}
 .answer-source-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-block:4px}
+
+.chat-find{position:absolute;inset:42px 16px auto auto;z-index:8;display:flex;align-items:center;gap:6px;max-width:calc(100% - 32px);padding:6px;background:var(--panel);border:1px solid var(--line);border-radius:9px}
+.chat-find[hidden],.project-attention[hidden]{display:none}
+.chat-find input{min-width:6em;width:15em}.chat-find span{white-space:nowrap;font-size:12px}.chat-find button{padding:4px 8px}
+::highlight(petya-find){background:#725e27;color:white}::highlight(petya-find-current){background:#d3ed92;color:#152017}
+.project-attention{padding:4px 8px;font-size:12px}.project-attention summary{color:#e4cd84;cursor:pointer}.project-attention>div{max-height:25vh;overflow:auto}.project-attention button{display:block;text-align:left;width:100%}.project-attention small{display:block;color:var(--muted)}
+.chat-queue-row>span{white-space:pre-wrap;overflow-wrap:anywhere}
+.message-actions-menu{position:relative}.message-actions-menu summary{cursor:pointer;list-style:none;padding:2px 5px}.message-actions-menu[open] button{position:absolute;left:0;bottom:100%;z-index:6;white-space:nowrap;background:var(--panel)}

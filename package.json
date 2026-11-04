@@ -79,6 +79,7 @@
       "allowElevation": false,
       "artifactName": "Petya-Setup.exe"
     },
+    "protocols": [{"name":"Petya chat messages","schemes":["petya"]}],
     "asarUnpack": [
       "src/setup-images.py",
       "src/local-images.py",
