@@ -93,6 +93,13 @@ function register(server, z, ctx) {
     shared.chatVersionEdit(t.id,a.messageIndex,a.text ?? a.original,true);
     return shared.chatWorkspaceInfo(t.id).index;
   },true);
+  const library=require('./features/chat-library.cjs');
+  tool('search_chat_files','Найти совпадения в тексте файлов текущей версии чата (номера строк с единицы).',{...chat,query:z.string().trim().min(1).max(300),...page},(a,t)=>library.searchFiles(t,a.query,a.offset,a.limit));
+  tool('list_saved_answers','Сохранённые ответы проекта выбранного чата.',{...chat,...page},(a,t)=>list(library.savedAnswers(state,t.projectId),a));
+  tool('bookmark_chat_answer','Сохранить ответ в проекте или удалить из сохранённых по ссылке из read_chat_version.',{...chat,url:z.string().max(600),saved:z.boolean()},(a,t)=>{
+    if(require('./chat-location.cjs').parse(a.url)?.chat!==t.id)throw Error('Ссылка относится к другому чату.');
+    return library.bookmark(ctx.dialogue,ctx.companyId,a.url,a.saved);
+  },true);
   const materials=()=>{
     const rows=ctx.memory.prune();
     if(!ctx.access?.projectId)return rows;

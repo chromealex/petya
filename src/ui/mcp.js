@@ -52,10 +52,11 @@
   }
   window.petyaEvents.onMcpChatChanged(async ({owner,name,revision,token})=>{
     try{
+      if(name==='bookmark_chat_answer')document.dispatchEvent(new Event('petya-bookmarks-updated'));
       if(token || name==='prepare_chat_version'){
         const drafts=await window.petya.chatDrafts();
         const value=drafts[owner]||'';
-        window.applyExternalChatDraft(owner,value);
+        window.applyExternalChatDraft(owner,value);document.dispatchEvent(new Event('petya-drafts-updated'));
         if(activeOwner()===owner && !$('home').hidden){
           if(token)feedback(owner,token,value);
         }else{

@@ -180,7 +180,7 @@
     for(const row of rows){
       const label=el('label');label.className='chat-material-check';
       const check=el('input');check.type='checkbox';check.checked=row.enabled;
-      check.onchange=async()=>{check.disabled=true;try{await window.petya.chatContextToggle(owner,row.type,row.id,check.checked);}catch(e){check.checked=!check.checked;notice(e.message,true);}finally{check.disabled=false;}};
+      check.onchange=async()=>{check.disabled=true;try{await window.toggleChatMaterial(owner,row.type,row.id,check.checked,label,()=>check.checked=true);}catch(e){check.checked=!check.checked;notice(e.message,true);}finally{check.disabled=false;}};
       label.append(check,el('span',row.name));box.append(label);
     }
   });
