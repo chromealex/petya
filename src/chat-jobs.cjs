@@ -62,7 +62,7 @@ ChatJobs.prototype.executeFull=async function(job){
  const settle=()=>{const at=topic.messages.indexOf(placeholder);if(at<0)return -1;if(topic.messages.slice(at+1).some(m=>m.role==='user')){topic.messages.splice(at,1);return -1;}delete placeholder.pending;return at;};
  const record=target=>{if(!target.messages.some(m=>m.role==='user'&&m.at>=placeholder.at))target.messages.push({role:'user',text:command,at:placeholder.at});};
  try{
-  const result=await this.run(()=>d.within(topic.id,topic.projectId,()=>this.converse(command)),label=>{if(!job.cancelled&&d.state.topics.includes(topic))this.update(topic,'running',label);},topic.projectId);
+  const result=await this.run(()=>d.within(topic.id,topic.projectId,()=>this.converse(command)),label=>{if(!job.cancelled&&d.state.topics.includes(topic))this.update(topic,'running',label);},topic.projectId,topic.id);
   if(job.cancelled)return;
   if(job.scope!==this.scope(topic.projectId))throw Error('Настройки или компания изменились. Повторите запрос с новым контекстом.');
   if(!result||!result.handled)throw Error('Для этого запроса нужно действие. Откройте чат и повторите запрос.');

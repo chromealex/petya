@@ -40,9 +40,15 @@ window.stopStreamedVoice=stopStreamedVoice;
 // Transient preview; only the final response enters history. Speech uses complete sentences.
 let answerPreview=null,answerStreamId='',answerStreamHidden=false,answerPace=null,answerShown=0;
 window.petyaEvents.onAnswerChunk?.(chunk=>{
- if(chunk.start){answerPace?.stop();answerPace=null;answerShown=0;if(window.streamSpeechEnabled){++speechEpoch;releaseReplyAudio();spokenStreamId=chunk.id;streamedVoice.start();window.answerVoiceBegin?.();}answerPreview?.remove();answerPreview=null;answerStreamId=chunk.id;answerStreamHidden=false;return;}
+ // Background chats tag their stream with the chat: show only the open chat's stream, never speak it,
+ // and pick it up mid-way when the user opens that chat while the answer is being written.
+ if(chunk.topicId){
+  if(chunk.topicId!==topicSelect.value)return;
+  if(chunk.start||((chunk.id!==answerStreamId||answerStreamHidden)&&!chunk.end&&typeof chunk.text==='string')){answerPace?.stop();answerPace=null;answerShown=0;answerPreview?.remove();answerPreview=null;answerStreamId=chunk.id;answerStreamHidden=false;if(chunk.start)return;}
+ }
+ else if(chunk.start){answerPace?.stop();answerPace=null;answerShown=0;if(window.streamSpeechEnabled){++speechEpoch;releaseReplyAudio();spokenStreamId=chunk.id;streamedVoice.start();window.answerVoiceBegin?.();}answerPreview?.remove();answerPreview=null;answerStreamId=chunk.id;answerStreamHidden=false;return;}
  if(chunk.id!==answerStreamId)return;
- if(chunk.end){answerShown=answerPace?.shown||0;answerPace?.stop();if(chunk.id===spokenStreamId)streamedVoice.generationEnded();answerPreview?.remove();answerPreview=null;answerStreamId='';return;}
+ if(chunk.end){answerShown=answerPace?.shown||0;if(chunk.topicId)window.lastStreamShown={topicId:chunk.topicId,length:answerShown};answerPace?.stop();if(chunk.id===spokenStreamId)streamedVoice.generationEnded();answerPreview?.remove();answerPreview=null;answerStreamId='';return;}
  if(answerStreamHidden||typeof chunk.text!=='string')return;
  if(chunk.id===spokenStreamId)streamedVoice.feed(chunk.text);
  if(!chunk.text){answerPreview?.remove();answerPreview=null;return;}

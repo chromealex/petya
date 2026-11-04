@@ -166,5 +166,8 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
   return async(command,choice,background=false)=>{const result=await pipeline(command,choice,background);
     const spoken=typeof command==='string'?command.trim():'';const topic=ctx.dialogue.active();
     if(!choice&&spoken&&result?.handled&&topic){const corrected=require('./self-correction.cjs').resolve(spoken);if(corrected.changed&&!corrected.cancelled){const m=[...topic.messages].reverse().find(m=>m.role==='user'&&m.text===corrected.text);if(m&&!m.originalText){m.originalText=spoken;ctx.dialogue.persist();}}}
+    // A complete answer resolves an older «Нужно уточнение» status of this chat.
+    const chat=result?.topicId?ctx.dialogue.state.topics.find(t=>t.id===result.topicId):topic;
+    if(!background&&chat&&['attention','cancelled'].includes(chat.chatJob?.state)&&result?.handled&&!result.error&&!require('./chat-jobs.cjs').needsUser(result)&&!ctx.chatJobs.busy(chat.id)){delete chat.lastChatResult;ctx.chatJobs.update(chat,'done','Готово');}
     return result;};
 };
