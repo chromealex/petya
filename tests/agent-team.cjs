@@ -35,6 +35,9 @@ const assert=require('node:assert/strict');const {agentRequest,AgentTeam}=requir
   await team4.offer('Покажи мои задачи и что нового в слаке',t4);const run=await team4.offer('Всегда раздавать',t4);assert(run.agentPlan);assert.equal(mode,'always');assert.match(run.text,/Запомнил/);
   const auto=await team4.offer('Покажи мои задачи и что нового в слаке',t4);assert(auto.agentPlan);
   assert.match((await team4.offer('Спрашивай про агентов',t4)).text,/снова буду спрашивать/);assert.equal(mode,'ask');
+  await team4.offer('Покажи мои задачи и что нового в слаке',t4);assert.equal((await team4.offer('Нет, одним',t4)).continueWith,'Покажи мои задачи и что нового в слаке');await team4.offer('Покажи мои задачи и что нового в слаке',t4);
+  await team4.offer('Покажи мои задачи и что нового в слаке',t4);assert((await team4.offer('Петя, раздай',t4)).agentPlan);
+  await team4.offer('Покажи мои задачи и что нового в слаке',t4);await team4.offer('никогда не раздавай',t4);assert.equal(mode,'never');
   mode='never';assert.equal(await team4.offer('Покажи мои задачи и что нового в слаке',t4),null);
   for(const e of team4.active.values())clearTimeout(e.timer);team4.active.clear();}
  // single task → normal pipeline; agent chats never spawn agents

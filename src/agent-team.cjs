@@ -47,7 +47,13 @@ class AgentTeam{
   const mode=this.preference();
   if(/^(?:спрашивай|снова спрашивай|сбрось выбор)(?:\s+(?:про|перед|насч[её]т))?\s+агент/iu.test(text)){this.remember('ask');this.offers.delete(topic.id);return {handled:true,text:'Хорошо, снова буду спрашивать, раздавать ли сложные задачи агентам.',by:'агенты Пети'};}
   if(pending&&this.now()-pending.at<30*60000){
-   const choice=Object.entries(OFFER).find(([,label])=>label.toLowerCase()===text.toLowerCase().replace(/[.!]+$/u,''))?.[0];
+   const said=text.toLowerCase().replace(/^петя[,!\s]+/u,'').replace(/[.!]+$/u,'').trim();
+   // Buttons send their label; by voice short answers work too («раздай», «одним», «всегда раздавай»).
+   const choice=Object.entries(OFFER).find(([,label])=>label.toLowerCase()===said)?.[0]||
+    (/^(?:всегда\s+(?:раздавай|раздавать|через агентов|агентам)|раздавай\s+всегда)/u.test(said)?'always':
+     /^(?:всегда\s+(?:одним|сам|без агентов)|никогда не раздавай|не предлагай агентов|больше не предлагай)/u.test(said)?'never':
+     /^(?:да|давай|ок|окей|раздай|раздать|раздавай|агентам|запускай|запусти(?:\s+агентов)?|параллельно)(?:\s|,|$)/u.test(said)?'run':
+     /^(?:нет|не надо|одним|одним сообщением|ответь одним|сам|ответь сам|без агентов|не раздавай)(?:\s|,|$)/u.test(said)?'single':null);
    if(choice){this.offers.delete(topic.id);this.drop(topic,pending);
     if(choice==='always')this.remember('always');if(choice==='never')this.remember('never');
     const note=choice==='always'?' Запомнил: сложные задачи буду сразу раздавать агентам. Сказать «спрашивай про агентов» — чтобы снова спрашивал.':choice==='never'?' Запомнил: буду отвечать одним сообщением. «Спрашивай про агентов» — чтобы снова спрашивал.':'';
