@@ -781,3 +781,8 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .chat-running-reply .message-steps{margin:0}
 .chat-running-reply .message-steps[open]{flex-basis:100%;order:9}
 @media (prefers-reduced-motion:reduce){.chat-running-reply .command-progress p::before,.chat-job-status>span:first-of-type::before{animation:none}}
+/* Saved steps live in the hover row; opened, the list drops below it and the row stays visible. */
+#home .chat-feed .message-meta{flex-wrap:wrap}
+#home .chat-feed .message-meta>.message-steps{margin:0;order:5}
+#home .chat-feed .message-meta>.message-steps[open]{flex-basis:100%;order:10}
+#home .chat-feed article:has(>.message-meta .message-steps[open])>.message-meta{opacity:1}

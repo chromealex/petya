@@ -21,7 +21,6 @@ window.renderMessage = function(message){
  const heading=line.match(/^(#{1,4})\s+(.+)/),p=document.createElement(heading?'h'+Math.min(4,heading[1].length+1):'p');inline(p,heading?heading[2]:line);node.append(p);
  }
  const content=document.createElement('div');content.className='message-content';content.append(...node.childNodes);node.append(content);
- if(message.role!=='user'&&Array.isArray(message.steps)&&message.steps.length>1)node.insertBefore(window.renderSteps(message.steps),content);
  const files=document.createElement('div');files.className='message-attachments';for(const file of (message.attachments||[]).slice(0,5)){const item=document.createElement('div');item.className='message-attachment';const name=document.createElement('span');name.textContent=file.name||'Файл';item.append(name);if(typeof file.thumbnail==='string'&&file.thumbnail.length<2*1024*1024&&/^[A-Za-z0-9+/=]+$/.test(file.thumbnail)){const image=document.createElement('img');image.src='data:image/png;base64,'+file.thumbnail;image.alt=file.name||'Изображение';image.loading='lazy';const open=document.createElement('button');open.type='button';open.setAttribute('aria-label','Открыть изображение '+(file.name||''));open.append(image);open.onclick=()=>{const dialog=document.createElement('dialog');dialog.className='chat-image-preview';const close=document.createElement('button');close.textContent='Закрыть';close.onclick=()=>dialog.close();const full=image.cloneNode();dialog.append(close,full);document.body.append(dialog);dialog.onclose=()=>dialog.remove();dialog.showModal();};item.prepend(open);}else{item.classList.add('document');item.title=file.note||file.name||'';}files.append(item);}if(files.childElementCount)content.append(files);
  const meta=document.createElement('div');meta.className='message-meta';
  const at=message.at?new Date(message.at):null;
@@ -29,6 +28,8 @@ window.renderMessage = function(message){
  const copy=document.createElement('button');copy.className='message-copy';copy.type='button';
  const paint=copied=>{copy.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(copied?'<path d="m5 12 4 4L19 6"/>':'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/>')+'</svg>';copy.title=copied?'Скопировано':'Копировать сообщение';copy.setAttribute('aria-label',copy.title);};paint(false);
  if(message.role!=='user'&&typeof message.by==='string'&&message.by){const source=document.createElement('span');source.className='message-source';source.textContent=message.by;source.title='Кто подготовил ответ';meta.append(source);}
+ // Finished steps stay out of the way: a small toggle in the hover row next to the source.
+ if(message.role!=='user'&&Array.isArray(message.steps)&&message.steps.length>1)meta.append(window.renderSteps(message.steps));
  copy.onclick=async()=>{try{await navigator.clipboard.writeText(message.text||'');paint(true);setTimeout(()=>paint(false),1800);}catch{notice('Не удалось скопировать сообщение. Выделите текст и нажмите ⌘C / Ctrl+C.',true);}};meta.append(copy);node.append(meta);
  return node;
 };
