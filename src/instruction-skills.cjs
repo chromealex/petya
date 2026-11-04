@@ -36,9 +36,9 @@ class InstructionSkills{
  remove(id){if(!this.state.some(s=>s.id===id))throw Error('Скилл не найден.');const next=this.state.filter(s=>s.id!==id);this.save(next);this.state=next;}
  resolve(command){const m=String(command).trim().match(/^(?:\/|\$|скилл\s+)([a-z][a-z0-9-]*)(?:\s+([\s\S]*))?$/iu);if(!m)return null;const skill=this.state.find(s=>s.name===m[1].toLowerCase());if(!skill)throw Error('Скилл '+m[1]+' не найден. Откройте «Скиллы».');if(!skill.enabled)throw Error('Скилл выключен. Включите его в разделе «Скиллы».');return {skill:{...skill},question:m[2]?.trim()||'Примени скилл к данным текущей темы. Если данных недостаточно, уточни, что нужно приложить.'};}
 }
-async function runSkill({selected,command,dialogue,settings,request,company,files,context='',evidence,assertCurrent,verified}){
+async function runSkill({selected,command,dialogue,settings,request,company,files,context='',contextRefs=[],evidence,assertCurrent,verified}){
  dialogue.prune();let topic=files||evidence?null:dialogue.active();
- if(!topic){topic={id:randomUUID(),title:'Скилл: '+selected.skill.name,kind:'chat',messages:[],at:Date.now(),...files?{attachments:files}:{}};dialogue.state.topics.push(topic);dialogue.state.activeId=topic.id;}
+ if(!topic){topic={id:randomUUID(),title:'Скилл: '+selected.skill.name,kind:'chat',projectId:dialogue.state.activeProjectId,messages:[],at:Date.now(),...files?{attachments:files}:{}};dialogue.state.topics.push(topic);dialogue.state.activeId=topic.id;}
  if(evidence){topic.lastData=evidence.data;topic.jiraProject=evidence.data.project;topic.title='Скилл: '+selected.skill.name+' · '+evidence.data.project;}
  topic.at=Date.now();topic.messages.push({role:'user',text:command,at:topic.at});dialogue.persist();let answer,error=false;
  try{
@@ -57,6 +57,6 @@ async function runSkill({selected,command,dialogue,settings,request,company,file
  if(!dialogue.state.topics.includes(topic))return {handled:true,text:'Тема удалена; результат не сохранён.'};
  if(verified&&!error)topic.workSelection=verified.selection;
  if(evidence&&!error&&!verified?.question)topic.workReport={id:randomUUID(),project:evidence.data.project,site:settings.jiraUrl||'',at:evidence.data.at,text:answer,sources:evidence.sources||[]};
- topic.messages.push({role:'assistant',text:answer,at:Date.now(),...(evidence&&!error?{sources:evidence.sources}:{})});dialogue.persist();return {handled:true,text:answer,error,...verified?.question?{question:true}:{},...evidence&&!error&&!verified?.question?{reportShareId:topic.workReport.id}:{},topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
+ topic.messages.push({role:'assistant',text:answer,at:Date.now(),usedMaterials:error||verified?[]:topic.attachments?.length?require('./chat-attribution.cjs').fileRefs(topic.attachments):contextRefs,...(evidence&&!error?{sources:evidence.sources}:{})});dialogue.persist();return {handled:true,text:answer,error,...verified?.question?{question:true}:{},...evidence&&!error&&!verified?.question?{reportShareId:topic.workReport.id}:{},topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
 }
 module.exports={InstructionSkills,validate,parseMarkdown,markdown,instruction,runSkill};

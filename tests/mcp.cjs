@@ -26,31 +26,35 @@ const {Dialogue}=require('../src/dialogue.cjs');
       assert.ok(!r.isError,r.content[0].text);
       return JSON.parse(r.content[0].text);
     }
+    const stamp=async owner=>(await call('get_chat_draft',{owner})).revision;
     assert.equal((await call('list_chat_projects')).items[0].draftOwner,'draft:general');
     assert.equal((await call('list_chats')).total,1);
     await call('set_chat_draft',{owner:'hidden',text:'x',previous:''},true);
     for(const owner of ['one','draft:general']){
-      await call('set_chat_draft',{owner,text:'Черновик',previous:''});
+      await call('set_chat_draft',{owner,revision:await stamp(owner),text:'Черновик',previous:''});
       assert.equal((await call('get_chat_draft',{owner})).text,'Черновик');
-      await call('set_chat_draft',{owner,text:'x',previous:''},true);
-      await call('set_chat_draft',{owner,text:'',previous:'Черновик'});
+      await call('set_chat_draft',{owner,revision:await stamp(owner),text:'x',previous:''},true);
+      await call('set_chat_draft',{owner,revision:await stamp(owner),text:'',previous:'Черновик'});
     }
-    const file=await call('add_draft_attachment',{owner:'one',name:'note.txt',base64:Buffer.from('Текст').toString('base64')});
+    const stale=await stamp('one');
+    const file=await call('add_draft_attachment',{owner:'one',revision:await stamp('one'),name:'note.txt',base64:Buffer.from('Текст').toString('base64')});
     assert.equal((await call('get_chat_draft',{owner:'one'})).files[0].id,file.id);
+    await call('remove_draft_attachment',{owner:'one',revision:stale,fileId:file.id},true);
     assert.equal((await call('read_draft_attachment',{owner:'one',fileId:file.id})).text,'Текст');
     await call('remove_draft_attachment',{owner:'draft:general',fileId:file.id},true);
-    await call('remove_draft_attachment',{owner:'one',fileId:file.id});
+    await call('remove_draft_attachment',{owner:'one',revision:await stamp('one'),fileId:file.id});
     const chat={chatId:'one'};
     assert.equal((await call('list_chat_versions',chat)).count,1);
     busy=true;
-    const edit={...chat,version:0,messageIndex:0,original:'Как дела?',text:'Что нового?'};
+    const edit={...chat,revision:await stamp('one'),version:0,messageIndex:0,original:'Как дела?',text:'Что нового?'};
     await call('prepare_chat_version',edit,true);
     busy=false;
     await call('prepare_chat_version',edit);
     assert.equal((await call('get_chat_draft',{owner:'one'})).text,edit.text);
     assert.equal((await call('read_chat_version',{...chat,version:0})).items[1].text,'Ответ');
     assert.equal((await call('list_chat_versions',chat)).index,1);
-    await call('select_chat_version',{...chat,version:0});
+    await call('select_chat_version',{...chat,revision:edit.revision,version:0},true);
+    await call('select_chat_version',{...chat,revision:await stamp('one'),version:0});
     await call('add_chat_note',{...chat,title:'Заметка',text:'Контекст'});
     assert.equal((await call('list_chat_materials',chat)).total,2);
     for(const [type,key] of [['material','note'],['file','f']]){
@@ -64,4 +68,19 @@ const {Dialogue}=require('../src/dialogue.cjs');
     assert.deepEqual([...used].sort(),tools.map(t=>t.name).sort());
     console.log('MCP: '+tools.length+' tools verified via authenticated HTTP client');
   }finally{await client.close();await endpoint.close();}
+  dialogue.state.projects.push({id:'private',name:'Другой проект'});
+  dialogue.state.topics.push({...topic,id:'private-chat',projectId:'private'});
+  for(const mode of ['read','drafts']){
+    const limited=await startMcp({...ctx,access:{mode,projectId:'general'}},{port:0});
+    const peer=new Client({name:'limited',version:'1'});
+    try{
+      await peer.connect(new StreamableHTTPClientTransport(new URL(limited.url),{requestInit:{headers:{Authorization:'Bearer '+limited.token}}}));
+      const tools=(await peer.listTools()).tools.map(t=>t.name);
+      assert.equal(tools.includes('set_chat_draft'),mode==='drafts');
+      assert.ok(!tools.includes('add_chat_note'));
+      assert.ok((await peer.callTool({name:'get_chat_draft',arguments:{owner:'private-chat'}})).isError);
+      assert.ok((await peer.callTool({name:'get_chat_draft',arguments:{owner:'draft:private'}})).isError);
+      assert.ok((await peer.callTool({name:'read_chat_material',arguments:{chatId:'one',type:'material',key:'note'}})).isError);
+    }finally{await peer.close();await limited.close();}
+  }
 })().catch(e=>{console.error(e);process.exitCode=1;});

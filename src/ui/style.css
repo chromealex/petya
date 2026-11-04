@@ -818,3 +818,11 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .sent-quote { margin:0 0 6px;padding-left:8px;border-left:2px solid var(--green);color:var(--muted);font-size:12px }
 .chat-material-check { display:flex;gap:10px;align-items:center;padding:6px }.chat-material-check input { width:auto;margin:0 }
 .selection-task { position:fixed;z-index:2000;font-size:12px;padding:6px 10px }
+
+.prepared-question,.mcp-edit-feedback{width:min(800px,100%);margin:0 auto;padding:6px 12px;color:var(--muted);font-size:12px;box-sizing:border-box}
+.prepared-question p{max-height:5em;overflow:auto;white-space:pre-wrap;margin:4px 0;color:var(--text)}
+.prepared-question button,.mcp-edit-feedback button{margin-inline-end:6px;padding:3px 8px}
+.version-added,.version-removed{padding:5px 9px;white-space:pre-wrap;border-inline-start:2px solid}
+.version-added{color:#c1e5b1;background:#243024}.version-removed{color:#e5b4aa;background:#352a28}
+.chat-composer .mcp-edit-feedback,.chat-composer .prepared-question{flex-basis:100%;max-width:100%;min-width:0}
+.answer-source-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-block:4px}

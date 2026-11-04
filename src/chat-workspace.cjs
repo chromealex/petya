@@ -17,17 +17,28 @@ function register(ctx) {
     if (mutate && (ctx.chatJobs.busy(id) || ctx.dialogue.running.has(id))) throw Error('Дождитесь завершения ответа.');
     return topic;
   }
+  ctx.handle('chatVersionMessages',(id,index)=>{
+    const t=get(id);
+    if(!Number.isInteger(index)||index<0||index>=info(t).count)throw Error('Версия недоступна.');
+    const v=index===info(t).index?t:t.versions[index];
+    const messages=v.messages.map(({role,text})=>({role,text}));
+    if(v.versionQuestion && v.messages.length===v.versionQuestion.index)messages.push({role:'user',text:v.versionQuestion.text});
+    return messages;
+  });
+  ctx.handle('chatKeepPrepared',(id)=>{delete get(id).preparedQuestion;ctx.dialogue.persist();});
   ctx.handle('chatDrafts', () => ctx.dialogue.state.composerDrafts || {});
   ctx.handle('chatDraftSet', (owner,value) => {
     const state=ctx.dialogue.state;
     if(!state.topics.some(t=>t.id===owner) && !state.projects.some(p=>'draft:'+p.id===owner)) return;
+    const topic=state.topics.find(t=>t.id===owner);
+    if(topic?.preparedQuestion && value!==topic.preparedQuestion)delete topic.preparedQuestion;
     const drafts=state.composerDrafts ||= {};
     if(value) drafts[owner]=String(value).slice(0,4000); else delete drafts[owner];
     ctx.dialogue.persist();
   });
   ctx.handle('chatWorkspaceInfo', id => {
     const topic = get(id);
-    return {...info(topic), excluded: topic.excludedMaterials || [], files: [
+    return {...info(topic),preparedQuestion:topic.preparedQuestion===ctx.dialogue.state.composerDrafts?.[id]?topic.preparedQuestion:'', excluded: topic.excludedMaterials || [], files: [
       ...(topic.attachments || []).map(f => ({id:f.id, name:f.name, enabled:true})),
       ...(topic.excludedFiles || []).map(f => ({id:f.id, name:f.name, enabled:false}))
     ]};
@@ -40,7 +51,7 @@ function register(ctx) {
     versions[topic.versionIndex || 0] = snapshot(topic);
     const history = topic.messages.slice(0,index);
     const ids = new Set([...history,message].flatMap(m => (m.attachments || []).map(f => f.id)));
-    const content = {kind:'chat', messages:history, at:Date.now(), attachments:(topic.attachments || []).filter(f=>ids.has(f.id)), pendingEditAttachments:message.attachments || []};
+    const content = {kind:'chat', versionQuestion:{index:history.length,text:command}, messages:history, at:Date.now(), attachments:(topic.attachments || []).filter(f=>ids.has(f.id)), pendingEditAttachments:message.attachments || []};
     content.excludedFiles = (topic.excludedFiles || []).filter(file => ids.has(file.id));
     for(const key of ['model','projectMemoryId','excludedMaterials']) if(topic[key]) content[key]=topic[key];
     if(message.replyTo) content.nextQuote=message.replyTo;
@@ -48,7 +59,10 @@ function register(ctx) {
     topic.versionIndex=versions.length;
     versions.push(null);
     topic.versions=versions;
-    if (saveAsDraft) (ctx.dialogue.state.composerDrafts ||= {})[id]=command;
+    if (saveAsDraft) {
+      (ctx.dialogue.state.composerDrafts ||= {})[id]=command;
+      topic.preparedQuestion=command;
+    }
     ctx.dialogue.persist();
     return {topicId:id,command};
   });
