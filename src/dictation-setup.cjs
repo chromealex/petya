@@ -43,7 +43,7 @@ module.exports=ctx=>{
       : await composeDraft(command, context);
     const id = ctx.randomUUID(); ctx.pending.set(id, { state: 'ready', createdAt: Date.now(), routeId, doIt: ctx.core.isDoCommand(command), command, context: {...context}, project: target.jiraProject, site: target.jiraUrl, issueType: target.jiraIssueType });
     for (const [key, value] of ctx.pending) if (Date.now() - value.createdAt > 3600e3) ctx.pending.delete(key);
-    return { id, project: target.jiraProject, ...draft };
+    return { ...draft, id, project: target.jiraProject, issueType:target.jiraIssueType };
   });
   ctx.handle('checkDraftSubmission',async id=>{
     const job=ctx.pending.get(id);

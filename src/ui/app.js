@@ -158,7 +158,7 @@ async function makeDraft(context, route = null, { reviewOnly = false } = {}) {
   if (currentIntent !== 'do' && (currentIntent === 'docs' || /(декомпоз|разбей|несколько|задачи|таски|найди.*док|найди.*спек|покажи.*док)/iu.test(commandSnapshot))) { await openWorkspace(context, route); return; }
   if (draftBusy) return; draftBusy = true;
   document.querySelectorAll('.choice').forEach(b => b.disabled = true);
-  try { commandProgress.update('working', 'Готовлю черновик'); notice('Готовлю черновик по выбранному обсуждению…'); currentDraft = await window.petya.draft(commandSnapshot, context.id, route.id); $('draft-summary').value = currentDraft.summary; $('draft-description').value = currentDraft.description; $('draft-card').hidden = false; $('resolution').hidden = true; $('send').disabled = false; $('issue-result').textContent = `Проект: ${route.project} · ${route.name}. ${route.reason}`; notice(`Контекст: ${context.source} — ${context.title}. Проверьте задачу перед отправкой.`); await window.petya.notify('Черновик Jira готов. Откройте Петю для проверки.'); commandProgress.update('waiting', 'Черновик готов'); }
+  try { commandProgress.update('working', 'Готовлю черновик'); notice('Готовлю черновик по выбранному обсуждению…'); currentDraft = await window.petya.draft(commandSnapshot, context.id, route.id); $('draft-summary').value = currentDraft.summary; $('draft-description').value = currentDraft.description; $('draft-card').hidden = false; $('resolution').hidden = true; $('send').disabled = false; $('send').textContent = 'Создать задачу в '+currentDraft.project; $('issue-result').textContent = [currentDraft.project,currentDraft.issueType,'Исполнитель — по умолчанию в Jira'].filter(Boolean).join(' · '); notice(`Контекст: ${context.source} — ${context.title}. Проверьте задачу перед отправкой.`); await window.petya.notify('Черновик Jira готов. Откройте Петю для проверки.'); commandProgress.update('waiting', 'Черновик готов'); }
   finally { draftBusy = false; document.querySelectorAll('.choice').forEach(b => b.disabled = false); }
   if (!reviewOnly && automaticVoiceCommand && currentDraft) {
     if (currentDraft.questions?.length) askVoiceQuestion(currentDraft.questions.join(' '), async answer => { commandSnapshot += '\nУточнение пользователя: ' + answer; currentDraft = null; await makeDraft(context, route); });
@@ -170,9 +170,10 @@ async function processCommand(command, at = Date.now(), automatic = false) {
   if (commandProgress.busy || planning || draftBusy || workspaceBusy || agentBusy || asanaVoiceBusy) {
     notice('Текущий запрос ещё выполняется.'); return;
   }
-  if (!command.trim()) return;
+  const filesOnly=!command.trim() && !!window.pendingChatFiles?.length;
+  if (!command.trim() && !filesOnly) return;
   $('notice').hidden=true;window.appendChatRequest?.(command);
-  const completed = await commandProgress.start(command, () => executeCommand(command, at, automatic));
+  const completed = await commandProgress.start(filesOnly?'Разобрать вложения':command, () => executeCommand(command, at, automatic));
   if (!completed && commandProgress.state === 'error') {
     if(!$('command').value)$('command').value=command;
     if(window.showChatRequestError)window.showChatRequestError(command,commandProgress.label);else notice(commandProgress.label,true);
@@ -188,7 +189,7 @@ async function executeCommand(command, at = Date.now(), automatic = false) {
   ++routeRevision; routePanel.hidden = true; activeJiraRoute = null;
   commandSnapshot = command.replace(/^петя(?=$|[\s,:.!?—-])[\s,:.!?—-]*/iu, '').trim(); commandAt = at;
   if($('command').value.trim()===command.trim()||$('command').value.trim()===commandSnapshot)$('command').value=''; view('home');
-  if(ConversationInput.presenceReply(commandSnapshot)||ConversationInput.isProjectCatalogQuestion(commandSnapshot)){const reply=await commandProgress.step('reply','Отвечаю',()=>window.petya.converse(commandSnapshot),true);automaticVoiceCommand=false;await showDialogueReply(reply,automatic);return;}
+  if(!window.pendingChatFiles?.length && (ConversationInput.presenceReply(commandSnapshot)||ConversationInput.isProjectCatalogQuestion(commandSnapshot))){const reply=await commandProgress.step('reply','Отвечаю',()=>window.petya.converse(commandSnapshot),true);automaticVoiceCommand=false;await showDialogueReply(reply,automatic);return;}
   if (meeting.active) { notice('Дослушиваю последние реплики встречи…'); await meeting.flushContext(); commandAt = Date.now(); }
   const files=await commandProgress.step('files', 'Проверяю вложения', () => window.petya.attachmentList(), true);
   const reply=await commandProgress.step('reply', 'Обрабатываю запрос', () => files.length ? window.petya.attachmentInspect(files.map(f=>f.id),commandSnapshot) : window.petya.converse(commandSnapshot));
@@ -222,7 +223,7 @@ async function executeCommand(command, at = Date.now(), automatic = false) {
   await window.petya.notify(result.kind === 'missing' ? 'Для задачи не хватает контекста.' : 'Уточните, какое обсуждение использовать для задачи.');
   } finally { planning = false; }
 }
-async function submitChatCommand(command) {$('notice').hidden=true;if(window.chatSwitchPending||window.chatNavigationPending){notice('Переключаю чат. Повторите отправку через секунду.');return;} if(!voiceReply&&await window.tryBackgroundChat?.(command))return;window.streamSpeechEnabled=false; if(voiceReply&&!VoiceTurn.isNewQuestion(command)){const reply=voiceReply;voiceReply=null;window.appendChatRequest?.(command);if($('command').value===command)$('command').value='';await reply(command);}else await processCommand(command); }
+async function submitChatCommand(command) {$('notice').hidden=true;if(window.chatSwitchPending||window.chatNavigationPending){notice('Переключаю чат. Повторите отправку через секунду.');return;} if(window.pendingChatFiles?.length){await processCommand(command);return;}if(!voiceReply&&await window.tryBackgroundChat?.(command))return;window.streamSpeechEnabled=false; if(voiceReply&&(dialogueChoices.dataset.selected||!VoiceTurn.isNewQuestion(command))){const reply=voiceReply;voiceReply=null;window.appendChatRequest?.(command);if($('command').value===command)$('command').value='';await reply(command);}else await processCommand(command); }
 $('command-form').onsubmit=run(()=>window.sendChatNow?window.sendChatNow():submitChatCommand($('command').value));
 $('context-form').onsubmit = run(async () => { await window.petya.addContext({ title: $('context-title').value, text: $('context-text').value, source: $('context-source').value }); $('context-form').reset(); await refreshContexts(); notice('Материал сохранён. Перейдите в «Ассистент» и задайте вопрос по нему.'); });
 $('import').onchange = run(async event => { const file = event.target.files[0]; if (!file) return; if (file.size > 100000) throw new Error('Файл слишком большой. Выберите фрагмент до 100 КБ.'); const content = await file.text(); $('context-text').value = content.slice(0, 50000); $('context-title').value = file.name.replace(/\.(txt|vtt)$/i, ''); notice(content.length > 50000 ? 'Загружены первые 50 000 символов. Проверьте текст и нажмите «Сохранить материал».' : 'Текст загружен в форму. Проверьте его и нажмите «Сохранить материал».'); });

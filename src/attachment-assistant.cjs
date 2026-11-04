@@ -80,4 +80,5 @@ async function answerAttachments({settings,request,topic,question,skill}){
  const result=await complete(input,{system:(visual.length?synthesisSystem:textSystem)+(skill?require('./instruction-skills.cjs').instruction(skill):''),citations:!visual.length});
  return (!visual.length?proposedCode(result.answer,question):result.answer)+(!visual.length?sources(result.sourceLines,files):'')+files.filter(a=>a.frames).map(a=>'\n\n'+a.name+': видео разобрано по выборочным кадрам. Короткие события между кадрами могли быть пропущены. '+(a.audio?.status==='complete'?'Звуковая дорожка обработана для распознавания речи; музыка и эффекты не классифицировались.'+(a.audio.truncated?' Расшифровка сокращена.':''):'Звук разобран не полностью: '+(a.audio?.error||'нет расшифровки')+'.')).join('');
 }
-module.exports={answerAttachments,views,parseReply,sources,proposedCode};
+const briefFileQuestion='Кратко объясни содержание вложений и выдели главное.';
+module.exports={briefFileQuestion,answerAttachments,views,parseReply,sources,proposedCode};

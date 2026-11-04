@@ -61,7 +61,7 @@ function setup(s){
     try{
       const step=last.retryStep;
       const result=await withProject(project,()=>s.dialogue.within(id,t.projectId,async()=>{
-        if(step==='files')return {text:await s.analyzeMaterials(t,question.text),usedMaterials:require('../chat-attribution.cjs').fileRefs(t.attachments||[])};
+        if(step==='files')return {text:await s.analyzeMaterials(t,question.text||require('../attachment-assistant.cjs').briefFileQuestion),usedMaterials:require('../chat-attribution.cjs').fileRefs(t.attachments||[])};
         if(!['bugs','tasks','anr'].includes(step))throw Error('Шаг недоступен.');
         return s.dialogue.readers[step](question.text,t,t.contextHint||s.dialogue.context());
       }));
