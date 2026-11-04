@@ -6,9 +6,24 @@ function actionRequest(text){
  return core.isDoCommand(s)||/^(?:(?:пожалуйста|можешь|можете)\s*[, ]*)?(?:создай|заведи|оформи|добавь|разбей|декомпозируй|передай|отдай|поручи|найди|покажи|поищи)(?=$|[\s,.!?])/iu.test(s) && (core.isJiraCommand(s)||core.isDocsCommand(s)||/(?:claude|клод|кодекс|codex)/iu.test(s));
 }
 function discussionOnly(text){return /^(?:а\s+)?(?:не\s|не надо\s|что такое|объясни|почему|как думаешь|что думаешь|как лучше|я думаю|мне кажется|давай обсудим|[«"“])/iu.test(text)||/^(?:\d+|первый|первая|первое|второй|вторая|второе|третий|третья|третье)[.!?]*$/iu.test(text.trim());}
+// Speech recognition often hears «Jira» as «жизни», «жиры», «джире». Only next to a task word.
+function jiraHeard(text){
+ const s=String(text||'').toLowerCase().replace(/ё/g,'е');
+ if(!/(?:задач|таск|тикет|баг)/u.test(s))return s;
+ return s.replace(/(?:^|(?<=\s))(?:жизн[иь]|жиз[еи]|жир[аеуы]|жиро|джир[аеуы]|джиро|жыр[аеуы])(?=[\s,.!?]|$)/gu,'jira');
+}
+// A read-only question about tasks in any word order: «покажи мои задачи», «задачи посмотри»,
+// «в Jira задачи посмотри», «сколько у меня задач», «какие задачи открыты», «глянь джиру».
 function taskListRequest(text){
  if(require('./personal-tasks.cjs').personalTasks(text))return true;
- return /^(?:(?:а|и|теперь)\s+)?(?:(?:какие|покажи|перечисли|прочитай|посмотри|проверь)\s+(?:там\s+)?(?:таски|задачи)(?:\s+(?:есть|в|по|для)(?:\s+.*)?)?|(?:таски|задачи)\s+какие)[.!?]*$/iu.test(text.trim());
+ if(/^(?:(?:а|и|теперь)\s+)?(?:(?:какие|покажи|перечисли|прочитай|посмотри|проверь)\s+(?:там\s+)?(?:таски|задачи)(?:\s+(?:есть|в|по|для)(?:\s+.*)?)?|(?:таски|задачи)\s+какие)[.!?]*$/iu.test(text.trim()))return true;
+ const s=jiraHeard(text).replace(/^петя[\s,:.!?—-]*/u,'').replace(/[.!?]+$/u,'').trim();
+ if(discussionOnly(s)||/^(?:а\s+)?(?:как|зачем|если|когда|где)\s/u.test(s)||/(?:^|\s)не\s/u.test(s)||/[«"“]/u.test(s))return false;
+ if(/(?:^|\s)(?:созда|завед|заведи|оформ|закр[оы]|назнач|перенес|перевед|удал|измен|помен|отправ|напиш|добав|разбей|декомпоз|оцени|запланир)\p{L}*/u.test(s))return false;
+ if(/(?:^|\s)(?:баг|bug)\p{L}*/u.test(s))return false; // bugs have their own reader
+ const tasks=/(?:^|\s)(?:задач\p{L}*|таск\p{L}*|тикет\p{L}*|issues?)(?=\s|$)/u.test(s),jira=/(?:^|\s)(?:в\s+)?(?:jira|джир\p{L}*)(?=\s|$)/u.test(s);
+ const read=/(?:^|\s)(?:покажи|показать|посмотри|посмотреть|глянь|глянуть|проверь|проверить|перечисли|прочитай|список|какие|какая|сколько|что|есть ли|открыт\p{L}*|висит|висят|остал\p{L}*|мои|мой)(?=\s|$)/u.test(s);
+ return read&&(tasks||jira&&/(?:^|\s)(?:посмотри|глянь|проверь|покажи|что)(?=\s|$)/u.test(s));
 }
 function intent(text,active){
  if(taskListRequest(text))return 'tasks';
@@ -17,6 +32,7 @@ function intent(text,active){
  if(/(?:верн|продолж).*(?:баг|bug|жир|jira)/iu.test(text))return 'bugs';
  if(/(?:\banr\b|анр|google play|гугл пл[еэ]й)/iu.test(text))return 'anr';
  if(/(?:баг|bug|ошиб).*(?:верс|релиз|сколько|jira|жир)|(?:сколько|посмотр|провер).*(?:баг|bug)/iu.test(text))return 'bugs';
+ if(/(?:какие|покажи|список|открыт|остал|висит|глянь).*(?:баг|bug)|(?:баг|bug)\p{L}*\s+(?:открыт|остал|какие|висят|есть)/iu.test(text)&&!actionRequest(text))return 'bugs';
  // A leading «а» is not evidence that a new subject is a bug/ANR request.
  const continuation=text.trim().replace(/^(?:а|теперь)\s+/iu,'').replace(/[.!?]+$/u,'');
  if(active&&['bugs','anr','tasks'].includes(active.kind)&&(/^(?:в|по|для)\s+проект[еу]?\s+[\p{L}\p{N}][\p{L}\p{N} _-]*$/iu.test(continuation)||/^теперь\s+в\s+[\p{L}\p{N}][\p{L}\p{N} _-]*[.!?]*$/iu.test(text)||/^(?:обнови(?: ответ| данные)?|сколько(?: их)?(?: всего| осталось| открытых| закрытых)?|посмотри ещё|проверь ещё)$/iu.test(continuation)||/^(?:по|за|в|для)\s+(?:эт|предыдущ|последн|прошл|текущ|нов|сегодня|вчера|\d)/iu.test(continuation)))return active.kind;
@@ -157,4 +173,4 @@ class Dialogue {
   }finally{this.running.delete(runningKey);}
  }
 }
-module.exports={chatScope,RAW,Dialogue,taskListRequest,intent,actionRequest,selectChoice,discussionOnly};
+module.exports={jiraHeard,chatScope,RAW,Dialogue,taskListRequest,intent,actionRequest,selectChoice,discussionOnly};
