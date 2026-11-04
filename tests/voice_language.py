@@ -6,7 +6,7 @@ from voice_numbers import spoken_numbers
 import num2words
 class LanguagePacks(unittest.TestCase):
  def test_detection_and_optional_install(self):
-  cases={'Guten Morgen. Ich möchte über das Projekt sprechen.':'de','Bonjour, nous avons douze tâches dans le projet.':'fr','Hola, tenemos doce tareas en este proyecto.':'es'}
+  cases={'Guten Morgen. Ich möchte über das Projekt sprechen.':'de','Bonjour, nous avons douze tâches dans le projet.':'fr','Hola, tenemos doce tareas en este proyecto.':'es','Buongiorno, abbiamo dodici attività nel progetto.':'it','Olá, temos doze tarefas neste projeto.':'pt','こんにちは、プロジェクトには十二のタスクがあります。':'ja','안녕하세요 프로젝트에 열두 개의 작업이 있습니다.':'ko'}
   with tempfile.TemporaryDirectory() as directory:
    for text,code in cases.items():
     self.assertEqual(detect_languages(text),[code]);self.assertEqual(missing_languages(text,directory)[0]['code'],code)
@@ -15,5 +15,8 @@ class LanguagePacks(unittest.TestCase):
     self.assertNotRegex(spoken_numbers('12',code),r'\d')
    self.assertEqual(detect_languages('Проверь Bunker Wars в Jira. Please check Slack.'),['ru','en'])
    self.assertEqual(detect_languages('Bunker Wars'),['en'])
+   self.assertEqual(detect_languages('日本語', 'ja'),['ja'])
+   self.assertEqual(detect_languages('你好世界'),['zh-cn'])
+   self.assertEqual(detect_languages('Привет! こんにちは。 안녕하세요.'),['ru','ja','ko'])
    (Path(directory)/'de/numbers.py').write_text('corrupt');self.assertFalse(installed('de',directory))
 if __name__=='__main__':unittest.main()
