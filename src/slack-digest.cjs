@@ -33,7 +33,7 @@ class SlackDigest{
    try{const started=this.sync();started?.catch?.(()=>{});}catch{}
    this.pending={command,ask,at:this.now()};
    const limited=/лимит|ограничил/iu.test(status.message||'');
-   return this.reply((limited?'Slack сейчас ограничил запросы, ':'В памяти нет сообщений Slack за '+(ask.days===1?'последние сутки':ask.days+' дн.')+'. ')+'Запустил обновление — из-за лимитов Slack оно идёт примерно по каналу в минуту. Могу сразу прочитать открытое окно Slack с экрана. Прочитать?',{question:true,clarificationOptions:['Да, прочитай с экрана','Нет, подожду обновления']});
+   return this.reply((limited?'Slack сейчас ограничил запросы. ':'В памяти нет сообщений Slack за '+(ask.days===1?'последние сутки':ask.days+' дн.')+'. ')+'Запустил обновление — из-за лимитов Slack оно идёт примерно по каналу в минуту. Могу сразу прочитать открытое окно Slack с экрана. Прочитать?',{question:true,clarificationOptions:['Да, прочитай с экрана','Нет, подожду обновления']});
   }
   const messages=rows.flatMap(i=>i.messages.map(m=>({channel:i.channel,thread:i.title,at:m.at,user:m.user,text:String(m.text||'').slice(0,600)}))).sort((a,b)=>b.at-a.at).slice(0,80);
   const answer=await this.summarize(command,messages,ask);
