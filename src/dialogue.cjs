@@ -76,7 +76,7 @@ class Dialogue {
   if(!text||this.busy||this.active()?.pending)return null;
   this.prune();let topic=this.active();
   if(!topic){topic={id:randomUUID(),title:'Разговор с Петей',kind:'chat',messages:[],at:this.now()};this.state.topics.push(topic);this.state.activeId=topic.id;}
-  topic.at=this.now();topic.messages.push({role:'user',text:command,at:topic.at},{role:'assistant',text,at:topic.at});this.persist();
+  topic.at=this.now();topic.messages.push({role:'user',text:command,at:topic.at},{role:'assistant',text,at:topic.at,by:'шаблон: приветствие'});this.persist();
   return {handled:true,text,topicId:topic.id,topicTitle:topic.title,messages:topic.messages,topics:this.list()};
  }
  async turn(text,choice,forcedKind,preparedRoute){
@@ -109,7 +109,8 @@ class Dialogue {
     else if(kind==='bugs'||kind==='anr'||kind==='tasks'){
      result=await this.readers[kind](text,active,active.contextHint||this.context());
      if(result.question){active.pending={command:text,kind,field:result.field,options:result.options||[]};result.text=result.question;}
-    }else {const answer=await this.answer(text,active,unclear);result=typeof answer==='string'?{text:answer}:answer;}
+     result.by=result.by||{bugs:'Jira: баги',anr:'Google Play: ANR',tasks:'Jira: задачи'}[kind];
+    }else {const answer=await this.answer(text,active,unclear);result=typeof answer==='string'?{text:answer}:{...answer};if(active.answeredBy&&!result.by)result.by=active.answeredBy;delete active.answeredBy;}
    }catch(error){result={text:'Не удалось проверить данные: '+error.message,error:true};}
    if(result.title && before.lastData && result.title!==before.title){
     const changed={...active,id:randomUUID(),messages:[{role:'user',text,at:this.now()}]};
@@ -120,7 +121,7 @@ class Dialogue {
    }
    if(result.title)active.title=result.title;
    if(result.data)active.lastData=result.data;
-   active.messages.push({role:'assistant',text:result.text,sources:result.sources||[],at:this.now()});this.persist();
+   active.messages.push({role:'assistant',text:result.text,sources:result.sources||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
    return {handled:true,...result,topicId:active.id,topicTitle:active.title,messages:active.messages,topics:this.list()};
   }finally{this.busy=false;}
  }

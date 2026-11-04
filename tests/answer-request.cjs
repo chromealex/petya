@@ -55,5 +55,11 @@ const {localAnswer,prohibitionReply,greetingReply}=require(root+'/src/dialogue-a
  const twice={...looped,messages:[...looped.messages,{role:'assistant',text:stuck},{role:'user',text:'Ну?'}]};
  assert.notEqual(await localAnswer({...options,topic:twice,command:'Ну?',request:async()=>({message:{content:JSON.stringify({understood:true,answer:stuck})}})}),stuck,'The loop notice itself is never repeated');
  assert.equal(await localAnswer({...options,topic:{title:'M',messages:[{role:'user',text:'2+2?'},{role:'assistant',text:'4'},{role:'user',text:'А 3+1?'}]},command:'А 3+1?',request:async()=>({message:{content:JSON.stringify({understood:true,answer:'4'})}})}),'4','Short factual answers may coincide');
+ // Every reply is labelled with the path that produced it (shown under the message).
+ {const {Dialogue}=require(root+'/src/dialogue.cjs');
+  const d=new Dialogue({routeTopic:async()=>null,answer:(command,topic)=>localAnswer({model:'qwen3:4b',command,topic,uncertain:()=>false,clarify:()=>({text:'?',question:true}),request:async()=>({message:{content:JSON.stringify({understood:true,answer:'Docker — это платформа для контейнеров.'})}})})});
+  await d.turn('Что такое Docker?');assert.equal(d.active().messages.at(-1).by,'модель qwen3:4b');assert.equal(d.active().answeredBy,undefined,'transient marker is cleared');
+  await d.turn('Сколько будет 2+2?');assert.equal(d.active().messages.at(-1).by,'калькулятор');
+  assert.equal(d.greeting('Привет').messages.at(-1).by,'шаблон: приветствие');}
  console.log('Answer request regressions passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});

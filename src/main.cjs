@@ -671,6 +671,8 @@ function setupHandlers() {
   });
   app.on('will-quit',()=>localImages.stop());
   handle('converse',async(command,choice)=>{
+    // Label replies produced by shortcut handlers before the model, so misrouting is visible in the chat.
+    const via=(source,reply)=>{if(reply&&typeof reply==='object'&&!reply.by){reply.by=source;const last=dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&!last.by&&last.text===reply.text){last.by=source;dialogue.persist();}}return reply;};
     if(chatJobs.busy(dialogue.active()?.id))throw Error('В этом чате ещё выполняется запрос.');const original=text(command,4000);let value=original,applied=[];
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
     if(gitRoute){
@@ -706,22 +708,22 @@ function setupHandlers() {
       }catch(error){message.text=error.message;message.error=true;}finally{localImages.turnBusy=false;}
       dialogue.persist();return {handled:true,text:message.text,error:!!message.error,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
     }
-    if(!choice&&!attachments.list().length&&!learning.preview(original).matched){const quick=dialogue.greeting(original);if(quick)return quick;}
-    const duplicateReply=await taskDuplicates.turn(original,choice);if(duplicateReply)return duplicateReply;
-    if(!choice){const skillReply=await executeSkill(original);if(skillReply)return skillReply;}
-    if(!choice&&!attachments.list().length){const info=require('./capabilities-reply.cjs').reply(original,dialogue.active(),settings,instructionSkills.list());if(info){dialogue.rememberAction(original,info.text);const topic=dialogue.active();topic.capabilityReply=info.text;topic.capabilityPage=info.capabilityPage;dialogue.persist();return {...info,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};}}
+    if(!choice&&!attachments.list().length&&!learning.preview(original).matched){const quick=dialogue.greeting(original);if(quick)return via('шаблон: приветствие',quick);}
+    const duplicateReply=await taskDuplicates.turn(original,choice);if(duplicateReply)return via('дубликаты задач',duplicateReply);
+    if(!choice){const skillReply=await executeSkill(original);if(skillReply)return via('скилл',skillReply);}
+    if(!choice&&!attachments.list().length){const info=require('./capabilities-reply.cjs').reply(original,dialogue.active(),settings,instructionSkills.list());if(info){dialogue.rememberAction(original,info.text);const topic=dialogue.active();topic.capabilityReply=info.text;topic.capabilityPage=info.capabilityPage;dialogue.persist();return via('шаблон: возможности',{...info,topicId:topic.id,topicTitle:topic.title,messages:topic.messages});}}
     if(!choice&&!attachments.list().length&&!dialogue.active()?.attachments?.length&&!require('./team-fill.cjs').isTeamFill(original)){
       const workRoute=require('./work-query-route.cjs');
       const report=async(command,workflow)=>{const offer=await serviceAccess.offer('Проверь Jira: '+command,null);if(offer)return offer;const skill=instructionSkills.list().find(s=>s.enabled&&s.workflow===workflow);if(!skill)return {handled:true,text:'Для этого отчёта включи скилл '+workflow+' в разделе «Скиллы».'};return workSkills.turn({skill,question:command,verified:true},command);};
       const selected=workRoute.classify(original,dialogue.active());
       const workReply=await workRoute.dispatch(selected,original,{personal:async command=>{const offer=await serviceAccess.offer('Проверь Jira: '+command,null);return offer||dialogue.turn(command,undefined,'tasks');},workload:command=>report(command,'team-workload'),status:command=>report(command,'project-status'),chat:command=>dialogue.turn(command,undefined,'chat'),action:command=>require('./dialogue.cjs').actionRequest(command)?null:{handled:true,text:'Эта команда требует изменения Jira. Выполнить её напрямую этим способом пока не могу; открой задачу в Jira для изменения.'}});
-      if(workReply)return workReply;
+      if(workReply)return via('рабочий запрос',workReply);
     }
-    if(!choice){const presence=require('./ui/conversation-input.js').ConversationInput.presenceReply(original);if(presence)return presence;}
-    if(!choice){const catalog=require('./project-catalog.cjs').projectCatalogReply(original,{projects:projectMemory.state.projects,activeId:projectMemory.active()?.id,settings});if(catalog)return catalog;}
-    if(!choice){const remembered=await projectMemory.turn(original);if(remembered)return remembered;const sent=await slackRequest.turn(original);if(sent)return sent;}
-    if(!choice){try{const controlled=await computer.command(original)||await computerIntent.turn(original);if(controlled)return controlled;}catch(error){if(error.code==='COMPUTER_PERMISSION_REQUIRED')return computerApproval.request(original,error.action);throw error;}}
-    if(!choice){const filled=await teamFill.turn(original);if(filled)return filled;}
+    if(!choice){const presence=require('./ui/conversation-input.js').ConversationInput.presenceReply(original);if(presence)return via('шаблон: присутствие',presence);}
+    if(!choice){const catalog=require('./project-catalog.cjs').projectCatalogReply(original,{projects:projectMemory.state.projects,activeId:projectMemory.active()?.id,settings});if(catalog)return via('каталог проектов',catalog);}
+    if(!choice){const remembered=await projectMemory.turn(original);if(remembered)return via('память проектов',remembered);const sent=await slackRequest.turn(original);if(sent)return via('Slack',sent);}
+    if(!choice){try{const controlled=await computer.command(original)||await computerIntent.turn(original);if(controlled)return via('управление компьютером',controlled);}catch(error){if(error.code==='COMPUTER_PERMISSION_REQUIRED')return computerApproval.request(original,error.action);throw error;}}
+    if(!choice){const filled=await teamFill.turn(original);if(filled)return via('заполнение команды',filled);}
     if(!choice&&!learning.preview(original).matched&&!attachments.list().length&&(!dialogue.active()?.attachments?.length||require('./service-access.cjs').detect(original,null).length)){const offer=await serviceAccess.offer(original.replace(/^петя[\s,:.!?-]*/iu,''),dialogue.active());if(offer)return offer;}
     if(!choice&&/(?:посмотри|разбери|проверь|объясни).*(?:скрин|картин|изображени|видео|ролик)/iu.test(original)&&/(?:телеграм|telegram|тг|slack|слак)/iu.test(original)){
       const service=/(?:slack|слак)/iu.test(original)?'slack':'telegram';const wantVideo=/(?:видео|ролик)/iu.test(original),wantImage=/(?:скрин|картин|изображени)/iu.test(original);const rows=(await allowedMedia(service)).filter(r=>wantVideo&&!wantImage?require('./attachments.cjs').isVideo(r.name):wantImage&&!wantVideo?!require('./attachments.cjs').isVideo(r.name):true);

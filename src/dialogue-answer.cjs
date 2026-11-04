@@ -17,13 +17,15 @@ function greetingReply(command='') {
  return greeting+'! Я на связи.';
 }
 async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',supplementalContext='',settings={},skills=[],chooseKnowledgeModel,request,clarify,uncertain,telegram=false}) {
- const capability=require('./capabilities-reply.cjs').answer(command,topic,settings,skills);if(capability)return capability.text;
- const confirmation=require('./action-evidence.cjs').actionConfirmation(command,topic);if(confirmation)return confirmation;
- const roleReply=require('./role-facts.cjs').roleFactReply(command,topic);if(roleReply)return roleReply;
- const prohibition=prohibitionReply(command);if(prohibition)return prohibition;
- const greeting=greetingReply(command);if(greeting)return greeting;
- const calculation=require('./explicit-calculation.cjs').explicitCalculation(command);if(calculation!==null)return calculation;
- const evidence=require('./work-answer.cjs').workEvidenceReply(command,topic,teamMembers,teamNotes,supplementalContext);if(evidence)return evidence;
+ // Record which path produced the answer (shown under the message) so wrong routing is visible.
+ const mark=(source,value)=>{if(topic)topic.answeredBy=source;return value;};
+ const capability=require('./capabilities-reply.cjs').answer(command,topic,settings,skills);if(capability)return mark('шаблон: возможности',capability.text);
+ const confirmation=require('./action-evidence.cjs').actionConfirmation(command,topic);if(confirmation)return mark('журнал действий',confirmation);
+ const roleReply=require('./role-facts.cjs').roleFactReply(command,topic);if(roleReply)return mark('роли команды',roleReply);
+ const prohibition=prohibitionReply(command);if(prohibition)return mark('шаблон: запрет',prohibition);
+ const greeting=greetingReply(command);if(greeting)return mark('шаблон: приветствие',greeting);
+ const calculation=require('./explicit-calculation.cjs').explicitCalculation(command);if(calculation!==null)return mark('калькулятор',calculation);
+ const evidence=require('./work-answer.cjs').workEvidenceReply(command,topic,teamMembers,teamNotes,supplementalContext);if(evidence)return mark('данные сервисов',evidence);
  if(!model)return {text:'Не выбрана локальная модель для ответов. Откройте «Подключения → Ollama» и подготовьте модель.',error:true};
  let modelOverrides={};
  if(chooseKnowledgeModel&&require('./knowledge-model.cjs').standaloneKnowledge(command,topic,supplementalContext)){const selected=await chooseKnowledgeModel();if(selected)modelOverrides={model:selected,think:false};}
@@ -46,11 +48,11 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
   }
   const answer=parsed.answer.trim().slice(0,12000);
   // A repeated answer never helps: regenerate once with more variety, then admit the loop.
-  if(parsed.understood&&repeat.repeated(answer,topic)){if(!repeatRetry){repeatRetry=true;modelOverrides={...modelOverrides,think:false,options:{temperature:1,top_p:0.95,repeat_penalty:1.3,num_ctx:16384,num_predict:2048}};attempt--;continue;}return repeat.fallback(topic);}
+  if(parsed.understood&&repeat.repeated(answer,topic)){if(!repeatRetry){repeatRetry=true;modelOverrides={...modelOverrides,think:false,options:{temperature:1,top_p:0.95,repeat_penalty:1.3,num_ctx:16384,num_predict:2048}};attempt--;continue;}return mark('защита от повторов',repeat.fallback(topic));}
   const choices=Array.isArray(parsed.clarificationOptions)?[...new Set(parsed.clarificationOptions.filter(v=>typeof v==='string').map(v=>v.trim().slice(0,160)).filter(Boolean))].slice(0,4):[];
-  if(parsed.understood&&choices.length>=2)return {text:answer,question:true,clarificationOptions:choices};
-  if(!parsed.understood||uncertain(answer))return telegram?'Уточните, что найти в сохранённых сообщениях Telegram.':clarify();
-  return answer;
+  if(parsed.understood&&choices.length>=2)return mark('модель '+(modelOverrides.model||model),{text:answer,question:true,clarificationOptions:choices});
+  if(!parsed.understood||uncertain(answer))return mark('уточнение',telegram?'Уточните, что найти в сохранённых сообщениях Telegram.':clarify());
+  return mark('модель '+(modelOverrides.model||model),answer);
  }
 }
 module.exports={localAnswer,prohibitionReply,greetingReply};
