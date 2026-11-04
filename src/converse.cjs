@@ -147,6 +147,9 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
         preparedTopicRoute ||= ctx.dialogue.prepareRoute(value);
         const response=await ctx.request(base.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(semantic.routingRequest(ctx.settings.model,value,{company:ctx.companies.get(ctx.companyId).name,topic:ctx.dialogue.active(),recipes}))});
         route=semantic.parseRoute(response,recipes);
+        // An unsure tool router must not answer for the conversation: the dialogue model sees the whole
+        // history and asks its own question when the request is really unclear («Приведи пример команды»).
+        if(route?.tool==='clarify'&&!/почтов/iu.test(route.question))route=null;
       }catch{} // Offline or malformed model output cannot trigger a tool.
       const read=async(kind,service)=>{
         const offer=await ctx.serviceAccess.offer('Проверь '+service+': '+value,ctx.dialogue.active());
