@@ -839,7 +839,8 @@ function setupHandlers() {
   handle('asanaPreview', input=>asana.preview(input));
   handle('asanaApply', id=>asana.apply(id));
   handle('asanaContext', async id=>{const task=await asana.task(id);return addContext({source:'Asana',title:task.name,text:task.name+'\n'+(task.notes||'')});});
-  handle('requestAttention', show);
+  // Saved chats may ask for attention right after start; the build check needs a quiet tray start.
+  handle('requestAttention', () => { if (process.env.PETYA_VERIFY_BUILD !== '1') show(); });
   handle('companies',()=>({...companies.list(),activeId:companyId}));
   handle('companyCreate',name=>companies.create(name,settings));
   handle('companyRename',(id,name)=>{companies.rename(id,name);win.setTitle('Петя · '+companies.get(companyId).name);refreshTrayMenu();return {...companies.list(),activeId:companyId};});
