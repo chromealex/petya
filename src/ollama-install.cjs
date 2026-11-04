@@ -89,6 +89,20 @@ class OllamaInstaller {
       return await this.launch(target);
     } finally { await fs.rm(dir, { recursive: true, force: true }); }
   }
+  // Quit a running but broken Ollama (crashed runner, stuck model) and start it again.
+  async restart() {
+    if (!urls[this.platform]) throw new Error('Перезапуск из Пети доступен на macOS и Windows.');
+    const target = this.find(this.platform, this.home);
+    if (!target) throw new Error('Ollama не найден. Нажмите «Запустить Ollama», чтобы установить его.');
+    this.update('starting', 'Перезапускаю Ollama…');
+    const quiet = (file, args) => this.run(file, args, { timeout: 15000, windowsHide: true }).catch(() => null);
+    if (this.platform === 'darwin') { await quiet('/usr/bin/osascript', ['-e', 'tell application id "com.electron.ollama" to quit']); await quiet('/usr/bin/pkill', ['-x', 'ollama']); }
+    else { await quiet('taskkill', ['/IM', 'ollama app.exe', '/F']); await quiet('taskkill', ['/IM', 'ollama.exe', '/F']); }
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    const error = await this.open(target);
+    if (error) throw new Error('Ollama не запустился после перезапуска.');
+    return this.update('done', 'Ollama перезапущен.');
+  }
   async launch(target) {
     this.update('starting', 'Запуск Ollama…');
     const error = await this.open(target);

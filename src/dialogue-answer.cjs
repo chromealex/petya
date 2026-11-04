@@ -16,20 +16,30 @@ function greetingReply(command='') {
  const greeting=/^добр/iu.test(match[1])?match[1][0].toUpperCase()+match[1].slice(1).toLowerCase():'Привет';
  return greeting+'! Я на связи.';
 }
-async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',supplementalContext='',settings={},skills=[],chooseKnowledgeModel,request,clarify,uncertain,telegram=false}) {
+// «Зови меня Алекс» / «Меня зовут Саша» / «Как меня зовут?» — exact, never paraphrased by the model.
+function nameReply(command='',topic,userName=''){
+ const text=String(command).trim().replace(/^петя[,! ]+/iu,'');
+ const cap=v=>v[0].toLocaleUpperCase('ru')+v.slice(1);
+ const set=/^(?:(?:нет|да|ну|а|и)[,\s]+)*(?:вообще-то\s+|лучше\s+|теперь\s+|пожалуйста[,\s]+)*(?:(зови|называй)\s+меня|обращайся ко мне|меня зовут|я\s+[—-])\s+([\p{L}][\p{L}-]{1,30})(?:[,\s]+пожалуйста)?[.!]*$/iu.exec(text);
+ if(set&&topic&&!/^(?:не|так|как|просто|теперь|тоже)$/iu.test(set[2])){const name=cap(set[2]);topic.preferredName=name;return /зовут|я\s/iu.test(set[1]||text)&&!set[1]?'Приятно познакомиться, '+name+'!':'Хорошо, буду звать тебя '+name+'.';}
+ if(/^(?:а\s+)?(?:как меня зовут|ты помнишь,? как меня зовут|как ты меня называешь)[?.!]*$/iu.test(text)){const name=topic?.preferredName||String(userName||'').trim();return name?'Тебя зовут '+name+'.':null;}
+ return null;
+}
+async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',supplementalContext='',settings={},skills=[],chooseKnowledgeModel,request,recover,clarify,uncertain,telegram=false}) {
  // Record which path produced the answer (shown under the message) so wrong routing is visible.
  const mark=(source,value)=>{if(topic)topic.answeredBy=source;return value;};
  const capability=require('./capabilities-reply.cjs').answer(command,topic,settings,skills);if(capability)return mark('шаблон: возможности',capability.text);
  const confirmation=require('./action-evidence.cjs').actionConfirmation(command,topic);if(confirmation)return mark('журнал действий',confirmation);
  const roleReply=require('./role-facts.cjs').roleFactReply(command,topic);if(roleReply)return mark('роли команды',roleReply);
  const prohibition=prohibitionReply(command);if(prohibition)return mark('шаблон: запрет',prohibition);
+ const named=nameReply(command,topic,settings.userName);if(named)return mark('память: имя',named);
  const greeting=greetingReply(command);if(greeting)return mark('шаблон: приветствие',greeting);
  const calculation=require('./explicit-calculation.cjs').explicitCalculation(command);if(calculation!==null)return mark('калькулятор',calculation);
  const evidence=require('./work-answer.cjs').workEvidenceReply(command,topic,teamMembers,teamNotes,supplementalContext);if(evidence)return mark('данные сервисов',evidence);
  if(!model)return {text:'Не выбрана локальная модель для ответов. Откройте «Подключения → Ollama» и подготовьте модель.',error:true};
  let modelOverrides={};
  if(chooseKnowledgeModel&&require('./knowledge-model.cjs').standaloneKnowledge(command,topic,supplementalContext)){const selected=await chooseKnowledgeModel();if(selected)modelOverrides={model:selected,think:false};}
- const repeat=require('./answer-repeat.cjs');let repeatRetry=false,lowMemory=false;
+ const repeat=require('./answer-repeat.cjs');let repeatRetry=false,lowMemory=false,restarted=false;
  for(let attempt=0;attempt<2;attempt++){
   let response;
   try { response=await request(attempt?{...modelOverrides,think:false}:modelOverrides); }
@@ -37,6 +47,8 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
    const status=Number(error.status);
    // Ollama answers 500 when the model cannot be loaded with this context (usually memory).
    // Retry once with a smaller window before reporting an outage.
+   // A crashed runner (panic, Metal/CUDA failure) is fixed by restarting Ollama, not by a smaller context.
+   if(status>=500&&recover&&!restarted&&/runner|panic|terminated|metal|cuda|exit status/iu.test(String(error.detail||''))){restarted=true;console.error('Ollama runner crashed, restarting: '+error.detail);try{await recover();}catch(e){console.error(e);}attempt--;continue;}
    if(status>=500&&!lowMemory){lowMemory=true;console.error('Ollama '+status+': '+(error.detail||error.message));modelOverrides={...modelOverrides,think:false,options:{temperature:0.6,top_p:0.9,repeat_penalty:1.1,num_ctx:4096,num_predict:1024}};attempt--;continue;}
    const detail=String(error.detail||'').match(/"error"\s*:\s*"([^"]{1,200})/)?.[1]||'';
    const reason=status===404?'Выбранная модель не найдена.':status===429?'Ollama вернула HTTP 429 — ограничение запросов.':status>=500?'Ollama не смогла обработать запрос.':error.name==='TimeoutError'||error.name==='AbortError'?'Ollama не ответила вовремя.':'Не удалось связаться с Ollama.';
@@ -60,4 +72,4 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
   return mark('модель '+(modelOverrides.model||model),answer);
  }
 }
-module.exports={localAnswer,prohibitionReply,greetingReply};
+module.exports={localAnswer,prohibitionReply,greetingReply,nameReply};

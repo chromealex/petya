@@ -163,6 +163,7 @@ function setupConnections() {
       connect.hidden = true; guide.hidden = true;
       content.querySelector('summary').textContent = 'Дополнительные настройки';
       const open = connectionNode('button', 'Запустить Ollama', 'primary'); open.type = 'button';
+      const restart = connectionNode('button', 'Перезапустить Ollama'); restart.type = 'button';
       const help = connectionNode('div', '', 'ollama-setup');
       help.append(connectionNode('p', 'Нажмите «Запустить Ollama» — Петя сам установит приложение при необходимости, подготовит модель и подключится.'));
       help.append(connectionNode('p', 'Модель загружается один раз. Название выбранной модели, фактический объём и прогресс загрузки показаны ниже. Следующие запуски используют сохранённую модель.', 'small'));
@@ -174,7 +175,7 @@ function setupConnections() {
       installPanel.append(installLabel, progress, cancel); help.append(installPanel); card.append(help);
       let revision = 0;
       const renderInstall = state => {
-        guide.disabled = state.busy; open.disabled = state.busy;
+        guide.disabled = state.busy; open.disabled = state.busy; restart.disabled = state.busy;
         open.textContent = state.busy ? ({preparing:'Подготовка…',downloading:'Загрузка…',pulling:'Загрузка модели…',extracting:'Распаковка…',installing:'Установка…',warming:'Запуск модели…',verifying:'Проверка…'}[state.phase]||'Запуск…') : 'Запустить Ollama';
         status.dataset.installPhase=state.busy?state.phase:'';
         guide.textContent = state.busy ? 'Устанавливается…' : state.phase === 'error' || state.phase === 'cancelled' ? 'Повторить установку' : 'Установить Ollama';
@@ -197,6 +198,7 @@ function setupConnections() {
       window.petya.ollamaInstallStatus().then(state => { if (!revision) renderInstall(state); }).catch(e => notice(e.message, true));
       guide.onclick = run(async () => { guide.disabled = true; try { renderInstall(await window.petya.installOllama()); } finally { guide.disabled = false; } });
       open.onclick = run(async () => { open.disabled = true; try { renderInstall(await window.petya.openOllama()); } finally { open.disabled = false; } });
+      restart.onclick = run(async () => { restart.disabled = true; try { renderInstall(await window.petya.restartOllama()); } finally { restart.disabled = false; } });
       const brain=connectionNode('button','Подготовить Qwen3.5 · 9B');brain.type='button';
       brain.onclick=run(async()=>{brain.disabled=true;try{renderInstall(await window.petya.installBrain());}finally{brain.disabled=false;}});
       const semantic=connectionNode('label','Понимать новые формулировки через модель','check');
@@ -205,7 +207,7 @@ function setupConnections() {
       window.petya.settings().then(s=>{toggle.checked=s.semanticTools!=='false';});
       content.append(semantic,connectionNode('p','Модель выбирает чтение Jira, ANR, почты, поиск и сводку по смыслу запроса. Действия выполняются доступными инструментами Пети. Qwen3.5:9B загружается на компьютер; для слабых устройств можно оставить меньшую модель.','small'));
       controls.append(brain);
-      controls.append(open);
+      controls.append(open, restart);
     }
     if (def.id === 'whisper') {
       const start = connectionNode('button', 'Запустить распознавание', 'primary'); start.type = 'button';

@@ -24,5 +24,14 @@ const {explicitCalculation}=require('../src/explicit-calculation.cjs');const {Di
   assert(fail.error);assert.match(fail.text,/requires more system memory/);}
  const access=new (require('../src/service-access.cjs').ServiceAccess)({settings:()=>({}),save:()=>{},open:()=>{}});
  assert.match((await access.offer('Есть новые письма?',null)).text,/^Почта не подключена/);
+ // Live check after reboot: exact names; Slack never goes to the internet; a crashed runner restarts Ollama.
+ {const {nameReply,localAnswer}=require('../src/dialogue-answer.cjs');const t={};
+  assert.equal(nameReply('Меня зовут Саша',t),'Приятно познакомиться, Саша!');assert.equal(nameReply('Нет, вообще-то зови меня Алекс',t),'Хорошо, буду звать тебя Алекс.');assert.equal(nameReply('Как меня зовут?',t),'Тебя зовут Алекс.');assert.equal(nameReply('Как меня зовут?',{},''),null);
+  assert.match(dialogueRequest({model:'q',command:'Привет',topic:{title:'T',messages:[],preferredName:'Алекс'},userName:'Александр',speechStyle:'0'}).messages[0].content,/"Алекс"/);
+  let restarts=0,calls=0;const r=await localAnswer({model:'m',command:'Что такое Docker?',topic:{messages:[]},uncertain:()=>false,clarify:()=>'?',recover:async()=>{restarts++;},request:async()=>{calls++;if(calls===1){const e=Error('HTTP 500');e.status=500;e.detail='{"error":"mlx runner failed: panic: Failed to create Metal shared event"}';throw e;}return {message:{content:JSON.stringify({understood:true,answer:'Контейнеры.'})}};}});
+  assert.equal(r,'Контейнеры.');assert.equal(restarts,1);}
+ {const s=require('../src/semantic-tools.cjs');assert.equal(await s.dispatch({tool:'web'},'Что нового в Slack?',{web:()=>'web'}),null);assert.equal(await s.dispatch({tool:'web'},'Какая погода в Москве?',{web:()=>'web'}),'web');}
+ {const {OllamaInstaller}=require('../src/ollama-install.cjs');const ran=[];let opened='';const i=new OllamaInstaller({platform:'darwin',home:'/h',find:()=>'/Applications/Ollama.app',run:async(f,a)=>{ran.push(f);return {stdout:''};},open:async t=>{opened=t;return '';}});
+  const st=await i.restart();assert.equal(st.phase,'done');assert.deepEqual(ran,['/usr/bin/osascript','/usr/bin/pkill']);assert.equal(opened,'/Applications/Ollama.app');}
  console.log('Live dialogue fixes: spoken arithmetic, return to a topic with a new question, everyday questions passed');
 })().catch(e=>{console.error(e);process.exit(1);});

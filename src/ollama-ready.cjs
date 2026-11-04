@@ -24,6 +24,13 @@ class OllamaReady {
     this.pending = this.prepare().catch(e => this.update(this.controller.signal.aborted ? 'cancelled' : 'error', this.controller.signal.aborted ? 'Запуск отменён. Загрузку модели можно продолжить следующей попыткой.' : e.message)).finally(() => { this.pending = null; });
     return this.pending;
   }
+  // Restart the Ollama app, then prepare the model as usual.
+  restart(model) {
+    if (this.pending) return this.pending;
+    this.pending = (async () => { const restarted = await this.install.restart(); if (restarted.phase !== 'done') throw new Error(restarted.message); })()
+      .catch(e => this.update('error', e.message)).finally(() => { this.pending = null; });
+    return this.pending.then(state => state?.phase === 'error' ? state : this.start(model));
+  }
   cancel() { this.controller?.abort(); this.install.cancel(); return this.state; }
   async prepare() {
     const original = { ollamaUrl: this.settings().ollamaUrl, model: this.settings().model };

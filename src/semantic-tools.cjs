@@ -17,6 +17,8 @@ function parseRoute(response,recipes=[]){
 async function dispatch(route,command,handlers){
  if(!route||route.tool==='chat')return null;
  if(route.tool==='clarify')return {handled:true,text:route.question};
+ // The internet never answers about the user's own workspace (Slack, Telegram, Jira, mail…).
+ if(route.tool==='web'&&/(?:slack|слак|telegram|телеграм|(?:^|\s)тг(?:\s|[,.!?]|$)|jira|джир|жир[аеуы]|почт|письм|confluence|конфлю|notion|ноуш|asana|асан)/iu.test(command))return null;
  if(!Object.hasOwn(handlers,route.tool))throw Error('Этот инструмент пока недоступен.');
  return handlers[route.tool](command,route);
 }
