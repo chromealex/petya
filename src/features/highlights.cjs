@@ -21,6 +21,11 @@ module.exports={
  setup(s){
   const state=()=>s.dialogue.state,save=()=>s.dialogue.persist();
   require('../dialogue-request.cjs').important=topic=>collect(state(),topic);
+  // A question about something the user marked stays in that chat instead of starting a new topic.
+  const words=v=>String(v||'').toLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}.]{2,}/gu)||[];
+  const key=w=>/\d/.test(w)?w.replace(/\.$/,''):w.slice(0,5);
+  const keep=(text,topic)=>{const marks=collect(state(),topic);if(!marks.length)return false;const asked=new Set(words(text).filter(w=>w.length>=4||/\d/.test(w)).map(key));return marks.some(m=>words(m).some(w=>(w.length>=4||/\d/.test(w))&&asked.has(key(w))));};
+  s.dialogue.keepTopic=keep;
   const add=(topicId,{text,messageIndex=null,scope='chat'}={})=>{
    const value=clean(text);if(value.length<2)throw Error('Выделите текст, который нужно отметить.');
    const holder=owner(state(),topicId,scope==='project'?'project':'chat');holder.highlights=holder.highlights||[];
@@ -44,6 +49,6 @@ module.exports={
    const text='Отметил как важное'+(scope==='project'?' для всего проекта':' для этого чата')+': «'+clean(m[2])+'». Буду учитывать это в ответах.';
    s.dialogue.rememberAction(command,text);const last=topic.messages.at(-1);if(last?.role==='assistant')last.by='важное';save();
    return {handled:true,text,by:'важное',topicId:topic.id,topicTitle:topic.title,messages:topic.messages,highlightsChanged:true};};
-  return {highlights:{turn,collect:topic=>collect(state(),topic)},ipc};
+  return {highlights:{turn,keep,collect:topic=>collect(state(),topic)},ipc};
  }
 };

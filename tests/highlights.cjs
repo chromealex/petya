@@ -15,4 +15,5 @@ r=ipc.remove('t1',r.chat[1].id);assert.equal(r.chat.length,1);
 assert.throws(()=>ipc.add('t1',{text:' '}),/Выделите/);assert.throws(()=>ipc.add('t1',{text:'x'.repeat(1000)})&&ipc.add('t1',{text:'y'.repeat(1000)})&&ipc.add('t1',{text:'z'.repeat(1000)})&&ipc.add('t1',{text:'w'.repeat(1000)}),/много/);
 const v=highlights.turn('Запомни как важное для проекта: демо в пятницу');assert.match(v.text,/для всего проекта/);assert(state.projects[0].highlights.some(h=>h.text==='демо в пятницу'));
 assert.equal(highlights.turn('Запомни: у нас это чинится так'),null);
+assert(highlights.keep('Когда релиз 1.19?',state.topics[0]));assert(!highlights.keep('Расскажи анекдот',state.topics[0]));
 console.log('Highlights: chat and project marks, agents inherit, model context, edit/move/remove, limits and voice command passed');

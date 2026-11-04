@@ -37,7 +37,7 @@ module.exports=async(win,out)=>{
    await js(`window.petya.chatProjectSelect(${JSON.stringify(target)})`);await js(`window.petya.dialogueSelect('')`);
    const turns=[];
    for(const text of scenario.turns){const started=Date.now();let r;
-    try{r=await withTimeout(js(`window.petya.converse(${JSON.stringify(text)}).then(r=>({text:r.text||'',by:r.by||(r.messages||[]).filter(m=>m.role==='assistant').at(-1)?.by||'',handled:r.handled,question:!!r.question,error:!!r.error,steps:(r.steps||[]).map(s=>s.label),options:(r.options||r.clarificationOptions||r.skillChoices||r.integrationOffers||r.mediaChoices||[]).map(o=>o.label||o).slice(0,6)}))`),150000);}
+    try{r=await withTimeout(js(`window.petya.converse(${JSON.stringify(text)}).then(r=>({text:r.text||'',topicId:r.topicId||'',by:r.by||(r.messages||[]).filter(m=>m.role==='assistant').at(-1)?.by||'',handled:r.handled,question:!!r.question,error:!!r.error,steps:(r.steps||[]).map(s=>s.label),options:(r.options||r.clarificationOptions||r.skillChoices||r.integrationOffers||r.mediaChoices||[]).map(o=>o.label||o).slice(0,6)}))`),150000);}
     catch(e){r={text:'',error:true,failure:e.message};}
     // Agents answer later: wait for the combined answer in the parent chat.
     if(scenario.agents&&!r.error){const id=(await js('window.petya.dialogueTopics()')).activeId;for(let i=0;i<120&&id;i++){await new Promise(res=>setTimeout(res,2000));const st=await js(`window.petya.chatJobState(${JSON.stringify(id)})`);const plan=st?.messages?.find(m=>m.agentPlan)?.agentPlan;if(st?.job?.state==='done'&&st.messages.at(-1)?.by==='агенты Пети: итог'){r.agents=(plan?.tasks||[]).map(t=>t.title+' — '+t.state);r.final=st.messages.at(-1).text;break;}}}
