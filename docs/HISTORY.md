@@ -1,93 +1,93 @@
 # Petya — feature history by version
 
-Detailed notes for versions 0.2–0.8.3, written in Russian before the switch to English documentation. Project overview: [README](../README.md).
+Detailed notes for versions 0.2–0.8.3. Project overview: [README](../README.md).
 
 
 
-Desktop MVP 0.5 голосового помощника для macOS и Windows: трей, уведомления, обращение «Петя», контекст встречи и Slack, уточнение неоднозначности и создание задачи в Jira Cloud.
+Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications, the «Петя» ("Petya") wake word, meeting and Slack context, clarification of ambiguity, and creating an issue in Jira Cloud.
 
-Пакет регистрации OAuth: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
+OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
-## Исправление распознавания (0.5.1)
+## Recognition fix (0.5.1)
 
-При открытии приложения и перед захватом микрофона/встречи Петя проверяет готовность Whisper. Автопроверка ждёт загрузки модели и подключается автоматически; параллельные запросы используют один запуск. Если сервер недоступен и заданы пути к `whisper-server` и модели, приложение запускает его локально, ждёт готовности и только затем начинает запись. В карточке whisper.cpp есть «Запустить распознавание». Неудачное соединение, таймаут, загрузка модели и неверный путь показываются понятными сообщениями.
+When the app opens and before capturing the microphone/meeting, Petya checks that Whisper is ready. The automatic check waits for the model to load and connects automatically; concurrent requests share a single launch. If the server is unavailable and paths to `whisper-server` and the model are set, the app starts it locally, waits until it is ready, and only then begins recording. The whisper.cpp card has «Запустить распознавание» (Start recognition). A failed connection, a timeout, model loading, and an invalid path are shown as clear messages.
 
-На этом Mac установлен runtime рядом с исходниками: `runtime/whisper-build/bin/whisper-server` и `runtime/models/ggml-base.bin`. Пока `Petya.app` находится в Projects/Peter, эти файлы обнаруживаются автоматически. При переносе приложения укажите полные пути в подключениях. Модель и сервер не включены в установщик; на Windows нужен Windows whisper-server.exe и мультиязычная модель. Выбранные пути сохраняются в настройках. Автозапуск поддерживает стандартный `/inference` и только loopback.
+On this Mac the runtime is installed next to the sources: `runtime/whisper-build/bin/whisper-server` and `runtime/models/ggml-base.bin`. As long as `Petya.app` is in Projects/Peter, these files are detected automatically. If you move the app, specify full paths in the connections. The model and server are not included in the installer; Windows needs a Windows whisper-server.exe and a multilingual model. The selected paths are saved in the settings. Auto-start supports the standard `/inference` and loopback only.
 
-Петя завершает запущенный ею сервер при выходе. Уже работающий внешний сервер используется без перезапуска и не останавливается. Микрофон при запуске приложения остаётся выключенным.
+Petya shuts down the server it started when it exits. An already running external server is used without restarting and is not stopped. The microphone stays off when the app starts.
 
-## Кнопки подключения (0.5)
+## Connection buttons (0.5)
 
-У каждого сервиса есть отдельная карточка и действие подключения. Slack, Notion, Jira, Ollama и whisper.cpp: «Подключить» открывает настройки, «Сохранить и проверить» сохраняет только поля этого сервиса и проверяет доступ. В Confluence — отдельная проверка с общими учётными данными Atlassian. Настройки сохраняются даже при неудачной проверке; ошибка видна в карточке. Сохранённый токен сам по себе не считается проверенным подключением.
+Each service has its own card and connect action. Slack, Notion, Jira, Ollama and whisper.cpp: «Подключить» (Connect) opens the settings, «Сохранить и проверить» (Save and check) saves only this service's fields and checks access. Confluence has a separate check using the shared Atlassian credentials. Settings are saved even if the check fails; the error is shown in the card. A saved token by itself does not count as a verified connection.
 
-Slack проверяет авторизацию и чтение указанных каналов; Notion — поиск доступных страниц; Jira — пользователя и выбранный проект; Confluence — поиск страниц. Проверки не создают и не изменяют задачи. Доступ к отдельной задаче/документу и права записи могут отличаться и проверяются при действии. Ollama показывает установленные модели; whisper.cpp проверяет `/health`.
+Slack checks authorization and reading of the specified channels; Notion checks search of accessible pages; Jira checks the user and the selected project; Confluence checks page search. The checks do not create or modify issues. Access to an individual issue/document and write permissions may differ and are checked when an action is performed. Ollama shows the installed models; whisper.cpp checks `/health`.
 
-Кнопка Zoom проверяет наличие системной аудиодорожки и сразу освобождает захват. Она не авторизует аккаунт Zoom и не начинает расшифровку. Для записи встречи используйте «Слушать встречу Zoom».
+The Zoom button checks that a system audio track is available and releases the capture immediately. It does not authorize a Zoom account and does not start transcription. To record a meeting, use «Слушать встречу Zoom» (Listen to Zoom meeting).
 
-**OAuth-вход через браузер ещё не подключён:** нужны зарегистрированные приложения Slack, Notion и Atlassian и реализация локального OAuth-потока. Кнопки открытия настройки сервиса ведут в соответствующую консоль, а не имитируют OAuth. Сейчас облачные сервисы подключаются через токены. Client secret нельзя включать в распространяемый exe/app.
+**OAuth sign-in via the browser is not connected yet:** it requires registered Slack, Notion and Atlassian apps and an implementation of a local OAuth flow. The buttons that open a service's settings lead to the corresponding console rather than imitating OAuth. For now, cloud services are connected with tokens. A client secret must not be included in a distributed exe/app.
 
-Для подготовки OAuth: зарегистрировать приложения в [Slack](https://api.slack.com/apps), [Notion](https://www.notion.so/my-integrations), [Atlassian](https://developer.atlassian.com/console/myapps/); использовать подготовленные localhost callback URL для личного пилота; настроить минимальные разрешения чтения Slack/Notion/Confluence и необходимые права Jira. Для Slack подготовлен desktop PKCE без client secret. Локальный вариант Notion/Atlassian требует проверки зарегистрированных callback и хранения собственных секретов владельца в Keychain/DPAPI; общий секрет нельзя распространять с приложением. Регистрация и публикация приложений в текущей версии не выполнены.
+To prepare OAuth: register apps in [Slack](https://api.slack.com/apps), [Notion](https://www.notion.so/my-integrations), [Atlassian](https://developer.atlassian.com/console/myapps/); use the prepared localhost callback URLs for a personal pilot; configure minimal read permissions for Slack/Notion/Confluence and the necessary Jira permissions. For Slack, desktop PKCE without a client secret is prepared. The local Notion/Atlassian option requires verifying the registered callbacks and storing the owner's own secrets in Keychain/DPAPI; a shared secret must not be distributed with the app. Registration and publication of the apps have not been done in the current version.
 
-## Документация Notion (0.4)
+## Notion documentation (0.4)
 
-В «Подключениях» укажите токен внутренней интеграции Notion с правом **Read content**. В Notion подключите интеграцию к нужным страницам через меню **Connections**. Токен хранится зашифрованным средствами ОС и не возвращается в интерфейс. Пустое поле сохраняет токен; отдельный флажок удаляет его.
+In «Подключения» (Connections), enter a Notion internal integration token with the **Read content** permission. In Notion, connect the integration to the required pages via the **Connections** menu. The token is stored encrypted by OS facilities and is not returned to the UI. An empty field keeps the token; a separate checkbox deletes it.
 
-Поиск документации обращается к Confluence и Notion, показывает источник каждой страницы и позволяет выбрать до пяти документов из обоих источников. Текст выбранных страниц передаётся локальной модели, ссылки добавляются в описания задач. Notion можно использовать без подключения Jira для поиска; создание задач требует Jira.
+Documentation search queries Confluence and Notion, shows the source of each page, and lets you select up to five documents from both sources. The text of the selected pages is passed to the local model, and links are added to issue descriptions. Notion can be used for search without connecting Jira; creating issues requires Jira.
 
-Ограничения: Notion API ищет **по названиям**, а не по всему содержимому. Используются первые четыре ключевых слова контекста или уточнённого запроса, до двух страниц выдачи по каждому слову. Читаются десять наиболее подходящих документов, вложенные блоки и таблицы (до четырёх уровней, восьми запросов блоков и 18 000 символов на документ). Ограниченная выдача и неполный текст отмечаются. Вложенные страницы ищутся отдельно; содержимое файлов, базы данных и комментарии не индексируются. Семантического индекса пока нет.
+Limitations: the Notion API searches **by titles**, not by full content. The first four keywords of the context or of the refined query are used, with up to two pages of results per word. The ten most relevant documents are read, including nested blocks and tables (up to four levels, eight block requests and 18,000 characters per document). Limited results and incomplete text are flagged. Nested pages are searched separately; file contents, databases and comments are not indexed. There is no semantic index yet.
 
-Ошибка доступа или лимит Notion показывается рядом с результатами; доступные документы Confluence остаются видны. Не удалось прочитать страницу — она не добавляется в контекст. Интеграция выполняет только чтение (POST используется исключительно для поиска). Лимиты запросов соблюдаются очередью; после HTTP 429 повторите поиск позже.
+A Notion access error or rate limit is shown next to the results; accessible Confluence documents remain visible. If a page could not be read, it is not added to the context. The integration is read-only (POST is used exclusively for search). Request limits are respected with a queue; after HTTP 429, repeat the search later.
 
-API: [поиск по названиям](https://developers.notion.com/reference/post-search), [чтение блоков](https://developers.notion.com/reference/get-block-children).
+API: [search by titles](https://developers.notion.com/reference/post-search), [reading blocks](https://developers.notion.com/reference/get-block-children).
 
-## История, правки и откат (0.3)
+## History, edits and rollback (0.3)
 
-В разделе «История» отображаются одиночные задачи, пакеты, правки и результат каждого шага. Отметьте нужные задачи, напишите, что изменить, и нажмите «Подготовить правку». Например: «Переназначь вторую задачу на Машу и перенеси её в следующий спринт». Ollama предлагает изменения названия, описания, исполнителя, fix version и спринта. Неоднозначный запрос возвращает вопросы; дополните текст и повторите. Перед отправкой показываются значения до/после. Статусы и произвольные поля пока не редактируются.
+The «История» (History) section shows single issues, batches, edits and the result of each step. Select the issues you need, write what to change, and click «Подготовить правку» (Prepare edit). For example: «Переназначь вторую задачу на Машу и перенеси её в следующий спринт» ("Reassign the second issue to Masha and move it to the next sprint"). Ollama proposes changes to the summary, description, assignee, fix version and sprint. An ambiguous request returns questions; add to the text and retry. Before sending, the before/after values are shown. Statuses and arbitrary fields cannot be edited yet.
 
-- «Откатить эту правку» возвращает прежние значения затронутых полей, включая исходный ADF описания. Работает без модели.
-- «Откатить создание» **безвозвратно удаляет** выбранные задачи из Jira после отдельного подтверждения. Прежние ключи восстановить нельзя. Нужны права удаления; подзадачи не удаляются.
-- Перед откатом проверяются сохранённый снимок, время изменения, метка создания и отсутствие подзадач. Внешние изменения блокируют автоматический откат. Для старых записей без снимка откат создания недоступен.
-- Перед записью повторно проверяются текущие значения. Jira не предоставляет здесь атомарной транзакции: остаётся промежуток между проверкой и записью. Пакет может выполниться частично; история показывает это, автоматических повторов неопределённых запросов нет. После сбоя с неизвестным результатом сверяйте Jira.
-- Нельзя восстановить закрытый спринт, выпущенную/архивную версию или недоступного исполнителя. Петя покажет ошибку без подмены значения.
-- Последние 100 записей с исходными и новыми значениями сохраняются в `batch-history.json`, зашифрованном Electron safeStorage (Keychain / DPAPI). Старый журнал читается и перезаписывается в шифрованном виде при следующем сохранении. «Очистить память» этот журнал не удаляет.
+- «Откатить эту правку» (Roll back this edit) restores the previous values of the affected fields, including the original ADF of the description. Works without the model.
+- «Откатить создание» (Roll back creation) **permanently deletes** the selected issues from Jira after a separate confirmation. The previous keys cannot be restored. Delete permissions are required; sub-tasks are not deleted.
+- Before a rollback, the saved snapshot, modification time, creation label and absence of sub-tasks are checked. External changes block automatic rollback. For old records without a snapshot, rolling back creation is unavailable.
+- Before writing, the current values are re-checked. Jira does not provide an atomic transaction here: a gap remains between the check and the write. A batch may complete partially; the history shows this, and there are no automatic retries of requests with an unknown outcome. After a failure with an unknown result, reconcile with Jira.
+- A closed sprint, a released/archived version or an unavailable assignee cannot be restored. Petya shows an error without substituting the value.
+- The last 100 records with original and new values are saved in `batch-history.json`, encrypted with Electron safeStorage (Keychain / DPAPI). An old log is read and rewritten in encrypted form on the next save. «Очистить память» (Clear memory) does not delete this log.
 
-Проверки 0.3: 12 тестов истории дополнительно к 23 существующим; UI smoke проверяет создание пакета, текстовую правку с предпросмотром и откат на тестовых ответах API. Реальные задачи при проверке не изменяются.
+0.3 checks: 12 history tests in addition to the 23 existing ones; the UI smoke test checks batch creation, a text edit with preview, and rollback against test API responses. No real issues are modified during the checks.
 
-## Документы, декомпозиция и планирование (0.2)
+## Documents, decomposition and planning (0.2)
 
-Примеры команд:
+Example commands:
 
-- «Петя, найди документацию по этой фиче».
-- «Петя, декомпозируй эту фичу».
-- «Петя, заведи несколько задач для реализации этой фичи».
+- «Петя, найди документацию по этой фиче». ("Petya, find the documentation for this feature.")
+- «Петя, декомпозируй эту фичу». ("Petya, decompose this feature.")
+- «Петя, заведи несколько задач для реализации этой фичи». ("Petya, create several issues to implement this feature.")
 
-После выбора обсуждения открывается планировщик. Для обычного одиночного черновика доступна кнопка «Найти документы / декомпозировать».
+After a discussion is selected, the planner opens. For an ordinary single draft, the «Найти документы / декомпозировать» (Find documents / decompose) button is available.
 
-1. **Документы:** поиск страниц Confluence на том же Atlassian Cloud сайте по словам из выбранного обсуждения; можно уточнить запрос и ограничить space key в подключениях. Используется Atlassian API token и email из Jira; права токена должны включать чтение Confluence. Показываются до 10 результатов, выдержки и ссылки. Отметьте до 5 документов: их текст и ссылки попадут в декомпозицию. Это лексический CQL-поиск, не векторный индекс. Другие хранилища документов пока не подключены.
-2. **Декомпозиция:** установленная модель Ollama составляет 2–12 редактируемых задач с описанием, критериями, вопросами и зависимостями. Без модели можно вручную собрать пакет из 1–12 задач. Ссылки на выбранные документы добавляются к сгенерированным описаниям. Зависимости сохраняются текстом; Jira issue links, Epic и sub-task иерархия пока не создаются.
-3. **Доска и спринт:** загружаются Scrum-доски проекта, активные и будущие спринты. Единственная доска/единственный активный спринт подставляются автоматически; иначе требуется выбор. Для постоянной доски можно задать board ID. Kanban без спринтов этим пакетным сценарием не поддерживается.
-4. **Версия:** заполняется `fixVersions`. «Текущая» — явно заданный в подключениях ID невыпущенной версии или единственная невыпущенная неархивная версия проекта. Если вариантов несколько, Петя просит выбрать, а не угадывает по названию или дате.
-5. **Исполнители:** загружаются доступные для назначения пользователи проекта (до 1000 результатов); есть отдельный поиск по имени. Поле «Кто за что отвечает» помогает модели сопоставить роли с людьми. Неизвестный ID отклоняется; без выбранного исполнителя задача не отправляется. Предложения модели нужно проверить, особенно при совпадении имён.
-6. **Отправка:** одна кнопка запускает последовательное создание всего пакета, с исполнителем и версией, затем добавление каждой созданной задачи в спринт через Agile API. Права создания задач, назначения, изменения версии и планирования спринта обязательны. Если схема проекта требует дополнительные поля, Jira отклонит создание. Состояние каждой задачи отображается отдельно.
+1. **Documents:** search for Confluence pages on the same Atlassian Cloud site using words from the selected discussion; you can refine the query and restrict the space key in the connections. The Atlassian API token and email from Jira are used; the token's permissions must include reading Confluence. Up to 10 results are shown, with excerpts and links. Select up to 5 documents: their text and links will go into the decomposition. This is a lexical CQL search, not a vector index. Other document stores are not connected yet.
+2. **Decomposition:** the installed Ollama model drafts 2–12 editable issues with a description, criteria, questions and dependencies. Without the model, you can assemble a batch of 1–12 issues manually. Links to the selected documents are added to the generated descriptions. Dependencies are saved as text; Jira issue links and the Epic and sub-task hierarchy are not created yet.
+3. **Board and sprint:** the project's Scrum boards and active and future sprints are loaded. A single board/single active sprint is filled in automatically; otherwise a choice is required. A board ID can be set for a permanent board. Kanban without sprints is not supported by this batch scenario.
+4. **Version:** `fixVersions` is filled in. «Текущая» ("Current") is either the unreleased version ID explicitly set in the connections or the project's only unreleased, unarchived version. If there are several options, Petya asks you to choose rather than guessing by name or date.
+5. **Assignees:** the project's assignable users are loaded (up to 1000 results); there is a separate search by name. The «Кто за что отвечает» (Who is responsible for what) field helps the model match roles to people. An unknown ID is rejected; an issue without a selected assignee is not sent. The model's suggestions must be reviewed, especially when names match.
+6. **Sending:** a single button starts sequential creation of the whole batch, with assignee and version, followed by adding each created issue to the sprint via the Agile API. Permissions to create issues, assign, change the version and plan the sprint are required. If the project scheme requires additional fields, Jira will reject the creation. The state of each issue is displayed separately.
 
-Повтор пакета пропускает уже завершённые действия. Если задача создана, но перенос в спринт не удался, повторяется только перенос. При неизвестном результате создания пакет останавливается: автоматически повторять создание нельзя. Проверьте Jira; задачи помечаются label `petya-<UUID пакета>` для сверки. Пакет не является атомарной транзакцией и не откатывает уже созданные задачи. После первого запроса менять его содержание нельзя.
+Retrying a batch skips already completed actions. If an issue was created but moving it to the sprint failed, only the move is retried. If the result of a creation is unknown, the batch stops: creation must not be retried automatically. Check Jira; issues are tagged with the label `petya-<UUID пакета>` for reconciliation. A batch is not an atomic transaction and does not roll back issues that were already created. After the first request, its contents cannot be changed.
 
-Журнал `batch-history.json` в userData сохраняет последние 100 записей создания, а также связанные правки: проект, адрес сайта, поля задач, ключи, статусы и ошибки. Он шифруется средствами ОС. Описания задач могут включать выдержки из обсуждений и документов; токены в журнал не записываются. После перезапуска журнал виден, но автоматическое продолжение пакета не поддерживается — сначала сверка с Jira. Очистка контекста не удаляет журнал. Во время работы приложения сохранённые незавершённые пакеты держат тексты задач в памяти для повтора.
+The `batch-history.json` log in userData keeps the last 100 creation records as well as related edits: project, site address, issue fields, keys, statuses and errors. It is encrypted by OS facilities. Issue descriptions may include excerpts from discussions and documents; tokens are not written to the log. After a restart the log is visible, but automatic continuation of a batch is not supported — reconcile with Jira first. Clearing the context does not delete the log. While the app is running, saved unfinished batches keep the issue texts in memory for retries.
 
-## Запуск
+## Running
 
-Нужен Node.js 22+.
+Requires Node.js 22+.
 
 ```sh
 npm ci
 npm start
 ```
 
-В разделе «Подключения» настройте сервисы. Без них можно добавить расшифровку вручную и пройти сценарий до редактируемого черновика текстовой командой.
+Configure services in the «Подключения» (Connections) section. Without them, you can add a transcript manually and go through the scenario up to an editable draft with a text command.
 
-### Распознавание речи
+### Speech recognition
 
-Установите и соберите [whisper.cpp](https://github.com/ggml-org/whisper.cpp). В его каталоге:
+Install and build [whisper.cpp](https://github.com/ggml-org/whisper.cpp). In its directory:
 
 ```sh
 bash models/download-ggml-model.sh base
@@ -96,72 +96,72 @@ cmake --build build --config Release -j
 ./build/bin/whisper-server -m models/ggml-base.bin --host 127.0.0.1 --port 8080
 ```
 
-На Windows используйте соответствующий whisper-server.exe и инструкции сборки upstream. Нужна мультиязычная модель, не `.en`. В Пете адрес по умолчанию: `http://127.0.0.1:8080/inference`.
+On Windows, use the corresponding whisper-server.exe and the upstream build instructions. A multilingual model is required, not `.en`. The default address in Petya: `http://127.0.0.1:8080/inference`.
 
-Включите микрофон и скажите полную команду, затем сделайте паузу: «Петя, заведи задачу в Jira для реализации этой фичи». Если произнести только «Петя», приложение ждёт следующую реплику до 12 секунд. Выбор контекста и проверка черновика пока выполняются мышью.
+Turn on the microphone and say the full command, then pause: «Петя, заведи задачу в Jira для реализации этой фичи» ("Petya, create a Jira issue to implement this feature"). If you say only «Петя» ("Petya"), the app waits up to 12 seconds for the next utterance. Choosing the context and reviewing the draft are still done with the mouse.
 
-Речь режется по паузам, максимум 15 секунд на фрагмент, преобразуется в WAV mono 16 kHz. Всё распознавание идёт на localhost, включая поиск обращения. Это не отдельная экономичная wake-word модель: CPU/GPU и задержка зависят от Whisper. При переполнении очереди запись останавливается с ошибкой. Аудио не пишется на диск. До обращения транскрипт микрофона не включается в память, кроме включённого режима встречи.
+Speech is split at pauses, with a maximum of 15 seconds per fragment, and converted to WAV mono 16 kHz. All recognition runs on localhost, including wake-word detection. This is not a separate lightweight wake-word model: CPU/GPU load and latency depend on Whisper. If the queue overflows, recording stops with an error. Audio is not written to disk. Before the wake word, the microphone transcript is not included in memory, except when meeting mode is on.
 
-### Zoom / встреча
+### Zoom / meeting
 
-Нажмите «Слушать встречу Zoom». Захватывается **весь системный звук**, а не конкретное приложение. Видеодорожка нужна для системного API захвата, кадры не обрабатываются и не сохраняются. Собственные реплики попадут в контекст, если также включить микрофон. Для уменьшения эха используйте наушники.
+Click «Слушать встречу Zoom» (Listen to Zoom meeting). **All system audio** is captured, not a specific app. The video track is needed for the system capture API; frames are not processed or saved. Your own utterances get into the context if you also turn on the microphone. Use headphones to reduce echo.
 
-На macOS системный звук через CoreAudio Tap требует macOS 14.2+ и разрешения ОС; конкретное поведение зависит от версии Electron/ОС. На Windows используется loopback. При отсутствии или завершении аудиодорожки приложение сообщает ошибку. Реальный захват Zoom необходимо проверить на обеих целевых ОС; это пока экспериментальный путь, не интеграция Zoom SDK. Резервный вариант — импорт `.txt` / `.vtt` в разделе «Контекст».
+On macOS, system audio via CoreAudio Tap requires macOS 14.2+ and OS permission; the specific behavior depends on the Electron/OS version. On Windows, loopback is used. If the audio track is missing or ends, the app reports an error. Real Zoom capture must be verified on both target OSes; this is still an experimental path, not a Zoom SDK integration. The fallback is importing `.txt` / `.vtt` in the «Контекст» (Context) section.
 
-Реплики одной сессии группируются. Команда рассматривает только уже расшифрованный контекст с временем окончания записи не позже начала команды. Реплики, которые ещё находятся в очереди распознавания, в текущий снимок не попадают. Для встречи длиннее лимита памяти остаётся хвост. Нет разделения по спикерам, сегментации тем и подключения к Zoom Cloud.
+Utterances from one session are grouped. A command considers only already transcribed context whose recording end time is no later than the start of the command. Utterances still in the recognition queue are not included in the current snapshot. For a meeting longer than the memory limit, the tail is kept. There is no speaker separation, topic segmentation or connection to Zoom Cloud.
 
 ### Slack
 
-Укажите OAuth token и до 5 channel ID. Нужны доступ к каналам и scopes `channels:history` / `groups:history` по типу канала. Кнопка «Обновить Slack» загружает до 15 сообщений на канал за последние 24 часа. Ответы в тредах, пагинация, события в реальном времени и OAuth login пока не реализованы. Ошибка 429 отображается пользователю; автоматических повторов нет.
+Enter an OAuth token and up to 5 channel IDs. Access to the channels and the scopes `channels:history` / `groups:history`, depending on channel type, are required. The «Обновить Slack» (Refresh Slack) button loads up to 15 messages per channel for the last 24 hours. Thread replies, pagination, real-time events and OAuth login are not implemented yet. Error 429 is shown to the user; there are no automatic retries.
 
 ### Jira Cloud
 
-Нужны адрес `https://company.atlassian.net`, email, обычный API token, ключ проекта и ID типа задачи. Scoped tokens через Atlassian gateway пока не поддерживаются. Issue type ID зависит от проекта. Создание использует REST v3 и ADF; проекты с дополнительными обязательными полями пока не поддерживаются.
+Requires the address `https://company.atlassian.net`, an email, a regular API token, a project key and an issue type ID. Scoped tokens via the Atlassian gateway are not supported yet. The issue type ID depends on the project. Creation uses REST v3 and ADF; projects with additional required fields are not supported yet.
 
-Задача отправляется только после нажатия «Создать задачу в Jira». Неопределённая сетевая ошибка блокирует повторную отправку того же черновика: сначала проверьте Jira. Создание одиночной задачи также попадает в постоянный журнал. Повтор того же ID блокируется после перезапуска; новая команда с новым ID не распознаётся как семантический дубликат.
+An issue is sent only after clicking «Создать задачу в Jira» (Create Jira issue). An indeterminate network error blocks re-sending the same draft: check Jira first. Creating a single issue is also recorded in the persistent log. Retrying the same ID is blocked after a restart; a new command with a new ID is not recognized as a semantic duplicate.
 
-### Локальная языковая модель (опционально)
+### Local language model (optional)
 
-Установите Ollama, загрузите выбранную модель и укажите её имя. API по умолчанию `http://127.0.0.1:11434/api/chat`. Модель оформляет выбранное обсуждение в JSON-черновик. Без неё используется прозрачный шаблон с исходным контекстом. Ошибка модели не маскируется успешным результатом.
+Install Ollama, download the chosen model and enter its name. The default API is `http://127.0.0.1:11434/api/chat`. The model formats the selected discussion into a JSON draft. Without it, a transparent template with the original context is used. A model error is not masked by a successful result.
 
-Поиск контекста сейчас эвристический: слова запроса, время и группировка реплик встречи. При нескольких правдоподобных источниках показывается выбор. Это пока не полноценная семантическая память и не универсальный агент; доступны создание задач и ограниченные правки через историю. Данные источников не имеют доступа к инструментам.
+Context search is currently heuristic: query words, time, and grouping of meeting utterances. When there are several plausible sources, a choice is shown. This is not yet a full semantic memory or a general-purpose agent; issue creation and limited edits via the history are available. Source data has no access to tools.
 
-## Хранение и управление
+## Storage and management
 
-- Токены шифруются Electron safeStorage (Keychain / DPAPI) и не возвращаются в интерфейс. Настройки лежат в `app.getPath('userData')/settings.json`.
-- Контекст и черновики только в RAM (кроме журнала результатов пакетов, описанного выше), до 200 фрагментов; для поиска учитываются последние 24 часа. «Очистить память» удаляет контекст и черновики.
-- Закрытие окна оставляет приложение в трее. Меню трея позволяет отключить запись или выйти. После блокировки экрана/сна запись останавливается; автоматически не возобновляется.
-- Микрофон и встреча при запуске выключены. Автозапуска, подписанных релизов и автообновления пока нет.
-- Распознавание и LLM допускают только loopback HTTP. Slack и Jira вызываются из main process по HTTPS; renderer изолирован, без Node.js и произвольного IPC.
+- Tokens are encrypted with Electron safeStorage (Keychain / DPAPI) and are not returned to the UI. Settings are stored in `app.getPath('userData')/settings.json`.
+- Context and drafts are kept only in RAM (except for the batch result log described above), up to 200 fragments; the last 24 hours are considered for search. «Очистить память» (Clear memory) deletes the context and drafts.
+- Closing the window leaves the app in the tray. The tray menu lets you turn off recording or quit. After screen lock/sleep, recording stops and is not resumed automatically.
+- The microphone and meeting capture are off at startup. There is no auto-launch, signed releases or auto-update yet.
+- Recognition and the LLM allow loopback HTTP only. Slack and Jira are called from the main process over HTTPS; the renderer is isolated, without Node.js or arbitrary IPC.
 
-## Проверка и сборка
+## Testing and building
 
 ```sh
 npm test
-PETYA_SMOKE_TEST=1 npm start # macOS / Linux: UI smoke test без внешних действий
+PETYA_SMOKE_TEST=1 npm start # macOS / Linux: UI smoke test without external actions
 npm run pack
 npm run dist:mac
 npm run dist:win
 ```
 
-Единая команда `python3 scripts/build.py` пересобирает macOS и Windows. `--mac` и `--win` выбирают платформу. Единственные готовые билды: `Petya.app` и `Petya-Setup.exe` в корне проекта. Новая сборка заменяет текущую; резервные и версионные копии запрещены. Временные файлы находятся в системном временном каталоге и очищаются автоматически. Одновременные сборки блокируются.
+The single command `python3 scripts/build.py` rebuilds macOS and Windows. `--mac` and `--win` select the platform. The only finished builds are `Petya.app` and `Petya-Setup.exe` in the project root. A new build replaces the current one; backup and versioned copies are forbidden. Temporary files are kept in the system temp directory and cleaned up automatically. Concurrent builds are blocked.
 
-macOS подписывается постоянным Developer ID Application, включает Whisper и модель. До замены проверяются комплектность исходников, подпись и запуск Whisper. Сборка не notarized. Windows-пакет проверяется на полноту исходников внутри ASAR; проверку установки и запуска нужно выполнять на Windows. Правило единственного актуального билда закреплено в `AGENTS.md`.
+macOS is signed with a permanent Developer ID Application certificate and includes Whisper and the model. Before replacement, the completeness of the sources, the signature and the Whisper launch are checked. The build is not notarized. The Windows package is checked for completeness of the sources inside ASAR; installation and launch must be checked on Windows. The single-current-build rule is set out in `AGENTS.md`.
 
-Тесты проверяют границы wake word, неоднозначность, временную отсечку, группировку встречи, локальность endpoint, ADF и WAV. Ручной acceptance: разрешения микрофона, звук реального Zoom, пауза из трея, сон/блокировка, Slack 401/429, отправка в тестовый Jira проект, таймаут после отправки. Эти проверки требуют подключений и реальных устройств.
+Tests cover wake word boundaries, ambiguity, the time cutoff, meeting grouping, endpoint locality, ADF and WAV. Manual acceptance: microphone permissions, real Zoom audio, pause from the tray, sleep/lock, Slack 401/429, sending to a test Jira project, timeout after sending. These checks require connections and real devices.
 
-Проверка 0.2: 10 исходных тестов + 13 тестов планировщика; UI smoke покрывает поиск документа, декомпозицию, редактируемые задачи и пакетную отправку на тестовых ответах. Реальные Atlassian permissions, ограничения схемы проекта, назначение задач и видимость на Scrum-доске требуют проверки на вашем тестовом проекте. Фильтр доски может скрыть задачу даже после добавления в спринт.
+0.2 checks: 10 original tests + 13 planner tests; the UI smoke test covers document search, decomposition, editable issues and batch sending against test responses. Real Atlassian permissions, project scheme constraints, issue assignment and visibility on the Scrum board need to be verified on your test project. A board filter may hide an issue even after it has been added to the sprint.
 
-## Следующие этапы
+## Next steps
 
-1. Семантический поиск и выделение отдельных тем/решений внутри встречи; полный Slack thread и фоновые события.
-2. Отдельный wake-word detector, streaming STT, голосовое уточнение и отмена.
-3. OAuth Slack/Jira, схемы обязательных полей Jira и расширенная история действий.
-4. Автозапуск, подписанные установщики и тестирование захвата звука на macOS/Windows.
+1. Semantic search and extraction of individual topics/decisions within a meeting; full Slack threads and background events.
+2. A separate wake-word detector, streaming STT, voice clarification and cancellation.
+3. Slack/Jira OAuth, Jira required-field schemes and an extended action history.
+4. Auto-launch, signed installers and testing of audio capture on macOS/Windows.
 
-## Документация API
+## API documentation
 
-- [Electron Tray](https://www.electronjs.org/docs/latest/api/tray), [захват системного звука](https://www.electronjs.org/docs/latest/api/desktop-capturer)
+- [Electron Tray](https://www.electronjs.org/docs/latest/api/tray), [system audio capture](https://www.electronjs.org/docs/latest/api/desktop-capturer)
 - [whisper.cpp server](https://github.com/ggml-org/whisper.cpp/tree/master/examples/server)
 - [Slack conversations.history](https://api.slack.com/methods/conversations.history)
 - [Jira REST v3 issues](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-issues/)
@@ -172,249 +172,249 @@ macOS подписывается постоянным Developer ID Application, 
 - [Jira sprint API](https://developer.atlassian.com/cloud/jira/software/rest/api-group-sprint/)
 - [Jira project versions](https://developer.atlassian.com/cloud/jira/platform/rest/v3/api-group-project-versions/)
 
-### Передача в приложения Claude и Codex (0.6)
+### Handoff to the Claude and Codex apps (0.6)
 
-Команды: «Петя, заведи клоду задачу, пусть реализует эту фичу»;
-«Петя, заведи таски в Jira, все которые на меня — отдай кодексу».
-В Подключениях проверьте установленное приложение. Вход выполняется в самом Claude/Codex.
-Прямая команда собирает выбранное обсуждение и первые три найденных документа в редактируемый запрос.
-Для составной команды сначала проверьте план Jira, исполнителей, спринт и версию; после создания Петя
-сверяет актуальные задачи и accountId текущего пользователя и передаёт подходящие задачи одним запросом.
-Незавершённые задачи без ключа не передаются. Повтор команды отправки пакета не дублирует передачу.
+Commands: «Петя, заведи клоду задачу, пусть реализует эту фичу» ("Petya, give Claude a task to implement this feature");
+«Петя, заведи таски в Jira, все которые на меня — отдай кодексу» ("Petya, create the Jira issues and hand all the ones assigned to me to Codex").
+In Подключения (Connections), check the installed app. Sign-in is done in Claude/Codex itself.
+A direct command assembles the selected discussion and the first three documents found into an editable prompt.
+For a compound command, first review the Jira plan, assignees, sprint and version; after creation, Petya
+reconciles the current issues and the current user's accountId and hands the matching issues over in a single prompt.
+Unfinished issues without a key are not handed over. Repeating the batch send command does not duplicate the handoff.
 
-Официальные deeplink-интерфейсы открывают новый чат и заполняют поле ввода, но НЕ отправляют запрос:
-нажмите отправку в приложении агента. Если запрос слишком длинный для ссылки, полный текст
-копируется в буфер обмена: вставьте его в новый чат и отправьте. Содержимое не обрезается.
-История передач зашифрована средствами ОС; статус не означает, что агент начал или завершил работу.
-Отмена и продолжение выполнения — в приложении агента. Автоматизация кнопки отправки пока не реализована.
-История Jira и её откат не отменяют уже отправленную агенту работу.
+The official deeplink interfaces open a new chat and fill in the input field but do NOT send the prompt:
+click send in the agent app. If the prompt is too long for a link, the full text
+is copied to the clipboard: paste it into a new chat and send it. The content is not truncated.
+The handoff history is encrypted by OS facilities; the status does not mean the agent has started or finished the work.
+Cancelling and continuing execution happen in the agent app. Automating the send button is not implemented yet.
+The Jira history and its rollback do not cancel work already sent to the agent.
 
-Документация протоколов:
+Protocol documentation:
 - https://support.claude.com/en/articles/14729294-open-claude-desktop-with-a-link
 - https://learn.chatgpt.com/docs/reference/commands#chats
 
-### Фоновые источники и память (0.7)
+### Background sources and memory (0.7)
 
-В Подключениях → «Память и фоновая работа» задайте срок 1–7 дней (по умолчанию 7),
-автообновление Slack и авторасшифровку Zoom. Автоматическое чтение/захват изначально выключены.
-Контекст сохраняется зашифрованным средствами ОС, переживает перезапуск и очищается по сроку.
-Тот же срок применяется к тексту запросов агентов и локальным снимкам Jira: после его истечения
-откат через Петю недоступен, остаются ключи и статусы задач для истории и защиты от повторного создания.
-Данные, уже отправленные в Jira/Claude/Codex, этой настройкой не удаляются.
+In Подключения (Connections) → «Память и фоновая работа» (Memory and background work), set a retention period of 1–7 days (7 by default),
+Slack auto-refresh and Zoom auto-transcription. Automatic reading/capture is off initially.
+Context is saved encrypted by OS facilities, survives restarts and is purged by the retention period.
+The same period applies to the text of agent prompts and local Jira snapshots: once it expires,
+rollback via Petya is unavailable; issue keys and statuses remain for the history and to protect against re-creation.
+Data already sent to Jira/Claude/Codex is not deleted by this setting.
 
-Slack: user token и от 1 до 20 ID выбранных каналов/переписок (C…, D…, G…). Нужны соответствующие
-channels:history, groups:history, im:history, mpim:history. Используется API, поэтому окно Slack
-может быть закрыто. Загрузка постраничная (15 сообщений), с ответами в тредах; интервалы 1/5/15 минут
-задают начало обхода, а фактическая скорость зависит от лимитов Slack. Консервативный интервал
-между запросами одного метода — 61 секунда; учитывается Retry-After. Первичная загрузка большой
-недели может занять много времени. Обход ищет корневые сообщения в пределах срока хранения:
-новые ответы на более старые, ещё не известные Пете треды могут не попасть в контекст.
-Удаление сообщения в Slack не удаляет автоматически уже загруженную локальную копию — она
-исчезнет по сроку хранения или после очистки памяти. Ошибки доступа показываются в статусе.
+Slack: a user token and 1 to 20 IDs of selected channels/conversations (C…, D…, G…). The corresponding
+channels:history, groups:history, im:history, mpim:history are required. The API is used, so the Slack window
+can be closed. Loading is paginated (15 messages), including thread replies; the 1/5/15-minute intervals
+set the start of a pass, while the actual speed depends on Slack's limits. The conservative interval
+between requests to the same method is 61 seconds; Retry-After is respected. The initial load of a busy
+week may take a long time. A pass looks for root messages within the retention period:
+new replies to older threads not yet known to Petya may not get into the context.
+Deleting a message in Slack does not automatically delete the already downloaded local copy — it
+disappears when the retention period expires or after clearing memory. Access errors are shown in the status.
 
-Zoom: определение окна процесса us.zoom.xos (macOS) / Zoom.exe (Windows), без чтения чужих окон.
-Поддерживаются стандартные названия «Zoom Meeting», «Zoom Webinar», «Конференция Zoom» и
-«Вебинар Zoom» либо выбранное точное название. Два последовательных обнаружения запускают
-захват; исчезновение окна на три проверки (~15 секунд) останавливает его. Это определение по
-окну, не интеграция с состоянием встречи Zoom: при нестандартном названии нужна настройка.
-Кнопка «Проверить открытые окна Zoom» позволяет выбрать окно во время тестовой встречи.
-macOS нужны права записи экрана/системного звука; для собственного голоса — доступ к микрофону.
-Сохраняется текст, не аудио/видео. Захватывается весь системный звук, не только Zoom.
-Остановка из трея, блокировка и сон приостанавливают автозапуск до исчезновения окна встречи.
+Zoom: detection of a window of the us.zoom.xos (macOS) / Zoom.exe (Windows) process, without reading other apps' windows.
+The standard titles «Zoom Meeting», «Zoom Webinar», «Конференция Zoom» (Zoom Meeting) and
+«Вебинар Zoom» (Zoom Webinar) are supported, or a selected exact title. Two consecutive detections start
+capture; the window disappearing for three checks (~15 seconds) stops it. This is detection by
+window, not an integration with the Zoom meeting state: a non-standard title requires configuration.
+The «Проверить открытые окна Zoom» (Check open Zoom windows) button lets you select a window during a test meeting.
+macOS requires screen/system audio recording permission; your own voice needs microphone access.
+Text is saved, not audio/video. All system audio is captured, not just Zoom.
+Stopping from the tray, locking and sleep pause auto-start until the meeting window disappears.
 
-Нативный помощник macOS: `native/watch-macos.swift`, сборка `npm run build:native:mac`.
-Windows использует локальный PowerShell/Win32 EnumWindows, без дополнительных библиотек.
-Документация Slack: https://docs.slack.dev/reference/methods/conversations.history/
-и https://docs.slack.dev/reference/methods/conversations.replies/.
-
-
-### Windows EXE с автоматической установкой Ollama (0.8.0)
-
-`npm run dist:win` включает сценарий установки Ollama в EXE Пети.
-На новом Windows-компьютере установщик автоматически загружает официальный
-OllamaSetup.exe версии 0.40.14 (1.68 ГБ), проверяет SHA-256 из GitHub Release
-и цифровую подпись Ollama Inc., затем запускает тихую установку.
-Нужен интернет и свободное место для Ollama. Оба приложения ставятся для
-текущего пользователя. Уже установленный Ollama в стандартной папке,
-PATH или зарегистрированный в HKCU/HKLM сохраняется без обновления.
-При ошибке можно повторить попытку; журнал: `%TEMP%\Petya-Ollama-install.log`.
-Удаление Пети не удаляет Ollama и его модели.
-
-Языковые модели не включены: после установки нажмите «Запустить Ollama»,
-выберите и загрузите модель, затем проверьте подключение в Пете.
-На macOS установка Ollama остаётся отдельной.
-Официальные исходники установщика и лицензия: https://github.com/ollama/ollama
-
-### Проверка при открытии (0.8.1)
-При запуске и повторном открытии окна Петя проверяет сохранённые подключения и обновляет карточки
-и боковую панель. Повторные открытия в течение 30 секунд объединяются; одна ошибка не мешает
-остальным сервисам. Проверка не сохраняет поля формы и не перекрывает результат ручной настройки.
-Claude и Codex объединены в карточку «ИИ» с отдельными проверками установки приложений.
-Автопроверка не запускает запись и локальные серверы. Для Zoom проверяются разрешения ОС;
-реальный захват звуковой дорожки по-прежнему проверяется отдельной кнопкой.
-
-### Поиск окон Zoom (0.8.2)
-Кнопка поиска больше не вызывает CGRequestScreenCaptureAccess в отдельном помощнике.
-При расхождении статуса помощника и основного приложения используются разрешение Пети
-и названия окон из Electron; окна фильтруются по ID, принадлежащим процессу Zoom.
-Если macOS ещё не применяет уже включённое разрешение к запущенному экземпляру, интерфейс
-предлагает полностью завершить Петю и открыть снова, без повторного запроса разрешения.
-
-### Фактическая проверка доступа к окнам (0.8.3)
-Явный поиск окон больше не останавливается только из-за отрицательного предварительного
-статуса CoreGraphics/Electron: он проверяет доступные окна через API основного приложения.
-Отсутствие запущенного Zoom или его окон не считается отказом в разрешении. Фоновая проверка
-сама не инициирует запрос доступа; успешный ручной поиск учитывается до выхода из приложения.
-Кнопка блокируется на время поиска, ручной поиск не подменяется результатом фоновой проверки.
-На этом Mac подписанная сборка проверена без записи аудио: доступ подтверждён, найдены 6 окон Zoom.
-
-### Захват системного звука на macOS (Electron 43)
-Для Electron 39–44 до запуска приложения отключается
-`MacCatapLoopbackAudioForScreenShare`: используется ScreenCaptureKit с разрешением
-«Запись экрана и системного звука». Это обход ситуации, когда CoreAudio Tap
-возвращает завершённую аудиодорожку при уже разрешённом захвате экрана.
-В Electron 45 этот флаг удалён; при обновлении нужен повторный аппаратный тест.
-Источник: https://releases.electronjs.org/pr/53646
-Проверка подключения и прослушивание используют одну проверку живой аудиодорожки;
-при отсутствии дорожки все полученные треки закрываются. После обновления нужно
-полностью завершить старую сборку. Автоматические тесты не подтверждают реальную
-запись системного звука: её следует проверить вручную с разрешением macOS.
+Native macOS helper: `native/watch-macos.swift`, built with `npm run build:native:mac`.
+Windows uses local PowerShell/Win32 EnumWindows, without additional libraries.
+Slack documentation: https://docs.slack.dev/reference/methods/conversations.history/
+and https://docs.slack.dev/reference/methods/conversations.replies/.
 
 
-### Asana — OAuth и задачи
+### Windows EXE with automatic Ollama installation (0.8.0)
 
-В «Подключениях → Asana» нажмите «Подключить Asana», сравните код в браузере, разрешите доступ и выберите рабочее пространство. Пользователям не нужны свои ключи. Приложение Petya доступно для любых рабочих пространств (с учётом ограничений администраторов Asana).
+`npm run dist:win` includes an Ollama installation script in Petya's EXE.
+On a new Windows computer, the installer automatically downloads the official
+OllamaSetup.exe version 0.40.14 (1.68 GB), verifies the SHA-256 from the GitHub Release
+and the Ollama Inc. digital signature, then runs a silent installation.
+An internet connection and free space for Ollama are required. Both apps are installed for
+the current user. An Ollama already installed in the standard folder,
+on PATH or registered in HKCU/HKLM is kept without updating.
+On error, you can retry; log: `%TEMP%\Petya-Ollama-install.log`.
+Uninstalling Petya does not remove Ollama or its models.
 
-Раздел «Asana» загружает проекты и задачи с кнопками следующей страницы. Доступны создание и изменение названия, описания, срока и отметки выполнения. Перед записью показывается предпросмотр; изменения отправляются только отдельным подтверждением. Внешние изменения после предпросмотра блокируют запись. Неопределённый результат отправки не повторяется автоматически — сначала проверьте Asana. Предпросмотр одноразовый, действует 10 минут и не переживает перезапуск. Сравнение перед записью не является атомарной блокировкой на стороне Asana.
+Language models are not included: after installation, click «Запустить Ollama» (Start Ollama),
+choose and download a model, then check the connection in Petya.
+On macOS, Ollama installation remains separate.
+Official installer sources and license: https://github.com/ollama/ollama
 
-Выбранную задачу можно добавить в локальный контекст и использовать в существующих сценариях Пети. Голосовая маршрутизация команд прямо в Asana, назначение исполнителей, пользовательские поля, комментарии, удаление и откат задач пока не реализованы. Работа с задачами Asana выполняется в отдельном разделе.
+### Check on open (0.8.1)
+On startup and when the window is reopened, Petya checks the saved connections and updates the cards
+and the sidebar. Repeated openings within 30 seconds are merged; one error does not affect
+the other services. The check does not save form fields and does not override the result of manual configuration.
+Claude and Codex are combined into the «ИИ» (AI) card with separate checks of the app installations.
+The automatic check does not start recording or local servers. For Zoom, OS permissions are checked;
+real capture of the audio track is still checked with a separate button.
 
-OAuth scopes: workspaces:read projects:read tasks:read tasks:write. Сервер хранит токены зашифрованными; Asana использует долгоживущий refresh token, который может отсутствовать в ответе обновления. При отключении удаляется запись подключения Пети; разрешение также можно отозвать в Asana.
+### Zoom window search (0.8.2)
+The search button no longer calls CGRequestScreenCaptureAccess in a separate helper.
+When the helper's status and the main app's status disagree, Petya's permission
+and window titles from Electron are used; windows are filtered by IDs belonging to the Zoom process.
+If macOS does not yet apply an already enabled permission to the running instance, the UI
+suggests fully quitting Petya and opening it again, without requesting the permission again.
 
-### Выбор проектов Jira по контексту
+### Actual check of window access (0.8.3)
+An explicit window search no longer stops just because of a negative preliminary
+CoreGraphics/Electron status: it checks the available windows through the main app's API.
+Zoom not running or having no windows is not treated as a permission denial. The background check
+does not itself trigger an access request; a successful manual search is remembered until the app quits.
+The button is disabled during the search, and a manual search is not overridden by the result of the background check.
+On this Mac, the signed build was verified without recording audio: access confirmed, 6 Zoom windows found.
 
-В настройках отметьте проекты, доступные Пете. Общий рабочий проект выбирать и переключать не нужно: для каждого черновика Петя определяет проект отдельно. Явное указание ключа или названия в команде имеет приоритет. Затем учитываются название обсуждения, текст, ссылки и упоминания задач Jira. Если совпадений нет, настроенная локальная модель сопоставляет смысл обсуждения с названиями и описаниями отмеченных проектов. Предложение модели принимается только для разрешённого проекта, с высокой заявленной уверенностью и проверяемой цитатой из контекста; это эвристика, а не гарантия правильного выбора.
+### System audio capture on macOS (Electron 43)
+For Electron 39–44, before the app starts,
+`MacCatapLoopbackAudioForScreenShare` is disabled: ScreenCaptureKit is used with the permission
+«Запись экрана и системного звука» (Screen & System Audio Recording). This works around the situation where CoreAudio Tap
+returns an ended audio track even though screen capture is already permitted.
+In Electron 45 this flag has been removed; an update requires a repeat hardware test.
+Source: https://releases.electronjs.org/pr/53646
+The connection check and listening use the same check for a live audio track;
+if there is no track, all received tracks are closed. After an update, the old build must be
+fully quit. Automated tests do not confirm real
+system audio recording: it should be verified manually with the macOS permission.
 
-При неоднозначности Петя показывает вопрос с проектами прямо в текущем сценарии. Если в проекте нет единственного типа или стандартного типа Task / Задача, отдельно уточняется тип. Выбор закрепляется за черновиком; его проект виден перед отправкой. Исполнители, доски, спринты и версии загружаются для этого проекта. История, откат и передача агенту используют проект созданных задач. Исключение проекта из разрешённого списка или смена сайта блокирует старый выбор. Старые настройки одного проекта используются только для миграции списка разрешённых проектов.
 
-Проверки: `node tests/jira-routing.cjs`, `node tests/jira-selection.cjs`, `PETYA_SMOKE_TEST=1 electron .` (включает уточнение проекта и закрепление его за черновиком).
+### Asana — OAuth and tasks
 
-### Включённый переключатель macOS, но доступа нет
-На этом Mac причина подтверждена журналом tccd: `Failed to match existing code
+In «Подключениях → Asana» (Connections → Asana), click «Подключить Asana» (Connect Asana), compare the code in the browser, allow access and choose a workspace. Users do not need their own keys. The Petya app is available for any workspaces (subject to Asana administrators' restrictions).
+
+The «Asana» section loads projects and tasks with next-page buttons. Creating tasks and changing the name, description, due date and completion mark are available. A preview is shown before writing; changes are sent only after a separate confirmation. External changes after the preview block the write. An indeterminate send result is not retried automatically — check Asana first. The preview is single-use, valid for 10 minutes and does not survive a restart. The comparison before writing is not an atomic lock on the Asana side.
+
+A selected task can be added to the local context and used in Petya's existing scenarios. Voice routing of commands directly to Asana, assigning assignees, custom fields, comments, deleting and rolling back tasks are not implemented yet. Asana tasks are handled in a separate section.
+
+OAuth scopes: workspaces:read projects:read tasks:read tasks:write. The server stores tokens encrypted; Asana uses a long-lived refresh token, which may be absent from a refresh response. Disconnecting deletes Petya's connection record; the permission can also be revoked in Asana.
+
+### Choosing Jira projects by context
+
+In the settings, select the projects available to Petya. There is no need to choose and switch a common working project: Petya determines the project separately for each draft. An explicit key or name in the command takes priority. Next, the discussion title, text, links and mentions of Jira issues are considered. If there are no matches, the configured local model matches the meaning of the discussion against the names and descriptions of the selected projects. The model's suggestion is accepted only for an allowed project, with high stated confidence and a verifiable quote from the context; this is a heuristic, not a guarantee of the correct choice.
+
+When there is ambiguity, Petya shows a question with projects right in the current scenario. If the project has neither a single type nor the standard type Task / Задача (Task), the type is clarified separately. The choice is pinned to the draft; its project is visible before sending. Assignees, boards, sprints and versions are loaded for this project. History, rollback and handoff to an agent use the project of the created issues. Removing a project from the allowed list or changing the site blocks the old choice. Old single-project settings are used only to migrate the list of allowed projects.
+
+Checks: `node tests/jira-routing.cjs`, `node tests/jira-selection.cjs`, `PETYA_SMOKE_TEST=1 electron .` (includes project clarification and pinning it to the draft).
+
+### macOS toggle enabled, but no access
+On this Mac the cause was confirmed by the tccd log: `Failed to match existing code
 requirement for subject com.petya.desktop and service kTCCServiceScreenCapture`.
-Разрешение старой сборки было привязано к её cdhash, а текущая сборка подписана
-постоянным Developer ID. Перезапуск не заменяет старое требование подписи.
-Нужно удалить только старую запись Petya в «Запись экрана и системного звука»,
-добавить текущую Petya.app и разрешить доступ заново. Остальные разрешения
-не сбрасываются. Последующие сборки должны сохранять тот же Developer ID.
-Захват теперь ограничивает ожидание 20 секундами, блокирует повторный запрос,
-пока предыдущий остаётся в ОС, и закрывает поток, если тот пришёл после таймаута.
+The old build's permission was tied to its cdhash, while the current build is signed
+with a permanent Developer ID. Restarting does not replace the old signature requirement.
+You need to remove only the old Petya entry in «Запись экрана и системного звука» (Screen & System Audio Recording),
+add the current Petya.app and grant access again. Other permissions
+are not reset. Subsequent builds must keep the same Developer ID.
+Capture now limits waiting to 20 seconds, blocks a repeat request
+while the previous one is still pending in the OS, and closes the stream if it arrives after the timeout.
 
-Проверено 2026-11-03 на macOS 15.6 в установленной подписанной Petya.app:
-после замены устаревшей записи разрешения приложение показывает «2 из 2»,
-а ручная проверка получает живую аудиодорожку и завершает захват со статусом
-«Доступ к системному звуку проверен. Прослушивание выключено».
-Распознавание речи из реальной встречи в этой проверке не выполнялось.
+Verified 2026-11-03 on macOS 15.6 in the installed signed Petya.app:
+after replacing the outdated permission entry, the app shows «2 из 2» (2 of 2),
+and the manual check obtains a live audio track and finishes the capture with the status
+«Доступ к системному звуку проверен. Прослушивание выключено» (System audio access verified. Listening is off).
+Speech recognition from a real meeting was not performed in this check.
 
-### Опциональные модули
+### Optional modules
 
-В «Подключениях → Модули Пети» отметьте Slack, Notion, Asana, Jira, Confluence или Claude / Codex. Выбор сохраняется сразу; ниже появляется карточка для авторизации. Голос, локальная обработка, память и захват звука доступны без внешних интеграций. В новом профиле внешние модули выключены. При обновлении сохранённые подключения Slack, Notion, Asana и Atlassian остаются включёнными.
+In «Подключениях → Модули Пети» (Connections → Petya's modules), select Slack, Notion, Asana, Jira, Confluence or Claude / Codex. The choice is saved immediately; a card for authorization appears below. Voice, local processing, memory and audio capture are available without external integrations. In a new profile, external modules are off. On update, saved Slack, Notion, Asana and Atlassian connections stay enabled.
 
-Снятие галочки скрывает карточку и статус, отключает автопроверку и новые запросы к сервису; для Slack также сбрасывает очередь синхронизации. Уже отправленный запрос может завершиться. Настройки, токены и ранее загруженный контекст сохраняются. Jira и Confluence включаются независимо и используют общую авторизацию Atlassian. Если документационные модули отключены, подготовка задач использует выбранный локальный контекст.
+Unchecking a box hides the card and status, disables the automatic check and new requests to the service; for Slack it also resets the sync queue. A request already sent may complete. Settings, tokens and previously loaded context are kept. Jira and Confluence are enabled independently and use shared Atlassian authorization. If the documentation modules are disabled, issue preparation uses the selected local context.
 
-Проверки: `node tests/modules.cjs`, `npm test`, `PETYA_SMOKE_TEST=1 electron .`.
+Checks: `node tests/modules.cjs`, `npm test`, `PETYA_SMOKE_TEST=1 electron .`.
 
-Confluence проверяется отдельно от Jira: при OAuth Петя сверяет текущие разрешения сайта через Atlassian accessible-resources. Если Confluence не был разрешён при входе, карточка предлагает повторное подключение вместо HTTP 404. Наличие доступа Jira не означает доступ Confluence; проверка учитывает отдельные записи ресурсов одного сайта. Кнопка Confluence запускает повторный вход при отсутствии разрешения.
+Confluence is checked separately from Jira: with OAuth, Petya reconciles the site's current permissions via Atlassian accessible-resources. If Confluence was not allowed at sign-in, the card offers to reconnect instead of showing HTTP 404. Having Jira access does not imply Confluence access; the check takes into account separate resource records for the same site. The Confluence button starts a new sign-in if the permission is missing.
 
-Автоматическая встреча: ручной выбор названия удалён. Петя распознаёт стандартные окна Zoom, видимое плавающее окно звонка и (при уже выданном Accessibility) кнопки выхода/завершения встречи. Скрытое служебное окно не считается звонком. Во время команды очередь расшифровки системного звука дожидается обработки; текущая встреча становится контекстом по умолчанию. Аудиофайлы не сохраняются. Анализ для подготовки задач выполняется по команде, отдельного автоматического итогового отчёта пока нет.
+Automatic meeting: manual title selection has been removed. Petya recognizes standard Zoom windows, a visible floating call window and (if Accessibility has already been granted) the leave/end meeting buttons. A hidden service window is not considered a call. During a command, the system audio transcription queue waits for processing to finish; the current meeting becomes the default context. Audio files are not saved. Analysis for issue preparation runs on command; there is no separate automatic summary report yet.
 
-### Работа из трея
+### Running from the tray
 
-Петя запускается без открытого окна и остаётся в трее (строке меню macOS). Значка в Dock и панели задач Windows нет. Окно открывается по нажатию на значок или через «Открыть Петю». Закрытие и сворачивание скрывают окно; фоновая работа продолжается. Полное завершение — «Выйти» в меню трея.
+Petya starts without an open window and stays in the tray (the macOS menu bar). There is no icon in the Dock or the Windows taskbar. The window opens by clicking the icon or via «Открыть Петю» (Open Petya). Closing and minimizing hide the window; background work continues. To quit completely, use «Выйти» (Quit) in the tray menu.
 
-### Окончание голосовой команды и автоматическая работа
+### End of a voice command and automatic work
 
-При включённом микрофоне скажите «Петя», затем команду. Петя собирает части фразы и начинает обработку примерно после 2–3 секунд тишины, дождавшись всей очереди распознавания. Короткая пауза и нарезка аудио на фрагменты не запускают отдельные задачи. Если фраза заканчивается на «для», «чтобы», «и» и похожие связки, Петя ждёт продолжения. Это определение конца по паузе и простым признакам речи, а не безошибочное понимание завершённости мысли. «Отмена» во время сбора фразы отменяет её.
+With the microphone on, say «Петя» ("Petya"), then the command. Petya collects the parts of the phrase and starts processing after roughly 2–3 seconds of silence, having waited for the whole recognition queue. A short pause and the slicing of audio into fragments do not start separate tasks. If the phrase ends with «для» ("for"), «чтобы» ("so that"), «и» ("and") and similar connectives, Petya waits for the continuation. This is end detection by pause and simple speech cues, not flawless understanding of whether a thought is complete. «Отмена» ("Cancel") while the phrase is being collected cancels it.
 
-Голосовые команды создания сразу создают задачу Jira или явно названной Asana без просмотра черновика. Проект выбирается по контексту. Если контекста нет, достаточно подробная команда служит описанием задачи. Неоднозначный проект, обсуждение, тип задачи и обязательные вопросы уточняются в окне и уведомлении; ответить можно голосом, названием либо номером варианта. После уточнения выполнение продолжается. Для пакета Jira также уточняются недостающие спринт, версия и исполнители. Если обязательных вариантов нет в самом сервисе, нужно исправить настройки проекта.
+Voice creation commands immediately create a Jira issue, or an Asana task when Asana is explicitly named, without reviewing a draft. The project is chosen by context. If there is no context, a sufficiently detailed command serves as the issue description. An ambiguous project, discussion, issue type and required questions are clarified in the window and a notification; you can answer by voice, with a name or with the option number. After clarification, execution continues. For a Jira batch, a missing sprint, version and assignees are also clarified. If the required options do not exist in the service itself, the project settings need to be fixed.
 
-Текстовые команды сохраняют ручную отправку. Уже отправленный запрос не отменяется голосовой командой. Ошибка с неизвестным результатом записи не вызывает автоматический повтор. Автоматическое голосовое создание Asana использует тот же одноразовый серверный предпросмотр, что и ручная отправка. Передача в приложения Claude/Codex сохраняет существующий сценарий.
+Text commands keep manual sending. A request that has already been sent is not cancelled by a voice command. An error with an unknown write result does not trigger an automatic retry. Automatic voice creation in Asana uses the same single-use server-side preview as manual sending. Handoff to the Claude/Codex apps keeps the existing scenario.
 
-Проверки: `node tests/voice-turn.cjs`, `node tests/asana.cjs`, `PETYA_SMOKE_TEST=1 electron .` (автоматическая запись в фиктивную Jira без нажатия кнопки).
+Checks: `node tests/voice-turn.cjs`, `node tests/asana.cjs`, `PETYA_SMOKE_TEST=1 electron .` (automatic write to a mock Jira without clicking a button).
 
-### «Петя, делай»
+### «Петя, делай» ("Petya, do it")
 
-Явно названный исполнитель имеет приоритет: «Петя, делай через Claude» или «Петя, делай через Codex». Для него лимиты не проверяются и автоматической замены нет. Если приложение недоступно, Петя предлагает варианты. Автоматический выбор по лимитам применяется только без указания исполнителя.
+An explicitly named executor takes priority: «Петя, делай через Claude» ("Petya, do it via Claude") or «Петя, делай через Codex» ("Petya, do it via Codex"). For it, limits are not checked and there is no automatic substitution. If the app is unavailable, Petya offers options. Automatic selection by limits applies only when no executor is specified.
 
-Короткая команда создаёт одну задачу Jira из выбранного контекста и готовит передачу агенту со ссылкой на задачу, описанием и обсуждением. Повторного создания Jira при выборе агента или продолжении отложенной передачи нет. Передача сохраняется в зашифрованной истории агентов. При недостаточном контексте Петя показывает уведомление и предлагает рассказать задачу, выбрать обсуждение, добавить текст/ссылку, обновить Slack либо отложить.
+The short command creates one Jira issue from the selected context and prepares a handoff to an agent with a link to the issue, the description and the discussion. Jira is not created again when choosing an agent or continuing a deferred handoff. The handoff is saved in the encrypted agent history. If the context is insufficient, Petya shows a notification and offers to describe the task, choose a discussion, add text/a link, refresh Slack or defer.
 
-Если исполнитель не указан и доступно только одно приложение, задача сразу передаётся ему без проверки лимитов. Если доступны оба, при свежих данных о лимитах приоритет у Claude; если остаток хотя бы одного действующего лимита не больше 20%, выбирается Codex. Данные старше пяти минут или без действующего окна считаются неизвестными. В этом случае показывается выбор Claude / Codex / отложить. Если агент не установлен или модуль выключен, Петя предлагает подключение.
+If no executor is specified and only one app is available, the task is handed to it immediately without checking limits. If both are available, with fresh limit data Claude has priority; if the remaining share of at least one active limit is 20% or less, Codex is chosen. Data older than five minutes or without an active window is considered unknown. In that case a choice of Claude / Codex / defer is shown. If an agent is not installed or the module is off, Petya offers to connect it.
 
-Отправка не требует подтверждения черновика. Codex: официальный локальный App Server (`thread/start` с рабочей папкой, затем `turn/start`), существующая авторизация CLI; дополнительные запросы разрешений не подтверждаются автоматически. Claude на macOS: подписанный модуль Accessibility читает каталог Projects, открывает выбранный проект, проверяет пустой новый чат, заполняет запрос и нажимает Send message. Требуется однократно разрешить Универсальный доступ Пете; кнопка находится в подключении ИИ. На Windows автоотправка Claude пока недоступна — задача сохраняется с сообщением об ограничении.
+Sending does not require draft confirmation. Codex: the official local App Server (`thread/start` with the working folder, then `turn/start`), with the existing CLI authorization; additional permission requests are not approved automatically. Claude on macOS: a signed Accessibility module reads the Projects list, opens the selected project, checks for an empty new chat, fills in the prompt and clicks Send message. Petya must be granted Универсальный доступ (Accessibility) once; the button is in the AI connection. On Windows, automatic sending to Claude is not available yet — the task is saved with a message about the limitation.
 
-Проект исполнителя определяется отдельно от проекта Jira: по явному названию в команде, затем контексту, либо локальной модели с высокой уверенностью и цитатой-основанием. Каталог Codex включает рабочие папки его чатов и сохранённые проекты; каталог Claude читается из приложения. При нескольких совпадениях или отсутствии уверенного совпадения Петя предлагает выбрать проект. Наличие единственного проекта само по себе не считается основанием. Выбор сохраняется для этой задачи.
+The executor's project is determined separately from the Jira project: by an explicit name in the command, then by context, or by the local model with high confidence and a supporting quote. The Codex catalog includes the working folders of its chats and saved projects; the Claude catalog is read from the app. With several matches or no confident match, Petya offers to choose a project. Having only one project is not in itself a basis for choosing it. The choice is saved for this task.
 
-Статус «отправлена» выставляется после ответа Codex о начале turn или после появления отправленного сообщения с уникальной меткой в новом чате Claude. Это не означает завершения работы. Тайм-аут после начала передачи оставляет статус «результат неизвестен» без повторной отправки. Реальные отправки при автотестах не выполняются.
+The «отправлена» ("sent") status is set after Codex responds that the turn has started or after the sent message with a unique marker appears in the new Claude chat. This does not mean the work is finished. A timeout after the handoff has started leaves the status «результат неизвестен» ("result unknown") without re-sending. No real sends are made during automated tests.
 
-Для автоматического выбора по реальным лимитам Claude Code можно подключить адаптер `assets/claude-usage.cjs` как `statusLine.command` (например, `node /полный/путь/к/assets/claude-usage.cjs`). Не заменяйте существующую statusLine без сохранения её поведения. Адаптер получает официальный JSON Claude Code и сохраняет только проценты, время сброса и время наблюдения в `claude-usage.json` внутри каталога данных Пети; ни токены, ни запросы не копируются. На этом компьютере адаптер ещё не подключён, поэтому применяется выбор при неизвестном лимите. Документация: https://code.claude.com/docs/en/statusline .
+For automatic selection based on real Claude Code limits, you can connect the adapter `assets/claude-usage.cjs` as `statusLine.command` (for example, `node /полный/путь/к/assets/claude-usage.cjs`). Do not replace an existing statusLine without preserving its behavior. The adapter receives Claude Code's official JSON and saves only percentages, reset times and the observation time in `claude-usage.json` inside Petya's data directory; neither tokens nor prompts are copied. On this computer the adapter is not connected yet, so the unknown-limit selection applies. Documentation: https://code.claude.com/docs/en/statusline .
 
-Проверки: `node tests/do-command.cjs`, UI smoke — создание одной задачи и выбор Codex без дублирования.
+Checks: `node tests/do-command.cjs`, UI smoke — creating one issue and choosing Codex without duplication.
 
 
-### Диалог, темы и ответы голосом
+### Dialogue, topics and spoken answers
 
-Петя отделяет явные команды создания/передачи от вопросов и обычных реплик. «Посмотри сколько багов по последней версии» читает Jira, не создавая задачи. По умолчанию берётся последняя выпущенная версия по `releaseDate` и поле «Затронутые версии»; в ответе названы проект, версия, критерий подсчёта и ссылка на JQL. Все страницы результатов учитываются. Если проект или релиз неоднозначны, Петя предлагает варианты. «Исправленные в версии» использует `fixVersion`. Продолжения вроде «а сколько критичных» учитывают выбранные проект и версию.
+Petya separates explicit creation/handoff commands from questions and ordinary utterances. «Посмотри сколько багов по последней версии» ("Check how many bugs there are in the latest version") reads Jira without creating issues. By default, the latest released version by `releaseDate` and the «Затронутые версии» (Affects versions) field are used; the answer names the project, the version, the counting criterion and a link to the JQL. All pages of results are counted. If the project or release is ambiguous, Petya offers options. «Исправленные в версии» ("Fixed in version") uses `fixVersion`. Follow-ups like «а сколько критичных» ("and how many critical ones") take the selected project and version into account.
 
-«Посмотри ANR в Google Play» читает Android vitals через [Play Developer Reporting API](https://developers.google.com/play/developer/reporting/reference/rest/v1beta1/vitals.anrrate). Модуль Google Play опционален. Для подключения включите API в Google Cloud, выдайте сервисному аккаунту право просмотра информации о приложениях в Play Console и импортируйте JSON-ключ в карточке Google Play. Ключ хранится через хранилище секретов ОС и не возвращается интерфейсу. Петя использует только reporting scope; публикации приложений нет. При отсутствии ключа или прав он сообщает о подключении, не выдумывает статистику.
+«Посмотри ANR в Google Play» ("Check ANR in Google Play") reads Android vitals via the [Play Developer Reporting API](https://developers.google.com/play/developer/reporting/reference/rest/v1beta1/vitals.anrrate). The Google Play module is optional. To connect it, enable the API in Google Cloud, grant the service account permission to view app information in Play Console, and import the JSON key in the Google Play card. The key is stored via the OS secret store and is not returned to the UI. Petya uses only the reporting scope; there is no app publishing. If the key or permissions are missing, it reports the connection status and does not invent statistics.
 
-Отчёт ANR называет последний доступный день из `freshnessInfo`, часовой пояс America/Los_Angeles, общую и заметную пользователям долю ANR, 7-дневный взвешенный показатель. Пустые строки и отсутствующая метрика не превращаются в ноль. Можно уточнить день («за вчера» или ГГГГ-ММ-ДД) и числовой `versionCode`. Отчёт не подменяет показатель числом событий.
+The ANR report names the last available day from `freshnessInfo`, the America/Los_Angeles time zone, the overall and user-perceived ANR rate, and the 7-day weighted figure. Empty rows and a missing metric are not turned into zero. You can specify the day («за вчера» ("for yesterday") or YYYY-MM-DD) and a numeric `versionCode`. The report does not substitute an event count for the rate.
 
-Темы и история ответов сохраняются отдельно в зашифрованном `dialogue-memory.json`; срок хранения совпадает с настройкой памяти. Возврат: «вернёмся к багам», «продолжим про ANR» или выбор темы в диалоге. Можно начать новую тему; локальная модель также распознаёт смену темы и отвечает на обычные вопросы без инструментов и внешних изменений. Без настроенной локальной модели доступны детерминированные отчёты Jira/ANR и сообщение о подключении модели для свободного диалога. Очистка памяти удаляет и историю тем.
+Topics and the answer history are saved separately in the encrypted `dialogue-memory.json`; the retention period matches the memory setting. Returning: «вернёмся к багам» ("let's go back to the bugs"), «продолжим про ANR» ("let's continue about ANR") or choosing a topic in the dialogue. You can start a new topic; the local model also recognizes topic changes and answers ordinary questions without tools or external changes. Without a configured local model, the deterministic Jira/ANR reports are available, along with a message about connecting a model for free-form dialogue. Clearing memory also deletes the topic history.
 
-Голосовой вопрос получает озвученный ответ системным синтезатором. Во время озвучивания распознавание собственной речи подавляется; после ответа микрофон принимает продолжение без повторного «Петя» в течение короткого окна. Кнопка «Остановить ответ» прерывает озвучивание. Текст ответа и ссылки остаются в диалоге.
+A voice question gets a spoken answer from the system speech synthesizer. While speaking, recognition of Petya's own speech is suppressed; after the answer, the microphone accepts a follow-up without repeating «Петя» ("Petya") within a short window. The «Остановить ответ» (Stop answer) button interrupts speech. The answer text and links remain in the dialogue.
 
-### Обучение фразам в установленном приложении
+### Phrase training in the installed app
 
-В разделе «Обучение» пользователь сохраняет собственные шаблоны фраз и выбирает действие. Варианты вводятся по одному на строку; регистр и конечные знаки препинания не учитываются. Доступны переменные `{delay}`, `{message}`, `{query}`. «Проверить без выполнения» показывает распознавание, не создавая напоминаний и не обращаясь к внешним сервисам. Навык можно изменить, выключить или удалить. Готовые пользовательские фразы не предустанавливаются.
+In the «Обучение» (Training) section, the user saves their own phrase templates and chooses an action. Variants are entered one per line; case and trailing punctuation are ignored. The variables `{delay}`, `{message}`, `{query}` are available. «Проверить без выполнения» (Check without running) shows the recognition result without creating reminders or calling external services. A skill can be edited, disabled or deleted. No ready-made user phrases are preinstalled.
 
-Текущие действия: напоминание, заданный ответ, чтение багов Jira и ANR Google Play. Это обучение шаблонам, а не изменение весов модели. Произвольные инструкции для внешних исполнителей пока не подключены.
+Current actions: a reminder, a predefined answer, reading Jira bugs and Google Play ANR. This is template training, not a change to the model's weights. Arbitrary instructions for external executors are not connected yet.
 
-Навыки и таймеры записываются атомарно в зашифрованный `learned-skills.json` внутри Electron userData, отдельно от APP/EXE. Изменения вступают в силу сразу, без пересборки. Очистка контекста диалога не удаляет навыки и напоминания. Таймеры используют абсолютное время, проверяются раз в секунду и после пробуждения; просроченные срабатывают при запуске. При полном выходе из приложения уведомления до следующего запуска невозможны. ОС должна разрешать уведомления. Статус доставки фиксируется до показа, чтобы после перезапуска уведомления не дублировались; аварийное завершение между записью и показом может привести к пропуску уведомления.
+Skills and timers are written atomically to the encrypted `learned-skills.json` inside Electron userData, separately from the APP/EXE. Changes take effect immediately, without rebuilding. Clearing the dialogue context does not delete skills and reminders. Timers use absolute time and are checked once a second and after wake-up; overdue ones fire on startup. When the app is fully quit, notifications are impossible until the next launch. The OS must allow notifications. The delivery status is recorded before display so that notifications are not duplicated after a restart; a crash between recording and display may cause a notification to be missed.
 
-### Распознавание и понимание реплик
+### Recognizing and understanding utterances
 
-Захват сохраняет 350 мс перед началом речи, использует порог с учётом фонового шума и автоматическое усиление микрофона. Повторное обращение «Петя» в незавершённой команде не удаляет предыдущие слова. Поле последней реплики показывает всю собранную команду. В настройках whisper.cpp можно указать имена и рабочие термины: словарь передаётся в локальный Whisper как `prompt`, аудио не отправляется во внешние сервисы.
+Capture keeps 350 ms before the start of speech, uses a threshold that accounts for background noise, and applies automatic microphone gain. Saying «Петя» ("Petya") again within an unfinished command does not delete the previous words. The last-utterance field shows the whole assembled command. In the whisper.cpp settings you can enter names and work terms: the vocabulary is passed to the local Whisper as `prompt`; audio is not sent to external services.
 
-Для переформулированных запросов чтения Jira/Google Play используется настроенная локальная модель. Маршрутизатор требует JSON Schema и проверяет допустимые поля и уверенность; он не может выбрать действие записи. Формат сверён с документацией Ollama: https://docs.ollama.com/capabilities/structured-outputs . Тесты захвата используют синтетические PCM-данные; они проверяют сохранность фрагментов, но не заменяют оценку точности на голосе пользователя.
+For rephrased Jira/Google Play read requests, the configured local model is used. The router requires a JSON Schema and checks the allowed fields and confidence; it cannot choose a write action. The format has been checked against the Ollama documentation: https://docs.ollama.com/capabilities/structured-outputs . Capture tests use synthetic PCM data; they check that fragments are preserved, but do not replace an accuracy assessment on the user's voice.
 
-### Разъяснение непонятой фразы
+### Clarifying a misunderstood phrase
 
-При неуверенном/невалидном разборе, недоступности локальной модели или её ответе `understood=false` Петя консультируется с Claude/Codex. Пользователь может запустить консультацию кнопкой рядом с командой. Требуются включённый модуль ИИ и установленный CLI с выполненным входом. Для Claude используется Claude Code, одного Claude Desktop недостаточно. Настройка «Спрашивать Claude/Codex, если Петя не понял» отключает внешнюю консультацию.
+When parsing is uncertain/invalid, the local model is unavailable, or it responds `understood=false`, Petya consults Claude/Codex. The user can start a consultation with the button next to the command. This requires the AI module to be enabled and an installed CLI with a completed sign-in. For Claude, Claude Code is used; Claude Desktop alone is not enough. The «Спрашивать Claude/Codex, если Петя не понял» (Ask Claude/Codex if Petya did not understand) setting disables the external consultation.
 
-Передаются спорная фраза (до 4000 символов) и последние четыре сообщения только текущей темы (до 3000 символов), без аудио. Ответ подписан именем помощника, показывается и озвучивается для голосовых запросов. Он не возвращается в планировщик задач. Если Whisper не вернул текста, Петя просит повторить: помощнику не предлагается угадывать отсутствующую речь.
+The disputed phrase (up to 4000 characters) and the last four messages of the current topic only (up to 3000 characters) are sent, without audio. The answer is signed with the assistant's name, shown, and spoken for voice requests. It is not passed back to the task planner. If Whisper returned no text, Petya asks to repeat: the assistant is not asked to guess the missing speech.
 
-Явно выбранный помощник не заменяется другим. При одном доступном CLI выбирается он; при двух используется состояние лимитов Claude, а при неизвестных лимитах предлагаются Claude/Codex/отложить. Консультация запускается из временной пустой папки; Claude получает пустой набор инструментов/MCP, Codex — read-only sandbox с отключёнными shell, browser, apps, JS и multi-agent. Конфигурация пользовательских MCP не загружается. Таймаут — 90 секунд, запрос отменяется при выходе из приложения. Тесты используют подставные CLI; реальная доступность подписки и лимитов проверяется при запросе.
+An explicitly chosen assistant is not replaced by another one. With one available CLI, it is chosen; with two, the state of Claude's limits is used, and with unknown limits Claude/Codex/defer is offered. The consultation runs from a temporary empty folder; Claude gets an empty set of tools/MCP, Codex gets a read-only sandbox with shell, browser, apps, JS and multi-agent disabled. The user's MCP configuration is not loaded. The timeout is 90 seconds; the request is cancelled when the app quits. Tests use mock CLIs; real availability of the subscription and limits is checked at request time.
 
-### Исправления, личный словарь и результат поручений
+### Corrections, personal vocabulary and task results
 
-Фраза «Ты неправильно понял — я имел в виду [правильная фраза целиком]» добавляет уточнение в текущий разговор и предлагает сохранить точное соответствие фраз. Постоянное правило сохраняется по кнопке «Запомнить исправление» или голосовому «запомни». Неполную поправку Петя просит развернуть. Правило не изменяет уже созданную задачу.
+The phrase «Ты неправильно понял — я имел в виду [правильная фраза целиком]» ("You misunderstood — I meant [the full correct phrase]") adds a clarification to the current conversation and offers to save an exact phrase mapping. A permanent rule is saved with the «Запомнить исправление» (Remember correction) button or by saying «запомни» ("remember"). For an incomplete correction, Petya asks you to spell it out. The rule does not change an issue that has already been created.
 
-«Обучение → Личный словарь и исправления» позволяет добавлять, менять, выключать и удалять имена/сокращения или исправления целой фразы. Область действия — все проекты либо ключ Jira. Проект определяется из явного ключа (с учётом общих сокращений) или активной темы. Проектное правило важнее общего. Подстановка учитывает границы слов, ё/е, не выполняется каскадом. Если подстановка превращает обычную фразу в новую команду записи, Петя предлагает произнести команду целиком. Имена остаются текстом для обычного разрешения адресатов сервисом; запись в словаре не подтверждает личность получателя. Применённые правила видны в «Как Петя понял фразу». Данные сохраняются в существующем зашифрованном learned-skills.json без пересборки.
+«Обучение → Личный словарь и исправления» (Training → Personal vocabulary and corrections) lets you add, change, disable and delete names/abbreviations or whole-phrase corrections. The scope is all projects or a Jira key. The project is determined from an explicit key (taking common abbreviations into account) or the active topic. A project rule takes precedence over a general one. Substitution respects word boundaries and ё/е, and is not applied in cascade. If a substitution turns an ordinary phrase into a new write command, Petya suggests saying the whole command. Names remain text for the service's ordinary recipient resolution; a vocabulary entry does not confirm the recipient's identity. Applied rules are visible in «Как Петя понял фразу» (How Petya understood the phrase). The data is saved in the existing encrypted learned-skills.json without rebuilding.
 
-«Чем закончилась та задача?», «Статус задачи KEY-123» и кнопка «Проверить результат» в разделе «Агенты» читают журнал поручений. Неоднозначный запрос предлагает выбор; учитываются текущий проект и последнее проверенное поручение. Для Codex запрашивается точный threadId/turnId через thread/read, а события выполнения сохраняют ответ и статус. Ответ явно различает свежую проверку и последнюю сохранённую запись. Для Claude пока доступен только журнал передачи: Петя не заявляет о завершении без подтверждения и предлагает открыть чат. Чтение статуса не создаёт задачу и не повторяет передачу. Результаты очищаются вместе с контекстом поручения по сроку хранения.
+«Чем закончилась та задача?» ("How did that task end?"), «Статус задачи KEY-123» ("Status of task KEY-123") and the «Проверить результат» (Check result) button in the «Агенты» (Agents) section read the task log. An ambiguous request offers a choice; the current project and the last checked task are taken into account. For Codex, the exact threadId/turnId is requested via thread/read, and execution events save the answer and status. The answer clearly distinguishes a fresh check from the last saved record. For Claude, only the handoff log is available so far: Petya does not claim completion without confirmation and offers to open the chat. Reading the status does not create an issue and does not repeat the handoff. Results are purged together with the task context according to the retention period.
 
-### Уведомления, объяснения, сводка и отмена
+### Notifications, explanations, summary and undo
 
-В подключении ИИ появилась настройка «Сообщать об изменениях поручений». Петя проверяет активные поручения Codex раз в минуту, не более пяти за проход, без параллельных проходов. Уведомления появляются при завершении, ошибке, прерывании, необходимости решения или новой проблеме доступа. Неизменившееся состояние молчит; отметки сохраняются между запусками. Завершённые поручения больше не опрашиваются. События и фоновый опрос используют общий механизм устранения повторов; запоздавший ответ «в работе» не отменяет уже подтверждённое завершение. Для Claude фоновое чтение результата пока не поддерживается.
+The AI connection now has the «Сообщать об изменениях поручений» (Notify about task changes) setting. Petya checks active Codex tasks once a minute, no more than five per pass, with no parallel passes. Notifications appear on completion, error, interruption, a needed decision or a new access problem. An unchanged state stays silent; markers are saved between launches. Completed tasks are no longer polled. Events and background polling share a common deduplication mechanism; a late "in progress" response does not override an already confirmed completion. For Claude, background reading of the result is not supported yet.
 
-«Почему выбрал этот проект?» показывает сохранённую причину выбора Jira и проекта исполнителя, а также источник контекста или цитату, когда она известна. Основание не придумывается задним числом. Хранение объяснения не создаёт фиктивный диалог и не меняет выбранный контекст. Цитаты удаляются по сроку хранения истории.
+«Почему выбрал этот проект?» ("Why did you choose this project?") shows the saved reason for choosing the Jira project and the executor's project, as well as the context source or quote when it is known. The rationale is not invented after the fact. Storing the explanation does not create a fake dialogue and does not change the selected context. Quotes are deleted according to the history retention period.
 
-«Что у нас сегодня?» (также отдельная кнопка) собирает напоминания, незавершённые поручения, записи о созданных сегодня задачах Jira и сохранённые сегодняшние сообщения Slack. Указываются даты и границы данных. Сценарий не заявляет о чтении почты, календаря, текущего статуса Jira или о полноте Slack; таких источников в этой сводке пока нет.
+«Что у нас сегодня?» ("What do we have today?") (also a separate button) collects reminders, unfinished tasks, records of Jira issues created today and saved Slack messages from today. Dates and data boundaries are stated. The scenario does not claim to read email, the calendar or the current Jira status, or to cover Slack completely; this summary does not have such sources yet.
 
-«Отмени последнее действие» и кнопка в «Обучении» откатывают последнее поддерживаемое локальное изменение: создание/отмену напоминания, добавление/изменение/удаление навыка или правила словаря. Журнал последних 30 изменений хранится зашифрованным вместе с обучением. Перед откатом сравнивается состояние; уже доставленное напоминание и изменившиеся данные не откатываются. Если после локального действия происходила передача поручения или изменение Jira, Петя не пропускает её молча ради отмены более старого действия: он объясняет ограничение и предлагает открыть историю. Созданные внешние задачи не удаляются, работа исполнителя не отзывается.
+«Отмени последнее действие» ("Undo the last action") and the button in «Обучении» (Training) roll back the last supported local change: creating/cancelling a reminder, adding/changing/deleting a skill or a vocabulary rule. A log of the last 30 changes is stored encrypted together with the training data. Before a rollback, the state is compared; an already delivered reminder and changed data are not rolled back. If a task handoff or a Jira change happened after the local action, Petya does not silently skip it to undo an older action: it explains the limitation and offers to open the history. Created external issues are not deleted, and the executor's work is not recalled.
 
-### Контекст локального проекта
+### Local project context
 
-Скажите «Работаем над проектом Название», затем в «Настройки → Сервисы → Локальный проект» выберите проект и его папку. Привязка хранится в зашифрованной памяти проектов отдельно для каждой компании. В диалоге этого проекта Петя перечитывает файлы перед обычным ответом и передаёт выборку настроенной модели Ollama. «Обновить контекст» показывает время чтения и список источников; «Отключить» удаляет привязку, не файлы.
+Say «Работаем над проектом Название» ("We're working on project Name"), then in «Настройки → Сервисы → Локальный проект» (Settings → Services → Local project) choose the project and its folder. The binding is stored in the encrypted project memory separately for each company. In this project's dialogue, Petya rereads the files before an ordinary answer and passes a selection to the configured Ollama model. «Обновить контекст» (Refresh context) shows the read time and the list of sources; «Отключить» (Disconnect) removes the binding, not the files.
 
-Читаются корневые README, AGENTS.md, package.json, pyproject.toml, Cargo.toml и текстовые исходники, имена которых совпадают со словами вопроса. Git даёт список отслеживаемых и неигнорируемых новых файлов. Без Git доступны только файлы корня. Выборка ограничена 8 файлами, 14 000 символами текста и 100 путями структуры. Скрытые каталоги, зависимости, сборки, известные имена секретов, бинарные файлы и символические ссылки исключаются. Это не полный индекс и не гарантия обнаружения секретов внутри обычного исходника. Команды из проекта не выполняются. Новая тема без привязки к проекту не получает его папку; автоматической передачи исходников Claude/Codex нет.
+The root README, AGENTS.md, package.json, pyproject.toml, Cargo.toml and text source files whose names match words in the question are read. Git provides the list of tracked and non-ignored new files. Without Git, only the root files are available. The selection is limited to 8 files, 14,000 characters of text and 100 structure paths. Hidden directories, dependencies, builds, known secret file names, binary files and symbolic links are excluded. This is not a full index and does not guarantee detection of secrets inside an ordinary source file. Commands from the project are not executed. A new topic not bound to the project does not get its folder; there is no automatic handoff of source code to Claude/Codex.
