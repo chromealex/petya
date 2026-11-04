@@ -16,7 +16,7 @@ const {JiraInsights}=require('../src/jira-insights.cjs');const {WorkSkills,defau
  for(const q of ['Что делает функция?','Что делает этот скрипт?','Кто отвечает за дизайн?'])assert.equal(classify(q)?.kind,'chat',q);
  for(const q of ['Покажи нагрузку на сервер','Проверь загрузку процессора'])assert.equal(classify(q),null,q);
  assert.equal(classify('Покажи статус проекта AA в GitHub')?.kind,'clarify');
- const main=fs.readFileSync(require.resolve('../src/main.cjs'),'utf8');assert(main.indexOf('workRoute.classify(original,')<main.indexOf('const semantic=require(\'./semantic-tools.cjs\')'));
+ const main=fs.readFileSync(require.resolve('../src/converse.cjs'),'utf8');assert(main.indexOf('workRoute.classify(original,')>0&&main.indexOf('workRoute.classify(original,')<main.indexOf('const semantic=require(\'./semantic-tools.cjs\')'));
  if(process.env.PETYA_ROUTING_REPORT)fs.writeFileSync(process.env.PETYA_ROUTING_REPORT,JSON.stringify({scope:'100 routing and dispatch cases; synthetic services, no real Jira or Slack actions',passed:100,total:100,results},null,2));
  console.log('Work routing 100/100: personal tasks, colleagues, project status, discussion/negation, multiple actions, unsupported time/service scopes and real workflow read dispatch passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});

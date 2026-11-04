@@ -29,6 +29,6 @@ const {Dialogue}=require('../src/dialogue.cjs');
   const pace=pctx.window.createAnswerPace(t=>paints.push(t));pace.update('Привет, мир');assert(!paints.includes('Привет, мир'),'text is paced, not dumped at once');
   now+=150;timers.shift()?.();assert(paints.at(-1).length>0&&paints.at(-1).length<'Привет, мир'.length);
   pace.finish();assert.equal(paints.at(-1),'Привет, мир');const count=paints.length;timers.splice(0).forEach(f=>f());assert.equal(paints.length,count,'no painting after finish');}
- const main=fs.readFileSync(require.resolve('../src/main.cjs'),'utf8');assert(main.indexOf('const quick=dialogue.greeting(original)')<main.indexOf('const duplicateReply=await taskDuplicates.turn'));assert(main.includes('onAnswerChunk:require(\'./answer-stream.cjs\').report'));
+ const main=fs.readFileSync(require.resolve('../src/main.cjs'),'utf8'),pipeline=fs.readFileSync(require.resolve('../src/converse.cjs'),'utf8');assert(pipeline.indexOf('const quick=ctx.dialogue.greeting(original)')>0&&pipeline.indexOf('const quick=ctx.dialogue.greeting(original)')<pipeline.indexOf('const duplicateReply=await ctx.taskDuplicates.turn'));assert(main.includes('onAnswerChunk:require(\'./answer-stream.cjs\').report'));
  console.log('Fast greetings and streaming: zero model calls, pre-completion text, UTF-8, JSON escapes, no thinking leakage, interrupted streams, cleanup and stale-topic preview passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});

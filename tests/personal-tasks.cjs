@@ -9,6 +9,6 @@ const assert=require('node:assert/strict');const {personalTasks}=require('../src
  mode='empty';result=await reader.read('Мои задачи',topic,'','tasks');assert.equal(result.data.total,0);assert(!result.text.includes('Slack'));
  result=await reader.read('Мои задачи',{},'','tasks');assert(result.question);assert.equal(result.options.length,2);
  let routes=0;const d=new Dialogue({routeTopic:async()=>{routes++;return {kind:'chat'};},readers:{tasks:async()=>({text:'Личные задачи'})}});assert.equal((await d.turn('Какие задачи на мне?')).text,'Личные задачи');assert.equal(routes,0);
- const fs=require('node:fs'),main=fs.readFileSync(require.resolve('../src/main.cjs'),'utf8');assert(main.indexOf("workRoute.classify(original,")<main.indexOf("if(!choice){const presence="));
+ const fs=require('node:fs'),main=fs.readFileSync(require.resolve('../src/converse.cjs'),'utf8');assert(main.indexOf("workRoute.classify(original,")>0&&main.indexOf("workRoute.classify(original,")<main.indexOf("if(!choice){const presence="));
  console.log('Personal tasks: direct Jira routing, current account, assignee/status validation, no stale version, refresh, project choice and no Slack fallback passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});
