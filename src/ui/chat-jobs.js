@@ -7,7 +7,7 @@
  window.tryBackgroundChat=async command=>{
   if(starting||voiceReply||currentDraft||workspaceBusy||planning||commandProgress.busy)return false;
   starting=true;window.chatStartPending=true;
-  try{if((await window.petya.attachmentList()).length)return false;const state=await window.petya.dialogueTopics(),result=await window.petya.chatJobStart(state.activeId,state.activeProjectId,command);if(result.foreground)return false;
+  try{if((await window.petya.attachmentList()).length)return false;const state=await window.petya.dialogueTopics(),result=await window.petya.chatJobStart(state.activeId,state.activeProjectId,command);if(result.foreground)return false;commandProgress.reset();$('notice').hidden=true;
    if($('command').value.trim()===command.trim())$('command').value='';window.adoptChatQueue?.(result.topicId);await refreshTopics();const latest=await window.petya.chatJobState(result.topicId);jobs.set(result.topicId,latest?.job||result.job);showDialogueMessages(latest?.messages||result.messages);if(['done','attention'].includes(latest?.job?.state)){const answer=latest.messages.at(-1);if(answer?.role==='assistant')window.revealAnswer?.([...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1),answer.text);}window.chatScrollToLatest?.();paint();await window.restoreChatJob(result.topicId);return true;
   }finally{starting=false;window.chatStartPending=false;}
  };

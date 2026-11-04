@@ -8,14 +8,30 @@ const reads=new Set(['status','diff','log','branches']);
 const actions=new Set([...reads,'stage','unstage','commit','createBranch','switchBranch','fetch','pull','push']);
 function redact(s){return String(s||'').replace(/(https?:\/\/)[^\s/@]+@/g,'$1[скрыто]@').replace(/\x1b\[[0-9;]*m/g,'').slice(0,16000);}
 function parseStatus(raw){const parts=raw.split('\0'),files=[];for(let i=0;i<parts.length;i++){const row=parts[i];if(!row)continue;const status=row.slice(0,2),file={path:row.slice(3),status,staged:![' ','?'].includes(status[0]),unstaged:status[1]!==' ',conflict:/U/.test(status)||['AA','DD'].includes(status)};if(/[RC]/.test(status))file.oldPath=parts[++i];files.push(file);}return files;}
+// Read requests in conversational form; never infer a write from a question.
+function conversationalRead(value){
+ const s=value.toLowerCase().replace(/[.!?]+$/u,'').trim();
+ if(/^(?:не |не надо |как |зачем |почему |что такое |объясни |если |[«"“`])/u.test(s)||/(?:^|\s)не\s|[«"“`]/u.test(s))return null;
+ const body=s.replace(/^(?:(?:а|сейчас|теперь|пожалуйста|ещ[её] раз|ты|можешь|можете|мог бы)[,\s]+)+/u,'');
+ const target='(?:git|гит(?:а|е)?|(?:git[- ]|гит[- ])?репозиторий|репозитория)';
+ const verb='(?:посмотри|посмотреть|проверь|проверить|покажи|показать|глянь|глянуть)';
+ const suffix='(?:\\s+(?:проекта|этого проекта|текущего проекта|сейчас|теперь|пожалуйста|ещ[её] раз))*';
+ if(new RegExp('^(?:'+verb+'\\s+(?:состояние\\s+|статус\\s+)?'+target+'|'+target+'\\s+'+verb+')'+suffix+'$','u').test(body))return {action:'status'};
+ if(/^(?:что (?:сейчас )?(?:в гите|в git|с гитом)|какие изменения (?:в гите|в git|в репозитории)|(?:какой|покажи) (?:сейчас )?статус (?:гита|git|репозитория))(?: проекта)?$/u.test(body))return {action:'status'};
+ if(/^(?:какая (?:сейчас |текущая )?ветка(?: (?:в гите|git|проекта))?|на какой (?:мы )?ветке|покажи (?:текущую )?ветку)$/u.test(body))return {action:'branches'};
+ if(/^(?:(?:покажи|посмотри|какой) (?:последний коммит|последние коммиты)|(?:покажи|посмотри) историю (?:гита|git|репозитория))(?: (?:в гите|в git|проекта))?$/u.test(body))return {action:'log'};
+ return null;
+}
 function commandRoute(value){
  const s=String(value||'').trim().replace(/^петя[\s,:.!—-]*/iu,'');
  if(/^(?:git init|создай (?:git|гит|репозиторий git)(?: для проекта)?)[.!?]*$/iu.test(s))return {action:'init'};
+ const natural=require('./git-intent.cjs').naturalGit(s);if(natural)return natural;
+ const read=conversationalRead(s);if(read)return read;
  const exact=[[/^(?:git status|статус (?:git|гита)|покажи (?:статус|изменения) (?:git|гита))[.!?]*$/iu,'status'],[/^(?:git diff|покажи (?:git )?diff|покажи дифф)[.!?]*$/iu,'diff'],[/^(?:git log|история (?:git|гита|коммитов)|покажи историю коммитов)[.!?]*$/iu,'log'],[/^(?:git branch|ветки (?:git|гита)|покажи ветки)[.!?]*$/iu,'branches'],[/^(?:git fetch|сделай fetch)[.!?]*$/iu,'fetch'],[/^(?:git pull|сделай pull|сделай пулл|подтяни изменения из гита)[.!?]*$/iu,'pull'],[/^(?:git push|сделай push|сделай пуш|запушь(?: изменения)?)[.!?]*$/iu,'push']];
  for(const [re,action]of exact)if(re.test(s))return {action};
  let m;if((m=s.match(/^git (fetch|pull|push) ([A-Za-z0-9_][A-Za-z0-9_.\/-]*)$/iu)))return {action:m[1].toLowerCase(),remote:m[2]};if((m=s.match(/^(?:создай ветку|git switch -c)\s+(\S+)$/iu)))return {action:'createBranch',branch:m[1]};
  if((m=s.match(/^(?:переключись на ветку|git switch)\s+(\S+)$/iu)))return {action:'switchBranch',branch:m[1]};
- if((m=s.match(/^(?:сделай коммит|создай коммит|закоммить|git commit -m)\s*[: ]\s*(.+)$/iu)))return {action:'commit',message:m[1].replace(/^[«"]|[»"]$/g,'')};
+ if((m=s.match(/^git commit -m\s+(.+)$/iu)))return {action:'commit',message:m[1].replace(/^[«"]|[»"]$/g,'')};
  if((m=s.match(/^(?:добавь в коммит|git add)\s+(.+)$/iu)))return {action:'stage',paths:[m[1].replace(/^[«"]|[»"]$/g,'')]};
  if((m=s.match(/^(?:убери из коммита)\s+(.+)$/iu)))return {action:'unstage',paths:[m[1].replace(/^[«"]|[»"]$/g,'')]};
  if(/^(?:git\s|сделай коммит$|закоммить$)/iu.test(s))return {action:'help'};
@@ -49,11 +65,11 @@ class GitWorkspace{
  async select(root,projectId){const found=await this.discover();if(found.projectId!==projectId||!found.repositories.includes(root))throw Error('Контекст проекта изменился. Повторите запрос Git.');this.selected.set(found.scope,root);return this.status();}
  async init(folder,projectId){
   const found=await this.discover();if(found.projectId!==projectId)throw Error('Контекст проекта изменился. Повторите запрос Git.');
-  folder=folder|| (found.missing.length===1?found.missing[0]:'');
+  if(!folder&&!found.missing.length)throw Error('В папках проекта уже есть Git.');folder=folder|| (found.missing.length===1?found.missing[0]:'');
   if(found.partial||found.warnings.length)throw Error('Поиск Git завершён не полностью. Уточните папки проекта перед созданием репозитория.');
-  if(!folder){const error=Error('В какой папке проекта создать Git?');error.gitDiscovery=found;throw error;}if(!found.missing.includes(folder))throw Error('В этой папке проекта уже есть Git либо она больше не относится к проекту.');
+  if(!folder){const error=Error('В какой папке проекта создать Git?');error.gitDiscovery={...found,repositories:[]};throw error;}if(!found.missing.includes(folder))throw Error('В этой папке проекта уже есть Git либо она больше не относится к проекту.');
   if(this.busy.has(folder))throw Error('Дождитесь текущей операции Git.');this.busy.add(folder);
-  try{await this.git(folder,['init','-b','main']);this.selected.set(found.scope,folder);return {state:await this.status(),text:'Создан Git-репозиторий: '+folder+'. Файлы ещё не добавлены в коммит.'};}finally{this.busy.delete(folder);}
+  try{const current=await this.discover();if(current.scope!==found.scope||!current.missing.includes(folder)||current.partial||current.warnings.length)throw Error('Контекст проекта или состояние Git изменились. Повторите запрос.');await this.git(folder,['init','-b','main']);this.selected.set(found.scope,folder);return {state:await this.status(),text:'Создан Git-репозиторий: '+folder+'. Файлы ещё не добавлены в коммит.'};}finally{this.busy.delete(folder);}
  }
  async repository(expected){
   const found=await this.discover();if(expected&&expected.projectId!==found.projectId)throw Error('Выбранный проект изменился. Обновите панель Git.');
@@ -85,9 +101,10 @@ class GitWorkspace{
    if(input.action==='log'){if(!state.head)return {state,text:'В репозитории ещё нет коммитов.'};args=['log','-30','--date=short','--format=%h %ad %s'];}
    if(input.action==='diff')args=['diff','--no-ext-diff','--no-textconv',...(input.staged?['--cached']:[]),'--'];
    if(['stage','unstage'].includes(input.action)){
-    if(!Array.isArray(input.paths)||!input.paths.length||input.paths.length>200)throw Error('Выберите от 1 до 200 файлов.');
+    const requested=input.all===true?state.files.filter(f=>input.action==='stage'?f.unstaged:f.staged).map(f=>f.path):input.paths;
+    if(!Array.isArray(requested)||!requested.length||requested.length>200)throw Error('Выберите от 1 до 200 файлов.');
     const names=new Set(state.files.flatMap(f=>[f.path,f.oldPath].filter(Boolean)));const selected=[];
-    for(const name of input.paths){if(typeof name!=='string'||!names.has(name))throw Error('Файл не найден в текущих изменениях: '+String(name));selected.push(name);const rename=state.files.find(f=>f.path===name&&f.oldPath);if(rename)selected.push(rename.oldPath);}
+    for(const name of requested){if(typeof name!=='string'||!names.has(name))throw Error('Файл не найден в текущих изменениях: '+String(name));selected.push(name);const rename=state.files.find(f=>f.path===name&&f.oldPath);if(rename)selected.push(rename.oldPath);}
     args=input.action==='stage'?['add','--',...new Set(selected)]:state.head?['restore','--staged','--',...new Set(selected)]:['rm','--cached','--',...new Set(selected)];
    }
    if(input.action==='commit'){

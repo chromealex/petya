@@ -1,6 +1,7 @@
 const {randomUUID}=require('node:crypto');
 const {Dialogue,intent,actionRequest}=require('./dialogue.cjs');
 function eligible(text,topic){
+ if(require('./git-workspace.cjs').commandRoute(text))return false;
  if(actionRequest(text)||topic?.pending||topic?.chatJob?.state==='attention')return false;
  if(/(?:запомни|забудь|работаем над|переключись|заполни|подключи|покажи.{0,12}откуда|источник|сводк|что у нас сегодня|напомни|встреч|билд|сборк|slack|слак|почт|браузер|интернет|погода|новост|поиск|найди|telegram|телеграм|confluence|notion|asana)/iu.test(text))return false;
  if(require('./ui/conversation-input.js').ConversationInput.isProjectCatalogQuestion(text))return false;

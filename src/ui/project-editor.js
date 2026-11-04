@@ -5,7 +5,7 @@
  let project=null,folders=[],disabled=[];
  const folderRow=el('div'),folderLabel=el('span');folderRow.className='project-folder-row';
  const choose=button('Добавить папку',async()=>{try{const value=await window.petya.chatProjectPickFolder(project?.id||'');if(value&&!folders.includes(value)){folders.push(value);paintFolder();}}catch(e){error(e);}});folderRow.append(choose,folderLabel);
- function paintFolder(){folderLabel.replaceChildren();for(const folder of folders){const row=el('div'),text=el('span',folder);row.append(text,button('Убрать',()=>{folders=folders.filter(p=>p!==folder);paintFolder();}));folderLabel.append(row);}choose.disabled=folders.length>=20;}
+ function paintFolder(){folderLabel.replaceChildren();for(const folder of folders){const row=el('div'),text=el('span',folder);const remove=button('',()=>{folders=folders.filter(p=>p!==folder);paintFolder();});remove.className='project-folder-remove';remove.title='Убрать папку';remove.setAttribute('aria-label','Убрать папку '+folder);remove.innerHTML='<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg>';row.append(text,remove);folderLabel.append(row);}choose.disabled=folders.length>=20;}
  function error(e){status.textContent=e.message;status.hidden=false;}
  const actions=el('div');actions.className='project-editor-actions';const cancel=button('Отмена',()=>dialog.close()),save=el('button','Создать проект');save.type='submit';save.className='primary';actions.append(cancel,save);
  const label=(text,input)=>{const l=el('label',text);l.append(input);return l;};

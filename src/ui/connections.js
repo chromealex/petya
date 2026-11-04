@@ -165,7 +165,7 @@ function setupConnections() {
       const open = connectionNode('button', 'Запустить Ollama', 'primary'); open.type = 'button';
       const help = connectionNode('div', '', 'ollama-setup');
       help.append(connectionNode('p', 'Нажмите «Запустить Ollama» — Петя сам установит приложение при необходимости, подготовит модель и подключится.'));
-      help.append(connectionNode('p', 'При первом запуске без установленной модели загрузится Qwen3 4B (около 2,5 ГБ). Прогресс появится здесь. Следующие запуски используют сохранённую модель.', 'small'));
+      help.append(connectionNode('p', 'Модель загружается один раз. Название выбранной модели, фактический объём и прогресс загрузки показаны ниже. Следующие запуски используют сохранённую модель.', 'small'));
       const installPanel = connectionNode('div', '', 'ollama-install'); installPanel.hidden = true;
       const installLabel = connectionNode('p', '', 'small'); installLabel.setAttribute('role', 'status');
       const progress = document.createElement('progress'); progress.max = 100; progress.setAttribute('aria-label', 'Загрузка и установка Ollama');
@@ -175,14 +175,15 @@ function setupConnections() {
       let revision = 0;
       const renderInstall = state => {
         guide.disabled = state.busy; open.disabled = state.busy;
-        open.textContent = state.busy ? 'Запускается…' : 'Запустить Ollama';
+        open.textContent = state.busy ? ({preparing:'Подготовка…',downloading:'Загрузка…',pulling:'Загрузка модели…',extracting:'Распаковка…',installing:'Установка…',warming:'Запуск модели…',verifying:'Проверка…'}[state.phase]||'Запуск…') : 'Запустить Ollama';
+        status.dataset.installPhase=state.busy?state.phase:'';
         guide.textContent = state.busy ? 'Устанавливается…' : state.phase === 'error' || state.phase === 'cancelled' ? 'Повторить установку' : 'Установить Ollama';
         installPanel.hidden = state.phase === 'idle';
         progress.hidden = !state.busy;
         cancel.hidden = !['preparing', 'downloading', 'pulling', 'warming', 'starting'].includes(state.phase);
         let detail = state.message;
         if (['downloading', 'pulling'].includes(state.phase) && state.received) {
-          const mb = n => (n / 1048576).toFixed(1) + ' МБ';
+          const mb = n => (n >= 1e9 ? n / 1e9 : n / 1e6).toLocaleString('ru-RU',{maximumFractionDigits:n>=1e9?2:1}) + (n>=1e9?' ГБ':' МБ');
           detail += state.total ? ` ${Math.floor(state.received * 100 / state.total)}% · ${mb(state.received)} из ${mb(state.total)}` : ` ${mb(state.received)}`;
         }
         if (['downloading', 'pulling'].includes(state.phase) && state.total) progress.value = state.received * 100 / state.total;

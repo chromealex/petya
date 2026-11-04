@@ -28,6 +28,8 @@
  const popup=document.createElement('div');popup.className='sidebar-services-popup';
  popup.append(...[...services.children].filter(node=>node!==summary));services.append(popup);
  services.open=false;
+ const placeServices=()=>{if(!services.open)return;const anchor=summary.getBoundingClientRect(),inset=8,top=Math.min(innerHeight-inset*2,(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chrome-height'))||0)+inset);popup.style.maxHeight=Math.max(32,innerHeight-top-inset)+'px';popup.style.left=Math.max(inset,Math.min(anchor.right+8,innerWidth-popup.offsetWidth-inset))+'px';popup.style.top=Math.max(top,Math.min(anchor.top,innerHeight-popup.offsetHeight-inset))+'px';};
+ services.addEventListener('toggle',placeServices);window.addEventListener('resize',placeServices);new ResizeObserver(placeServices).observe(popup);
  document.addEventListener('click',event=>{if(!services.contains(event.target))services.open=false;});
  services.addEventListener('keydown',event=>{if(event.key==='Escape'){services.open=false;summary.focus();}});
  document.querySelector('.aside-bottom').title='Локальное распознавание. Аудио не сохраняется. Контекст хранится до 7 дней.';

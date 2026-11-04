@@ -28,19 +28,19 @@ class ComputerControl{
  status(){return {mode:this.session?.mode||'off',target:this.session?.target||null,persistent:!!this.session,busy:this.busy,restoreError:this.restoreError,accessGranted:this.platform==='darwin'?Boolean(this.access()):this.platform==='win32',supported:['darwin','win32'].includes(this.platform)};}
  async apps(){if(!this.status().supported)throw Error('Поддерживаются macOS и Windows.');const rows=await this.run({type:'apps'});return rows.filter((r,i)=>rows.findIndex(v=>v.pid===r.pid)===i);}
  persist(session){this.save({version:1,platform:this.platform,mode:session?.mode||'off',target:session?.target?durable(session.target):null});this.restoreError='';}
- async start({mode,pid}={}){
+ async start({mode,pid,remember=true}={}){
  this.stop();const generation=this.generation;
  if(!['app','desktop'].includes(mode))throw Error('Выберите режим управления.');if(!this.status().supported)throw Error('Поддерживаются macOS и Windows.');if(!this.access())throw Error('Разрешите Пете универсальный доступ в настройках macOS.');
  let target=null;
  if(mode==='app'){const rows=await this.apps();if(generation!==this.generation)throw Error('Включение отменено.');target=rows.find(r=>r.pid===Number(pid));if(!target)throw Error('Выберите запущенное приложение.');if(!durable(target))throw Error('Не удалось определить постоянный идентификатор приложения.');}
- const next={mode,target:durable(target)};this.persist(next);this.session=next;return this.status();
+ const next={mode,target:durable(target)};if(remember)this.persist(next);this.session=next;return this.status();
  }
  suspend(){this.generation++;this.abort?.abort();this.visual?.clear();}
  stop(){this.suspend();this.session=null;this.persist(null);return this.status();}
  async execute(action){
  if(action?.type==='stop')return this.stop();
- const session=this.session;if(!session)throw Error('Включите управление в разделе «Управление компьютером».');
- if(!this.access())throw Error('Доступ сохранён, но ОС его не разрешает. Проверьте универсальный доступ.');
+ const session=this.session;if(!session)throw Object.assign(Error('Для запроса нужно разрешение на управление компьютером.'),{code:'COMPUTER_PERMISSION_REQUIRED',action:structuredClone(action)});
+ if(!this.access())throw Object.assign(Error('Нужно разрешение macOS на управление компьютером.'),{code:'COMPUTER_PERMISSION_REQUIRED',action:structuredClone(action)});
  if(this.busy)throw Error('Дождитесь завершения предыдущего действия.');
  if(!action||!['text','key','click','hotkey','scroll','drag','focus','search'].includes(action.type))throw Error('Неизвестное действие.');
  if(action.type==='search'&&(action.service!=='telegram'||typeof action.query!=='string'||!action.query.trim()||action.query.length>120||/[\r\n]/.test(action.query)))throw Error('Укажите имя для поиска в Telegram.');

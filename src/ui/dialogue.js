@@ -126,9 +126,9 @@ async function showDialogueReply(result,spoken=false){
  if(result.teamUpdated)document.dispatchEvent(new Event('petya-team-updated'));
  if(result.teamFillReply)voiceReply=async answer=>showDialogueReply(await window.petya.teamFillReply(answer),spoken);
  if(result.messages)showDialogueMessages(result.messages);else {const message={role:'assistant',text:result.text,at:Date.now(),sources:result.sources||[],evidence:result.evidence||[]};chatHistory.push(message);dialogueMessages.append(renderDialogueMessage(message));}
- const newest=[...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1);if(!result.error)window.revealAnswer?.(newest,result.text,{spoken,initial:result.answerStreamId===spokenStreamId||result.answerStreamId?answerShown:0});
+ const newest=[...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1);if(!result.error&&!result.computerApproval)window.revealAnswer?.(newest,result.text,{spoken,initial:result.answerStreamId===spokenStreamId||result.answerStreamId?answerShown:0});
  window.applyChatPlaceholder($('command'),chatHistory,result);
- dialogueTitle.textContent=result.topicTitle||'Диалог с Петей';dialogueChoices.replaceChildren();window.offerReportShare?.(result.reportShareId,dialogueChoices);
+ dialogueTitle.textContent=result.topicTitle||'Диалог с Петей';dialogueChoices.replaceChildren();window.offerReportShare?.(result.reportShareId,dialogueChoices);if(result.computerApproval)window.showComputerApproval(result.computerApproval,newest,spoken);
  if(result.gitDiscovery){const found=result.gitDiscovery;for(const root of found.repositories){const b=document.createElement('button');b.type='button';b.textContent='Работать с '+root;b.onclick=run(async()=>{await window.petya.gitSelect(root,found.projectId);await processCommand(result.gitCommand||'статус гита');});dialogueChoices.append(b);}if(!found.repositories.length&&!found.partial&&!found.warnings.length)for(const folder of found.missing){const b=document.createElement('button');b.type='button';b.textContent='Создать Git в '+folder;b.onclick=run(async()=>{b.disabled=true;try{const created=await window.petya.gitInit(folder,found.projectId);await showDialogueReply({handled:true,text:created.text},spoken);}finally{b.disabled=false;}});dialogueChoices.append(b);}}
 
 
@@ -166,6 +166,7 @@ async function showDialogueReply(result,spoken=false){
  if(result.interpretChoices?.length){const b=document.createElement('button');b.type='button';b.textContent='Отложить';b.onclick=()=>{dialogueChoices.replaceChildren();notice('Повторите фразу, когда будете готовы.');};dialogueChoices.append(b);}
  for(const option of result.options||[]){const b=document.createElement('button');b.type='button';b.textContent=option.label;b.onclick=run(async()=>showDialogueReply(await window.petya.converse(option.label,option.id),spoken));dialogueChoices.append(b);}
  for(const topic of result.topicChoices||[]){const b=document.createElement('button');b.type='button';b.textContent=topic.title;b.onclick=run(()=>selectDialogueTopic(topic.id));dialogueChoices.append(b);}
+ window.renderClarification?.(result,newest,spoken);
  commandProgress.update(result.error?'error':voiceReply||result.question?'waiting':'done', result.error?result.text:voiceReply||result.question?'Жду уточнения':'Готово');
  notice(result.text,!!result.error);$('notice').hidden=true;updateChromeStatus();await refreshTopics();
  if(result.question||result.topicChoices||result.interpretChoices?.length||result.error){await window.petya.requestAttention();await window.petya.notify(result.text);}
@@ -175,7 +176,7 @@ async function showDialogueReply(result,spoken=false){
    if(!result.interpretChoices.includes(target)){await showDialogueReply(result,spoken);return;}
    await showDialogueReply(await window.petya.interpret(result.interpretCommand,target),spoken);
  };}
- const options=(result.skillChoices||result.slackRequestChoices||result.options||result.topicChoices||result.mediaChoices||result.repairChoices||result.buildQuestionChoices||result.reviewChoices||result.trackingChoices||result.interpretChoices?.map(id=>({label:id}))||[]).slice(0,8).map((o,i)=>(i+1)+' — '+(o.label||o.title));
+ const options=(result.clarificationOptions?.map(label=>({label}))||result.skillChoices||result.slackRequestChoices||result.options||result.topicChoices||result.mediaChoices||result.repairChoices||result.buildQuestionChoices||result.reviewChoices||result.trackingChoices||result.interpretChoices?.map(id=>({label:id}))||[]).slice(0,8).map((o,i)=>(i+1)+' — '+(o.label||o.title));
  const voiceText=result.text+(options.length?' Варианты: '+options.join('; '):'');
  if(spoken&&result.answerStreamId===spokenStreamId){if(result.error){if(!streamedVoice.stopped){stopStreamedVoice();await speakReply(voiceText,{continueConversation:true});}}else streamedVoice.finish(voiceText);}
  else if(spoken)await speakReply(voiceText,{continueConversation:true});else if(mic.active&&voiceReply)voiceTurn.arm();

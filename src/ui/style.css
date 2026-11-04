@@ -690,3 +690,16 @@ details[open]>:not(summary){animation:ui-expand var(--motion-enter) var(--motion
 @keyframes ui-expand{from{opacity:0;translate:0 -3px}to{opacity:1;translate:0 0}}
 @keyframes ui-fade{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Anchor the services flyout to the viewport, never above or below the window. */
+body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height:calc(100dvh - 16px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#66716b transparent;z-index:40}
+
+.project-folder-row .project-folder-remove{display:inline-flex;align-items:center;justify-content:center;flex:0 0 28px;width:28px;height:28px;min-height:28px;padding:0;border:0;background:transparent;color:var(--muted)}
+.project-folder-row .project-folder-remove:hover{background:#ffffff0c;color:var(--ink)}
+
+.clarification-list.actions{display:flex;flex-direction:column;align-items:stretch;gap:6px;margin:14px 0 0;max-width:560px;padding:8px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.clarification-list>.clarification-option{display:flex;align-items:center;gap:12px;text-align:left;padding:10px 12px;border:0;background:transparent;line-height:1.45;white-space:normal}
+.clarification-option::before{content:"";width:14px;height:14px;flex:0 0 14px;border:1px solid var(--muted);border-radius:50%}
+.clarification-list>.clarification-option:hover,.clarification-list>.clarification-option:focus-visible{background:#d0f59612}
+.clarification-option:hover::before{border-color:var(--green)}
+.clarification-list>.clarification-custom{align-self:flex-start;border:0;background:transparent;color:var(--muted);padding:8px 12px;font-size:12px}

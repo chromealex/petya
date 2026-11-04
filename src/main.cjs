@@ -207,6 +207,8 @@ function setupHandlers() {
     if(info.remote_host||info.remote_model||/cloud/i.test(settings.model))throw Error('Нужна локальная модель.');
     return request(base.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(require('./computer-intent.cjs').routingRequest(settings.model,command))});
   }});
+  const computerApproval=new (require('./computer-approval.cjs').ComputerApproval)({computer,scope:()=>JSON.stringify([companyId,dialogue.state.activeProjectId,dialogue.state.activeId]),execute:async(command,action)=>{const result=await computer.execute(action);const rows=(result.observation?.results||[]).slice(0,12);return {handled:true,text:result.text+(rows.length?'\nНа экране:\n'+rows.map(r=>r.text).join('\n'):result.observation?.empty?'\nНичего не найдено.':'')};}});
+  handle('computerApprove',(id,allow)=>computerApproval.decide(id,allow));
   handle('computerStatus',()=>computer.status());
   handle('computerApps',()=>computer.apps());
   handle('computerStart',options=>computer.start(options));
@@ -384,8 +386,8 @@ function setupHandlers() {
       const confirmation=require('./action-evidence.cjs').actionConfirmation(command,topic);if(confirmation)return confirmation;
       if(topic.attachments?.length){try{return await analyzeMaterials(topic,command);}catch(e){return {text:e.message,error:true};}}
       let localProject=null;
-      const chatProject=dialogue.state.projects.find(p=>p.id===topic.projectId);const localRepo=chatProject?.id==='general'?null:(chatProject&&Object.hasOwn(chatProject,'folder')?chatProject.folder:projectMemory?.get(topic.projectMemoryId)?.localFolder);
-      if(localRepo){try{localProject=await require('./local-project.cjs').readProject(localRepo,command);}catch(error){localProject={error:'Папка проекта недоступна: '+error.message};}}
+      const chatProject=dialogue.state.projects.find(p=>p.id===topic.projectId);const localRepos=require('./project-folders.cjs').projectFolders(chatProject,projectMemory?.get(chatProject?.memoryId||topic.projectMemoryId));
+      if(localRepos.length){const projects=[];for(const folder of localRepos){try{const data=await require('./local-project.cjs').readProject(folder,command);let budget=Math.floor(14000/localRepos.length);data.files=data.files.map(file=>{const text=file.text.slice(0,Math.max(0,budget));budget-=text.length;return {...file,text,truncated:file.truncated||text.length<file.text.length};}).filter(file=>file.text);projects.push(data);}catch(error){projects.push({root:folder,error:'Папка проекта недоступна: '+error.message});}}localProject=projects.length===1?projects[0]:{projects};}
       const telegramQuestion=/(?:телеграм|telegram|(?:^|\s)тг(?:\s|$))/iu.test(command)||topic.telegram;
       const telegramContext=telegramQuestion?memory.prune().filter(c=>c.source==='Telegram').slice(-5).map(c=>({title:c.title,text:c.text.slice(-3000),at:c.at,url:c.url})):null;
       if(telegramQuestion){topic.telegram=true;if(!modules.enabled(settings,'telegram'))return 'Включите модуль Telegram в подключениях.';if(!telegramContext.length)return 'Сначала подключите Telegram, выберите чаты и нажмите «Обновить контекст».';if(!settings.model)return 'В памяти есть сообщения Telegram. Настройте локальную модель Ollama для ответа по их содержимому. Их можно посмотреть во вкладке «Контекст».';}
@@ -672,6 +674,7 @@ function setupHandlers() {
     if(chatJobs.busy(dialogue.active()?.id))throw Error('В этом чате ещё выполняется запрос.');const original=text(command,4000);let value=original,applied=[];
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
     if(gitRoute){
+      if(gitRoute.action==='clarify')return {handled:true,text:gitRoute.question,question:true};
       if(gitRoute.action==='help')return {handled:true,text:'Git: «статус гита», «покажи diff», «история коммитов», «добавь в коммит путь/файл», «сделай коммит: описание», «создай ветку feature/name», «переключись на ветку main», «git fetch», «git pull», «git push». Git автоматически определяется по папкам текущего проекта. Панель открывается кнопкой Git в чате.'};
       dialogue.rememberAction(original,'Выполняю Git…');const topic=dialogue.active(),message=topic.messages.at(-1);
       try{requestProgress.report('Выполняю Git: '+gitRoute.action);const result=gitRoute.action==='init'?await gitWorkspace.init(null,(await gitWorkspace.discover()).projectId):await gitWorkspace.execute(gitRoute);message.text=result.text;}catch(error){message.text=error.message;message.error=true;if(error.gitDiscovery)message.gitDiscovery=error.gitDiscovery;}
@@ -717,7 +720,7 @@ function setupHandlers() {
     if(!choice){const presence=require('./ui/conversation-input.js').ConversationInput.presenceReply(original);if(presence)return presence;}
     if(!choice){const catalog=require('./project-catalog.cjs').projectCatalogReply(original,{projects:projectMemory.state.projects,activeId:projectMemory.active()?.id,settings});if(catalog)return catalog;}
     if(!choice){const remembered=await projectMemory.turn(original);if(remembered)return remembered;const sent=await slackRequest.turn(original);if(sent)return sent;}
-    if(!choice){const controlled=await computer.command(original)||await computerIntent.turn(original);if(controlled)return controlled;}
+    if(!choice){try{const controlled=await computer.command(original)||await computerIntent.turn(original);if(controlled)return controlled;}catch(error){if(error.code==='COMPUTER_PERMISSION_REQUIRED')return computerApproval.request(original,error.action);throw error;}}
     if(!choice){const filled=await teamFill.turn(original);if(filled)return filled;}
     if(!choice&&!learning.preview(original).matched&&!attachments.list().length&&(!dialogue.active()?.attachments?.length||require('./service-access.cjs').detect(original,null).length)){const offer=await serviceAccess.offer(original.replace(/^петя[\s,:.!?-]*/iu,''),dialogue.active());if(offer)return offer;}
     if(!choice&&/(?:посмотри|разбери|проверь|объясни).*(?:скрин|картин|изображени|видео|ролик)/iu.test(original)&&/(?:телеграм|telegram|тг|slack|слак)/iu.test(original)){

@@ -1,0 +1,19 @@
+process.env.GIT_CONFIG_GLOBAL=require('node:os').devNull;process.env.GIT_CONFIG_NOSYSTEM='1';
+const assert=require('node:assert/strict'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
+const {execFile}=require('node:child_process'),{promisify}=require('node:util');const exec=promisify(execFile);
+const {GitWorkspace,commandRoute}=require('../src/git-workspace.cjs');const {projectFolders}=require('../src/project-folders.cjs');const {validate}=require('../src/project-settings.cjs');
+(async()=>{const base=await fs.mkdtemp(path.join(os.tmpdir(),'petya-discovery-'));try{
+ const root=await fs.realpath(base),one=path.join(root,'one'),two=path.join(root,'two');await fs.mkdir(one);await fs.mkdir(two);await fs.writeFile(path.join(one,'existing.txt'),'keep');
+ let context={id:'a',name:'App',folders:[one,two]};const git=new GitWorkspace({context:()=>context});let found=await git.discover();assert.equal(found.repositories.length,0);assert.deepEqual(found.missing,[one,two]);await assert.rejects(git.status(),error=>!!error.gitDiscovery&&/не найден/.test(error.message));await assert.rejects(fs.stat(path.join(one,'.git')));
+ await assert.rejects(git.init(one,'wrong'),/изменился/);await assert.rejects(git.init(root,'a'),/не относится/);await assert.rejects(git.init(null,'a'),e=>!!e.gitDiscovery);
+ await git.init(one,'a');assert.equal((await git.status()).root,one);assert.equal(await fs.readFile(path.join(one,'existing.txt'),'utf8'),'keep');assert(!(await git.status()).files.some(f=>f.staged));
+ await git.init(two,'a');found=await git.discover();assert.equal(found.repositories.length,2);const fresh=new GitWorkspace({context:()=>context});await assert.rejects(fresh.status(),e=>e.gitDiscovery.repositories.length===2);await fresh.select(one,'a');assert.equal((await fresh.status()).root,one);
+ context={...context,folders:[two]};await assert.rejects(fresh.select(one,'a'),/изменился/);assert.equal((await fresh.status()).root,two);
+ context={...context,folders:[root]};found=await fresh.discover();assert.deepEqual(found.repositories,[one,two]);await assert.rejects(fresh.init(root,'a'),/уже есть/);
+ const sub=path.join(one,'src');await fs.mkdir(sub);context={...context,folders:[sub,one]};assert.equal((await fresh.discover()).repositories.length,1);assert.equal((await fresh.status()).root,one);
+ // A worktree uses a .git file rather than directory.
+ await exec('git',['-C',one,'-c','user.name=Test','-c','user.email=test@example.invalid','-c','commit.gpgsign=false','commit','--allow-empty','-m','Initial']);const worktree=path.join(root,'worktree');await exec('git',['-C',one,'worktree','add','-b','other',worktree]);context={...context,folders:[worktree]};assert.equal((await fresh.status()).root,worktree);
+ const empty=path.join(root,'empty');await fs.mkdir(empty);await fs.symlink(one,path.join(empty,'linked'));context={...context,folders:[empty]};assert.equal((await fresh.discover()).repositories.length,0);await fs.mkdir(path.join(empty,'a/b/c/d/e'),{recursive:true});assert.equal((await fresh.discover()).partial,true);await assert.rejects(fresh.init(empty,'a'),/не полностью/);
+ assert.deepEqual(projectFolders({id:'x',folders:[one,two,one],folder:'old'}),[one,two]);assert.deepEqual(projectFolders({id:'x',folders:[]},{localFolder:one}),[]);assert.deepEqual(projectFolders({id:'x'},{localFolder:one}),[one]);assert.deepEqual(projectFolders({id:'general',folders:[one]}),[]);assert.deepEqual(validate({folders:[one,two],disabledServices:[]}).folders,[one,two]);assert.equal(commandRoute('создай git для проекта').action,'init');assert.equal(commandRoute('не создавай git'),null);
+ console.log('Git discovery: project folders, nested/parent repos, multiple selection, no auto-init, explicit init, stale scope, worktrees and symlinks passed.');
+}finally{await fs.rm(base,{recursive:true,force:true});}})().catch(e=>{console.error(e);process.exitCode=1;});

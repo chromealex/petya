@@ -1,12 +1,17 @@
 // These badges mirror the latest connection check, not continuous availability.
-function connectionBadge(message, classes, service) {
+function connectionBadge(message, classes, service, phase) {
+  const stages={preparing:'Подготовка…',downloading:'Загрузка…',pulling:'Загрузка модели…',extracting:'Распаковка…',installing:'Установка…',starting:'Запуск…',warming:'Запуск модели…',verifying:'Проверка…'};
+  if(stages[phase])return {state:'checking',label:stages[phase]};
   if(service==='images'){
     if(classes.includes('connected'))return {state:'connected',label:'Установлено'};
     if(classes.includes('disconnected'))return {state:'disconnected',label:'Не установлено'};
     if(/Скачиваю|Подготавливаю|Останавливаю/.test(message))return {state:'checking',label:'Установка…'};
   }
   if (service === 'ollama' && classes.includes('setup')) return { state: 'setup', label: 'Запустить' };
-  if (/Проверяю|Загружаю|Запускаю/.test(message)) return { state: 'checking', label: 'Проверка…' };
+  if (/^(?:Загружаю|Скачиваю|Загрузка)/.test(message)) return {state:'checking',label:'Загрузка…'};
+  if (/^(?:Устанавливаю|Установка)/.test(message)) return {state:'checking',label:'Установка…'};
+  if (/^(?:Запускаю|Запуск)/.test(message)) return {state:'checking',label:'Запуск…'};
+  if (/^Проверяю|^Проверка/.test(message)) return {state:'checking',label:'Проверка…'};
   if (classes.includes('disconnected')) return { state: 'disconnected', label: 'Не подключено' };
   if (classes.includes('setup')) return { state: 'setup', label: 'Настроить' };
   if (classes.includes('error')) return { state: 'error', label: 'Ошибка' };
@@ -35,7 +40,7 @@ function setupConnectionSidebar() {
     button.append(dot, name, label); panel.append(button);
     const update = () => {
       button.hidden = !moduleEnabled(id);
-      const badge = connectionBadge(status.textContent, [...status.classList], id);
+      const badge = connectionBadge(status.textContent, [...status.classList], id, status.dataset.installPhase);
       button.dataset.state = badge.state; label.textContent = badge.label;
       button.title = `${title}: ${status.textContent}`;if(['connected','error'].includes(badge.state)){button.dataset.checkedAt=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});button.title+=' · Результат проверки '+button.dataset.checkedAt;}
       button.setAttribute('aria-label', `${title}: ${badge.label}. Открыть настройки подключения`);
@@ -47,7 +52,7 @@ function setupConnectionSidebar() {
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
       const heading = card.querySelector('h2'); heading.tabIndex = -1; heading.focus({ preventScroll: true });
     };
-    new MutationObserver(update).observe(status, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    new MutationObserver(update).observe(status, { childList: true, characterData: true, subtree: true, attributes: true, attributeFilter: ['class','data-install-phase'] });
     document.addEventListener('petya-modules-changed', update);
     update();
   }

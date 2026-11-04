@@ -5,6 +5,7 @@ class CommandProgress {
     this.failed = null; this.startedAt = 0; this.label = 'Готов к команде';
   }
   update(state, label) { this.state = state; this.label = label; this.change(this); }
+  reset() { if(this.busy)return false;this.failed=null;this.request=null;this.retryable=false;this.startedAt=0;this.update('idle','');return true; }
   async start(command, work) {
     if (this.busy) return false;
     this.failed = null;

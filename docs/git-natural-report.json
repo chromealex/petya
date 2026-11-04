@@ -1,0 +1,267 @@
+[
+  {
+    "phrase": "Можешь проверить гит?",
+    "action": "status",
+    "passed": true
+  },
+  {
+    "phrase": "А сейчас можешь гит посмотреть",
+    "action": "status",
+    "passed": true
+  },
+  {
+    "phrase": "Пожалуйста, проверь репозиторий",
+    "action": "status",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь показать изменения в файлах?",
+    "action": "diff",
+    "passed": true
+  },
+  {
+    "phrase": "Давай посмотрим изменения",
+    "action": "diff",
+    "passed": true
+  },
+  {
+    "phrase": "Покажи разницу в коде",
+    "action": "diff",
+    "passed": true
+  },
+  {
+    "phrase": "Что войдёт в коммит?",
+    "action": "diff",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь показать изменения для коммита?",
+    "action": "diff",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь показать последние коммиты?",
+    "action": "log",
+    "passed": true
+  },
+  {
+    "phrase": "Пожалуйста, покажи историю коммитов",
+    "action": "log",
+    "passed": true
+  },
+  {
+    "phrase": "Посмотри историю гита",
+    "action": "log",
+    "passed": true
+  },
+  {
+    "phrase": "Какие есть ветки в проекте?",
+    "action": "branches",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь перечислить все ветки?",
+    "action": "branches",
+    "passed": true
+  },
+  {
+    "phrase": "На какой ветке мы сейчас?",
+    "action": "branches",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь создать новую ветку feature/test?",
+    "action": "createBranch",
+    "passed": true
+  },
+  {
+    "phrase": "Давай заведём ветку feature/test",
+    "action": "createBranch",
+    "passed": true
+  },
+  {
+    "phrase": "Создай ветку с именем feature/test",
+    "action": "createBranch",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь переключиться на ветку main?",
+    "action": "switchBranch",
+    "passed": true
+  },
+  {
+    "phrase": "Перейди на ветку main",
+    "action": "switchBranch",
+    "passed": true
+  },
+  {
+    "phrase": "Теперь переключись на ветку main",
+    "action": "switchBranch",
+    "passed": true
+  },
+  {
+    "phrase": "Добавь все изменения в коммит",
+    "action": "stage",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь добавить файл src/a.js в коммит?",
+    "action": "stage",
+    "passed": true
+  },
+  {
+    "phrase": "Подготовь src/a.js для коммита",
+    "action": "stage",
+    "passed": true
+  },
+  {
+    "phrase": "Добавь в коммит src/a.js",
+    "action": "stage",
+    "passed": true
+  },
+  {
+    "phrase": "Убери все файлы из коммита",
+    "action": "unstage",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь убрать файл src/a.js из коммита?",
+    "action": "unstage",
+    "passed": true
+  },
+  {
+    "phrase": "Исключи src/a.js из коммита",
+    "action": "unstage",
+    "passed": true
+  },
+  {
+    "phrase": "Теперь убери из коммита src/a.js",
+    "action": "unstage",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь сделать коммит с сообщением «Исправлен вход»?",
+    "action": "commit",
+    "passed": true
+  },
+  {
+    "phrase": "Создай коммит: Исправлен вход",
+    "action": "commit",
+    "passed": true
+  },
+  {
+    "phrase": "Закоммить изменения с описанием Исправлен вход",
+    "action": "commit",
+    "passed": true
+  },
+  {
+    "phrase": "Сделай fetch из origin",
+    "action": "fetch",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь сделать fetch?",
+    "action": "fetch",
+    "passed": true
+  },
+  {
+    "phrase": "Обнови данные удалённого репозитория",
+    "action": "fetch",
+    "passed": true
+  },
+  {
+    "phrase": "Получи изменения без слияния",
+    "action": "fetch",
+    "passed": true
+  },
+  {
+    "phrase": "Подтяни изменения из origin",
+    "action": "pull",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь подтянуть последние изменения?",
+    "action": "pull",
+    "passed": true
+  },
+  {
+    "phrase": "Получи свежие изменения с сервера",
+    "action": "pull",
+    "passed": true
+  },
+  {
+    "phrase": "Сделай пулл",
+    "action": "pull",
+    "passed": true
+  },
+  {
+    "phrase": "Отправь коммиты в origin",
+    "action": "push",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь отправить коммиты на сервер?",
+    "action": "push",
+    "passed": true
+  },
+  {
+    "phrase": "Давай запушим изменения",
+    "action": "push",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь сделать push?",
+    "action": "push",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь создать git для этого проекта?",
+    "action": "init",
+    "passed": true
+  },
+  {
+    "phrase": "Инициализируй репозиторий в папке проекта",
+    "action": "init",
+    "passed": true
+  },
+  {
+    "phrase": "Создай git для проекта",
+    "action": "init",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь создать новую ветку?",
+    "action": "clarify",
+    "passed": true
+  },
+  {
+    "phrase": "Сделай коммит",
+    "action": "clarify",
+    "passed": true
+  },
+  {
+    "phrase": "Добавь изменения в коммит",
+    "action": "clarify",
+    "passed": true
+  },
+  {
+    "phrase": "Не делай push",
+    "action": "no-operation",
+    "passed": true
+  },
+  {
+    "phrase": "Можешь не отправлять коммиты?",
+    "action": "no-operation",
+    "passed": true
+  },
+  {
+    "phrase": "Как сделать коммит?",
+    "action": "no-operation",
+    "passed": true
+  },
+  {
+    "phrase": "«Отправь коммиты на сервер»",
+    "action": "no-operation",
+    "passed": true
+  }
+]
