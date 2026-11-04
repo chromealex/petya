@@ -507,7 +507,7 @@ function setupHandlers() {
     topic.webQuery=result.query;topic.at=Date.now();topic.messages.push({role:'user',text:original,at:Date.now()},{role:'assistant',text:result.text,sources:result.sources,at:Date.now()});dialogue.state.activeId=topic.id;dialogue.persist();return {handled:true,...result,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
   };
   handle('webSearchContinue',()=>{if(!pendingWeb)throw Error('Нет поиска для продолжения.');return runWeb(pendingWeb.original,pendingWeb.search,true);});
-  const clientDefaults=require('./integration-clients.json');
+  const clientDefaults=require('./integration-clients.cjs').load();
   const mailOptions=key=>({load:()=>JSON.parse(settings[key]||'{}'),save:value=>saveSettings({[key]:JSON.stringify(value)},true),enabled:()=>modules.enabled(settings,'gmail'),open:url=>require('electron').shell.openExternal(url)});
   const gmail=new (require('./mail-accounts.cjs').MailAccounts)({google:mailOptions('gmailCredential'),microsoft:mailOptions('microsoftCredential')});
   for(const [provider,manager] of [['google',gmail.google],['microsoft',gmail.microsoft]])if(clientDefaults[provider]&&!manager.status().configured)manager.importClient(clientDefaults[provider]);
