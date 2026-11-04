@@ -70,7 +70,8 @@ function scopedState(dialogue,target){
 }
 // A background chat job shows the user's question at once as a pending message; the pipeline
 // takes it over instead of recording the question a second time.
-function takePlaceholder(topic,text){const last=topic?.messages?.at(-1);if(last?.role==='user'&&last.pending&&last.text===text)topic.messages.pop();}
+// One job runs per chat, so a pending question is this request's even if a correction changed its text.
+function takePlaceholder(topic,text){const last=topic?.messages?.at(-1);if(last?.role==='user'&&last.pending)topic.messages.pop();}
 class Dialogue {
  get state(){return this._state;}
  set state(value){this._state=scopedState(this,value||{topics:[],activeId:''});}

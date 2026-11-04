@@ -1,9 +1,14 @@
 // Extracted from setupHandlers() in main.cjs. `ctx` gives live access to the shared state of main.cjs:
 // agents, allowedMedia, analyzeMaterials, attachments, buildQuestion, buildRepair, chatJobs, checkProgress, companies, companyId, computer, computerApproval, computerIntent, computerLock, core, dailyBrief, dialogue, dictionary, dictionaryScope, draftAnswers, executeSkill, gitWorkspace, importMedia, inspectAttachments, instructionSkills, learning, localImages, mailSkill, modules, pendingWeb, projectMemory, randomUUID, request, requestProgress, runReview, runWeb, saveSettings, searchCommand, serviceAccess, settings, slackLogs, slackRequest, taskDuplicates, taskProgress, teamFill, telegramSource, text, undoLast, voicePreparation, voicePreparationKey, workSkills
-module.exports=ctx=>(async(command,choice,background=false)=>{
+module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     // Label replies produced by shortcut handlers before the model, so misrouting is visible in the chat.
     const via=(source,reply)=>{if(reply&&typeof reply==='object'&&!reply.by){reply.by=source;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&!last.by&&last.text===reply.text){last.by=source;ctx.dialogue.persist();}}return reply;};
-    if(!background&&ctx.chatJobs.busy(ctx.dialogue.active()?.id))throw Error('В этом чате ещё выполняется запрос.');const original=ctx.text(command,4000);let value=original,applied=[];
+    if(!background&&ctx.chatJobs.busy(ctx.dialogue.active()?.id))throw Error('В этом чате ещё выполняется запрос.');const spoken=ctx.text(command,4000);
+    // A correction inside the utterance («Альфа, нет, Бета») routes the corrected request; a cancelled
+    // action («создай задачу, нет, не создавай») is not run at all.
+    const correction=choice?{text:spoken,changed:false}:require('./self-correction.cjs').resolve(spoken);
+    if(correction.cancelled){ctx.dialogue.rememberAction(spoken,correction.reply);const topic=ctx.dialogue.active(),last=topic?.messages?.at(-1);if(last?.role==='assistant')last.by='поправка во фразе';ctx.dialogue.persist();return {handled:true,text:correction.reply,by:'поправка во фразе',topicId:topic?.id,topicTitle:topic?.title,messages:topic?.messages};}
+    const original=correction.text;let value=original,applied=[];
     if(choice)ctx.draftAnswers.clear();else ctx.draftAnswers.commit(original,ctx.voicePreparationKey());
     const namePreference=!choice?require('./name-preference.cjs').preference(original,ctx.settings):null;
     if(namePreference){ctx.saveSettings(namePreference.patch);ctx.dialogue.rememberAction(original,namePreference.text);return {handled:true,text:namePreference.text,topicId:ctx.dialogue.active()?.id,messages:ctx.dialogue.active()?.messages};}
@@ -157,3 +162,9 @@ module.exports=ctx=>(async(command,choice,background=false)=>{
     if(applied.length&&reply.handled){const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user');if(m){m.originalText=original;ctx.dialogue.persist();}}
     return {...reply,resolvedCommand:value,appliedRules:applied};
   });
+  // When a correction changed the request, the recorded question keeps what was actually said.
+  return async(command,choice,background=false)=>{const result=await pipeline(command,choice,background);
+    const spoken=typeof command==='string'?command.trim():'';const topic=ctx.dialogue.active();
+    if(!choice&&spoken&&result?.handled&&topic){const corrected=require('./self-correction.cjs').resolve(spoken);if(corrected.changed&&!corrected.cancelled){const m=[...topic.messages].reverse().find(m=>m.role==='user'&&m.text===corrected.text);if(m&&!m.originalText){m.originalText=spoken;ctx.dialogue.persist();}}}
+    return result;};
+};

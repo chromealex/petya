@@ -58,8 +58,8 @@ ChatJobs.prototype.executeFull=async function(job){
  const {topic,command,placeholder}=job,d=this.dialogue;
  // The question stays visible while the job runs. The pipeline usually takes the placeholder over;
  // otherwise it is kept as the recorded question (or dropped when the pipeline recorded its own).
- const settle=()=>{const at=topic.messages.indexOf(placeholder);if(at<0)return -1;if(topic.messages.slice(at+1).some(m=>m.role==='user'&&m.text===command)){topic.messages.splice(at,1);return -1;}delete placeholder.pending;return at;};
- const record=target=>{if(!target.messages.some(m=>m.role==='user'&&m.text===command&&m.at>=placeholder.at))target.messages.push({role:'user',text:command,at:placeholder.at});};
+ const settle=()=>{const at=topic.messages.indexOf(placeholder);if(at<0)return -1;if(topic.messages.slice(at+1).some(m=>m.role==='user')){topic.messages.splice(at,1);return -1;}delete placeholder.pending;return at;};
+ const record=target=>{if(!target.messages.some(m=>m.role==='user'&&m.at>=placeholder.at))target.messages.push({role:'user',text:command,at:placeholder.at});};
  try{
   const result=await this.run(()=>d.within(topic.id,topic.projectId,()=>this.converse(command)),label=>{if(d.state.topics.includes(topic))this.update(topic,'running',label);},topic.projectId);
   if(job.scope!==this.scope(topic.projectId))throw Error('Настройки или компания изменились. Повторите запрос с новым контекстом.');
