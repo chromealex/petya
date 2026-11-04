@@ -14,11 +14,16 @@ def detect_languages(text, preferred='ru'):
     def add(code):
         if code not in found: found.append(code)
     if re.search('[А-Яа-яЁё]', text): add('ru')
+    if re.search('[\u3040-\u30ff]', text): add('ja')
+    if re.search('[\uac00-\ud7af\u1100-\u11ff]', text): add('ko')
+    if re.search('[\u4e00-\u9fff]', text) and not any(code in found for code in ('ja','ko')):
+        add('ja' if preferred=='ja' else 'zh-cn')
     for segment in re.findall(r'[A-Za-zÀ-ž][A-Za-zÀ-ž\s\d,\'’:%-]*', text):
         value = segment.strip()
-        greetings = {'bonjour':'fr', 'guten morgen':'de', 'buenos días':'es', 'hola':'es'}
-        if value.lower() in greetings:
-            add(greetings[value.lower()]); continue
+        greetings = {'bonjour':'fr', 'guten morgen':'de', 'buenos días':'es', 'hola':'es', 'ciao':'it', 'buongiorno':'it', 'olá':'pt', 'bom dia':'pt'}
+        greeting = re.split(r'[,!?:]', value.lower(), maxsplit=1)[0].strip()
+        if greeting in greetings:
+            add(greetings[greeting]); continue
         if len(re.findall(r'[A-Za-zÀ-ž]+', value)) < 3:
             continue  # Project names alone must not trigger installation.
         try:

@@ -1,5 +1,65 @@
 {
- "de":{"label":"Немецкий","model":"german","module":"DE","sha256":"74fcd465368e88f4e1f3edc8d6e47dae68b731c5c96e38ce3e79124b40f9c078","point":"Punkt","minus":"minus","percent":"Prozent"},
- "fr":{"label":"Французский","model":"french","module":"FR","sha256":"a7e67e85c7e38588a5b1e1bb176756834c6224b88158b55c3f904ab7a5ac0806","point":"point","minus":"moins","percent":"pour cent"},
- "es":{"label":"Испанский","model":"spanish","module":"ES","sha256":"310cc1e9a52a5055722496bde6b707ae2502209e17518035117e3cc2190e9f40","point":"punto","minus":"menos","percent":"por ciento"}
+ "de": {
+  "label": "Немецкий",
+  "model": "german",
+  "module": "DE",
+  "sha256": "74fcd465368e88f4e1f3edc8d6e47dae68b731c5c96e38ce3e79124b40f9c078",
+  "point": "Punkt",
+  "minus": "minus",
+  "percent": "Prozent"
+ },
+ "fr": {
+  "label": "Французский",
+  "model": "french",
+  "module": "FR",
+  "sha256": "a7e67e85c7e38588a5b1e1bb176756834c6224b88158b55c3f904ab7a5ac0806",
+  "point": "point",
+  "minus": "moins",
+  "percent": "pour cent"
+ },
+ "es": {
+  "label": "Испанский",
+  "model": "spanish",
+  "module": "ES",
+  "sha256": "310cc1e9a52a5055722496bde6b707ae2502209e17518035117e3cc2190e9f40",
+  "point": "punto",
+  "minus": "menos",
+  "percent": "por ciento"
+ },
+ "it": {
+  "label": "Итальянский",
+  "model": "italian",
+  "module": "IT",
+  "sha256": "c74714f856a339080487f872b7fde8c5d1ec7f0b2302fe5807999b497aecb1b2",
+  "point": "punto",
+  "minus": "meno",
+  "percent": "per cento"
+ },
+ "pt": {
+  "label": "Португальский",
+  "model": "portuguese",
+  "module": "PT",
+  "sha256": "79b3640d15e4a9f01c02dd7f0ee666135bf0c09121ced8becb1edbe45f6a0241",
+  "point": "ponto",
+  "minus": "menos",
+  "percent": "por cento"
+ },
+ "ja": {
+  "label": "Японский",
+  "model": "japanese",
+  "module": "JA",
+  "sha256": "bc1c811d7b1da68e76d46fca418ce671e9f301c044e2a1e06611c59f134f72dd",
+  "point": "点",
+  "minus": "マイナス",
+  "percent": "パーセント"
+ },
+ "ko": {
+  "label": "Корейский",
+  "model": "korean",
+  "module": "KO",
+  "sha256": "e6ccca1c64e9d6a13a02dd9f79bdeef04ac72f2dff8b15f73636bcab008ddf91",
+  "point": "점",
+  "minus": "마이너스",
+  "percent": "퍼센트"
+ }
 }
