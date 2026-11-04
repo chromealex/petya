@@ -56,4 +56,4 @@ class JiraRouting {
     return {ready:true,id,project:result.project.key,name:result.project.name,issueType:type.name,reason:result.reason};
   }
 }
-module.exports = { JiraRouting, choose, allowed };
+module.exports = { JiraRouting, choose, allowed, matches };

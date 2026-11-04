@@ -1,3 +1,4 @@
+const growth=require('./growth.cjs');
 const {randomUUID}=require('node:crypto');
 const ACTIONS=['reminder','answer','bugs','anr'];
 const clean=s=>String(s||'').trim().replace(/[.!?]+$/u,'').replace(/\s+/g,' ');
@@ -34,14 +35,16 @@ function validate(input){
  return {id:typeof input.id==='string'&&input.id?input.id:randomUUID(),name,patterns:[...new Set(patterns)],action:input.action,output,enabled:input.enabled!==false};
 }
 class Learning{
- constructor({state={version:1,skills:[],reminders:[]},save=()=>{},notify=()=>{},now=Date.now}){if(state.version!==1||!Array.isArray(state.skills)||!Array.isArray(state.reminders))throw new Error('Неизвестный формат обучения.');this.state=structuredClone(state);this.state.dictionary ||= [];this.state.recipes ||= [];this.state.undoLog ||= [];this.save=save;this.notify=notify;this.now=now;}
+ constructor({state={version:1,skills:[],reminders:[]},save=()=>{},notify=()=>{},now=Date.now}){if(state.version!==1||!Array.isArray(state.skills)||!Array.isArray(state.reminders))throw new Error('Неизвестный формат обучения.');this.state=structuredClone(state);this.state.dictionary ||= [];this.state.recipes ||= [];this.state.undoLog ||= [];growth.initialize(this.state);this.save=save;this.notify=notify;this.now=now;}
  commit(next){this.save(next);this.state=next;}
  list(){return structuredClone(this.state);}
  commitUser(next,collection,id,label){
   const before=this.state[collection].find(r=>r.id===id)||null,after=next[collection].find(r=>r.id===id)||null;
   if(JSON.stringify(before)!==JSON.stringify(after))next.undoLog=[...(next.undoLog||[]),{id:randomUUID(),at:this.now(),collection,itemId:id,label,before:structuredClone(before),after:structuredClone(after)}].slice(-30);
+  growth.record(next,collection,after,before,this.now());
   this.commit(next);
  }
+ growth(){return growth.summary(this.state);}
  undoInfo(){const op=[...this.state.undoLog].reverse().find(o=>!o.undone);return op?{id:op.id,label:op.label,at:op.at}:null;}
  undo(id){
   const next=this.list(),op=next.undoLog.find(o=>o.id===id&&!o.undone);if(!op||this.undoInfo()?.id!==id)throw new Error('Последнее действие изменилось. Обновите список.');

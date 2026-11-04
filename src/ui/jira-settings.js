@@ -6,7 +6,7 @@ const jiraField = name => jiraForm.elements[name];
 const jiraKeys = () => [...new Set((jiraField('jiraProjects').value || jiraField('jiraProject').value).split(',').filter(Boolean))];
 function jiraOptions(name, values, selected, placeholder) {
   const select = jiraField(name);
-  select.replaceChildren(new Option(placeholder, ''));
+  select.replaceChildren(new Option(placeholder, ''));select.disabled=!values.length;
   for (const v of values) select.add(new Option(v.name, String(v.id)));
   select.value = values.some(v => String(v.id) === selected) ? selected : '';
 }

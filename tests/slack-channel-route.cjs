@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');const {chooseChannels}=require('../src/slack-channel-route.cjs');
+const channels=[{id:'CBW',name:'jw-bw-dev'},{id:'CMW',name:'jw-mw-dev'},{id:'CQA',name:'jw-bw-qa'}];
+assert.deepEqual(chooseChannels(channels,{target:'разработка',topic:{jiraProject:'BW'}}).channels.map(c=>c.id),['CBW']);
+assert.deepEqual(chooseChannels(channels,{target:'разработка',topic:{jiraProject:'MW'}}).channels.map(c=>c.id),['CMW']);
+assert.equal(chooseChannels(channels,{target:'разработка'}).options.length,2);
+assert.equal(chooseChannels(channels,{}).options.length,3);
+assert.deepEqual(chooseChannels(channels,{topic:{slackSource:{url:'https://app.slack.com/archives/CMW/p123'}}}).channels.map(c=>c.id),['CMW']);
+assert.deepEqual(chooseChannels(channels,{target:'jw-bw-dev',literal:true,topic:{jiraProject:'MW'}}).channels.map(c=>c.id),['CBW']);
+assert.deepEqual(chooseChannels(channels,{target:'разработка',topic:{jiraProject:'BW',slackSource:{url:'https://app.slack.com/archives/CMW/p123'}}}).channels.map(c=>c.id),['CBW']);
+assert(chooseChannels(channels,{target:'разработка',topic:{jiraProject:'BWW'}}).options);
+assert(chooseChannels(channels,{target:'разработка',topic:{jiraProject:'Unknown'}}).options);
+assert.equal(chooseChannels([{id:'CBW',name:'jw-bw-dev',is_archived:true}],{target:'разработка'}).channels,undefined);
+console.log('Slack routing: BW/MW isolation, role aliases, ambiguity, exact channel precedence and stale thread passed');

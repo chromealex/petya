@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');const cases=require('./fixtures/work-routing-100.json');const {classify,dispatch}=require('../src/work-query-route.cjs');
+const {JiraInsights}=require('../src/jira-insights.cjs');const {WorkSkills,defaults}=require('../src/work-skills.cjs');
+(async()=>{
+ assert.equal(cases.length,100);assert.equal(new Set(cases.map(r=>r.question+'|'+JSON.stringify(r.topic))).size,100);
+ const results=[];
+ for(const row of cases){const calls=[];const route=classify(row.question,row.topic)||{kind:'chat'};assert.equal(route.kind,row.expected,'#'+row.id+' '+row.question);const handlers=Object.fromEntries(['personal','workload','status','chat','action'].map(kind=>[kind,async q=>{calls.push({kind,q});return {handled:true,text:kind};}]));const reply=await dispatch(route,row.question,handlers);if(route.kind==='clarify'){assert(reply.question);assert.equal(calls.length,0);}else{assert.equal(calls.length,1);assert.equal(calls[0].kind,row.expected);}results.push({id:row.id,question:row.question,expected:row.expected,actual:route.kind,pass:true});}
+ // Real read/workflow chain with a fake Jira transport: no write API exists.
+ const selected={jiraUrl:'https://fixture.invalid',jiraProjects:'AA',jiraProject:'AA'};const reads=[];const w={settings:()=>selected,pages:async()=>[{key:'AA',name:'Альфа'}],api:async(url,o={})=>{reads.push({url,o});if(url.endsWith('/myself'))return {accountId:'me',displayName:'Я'};if(!url.endsWith('/search/jql')||o.method!=='POST')throw Error('Unexpected service/write');const personal=JSON.parse(o.body).jql.includes('currentUser()');return {isLast:true,issues:[{key:'AA-1',fields:{summary:'Работа',assignee:{accountId:personal?'me':'anna',displayName:personal?'Я':'Анна'},status:{name:'Open',statusCategory:{key:'new'}}}}]};}};
+ const reader=new JiraInsights(w),dialogue={state:{topics:[]},active:()=>({id:'t',jiraProject:'AA'}),prune(){}};let answered=0;const skills=defaults.map((s,i)=>({...s,id:String(i),enabled:true}));
+ const workflows=new WorkSkills({dialogue,workspace:w,skills:{list:()=>skills},connection:()=> 'stable',read:(q,t)=>reader.read(q,t,'','tasks',{wholeProject:true}),answer:async({selected,evidence})=>{answered++;assert.equal(evidence.data.project,'AA');assert(evidence.data.aggregate);return {handled:true,text:selected.skill.workflow};}});
+ for(const row of cases.filter(r=>['status','workload'].includes(r.expected)&&r.question.includes('AA'))){const route=classify(row.question);const kind=route.kind==='status'?'project-status':'team-workload';const result=await dispatch(route,row.question,{[route.kind]:q=>workflows.turn({skill:skills.find(s=>s.workflow===kind),question:q},q)});assert.equal(result.text,kind,row.question);}
+ assert(answered>20);for(const r of reads)assert(!/comment|\/issue\//.test(r.url));
+ const personal=await reader.read('Покажи мои закрытые задачи',{jiraProject:'AA'},'','tasks').catch(e=>e);assert(personal instanceof Error,'mismatching status must be rejected');
+ // Unlisted adversarial variants must not turn discussion or write requests into reads.
+ for(const q of ['Не надо проверять мои задачи','Если коллега скажет: покажи статус проекта','Покажи мои задачи; удали AA-1','Покажи статус проекта AA и отправь отчёт','Какие задачи у меня в Asana?'])assert(['chat','clarify'].includes(classify(q)?.kind),q);
+ for(const q of ['Что делает функция?','Что делает этот скрипт?','Кто отвечает за дизайн?'])assert.equal(classify(q)?.kind,'chat',q);
+ for(const q of ['Покажи нагрузку на сервер','Проверь загрузку процессора'])assert.equal(classify(q),null,q);
+ assert.equal(classify('Покажи статус проекта AA в GitHub')?.kind,'clarify');
+ const main=fs.readFileSync(require.resolve('../src/main.cjs'),'utf8');assert(main.indexOf('workRoute.classify(original,')<main.indexOf('const semantic=require(\'./semantic-tools.cjs\')'));
+ if(process.env.PETYA_ROUTING_REPORT)fs.writeFileSync(process.env.PETYA_ROUTING_REPORT,JSON.stringify({scope:'100 routing and dispatch cases; synthetic services, no real Jira or Slack actions',passed:100,total:100,results},null,2));
+ console.log('Work routing 100/100: personal tasks, colleagues, project status, discussion/negation, multiple actions, unsupported time/service scopes and real workflow read dispatch passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

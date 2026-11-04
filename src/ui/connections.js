@@ -117,7 +117,7 @@ function setupConnections() {
     }
     const verify = connectionNode('button', 'Сохранить и проверить', 'primary'); verify.type = 'button';
     const savedOnly = connectionNode('p', ['slack', 'notion', 'jira'].includes(def.id) ? 'Нажмите «Подключить» и разрешите доступ в браузере. Создавать приложение и копировать ключи не нужно. Токены обновляются автоматически.' : 'Запустите локальный сервер, затем проверьте доступ.', 'small');
-    if(def.id === 'slack') savedOnly.textContent='Выберите вход через приложение или используйте свой User OAuth Token. При ручном вводе истёкший токен нужно заменить самостоятельно. Если Slack уже подключён через приложение, сначала нажмите «Отключить Slack».';
+    if(def.id === 'slack') savedOnly.textContent='Подключите Slack через приложение или укажите API-токен.';
     if(def.id === 'jira') savedOnly.textContent='При входе разрешите доступ к Jira и Confluence на нужном сайте. Доступ к каждому сервису проверяется отдельно. Токены обновляются автоматически.';
     verify.onclick = run(async () => {
       verify.disabled = true; connect.disabled = true; status.textContent = 'Проверяю доступ…'; status.className = 'connection-status';
@@ -140,8 +140,8 @@ function setupConnections() {
       finally { verify.disabled = false; connect.disabled = false; }
     });
     if (def.id === 'slack') {
-      const help = connectionNode('div', '', 'slack-setup');
-      help.append(connectionNode('h3', 'Как разрешить поиск каналов по имени и маске'));
+      const help = connectionNode('details', '', 'slack-setup');
+      help.append(connectionNode('summary', 'Как получить токен и настроить права'));
       const steps = connectionNode('ol');
       [
         'Нажмите «Открыть настройки сервиса», выберите своё приложение Slack и откройте OAuth & Permissions → User Token Scopes.',
@@ -196,6 +196,14 @@ function setupConnections() {
       window.petya.ollamaInstallStatus().then(state => { if (!revision) renderInstall(state); }).catch(e => notice(e.message, true));
       guide.onclick = run(async () => { guide.disabled = true; try { renderInstall(await window.petya.installOllama()); } finally { guide.disabled = false; } });
       open.onclick = run(async () => { open.disabled = true; try { renderInstall(await window.petya.openOllama()); } finally { open.disabled = false; } });
+      const brain=connectionNode('button','Подготовить Qwen3.5 · 9B');brain.type='button';
+      brain.onclick=run(async()=>{brain.disabled=true;try{renderInstall(await window.petya.installBrain());}finally{brain.disabled=false;}});
+      const semantic=connectionNode('label','Понимать новые формулировки через модель','check');
+      const toggle=document.createElement('input');toggle.type='checkbox';toggle.name='semanticTools';
+      toggle.onchange=run(()=>window.petya.saveSettings({semanticTools:String(toggle.checked)}));semantic.prepend(toggle);
+      window.petya.settings().then(s=>{toggle.checked=s.semanticTools!=='false';});
+      content.append(semantic,connectionNode('p','Модель выбирает чтение Jira, ANR, почты, поиск и сводку по смыслу запроса. Действия выполняются доступными инструментами Пети. Qwen3.5:9B загружается на компьютер; для слабых устройств можно оставить меньшую модель.','small'));
+      controls.append(brain);
       controls.append(open);
     }
     if (def.id === 'whisper') {
@@ -223,21 +231,18 @@ function setupConnections() {
     } else controls.append(guide);
     content.append(verify); controls.append(connect); card.append(description, status, controls, content);
     if (def.id === 'slack') {
-      const shortcuts = connectionNode('div', '', 'slack-shortcuts');
-      shortcuts.append(connectionNode('p', 'Не хватает прав (missing_scope)? Для своего API-токена откройте приложение Slack → OAuth & Permissions → User Token Scopes, добавьте channels:read и groups:read, затем нажмите Reinstall to Workspace и сохраните новый User OAuth Token.', 'small'));
-      const links = connectionNode('div', '', 'actions');
-      for (const [key, title] of [['slack', 'Открыть приложения Slack ↗'], ['slackPublicRead', 'channels:read ↗'], ['slackPrivateRead', 'groups:read ↗']]) {
-        const link = connectionNode('button', title); link.type = 'button';
-        link.onclick = run(() => window.petya.connectionGuide(key)); links.append(link);
-      }
-      const instructions = connectionNode('button', 'Пошаговая инструкция'); instructions.type = 'button';
-      instructions.onclick = () => {
-        content.open = true;
-        const help = card.querySelector('.slack-setup');
-        help.closest('details').open = true;
-        help.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      const shortcuts = connectionNode('div', '', 'slack-shortcuts');shortcuts.hidden=true;
+      shortcuts.append(connectionNode('p','Slack сообщил, что подключению не хватает прав. Откройте инструкцию или повторите подключение через приложение.','small'));
+      const instructions=connectionNode('button','Как настроить права');instructions.type='button';
+      instructions.onclick=()=>{
+        const help=card.querySelector('.slack-setup');
+        for(let parent=help;parent&&parent!==card;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;
+        help.scrollIntoView({block:'nearest',behavior:'smooth'});
       };
-      links.append(instructions); shortcuts.append(links); card.insertBefore(shortcuts, controls);
+      shortcuts.append(instructions);card.insertBefore(shortcuts,controls);
+      const updateScopeHelp=()=>{shortcuts.hidden=!(status.classList.contains('error')&&/\bmissing_scope\b/i.test(status.textContent));};
+      new MutationObserver(updateScopeHelp).observe(status,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class']});
+      updateScopeHelp();
     }
     const setupHelp = card.querySelector('.ollama-setup'); if (setupHelp) card.insertBefore(setupHelp, content);
     connectionCards.set(def.id, { card, status, content });

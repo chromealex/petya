@@ -1,7 +1,34 @@
 const fs = require('fs');
 module.exports = async (win, workspace) => {
+  await require('./local-project-ui.cjs')(win);
+  await require('./microphone-picker-ui.cjs')(win);
+  await require('./slack-help-ui.cjs')(win);
+  win.webContents.send('navigate','sources');
+  for(let attempt=0;attempt<50;attempt++){
+    if(await win.webContents.executeJavaScript("!document.getElementById('sources').hidden"))break;
+    await new Promise(resolve=>setTimeout(resolve,20));
+  }
+  if(!await win.webContents.executeJavaScript("!document.getElementById('sources').hidden"))throw Error('Tray navigation failed');
+  await win.webContents.executeJavaScript("view('home')");
+
+  await require('./team-fill-ui.cjs')(win);
+  await require('./slack-request-ui.cjs')(win);
+  await require('./ux-review-ui.cjs')(win);
+  await require('./ui-layout.cjs')(win);
+  await require('./command-progress-ui.cjs')(win);
+  await require('./voice-diagnostics-ui.cjs')(win);
+  await require('./current-question-ui.cjs')(win);
+  await require('./project-catalog-ui.cjs')(win);
   await win.webContents.executeJavaScript(`(async () => {
     await modulesReady;
+    if(!$('microsoft-start')||!$('mail-cancel')||!$('tg-connect')||!$('tg-phone-step').hidden)throw Error('Missing simplified connection UI');
+    if((await window.petya.settings()).microsoftCredential)throw Error('Microsoft tokens exposed');
+    const mailStatus=await window.petya.gmailStatus();if(!mailStatus.microsoft||mailStatus.microsoft.connected)throw Error('Unexpected fresh mail provider state');
+    const previousWeb=(await window.petya.settings()).module_web;await window.petya.saveSettings({module_web:'false'});
+    try{await window.petya.attachmentAdd('private.abc',new TextEncoder().encode('sample').buffer);throw Error('Unknown format should request web access');}catch(e){if(!e.message.includes('поиск'))throw e;}
+    await refreshFormats();if(!$('format-pending').textContent.includes('Включить поиск'))throw Error('Missing format learning retry');
+    await window.petya.formatCancel();if((await window.petya.formatStatus()).pending)throw Error('Pending format not cleared');await window.petya.saveSettings({module_web:previousWeb});
+
     const accessOffer=await window.petya.converse('Прочитай Telegram');if(!accessOffer.integrationOffers?.length)throw Error('Missing integration proposal');
     const browserChoice=await window.petya.integrationChoice(accessOffer.integrationOffers[0].id,'browser');if(!browserChoice.serviceBrowser)throw Error('Missing browser fallback');
     if(JSON.parse((await window.petya.settings()).integrationChoices).telegram!=='browser')throw Error('Browser refusal not persisted');
@@ -16,10 +43,20 @@ module.exports = async (win, workspace) => {
     if((await window.petya.settings()).telegramCredential)throw Error('Telegram credential exposed');
     const initialCompanies=await window.petya.companies();if(initialCompanies.activeId!=='default')throw Error('Missing default company');
     const companySettings=await window.petya.settings();if(companySettings.companyId!==initialCompanies.activeId||companySettings.companyName!==initialCompanies.companies[0].name)throw Error('Settings company scope missing');
-    const otherCompany=await window.petya.companyCreate('Smoke company');
+    if(document.querySelector('#company-tabs [aria-current]')?.dataset.companyId!==initialCompanies.activeId)throw Error('Active company tab missing');
+    $('company-new-name').value='Smoke company';$('company-create-form').requestSubmit();
+    for(let i=0;i<100&&!document.querySelectorAll('#company-tabs button')[1];i++)await new Promise(r=>setTimeout(r,20));
+    const otherCompany=(await window.petya.companies()).companies.find(c=>c.name==='Smoke company');
+    if(!otherCompany||![...document.querySelectorAll('#company-tabs button')].some(b=>b.dataset.companyId===otherCompany.id))throw Error('New company tab missing');
+    $('settings-form').dispatchEvent(new Event('input',{bubbles:true}));
+    [...document.querySelectorAll('#company-tabs button')].find(b=>b.dataset.companyId===otherCompany.id).click();
+    await new Promise(r=>setTimeout(r,20));
+    if(!document.getElementById('notice').textContent.includes('Сохраните изменения'))throw Error('Company tab lost unsaved changes guard');
+    if((await window.petya.companies()).activeId!==initialCompanies.activeId)throw Error('Blocked tab changed company');
+    document.dispatchEvent(new Event('petya-settings-displayed'));
     await window.petya.companyRename(otherCompany.id,'Second company');
     if(!(await window.petya.companies()).companies.some(c=>c.name==='Second company'))throw Error('Company rename failed');
-    const switchCheck=await window.petya.companySwitch(otherCompany.id);if(!switchCheck.testOnly)throw Error('Smoke must not restart the real app');
+    let switchCheck;for(let attempt=0;attempt<300;attempt++){try{switchCheck=await window.petya.companySwitch(otherCompany.id);break;}catch(error){if(!error.message.includes('завершает текущую операцию')||attempt===299)throw error;await new Promise(resolve=>setTimeout(resolve,100));}}if(!switchCheck.testOnly)throw Error('Smoke must not restart the real app');
     if((await window.petya.companies()).activeId!=='default')throw Error('Smoke changed actual company');
     document.getElementById('company-manage').click();if(document.getElementById('companies').hidden)throw Error('Company UI missing');
 
@@ -46,7 +83,7 @@ module.exports = async (win, workspace) => {
     const attachment = await window.petya.attachmentAdd('smoke.txt',new TextEncoder().encode('Проверочный документ: версия 42.').buffer);
     const previous = await window.petya.settings();await window.petya.saveSettings({model:''});
     const attachmentReply = await window.petya.attachmentInspect([attachment.id],'Что в файле?');
-    const attachmentTopic = await window.petya.attachmentTopic();if(!attachmentTopic?.files.some(f=>f.name==='smoke.txt')) throw new Error('Attachment topic not saved');
+    const attachmentTopic = await window.petya.attachmentTopic();if(!attachmentReply.messages?.[0]?.attachments?.some(f=>f.name==='smoke.txt'))throw Error('Sent message lost its attachment');if(!attachmentTopic?.files.some(f=>f.name==='smoke.txt')) throw new Error('Attachment topic not saved');
     const reviewFile=await window.petya.attachmentAdd('build.log',new TextEncoder().encode('Android build 123\\nError: Cannot find module ./modules.cjs').buffer);
     const reviewTopic=await window.petya.attachmentInspect([reviewFile.id],'Почему падает?');
     const proof=await window.petya.converse('Покажи, откуда ты это взял');await showDialogueReply(proof);
@@ -92,6 +129,7 @@ module.exports = async (win, workspace) => {
       if (url.pathname === '/v1/search') return { results: [{ id: 'abc-123', object: 'page', properties: { Name: { type: 'title', title: [{ plain_text: 'Требования к входу' }] } } }] };
       return { results: [{ id: 'b1', type: 'paragraph', paragraph: { rich_text: [{ plain_text: 'После пяти ошибок заблокировать код.' }] } }] };
     }
+    if (url.pathname === '/rest/api/3/search/jql') return {issues:[],isLast:true};
     if (url.pathname === '/rest/api/3/project/search') return { values: [{key:'TEST',name:'Тестовый проект'}, {key:'OTHER',name:'Другой проект'}], isLast:true };
     if (['/rest/api/3/project/TEST', '/rest/api/3/project/OTHER'].includes(url.pathname)) return { issueTypes: [{id:'10001',name:'Task'}] };
     if (url.pathname === '/rest/api/3/myself') return { accountId: 'user-1', displayName: 'Иван Петров' };
@@ -157,23 +195,25 @@ module.exports = async (win, workspace) => {
     const history = await window.petya.batchHistory();
     if (!history[0].rows.every(r => r.state === 'done')) throw new Error('Batch did not complete');
     view('settings');
-    if (document.querySelectorAll('[data-service]').length !== 13) throw new Error('Missing connection cards');
+    for(const service of [...optionalModules.map(([id])=>id),'zoom','localproject'])if(!document.querySelector('[data-service="'+service+'"]'))throw new Error('Missing connection card: '+service);
     if (document.querySelector('aside nav [data-view=asana]') || !$('asana')) throw new Error('Unexpected Asana navigation or missing workspace');
     const notionCard = document.querySelector('[data-service="notion"]');
     if (notionCard.querySelector('.actions .primary').textContent !== 'Подключить Notion') throw new Error('Missing browser sign-in');
-    if (notionCard.querySelector('details details').open) throw new Error('Manual credentials should be collapsed');
-    notionCard.querySelector('details').open = true;
+    if (notionCard.querySelector('.connection-options details').open) throw new Error('Manual credentials should be collapsed');
+    notionCard.querySelector('.settings-disclosure').open = true;
+    notionCard.querySelector('.connection-options').open = true;
     await window.petya.saveSettings({slackCredential:'forged', notionCredential:'forged',atlassianCredential:'forged'});
     const guarded=await window.petya.settings();
     if(guarded.slackCredential || guarded.notionCredential || guarded.atlassianCredential || guarded.hasSlackOAuth || guarded.hasNotionOAuth || guarded.hasAtlassianOAuth) throw new Error('Renderer injected OAuth credentials');
     $('settings-form').elements.notionToken.value = 'fixture-secret';
-    notionCard.querySelector('details > button.primary').click();
-    for (let i = 0; i < 150 && notionCard.querySelector('details > button.primary').disabled; i++) await new Promise(r => setTimeout(r, 20));
+    notionCard.querySelector('.connection-options > button.primary').click();
+    for (let i = 0; i < 150 && notionCard.querySelector('.connection-options > button.primary').disabled; i++) await new Promise(r => setTimeout(r, 20));
     if (!notionCard.querySelector('.connection-status').textContent.startsWith('Подключено')) throw new Error('Connection check failed');
     const publicSettings = await window.petya.settings();
     if (publicSettings.notionToken || !publicSettings.hasNotionToken) throw new Error('Token storage failed or secret exposed');
     view('history');
     let card = document.querySelector('.history-entry');
+    card.querySelector('.history-editor').open = true;
     card.querySelector('textarea').value = 'Добавь защиту от перебора в название первой задачи';
     card.querySelector('.actions .primary').click();
     for (let i = 0; i < 150 && (workspaceBusy || !card.querySelector('.history-preview .primary')); i++) await new Promise(r => setTimeout(r, 20));
@@ -183,8 +223,8 @@ module.exports = async (win, workspace) => {
     const edited = (await window.petya.batchHistory())[0];
     if (edited.operations[0].rows[0].state !== 'done') throw new Error('History edit failed');
     card = document.querySelector('.history-entry');
-    card.querySelector('details').open = true;
-    card.querySelector('details button').click();
+    card.querySelector('.history-operation').open = true;
+    card.querySelector('.history-operation button').click();
     for (let i = 0; i < 150 && (workspaceBusy || !card.querySelector('.history-preview .primary')); i++) await new Promise(r => setTimeout(r, 20));
     card.querySelector('.history-preview .primary').click();
     for (let i = 0; i < 150 && workspaceBusy; i++) await new Promise(r => setTimeout(r, 20));
@@ -262,18 +302,31 @@ module.exports = async (win, workspace) => {
   await win.webContents.executeJavaScript(`(async()=>{
     currentDraft=null;frozenBatch=null;workspaceBusy=false;planning=false;agentBusy=false;
     await processCommand('Как думаешь, стоит ли создавать задачу?');
+    const conversationTopic=(await window.petya.dialogueTopics()).activeId;
     if(!dialogueMessages.textContent.includes('Петя:'))throw new Error('No conversational reply');
     await processCommand('посмотри anr в гугл плее');
     const state=await window.petya.dialogueTopics();
     if(!state.topics.length)throw new Error('Conversation topic lost');
     if(!dialogueMessages.textContent.includes('Google Play Console не подключён')||!dialogueChoices.textContent.includes('Без интеграции: браузер'))throw new Error('Missing access must offer integration or browser, not invent ANR');
-    await selectDialogueTopic(state.topics[0].id);
+    await selectDialogueTopic(conversationTopic);
     if(!dialogueMessages.textContent.includes('Как думаешь'))throw new Error('Topic history not restored');
     await selectDialogueTopic('');
+    if(typeof releaseReplyAudio==='function'){
+      const speaking=speakReply('Silent smoke test');
+      if(window.petyaSpeaking)throw Error('Synthesis muted capture before playback');
+      stopSpeech.onclick();await speaking;
+      if(window.petyaSpeaking)throw Error('Speech cancellation did not restore capture');
+    }else if(typeof replyAudioContext!=='undefined'){
+      const previousContext=replyAudioContext;let resume;
+      replyAudioContext={resume:()=>new Promise(resolve=>resume=resolve)};
+      try{const speaking=speakReply('Silent smoke test');if(!window.petyaSpeaking)throw Error('Speech did not mute capture');stopSpeech.onclick();resume();await speaking;if(window.petyaSpeaking)throw Error('Speech cancellation did not restore capture');}
+      finally{replyAudioContext=previousContext;}
+    }else{
     const originalSpeak=speechSynthesis.speak.bind(speechSynthesis);const originalCancel=speechSynthesis.cancel.bind(speechSynthesis);let utterance;
     speechSynthesis.speak=value=>{utterance=value;};speechSynthesis.cancel=()=>{};
     try{await speakReply('Тест без звука');if(!window.petyaSpeaking||utterance.lang!=='ru-RU')throw new Error('Speech did not mute capture');utterance.onend();await new Promise(r=>setTimeout(r,550));if(window.petyaSpeaking)throw new Error('Speech capture stayed muted');}
     finally{speechSynthesis.speak=originalSpeak;speechSynthesis.cancel=originalCancel;}
+    }
   })()`);
   if(created!==beforeDialogue)throw new Error('Question created a task');
   await win.webContents.executeJavaScript(`(async()=>{
@@ -331,4 +384,21 @@ module.exports = async (win, workspace) => {
   fs.writeFileSync('/private/tmp/petya-smoke.png', screenshot.toPNG());
   await win.webContents.executeJavaScript(`new Promise(resolve => { view('settings'); document.querySelector('[data-service="notion"] details').open = false; window.scrollTo(0, 0); requestAnimationFrame(() => requestAnimationFrame(resolve)); })`);
   fs.writeFileSync('/private/tmp/petya-connections.png', (await win.webContents.capturePage()).toPNG());
+  await win.webContents.executeJavaScript(`(async()=>{
+    const first=await window.petya.converse('Работаем над проектом Проверочный');
+    if(!first.projectChanged)throw Error('Project switch failed');
+    await showDialogueReply(first);
+    const state=await window.petya.dialogueTopics();
+    if(!state.activeId)throw Error('Project topic missing');
+    const question=await window.petya.converse('Работаем над другим проектом');
+    if(!question.projectMemoryReply)throw Error('Project voice clarification missing');
+    const invalid=await window.petya.projectMemoryReply('9');if(!invalid.question)throw Error('Invalid project option was accepted');
+    const second=await window.petya.projectMemoryReply('Бета');
+    if(!second.projectChanged)throw Error('Project voice reply failed');
+    await showDialogueReply(second);
+    if(!dialogueTitle.textContent.includes('Бета'))throw Error('Project title missing');
+  })()`);
+
+  await require('./chat-jobs-ui.cjs')(win);
+
 };

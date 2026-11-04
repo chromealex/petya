@@ -24,3 +24,9 @@ dist/
 
 # Downloaded dependency archives
 /*.tgz
+
+# Python caches
+__pycache__/
+
+# OAuth client credentials (kept locally, packaged from disk)
+/src/integration-clients.json

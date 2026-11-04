@@ -2,7 +2,7 @@ const assert=require('node:assert/strict');const fs=require('node:fs');const os=
 (async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'petya-integration-scope-'));
  try{
-  const c=new Companies(root);const fields=['telegramCredential','telegramAutoSync','jiraToken','jiraUrl','jiraEmail','jiraProjects','jiraProject','jiraIssueType','jiraBoardId','jiraVersionId','atlassianCredential','confluenceSpace','slackToken','slackCredential','slackChannels','notionToken','notionCredential','asanaCredential','asanaWorkspace','googlePlayCredential','gmailCredential',...Object.keys(modules.defaults)];
+  const c=new Companies(root);const fields=['telegramCredential','telegramAutoSync','jiraToken','jiraUrl','jiraEmail','jiraProjects','jiraProject','jiraIssueType','jiraBoardId','jiraVersionId','atlassianCredential','confluenceSpace','slackToken','slackCredential','slackChannels','notionToken','notionCredential','asanaCredential','asanaWorkspace','googlePlayCredential','microsoftCredential','gmailCredential',...Object.keys(modules.defaults)];
   const first=Object.fromEntries(fields.map(k=>[k,k.startsWith('module_')?'true':'first-'+k]));
   fs.writeFileSync(path.join(root,'settings.json'),JSON.stringify(first));const second=c.create('Second',first);const secondFile=path.join(c.directory(second.id),'settings.json');const blank=JSON.parse(fs.readFileSync(secondFile));for(const key of fields)assert.equal(blank[key],undefined,'New company copied '+key);
   const other=Object.fromEntries(fields.map(k=>[k,k.startsWith('module_')?'false':'second-'+k]));fs.writeFileSync(secondFile,JSON.stringify(other));

@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const {prepareCommandAudio}=require('../src/speech-audio.cjs');
+const c=vm.createContext({});vm.runInContext(fs.readFileSync('src/ui/audio.js','utf8')+'\nthis.wav=toWav;',c);
+const pcm=new Float32Array(48000);const encode=()=>c.wav([pcm],16000);
+assert.equal(prepareCommandAudio(encode()),null);
+pcm[16000]=0.8;assert.equal(prepareCommandAudio(encode()),null,'isolated click is not a phrase');
+for(let i=16000;i<20800;i++)pcm[i]=0.004*Math.sin(i/10);
+const result=prepareCommandAudio(encode());assert(result);assert.equal(result.length,encode().byteLength,'preserve original audio and pause');assert.equal(result.readUInt32LE(40),result.length-44);
+pcm.fill(0);for(let i=16000;i<20800;i++)pcm[i]=0.0005*Math.sin(i/10);assert(prepareCommandAudio(encode()),'quiet captured speech is not gated a second time');
+pcm.fill(0);for(let i=16000;i<16640;i++)pcm[i]=0.004*Math.sin(i/10);assert(prepareCommandAudio(encode()),'short captured reply is retained');
+assert.throws(()=>prepareCommandAudio(Buffer.alloc(44)),/Некорректное/);
+console.log('Live PCM: silence/click rejection, quiet speech onset and bounded tail passed');

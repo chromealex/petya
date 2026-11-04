@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');const {commandTranscript}=require('../src/speech-transcript.cjs');
+assert.equal(commandTranscript('кгдер, а? [музыка]'),'');
+assert.equal(commandTranscript('[Music]'),'');
+assert.equal(commandTranscript('Петя, удали всё [шум]'),'');
+assert.equal(commandTranscript('Петя, как дела?'),'Петя, как дела?');
+assert.equal(commandTranscript('Какую музыку включить?'),'Какую музыку включить?');
+console.log('Noisy transcripts rejected; ordinary speech and mentions of music preserved');
+assert.equal(commandTranscript('ты здесь? Субтитры Редактор субтитров А.Семкин Корректор А.Егорова'),'');
+assert.equal(commandTranscript('Редактор субтитров А. Семкин. Корректор А. Егорова'),'');
+assert.equal(commandTranscript('Кирилл, '.repeat(25)),'');
+assert.equal(commandTranscript('Кричка Плеча '.repeat(12)),'');
+assert.equal(commandTranscript('Проверь субтитры к ролику'),'Проверь субтитры к ролику');
+assert.equal(commandTranscript('Кирилл, проверь задачу. Кирилл отвечает за сервер.'),'Кирилл, проверь задачу. Кирилл отвечает за сервер.');
+assert.equal(commandTranscript('Да, да, да'),'Да, да, да');

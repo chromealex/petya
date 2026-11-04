@@ -13,14 +13,14 @@ function historyDiff(target, rows) {
 }
 function renderHistory(records) {
   const target = $('batch-history'); target.replaceChildren();
-  if (!records.length) { target.append(historyElement('p', 'Здесь появятся созданные задачи и последующие правки.')); return; }
+  if (!records.length) { const empty=historyElement('p', 'Здесь появятся созданные задачи и последующие правки.');empty.dataset.empty='true';target.append(empty); return; }
   for (const record of records) {
-    const card = historyElement('article', '', 'card history-entry'); card.dataset.id = record.id;
-    card.append(historyElement('h2', `${record.project} · ${record.rows.length === 1 ? 'Задача' : 'Пакет задач'}`), historyElement('p', `${new Date(record.at).toLocaleString('ru-RU')} · ${record.url}`, 'small'));
+    const card = historyElement('article', '', 'card history-entry'); card.dataset.id = record.id;card.dataset.at=record.at;card.dataset.project=record.project;card.dataset.result=record.rows.every(r=>['done','deleted'].includes(r.state))?'done':'attention';
+    card.append(historyElement('h2', `${record.project} · ${record.rows.length === 1 ? 'Задача' : 'Пакет задач'}`), historyElement('p', `${new Date(record.at).toLocaleString('ru-RU')}`, 'small'));
     const checks = [];
     for (const [index, row] of record.rows.entries()) {
       const label = historyElement('label', '', 'check history-task'), check = document.createElement('input'); check.type = 'checkbox'; check.value = row.key || ''; check.checked = !!row.key && row.state !== 'deleted'; check.disabled = !check.checked; checks.push(check);
-      const text = historyElement('span', `${index + 1}. ${row.key || 'Без ключа'} · ${row.title}`); label.append(check, text); card.append(label);
+      const text = historyElement('span', `${index + 1}. ${row.key || 'Без ключа'} · ${row.title}`);if(row.key&&record.url){try{const url=new URL(record.url);url.pathname='/browse/'+row.key;url.search='';url.hash='';const link=historyElement('a','Открыть задачу');link.href=url.href;link.target='_blank';link.rel='noopener';text.append(document.createTextNode(' · '),link);}catch{}} label.append(check, text); card.append(label);
       card.append(historyElement('p', (row.state === 'deleted' ? 'Удалена из Jira' : row.state === 'done' ? 'Создана' : states[row.state] || row.state) + (row.error ? ': ' + row.error : ''), 'small'));
     }
     if (record.retentionExpired) { card.append(historyElement('p', 'Срок хранения истёк. Локальные снимки для правок и отката удалены.')); target.append(card); continue; }
@@ -51,7 +51,7 @@ function renderHistory(records) {
     }
     const edit = historyElement('button', 'Подготовить правку', 'primary'); edit.onclick = () => { const keys = selected(); return act(async () => showPreview(await window.petya.previewHistoryEdit(record.id, instruction.value, keys))); };
     const undo = historyElement('button', 'Откатить создание'); undo.onclick = () => { const keys = selected(); return act(async () => showPreview(await window.petya.previewHistoryUndo(record.id, '', keys))); };
-    controls.append(edit, undo); card.append(instruction, controls, historyElement('p', 'Действия относятся к отмеченным задачам. Правка текстом использует Ollama. Откат создания удаляет задачи; откат правки возвращает прежние значения.', 'small'));
+    const editor=historyElement('details','','history-editor');editor.append(historyElement('summary','Изменить или откатить задачи'));controls.append(edit, undo); editor.append(instruction, controls, historyElement('p', 'Действия относятся к отмеченным задачам. Правка текстом использует Ollama. Откат создания удаляет задачи; откат правки возвращает прежние значения.', 'small'));card.append(editor);
     if (record.rows.some(r => r.key && !r.snapshot && r.state !== 'deleted')) card.append(historyElement('p', 'Для части задач нет снимка: откат недоступен. Правку можно подготовить по текущим данным Jira.', 'small'));
     for (const op of [...(record.operations || [])].reverse()) {
       const details = document.createElement('details'); details.className = 'history-operation';

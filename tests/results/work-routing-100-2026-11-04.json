@@ -1,0 +1,1962 @@
+{
+  "date": "2026-11-04",
+  "baselineModel": "qwen3:4b",
+  "scope": "Routing only. Baseline: existing task/discussion rules and actual local semantic model; not a full desktop UI test. After: shared production work-route classifier/dispatcher plus synthetic Jira workflow transport. No real Jira/Slack requests or writes. This does not measure factual answer quality.",
+  "before": {
+    "matched": 22,
+    "total": 100,
+    "cases": [
+      {
+        "id": 1,
+        "category": "personal",
+        "question": "Какие задачи на мне?",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 2,
+        "category": "personal",
+        "question": "Покажи мои задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 3,
+        "category": "personal",
+        "question": "Мои задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 4,
+        "category": "personal",
+        "question": "Какие у меня задачи?",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 5,
+        "category": "personal",
+        "question": "Что назначено мне?",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 18488,
+        "pass": false
+      },
+      {
+        "id": 6,
+        "category": "personal",
+        "question": "Покажи задачи, назначенные мне",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 419,
+        "pass": false
+      },
+      {
+        "id": 7,
+        "category": "personal",
+        "question": "Какие задачи назначены на меня?",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 416,
+        "pass": false
+      },
+      {
+        "id": 8,
+        "category": "personal",
+        "question": "Что у меня в работе?",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 528,
+        "pass": false
+      },
+      {
+        "id": 9,
+        "category": "personal",
+        "question": "Покажи мои открытые задачи",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 416,
+        "pass": false
+      },
+      {
+        "id": 10,
+        "category": "personal",
+        "question": "Мои незавершённые задачи",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 408,
+        "pass": false
+      },
+      {
+        "id": 11,
+        "category": "personal",
+        "question": "Список моих задач",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 408,
+        "pass": false
+      },
+      {
+        "id": 12,
+        "category": "personal",
+        "question": "Перечисли мои задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 13,
+        "category": "personal",
+        "question": "Пожалуйста, покажи мои задачи",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 435,
+        "pass": false
+      },
+      {
+        "id": 14,
+        "category": "personal",
+        "question": "Петя, какие задачи на мне?",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 15,
+        "category": "personal",
+        "question": "Покажи все мои задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 16,
+        "category": "personal",
+        "question": "Покажи мои закрытые задачи",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 519,
+        "pass": false
+      },
+      {
+        "id": 17,
+        "category": "personal",
+        "question": "Какие из моих задач завершены?",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 415,
+        "pass": false
+      },
+      {
+        "id": 18,
+        "category": "personal",
+        "question": "Мои задачи в AA",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 19,
+        "category": "personal",
+        "question": "Мои задачи по проекту AA",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 20,
+        "category": "personal",
+        "question": "Что мне назначено в проекте AA?",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 416,
+        "pass": false
+      },
+      {
+        "id": 21,
+        "category": "personal",
+        "question": "Покажи задачи на мне в AA",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 22,
+        "category": "personal",
+        "question": "Какие таски на мне?",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 23,
+        "category": "personal",
+        "question": "Покажи мои таски",
+        "expected": "personal",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 24,
+        "category": "personal",
+        "question": "Что сейчас висит на мне?",
+        "expected": "personal",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 428,
+        "pass": false
+      },
+      {
+        "id": 25,
+        "category": "personal",
+        "question": "А мои?",
+        "expected": "personal",
+        "topic": {
+          "id": "tasks",
+          "kind": "tasks",
+          "jiraProject": "AA",
+          "title": "Задачи AA",
+          "messages": []
+        },
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 447,
+        "pass": false
+      },
+      {
+        "id": 26,
+        "category": "colleagues",
+        "question": "Кто чем занят в проекте AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 432,
+        "pass": false
+      },
+      {
+        "id": 27,
+        "category": "colleagues",
+        "question": "Какие задачи у Анны в AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 450,
+        "pass": false
+      },
+      {
+        "id": 28,
+        "category": "colleagues",
+        "question": "Что делает Борис в проекте AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 433,
+        "pass": false
+      },
+      {
+        "id": 29,
+        "category": "colleagues",
+        "question": "Покажи загрузку команды AA",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 425,
+        "pass": false
+      },
+      {
+        "id": 30,
+        "category": "colleagues",
+        "question": "Сколько задач у каждого в проекте AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 426,
+        "pass": false
+      },
+      {
+        "id": 31,
+        "category": "colleagues",
+        "question": "На ком больше всего задач в AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 434,
+        "pass": false
+      },
+      {
+        "id": 32,
+        "category": "colleagues",
+        "question": "Какие задачи назначены Анне в AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 462,
+        "pass": false
+      },
+      {
+        "id": 33,
+        "category": "colleagues",
+        "question": "Что у команды в работе по проекту AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 447,
+        "pass": false
+      },
+      {
+        "id": 34,
+        "category": "colleagues",
+        "question": "Кто отвечает за открытые задачи AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 435,
+        "pass": false
+      },
+      {
+        "id": 35,
+        "category": "colleagues",
+        "question": "Какие задачи у разработчиков в AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 429,
+        "pass": false
+      },
+      {
+        "id": 36,
+        "category": "colleagues",
+        "question": "Покажи задачи коллег в AA",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 434,
+        "pass": false
+      },
+      {
+        "id": 37,
+        "category": "colleagues",
+        "question": "У кого есть просроченные задачи в AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 437,
+        "pass": false
+      },
+      {
+        "id": 38,
+        "category": "colleagues",
+        "question": "Есть ли задачи без исполнителя в AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 434,
+        "pass": false
+      },
+      {
+        "id": 39,
+        "category": "colleagues",
+        "question": "Покажи распределение задач по людям в AA",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 438,
+        "pass": false
+      },
+      {
+        "id": 40,
+        "category": "colleagues",
+        "question": "Сколько незавершённых задач у Бориса в AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 452,
+        "pass": false
+      },
+      {
+        "id": 41,
+        "category": "colleagues",
+        "question": "Какие задачи у Анны?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 435,
+        "pass": false
+      },
+      {
+        "id": 42,
+        "category": "colleagues",
+        "question": "Чем занят Алексей?",
+        "expected": "workload",
+        "actual": "chat",
+        "raw": {
+          "tool": "chat",
+          "recipeId": ""
+        },
+        "ms": 420,
+        "pass": false
+      },
+      {
+        "id": 43,
+        "category": "colleagues",
+        "question": "Покажи загрузку команды",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 436,
+        "pass": false
+      },
+      {
+        "id": 44,
+        "category": "colleagues",
+        "question": "Кто чем занимается?",
+        "expected": "workload",
+        "actual": "chat",
+        "raw": {
+          "tool": "chat",
+          "recipeId": ""
+        },
+        "ms": 421,
+        "pass": false
+      },
+      {
+        "id": 45,
+        "category": "colleagues",
+        "question": "Сколько задач у коллег?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 441,
+        "pass": false
+      },
+      {
+        "id": 46,
+        "category": "colleagues",
+        "question": "У кого больше открытых задач?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 440,
+        "pass": false
+      },
+      {
+        "id": 47,
+        "category": "colleagues",
+        "question": "Кто работает над проектом AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 437,
+        "pass": false
+      },
+      {
+        "id": 48,
+        "category": "colleagues",
+        "question": "Покажи ответственность команды AA",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 438,
+        "pass": false
+      },
+      {
+        "id": 49,
+        "category": "colleagues",
+        "question": "Что назначено Ивану в проекте AA?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 441,
+        "pass": false
+      },
+      {
+        "id": 50,
+        "category": "colleagues",
+        "question": "Какие задачи сейчас у команды?",
+        "expected": "workload",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 432,
+        "pass": false
+      },
+      {
+        "id": 51,
+        "category": "projects",
+        "question": "Какой статус проекта AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 438,
+        "pass": false
+      },
+      {
+        "id": 52,
+        "category": "projects",
+        "question": "Как дела у проекта AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 436,
+        "pass": false
+      },
+      {
+        "id": 53,
+        "category": "projects",
+        "question": "Что происходит с проектом AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 436,
+        "pass": false
+      },
+      {
+        "id": 54,
+        "category": "projects",
+        "question": "Покажи прогресс проекта AA",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 444,
+        "pass": false
+      },
+      {
+        "id": 55,
+        "category": "projects",
+        "question": "Статус проекта AA",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 436,
+        "pass": false
+      },
+      {
+        "id": 56,
+        "category": "projects",
+        "question": "Дай статус по проекту AA",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 436,
+        "pass": false
+      },
+      {
+        "id": 57,
+        "category": "projects",
+        "question": "Что завершено в проекте AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 432,
+        "pass": false
+      },
+      {
+        "id": 58,
+        "category": "projects",
+        "question": "Что осталось сделать в проекте AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 433,
+        "pass": false
+      },
+      {
+        "id": 59,
+        "category": "projects",
+        "question": "Какие блокеры у проекта AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 432,
+        "pass": false
+      },
+      {
+        "id": 60,
+        "category": "projects",
+        "question": "Есть ли заблокированные задачи в проекте AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 433,
+        "pass": false
+      },
+      {
+        "id": 61,
+        "category": "projects",
+        "question": "Сколько задач открыто в проекте AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 418,
+        "pass": false
+      },
+      {
+        "id": 62,
+        "category": "projects",
+        "question": "Сколько задач закрыто в проекте AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 421,
+        "pass": false
+      },
+      {
+        "id": 63,
+        "category": "projects",
+        "question": "Покажи сводку проекта AA",
+        "expected": "status",
+        "actual": "brief",
+        "raw": {
+          "tool": "brief",
+          "recipeId": ""
+        },
+        "ms": 387,
+        "pass": false
+      },
+      {
+        "id": 64,
+        "category": "projects",
+        "question": "Как продвигается проект AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 422,
+        "pass": false
+      },
+      {
+        "id": 65,
+        "category": "projects",
+        "question": "Где застрял проект AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 413,
+        "pass": false
+      },
+      {
+        "id": 66,
+        "category": "projects",
+        "question": "Какие риски видны по задачам проекта AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 417,
+        "pass": false
+      },
+      {
+        "id": 67,
+        "category": "projects",
+        "question": "Что со сроками задач проекта AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 425,
+        "pass": false
+      },
+      {
+        "id": 68,
+        "category": "projects",
+        "question": "Сколько просроченных задач в проекте AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 420,
+        "pass": false
+      },
+      {
+        "id": 69,
+        "category": "projects",
+        "question": "Какие статусы у задач проекта AA?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 422,
+        "pass": false
+      },
+      {
+        "id": 70,
+        "category": "projects",
+        "question": "Статус нашего проекта",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 413,
+        "pass": false
+      },
+      {
+        "id": 71,
+        "category": "projects",
+        "question": "Как идёт текущий проект?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 417,
+        "pass": false
+      },
+      {
+        "id": 72,
+        "category": "projects",
+        "question": "Какие блокеры в текущем проекте?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 411,
+        "pass": false
+      },
+      {
+        "id": 73,
+        "category": "projects",
+        "question": "Покажи прогресс проекта",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 418,
+        "pass": false
+      },
+      {
+        "id": 74,
+        "category": "projects",
+        "question": "Что осталось по проекту?",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 419,
+        "pass": false
+      },
+      {
+        "id": 75,
+        "category": "projects",
+        "question": "Дай рабочий отчёт по проекту AA",
+        "expected": "status",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 433,
+        "pass": false
+      },
+      {
+        "id": 76,
+        "category": "guards",
+        "question": "Что такое статус проекта?",
+        "expected": "chat",
+        "actual": "chat",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 77,
+        "category": "guards",
+        "question": "Объясни, как распределять задачи в команде",
+        "expected": "chat",
+        "actual": "chat",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 78,
+        "category": "guards",
+        "question": "Что означает «задачи на мне»?",
+        "expected": "chat",
+        "actual": "clarify",
+        "raw": {
+          "tool": "clarify",
+          "question": "Что означает «задачи на мне»?"
+        },
+        "ms": 563,
+        "pass": false
+      },
+      {
+        "id": 79,
+        "category": "guards",
+        "question": "Не показывай мои задачи",
+        "expected": "chat",
+        "actual": "chat",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 80,
+        "category": "guards",
+        "question": "Не проверяй статус проекта AA",
+        "expected": "chat",
+        "actual": "chat",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 81,
+        "category": "guards",
+        "question": "«Покажи мои задачи»",
+        "expected": "chat",
+        "actual": "chat",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 82,
+        "category": "guards",
+        "question": "Если я спрошу «какие задачи на мне», что это значит?",
+        "expected": "chat",
+        "actual": "clarify",
+        "raw": {
+          "tool": "clarify",
+          "question": "Что вы имеете в виду под «задачи на мне»? Возможно, вы имеете в виду задачи, которые вы должны выполнить, или задачи, которые вам назначены в Jira?"
+        },
+        "ms": 891,
+        "pass": false
+      },
+      {
+        "id": 83,
+        "category": "guards",
+        "question": "Как лучше оценивать загрузку команды?",
+        "expected": "chat",
+        "actual": "chat",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 84,
+        "category": "guards",
+        "question": "Придумай пример статуса проекта",
+        "expected": "chat",
+        "actual": "chat",
+        "raw": {
+          "tool": "chat",
+          "recipeId": ""
+        },
+        "ms": 404,
+        "pass": true
+      },
+      {
+        "id": 85,
+        "category": "guards",
+        "question": "Переведи «мои задачи» на английский",
+        "expected": "chat",
+        "actual": "clarify",
+        "raw": {
+          "tool": "clarify",
+          "question": "Что вы имеете в виду под «мои задачи»? В Jira это может быть задачи, которые вы отмечаете как «в работе», или это что-то другое?"
+        },
+        "ms": 848,
+        "pass": false
+      },
+      {
+        "id": 86,
+        "category": "guards",
+        "question": "Покажи мои задачи и отправь их в Slack",
+        "expected": "clarify",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 442,
+        "pass": false
+      },
+      {
+        "id": 87,
+        "category": "guards",
+        "question": "Покажи задачи Анны и переназначь их мне",
+        "expected": "clarify",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 435,
+        "pass": false
+      },
+      {
+        "id": 88,
+        "category": "guards",
+        "question": "Покажи мои задачи за вчера",
+        "expected": "clarify",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 432,
+        "pass": false
+      },
+      {
+        "id": 89,
+        "category": "guards",
+        "question": "Какие задачи у меня на завтра?",
+        "expected": "clarify",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 432,
+        "pass": false
+      },
+      {
+        "id": 90,
+        "category": "guards",
+        "question": "Покажи мои задачи в Asana",
+        "expected": "clarify",
+        "actual": "personal",
+        "raw": null,
+        "ms": 0,
+        "pass": false
+      },
+      {
+        "id": 91,
+        "category": "guards",
+        "question": "Какие мои задачи в Jira и Asana?",
+        "expected": "clarify",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 433,
+        "pass": false
+      },
+      {
+        "id": 92,
+        "category": "guards",
+        "question": "Кто из коллег сейчас свободен?",
+        "expected": "clarify",
+        "actual": "chat",
+        "raw": {
+          "tool": "chat",
+          "recipeId": ""
+        },
+        "ms": 401,
+        "pass": false
+      },
+      {
+        "id": 93,
+        "category": "guards",
+        "question": "Кто сейчас онлайн в команде?",
+        "expected": "clarify",
+        "actual": "chat",
+        "raw": {
+          "tool": "chat",
+          "recipeId": ""
+        },
+        "ms": 411,
+        "pass": false
+      },
+      {
+        "id": 94,
+        "category": "guards",
+        "question": "Какой статус проекта был неделю назад?",
+        "expected": "clarify",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 432,
+        "pass": false
+      },
+      {
+        "id": 95,
+        "category": "guards",
+        "question": "А мои?",
+        "expected": "clarify",
+        "actual": "brief",
+        "raw": {
+          "tool": "brief",
+          "recipeId": ""
+        },
+        "ms": 408,
+        "pass": false
+      },
+      {
+        "id": 96,
+        "category": "guards",
+        "question": "Создай мне задачу в Jira",
+        "expected": "action",
+        "actual": "action",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 97,
+        "category": "guards",
+        "question": "Закрой мою задачу AA-12",
+        "expected": "action",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 437,
+        "pass": false
+      },
+      {
+        "id": 98,
+        "category": "guards",
+        "question": "Назначь AA-12 Анне",
+        "expected": "action",
+        "actual": "bugs",
+        "raw": {
+          "tool": "bugs",
+          "recipeId": ""
+        },
+        "ms": 435,
+        "pass": false
+      },
+      {
+        "id": 99,
+        "category": "guards",
+        "question": "Как дела?",
+        "expected": "chat",
+        "actual": "chat",
+        "raw": null,
+        "ms": 0,
+        "pass": true
+      },
+      {
+        "id": 100,
+        "category": "guards",
+        "question": "Спасибо!",
+        "expected": "chat",
+        "actual": "chat",
+        "raw": {
+          "tool": "chat",
+          "recipeId": ""
+        },
+        "ms": 407,
+        "pass": true
+      }
+    ]
+  },
+  "after": {
+    "scope": "100 routing and dispatch cases; synthetic services, no real Jira or Slack actions",
+    "passed": 100,
+    "total": 100,
+    "results": [
+      {
+        "id": 1,
+        "question": "Какие задачи на мне?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 2,
+        "question": "Покажи мои задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 3,
+        "question": "Мои задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 4,
+        "question": "Какие у меня задачи?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 5,
+        "question": "Что назначено мне?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 6,
+        "question": "Покажи задачи, назначенные мне",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 7,
+        "question": "Какие задачи назначены на меня?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 8,
+        "question": "Что у меня в работе?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 9,
+        "question": "Покажи мои открытые задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 10,
+        "question": "Мои незавершённые задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 11,
+        "question": "Список моих задач",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 12,
+        "question": "Перечисли мои задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 13,
+        "question": "Пожалуйста, покажи мои задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 14,
+        "question": "Петя, какие задачи на мне?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 15,
+        "question": "Покажи все мои задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 16,
+        "question": "Покажи мои закрытые задачи",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 17,
+        "question": "Какие из моих задач завершены?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 18,
+        "question": "Мои задачи в AA",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 19,
+        "question": "Мои задачи по проекту AA",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 20,
+        "question": "Что мне назначено в проекте AA?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 21,
+        "question": "Покажи задачи на мне в AA",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 22,
+        "question": "Какие таски на мне?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 23,
+        "question": "Покажи мои таски",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 24,
+        "question": "Что сейчас висит на мне?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 25,
+        "question": "А мои?",
+        "expected": "personal",
+        "actual": "personal",
+        "pass": true
+      },
+      {
+        "id": 26,
+        "question": "Кто чем занят в проекте AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 27,
+        "question": "Какие задачи у Анны в AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 28,
+        "question": "Что делает Борис в проекте AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 29,
+        "question": "Покажи загрузку команды AA",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 30,
+        "question": "Сколько задач у каждого в проекте AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 31,
+        "question": "На ком больше всего задач в AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 32,
+        "question": "Какие задачи назначены Анне в AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 33,
+        "question": "Что у команды в работе по проекту AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 34,
+        "question": "Кто отвечает за открытые задачи AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 35,
+        "question": "Какие задачи у разработчиков в AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 36,
+        "question": "Покажи задачи коллег в AA",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 37,
+        "question": "У кого есть просроченные задачи в AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 38,
+        "question": "Есть ли задачи без исполнителя в AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 39,
+        "question": "Покажи распределение задач по людям в AA",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 40,
+        "question": "Сколько незавершённых задач у Бориса в AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 41,
+        "question": "Какие задачи у Анны?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 42,
+        "question": "Чем занят Алексей?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 43,
+        "question": "Покажи загрузку команды",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 44,
+        "question": "Кто чем занимается?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 45,
+        "question": "Сколько задач у коллег?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 46,
+        "question": "У кого больше открытых задач?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 47,
+        "question": "Кто работает над проектом AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 48,
+        "question": "Покажи ответственность команды AA",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 49,
+        "question": "Что назначено Ивану в проекте AA?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 50,
+        "question": "Какие задачи сейчас у команды?",
+        "expected": "workload",
+        "actual": "workload",
+        "pass": true
+      },
+      {
+        "id": 51,
+        "question": "Какой статус проекта AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 52,
+        "question": "Как дела у проекта AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 53,
+        "question": "Что происходит с проектом AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 54,
+        "question": "Покажи прогресс проекта AA",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 55,
+        "question": "Статус проекта AA",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 56,
+        "question": "Дай статус по проекту AA",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 57,
+        "question": "Что завершено в проекте AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 58,
+        "question": "Что осталось сделать в проекте AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 59,
+        "question": "Какие блокеры у проекта AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 60,
+        "question": "Есть ли заблокированные задачи в проекте AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 61,
+        "question": "Сколько задач открыто в проекте AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 62,
+        "question": "Сколько задач закрыто в проекте AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 63,
+        "question": "Покажи сводку проекта AA",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 64,
+        "question": "Как продвигается проект AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 65,
+        "question": "Где застрял проект AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 66,
+        "question": "Какие риски видны по задачам проекта AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 67,
+        "question": "Что со сроками задач проекта AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 68,
+        "question": "Сколько просроченных задач в проекте AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 69,
+        "question": "Какие статусы у задач проекта AA?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 70,
+        "question": "Статус нашего проекта",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 71,
+        "question": "Как идёт текущий проект?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 72,
+        "question": "Какие блокеры в текущем проекте?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 73,
+        "question": "Покажи прогресс проекта",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 74,
+        "question": "Что осталось по проекту?",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 75,
+        "question": "Дай рабочий отчёт по проекту AA",
+        "expected": "status",
+        "actual": "status",
+        "pass": true
+      },
+      {
+        "id": 76,
+        "question": "Что такое статус проекта?",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 77,
+        "question": "Объясни, как распределять задачи в команде",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 78,
+        "question": "Что означает «задачи на мне»?",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 79,
+        "question": "Не показывай мои задачи",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 80,
+        "question": "Не проверяй статус проекта AA",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 81,
+        "question": "«Покажи мои задачи»",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 82,
+        "question": "Если я спрошу «какие задачи на мне», что это значит?",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 83,
+        "question": "Как лучше оценивать загрузку команды?",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 84,
+        "question": "Придумай пример статуса проекта",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 85,
+        "question": "Переведи «мои задачи» на английский",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 86,
+        "question": "Покажи мои задачи и отправь их в Slack",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 87,
+        "question": "Покажи задачи Анны и переназначь их мне",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 88,
+        "question": "Покажи мои задачи за вчера",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 89,
+        "question": "Какие задачи у меня на завтра?",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 90,
+        "question": "Покажи мои задачи в Asana",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 91,
+        "question": "Какие мои задачи в Jira и Asana?",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 92,
+        "question": "Кто из коллег сейчас свободен?",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 93,
+        "question": "Кто сейчас онлайн в команде?",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 94,
+        "question": "Какой статус проекта был неделю назад?",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 95,
+        "question": "А мои?",
+        "expected": "clarify",
+        "actual": "clarify",
+        "pass": true
+      },
+      {
+        "id": 96,
+        "question": "Создай мне задачу в Jira",
+        "expected": "action",
+        "actual": "action",
+        "pass": true
+      },
+      {
+        "id": 97,
+        "question": "Закрой мою задачу AA-12",
+        "expected": "action",
+        "actual": "action",
+        "pass": true
+      },
+      {
+        "id": 98,
+        "question": "Назначь AA-12 Анне",
+        "expected": "action",
+        "actual": "action",
+        "pass": true
+      },
+      {
+        "id": 99,
+        "question": "Как дела?",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      },
+      {
+        "id": 100,
+        "question": "Спасибо!",
+        "expected": "chat",
+        "actual": "chat",
+        "pass": true
+      }
+    ]
+  }
+}

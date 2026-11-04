@@ -1,0 +1,3 @@
+const assert=require('node:assert/strict');const {Dialogue}=require('../src/dialogue.cjs');let saved;
+const d=new Dialogue({state:{activeId:'topic',topics:[{id:'topic',at:Date.now(),title:'Старая тема',messages:[{role:'user',text:'Запрос'}]}]},save:s=>saved=JSON.parse(JSON.stringify(s))});
+assert.equal(d.rename('topic','  Новое название  ').topics[0].title,'Новое название');assert.equal(saved.topics[0].messages[0].text,'Запрос');assert.equal(saved.activeId,'topic');assert.throws(()=>d.rename('missing','Название'));assert.throws(()=>d.rename('topic','  '));assert.equal(d.rename('topic','а'.repeat(200)).topics[0].title.length,160);console.log('Topic rename passed');

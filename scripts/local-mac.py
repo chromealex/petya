@@ -52,6 +52,10 @@ voice = app_dir / 'runtime'
 shutil.copytree(root / 'runtime/whisper-build/bin', voice / 'whisper-build/bin', symlinks=True)
 (voice / 'models').mkdir()
 shutil.copy2(root / 'runtime/models/ggml-base.bin', voice / 'models/ggml-base.bin')
+speech_model = 'ggml-base.bin'
+if (root / 'runtime/models/ggml-small.bin').exists():
+    speech_model = 'ggml-small.bin'
+    shutil.copy2(root / 'runtime/models' / speech_model, voice / 'models' / speech_model)
 # Build-tree rpaths must not point to the developer's computer.
 for binary in (voice / 'whisper-build/bin').iterdir():
     if binary.is_symlink() or not (binary.name == 'whisper-server' or binary.suffix == '.dylib'):
@@ -82,7 +86,7 @@ with socket.socket() as probe:
     probe.bind(('127.0.0.1', 0))
     port = probe.getsockname()[1]
 with tempfile.TemporaryFile() as log:
-    server = subprocess.Popen([str(voice / 'whisper-build/bin/whisper-server'), '-m', str(voice / 'models/ggml-base.bin'), '--host', '127.0.0.1', '--port', str(port), '-t', '4'], stdout=log, stderr=log)
+    server = subprocess.Popen([str(voice / 'whisper-build/bin/whisper-server'), '-m', str(voice / 'models' / speech_model), '--host', '127.0.0.1', '--port', str(port), '-t', '4'], stdout=log, stderr=log)
     try:
         for attempt in range(90):
             if server.poll() is not None:

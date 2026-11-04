@@ -10,7 +10,7 @@ class ContextStore {
     const changed = JSON.stringify(next) !== JSON.stringify(this.items);
     if (changed) this.save(next);
     this.items = next;
-    return this.items;
+    return require('./modules.cjs').filterContext(this.items);
   }
   put(items) {
     const old = this.items;

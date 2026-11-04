@@ -149,6 +149,7 @@ class Workspace {
         if (row.state === 'done') continue;
         try {
           if (!row.key) {
+            if(this.beforeCreate)this.beforeCreate(batch.id);
             row.state = 'sending'; this.checkpoint(batch);
             const dependencyText = row.task.dependsOn.length ? '\n\nЗависимости внутри плана: ' + row.task.dependsOn.map(n => `${n + 1}. ${batch.rows[n].task.summary}`).join('; ') : '';
             const issue = await this.api('/rest/api/3/issue', { method: 'POST', body: JSON.stringify({ fields: { project: { key: batch.settings.jiraProject }, issuetype: { id: batch.settings.jiraIssueType }, summary: row.task.summary, description: adf(row.task.description + dependencyText), assignee: { accountId: row.task.assigneeId }, fixVersions: [{ id: batch.versionId }], labels: ['petya-' + batch.id] } }) }, batch.settings);
@@ -159,7 +160,7 @@ class Workspace {
           await this.api('/rest/agile/1.0/sprint/' + encodeURIComponent(batch.sprintId) + '/issue', { method: 'POST', body: JSON.stringify({ issues: [row.key] }) }, batch.settings);
           row.state = 'done'; row.error = ''; this.checkpoint(batch); await this.capture(row, batch); this.checkpoint(batch);
         } catch (error) {
-          row.state = row.key ? 'schedule-failed' : error.status >= 400 && error.status < 500 && error.status !== 408 ? 'rejected' : 'uncertain';
+          row.state = row.key ? 'schedule-failed' : error.beforeWrite ? 'rejected' : error.status >= 400 && error.status < 500 && error.status !== 408 ? 'rejected' : 'uncertain';
           row.error = error.message;
           if (row.key && row.state !== 'done') await this.capture(row, batch);
           this.checkpoint(batch); break;

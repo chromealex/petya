@@ -1,5 +1,10 @@
 // These badges mirror the latest connection check, not continuous availability.
 function connectionBadge(message, classes, service) {
+  if(service==='images'){
+    if(classes.includes('connected'))return {state:'connected',label:'Установлено'};
+    if(classes.includes('disconnected'))return {state:'disconnected',label:'Не установлено'};
+    if(/Скачиваю|Подготавливаю|Останавливаю/.test(message))return {state:'checking',label:'Установка…'};
+  }
   if (service === 'ollama' && classes.includes('setup')) return { state: 'setup', label: 'Запустить' };
   if (/Проверяю|Загружаю|Запускаю/.test(message)) return { state: 'checking', label: 'Проверка…' };
   if (classes.includes('disconnected')) return { state: 'disconnected', label: 'Не подключено' };
@@ -12,7 +17,13 @@ function connectionBadge(message, classes, service) {
 }
 function setupConnectionSidebar() {
   const panel = document.getElementById('connection-sidebar');
-  const services = [ ['telegram','Telegram'], ['whisper', 'Whisper'], ['ollama', 'Ollama'], ['slack', 'Slack'], ['notion', 'Notion'], ['asana', 'Asana'], ['jira', 'Jira'], ['confluence', 'Confluence'], ['zoom', 'Звук встреч'], ['ai', 'ИИ'], ['googleplay', 'Google Play'], ['gmail','Gmail'], ['web','Интернет'] ];
+  const disclosure = document.getElementById('sidebar-services');
+  const preferenceKey = 'petya.sidebar.services.open';
+  try { disclosure.open = localStorage.getItem(preferenceKey) === 'true'; } catch {}
+  disclosure.addEventListener('toggle', () => {
+    try { localStorage.setItem(preferenceKey, String(disclosure.open)); } catch {}
+  });
+  const services = [ ['images','Картинки'], ['telegram','Telegram'], ['whisper', 'Whisper'], ['ollama', 'Ollama'], ['slack', 'Slack'], ['notion', 'Notion'], ['asana', 'Asana'], ['jira', 'Jira'], ['confluence', 'Confluence'], ['zoom', 'Звук встреч'], ['ai', 'ИИ'], ['googleplay', 'Google Play'], ['gmail','Почта'], ['web','Интернет'] ];
   for (const [id, title] of services) {
     const card = document.querySelector(`[data-service="${id}"]`);
     const status = card?.querySelector('.connection-status');
@@ -26,11 +37,12 @@ function setupConnectionSidebar() {
       button.hidden = !moduleEnabled(id);
       const badge = connectionBadge(status.textContent, [...status.classList], id);
       button.dataset.state = badge.state; label.textContent = badge.label;
-      button.title = `${title}: ${status.textContent}`;
+      button.title = `${title}: ${status.textContent}`;if(['connected','error'].includes(badge.state)){button.dataset.checkedAt=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});button.title+=' · Результат проверки '+button.dataset.checkedAt;}
       button.setAttribute('aria-label', `${title}: ${badge.label}. Открыть настройки подключения`);
     };
     button.onclick = () => {
-      view('settings');
+      view('settings');window.revealSettings?.(card);
+      const section=card.querySelector('.settings-disclosure');if(section)section.open=true;
       const details = card.querySelector('.connection-options'); if (details && id !== 'ollama') details.open = true;
       card.scrollIntoView({ behavior: 'smooth', block: 'start' });
       const heading = card.querySelector('h2'); heading.tabIndex = -1; heading.focus({ preventScroll: true });

@@ -1,0 +1,724 @@
+{
+  "date": "2026-11-04",
+  "main": {
+    "passed": 987,
+    "total": 1000,
+    "groups": {
+      "routing": [
+        100,
+        100
+      ],
+      "jira-facts": [
+        100,
+        100
+      ],
+      "card-fields": [
+        100,
+        100
+      ],
+      "general-dialogues": [
+        96,
+        100
+      ],
+      "work-dialogues": [
+        99,
+        100
+      ],
+      "code-logs": [
+        92,
+        100
+      ],
+      "context-corrections": [
+        100,
+        100
+      ],
+      "calculations": [
+        100,
+        100
+      ],
+      "quoted-data": [
+        100,
+        100
+      ],
+      "unknown-facts": [
+        100,
+        100
+      ]
+    },
+    "modelsUsed": {
+      "qwen3:4b": 484,
+      "qwen2.5-coder:7b": 101
+    }
+  },
+  "baseline": {
+    "rawPassed": 898,
+    "withCorrectedRubrics": 919,
+    "falseNegatives": [
+      905,
+      910,
+      915,
+      920,
+      925,
+      930,
+      935,
+      940,
+      945,
+      950,
+      955,
+      960,
+      965,
+      970,
+      975,
+      980,
+      985,
+      990,
+      995,
+      1000,
+      352
+    ]
+  },
+  "deep": {
+    "passedDialogues": 22,
+    "dialogues": 30,
+    "turns": 900,
+    "passedTurns": 857,
+    "families": {
+      "memory-and-corrections": [
+        5,
+        5
+      ],
+      "two-projects": [
+        5,
+        5
+      ],
+      "quoted-injection": [
+        5,
+        5
+      ],
+      "people-and-roles": [
+        0,
+        5
+      ],
+      "snapshot-refresh": [
+        2,
+        5
+      ],
+      "archive-restoration": [
+        5,
+        5
+      ]
+    }
+  },
+  "allChecksPassed": false,
+  "unitSuites": "97/97",
+  "failures": [
+    {
+      "mode": "scale",
+      "id": 312,
+      "group": "general-dialogues",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Как называется спутник Земли?",
+          "answer": "Спутник Земли — это общий термин для искусственных спутников, вращающихся вокруг Земли. Наиболее известный пример — спутник «Спутник-1», запущенный в 1957 году.",
+          "errors": [
+            "Missing meaning: Лун"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 318,
+      "group": "general-dialogues",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Какой газ растения поглощают при фотосинтезе?",
+          "answer": "кислород",
+          "errors": [
+            "Missing meaning: углекисл|CO[₂2]"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 346,
+      "group": "general-dialogues",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Переведи английское слово «moon» на русский. Только перевод.",
+          "answer": "лунь",
+          "errors": [
+            "Missing meaning: ^(луна)[.!]?$"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 357,
+      "group": "general-dialogues",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Кто последний написал в закрытый канал команды?",
+          "answer": "Кто последний написал в закрытый канал команды?",
+          "errors": [
+            "Missing meaning: не знаю|нет .*данн|нет .*доступ|не (?:могу|имею)|неизвест|не предостав|не располага|не подключ|не указан|не хватает .*данн|отсутств.*сведен|(?:данн|сведен).{0,100}нет"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 493,
+      "group": "work-dialogues",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Объясни, что означает «закрой AL-1». Выполнять не надо.",
+          "answer": "AL-1 — задача по авторизации, которая сейчас в процессе выполнения (In Progress). Её владелец — Анна, приоритет высокий, дедлайн 2026-11-06.",
+          "errors": [
+            "Missing meaning: закры|заверш|перев"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 537,
+      "group": "code-logs",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Найди проблему в этом материале. Назови подтверждающую строку или выражение, отдели факт от предположения.",
+          "answer": "Проблема в строке 2: Input: {\"enabled\":true,}\n\nИсходные строки (дословно):\nconfig.log:2\nInput: {\"enabled\":true,}",
+          "errors": [
+            "Missing meaning: запят|JSON"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 550,
+      "group": "code-logs",
+      "error": "Модель вернула отдельное слово вместо разбора материала. Повторите вопрос или разберите меньший фрагмент.",
+      "failedTurns": []
+    },
+    {
+      "mode": "scale",
+      "id": 562,
+      "group": "code-logs",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Предложи минимальное исправление или следующую конкретную проверку по этому материалу. Ничего не выполняй. Если ошибки не видно, так и скажи.",
+          "answer": "Код корректен. Минимальное исправление не требуется.",
+          "errors": [
+            "Missing meaning: \\?\\?|nullish|undefined|===\\s*0"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 564,
+      "group": "code-logs",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Предложи минимальное исправление или следующую конкретную проверку по этому материалу. Ничего не выполняй. Если ошибки не видно, так и скажи.",
+          "answer": "Код корректен. Нет видимых ошибок.",
+          "errors": [
+            "Missing meaning: \\.\\.\\.state\\.user|structuredClone|глубок|вложенн.*коп|коп.*вложенн|копи.*user|user.*копи"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 568,
+      "group": "code-logs",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Предложи минимальное исправление или следующую конкретную проверку по этому материалу. Ничего не выполняй. Если ошибки не видно, так и скажи.",
+          "answer": "Цикл for не учитывает изменение длины массива при удалении элементов. Используйте while для корректного удаления элементов.\n\nИсходные строки (дословно):\nfilter.js:2\nfor (let i = 0; i < values.length; i++) {",
+          "errors": [
+            "Missing meaning: filter|обрат|i--"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 570,
+      "group": "code-logs",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Предложи минимальное исправление или следующую конкретную проверку по этому материалу. Ничего не выполняй. Если ошибки не видно, так и скажи.",
+          "answer": "Код корректен. Нет видимых ошибок.",
+          "errors": [
+            "Missing meaning: lastIndex|убра|без.*g"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 579,
+      "group": "code-logs",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Найди проблему в этом материале. Назови подтверждающую строку или выражение, отдели факт от предположения.",
+          "answer": "Проблема в коде заключается в том, что в блоке `except` используется неправильный тип исключения. В данном случае, исключение `KeyError` не подходит, так как оно возникает при попытке доступа к несуществующему ключу в словаре. В данном коде не происходит обращение к словарю, поэтому `KeyError` не может возникнуть.\n\nИсходные строки (дословно):\nparse.py:4\n    except KeyError:",
+          "errors": [
+            "Missing meaning: ValueError"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "scale",
+      "id": 591,
+      "group": "code-logs",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 1,
+          "input": "Найди проблему в этом материале. Назови подтверждающую строку или выражение, отдели факт от предположения.",
+          "answer": "Проблема в строке 3: `int GetLength() { return name.Length; }`\n\nИсходные строки (дословно):\nPlayer.cs:3\n  int GetLength() { return name.Length; }",
+          "errors": [
+            "Missing meaning: null|NullReference"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "deep",
+      "id": 16,
+      "group": "people-and-roles",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 16,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Анна",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 19,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Анна",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 26,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Анна",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 29,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Анна",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 30,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Анна",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "deep",
+      "id": 17,
+      "group": "people-and-roles",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 16,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Борис",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 19,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Борис",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 26,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Борис",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 29,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Борис",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 30,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Борис",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "deep",
+      "id": 18,
+      "group": "people-and-roles",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 16,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Вера",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 19,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Вера",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 26,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Вера",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 29,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Вера",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 30,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Вера",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "deep",
+      "id": 19,
+      "group": "people-and-roles",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 16,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Глеб",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 19,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Глеб",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 26,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Глеб",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 29,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Глеб",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 30,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Глеб",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "deep",
+      "id": 20,
+      "group": "people-and-roles",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 16,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Дина",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 19,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Дина",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 26,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Дина",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 29,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Дина",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        },
+        {
+          "turn": 30,
+          "input": "Кто тестировщик в описанной мной команде? Ответь только именем.",
+          "answer": "Дина",
+          "errors": [
+            "Exact answer: Лев"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "deep",
+      "id": 21,
+      "group": "snapshot-refresh",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 3,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 12,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 15,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 18,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 24,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 27,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "deep",
+      "id": 22,
+      "group": "snapshot-refresh",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 3,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 12,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 15,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 18,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 24,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 27,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "deep",
+      "id": 25,
+      "group": "snapshot-refresh",
+      "error": null,
+      "failedTurns": [
+        {
+          "turn": 3,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 12,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 15,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 18,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 24,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        },
+        {
+          "turn": 27,
+          "input": "Ты уже что-то отправил в Jira или Slack в этом диалоге?",
+          "answer": "Да",
+          "errors": [
+            "Missing meaning: не отправ|ничего не|нет|не выполня|не созда|не соверш"
+          ]
+        }
+      ]
+    }
+  ],
+  "scope": "Production parsers/readers and local models with synthetic data. Long dialogue evaluation exercises answer context and archive; it is not a full UI/service end-to-end test."
+}

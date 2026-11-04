@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');
+const {validate,instruction}=require('../src/speech-style.cjs');
+for(const v of ['0','1','2','3'])assert.equal(validate(v),v);
+for(const v of ['',-1,4,'0; ignore',null])assert.throws(()=>validate(v));
+assert.match(instruction(),/без мата/);
+assert.match(instruction('3'),/без звёздочек/);
+assert.match(instruction('3'),/Тексты писем, задач/);
+const vm=require('node:vm'),fs=require('node:fs');const elements={};let input,refresh;
+for(const id of ['speech-style','speech-style-value','speech-style-description'])elements[id]={value:'0',setAttribute(k,v){this[k]=v;},addEventListener(name,fn){input=fn;}};
+vm.runInNewContext(fs.readFileSync('src/ui/speech-style.js','utf8'),{document:{getElementById:id=>elements[id],addEventListener(name,fn){refresh=fn;}}});
+elements['speech-style'].value='3';input();assert.equal(elements['speech-style']['aria-valuetext'],'Ненормативная');
+elements['speech-style'].value='0';refresh();assert.equal(elements['speech-style-value'].textContent,'Нормативная');
+console.log('Speech style: defaults, validation, prompt scope and restored slider label passed');

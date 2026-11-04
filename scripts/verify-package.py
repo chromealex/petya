@@ -9,7 +9,8 @@ def verify(source, packaged):
     source, packaged = pathlib.Path(source), pathlib.Path(packaged)
     def manifest(root):
         return {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
-                for p in root.rglob('*') if p.is_file() and p.name != '.DS_Store'}
+                for p in root.rglob('*') if p.is_file() and p.name != '.DS_Store'
+                and not ('__pycache__' in p.relative_to(root).parts and p.suffix in {'.pyc', '.pyo'})}
     expected, actual = manifest(source), manifest(packaged)
     if expected != actual:
         missing = sorted(expected.keys() - actual.keys())

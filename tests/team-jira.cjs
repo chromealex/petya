@@ -1,0 +1,2 @@
+const assert=require('node:assert/strict'),{search}=require('../src/team-jira.cjs');
+(async()=>{const s={jiraProjects:'BW,MW2'},calls=[],w={settings:()=>s,people:async(q,settings)=>{calls.push([q,settings.jiraProject]);return [{id:'a',name:'Анна'}];}};assert.deepEqual(await search(w,'Анна'),[{id:'a',name:'Анна',projects:['BW','MW2']}]);assert.equal(calls.length,2);await assert.rejects(()=>search(w,'а'),/две/);s.module_jira='false';await assert.rejects(()=>search(w,'Анна'),/Включите/);console.log('Team Jira search: project scope, deduplication and validation passed');})();

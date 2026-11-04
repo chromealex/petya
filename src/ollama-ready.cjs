@@ -17,8 +17,9 @@ class OllamaReady {
     this.state = { phase: 'idle', busy: false, message: '' };
   }
   update(phase, message, extra = {}) { this.state = { phase, message, busy: !['idle', 'done', 'error', 'cancelled'].includes(phase), ...extra }; this.emit(this.state); return this.state; }
-  start() {
+  start(model) {
     if (this.pending) return this.pending;
+    this.selectedModel = model;
     this.controller = new AbortController();
     this.pending = this.prepare().catch(e => this.update(this.controller.signal.aborted ? 'cancelled' : 'error', this.controller.signal.aborted ? 'Запуск отменён. Загрузку модели можно продолжить следующей попыткой.' : e.message)).finally(() => { this.pending = null; });
     return this.pending;
@@ -47,7 +48,7 @@ class OllamaReady {
       if (!tags) throw new Error('Ollama пока не запустился. Повторите запуск.');
     }
     if (!Array.isArray(tags.models)) throw new Error('Ollama вернул неверный список моделей.');
-    let model = original.model;
+    let model = this.selectedModel || original.model;
     // Reuse only local models capable of text completion, never embeddings or cloud models.
     if (!model) {
       const candidates = tags.models.filter(m => typeof m.name === 'string' && !m.name.includes('cloud')).sort((a,b) => (a.size || 0) - (b.size || 0));

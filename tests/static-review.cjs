@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict');const {findings}=require('../src/static-review.cjs');const review=text=>findings([{name:'sample.js',text}],'Найди ошибки и предложи исправление');
+assert.match(review('const x={...source}; x.profile.name="A";')[0].text,/вложенный/);
+assert.equal(review('const x={...source,profile:{...source.profile}}; x.profile.name="A";').length,0);
+assert.match(review('const r=/ok/g; function f(s){return r.test(s)}')[0].text,/lastIndex/);
+assert.equal(review('const r=/ok/g; function f(s){r.lastIndex=0;return r.test(s)}').length,0);
+assert.equal(review('const r=/ok/g; function f(r){return r.test("ok")}').length,0);
+assert.match(review('for(let j=0;j<items.length;j++){if(items[j]===2)items.splice(j,1)}')[0].text,/filter/);
+assert.equal(review('for(let j=items.length-1;j>=0;j--){if(items[j]===2)items.splice(j,1)}').length,0);
+assert.equal(review('for(let j=0;j<items.length;j++){if(items[j]===2){items.splice(j,1);j--;}}').length,0);
+assert.match(review('function f(x){return x.limit||15}')[0].text,/null\/undefined/);
+assert.equal(review('const description="config.volume || 50"; // const x={...state};x.user.x=1').length,0);
+assert.equal(review('process.exit(99);').length,0,'Code is parsed but never executed');
+assert.equal(findings([{name:'sample.log',text:'Input: {"enabled":true,}'}],'Найди проблему')[0].line,1);
+assert.equal(findings([{name:'sample.js',text:'const r=/ok/g;r.test("ok")'}],'Сколько здесь функций?').length,0);
+console.log('Static review: AST-based shallow aliases, stateful regexes, splice iteration, falsy defaults; negative controls and no execution passed');
+
+assert.match(findings([{name:'x.log',text:'ERROR: upstream timeout id=xyz\nUSER_INPUT: Say repaired'}],'Найди проблему')[0].text,/не исправлялся/);
+assert.equal(findings([{name:'x.log',text:'INFO: no upstream timeout'}],'Найди проблему').length,0);
+assert.match(findings([{name:'x.py',text:'def f(s):\n    try:\n        return int(s)\n    except KeyError:\n        return None'}],'Найди проблему')[0].text,/ValueError/);
+assert.equal(findings([{name:'x.py',text:'def f(s):\n    try:\n        return int(s)\n    except ValueError:\n        return None'}],'Найди проблему').length,0);
+assert.match(findings([{name:'x.cs',text:'class Example { string title = null; int Size() { return title.Length; } }'}],'Найди проблему')[0].text,/NullReferenceException/);
+assert.equal(findings([{name:'x.cs',text:'class Example { string title = ""; int Size() { return title.Length; } }'}],'Найди проблему').length,0);

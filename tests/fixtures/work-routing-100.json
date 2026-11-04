@@ -1,0 +1,609 @@
+[
+  {
+    "id": 1,
+    "category": "personal",
+    "question": "Какие задачи на мне?",
+    "expected": "personal"
+  },
+  {
+    "id": 2,
+    "category": "personal",
+    "question": "Покажи мои задачи",
+    "expected": "personal"
+  },
+  {
+    "id": 3,
+    "category": "personal",
+    "question": "Мои задачи",
+    "expected": "personal"
+  },
+  {
+    "id": 4,
+    "category": "personal",
+    "question": "Какие у меня задачи?",
+    "expected": "personal"
+  },
+  {
+    "id": 5,
+    "category": "personal",
+    "question": "Что назначено мне?",
+    "expected": "personal"
+  },
+  {
+    "id": 6,
+    "category": "personal",
+    "question": "Покажи задачи, назначенные мне",
+    "expected": "personal"
+  },
+  {
+    "id": 7,
+    "category": "personal",
+    "question": "Какие задачи назначены на меня?",
+    "expected": "personal"
+  },
+  {
+    "id": 8,
+    "category": "personal",
+    "question": "Что у меня в работе?",
+    "expected": "personal"
+  },
+  {
+    "id": 9,
+    "category": "personal",
+    "question": "Покажи мои открытые задачи",
+    "expected": "personal"
+  },
+  {
+    "id": 10,
+    "category": "personal",
+    "question": "Мои незавершённые задачи",
+    "expected": "personal"
+  },
+  {
+    "id": 11,
+    "category": "personal",
+    "question": "Список моих задач",
+    "expected": "personal"
+  },
+  {
+    "id": 12,
+    "category": "personal",
+    "question": "Перечисли мои задачи",
+    "expected": "personal"
+  },
+  {
+    "id": 13,
+    "category": "personal",
+    "question": "Пожалуйста, покажи мои задачи",
+    "expected": "personal"
+  },
+  {
+    "id": 14,
+    "category": "personal",
+    "question": "Петя, какие задачи на мне?",
+    "expected": "personal"
+  },
+  {
+    "id": 15,
+    "category": "personal",
+    "question": "Покажи все мои задачи",
+    "expected": "personal"
+  },
+  {
+    "id": 16,
+    "category": "personal",
+    "question": "Покажи мои закрытые задачи",
+    "expected": "personal"
+  },
+  {
+    "id": 17,
+    "category": "personal",
+    "question": "Какие из моих задач завершены?",
+    "expected": "personal"
+  },
+  {
+    "id": 18,
+    "category": "personal",
+    "question": "Мои задачи в AA",
+    "expected": "personal"
+  },
+  {
+    "id": 19,
+    "category": "personal",
+    "question": "Мои задачи по проекту AA",
+    "expected": "personal"
+  },
+  {
+    "id": 20,
+    "category": "personal",
+    "question": "Что мне назначено в проекте AA?",
+    "expected": "personal"
+  },
+  {
+    "id": 21,
+    "category": "personal",
+    "question": "Покажи задачи на мне в AA",
+    "expected": "personal"
+  },
+  {
+    "id": 22,
+    "category": "personal",
+    "question": "Какие таски на мне?",
+    "expected": "personal"
+  },
+  {
+    "id": 23,
+    "category": "personal",
+    "question": "Покажи мои таски",
+    "expected": "personal"
+  },
+  {
+    "id": 24,
+    "category": "personal",
+    "question": "Что сейчас висит на мне?",
+    "expected": "personal"
+  },
+  {
+    "id": 25,
+    "category": "personal",
+    "question": "А мои?",
+    "expected": "personal",
+    "topic": {
+      "id": "tasks",
+      "kind": "tasks",
+      "jiraProject": "AA",
+      "title": "Задачи AA",
+      "messages": []
+    }
+  },
+  {
+    "id": 26,
+    "category": "colleagues",
+    "question": "Кто чем занят в проекте AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 27,
+    "category": "colleagues",
+    "question": "Какие задачи у Анны в AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 28,
+    "category": "colleagues",
+    "question": "Что делает Борис в проекте AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 29,
+    "category": "colleagues",
+    "question": "Покажи загрузку команды AA",
+    "expected": "workload"
+  },
+  {
+    "id": 30,
+    "category": "colleagues",
+    "question": "Сколько задач у каждого в проекте AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 31,
+    "category": "colleagues",
+    "question": "На ком больше всего задач в AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 32,
+    "category": "colleagues",
+    "question": "Какие задачи назначены Анне в AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 33,
+    "category": "colleagues",
+    "question": "Что у команды в работе по проекту AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 34,
+    "category": "colleagues",
+    "question": "Кто отвечает за открытые задачи AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 35,
+    "category": "colleagues",
+    "question": "Какие задачи у разработчиков в AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 36,
+    "category": "colleagues",
+    "question": "Покажи задачи коллег в AA",
+    "expected": "workload"
+  },
+  {
+    "id": 37,
+    "category": "colleagues",
+    "question": "У кого есть просроченные задачи в AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 38,
+    "category": "colleagues",
+    "question": "Есть ли задачи без исполнителя в AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 39,
+    "category": "colleagues",
+    "question": "Покажи распределение задач по людям в AA",
+    "expected": "workload"
+  },
+  {
+    "id": 40,
+    "category": "colleagues",
+    "question": "Сколько незавершённых задач у Бориса в AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 41,
+    "category": "colleagues",
+    "question": "Какие задачи у Анны?",
+    "expected": "workload"
+  },
+  {
+    "id": 42,
+    "category": "colleagues",
+    "question": "Чем занят Алексей?",
+    "expected": "workload"
+  },
+  {
+    "id": 43,
+    "category": "colleagues",
+    "question": "Покажи загрузку команды",
+    "expected": "workload"
+  },
+  {
+    "id": 44,
+    "category": "colleagues",
+    "question": "Кто чем занимается?",
+    "expected": "workload"
+  },
+  {
+    "id": 45,
+    "category": "colleagues",
+    "question": "Сколько задач у коллег?",
+    "expected": "workload"
+  },
+  {
+    "id": 46,
+    "category": "colleagues",
+    "question": "У кого больше открытых задач?",
+    "expected": "workload"
+  },
+  {
+    "id": 47,
+    "category": "colleagues",
+    "question": "Кто работает над проектом AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 48,
+    "category": "colleagues",
+    "question": "Покажи ответственность команды AA",
+    "expected": "workload"
+  },
+  {
+    "id": 49,
+    "category": "colleagues",
+    "question": "Что назначено Ивану в проекте AA?",
+    "expected": "workload"
+  },
+  {
+    "id": 50,
+    "category": "colleagues",
+    "question": "Какие задачи сейчас у команды?",
+    "expected": "workload"
+  },
+  {
+    "id": 51,
+    "category": "projects",
+    "question": "Какой статус проекта AA?",
+    "expected": "status"
+  },
+  {
+    "id": 52,
+    "category": "projects",
+    "question": "Как дела у проекта AA?",
+    "expected": "status"
+  },
+  {
+    "id": 53,
+    "category": "projects",
+    "question": "Что происходит с проектом AA?",
+    "expected": "status"
+  },
+  {
+    "id": 54,
+    "category": "projects",
+    "question": "Покажи прогресс проекта AA",
+    "expected": "status"
+  },
+  {
+    "id": 55,
+    "category": "projects",
+    "question": "Статус проекта AA",
+    "expected": "status"
+  },
+  {
+    "id": 56,
+    "category": "projects",
+    "question": "Дай статус по проекту AA",
+    "expected": "status"
+  },
+  {
+    "id": 57,
+    "category": "projects",
+    "question": "Что завершено в проекте AA?",
+    "expected": "status"
+  },
+  {
+    "id": 58,
+    "category": "projects",
+    "question": "Что осталось сделать в проекте AA?",
+    "expected": "status"
+  },
+  {
+    "id": 59,
+    "category": "projects",
+    "question": "Какие блокеры у проекта AA?",
+    "expected": "status"
+  },
+  {
+    "id": 60,
+    "category": "projects",
+    "question": "Есть ли заблокированные задачи в проекте AA?",
+    "expected": "status"
+  },
+  {
+    "id": 61,
+    "category": "projects",
+    "question": "Сколько задач открыто в проекте AA?",
+    "expected": "status"
+  },
+  {
+    "id": 62,
+    "category": "projects",
+    "question": "Сколько задач закрыто в проекте AA?",
+    "expected": "status"
+  },
+  {
+    "id": 63,
+    "category": "projects",
+    "question": "Покажи сводку проекта AA",
+    "expected": "status"
+  },
+  {
+    "id": 64,
+    "category": "projects",
+    "question": "Как продвигается проект AA?",
+    "expected": "status"
+  },
+  {
+    "id": 65,
+    "category": "projects",
+    "question": "Где застрял проект AA?",
+    "expected": "status"
+  },
+  {
+    "id": 66,
+    "category": "projects",
+    "question": "Какие риски видны по задачам проекта AA?",
+    "expected": "status"
+  },
+  {
+    "id": 67,
+    "category": "projects",
+    "question": "Что со сроками задач проекта AA?",
+    "expected": "status"
+  },
+  {
+    "id": 68,
+    "category": "projects",
+    "question": "Сколько просроченных задач в проекте AA?",
+    "expected": "status"
+  },
+  {
+    "id": 69,
+    "category": "projects",
+    "question": "Какие статусы у задач проекта AA?",
+    "expected": "status"
+  },
+  {
+    "id": 70,
+    "category": "projects",
+    "question": "Статус нашего проекта",
+    "expected": "status"
+  },
+  {
+    "id": 71,
+    "category": "projects",
+    "question": "Как идёт текущий проект?",
+    "expected": "status"
+  },
+  {
+    "id": 72,
+    "category": "projects",
+    "question": "Какие блокеры в текущем проекте?",
+    "expected": "status"
+  },
+  {
+    "id": 73,
+    "category": "projects",
+    "question": "Покажи прогресс проекта",
+    "expected": "status"
+  },
+  {
+    "id": 74,
+    "category": "projects",
+    "question": "Что осталось по проекту?",
+    "expected": "status"
+  },
+  {
+    "id": 75,
+    "category": "projects",
+    "question": "Дай рабочий отчёт по проекту AA",
+    "expected": "status"
+  },
+  {
+    "id": 76,
+    "category": "guards",
+    "question": "Что такое статус проекта?",
+    "expected": "chat"
+  },
+  {
+    "id": 77,
+    "category": "guards",
+    "question": "Объясни, как распределять задачи в команде",
+    "expected": "chat"
+  },
+  {
+    "id": 78,
+    "category": "guards",
+    "question": "Что означает «задачи на мне»?",
+    "expected": "chat"
+  },
+  {
+    "id": 79,
+    "category": "guards",
+    "question": "Не показывай мои задачи",
+    "expected": "chat"
+  },
+  {
+    "id": 80,
+    "category": "guards",
+    "question": "Не проверяй статус проекта AA",
+    "expected": "chat"
+  },
+  {
+    "id": 81,
+    "category": "guards",
+    "question": "«Покажи мои задачи»",
+    "expected": "chat"
+  },
+  {
+    "id": 82,
+    "category": "guards",
+    "question": "Если я спрошу «какие задачи на мне», что это значит?",
+    "expected": "chat"
+  },
+  {
+    "id": 83,
+    "category": "guards",
+    "question": "Как лучше оценивать загрузку команды?",
+    "expected": "chat"
+  },
+  {
+    "id": 84,
+    "category": "guards",
+    "question": "Придумай пример статуса проекта",
+    "expected": "chat"
+  },
+  {
+    "id": 85,
+    "category": "guards",
+    "question": "Переведи «мои задачи» на английский",
+    "expected": "chat"
+  },
+  {
+    "id": 86,
+    "category": "guards",
+    "question": "Покажи мои задачи и отправь их в Slack",
+    "expected": "clarify"
+  },
+  {
+    "id": 87,
+    "category": "guards",
+    "question": "Покажи задачи Анны и переназначь их мне",
+    "expected": "clarify"
+  },
+  {
+    "id": 88,
+    "category": "guards",
+    "question": "Покажи мои задачи за вчера",
+    "expected": "clarify"
+  },
+  {
+    "id": 89,
+    "category": "guards",
+    "question": "Какие задачи у меня на завтра?",
+    "expected": "clarify"
+  },
+  {
+    "id": 90,
+    "category": "guards",
+    "question": "Покажи мои задачи в Asana",
+    "expected": "clarify"
+  },
+  {
+    "id": 91,
+    "category": "guards",
+    "question": "Какие мои задачи в Jira и Asana?",
+    "expected": "clarify"
+  },
+  {
+    "id": 92,
+    "category": "guards",
+    "question": "Кто из коллег сейчас свободен?",
+    "expected": "clarify"
+  },
+  {
+    "id": 93,
+    "category": "guards",
+    "question": "Кто сейчас онлайн в команде?",
+    "expected": "clarify"
+  },
+  {
+    "id": 94,
+    "category": "guards",
+    "question": "Какой статус проекта был неделю назад?",
+    "expected": "clarify"
+  },
+  {
+    "id": 95,
+    "category": "guards",
+    "question": "А мои?",
+    "expected": "clarify"
+  },
+  {
+    "id": 96,
+    "category": "guards",
+    "question": "Создай мне задачу в Jira",
+    "expected": "action"
+  },
+  {
+    "id": 97,
+    "category": "guards",
+    "question": "Закрой мою задачу AA-12",
+    "expected": "action"
+  },
+  {
+    "id": 98,
+    "category": "guards",
+    "question": "Назначь AA-12 Анне",
+    "expected": "action"
+  },
+  {
+    "id": 99,
+    "category": "guards",
+    "question": "Как дела?",
+    "expected": "chat"
+  },
+  {
+    "id": 100,
+    "category": "guards",
+    "question": "Спасибо!",
+    "expected": "chat"
+  }
+]

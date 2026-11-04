@@ -10,7 +10,7 @@ async function prepareAgent(context) {
   finally { agentBusy = false; }
 }
 async function refreshAgents() {
-  const rows = await window.petya.agentHistory(); $('agent-history').replaceChildren();
+  const rows = await window.petya.agentHistory(); $('agent-history').replaceChildren();if(!rows.length)$('agent-history').textContent='Пока нет переданных задач. Нажмите «Передать задачу», чтобы подготовить запрос Claude или Codex.';
   for (const row of rows) {
     const card = document.createElement('article'); card.className = 'card';
     const title = document.createElement('h2'); title.textContent = agentStatus(row);

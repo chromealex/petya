@@ -90,15 +90,15 @@ async function findDocs() {
 }
 async function openWorkspace(context, route = activeJiraRoute) {
   activeJiraRoute = route;
-  activeContext = context; currentDraft = null; frozenBatch = null; batchId = crypto.randomUUID(); selectedPeople = [];
+  activeContext = context; currentDraft = null; frozenBatch = null; batchId = context.skillDraftId || crypto.randomUUID(); selectedPeople = [];
   $('draft-card').hidden = true; $('resolution').hidden = true; $('workspace-card').hidden = false;
   $('workspace-title').textContent = context.title + (currentIntent === 'jira-agent' ? ' · Jira → агент (отправка в приложении)' : ''); $('batch-tasks').replaceChildren(); $('batch-results').replaceChildren(); $('docs-list').replaceChildren(); $('plan-questions').textContent = ''; $('docs-query').value = '';
   for (const name of ['board', 'sprint', 'version']) selectOptions($('batch-' + name), [], '', 'Выберите значение');
   lockPlan(false); $('submit-batch').disabled = false; $('submit-batch').textContent = 'Создать задачи и добавить в спринт';
-  const outcomes = await Promise.allSettled([findDocs(), currentIntent === 'docs' && !activeJiraRoute ? Promise.resolve() : refreshMetadata()]);
+  const outcomes = await Promise.allSettled([context.skillDraftId?Promise.resolve():findDocs(), currentIntent === 'docs' && !activeJiraRoute ? Promise.resolve() : refreshMetadata()]);
   outcomes.forEach((result, i) => { if (result.status === 'rejected') $(i === 0 ? 'docs-status' : 'metadata-status').textContent = result.reason.message; });
   $('workspace-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  if (automaticVoiceCommand && currentIntent !== 'docs' && activeJiraRoute) await decompose();
+  if ((automaticVoiceCommand || context.skillDraftId) && currentIntent !== 'docs' && activeJiraRoute) await decompose();
 }
 function taskEditor(task = { summary: '', description: '', assigneeId: '', dependsOn: [] }) {
   const article = document.createElement('article'); article.className = 'card task-editor';
@@ -141,9 +141,10 @@ async function decompose() {
   if (automaticVoiceCommand) await continueAutomaticBatch();
 }
 function renderResult(target, record) {
-  const card = document.createElement('div'); card.className = 'context-item';
-  const heading = document.createElement('strong'); heading.textContent = `${record.project} · ${new Date(record.at).toLocaleString('ru-RU')} · ${record.id}`; card.append(heading);
-  for (const row of record.rows) { const p = document.createElement('p'); p.textContent = `${row.key || 'Без ключа'} — ${row.title}: ${states[row.state] || row.state}${row.error ? '. ' + row.error : ''}${row.key ? '\n' + record.url + '/browse/' + row.key : ''}`; card.append(p); }
+  const card=document.createElement('div');card.className='context-item';
+  const completed=record.rows.filter(row=>row.state==='done'),pending=record.rows.filter(row=>row.state!=='done');
+  const heading=document.createElement('strong');heading.textContent=record.project+' · Создано: '+completed.length+' из '+record.rows.length;card.append(heading);
+  for(const [title,rows]of [['Созданные задачи',completed],['Требуют внимания',pending]]){if(!rows.length)continue;const h=document.createElement('h3');h.textContent=title;card.append(h);for(const row of rows){const p=document.createElement('p');p.textContent=(row.key||'Без ключа')+' — '+row.title+': '+(states[row.state]||row.state)+(row.error?'. '+row.error:'');if(row.key){const a=document.createElement('a');a.textContent='Открыть задачу';a.href=record.url+'/browse/'+row.key;a.target='_blank';a.rel='noopener';p.append(document.createTextNode(' · '),a);}card.append(p);}}
   target.append(card);
 }
 async function refreshHistory() { renderHistory(await window.petya.batchHistory()); }

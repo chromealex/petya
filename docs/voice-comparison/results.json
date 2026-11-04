@@ -1,0 +1,20 @@
+[
+  {
+    "voice": "am_michael",
+    "text": "Hello, I'm here. I'll check the project in Slack and send you a short update. Which task should we start with?",
+    "synthesis_seconds": 1.184,
+    "audio_seconds": 6.845
+  },
+  {
+    "voice": "am_fenrir",
+    "text": "Hello, I'm here. I'll check the project in Slack and send you a short update. Which task should we start with?",
+    "synthesis_seconds": 0.615,
+    "audio_seconds": 6.825
+  },
+  {
+    "voice": "bm_george",
+    "text": "Hello, I'm here. I'll check the project in Slack and send you a short update. Which task should we start with?",
+    "synthesis_seconds": 1.166,
+    "audio_seconds": 7.115
+  }
+]

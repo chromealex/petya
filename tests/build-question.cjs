@@ -20,10 +20,16 @@ const {BuildQuestion,isBuildQuestion,owners}=require('../src/build-question.cjs'
  // No guessed QA recipient: use the actual source channel.
  now+=16*60000;reply=false;messages=[{...message,ts:String(now/1000)+'.000000',text:'Обсуждаем билд 123'}];await service.turn('что с билдом');assert.equal(posted.at(-1).channel,'C123');
  // Multiple context-backed owners require selection, never random recipient.
- now+=16*60000;messages=[{...message,ts:String(now/1000)+'.000000'},{user:'UOTHER',ts:String(now/1000)+'.000001',text:'Собираю билд 123'}];result=await service.turn('что с билдом');assert.equal(result.buildQuestionChoices.length,3);const count=posted.length;await service.turn('', 'channel');assert.equal(posted.length,count+1);assert.equal(posted.at(-1).channel,'C123');
+ now+=16*60000;messages=[{...message,ts:String(now/1000)+'.000000'},{user:'UOTHER',ts:String(now/1000)+'.000001',text:'Собираю билд 123'}];result=await service.turn('что с билдом');assert.equal(result.buildQuestionChoices.length,3);const count=posted.length;await service.turn('третий');assert.equal(posted.length,count+1);assert.equal(posted.at(-1).channel,'C123');
  // Ambiguous transport failure survives restart and must not resend.
  now+=16*60000;messages=[{...message,ts:String(now/1000)+'.000000'}];failSend=true;await service.turn('что с билдом');const sent=posted.length;assert.equal(state.buildQuestions.at(-1).status,'unknown');service=create();await service.turn('что с билдом');assert.equal(posted.length,sent);
  // Revocation mid-lookup prevents writes.
  let resolve;const delayed=new Promise(r=>resolve=r);const revoked=new BuildQuestion({state:{},save:()=>{},settings,enabled:()=>true,dialogue,store:{items:[],prune(){}},notify(){},now:()=>now,request:()=>delayed});const pending=revoked.turn('что с билдом');revoked.reset();resolve({ok:true,user_id:'UME'});result=await pending;assert.match(result.text,/изменились/);
+ let failLookup=true;const retryState={buildQuestions:[]};
+ const retryService=new BuildQuestion({state:retryState,save(){},settings,enabled:()=>true,dialogue,store:{items:[],prune(){}},notify(){},now:()=>now,request:async(...args)=>{if(failLookup)throw Error('No network');return request(...args);}});
+ result=await retryService.turn('что с билдом');assert(result.buildQuestionRetry);const beforeRetry=posted.length;failLookup=false;failSend=false;
+ result=await retryService.turn('повтори');assert.equal(posted.length,beforeRetry+1);assert.match(result.text,/Спросил/);
+ await retryService.turn('повтори');assert.equal(posted.length,beforeRetry+1);
+ failLookup=true;await retryService.turn('что с билдом');retryService.reset();failLookup=false;assert.equal(await retryService.turn('повтори'),null);
  console.log('Build questions: contextual recipient, channel fallback, ambiguity, send dedupe, restart, replies and revocation passed');
 })().catch(e=>{console.error(e);process.exitCode=1});

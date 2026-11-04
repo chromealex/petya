@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');const {read,summarize}=require('../src/task-metrics.cjs');
+(async()=>{const now=Date.UTC(2026,10,4),at=new Date(now-1000).toISOString(),old=new Date(now-100*86400000).toISOString();
+ const issue=(key,who,status='new')=>({key,fields:{assignee:{accountId:who},status:{statusCategory:{key:status}},updated:at}});
+ const change=(from,to,created=at)=>({created,items:[{field:'status',from,to}]});
+ const logs=new Map([['T-1',[change('1','2'),change('2','1'),change('1','2')]],['T-2',[change('1','2',old)]]]);
+ assert.deepEqual(summarize([issue('T-1','me','done'),issue('T-2','other')],logs,new Set(['2']),now-30*86400000,['me']),{closed:1,reopened:1,open:0});
+ const settings={jiraUrl:'https://example.atlassian.net',jiraProjects:'T',teamMembers:JSON.stringify([{name:'Анна',jiraId:'anna'},{name:'Борис'}])};
+ const calls=[];const w={settings:()=>settings,api:async(path,options)=>{calls.push(path);if(path.endsWith('/myself'))return{accountId:'me'};if(path.endsWith('/statuses'))return[{statuses:[{id:'1',statusCategory:{key:'new'}},{id:'2',statusCategory:{key:'done'}}]}];if(path.endsWith('/search/jql')){assert.match(JSON.parse(options.body).jql,/"me","anna"/);return{issues:[issue('T-1','me','done'),issue('T-2','anna')],isLast:true};}return{values:logs.get(path.includes('T-1')?'T-1':'T-2'),isLast:true};}};
+ const result=await read(w,{},now);assert.deepEqual(result.personal,{closed:1,reopened:1,open:0});assert.deepEqual(result.team,{closed:0,reopened:0,open:1});assert.deepEqual(result.missing,['Борис']);assert.equal(result.partial,false);await assert.rejects(()=>read(w,{project:'OTHER'},now),/недоступен/);
+ settings.teamMembers='[]';const none=await read({...w,api:async(path,options)=>path.endsWith('/search/jql')?{issues:[],isLast:true}:w.api(path,options)},{},now);assert.equal(none.team,null);
+ console.log('Task metrics: unique transitions, periods, team membership and project scope passed');})();

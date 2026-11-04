@@ -8,7 +8,7 @@ window.petyaStartAutomaticMeeting = async () => {
     meetingId = crypto.randomUUID(); autoOwnMeeting = true; window.petyaAutoMeetingActive = true;
     await meeting.start(true);
     if (generation !== autoGeneration) { meeting.stop(); return; }
-    if (config.zoomCaptureMic === 'true' && !mic.active) { autoOwnMic = true; await mic.start(); }
+    if (config.zoomCaptureMic === 'true' && !mic.active) { autoOwnMic = true; await startSelectedMicrophone(); }
     if (generation !== autoGeneration) { await window.petyaStopAutomaticMeeting(); return; }
     updateAudio(); notice('Автоматически начата расшифровка Zoom. Захватывается весь системный звук' + (autoOwnMic ? ' и микрофон.' : '.'));
     await window.petya.notify('Петя начал расшифровку встречи Zoom. Остановить можно в трее.');

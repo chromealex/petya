@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');
+const {Dialogue}=require('../src/dialogue.cjs');
+let saved;
+const dialogue=new Dialogue({save:state=>saved=structuredClone(state)});
+for(let i=0;i<80;i++)dialogue.rememberAction('Запрос '+i,'Ответ '+i);
+assert.equal(saved.topics[0].messages.length,160);
+assert.equal(saved.topics[0].messages[0].text,'Запрос 0');
+const restored=new Dialogue({state:saved});
+assert.equal(restored.active().messages.length,160);
+const {dailyBrief}=require('../src/daily-brief.cjs');
+const text=dailyBrief({records:[],reminders:[],contexts:[{source:'slack',at:Date.now(),text:'More channel actions\nClose\nThread'}],slackEnabled:true}).text;
+assert(text.includes('### Slack'));assert(!text.includes('More channel actions'));
+console.log('History survives 80 exchanges and restart; brief hides raw Slack UI text');

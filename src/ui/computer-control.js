@@ -1,0 +1,21 @@
+(()=>{
+ const $=id=>document.getElementById('computer-'+id),api=window.petya;
+ const render=s=>{document.dispatchEvent(new CustomEvent('petya-computer-status',{detail:s}));$('state').textContent=s.mode==='off'?'Управление выключено':(s.mode==='app'?'Приложение: '+s.target.name:'Весь компьютер · активное окно')+(s.persistent?' · доступ сохранён после перезапуска':'');if(s.restoreError)$('state').textContent=s.restoreError;if(s.mode!=='off'&&!s.accessGranted)$('state').textContent+=' · требуется разрешение ОС';$('start').disabled=!s.supported||s.busy;
+ const granted=s.accessGranted===true;
+ $('permission').textContent=granted?'✓ Доступ разрешён':'Разрешить доступ в macOS';
+ $('permission').disabled=granted;
+ $('permission').classList.toggle('permission-granted',granted);};
+ const run=async fn=>{try{await fn();}catch(e){$('state').textContent=e.message;}};
+ const updateMode=()=>{const desktop=$('mode').value==='desktop';$('app-field').hidden=desktop;$('app').disabled=desktop;$('refresh').hidden=desktop;};
+ const refresh=async()=>{render(await api.computerStatus());if($('mode').value==='app'){const rows=await api.computerApps();$('app').replaceChildren(...rows.map(r=>{const o=document.createElement('option');o.value=r.pid;o.textContent=r.name;return o;}));}render(await api.computerStatus());};
+ $('mode').onchange=()=>{updateMode();run(refresh);};updateMode();
+ $('refresh').onclick=()=>run(refresh);
+ $('start').onclick=()=>run(async()=>render(await api.computerStart({mode:$('mode').value,...($('mode').value==='app'?{pid:Number($('app').value)}:{})})));
+ $('stop').onclick=()=>run(async()=>render(await api.computerStop()));
+ $('permission').hidden=window.petyaPlatform!=='darwin';
+ $('permission').onclick=()=>run(async()=>render(await api.computerPermission()));
+ $('form').onsubmit=e=>{e.preventDefault();run(async()=>{const r=await api.computerCommand($('command').value);$('state').textContent=r.text||'Команда обработана';});};
+ document.getElementById('computer-control').addEventListener('toggle',()=>{if(document.getElementById('computer-control').open)run(refresh);});
+ run(async()=>{const s=await api.computerStatus();if(s.mode!=='off')$('mode').value=s.mode;updateMode();render(s);});
+ window.addEventListener('focus',()=>run(async()=>render(await api.computerStatus())));
+})();

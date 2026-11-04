@@ -1,0 +1,14 @@
+[
+  {
+    "voice": "am_michael",
+    "recognized": "Hello, I'm here. I'll check the project in Slack and send you a short update. Which task should we start with?"
+  },
+  {
+    "voice": "am_fenrir",
+    "recognized": "Hello, I'm here. I'll check the project in Slack and send you a short update. Which task should we start with?"
+  },
+  {
+    "voice": "bm_george",
+    "recognized": "Hello, I'm here. I'll check the project in Slack and send you a short update. Which task should we start with?"
+  }
+]

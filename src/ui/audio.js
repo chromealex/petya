@@ -67,16 +67,32 @@ class SpeechGate {
     const chunks=this.pre;this.pre=[];this.count=0;return {speaking,chunks};
   }
 }
+function audioTail(chunks, samples) {
+  const tail = [];
+  for (let i = chunks.length - 1; i >= 0 && samples > 0; i--) {
+    const part = chunks[i].slice(-samples); tail.unshift(part); samples -= part.length;
+  }
+  return tail;
+}
+function stitchSpeech(previous, current) {
+  const before = previous.trim().split(/\s+/), after = current.trim().split(/\s+/);
+  const normal = word => word.toLocaleLowerCase('ru').replace(/[^\p{L}\p{N}]/gu, '');
+  for (let n = Math.min(8, before.length, after.length); n >= 1; n--) {
+    if (before.slice(-n).every((word,i) => normal(word) && normal(word) === normal(after[i]))) return after.slice(n).join(' ');
+  }
+  return current;
+}
 class AudioListener {
-  constructor(onText, onError, options = {}) { this.options = options; this.onText = onText; this.onError = onError; this.active = false; this.generation = 0; }
-  async start(meeting = false) {
+  constructor(onText, onError, options = {}) { this.options = options; this.onText = onText; this.onError = onError; this.active = false; this.generation = 0; this.inFlight = 0; this.captureEpoch = 0; this.previousText = ''; this.concurrency = 2; }
+  async start(meeting = false, deviceId = '') {
     if (this.active) return;
     this.active = true; const generation = ++this.generation;
     try {
-      await window.petya.ensureSpeech();
+      const speech = await window.petya.ensureSpeech();this.engine=speech?.engine||'Whisper';
+      this.concurrency = Math.max(1, Math.min(4, Number(speech?.concurrency) || 2));
       if (!this.active || generation !== this.generation) return;
       if (!meeting && !await window.petya.permission()) throw new Error('Нет разрешения на микрофон. Разрешите его в настройках ОС.');
-      const stream = meeting ? await captureMeetingAudio() : await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
+      const stream = meeting ? await captureMeetingAudio() : await navigator.mediaDevices.getUserMedia({ audio: { ...(deviceId ? {deviceId:{exact:deviceId}} : {}), echoCancellation: true, noiseSuppression: true, autoGainControl: true }, video: false });
       if (!this.active || generation !== this.generation) { stream.getTracks().forEach(t => t.stop()); return; }
       this.stream = stream;
       const track = stream.getAudioTracks()[0];
@@ -91,37 +107,79 @@ class AudioListener {
       this.node = new AudioWorkletNode(this.context, 'pcm-capture');
       this.silence = this.context.createGain(); this.silence.gain.value = 0;
       this.source.connect(this.node); this.node.connect(this.silence); this.silence.connect(this.context.destination);
-      this.gate = new SpeechGate(this.context.sampleRate); this.chunks = []; this.samples = 0; this.quiet = 0; this.voiced = false; this.queue = []; this.busy = false; this.started = Date.now();
+      this.gate = new SpeechGate(this.context.sampleRate); this.chunks = []; this.samples = 0; this.quiet = 0; this.voiced = false; this.queue = []; this.busy = false; this.inFlight = 0; this.previousText = ''; this.overlap = false; this.captureEpoch = 0; this.started = Date.now();
+      this.lastFrameAt=Date.now();
+      this.captureWatch=setInterval(()=>{
+        if(!this.active||generation!==this.generation)return;
+        if(['suspended','interrupted'].includes(this.context.state)&&!this.resuming){
+          this.resuming=true;
+          this.context.resume().catch(error=>{if(this.active){this.stop();this.onError(error);}}).finally(()=>{this.resuming=false;});
+        }
+        if(Date.now()-this.lastFrameAt>6000){this.stop();this.onError(new Error('Микрофон перестал передавать звук. Выбери микрофон заново или выключи и включи его.'));}
+      },1000);
       this.node.port.onmessage = event => {
         if (!this.active || generation !== this.generation) return;
-        if(window.petyaSpeaking){this.gate.reset();this.chunks=[];this.samples=0;this.quiet=0;this.voiced=false;this.queue=[];this.started=Date.now();return;}
+        this.lastFrameAt=Date.now();
+        if(this.options.onLevel){let energy=0;for(const sample of event.data)energy+=sample*sample;this.options.onLevel(Math.sqrt(energy/Math.max(1,event.data.length)));}
+        if(window.petyaSpeaking){this.options.onState?.('Петя говорит — микрофон временно не распознаёт');this.gate.reset();this.chunks=[];this.samples=0;this.quiet=0;this.voiced=false;this.queue=[];this.previousText='';this.overlap=false;++this.captureEpoch;this.started=Date.now();return;}
         const chunk = event.data, duration = chunk.length / this.context.sampleRate;
         const {speaking,chunks}=this.gate.feed(chunk,this.voiced);
-        if (speaking) this.options.onSpeech?.(Date.now());
+        if (speaking) { this.lastSpeechAt=Date.now(); this.options.onSpeech?.(this.lastSpeechAt);this.options.onState?.('Слышу речь'); }
+        else if(!this.voiced&&!this.busy)this.options.onState?.('Слушаю микрофон');
         if (!this.voiced && !speaking) return;
-        if(!this.voiced)this.started=Date.now()-chunks.reduce((n,c)=>n+c.length,0)/this.context.sampleRate*1000;
+        if(!this.voiced){this.started=Date.now()-chunks.reduce((n,c)=>n+c.length,0)/this.context.sampleRate*1000;this.direct=!!this.options.allowDirect?.();}
         this.voiced = this.voiced || speaking; this.quiet = speaking ? 0 : this.quiet + duration;
         this.chunks.push(...chunks); this.samples += chunks.reduce((n,c)=>n+c.length,0);
-        if (this.voiced && (this.quiet > 0.85 || this.samples / this.context.sampleRate >= 15)) {
-          if (this.queue.length >= 3) { this.stop(); this.onError(new Error('Распознавание не успевает за аудио. Выберите более быструю модель whisper и включите запись снова.')); return; }
-          this.queue.push({ wav: toWav(this.chunks, this.context.sampleRate), at: this.started, endedAt: Date.now() });
-          this.chunks = []; this.samples = 0; this.quiet = 0; this.voiced = false; this.started = Date.now(); this.drain(generation);
+        if (this.voiced && (this.quiet > 0.65 || this.samples / this.context.sampleRate >= 8)) {
+          if (this.queue.length + this.inFlight >= 8) { this.stop(); this.onError(new Error('Распознавание не успевает за аудио. Выберите более быструю модель whisper и включите запись снова.')); return; }
+          this.queue.push({ wav: toWav(this.chunks, this.context.sampleRate), at: this.started, endedAt: Date.now(), overlap: this.overlap, direct: this.direct });
+          // Prefer a pause; retain 400 ms when continuous speech forces a cut.
+          const tail = this.quiet < 0.18 ? audioTail(this.chunks, Math.ceil(this.context.sampleRate * 0.4)) : [];
+          this.chunks = tail; this.samples = tail.reduce((n,c)=>n+c.length,0); this.quiet = 0; this.voiced = tail.length > 0; this.overlap = this.voiced;
+          this.started = Date.now() - this.samples / this.context.sampleRate * 1000; this.drain(generation);
         }
       };
     } catch (error) { this.stop(); throw error; }
   }
   async drain(generation) {
-    if (this.busy) return; this.busy = true;
-    try { while (this.active && generation === this.generation && this.queue.length) { const item = this.queue.shift(); const result = await window.petya.transcribe(item.wav); if (this.active && generation === this.generation) {if(result)await this.onText(result,item.at,item.endedAt);else this.options.onUnrecognized?.();} } }
+    if (this.busy) { this.pump?.(); return; } this.busy = true;
+    const pending = [];
+    const fill = () => {
+      while (this.active && generation === this.generation && this.inFlight < this.concurrency && this.queue.length) {
+        const item = this.queue.shift(), epoch = this.captureEpoch;
+        this.options.onState?.('Распознаю речь');
+        // Attach a rejection handler immediately, including to the second request.
+        const promise = new Promise(resolve => resolve(window.petya.transcribe(item.wav))).then(result => ({result}), error => ({error}));
+        pending.push({ item, epoch, promise }); this.inFlight++;
+      }
+    };
+    this.pump = fill;
+    try {
+      fill();
+      while (pending.length) {
+        const {item, epoch, promise} = pending.shift();
+        const {result, error} = await promise;
+        if (!this.active || generation !== this.generation) return;
+        this.inFlight--;
+        if (epoch === this.captureEpoch) {
+          if (error) throw error;
+          const text = item.overlap ? stitchSpeech(this.previousText, result || '') : result;
+          if (result) this.previousText = result;
+          if (text) {this.options.onState?.('Текст распознан');await this.onText(text, item.at, item.endedAt, item.direct);}
+          else if (!result) this.options.onUnrecognized?.();
+        }
+        fill();
+      }
+    }
     catch (error) { if (this.active && generation === this.generation) { this.stop(); this.onError(error); } }
-    finally { if (generation === this.generation) this.busy = false; }
+    finally { if (generation === this.generation) { this.busy = false; this.pump = null; } }
   }
   async flushContext() {
     if (!this.active || !this.queue) return;
     const generation = this.generation;
     if (this.voiced && this.chunks?.length) {
-      this.queue.push({ wav: toWav(this.chunks, this.context.sampleRate), at: this.started, endedAt: Date.now() });
-      this.chunks = []; this.samples = 0; this.quiet = 0; this.voiced = false; this.started = Date.now();
+      this.queue.push({ wav: toWav(this.chunks, this.context.sampleRate), at: this.started, endedAt: Date.now(), overlap: this.overlap, direct: this.direct });
+      this.chunks = []; this.samples = 0; this.quiet = 0; this.voiced = false; this.overlap = false; this.started = Date.now();
     }
     const deadline = Date.now() + 30000;
     this.drain(generation);
@@ -138,7 +196,7 @@ class AudioListener {
     this.finishing = (async () => {
       if (this.node) this.node.port.onmessage = null;
       if (this.stream) this.stream.getTracks().forEach(t => { t.onended = null; t.stop(); });
-      if (this.voiced && this.chunks?.length) this.queue.push({ wav: toWav(this.chunks, this.context.sampleRate), at: this.started, endedAt: Date.now() });
+      if (this.voiced && this.chunks?.length) this.queue.push({ wav: toWav(this.chunks, this.context.sampleRate), at: this.started, endedAt: Date.now(), overlap: this.overlap, direct: this.direct });
       this.chunks = []; this.voiced = false;
       await this.drain(generation);
       while (this.busy && generation === this.generation) await new Promise(resolve => setTimeout(resolve, 50));
@@ -147,11 +205,12 @@ class AudioListener {
     try { await this.finishing; } finally { this.finishing = null; }
   }
   stop() {
+    if(this.captureWatch){clearInterval(this.captureWatch);this.captureWatch=null;}
     this.active = false; ++this.generation; this.options.onStop?.();
     if (this.stream) this.stream.getTracks().forEach(t => { t.onended = null; t.stop(); });
     if (this.node) { this.node.port.onmessage = null; this.node.disconnect(); }
     if (this.source) this.source.disconnect();
     if (this.context && this.context.state !== 'closed') this.context.close();
-    this.queue = []; this.chunks = []; this.stream = null;
+    this.queue = []; this.chunks = []; this.stream = null; this.inFlight = 0; this.busy = false;
   }
 }

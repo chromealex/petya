@@ -1,0 +1,12 @@
+const assert = require('node:assert/strict'), path = require('node:path');
+const { bundledModel, upgradeBundledModel } = require('../src/speech-model.cjs');
+const roots = ['/app', '/checkout'];
+const base = path.join(roots[0], 'runtime/models/ggml-base.bin');
+const small = path.join(roots[0], 'runtime/models/ggml-small.bin');
+assert.equal(bundledModel(roots, p => [base, small].includes(p)), small);
+assert.equal(bundledModel(roots, p => p === base), base);
+assert.equal(bundledModel(roots, () => false), '');
+assert.equal(upgradeBundledModel(base, small, roots), small);
+assert.equal(upgradeBundledModel('/custom/ggml-base.bin', small, roots), '/custom/ggml-base.bin');
+assert.equal(upgradeBundledModel(base, '', roots), base);
+console.log('Speech model selection passed');

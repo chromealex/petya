@@ -1,0 +1,5 @@
+const modules=require('./modules.cjs'),{ready}=require('./service-access.cjs');
+const labels={telegram:'Telegram',slack:'Slack',notion:'Notion',asana:'Asana',jira:'Jira',confluence:'Confluence',ai:'Claude / Codex',googleplay:'Google Play Console',gmail:'Почта',web:'Поиск в интернете'};
+function services(settings){return modules.optional.map(id=>({id,name:labels[id],connected:['ai','web'].includes(id)?modules.enabled(settings,id):ready(id,settings)}));}
+function validate(input){if(!input||typeof input!=='object')throw Error('Некорректные настройки проекта.');const context=input.context??'';if(typeof context!=='string'||context.length>12000)throw Error('Контекст должен быть не длиннее 12 000 символов.');if(!Array.isArray(input.disabledServices)||input.disabledServices.some(id=>!modules.optional.includes(id)))throw Error('Неизвестный сервис проекта.');if(input.folder&&typeof input.folder!=='string')throw Error('Выберите папку проекта.');return {context:context.trim(),folder:input.folder||'',disabledServices:[...new Set(input.disabledServices)]};}
+module.exports={services,validate};

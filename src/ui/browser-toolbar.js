@@ -1,0 +1,3 @@
+for(const button of document.querySelectorAll('button'))button.onclick=()=>window.browserToolbar.action(button.dataset.action);
+window.browserToolbar.onState(state=>{document.getElementById('service').textContent=state.label;const address=document.getElementById('address');address.textContent=state.url;address.title=state.url;document.getElementById('read').textContent=state.actionLabel;});
+window.browserToolbar.onBusy(busy=>{document.getElementById('read').disabled=busy;});window.browserToolbar.onError(message=>{document.getElementById('address').textContent=message;document.getElementById('address').title=message;});

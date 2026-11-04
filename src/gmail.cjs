@@ -22,6 +22,7 @@ class Gmail{
    }catch(e){this.lastError=e.message;res.end(e.message);}finally{if(generation===this.generation)this.stop();}
   });
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
+  if(generation!==this.generation){server.close();throw Error('Вход отменён.');}
   const redirect='http://127.0.0.1:'+server.address().port+'/callback';
   this.pending={server,timer:setTimeout(()=>{this.lastError='Время входа истекло. Повторите подключение.';this.stop();},300000)};this.pending.timer.unref();this.lastError='';
   const url='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:client.client_id,redirect_uri:redirect,response_type:'code',scope:SCOPE,state,code_challenge:createHash('sha256').update(verifier).digest('base64url'),code_challenge_method:'S256',access_type:'offline',prompt:'consent select_account'});

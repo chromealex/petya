@@ -1,0 +1,3 @@
+const {BaseWindow,WebContentsView}=require('electron');
+// A browser surface with an independently sized page and trusted toolbar.
+module.exports=function BrowserSurface(options){const {webPreferences,...windowOptions}=options;const win=new BaseWindow(windowOptions),page=new WebContentsView({webPreferences});win.contentView.addChildView(page);win.pageView=page;win.webContents=page.webContents;win.loadURL=(...args)=>page.webContents.loadURL(...args);const fit=()=>{if(!win.toolbarHeight&&!win.isDestroyed()){const [width,height]=win.getContentSize();page.setBounds({x:0,y:0,width,height});}};win.on('resize',fit);win.on('closed',()=>{if(!page.webContents.isDestroyed())page.webContents.close();});fit();return win;};

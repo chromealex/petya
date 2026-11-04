@@ -1,4 +1,4 @@
-const optionalModules = [['telegram','Telegram'], ['slack','Slack'], ['notion','Notion'], ['asana','Asana'], ['jira','Jira'], ['confluence','Confluence'], ['ai','Claude / Codex'], ['googleplay','Google Play Console'], ['gmail','Gmail'], ['web','Поиск в интернете']];
+const optionalModules = [['telegram','Telegram'], ['slack','Slack'], ['notion','Notion'], ['asana','Asana'], ['jira','Jira'], ['confluence','Confluence'], ['ai','Claude / Codex'], ['googleplay','Google Play Console'], ['gmail','Почта · Google / Microsoft'], ['web','Поиск в интернете']];
 let moduleSettings = {};
 function moduleEnabled(name) { return moduleSettings['module_' + (['claude','codex'].includes(name) ? 'ai' : name)] !== 'false'; }
 const modulePicker = connectionNode('article', '', 'card');
@@ -21,7 +21,7 @@ function renderModules(settings) {
 }
 for (const [id, title] of optionalModules) {
   const label = connectionNode('label', '', 'check'), check = document.createElement('input'); check.type = 'checkbox'; check.dataset.module = id;
-  label.append(check, document.createTextNode(title)); modulePicker.append(label); moduleChecks.set(id, check);
+  label.append(check, document.createTextNode(title)); modulePicker.classList.add('module-picker');modulePicker.append(label); moduleChecks.set(id, check);
   check.onchange = async () => {
     const previous = moduleSettings; moduleChecks.forEach(c => c.disabled = true);
     try { renderModules(await window.petya.saveSettings({ ['module_' + id]: String(check.checked) })); notice(title + (moduleEnabled(id) ? ': модуль включён. Подключите сервис в карточке ниже.' : ': модуль выключен.')); }

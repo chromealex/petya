@@ -1,0 +1,39 @@
+const assert=require('node:assert/strict');
+const {WorkSkills,aggregate,validatedTasks,taskId,migrate}=require('../src/work-skills.cjs');
+const {JiraInsights}=require('../src/jira-insights.cjs');
+(async()=>{
+ const original={id:'old',name:'project-status',body:'# Статус проекта\nПо данным текущей темы подготовь: x',enabled:false};const migrated=migrate([original]);assert.equal(migrated[0].workflow,'project-status');assert.equal(migrated[0].enabled,false);assert.equal(migrated[0].body,original.body);assert.equal(migrated.length,3);
+ const rows=Array.from({length:35},(_,i)=>({id:String(i),key:'AA-'+i,fields:{summary:'Task '+i,status:{name:i<30?'Open':'Done',statusCategory:{key:i<30?'new':'done'}},assignee:{accountId:i%2?'one':'two',displayName:'Алексей'},duedate:'2020-01-01'}}));
+ const agg=aggregate(rows);assert.equal(agg.total,35);assert.equal(agg.open,30);assert.equal(agg.done,5);assert.equal(agg.overdue,30);assert.equal(agg.byAssignee.length,2);assert.equal(aggregate([{fields:{}}]).unknownStatus,1);
+ let jql='',requests=0;
+ const w={settings:()=>({jiraProjects:'AA,BB',jiraUrl:'https://fixture.invalid'}),pages:async()=>[{key:'AA',name:'Альфа'},{key:'BB',name:'Бета'}],api:async(route,o)=>{requests++;if(route.endsWith('/versions'))return [{id:'v',name:'1.0',released:true,releaseDate:'2020-01-01'}];if(route.includes('/project/'))return {};const body=JSON.parse(o.body);jql=body.jql;return {isLast:!!body.nextPageToken,...body.nextPageToken?{issues:rows.slice(20)}:{issues:rows.slice(0,20),nextPageToken:'next'}};}};
+ const reader=new JiraInsights(w);
+ const data=await reader.read('AA',{jiraProject:'BB',versionId:'v'},'','tasks',{wholeProject:true});assert.equal(data.data.total,35);assert.equal(data.data.issues.length,20);assert.equal(data.data.aggregate.open,30);assert(!jql.includes('fixVersion'));assert(jql.includes('"AA"'));assert(data.data.detailsTruncated);
+ for(const command of ['проект UNKNOWN','UNKNOWN','AA BB']){const r=await reader.read(command,{jiraProject:'AA'},'','tasks',{wholeProject:true});assert(r.question);assert.equal(r.options.length,2);}
+ const quote='Анна Петрова: подготовлю отчёт к пятнице.';const sources=[{name:'Встреча',text:quote}],tasks=[{summary:'Подготовить отчёт',source:0,quote,owner:'Анна Петрова',due:'к пятнице'}];
+ assert.equal(validatedTasks({tasks:[tasks[0],tasks[0]]},sources).length,1);
+ assert.throws(()=>validatedTasks({tasks:[{...tasks[0],quote:'Несуществующее поручение'}]},sources));assert.equal(validatedTasks({tasks:[{...tasks[0],owner:'Борис'}]},sources)[0].owner,'Анна Петрова');assert.equal(validatedTasks({tasks:[{...tasks[0],due:'завтра'}]},sources)[0].due,'');assert.deepEqual(validatedTasks({tasks:[]},sources),[]);assert.equal(taskId(sources),taskId(sources));assert.equal(taskId(sources),taskId([{name:'renamed.txt',text:quote}]));
+ const selected={skill:{id:'s',enabled:true,name:'meeting-tasks',workflow:'meeting-tasks',body:'Поручения'},question:'Разбери встречу'};
+ const dialogue={state:{topics:[],activeId:''},active(){return this.state.topics.find(t=>t.id===this.state.activeId);},prune(){},persist(){}};let modelCalls=0;let connection='one';
+ const workspace={history:[],metadata:async()=>({project:'AA'}),people:async()=>[{id:'anna',name:'Анна Петрова'}]};
+ const deps={skills:{list:()=>[selected.skill]},dialogue,workspace,settings:()=>({model:'test',ollamaUrl:'http://127.0.0.1:11434/api/chat'}),request:async()=>{modelCalls++;return {message:{content:JSON.stringify({tasks})}};},connection:()=>connection,meetings:()=>sources,read:async()=>data,answer:async()=>({handled:true,text:'Report'})};
+ const skill=new WorkSkills(deps);const r=await skill.turn(selected,'/meeting-tasks');assert(r.skillDraftId);assert.equal(modelCalls,1);assert.equal(workspace.history.length,0);
+ const again=await skill.turn(selected,'/meeting-tasks');assert.equal(again.skillDraftId,r.skillDraftId);assert.equal(modelCalls,1);
+ const ctx=skill.context(r.skillDraftId);assert.equal(ctx.skillDraftId,r.skillDraftId);
+ const plan=await skill.prepare(r.skillDraftId,'',{});assert.equal(plan.tasks.length,1);assert.equal(plan.tasks[0].assigneeId,'anna');assert.match(plan.tasks[0].description,/к пятнице/);
+ workspace.people=async()=>[{id:'1',name:'Анна Петрова'},{id:'2',name:'Анна Петрова'}];assert.equal((await skill.prepare(r.skillDraftId,'',{})).tasks[0].assigneeId,'');
+ workspace.history.push({id:r.skillDraftId});assert((await skill.turn(selected,'/meeting-tasks')).openHistory);assert.throws(()=>skill.draft(r.skillDraftId));assert.equal(modelCalls,1);
+ const project={skill:{id:'p',name:'status',workflow:'project-status',enabled:true},question:'unknown'};
+ skill.skills={list:()=>[project.skill]};skill.read=async(command)=>command==='AA'?data:{question:'project?',field:'jiraProject',options:[{id:'AA',label:'Альфа'}]};
+ const q=await skill.turn(project,'/status unknown');assert(q.skillChoices);assert.equal((await skill.choose(q.skillChoices[0].id)).text,'Report');await assert.rejects(()=>skill.choose(q.skillChoices[0].id));
+ const q2=await skill.turn(project,'/status unknown');dialogue.state.activeId='changed';await assert.rejects(()=>skill.choose(q2.skillChoices[0].id),/устарел/);
+ skill.read=async()=>{connection='two';return data;};await assert.rejects(()=>skill.turn(project,'/status AA'),/изменил(?:ось|ись)/);
+ const cancelled=new WorkSkills({...deps,dialogue:{...dialogue,state:{topics:[],activeId:''}},workspace:{...workspace,history:[]},request:async()=>{cancelled.reset();return {message:{content:JSON.stringify({tasks})}};}});await assert.rejects(()=>cancelled.turn(selected,'/meeting-tasks'),/удалён/);
+ const {runSkill}=require('../src/instruction-skills.cjs');let prompt;const sharedReport=await runSkill({selected:project,command:'/status',dialogue:{state:{topics:[]},active(){},prune(){},persist(){}},settings:{model:'test',ollamaUrl:'http://127.0.0.1:11434/api/chat'},request:async(u,o)=>{prompt=JSON.parse(o.body);return {message:{content:'{\"answer\":\"Отчёт\"}'}};},company:'Fixture',evidence:data});assert.match(prompt.messages[0].content,/Отсутствие блокеров не проверено/);assert(sharedReport.reportShareId);assert(sharedReport.messages.at(-1).sources.length);
+ // In-flight meeting extraction must keep the original project and connection.
+ function contextFixture(){const origin={id:'origin',jiraProject:'AA',projectMemoryId:'memory-a',messages:[]};const d={...dialogue,state:{topics:[origin],activeId:origin.id}};let conn='one',hook=()=>{};const ws={history:[],metadata:async()=>({project:'AA'}),people:async()=>[{id:'anna',name:'Анна Петрова'}]};const instance=new WorkSkills({...deps,dialogue:d,workspace:ws,connection:()=>conn,request:async()=>{hook();return {message:{content:JSON.stringify({tasks})}};}});return {instance,d,ws,origin,setHook:h=>hook=h,setConnection:c=>conn=c};}
+ let cf=contextFixture();let result=await cf.instance.turn(selected,'/meeting-tasks');assert.equal(cf.d.active().jiraProject,'AA');assert.equal(cf.d.active().projectMemoryId,'memory-a');
+ for(const change of [f=>f.origin.jiraProject='BB',f=>f.origin.projectMemoryId='memory-b',f=>f.setConnection('two')]){cf=contextFixture();cf.setHook(()=>change(cf));await assert.rejects(()=>cf.instance.turn(selected,'/meeting-tasks'),/изменились/);assert.equal(cf.d.state.topics.length,1);}
+ for(const change of [f=>f.d.active().jiraProject='BB',f=>f.d.active().projectMemoryId='memory-b',f=>f.d.state.activeId='origin']){cf=contextFixture();result=await cf.instance.turn(selected,'/meeting-tasks');cf.ws.people=async()=>{change(cf);return [{id:'anna',name:'Анна Петрова'}];};await assert.rejects(()=>cf.instance.prepare(result.skillDraftId,'',{}),/контекст изменились/);}
+ console.log('Work skills: full paginated counts, scope, ambiguous projects/people, quoted tasks, one-task plans, persistent repeat guard, stale choices and cancellation OK');
+})().catch(e=>{console.error(e);process.exitCode=1;});

@@ -4,7 +4,17 @@ class WebSearch{
  constructor({enabled,model,read,searchAPI}){Object.assign(this,{enabled,model,read,searchAPI});this.busy=false;}
  async search(raw,{resume=false}={}){if(!this.enabled())throw Error('Включите модуль «Поиск в интернете» в «Подключениях».');const query=queryText(raw);if(!query)throw Error('Что найти в интернете? Произнесите команду вместе с вопросом.');if(this.busy)throw Error('Дождитесь текущего поиска.');this.busy=true;
  try{const links=await this.searchAPI(query,resume);if(!links.length)throw Error('Поисковик не вернул доступные результаты или запросил проверку. Попробуйте позже или уточните вопрос.');
-  const pages=[];for(const link of links){if(!this.enabled())throw Error('Модуль поиска выключен.');try{const page=await this.read(link.url,{enabled:this.enabled});const text=page.text.slice(0,10000);if(text.length<150)continue;pages.push({...link,url:page.url,text});}catch{}if(pages.length===3)break;}
+  const pages=[];
+  // Read up to three independent sources together; preserve search ranking.
+  for(let offset=0;offset<links.length&&pages.length<3;){
+   if(!this.enabled())throw Error('Модуль поиска выключен.');
+   const batch=links.slice(offset,offset+3-pages.length);offset+=batch.length;
+   const results=await Promise.all(batch.map(async link=>{
+    if(!this.enabled())return null;
+    try{const page=await this.read(link.url,{enabled:this.enabled});const text=page.text.slice(0,10000);return text.length>=150?{...link,url:page.url,text}:null;}catch{return null;}
+   }));
+   pages.push(...results.filter(Boolean));
+  }
   if(!this.enabled())throw Error('Модуль поиска выключен.');if(!pages.length)return {query,text:'Нашёл ссылки, но прочитать страницы не удалось. Проверенного ответа пока нет.',sources:links,verified:false};
   let answer;try{const r=await this.model(query,pages);if(!this.enabled())throw Error('Модуль поиска выключен.');if(!r||typeof r.answer!=='string'||!r.answer.trim()||!Array.isArray(r.sources)||!r.sources.length||r.sources.some(i=>!Number.isInteger(i)||i<1||i>pages.length))throw Error('Неверные ссылки');answer=r.answer.slice(0,7000);return {query,text:answer+'\nПроверено '+new Date().toLocaleString('ru-RU')+'.'+(pages.length===1?' Удалось прочитать только один источник.':''),sources:[...new Set(r.sources)].map(i=>({title:'['+i+'] '+pages[i-1].title,url:pages[i-1].url})),verified:true};}
   catch{return {query,text:'Страницы найдены и прочитаны, но локальная модель не смогла подготовить ответ. Откройте источники ниже.',sources:pages.map(({title,url})=>({title,url})),verified:false};}

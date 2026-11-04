@@ -1,0 +1,26 @@
+const assert=require('node:assert/strict');
+const {InstructionSkills,parseMarkdown,markdown,runSkill}=require('../src/instruction-skills.cjs');
+(async()=>{
+ const sample={name:'project-status',description:'Статус: команды',body:'Ответь в формате: Итог — один факт. Не выдумывай данные.'};let saved;
+ const store=new InstructionSkills({save:state=>saved=JSON.parse(JSON.stringify(state))});const s=store.put(sample);
+ assert.deepEqual(parseMarkdown(markdown(s)),{...sample,enabled:true});assert.equal(new InstructionSkills({state:saved}).resolve('/project-status тест').question,'тест');
+ assert.equal(store.resolve('$project-status').skill.id,s.id);assert.equal(store.resolve('скилл project-status тест').question,'тест');assert.equal(store.resolve('обсуди /project-status'),null);
+ assert.throws(()=>store.put(sample),/занято/);assert.throws(()=>store.put({...sample,name:'../path'}));assert.throws(()=>store.put({...sample,body:'a'.repeat(12001)}));assert.throws(()=>store.resolve('/unknown'),/не найден/);
+ assert.throws(()=>parseMarkdown('---\nname: a\ndescription: b\nallowed-tools: bash\n---\nc'),/только/);
+ assert.equal(parseMarkdown('---\nname: a\ndescription: >\n  hello\n  world\n---\nbody').description,'hello world');
+ assert.throws(()=>parseMarkdown('---\nname: a\nname: b\ndescription: x\n---\ny'),/Повтор/);
+ store.put({...s,enabled:false});assert.throws(()=>store.resolve('/project-status'),/выключен/);store.put(s);
+ const failing=new InstructionSkills({save:()=>{throw Error('disk');}});assert.throws(()=>failing.put(sample));assert.equal(failing.list().length,0);
+ const topic={id:'one',title:'Project',messages:[],at:Date.now(),lastData:{issues:[{key:'P-1',status:'Done'}]}};
+ const dialogue={state:{topics:[topic],activeId:topic.id},active:()=>topic,prune(){},persist(){}};let calls=[];
+ const request=async(url,options)=>{calls.push(JSON.parse(options.body));return {message:{content:JSON.stringify({answer:'Итог — P-1 завершена.',understood:true})}};};
+ const settings={model:'qwen3:4b',ollamaUrl:'http://127.0.0.1:11434'};
+ const result=await runSkill({selected:store.resolve('/project-status'),command:'/project-status',dialogue,settings,request,company:'A'});
+ assert.equal(result.error,false);assert.match(calls[0].messages[0].content,/selected_skill/);assert.match(calls[0].messages[2].content,/P-1/);assert.equal(topic.messages.length,2);
+ calls=[];const retry=await runSkill({selected:store.resolve('/project-status'),command:'/project-status',dialogue,settings,request:async()=>{calls.push(1);return {message:{content:'{}'}};},company:'A'});assert.equal(retry.error,true);assert.equal(calls.length,2);
+ const {answerAttachments}=require('../src/attachment-assistant.cjs');let prompts=[];
+ await answerAttachments({settings,topic:{attachments:[{name:'notes.txt',text:'evidence'}],messages:[]},question:'Сводка',skill:s,request:async(url,options)=>{if(url.endsWith('/api/show'))return {capabilities:['completion']};prompts.push(JSON.parse(options.body));return {message:{content:'{"answer":"Итог — evidence","sourceLines":[]}'}};}});
+ assert.match(prompts[0].messages[0].content,/selected_skill/);
+ store.remove(s.id);assert.equal(store.list().length,0);assert.throws(()=>store.put(s),/удалён/);
+ console.log('instruction-skills: storage, validation, import/export, invocation, context, retries and attachment instructions OK');
+})().catch(e=>{console.error(e);process.exitCode=1;});
