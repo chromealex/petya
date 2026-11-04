@@ -7,6 +7,7 @@ class CommandProgress {
   update(state, label) { this.state = state; this.label = label; this.change(this); }
   reset() { if(this.busy)return false;this.failed=null;this.request=null;this.retryable=false;this.startedAt=0;this.update('idle','');return true; }
   cancel(){if(this.request)this.request.cancelled=true;this.failed=null;this.retryable=false;this.update('idle','Ответ остановлен');}
+  async resume(request=this.request){if(this.busy||!request?.cancelled)return false;request.cancelled=false;return this.execute(request);}
   async start(command, work) {
     if (this.busy) return false;
     this.failed = null;

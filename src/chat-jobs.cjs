@@ -15,6 +15,12 @@ class ChatJobs{
  constructor({dialogue,scope,emit=()=>{},run=fn=>fn(),converse=null,limit=10}){Object.assign(this,{dialogue,scope,emit,run,converse,limit});this.jobs=new Map();this.running=0;let changed=false;for(const t of dialogue.state.topics)if(['running','queued'].includes(t.chatJob?.state)){t.chatJob={...t.chatJob,state:'attention',label:'Запрос прерван перезапуском. Повторите его.',at:Date.now()};changed=true;}if(changed)dialogue.persist();}
  acknowledge(id,at){const topic=this.dialogue.state.topics.find(t=>t.id===id);if(!topic?.chatJob||topic.chatJob.at!==at||!['done','attention'].includes(topic.chatJob.state))return false;topic.chatJob.acknowledged=true;this.dialogue.persist();return true;}
  cancel(id){const job=this.jobs.get(id);if(!job)return false;job.cancelled=true;job.controller.abort(require('./answer-cancel.cjs').stopped());delete job.placeholder.pending;delete job.topic.lastChatResult;this.update(job.topic,'cancelled','Ответ остановлен');if(!job.started)this.jobs.delete(id);return true;}
+ async resume(id){
+  const running=this.jobs.get(id);if(running&&!running.cancelled)throw Error('Ответ уже выполняется.');if(running?.settled)await running.settled;
+  const topic=this.dialogue.state.topics.find(t=>t.id===id),last=topic?.messages.at(-1);
+  if(topic?.chatJob?.state!=='cancelled'||last?.role!=='user'||last.text!==topic.chatJob.command)throw Error('Этот ответ уже нельзя продолжить.');
+  topic.messages.pop();try{const result=this.start(id,topic.projectId,topic.chatJob.command);if(result.foreground)throw Error('Продолжите запрос в открытом чате.');return result;}catch(error){topic.messages.push(last);this.dialogue.persist();throw error;}
+ }
  busy(id){return this.jobs.has(id);}
  any(){return this.jobs.size>0;}
  update(topic,state,label){const at=Date.now();topic.chatJob={...topic.chatJob,state,label,at,finishedAt:['done','attention','cancelled'].includes(state)?at:null,acknowledged:false};this.dialogue.persist();this.emit({topicId:topic.id,job:topic.chatJob});}
@@ -34,7 +40,7 @@ class ChatJobs{
   if(!topic){topic={id:randomUUID(),projectId,title:text.trim().slice(0,80),kind:'chat',messages:[],at:Date.now(),...(project.memoryId?{projectMemoryId:project.memoryId}:{})};d.state.topics.push(topic);if(d.state.activeProjectId===projectId&&!d.active()){d.state.activeId=topic.id;delete d.state.newChat;}}
   const job={controller:new AbortController(),topic,scope:this.scope(projectId),command:text.trim(),snapshot:structuredClone(topic)};this.jobs.set(topic.id,job);job.created=!id;job.placeholder={role:'user',text:job.command,at:Date.now(),pending:true};topic.messages.push(job.placeholder);topic.at=Date.now();topic.chatJob={command:job.command,startedAt:Date.now()};delete topic.lastChatResult;this.update(topic,'queued','В очереди');queueMicrotask(()=>this.pump());return {topicId:topic.id,messages:topic.messages,job:topic.chatJob};
  }
- pump(){for(const job of this.jobs.values()){if(this.running>=this.limit)break;if(job.started)continue;job.started=true;this.running++;require('./answer-cancel.cjs').run(job.controller.signal,()=>this.execute(job)).catch(error=>this.emit({topicId:job.topic.id,job:{state:'attention',label:error.message}})).finally(()=>{this.jobs.delete(job.topic.id);this.running--;this.pump();});}}
+ pump(){for(const job of this.jobs.values()){if(this.running>=this.limit)break;if(job.started)continue;job.started=true;this.running++;job.settled=require('./answer-cancel.cjs').run(job.controller.signal,()=>this.execute(job)).catch(error=>this.emit({topicId:job.topic.id,job:{state:'attention',label:error.message}})).finally(()=>{this.jobs.delete(job.topic.id);this.running--;this.pump();});}}
  async execute(job){const {topic,snapshot,command}=job,d=this.dialogue;
   this.update(topic,'running','Готовлю ответ');
   if(this.converse)return this.executeFull(job);
