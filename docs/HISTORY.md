@@ -1,6 +1,6 @@
-# Петя — история возможностей по версиям
+# Petya — feature history by version
 
-Подробные заметки к версиям 0.2–0.8.3. Краткое описание проекта — в [README](../README.md).
+Detailed notes for versions 0.2–0.8.3, written in Russian before the switch to English documentation. Project overview: [README](../README.md).
 
 
 

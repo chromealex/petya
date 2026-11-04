@@ -1,32 +1,37 @@
-# Сборки Пети
+# Language
 
-- Пользователь требует один актуальный билд на платформу: `/Users/aleksandrfeer/Projects/Peter/Petya.app` для macOS и `/Users/aleksandrfeer/Projects/Peter/Petya-Setup.exe` для Windows.
-- Собирать только через `python3 scripts/build.py` (`--mac`, `--win`, либо обе платформы без флага). Команды npm перенаправлены на этот сценарий.
-- Не создавать резервные, датированные или версионные `.app`, EXE, ZIP, DMG и копии билдов в других каталогах. Новая проверенная сборка заменяет текущую по тому же пути.
-- Временная сборка допустима только в системном временном каталоге на время процесса; удалять её после успеха и ошибки. Не запускать несколько сборок одновременно.
-- Копировать весь `src`, а не отдельные изменённые файлы. До публикации сверять состав и содержимое через `scripts/verify-package.py`; для macOS проверять подпись прежнего Developer ID и запуск установленного приложения.
-- Не удалять исходники, зависимости Electron, runtime распознавания, настройки пользователя и ключи при очистке билдов.
+- Write commit messages, documentation (README, AGENTS.md, `docs/`), and code comments in English.
+- Petya's user-facing text stays in Russian: UI strings, spoken replies, model prompts, and test scenarios that check Russian answers.
 
-# Иконка Пети в интеграциях
+# Builds
 
-- Во всех ботах, OAuth-приложениях и интеграциях Пети обязательно устанавливать иконку Пети на стороне соответствующего сервиса, включая новые интеграции. Использовать готовый ассет `assets/app-icon.png`.
-- При создании или настройке интеграции сохранять иконку и проверять её отображение в сервисе. Если сервис не поддерживает иконку или нет доступа к её настройке, явно сообщать об этом пользователю.
+- The user requires exactly one current build per platform: `/Users/aleksandrfeer/Projects/Peter/Petya.app` for macOS and `/Users/aleksandrfeer/Projects/Peter/Petya-Setup.exe` for Windows.
+- Build only with `python3 scripts/build.py` (`--mac`, `--win`, or both platforms without a flag). The npm build commands redirect to this script.
+- Do not create backup, dated, or versioned `.app`, EXE, ZIP, or DMG files, or copies of builds in other folders. A new verified build replaces the current one at the same path.
+- A temporary build is allowed only in the system temp directory for the duration of the process; delete it after both success and failure. Never run several builds at once.
+- Copy the whole `src`, not individual changed files. Before publishing, check the package contents with `scripts/verify-package.py`; on macOS, verify the signature with the existing Developer ID and that the installed app launches.
+- When cleaning builds, never delete sources, Electron dependencies, the speech-recognition runtime, user settings, or keys.
 
-# Контекст Slack
+# Petya's icon in integrations
 
-- Требование пользователя: назначение канала («разработка», «QA») не является однозначным адресом. `jw-bw-dev` и `jw-mw-dev` относятся к разным проектам. Не создавать глобальное соответствие «разработка → один канал».
-- Для чтения, заполнения команды и особенно отправки сообщений учитывать текущую компанию, явно выбранный проект и исходный тред. Если контекст не даёт единственного адресата, уточнять голосом проект или канал с конкретными вариантами. Не выбирать первый или самый свежий канал по умолчанию.
-- Явно названный точный канал имеет приоритет. При смене темы, проекта или подключения повторно проверять прежний выбор. Не распространять выбор из одного проекта на другой.
+- Every bot, OAuth app, and integration of Petya must have Petya's icon set on the service side, including new integrations. Use the existing asset `assets/app-icon.png`.
+- When creating or configuring an integration, save the icon and check that the service displays it. If the service does not support an icon or there is no access to its settings, tell the user explicitly.
 
-# Качество ответов: без заплаток в промпте
+# Slack context
 
-- Не добавлять правила, справки и частные случаи в системный промпт `src/dialogue-request.cjs` ради прохождения отдельных сценариев (scale-eval, answer-100 и т. п.). Маленькая локальная модель теряет разговор под длинным списком правил: тесты зеленеют, живой диалог глупеет. Базовый промпт держать коротким (тест `answer-request` ограничивает длину).
-- Проваленный сценарий чинить в данных, маршрутизации, извлечении сведений или в самом сценарии, если он ошибочен. Если без изменения промпта никак — заменить или обобщить существующее правило, а не дописать новое, и проверить на длинных диалогах.
-- История разговора передаётся модели репликами `user`/`assistant`, а не строкой внутри справочных данных. Не возвращать прежнюю схему.
-- Не отключать защиту от повторов (`src/answer-repeat.cjs`) и не возвращать `temperature: 0` для обычного диалога.
-- Сценарии проверять не только из 1–2 реплик: продолжения («а он?», «нет, другое»), повторный вопрос (ответ не должен совпадать с прошлым), смена темы и поправка в разговоре из 5–10 реплик.
+- User requirement: a channel's purpose ("development", "QA") is not an unambiguous address. `jw-bw-dev` and `jw-mw-dev` belong to different projects. Do not create a global "development → one channel" mapping.
+- For reading, team fill-in, and especially sending messages, take into account the current company, the explicitly selected project, and the source thread. If the context does not yield a single recipient, ask by voice for the project or channel with concrete options. Never pick the first or most recent channel by default.
+- An explicitly named exact channel takes priority. Re-check the previous choice when the topic, project, or connection changes. Do not carry a choice over from one project to another.
 
-# Совместная работа агентов
+# Answer quality: no prompt patches
 
-- В этой папке могут работать несколько агентов. Перед началом смотреть `git status` и `git log -5`; не перезаписывать файлы целиком по старой копии, а править точечно.
-- Коммитить небольшими законченными шагами, только свои файлы (`git add <файлы>`, не `git add -A`), с прогнанными тестами.
+- Do not add rules, reference notes, or special cases to the system prompt in `src/dialogue-request.cjs` just to make individual scenarios pass (scale-eval, answer-100, etc.). A small local model loses the conversation under a long list of rules: tests turn green while live dialogue gets dumber. Keep the base prompt short (the `answer-request` test limits its length).
+- Fix a failing scenario in the data, routing, or evidence extraction — or fix the scenario itself if it is wrong. If the prompt really must change, replace or generalize an existing rule instead of appending a new one, and check long dialogues.
+- Conversation history is sent to the model as `user`/`assistant` turns, not as a string inside the reference data. Do not bring back the old scheme.
+- Do not disable the repeat guard (`src/answer-repeat.cjs`) and do not return to `temperature: 0` for ordinary dialogue.
+- Test scenarios beyond 1–2 turns: follow-ups ("а он?", "нет, другое"), a repeated question (the answer must not match the previous one), topic changes, and corrections in conversations of 5–10 turns (`tests/long-dialogue-live.cjs`).
+
+# Working alongside other agents
+
+- Several agents may work in this folder at the same time. Before starting, check `git status` and `git log -5`; edit files in place instead of overwriting them from an old copy.
+- Commit in small, complete steps, only your own files (`git add <files>`, not `git add -A`), with tests passing.
