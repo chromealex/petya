@@ -164,6 +164,7 @@ class Dialogue {
      result.by=result.by||{bugs:'Jira: баги',anr:'Google Play: ANR',tasks:'Jira: задачи'}[kind];
     }else {const answer=await this.answer(text,active,unclear);result=typeof answer==='string'?{text:answer}:{...answer};if(active.answeredBy&&!result.by)result.by=active.answeredBy;delete active.answeredBy;}
    }catch(error){result={text:'Не удалось проверить данные: '+error.message,error:true};}
+   require('./answer-cancel.cjs').check();
    if(result.title && before.lastData && result.title!==before.title){
     const changed={...active,id:randomUUID(),messages:[{role:'user',text,at:this.now()}]};
     Object.assign(active,before);

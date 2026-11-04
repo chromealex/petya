@@ -148,6 +148,9 @@ async function request(url, options = {}) {
   return directRequest(target.url, target.options);
 }
 async function directRequest(url, options = {}) {
+  require('./answer-cancel.cjs').check();
+  const cancelSignal=require('./answer-cancel.cjs').signal();
+  if(cancelSignal)options={...options,signal:options.signal?AbortSignal.any([options.signal,cancelSignal]):cancelSignal};
   const {onAnswerChunk,...fetchOptions}=options;
   const response = await fetch(url, { ...fetchOptions, redirect: 'error', signal: options.signal ? AbortSignal.any([options.signal,AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000) });
   if (!response.ok) { const retryAfter = Math.max(1, Number(response.headers.get('retry-after')) || 60); const slack = new URL(url).hostname === 'slack.com'; const error = new Error(slack && response.status === 429 ? `Slack временно ограничил запросы (HTTP 429). Повторите через ${Math.ceil(retryAfter)} с. Это ограничение Slack, а не голоса или обычного диалога Пети.` : `Сервис вернул HTTP ${response.status}${response.status === 429 ? '. Достигнут лимит запросов; повторите позже.' : ''}`); error.status = response.status; error.retryAfter = retryAfter; throw error; }
@@ -156,10 +159,13 @@ async function directRequest(url, options = {}) {
   return response.json();
 }
 const projectOperations=new Set(['prepareVoice','converse','interpret','attachmentInspect','attachmentImport','attachmentAdd','attachmentPick','attachmentVideoFile','plan','draft','prepareBatch','submitBatch','createIssue','skillsContinue','skillsDraft','webSearchOpen','webSearchContinue','dailyBrief','searchDocs','slackRequestReply','projectMemoryReply','teamFillReply','buildQuestionSelect','reviewSelect','repairSelect','reportShareOpen','reportShareSend','serviceBrowserRead','serviceBrowserOpen','integrationChoice','routeAgent','agentChat','prepareAgent','handoffBatch','routeJira','asanaVoicePrepare','asanaPreview','asanaApply']);
+const foregroundAnswers=new Map();
+const cancellableAnswers=new Set(['converse','attachmentInspect','plan','draft','dailyBrief','webSearchContinue']);
 function handle(name, fn) { ipcMain.handle('petya:' + name, async (event, ...args) => {
   if (event.sender !== win.webContents || event.senderFrame !== win.webContents.mainFrame || event.senderFrame.url !== entry) throw new Error('Недопустимый источник запроса.');
   if(switchingCompany)throw Error('Переключаю компанию. Дождитесь открытия Пети.');
-  activeOperations++;try{return await requestProgress.run(name,label=>{if(!event.sender.isDestroyed())event.sender.send('request-progress',label);},()=>require('./answer-stream.cjs').run(chunk=>{if(!event.sender.isDestroyed())event.sender.send('answer-chunk',chunk);},()=>modules.withProject(projectOperations.has(name)?dialogue?.state.projects.find(p=>p.id===dialogue.state.activeProjectId):null,()=>projectOperations.has(name)&&dialogue?dialogue.within(dialogue.state.activeId,dialogue.state.activeProjectId,()=>fn(...args)):fn(...args))));}finally{activeOperations--;}
+  const controller=cancellableAnswers.has(name)?new AbortController():null,answerTopic=dialogue?.state.activeId||'';if(controller){if(!foregroundAnswers.has(answerTopic))foregroundAnswers.set(answerTopic,new Set());foregroundAnswers.get(answerTopic).add(controller);}
+  activeOperations++;try{return await require('./answer-cancel.cjs').run(controller?.signal,()=>requestProgress.run(name,label=>{if(!event.sender.isDestroyed())event.sender.send('request-progress',label);},()=>require('./answer-stream.cjs').run(chunk=>{if(!event.sender.isDestroyed())event.sender.send('answer-chunk',chunk);},()=>modules.withProject(projectOperations.has(name)?dialogue?.state.projects.find(p=>p.id===dialogue.state.activeProjectId):null,()=>projectOperations.has(name)&&dialogue?dialogue.within(dialogue.state.activeId,dialogue.state.activeProjectId,()=>fn(...args)):fn(...args)))));}finally{activeOperations--;if(controller){foregroundAnswers.get(answerTopic)?.delete(controller);if(!foregroundAnswers.get(answerTopic)?.size)foregroundAnswers.delete(answerTopic);}}
 }); }
 function saveSettings(input, internal = false) {
     if(typeof input.microsoftCredential==='string'&&input.microsoftCredential.length>200000)throw Error('Too many Microsoft accounts.');
@@ -853,6 +859,7 @@ function setupHandlers() {
   };
   handle('converse',(command,choice)=>converseTurn(command,choice));
   const chatJobs=new (require('./chat-jobs.cjs').ChatJobs)({dialogue,scope:projectId=>JSON.stringify([companyId,settings.model,settings.ollamaUrl,settings.jiraUrl,settings.jiraProjects,settings.module_jira,settings.jiraToken,settings.atlassianCredential,projectMemory.state.projects.filter(m=>dialogue.state.projects.find(p=>p.id===projectId)?.memoryId===m.id||dialogue.state.topics.some(t=>t.projectId===projectId&&t.projectMemoryId===m.id)),dialogue.state.projects.filter(p=>p.id===projectId).map(p=>({id:p.id,context:p.context,folder:p.folder,folders:p.folders,disabledServices:p.disabledServices}))]),emit:event=>{if(!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('chat-job',event);},run:(work,progress,projectId)=>modules.withProject(dialogue.state.projects.find(p=>p.id===projectId),()=>requestProgress.run('converse',progress,()=>require('./answer-stream.cjs').run(()=>{},work))),converse:command=>converseTurn(command,undefined,true),limit:10});
+  handle('chatAnswerStop',id=>{const stopped=chatJobs.cancel(id);for(const controller of foregroundAnswers.get(id)||[])controller.abort(require('./answer-cancel.cjs').stopped());return {stopped};});
   handle('chatJobAcknowledge',(id,at)=>chatJobs.acknowledge(id,at));
   handle('chatJobStart',(id,projectId,command)=>chatJobs.start(id,projectId,command));
   handle('chatJobFinish',(id,state,result)=>chatJobs.finishForeground(id,state,result));

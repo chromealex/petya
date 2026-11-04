@@ -1,6 +1,8 @@
 // Pace presentation only: complete responses remain available in stored history.
 (()=>{
  const active=new Set();let voice=null;
+ window.answerPaceBusy=()=>active.size>0;
+ window.stopAnswerPace=()=>{for(const task of [...active])task.stop();};
  window.answerVoiceBegin=()=>{voice={offset:0,audio:null,length:0};};
  window.answerVoiceSegment=(audio,text)=>{if(!voice)window.answerVoiceBegin();voice.audio=audio;voice.length=text.length;};
  window.answerVoiceSegmentEnd=()=>{if(voice){voice.offset+=voice.length;voice.length=0;voice.audio=null;}};
