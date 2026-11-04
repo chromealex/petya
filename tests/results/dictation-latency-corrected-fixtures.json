@@ -1,0 +1,159 @@
+{
+  "model": "qwen3.5:9b",
+  "method": "Synthetic Silero Eugene PCM replayed at real-time speed through production AudioListener, Qwen ASR, VoiceTurn, IPC converse and speech playback. Output muted. Warm ASR/TTS. Speech end = last non-silent fixture sample plus 10 ms. No live microphone measurement.",
+  "cases": [
+    {
+      "drafts": false,
+      "transcripts": [
+        {
+          "text": "Расскажи про язык Java. Нет, лучше про Java Script.",
+          "afterEndMs": -1376.550000011921
+        },
+        {
+          "text": "Джаваскрипт. Ответ одним предложением.",
+          "afterEndMs": 711.9499999880791
+        }
+      ],
+      "preparations": [],
+      "startedAt": "2026-11-04T19:53:18.629Z",
+      "inputDurationMs": 4137.25,
+      "speechEndFromStartMs": 4262.149999976158,
+      "inputEndedJitterMs": 54.64999997615814,
+      "finalTranscript": "Расскажи про язык Java. Нет, лучше про Java Script. Джаваскрипт. Ответ одним предложением.",
+      "dispatchMs": 1669.75,
+      "firstTextMs": 2541.25,
+      "textMs": 3022.649999976158,
+      "answer": "JavaScript — это динамически типизированный язы программирования с поддержкой объектно-ориентированного и функционального стилей написания кода, который выполняется в браузере или на сервере.",
+      "replyError": false,
+      "routing": {
+        "handled": true,
+        "by": "модель qwen3.5:9b",
+        "resolvedCommand": "Расскажи про язык Java. Нет, лучше про Java Script. Джаваскрипт. Ответ одним предложением."
+      },
+      "firstVoiceMs": 8703.350000023842,
+      "id": "topic-correction",
+      "input": "Расскажи про язык Java, нет, лучше про JavaScript. Ответь одним предложением.",
+      "meaningPassed": true
+    },
+    {
+      "drafts": true,
+      "transcripts": [
+        {
+          "text": "Расскажи про язык Java. Нет, лучше про JavaScript.",
+          "afterEndMs": -1420.1499999761581
+        },
+        {
+          "text": "Ответь одним предложением.",
+          "afterEndMs": 648.8500000238419
+        }
+      ],
+      "preparations": [
+        {
+          "text": "Расскажи про язык Java. Нет, лучше про JavaScript.",
+          "afterEndMs": -1420.1499999761581
+        },
+        {
+          "text": "Расскажи про язык Java. Нет, лучше про JavaScript. Ответь одним предложением.",
+          "afterEndMs": 648.8500000238419
+        }
+      ],
+      "startedAt": "2026-11-04T19:53:31.616Z",
+      "inputDurationMs": 4137.25,
+      "speechEndFromStartMs": 4264.350000023842,
+      "inputEndedJitterMs": 19.850000023841858,
+      "finalTranscript": "Расскажи про язык Java. Нет, лучше про JavaScript. Ответь одним предложением.",
+      "dispatchMs": 1629.25,
+      "textMs": 2128.75,
+      "firstTextMs": 2128.75,
+      "answer": "JavaScript — это популярный язы программирования для веб-разработки, который работает в браузерах и на серверах.",
+      "replyError": false,
+      "routing": {
+        "handled": true,
+        "by": "модель qwen3.5:9b",
+        "resolvedCommand": "Расскажи про язык Java. Нет, лучше про JavaScript. Ответь одним предложением."
+      },
+      "firstVoiceMs": 6131.350000023842,
+      "id": "topic-correction",
+      "input": "Расскажи про язык Java, нет, лучше про JavaScript. Ответь одним предложением.",
+      "meaningPassed": true
+    },
+    {
+      "drafts": true,
+      "transcripts": [
+        {
+          "text": "Создай задачу в Джира нет ничего не создавай.",
+          "afterEndMs": -1698.7083333333321
+        },
+        {
+          "text": "Просто скажи, что не будешь создавать задачу.",
+          "afterEndMs": 444.59166661898416
+        }
+      ],
+      "preparations": [
+        {
+          "text": "Создай задачу в Джира нет ничего не создавай.",
+          "afterEndMs": -1698.608333369095
+        },
+        {
+          "text": "Создай задачу в Джира нет ничего не создавай. Просто скажи, что не будешь создавать задачу.",
+          "afterEndMs": 444.691666642826
+        }
+      ],
+      "startedAt": "2026-11-04T19:53:42.035Z",
+      "inputDurationMs": 4370.708333333333,
+      "speechEndFromStartMs": 4509.208333333332,
+      "inputEndedJitterMs": 1.6916666428260214,
+      "unrecognized": 1,
+      "finalTranscript": "Создай задачу в Джира нет ничего не создавай. Просто скажи, что не будешь создавать задачу.",
+      "dispatchMs": 1377.991666654747,
+      "textMs": 1397.5916666189842,
+      "firstTextMs": 1397.5916666189842,
+      "replyError": true,
+      "routing": {
+        "handled": false,
+        "resolvedCommand": "Создай задачу в Джира нет ничего не создавай. Просто скажи, что не будешь создавать задачу."
+      },
+      "error": "No conversational answer: returned to action routing",
+      "id": "action-cancelled",
+      "input": "Создай задачу в Jira, нет, ничего не создавай. Просто скажи, что не будешь создавать задачу.",
+      "meaningPassed": false
+    },
+    {
+      "drafts": false,
+      "transcripts": [
+        {
+          "text": "Создай задачу в Джира нет ничего не создавай.",
+          "afterEndMs": -1681.0083333452567
+        },
+        {
+          "text": "Просто скажи, что не будешь создавать задачу.",
+          "afterEndMs": 450.9916666547433
+        }
+      ],
+      "preparations": [],
+      "startedAt": "2026-11-04T19:53:47.945Z",
+      "inputDurationMs": 4370.708333333333,
+      "speechEndFromStartMs": 4498.708333333336,
+      "inputEndedJitterMs": 11.291666666664241,
+      "unrecognized": 1,
+      "finalTranscript": "Создай задачу в Джира нет ничего не создавай. Просто скажи, что не будешь создавать задачу.",
+      "dispatchMs": 1386.6916666428224,
+      "textMs": 1400.2916666666642,
+      "firstTextMs": 1400.2916666666642,
+      "replyError": true,
+      "routing": {
+        "handled": false,
+        "resolvedCommand": "Создай задачу в Джира нет ничего не создавай. Просто скажи, что не будешь создавать задачу."
+      },
+      "error": "No conversational answer: returned to action routing",
+      "id": "action-cancelled",
+      "input": "Создай задачу в Jira, нет, ничего не создавай. Просто скажи, что не будешь создавать задачу.",
+      "meaningPassed": false
+    }
+  ],
+  "warmup": {
+    "modelMs": 94,
+    "asrMs": 796,
+    "ttsMs": 2396
+  }
+}
