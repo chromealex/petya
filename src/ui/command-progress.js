@@ -6,6 +6,7 @@ class CommandProgress {
   }
   update(state, label) { this.state = state; this.label = label; this.change(this); }
   reset() { if(this.busy)return false;this.failed=null;this.request=null;this.retryable=false;this.startedAt=0;this.update('idle','');return true; }
+  cancel(){if(this.request)this.request.cancelled=true;this.failed=null;this.retryable=false;this.update('idle','Ответ остановлен');}
   async start(command, work) {
     if (this.busy) return false;
     this.failed = null;
@@ -21,6 +22,7 @@ class CommandProgress {
       if (this.state === 'working') this.update('done', 'Готово');
       return true;
     } catch (error) {
+      if(request.cancelled){this.failed=null;this.update('idle','Ответ остановлен');return false;}
       this.failed = this.retryable ? request : null;
       this.update('error', String(error.message || error) + (this.failed
         ? ' Запрос сохранён. Скажите «повтори».'
@@ -29,9 +31,11 @@ class CommandProgress {
     } finally { this.busy = false; this.change(this); }
   }
   async step(key, label, action, retryable = false) {
+    if(this.request.cancelled)throw Error('Ответ остановлен.');
     if (this.request.cache.has(key)) return this.request.cache.get(key);
     this.retryable = retryable; this.update('working', label);
     const value = await action();
+    if(this.request.cancelled)throw Error('Ответ остановлен.');
     this.request.cache.set(key, value);
     // Code outside a known safe step must not inherit its retry permission.
     this.retryable = false;
