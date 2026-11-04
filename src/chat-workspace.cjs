@@ -32,7 +32,7 @@ function register(ctx) {
       ...(topic.excludedFiles || []).map(f => ({id:f.id, name:f.name, enabled:false}))
     ]};
   });
-  ctx.handle('chatVersionEdit', (id,index,value) => {
+  ctx.handle('chatVersionEdit', (id,index,value,saveAsDraft=false) => {
     const topic = get(id,true), message = topic.messages[index];
     const command = typeof value === 'string' ? value.trim() : '';
     if (!Number.isInteger(index) || message?.role !== 'user' || !command || command.length>4000) throw Error('Проверьте текст сообщения.');
@@ -48,6 +48,7 @@ function register(ctx) {
     topic.versionIndex=versions.length;
     versions.push(null);
     topic.versions=versions;
+    if (saveAsDraft) (ctx.dialogue.state.composerDrafts ||= {})[id]=command;
     ctx.dialogue.persist();
     return {topicId:id,command};
   });

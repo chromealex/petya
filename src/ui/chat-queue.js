@@ -17,6 +17,11 @@
   draftsLoaded=true;
   if(!$('command').value)$('command').value=drafts.get(queueTopic)||'';
  }).catch(e=>notice(e.message,true));
+ window.applyExternalChatDraft=(owner,value)=>{
+  const previous=drafts.get(owner)||'';
+  drafts.set(owner,value);
+  if(owner===queueTopic && $('command').value===previous)$('command').value=value;
+ };
  const flushDraft=()=>saveDraft(queueTopic,$('command').value);
  let saveTimer;
  $('command').addEventListener('input',()=>{clearTimeout(saveTimer);saveTimer=setTimeout(flushDraft,120);});
