@@ -1,5 +1,6 @@
 const fs = require('fs');
 module.exports = async (win, workspace) => {
+  if(process.env.PETYA_E2E_SPECULATIVE==='1'){await require('./speculative-answer-ui.cjs')(win);return;}
   if(process.env.PETYA_E2E_PARALLEL==='1'){await require('./parallel-chats-e2e.cjs')(win);return;}
   await require('./local-project-ui.cjs')(win);
   await require('./microphone-picker-ui.cjs')(win);
@@ -402,5 +403,6 @@ module.exports = async (win, workspace) => {
 
   await require('./chat-jobs-ui.cjs')(win);
   await require('./voice-languages-ui.cjs')(win);
+  await require('./speculative-answer-ui.cjs')(win);
 
 };
