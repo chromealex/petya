@@ -178,7 +178,7 @@ class Dialogue {
    }
    if(result.title)active.title=result.title;
    if(result.data)active.lastData=result.data;
-   active.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
+   active.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
    return {handled:true,...result,topicId:active.id,topicTitle:active.title,messages:active.messages,topics:this.list()};
   }finally{this.running.delete(runningKey);}
  }

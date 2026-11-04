@@ -51,7 +51,7 @@ class ChatJobs{
    if(job.scope!==this.scope(topic.projectId))throw Error('Настройки или компания изменились. Повторите запрос с новым контекстом.');
    if(!result.handled)throw Error('Для этого запроса нужно действие. Откройте чат и повторите запрос.');
    const completed=clone.active();const {id,projectId,title,messages,background,chatJob,pinned,order,archived,...fields}=completed;
-   Object.assign(topic,fields);topic.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],at:Date.now()}); // Merge only this conversation; never change the selected chat.
+   Object.assign(topic,fields);topic.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:Date.now()}); // Merge only this conversation; never change the selected chat.
    if(topic.title==='Новый чат')topic.title=command.slice(0,80);
    topic.lastChatResult={...result,topicId:topic.id,topicTitle:topic.title,messages:undefined,topics:undefined};
    this.update(topic,result.error||result.question?'attention':'done',result.error?'Ошибка — откройте чат':result.question?'Нужно уточнение':'Готово');
@@ -80,7 +80,7 @@ ChatJobs.prototype.executeFull=async function(job){
   record(target);
   if(placeholder.replyTo){const turn=target.messages.findLast(m=>m.role==='user'&&m.at>=placeholder.at);if(turn)turn.replyTo=placeholder.replyTo;}
   const last=target.messages.at(-1);if(result.error&&last?.role==='assistant'&&last.text===result.text)last.error=true;
-  if(result.text&&!(last?.role==='assistant'&&last.text===result.text))target.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],at:Date.now(),...(result.by?{by:result.by}:{})});
+  if(result.text&&!(last?.role==='assistant'&&last.text===result.text))target.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:Date.now(),...(result.by?{by:result.by}:{})});
   if(target.title==='Новый чат')target.title=command.slice(0,80);
   const waiting=needsUser(result);
   target.lastChatResult={...result,question:result.question||waiting,topicId:target.id,topicTitle:target.title,messages:undefined,topics:undefined};

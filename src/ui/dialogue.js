@@ -139,7 +139,7 @@ async function showDialogueReply(result,spoken=false){
  if(result.teamUpdated)document.dispatchEvent(new Event('petya-team-updated'));
  if(result.teamFillReply)voiceReply=async answer=>showDialogueReply(await window.petya.teamFillReply(answer),spoken);
  if(result.error&&result.messages?.at(-1)?.role==='assistant')result.messages.at(-1).error=true;
- if(result.messages)showDialogueMessages(result.messages);else {const message={role:'assistant',text:result.text,at:Date.now(),error:!!result.error,sources:result.sources||[],evidence:result.evidence||[]};chatHistory.push(message);dialogueMessages.append(renderDialogueMessage(message));}
+ if(result.messages)showDialogueMessages(result.messages);else {const message={role:'assistant',text:result.text,at:Date.now(),error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],evidence:result.evidence||[]};chatHistory.push(message);dialogueMessages.append(renderDialogueMessage(message));}
  const newest=[...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1);if(!result.error&&!result.computerApproval)window.revealAnswer?.(newest,result.text,{spoken,initial:result.answerStreamId===spokenStreamId||result.answerStreamId?answerShown:0});
  if(result.text)window.checkVoiceLanguages?.(result.text,newest);
  window.applyChatPlaceholder($('command'),chatHistory,result);

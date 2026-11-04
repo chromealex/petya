@@ -29,7 +29,26 @@
  window.enhanceChatMessage=(node,message)=>{
   const meta=node.querySelector('.message-meta');if(message.role==='user'){const edit=button('',()=>editMessage(node,message),'message-copy message-edit');edit.title='Изменить сообщение';edit.setAttribute('aria-label',edit.title);edit.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m4 20 4-1L20 7l-3-3L5 16l-1 4m10-13 3 3"/></svg>';meta.append(edit);}
   const files=node.querySelectorAll('.message-attachment');[...(message.attachments||[])].slice(0,5).forEach((file,i)=>{const item=files[i];if(!item)return;const img=item.querySelector('button');if(img)img.onclick=safeRun(()=>window.openChatAttachment(file));else item.append(button('Открыть',safeRun(()=>window.openChatAttachment(file))));});
-  const sources=(message.sources||[]).filter(s=>{try{return ['https:','http:'].includes(new URL(s.url).protocol);}catch{return false;}});if(sources.length||message.evidence?.length){const details=el('details',null,'message-sources');details.append(el('summary','Источники · '+(sources.length+(message.evidence?.length||0))));for(const s of sources){const a=el('a',s.title||new URL(s.url).hostname);a.href=s.url;a.target='_blank';a.rel='noopener';details.append(a);}for(const e of message.evidence||[]){const b=el('blockquote');b.append(el('strong',e.name+' · строка '+e.line),el('mark',e.text));const file=chatHistory.flatMap(m=>m.attachments||[]).find(f=>f.name===e.name);if(file)b.append(button('Открыть файл',safeRun(()=>window.openChatAttachment(file))));details.append(b);}meta.before(details);}
+  const sources=(message.sources||[]).filter(s=>{try{return ['https:','http:'].includes(new URL(s.url).protocol);}catch{return false;}});const refs=message.usedMaterials||[];if(sources.length||message.evidence?.length||refs.length){const details=el('details',null,'message-sources');details.append(el('summary','Источники · '+(sources.length+refs.length+(message.evidence?.length||0))));for(const s of sources){const a=el('a',s.title||new URL(s.url).hostname);a.href=s.url;a.target='_blank';a.rel='noopener';details.append(a);}const owner=topicSelect.value;
+    for(const ref of refs){
+      const row=el('div',null,'answer-source-row');
+      row.append(button(ref.name||'Материал',safeRun(async()=>{
+        if(ref.type==='file'){await window.openChatAttachment({id:ref.id,name:ref.name});return;}
+        const item=(await window.petya.contexts()).find(m=>m.id===ref.id);
+        if(!item)throw Error('Материал больше не хранится в памяти.');
+        const d=modal(ref.name||'Материал','');d.append(el('p',item.text));d.showModal();
+      })));
+      const switcher=button('Исключить из следующих ответов',safeRun(async()=>{
+        const active=topicSelect.value||owner;if(!active)return;
+        const info=await window.petya.chatWorkspaceInfo(active);
+        const enabled=ref.type==='file'?info.files.find(f=>f.id===ref.id)?.enabled:!info.excluded.includes(ref.id);
+        await window.petya.chatContextToggle(active,ref.type,ref.id,!enabled);
+        switcher.textContent=enabled?'Вернуть в контекст':'Исключить из следующих ответов';
+      }));
+      details.addEventListener('toggle',async()=>{if(details.open){try{const info=await window.petya.chatWorkspaceInfo(topicSelect.value||owner);switcher.textContent=(ref.type==='file'?info.files.find(f=>f.id===ref.id)?.enabled:!info.excluded.includes(ref.id))?'Исключить из следующих ответов':'Вернуть в контекст';}catch{switcher.disabled=true;}}});
+      row.append(switcher);details.append(row);
+    }
+    for(const e of message.evidence||[]){const b=el('blockquote');b.append(el('strong',e.name+' · строка '+e.line),el('mark',e.text));const file=chatHistory.flatMap(m=>m.attachments||[]).find(f=>f.name===e.name);if(file)b.append(button('Открыть файл',safeRun(()=>window.openChatAttachment(file))));details.append(b);}meta.before(details);}
   if(message.error){node.dataset.error='true';const content=node.querySelector('.message-content'),raw=message.text||'';content.replaceChildren(el('p',errorText(raw)));const details=el('details');details.append(el('summary','Подробности'),el('pre',raw));content.append(details);const restore=button('Вернуть запрос',()=>{const index=Number(node.dataset.messageIndex);const user=chatHistory.slice(0,index).filter(m=>m.role==='user').at(-1);if(user){$('command').value=user.text;$('command').dispatchEvent(new Event('input'));$('command').focus();}});content.append(restore);if(commandProgress.failed)content.append(button('Повторить',safeRun(()=>repeatCommand(false))));}
  };
  // Inform about actual delays; never invent a percentage for model generation.

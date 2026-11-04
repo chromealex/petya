@@ -42,6 +42,40 @@
   }
   next.hidden=true;
   heading.append(versions,next);
+  const prepared=el('div');prepared.className='prepared-question';prepared.hidden=true;
+  document.querySelector('.chat-composer').prepend(prepared);
+  function review(owner,text){
+    prepared.hidden=!text;prepared.replaceChildren();
+    if(!text)return;
+    prepared.append(el('small','MCP подготовил вопрос'),el('p',text),button('Отправить Пете',async()=>{
+      if(id()!==owner || $('command').value!==text)throw Error('Вопрос изменился. Проверьте поле ввода.');
+      await window.sendChatNow();await window.petya.chatKeepPrepared(owner);schedule();
+    }),button('Оставить в черновике',async()=>{await window.petya.chatKeepPrepared(owner);schedule();}));
+  }
+  async function compare(owner,version){
+    const box=dialog('Сравнение версий'),select=el('select'),body=el('div');
+    select.setAttribute('aria-label','Сравнить с версией');
+    for(let i=0;i<version.count;i++)if(i!==version.index)select.add(new Option('Версия '+(i+1),i));
+    select.value=String(version.index>0?version.index-1:1);
+    box.append(el('p','Текущая версия '+(version.index+1)+' · сравнить с'),select,body);
+    async function draw(){
+      const other=Number(select.value);
+      const [a,b]=await Promise.all([other,version.index].map(i=>window.petya.chatVersionMessages(owner,i)));
+      if(other!==Number(select.value))return;
+      body.replaceChildren();
+      for(const [role,label] of [['user','Вопросы'],['assistant','Ответы']]){
+        const paragraphs=messages=>messages.filter(m=>m.role===role).flatMap(m=>String(m.text).split(/\n+/).filter(Boolean));
+        body.append(el('h3',label));let common;
+        for(const row of chatParagraphDiff(paragraphs(a),paragraphs(b))){
+          if(row.kind==='same'){
+            if(!common){common=el('details');common.append(el('summary','Совпадающий текст'));body.append(common);}
+            common.append(el('p',row.text));
+          }else{common=null;const line=el('p',(row.kind==='added'?'+ ':'− ')+row.text);line.className='version-'+row.kind;body.append(line);}
+        }
+      }
+    }
+    select.onchange=()=>draw().catch(e=>notice(e.message,true));await draw();
+  }
   let revision=0;
   async function refresh() {
     const ticket=++revision,owner=id();
@@ -50,6 +84,7 @@
     const count=unread(state).length;
     next.hidden=!count;
     next.textContent='Следующий ответ · '+count;
+    review(owner,version?.preparedQuestion);
     versions.replaceChildren();
     if(!version || version.count<2)return;
     const choose=async index=>{
@@ -61,7 +96,7 @@
     const forward=button('Следующая версия',()=>choose(version.index+1),'›');
     prev.disabled=version.index===0;
     forward.disabled=version.index===version.count-1;
-    versions.append(prev,el('span',(version.index+1)+' / '+version.count),forward);
+    versions.append(prev,el('span',(version.index+1)+' / '+version.count),forward,button('Сравнить',()=>compare(owner,version)));
   }
   let timer;
   function schedule(){clearTimeout(timer);timer=setTimeout(()=>refresh().catch(e=>notice(e.message,true)),60);}

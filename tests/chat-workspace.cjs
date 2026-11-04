@@ -5,6 +5,11 @@ const {ContextStore}=require('../src/context-store.cjs');
 const {classify}=require('../src/connection-failure.cjs');
 const {register}=require('../src/chat-workspace.cjs');
 (async()=>{
+  const {chatParagraphDiff}=require('../src/ui/version-diff.js');
+  const {contextExcerpt}=require('../src/chat-attribution.cjs');
+  assert.deepEqual(chatParagraphDiff(['до','общий','после'],['до','правка','общий','после']).map(r=>r.kind),['same','added','same','same']);
+  const excerpt=contextExcerpt([{id:'one',title:'А',text:'Заметка'},{id:'two',title:'Б',text:'Факты'}],5);
+  assert.equal(excerpt.context,'Факты');assert.deepEqual(excerpt.contextRefs.map(r=>r.id),['two']);
   let stored;
   function setup(state){
     const calls={};
