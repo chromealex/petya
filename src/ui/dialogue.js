@@ -8,6 +8,8 @@ const topicControls=document.createElement('div');topicControls.className='actio
 const dialogueMessages=document.createElement('div');dialogueMessages.setAttribute('aria-live','polite');dialogueMessages.className='dialogue-messages';
 const dialogueChoices=document.createElement('div');dialogueChoices.className='actions';
 dialogueCard.append(dialogueTitle,topicControls,dialogueMessages,dialogueChoices);$('command-help').after(dialogueCard);
+window.replyVoicePaused=false;
+window.pauseReplyVoice=()=>{const audio=replyAudioSource||streamingAudio;if(!audio||audio.ended)return null;audio.pause();window.replyVoicePaused=true;window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));return async()=>{if(audio!==(replyAudioSource||streamingAudio))return;window.replyVoicePaused=false;window.petyaSpeaking=true;document.dispatchEvent(new Event('petya-speaking'));await audio.play();};};
 let streamingAudio=null,streamingURL=null,streamingWatch=null,streamingReject=null,spokenStreamId='';
 function cancelStreamingAudio(){
  if(streamingWatch){clearInterval(streamingWatch);streamingWatch=null;}
@@ -28,12 +30,12 @@ const streamedVoice=new window.StreamingSpeech({
    const audio=new Audio(streamingURL);window.answerVoiceSegment?.(audio,text);streamingAudio=audio;streamingReject=reject;audio.preservesPitch=true;audio.defaultPlaybackRate=1.0;audio.playbackRate=1.0;
    const finish=error=>{if(streamingAudio!==audio)return;streamingReject=null;cancelStreamingAudio();if(error)reject(error);else resolve();};
    audio.onended=()=>{window.answerVoiceSegmentEnd?.();finish();};audio.onerror=()=>finish(Error('Не удалось воспроизвести фрагмент.'));
-   let lastPosition=0,lastProgress=Date.now();streamingWatch=setInterval(()=>{if(audio.currentTime>lastPosition){lastPosition=audio.currentTime;lastProgress=Date.now();}if(audio.ended||Number.isFinite(audio.duration)&&audio.duration>0&&audio.currentTime>=audio.duration)finish();else if(Date.now()-lastProgress>5000)finish(Error('Воспроизведение остановилось.'));},250);
+   let lastPosition=0,lastProgress=Date.now();streamingWatch=setInterval(()=>{if(window.replyVoicePaused){lastProgress=Date.now();return;}if(audio.currentTime>lastPosition){lastPosition=audio.currentTime;lastProgress=Date.now();}if(audio.ended||Number.isFinite(audio.duration)&&audio.duration>0&&audio.currentTime>=audio.duration)finish();else if(Date.now()-lastProgress>5000)finish(Error('Воспроизведение остановилось.'));},250);
    Promise.resolve(audio.play()).catch(finish);
   });
  }
 });
-function stopStreamedVoice(){window.answerVoiceEnd?.();streamedVoice.stop();window.petya.stopVoice().catch(()=>{});window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));}
+function stopStreamedVoice(){window.replyVoicePaused=false;window.answerVoiceEnd?.();streamedVoice.stop();window.petya.stopVoice().catch(()=>{});window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));}
 window.stopStreamedVoice=stopStreamedVoice;
 
 
@@ -79,6 +81,7 @@ async function speakReply(text,{continueConversation=false}={}){
   let lastPosition=0,lastProgress=Date.now();
   replyAudioWatch=setInterval(()=>{
    if(epoch!==speechEpoch)return;
+   if(window.replyVoicePaused){lastProgress=Date.now();return;}
    if(source.currentTime>lastPosition){lastPosition=source.currentTime;lastProgress=Date.now();}
    if(source.ended||(Number.isFinite(source.duration)&&source.duration>0&&source.currentTime>=source.duration)){done();return;}
    if(Date.now()-lastProgress>=5000){done();notice('Озвучивание прервалось. Микрофон снова слушает.');}

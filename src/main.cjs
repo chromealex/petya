@@ -755,6 +755,7 @@ function setupHandlers() {
   });
   handle('converse',(command,choice)=>converseTurn(command,choice));
   const chatJobs=new (require('./chat-jobs.cjs').ChatJobs)({dialogue,scope:projectId=>JSON.stringify([companyId,settings.model,settings.ollamaUrl,settings.jiraUrl,settings.jiraProjects,settings.module_jira,settings.jiraToken,settings.atlassianCredential,projectMemory.state.projects.filter(m=>dialogue.state.projects.find(p=>p.id===projectId)?.memoryId===m.id||dialogue.state.topics.some(t=>t.projectId===projectId&&t.projectMemoryId===m.id)),dialogue.state.projects.filter(p=>p.id===projectId).map(p=>({id:p.id,context:p.context,folder:p.folder,folders:p.folders,disabledServices:p.disabledServices}))]),emit:event=>{if(!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('chat-job',event);},run:(work,progress,projectId)=>modules.withProject(dialogue.state.projects.find(p=>p.id===projectId),()=>requestProgress.run('converse',progress,()=>require('./answer-stream.cjs').run(()=>{},work))),converse:command=>converseTurn(command,undefined,true),limit:10});
+  handle('chatAnswerResume',id=>chatJobs.resume(id));
   handle('chatAnswerStop',id=>{const stopped=chatJobs.cancel(id);for(const controller of foregroundAnswers.get(id)||[])controller.abort(require('./answer-cancel.cjs').stopped());return {stopped};});
   handle('chatJobAcknowledge',(id,at)=>chatJobs.acknowledge(id,at));
   handle('chatJobStart',(id,projectId,command)=>chatJobs.start(id,projectId,command));
