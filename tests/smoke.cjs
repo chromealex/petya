@@ -379,11 +379,11 @@ module.exports = async (win, workspace) => {
   await win.webContents.executeJavaScript('window.petya.saveSettings({ contextDays: "3" })');
   if (!workspace.history[0].retentionExpired || workspace.history[0].rows.some(r => r.snapshot) || !workspace.history[0].sealed) throw new Error('Expired history retained sensitive snapshots or lost duplicate guard');
   await win.webContents.executeJavaScript("view('learning'); refreshLearning()");
-  fs.writeFileSync('/private/tmp/petya-learning.png',(await win.webContents.capturePage()).toPNG());
+  fs.writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-learning.png'),(await win.webContents.capturePage()).toPNG());
   const screenshot = await win.webContents.capturePage();
-  fs.writeFileSync('/private/tmp/petya-smoke.png', screenshot.toPNG());
+  fs.writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-smoke.png'), screenshot.toPNG());
   await win.webContents.executeJavaScript(`new Promise(resolve => { view('settings'); document.querySelector('[data-service="notion"] details').open = false; window.scrollTo(0, 0); requestAnimationFrame(() => requestAnimationFrame(resolve)); })`);
-  fs.writeFileSync('/private/tmp/petya-connections.png', (await win.webContents.capturePage()).toPNG());
+  fs.writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-connections.png'), (await win.webContents.capturePage()).toPNG());
   await win.webContents.executeJavaScript(`(async()=>{
     const first=await window.petya.converse('Работаем над проектом Проверочный');
     if(!first.projectChanged)throw Error('Project switch failed');
