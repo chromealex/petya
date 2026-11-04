@@ -33,6 +33,8 @@ function intent(text,active){
  if(/(?:\banr\b|анр|google play|гугл пл[еэ]й)/iu.test(text))return 'anr';
  if(/(?:баг|bug|ошиб).*(?:верс|релиз|сколько|jira|жир)|(?:сколько|посмотр|провер).*(?:баг|bug)/iu.test(text))return 'bugs';
  if(/(?:какие|покажи|список|открыт|остал|висит|глянь).*(?:баг|bug)|(?:баг|bug)\p{L}*\s+(?:открыт|остал|какие|висят|есть)/iu.test(text)&&!actionRequest(text))return 'bugs';
+ // Inside «Мои задачи», a short status follow-up («а из todo?», «только в работе») narrows the same list.
+ if(active?.kind==='tasks'&&active.taskAssignee==='currentUser'&&!discussionOnly(text.replace(/^а\s+/iu,''))&&require('./personal-tasks.cjs').details(text,active))return 'tasks';
  // A leading «а» is not evidence that a new subject is a bug/ANR request.
  const continuation=text.trim().replace(/^(?:а|теперь)\s+/iu,'').replace(/[.!?]+$/u,'');
  if(active&&['bugs','anr','tasks'].includes(active.kind)&&(/^(?:в|по|для)\s+проект[еу]?\s+[\p{L}\p{N}][\p{L}\p{N} _-]*$/iu.test(continuation)||/^теперь\s+в\s+[\p{L}\p{N}][\p{L}\p{N} _-]*[.!?]*$/iu.test(text)||/^(?:обнови(?: ответ| данные)?|сколько(?: их)?(?: всего| осталось| открытых| закрытых)?|посмотри ещё|проверь ещё)$/iu.test(continuation)||/^(?:по|за|в|для)\s+(?:эт|предыдущ|последн|прошл|текущ|нов|сегодня|вчера|\d)/iu.test(continuation)))return active.kind;
