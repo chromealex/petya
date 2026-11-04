@@ -43,7 +43,15 @@ module.exports=ctx=>{
       : await composeDraft(command, context);
     const id = ctx.randomUUID(); ctx.pending.set(id, { state: 'ready', createdAt: Date.now(), routeId, doIt: ctx.core.isDoCommand(command), command, context: {...context}, project: target.jiraProject, site: target.jiraUrl, issueType: target.jiraIssueType });
     for (const [key, value] of ctx.pending) if (Date.now() - value.createdAt > 3600e3) ctx.pending.delete(key);
-    return { id, project: target.jiraProject, ...draft };
+    return { ...draft, id, project: target.jiraProject, issueType:target.jiraIssueType };
+  });
+  ctx.handle('checkDraftSubmission',async id=>{
+    const job=ctx.pending.get(id);
+    if(!job||job.state!=='uncertain')throw Error('Нет неподтверждённой отправки.');
+    const result=await ctx.workspace.checkSingle(id,ctx.routed(job.routeId));
+    if(result.key)job.state='sent';
+    if(result.retry){job.state='ready';job.retryRejected=true;}
+    return result;
   });
   ctx.handle('createIssue', async draft => {
     const job = ctx.pending.get(draft.id);
@@ -53,7 +61,7 @@ module.exports=ctx=>{
     if (!ctx.settings.jiraUrl || (!ctx.settings.atlassianCredential && (!ctx.settings.jiraEmail || !ctx.settings.jiraToken)) || !target.jiraProject || !target.jiraIssueType) throw new Error('Подключите Jira и определите проект и тип задачи по контексту.');
     job.state = 'sending';
     try {
-      const issue = await ctx.workspace.createSingle({ id: draft.id, summary, description }, target);
+      const issue = await ctx.workspace.createSingle({ id: draft.id, summary, description }, target, job.retryRejected===true);
       job.state = 'sent'; ctx.notify(`Создана задача ${issue.key}`);
       try{ctx.dialogue?.rememberAction(job.command,`Создана задача ${issue.key}: ${summary}. ${issue.url}`,job.project,{id:issue.key,action:'create',service:'jira',status:'confirmed',key:issue.key,at:Date.now()});}catch(error){ctx.notify('Задача создана, но историю диалога сохранить не удалось: '+error.message);}
       if (job.doIt) {

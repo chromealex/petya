@@ -92,8 +92,27 @@ class Workspace {
     try { row.snapshot = await snapshot(this, row.key, batch.settings); row.canDelete = row.snapshot.labels.includes('petya-' + batch.id); row.snapshotError = ''; }
     catch (error) { row.snapshotError = 'Снимок для отката не получен: ' + error.message; row.canDelete = false; }
   }
-  async createSingle(input, selected = this.settings()) {
-    if (this.inFlight.has(input.id) || this.history.some(h => h.id === input.id)) throw new Error('Эта команда уже выполнялась. Проверьте историю.');
+  async checkSingle(id, selected) {
+    if(!/^[0-9a-f-]{36}$/i.test(id)||this.inFlight.has(id))throw Error('Отправка ещё не завершилась.');
+    const entry=this.history.find(h=>h.id===id);
+    if(!entry || entry.url!==selected.jiraUrl || entry.project!==selected.jiraProject || entry.rows.length!==1)throw Error('Не удалось подтвердить проект исходной отправки.');
+    const row=entry.rows[0];
+    if(!row.key){
+      const found=await this.api('/rest/api/3/search/jql',{method:'POST',body:JSON.stringify({jql:'labels = "petya-'+id+'"',maxResults:2,fields:['project']})},selected);
+      if(!Array.isArray(found?.issues))throw Error('Jira не вернула результат проверки.');
+      if(found.issues.length>1)throw Error('Найдено несколько задач с этой меткой. Открой историю Jira.');
+      if(found.issues.length){
+        const issue=found.issues[0];
+        if(issue.fields?.project?.key!==entry.project||!issue.key)throw Error('Проект найденной задачи изменился.');
+        row.key=issue.key;row.state='done';row.error='';this.save(this.history);
+      }
+    }
+    return row.key?{key:row.key,url:selected.jiraUrl+'/browse/'+encodeURIComponent(row.key)}:{retry:row.state==='rejected'};
+  }
+  async createSingle(input, selected = this.settings(), retryRejected=false) {
+    const previous=this.history.find(h=>h.id===input.id);
+    const allowed=retryRejected&&previous?.rows.length===1&&previous.rows[0].state==='rejected'&&previous.url===selected.jiraUrl&&previous.project===selected.jiraProject;
+    if (this.inFlight.has(input.id) || (previous&&!allowed)) throw new Error('Эта команда уже выполнялась. Проверьте историю.');
     this.inFlight.add(input.id);
     const s = { ...selected };
     try {

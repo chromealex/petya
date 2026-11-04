@@ -20,12 +20,13 @@
  window.toggleChatMaterial=async(owner,type,id,enabled,anchor,onRestore)=>{
    const {index}=await window.petya.chatWorkspaceInfo(owner);
    await window.petya.chatContextToggle(owner,type,id,enabled);
+   document.dispatchEvent(new Event('petya-context-updated'));
    if(!enabled)window.offerInlineUndo(anchor,'Материал исключён',async()=>{
      const state=await window.petya.chatWorkspaceInfo(owner);
      if(state.index!==index)throw Error('Версия чата изменилась.');
      const excluded=type==='file'?state.files.some(f=>f.id===id&&!f.enabled):state.excluded.includes(id);
      if(excluded)await window.petya.chatContextToggle(owner,type,id,true);
-     onRestore();
+     onRestore();document.dispatchEvent(new Event('petya-context-updated'));
    });
  };
  const recent=[];let cycle=null,pending=Promise.resolve();

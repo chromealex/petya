@@ -38,7 +38,7 @@ function renderHistory(records) {
       preview.append(historyElement('h3', p.destructive ? 'Отмена создания' : 'Проверьте изменения'), historyElement('p', p.warning)); historyDiff(preview, p.rows);
       let confirmation;
       if (p.destructive) { const label = historyElement('label', '', 'check'); confirmation = document.createElement('input'); confirmation.type = 'checkbox'; label.append(confirmation, document.createTextNode('Понимаю, что удаление необратимо')); preview.append(label); }
-      const apply = historyElement('button', p.destructive ? `Удалить ${p.rows.length} задач из Jira` : 'Применить изменение', p.destructive ? 'danger' : 'primary');
+      const apply = historyElement('button', p.destructive ? `Удалить ${p.rows.length} задач из Jira` : p.rows.length===1?'Применить к '+p.rows[0].key:'Применить к задачам · '+p.rows.length, p.destructive ? 'danger' : 'primary');
       apply.onclick = () => act(async () => {
         if (confirmation && !confirmation.checked) throw new Error('Подтвердите необратимое удаление задач.');
         const result = await window.petya.applyHistoryChange(p.id, !!confirmation?.checked);

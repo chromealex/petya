@@ -28,7 +28,7 @@
  function close(){revision++;bar.hidden=true;CSS.highlights.delete('petya-find');CSS.highlights.delete('petya-find-current');returnFocus?.focus({preventScroll:true});}
  function open(){
    if(bar.hidden)returnFocus=document.activeElement;
-   bar.hidden=false;query.focus();query.select();find();
+   bar.hidden=false;window.captureChatSearchOrigin?.();query.focus();query.select();find();
  }
  const searchButton=button('','Найти в чате (Ctrl/⌘+F)',open);
  searchButton.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg>';
@@ -65,7 +65,7 @@
  async function reveal(){
    const ticket=++revision,hit=matches[selected];
    count.textContent=query.value.trim()?(hit?(selected+1)+' из '+matches.length:'Совпадений нет'):'';
-   if(hit)await window.jumpToChatMessage(hit.index);
+   if(hit){window.commitChatSearchOrigin?.();await window.jumpToChatMessage(hit.index);}
    if(ticket!==revision || bar.hidden)return;
    const current=paint();
    if(current){const feed=document.querySelector('.chat-feed');feed.scrollTop+=current.getBoundingClientRect().top-feed.getBoundingClientRect().top-feed.clientHeight*.35;}
@@ -105,13 +105,14 @@
      await window.chatNavigationReady;
      if(!url)return;
      const target=await window.petya.resolveMessageLink(url);
-     if(target.company){await window.petya.companySwitch(target.company,url);return;}
+     if(target.company){await window.prepareCompanyReturn?.(target.company,url);try{await window.petya.companySwitch(target.company,url);}catch(error){window.clearCompanyReturn?.();throw error;}return;}
      if(commandProgress.busy||planning||workspaceBusy||window.chatQueue?.active)throw Error('Завершите текущее действие и откройте ссылку ещё раз.');
+     await window.rememberChatOrigin?.();
      const info=await window.petya.chatWorkspaceInfo(target.chat);
      if(info.index!==target.version)await window.petya.chatVersionSelect(target.chat,target.version);
      if(topicSelect.dataset.projectId!==target.project)await window.petya.chatProjectSelect(target.project);
      view('home');await selectDialogueTopic(target.chat);
-     await window.jumpToChatMessage(target.index);
+     await window.jumpToChatMessage(target.index);window.completeCompanyReturn?.(url);
    }catch(e){notice(e.message,true);}
  }
  async function receive(){await window.chatNavigationReady;await window.openPetyaAnswer(await window.petya.takeMessageLink());}

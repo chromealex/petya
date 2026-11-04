@@ -30,6 +30,10 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     if(!choice){const address=ctx.address?.turn(original);if(address)return address;}
     if(!choice){const task=ctx.chatTasks?.turn(original);if(task)return task;}
     if(!choice){const fresh=await ctx.freshData?.turn(original);if(fresh)return fresh;}
+    if (!choice && !ctx.attachments.list().length) {
+      const visual = await ctx.extensionReplies?.turn(original);
+      if (visual) return visual;
+    }
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
     if(gitRoute){
       if(gitRoute.action==='clarify')return {handled:true,text:gitRoute.question,question:true};

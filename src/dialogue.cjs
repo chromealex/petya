@@ -167,7 +167,7 @@ class Dialogue {
      if(result.question){active.pending={command:text,kind,field:result.field,options:result.options||[]};result.text=result.question;}
      result.by=result.by||{bugs:'Jira: баги',anr:'Google Play: ANR',tasks:'Jira: задачи'}[kind];
     }else {const answer=await this.answer(text,active,unclear);result=typeof answer==='string'?{text:answer}:{...answer};if(active.answeredBy&&!result.by)result.by=active.answeredBy;delete active.answeredBy;}
-   }catch(error){result={text:'Не удалось проверить данные: '+error.message,error:true};}
+   }catch(error){result={text:'Не удалось проверить данные: '+error.message,error:true,...(['bugs','tasks','anr'].includes(kind)?{retryStep:kind}:{})};}
    require('./answer-cancel.cjs').check();
    if(result.title && before.lastData && result.title!==before.title){
     const changed={...active,id:randomUUID(),messages:[userMessage(active,text,this.now())]};
@@ -178,7 +178,8 @@ class Dialogue {
    }
    if(result.title)active.title=result.title;
    if(result.data)active.lastData=result.data;
-   active.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
+   if(result.error && kind==='chat' && active.attachments?.length)result.retryStep='files';
+   active.messages.push({role:'assistant',text:result.text,error:!!result.error,...(result.error&&(['bugs','tasks','anr'].includes(kind)||result.retryStep)?{retryStep:result.retryStep||kind}:{}),sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
    return {handled:true,...result,topicId:active.id,topicTitle:active.title,messages:active.messages,topics:this.list()};
   }finally{this.running.delete(runningKey);}
  }

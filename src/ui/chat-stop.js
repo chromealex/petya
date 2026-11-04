@@ -5,7 +5,7 @@
  resume.id='chat-resume';resume.type='button';resume.className='chat-send chat-resume';resume.title='Продолжить ответ';resume.setAttribute('aria-label',resume.title);resume.hidden=true;
  resume.innerHTML='<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M6 4.5v11l9-5.5z" fill="currentColor"/></svg>';stop.after(resume);
  let stopping=false,resuming=false,paused=null;
- function sync(){const busy=!!(window.chatJobBusy?.(topicSelect.value)||commandProgress.busy||window.answerPaceBusy?.()||window.petyaSpeaking);const canResume=paused&&paused.id===topicSelect.value&&!$('command').value&&!busy;stop.hidden=!busy;resume.hidden=!canResume;send.hidden=busy||!!canResume;stop.disabled=stopping||resuming;resume.disabled=resuming;}
+ function sync(){const busy=!!(window.chatJobBusy?.(topicSelect.value)||commandProgress.busy||window.answerPaceBusy?.()||window.petyaSpeaking);const canResume=paused&&paused.id===topicSelect.value&&!$('command').value&&!window.pendingChatFiles?.length&&!busy;stop.hidden=!busy;resume.hidden=!canResume;send.hidden=busy||!!canResume;stop.disabled=stopping||resuming;resume.disabled=resuming;}
  function discard(){paused=null;if(window.replyVoicePaused)stopSpeech.onclick();sync();}
  $('command').addEventListener('input',discard);
  document.addEventListener('petya-topic-changed',event=>{if(!event.detail?.preserveScroll)discard();});

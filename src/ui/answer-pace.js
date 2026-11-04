@@ -16,7 +16,7 @@
   active.add(task);return task;
  };
  window.revealAnswer=(node,text,{spoken=false,initial=0}={})=>{
-  if(!node||!text)return;const full=node.querySelector('.message-content');if(!full)return;
+  if(!node||!text)return;const full=node.querySelector('.message-content');if(!full||full.querySelector('.technical-block'))return;
   node.classList.add('ui-enter');const preview=document.createElement('div');preview.className='message-content answer-paced';preview.setAttribute('aria-hidden','true');full.before(preview);full.hidden=true;
   const extras=[...node.children].filter(e=>e!==full&&e!==preview),skip=document.createElement('button');skip.type='button';skip.className='answer-show-all';skip.textContent='Показать целиком';extras.forEach(e=>e.hidden=true);node.append(skip);
   let task;const restore=()=>{full.hidden=false;preview.remove();skip.remove();extras.forEach(e=>e.hidden=false);task?.stop();};

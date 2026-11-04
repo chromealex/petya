@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict');
+const {branch,recap,setup}=require('../src/features/chat-return.cjs');
+const {link}=require('../src/chat-location.cjs');
+const {Workspace}=require('../src/workspace.cjs');
+(async()=>{
+ const t={id:'one',projectId:'general',title:'Сборка',messages:[{role:'user',text:'Почему упала сборка?',at:1,attachments:[{id:'log'}]},{role:'assistant',text:'Не найден модуль.',at:2},{role:'user',text:'Следующий вопрос',at:3}],attachments:[{id:'log',name:'log.txt'},{id:'later'}]};
+ const dialogue={state:{topics:[t],projects:[{id:'general'}]},running:new Set(),persist(){},context:()=>'',within:(_i,_p,fn)=>fn()};
+ const handlers={},ctx={companyId:'default',dialogue,settings:{},chatJobs:{busy:()=>false},handle:(name,fn)=>handlers[name]=fn};
+ setup(ctx);
+ const raw=link('default',t,0,1),created=branch(dialogue,'default',raw),child=dialogue.state.topics.find(v=>v.id===created.id);
+ assert.equal(child.messages.length,2);assert.deepEqual(child.attachments.map(f=>f.id),['log']);assert.equal(child.origin.url,raw);child.messages[0].text='изменено';assert.notEqual(t.messages[0].text,child.messages[0].text);
+ assert.match(await recap(ctx,t,2),/упала сборка/);
+ assert.doesNotMatch(await recap(ctx,t,2),/Следующий/);
+ t.messages.push({role:'assistant',at:4,error:true,text:'HTTP 429',retryStep:'tasks'});
+ let reads=0;dialogue.readers={tasks:async q=>{reads++;assert.equal(q,'Следующий вопрос');return {text:'Открыта одна задача.'};}};
+ await handlers.chatRetryStep('one',0,4);assert.equal(reads,1);assert.equal(t.messages.length,4);assert.ok(!t.messages.at(-1).error);await assert.rejects(handlers.chatRetryStep('one',0,4));
+ const id='11111111-1111-1111-1111-111111111111',s={jiraUrl:'https://example.test',jiraProject:'P'},row={state:'uncertain'},store={history:[{id,url:s.jiraUrl,project:'P',rows:[row]}],inFlight:new Set(),api:async()=>({issues:[]}),save(){}};
+ assert.deepEqual(await Workspace.prototype.checkSingle.call(store,id,s),{retry:false});
+ store.api=async()=>({issues:[{key:'P-7',fields:{project:{key:'P'}}}]});
+ assert.equal((await Workspace.prototype.checkSingle.call(store,id,s)).key,'P-7');
+ console.log('Chat return: scoped fork, one-sentence recap, read-only retry and Jira reconciliation passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

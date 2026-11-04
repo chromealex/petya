@@ -1,5 +1,5 @@
 // Version snapshots contain conversation data. Project placement and sidebar state belong to the chat.
-const shared = new Set(['id', 'projectId', 'title', 'order', 'pinned', 'archived', 'versions', 'versionIndex','savedAnswers']);
+const shared = new Set(['id', 'projectId', 'title', 'order', 'pinned', 'archived', 'versions', 'versionIndex','savedAnswers','origin']);
 function snapshot(topic) {
   return structuredClone(Object.fromEntries(Object.entries(topic).filter(([key]) => !shared.has(key))));
 }
@@ -38,7 +38,7 @@ function register(ctx) {
   });
   ctx.handle('chatWorkspaceInfo', id => {
     const topic = get(id);
-    return {...info(topic),preparedQuestion:topic.preparedQuestion===ctx.dialogue.state.composerDrafts?.[id]?topic.preparedQuestion:'', excluded: topic.excludedMaterials || [], files: [
+    return {...info(topic),origin:topic.origin||null,preparedQuestion:topic.preparedQuestion===ctx.dialogue.state.composerDrafts?.[id]?topic.preparedQuestion:'', excluded: topic.excludedMaterials || [], files: [
       ...(topic.attachments || []).map(f => ({id:f.id, name:f.name, enabled:true})),
       ...(topic.excludedFiles || []).map(f => ({id:f.id, name:f.name, enabled:false}))
     ]};
