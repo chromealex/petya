@@ -164,5 +164,10 @@ class GitWorkspace{
   }finally{this.busy.delete(repo.root);}
  }
 }
-function summary(s){return s.name+' · '+(s.branch||'detached HEAD')+'\n'+(s.files.length?s.files.map(f=>f.status+' '+f.path+(f.oldPath?' ← '+f.oldPath:'')).join('\n'):'Рабочая папка чистая.')+'\nВ коммит: '+s.files.filter(f=>f.staged).length+' файлов.';}
+// A spoken/chat summary stays short: large repositories can have thousands of changed files.
+function summary(s,limit=15){const head=s.name+' · '+(s.branch||'detached HEAD');if(!s.files.length)return head+'\nРабочая папка чистая.';
+ const staged=s.files.filter(f=>f.staged).length,untracked=s.files.filter(f=>/\?/.test(f.status)).length;
+ const lines=s.files.slice(0,limit).map(f=>f.status+' '+f.path+(f.oldPath?' ← '+f.oldPath:''));
+ const rest=s.files.length-lines.length;
+ return head+'\nИзменено файлов: '+s.files.length+(untracked?' (новых: '+untracked+')':'')+'.\n'+lines.join('\n')+(rest>0?'\n…и ещё '+rest+'. Полный список — в панели Git.':'')+'\nВ коммит: '+staged+' файлов.';}
 module.exports={GitWorkspace,commandRoute,parseStatus,summary};

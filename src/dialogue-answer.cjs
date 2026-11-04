@@ -29,14 +29,18 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
  if(!model)return {text:'Не выбрана локальная модель для ответов. Откройте «Подключения → Ollama» и подготовьте модель.',error:true};
  let modelOverrides={};
  if(chooseKnowledgeModel&&require('./knowledge-model.cjs').standaloneKnowledge(command,topic,supplementalContext)){const selected=await chooseKnowledgeModel();if(selected)modelOverrides={model:selected,think:false};}
- const repeat=require('./answer-repeat.cjs');let repeatRetry=false;
+ const repeat=require('./answer-repeat.cjs');let repeatRetry=false,lowMemory=false;
  for(let attempt=0;attempt<2;attempt++){
   let response;
   try { response=await request(attempt?{...modelOverrides,think:false}:modelOverrides); }
   catch(error){
    const status=Number(error.status);
+   // Ollama answers 500 when the model cannot be loaded with this context (usually memory).
+   // Retry once with a smaller window before reporting an outage.
+   if(status>=500&&!lowMemory){lowMemory=true;console.error('Ollama '+status+': '+(error.detail||error.message));modelOverrides={...modelOverrides,think:false,options:{temperature:0.6,top_p:0.9,repeat_penalty:1.1,num_ctx:4096,num_predict:1024}};attempt--;continue;}
+   const detail=String(error.detail||'').match(/"error"\s*:\s*"([^"]{1,200})/)?.[1]||'';
    const reason=status===404?'Выбранная модель не найдена.':status===429?'Ollama вернула HTTP 429 — ограничение запросов.':status>=500?'Ollama не смогла обработать запрос.':error.name==='TimeoutError'||error.name==='AbortError'?'Ollama не ответила вовремя.':'Не удалось связаться с Ollama.';
-   return {text:reason+' Проверьте «Подключения → Ollama» и повторите запрос.',error:true};
+   return {text:reason+(detail?' Ollama: '+detail+'.':'')+' Проверьте «Подключения → Ollama» и повторите запрос.',error:true};
   }
   let parsed;
   try { parsed=JSON.parse(response?.message?.content||'null'); }catch{}
@@ -49,7 +53,7 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
   }
   const answer=parsed.answer.trim().slice(0,12000);
   // A repeated answer never helps: regenerate once with more variety, then admit the loop.
-  if(parsed.understood&&repeat.repeated(answer,topic)){if(!repeatRetry){repeatRetry=true;modelOverrides={...modelOverrides,think:false,options:{temperature:1,top_p:0.95,repeat_penalty:1.3,num_ctx:16384,num_predict:2048}};attempt--;continue;}return mark('защита от повторов',repeat.fallback(topic));}
+  if(parsed.understood&&repeat.repeated(answer,topic)){if(!repeatRetry){repeatRetry=true;modelOverrides={...modelOverrides,think:false,options:{temperature:1,top_p:0.95,repeat_penalty:1.3,num_ctx:lowMemory?4096:16384,num_predict:lowMemory?1024:2048}};attempt--;continue;}return mark('защита от повторов',repeat.fallback(topic));}
   const choices=Array.isArray(parsed.clarificationOptions)?[...new Set(parsed.clarificationOptions.filter(v=>typeof v==='string').map(v=>v.trim().slice(0,160)).filter(Boolean))].slice(0,4):[];
   if(parsed.understood&&choices.length>=2)return mark('модель '+(modelOverrides.model||model),{text:answer,question:true,clarificationOptions:choices});
   if(!parsed.understood||uncertain(answer))return mark('уточнение',telegram?'Уточните, что найти в сохранённых сообщениях Telegram.':clarify());

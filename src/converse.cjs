@@ -55,7 +55,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       const report=async(command,workflow)=>{const offer=await ctx.serviceAccess.offer('Проверь Jira: '+command,null);if(offer)return offer;const skill=ctx.instructionSkills.list().find(s=>s.enabled&&s.workflow===workflow);if(!skill)return {handled:true,text:'Для этого отчёта включи скилл '+workflow+' в разделе «Скиллы».'};return ctx.workSkills.turn({skill,question:command,verified:true},command);};
       const selected=workRoute.classify(original,ctx.dialogue.active());
       const workReply=await workRoute.dispatch(selected,original,{personal:async command=>{const offer=await ctx.serviceAccess.offer('Проверь Jira: '+command,null);return offer||ctx.dialogue.turn(command,undefined,'tasks');},workload:command=>report(command,'team-workload'),status:command=>report(command,'project-status'),chat:command=>ctx.dialogue.turn(command,undefined,'chat'),action:command=>require('./dialogue.cjs').actionRequest(command)?null:{handled:true,text:'Эта команда требует изменения Jira. Выполнить её напрямую этим способом пока не могу; открой задачу в Jira для изменения.'}});
-      if(workReply)return via('рабочий запрос',workReply);
+      if(workReply)return selected?.kind==='chat'?workReply:via('рабочий запрос',workReply);
     }
     if(!choice){const presence=require('./ui/conversation-input.js').ConversationInput.presenceReply(original);if(presence)return via('шаблон: присутствие',presence);}
     if(!choice){const catalog=require('./project-catalog.cjs').projectCatalogReply(original,{projects:ctx.projectMemory.state.projects,activeId:ctx.projectMemory.active()?.id,settings:ctx.settings});if(catalog)return via('каталог проектов',catalog);}

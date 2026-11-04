@@ -15,6 +15,8 @@ function classify(command,topic){
  if(/^(?:что делает|как работает).*(?:функци|метод|код|скрипт|алгоритм|программ)/iu.test(text))return {kind:'chat'};
  if(/(?:нагруз|загруз).*(?:процессор|сервер|CPU|GPU|диск|памят|страниц|файл|приложен)/iu.test(text))return null;
  if(/^кто отвечает за/iu.test(text)&&!/(?:задач|проект)/iu.test(text))return {kind:'chat'};
+ // «команда» as a shell/console command, not the team.
+ if(/(?:пример\w*|напиши|какой|какая|какую|подскажи|синтаксис\w*)\s+(?:\S+\s+)?команд|команд\w*\s+(?:для|в\s+терминал|git|гит|bash|docker|npm|linux|консол|shell)|(?:терминал|консол)\S*.*команд/iu.test(text)&&!/(?:задач|коллег|загруз|нагруз|в команде|команды проекта)/iu.test(text))return null;
  if(!work)return null;
  // Notion and Asana have their own readers: leave such questions to them instead of the Jira work route.
  if(/(?:asana|асан|notion|ноушен|ноушн)/iu.test(text)&&!/(?:задач|таск|тикет)/iu.test(text))return null;
