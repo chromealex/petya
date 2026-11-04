@@ -12,7 +12,7 @@ if not (3, 10) <= sys.version_info[:2] <= (3, 12):
 env = root / 'runtime/tts'
 venv.EnvBuilder(with_pip=True).create(env)
 python = env / ('Scripts/python.exe' if sys.platform == 'win32' else 'bin/python')
-subprocess.run([str(python), '-m', 'pip', 'install', 'torch==2.8.0', 'numpy==2.2.6', 'kokoro-onnx==0.6.1', 'scipy==1.15.3'], check=True)
+subprocess.run([str(python), '-m', 'pip', 'install', 'torch==2.8.0', 'numpy==2.2.6', 'kokoro-onnx==0.6.1', 'scipy==1.15.3', 'num2words==0.5.14'], check=True)
 model = root / 'runtime/models/petya-voice.pt'
 model.parent.mkdir(parents=True, exist_ok=True)
 expected = 'f036d3da1584899e5e24bdf2d5bd3bcf896e2d62505de39a02caca76014d7a1c'

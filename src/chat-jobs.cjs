@@ -16,7 +16,15 @@ class ChatJobs{
  acknowledge(id,at){const topic=this.dialogue.state.topics.find(t=>t.id===id);if(!topic?.chatJob||topic.chatJob.at!==at||!['done','attention'].includes(topic.chatJob.state))return false;topic.chatJob.acknowledged=true;this.dialogue.persist();return true;}
  busy(id){return this.jobs.has(id);}
  any(){return this.jobs.size>0;}
- update(topic,state,label){topic.chatJob={...topic.chatJob,state,label,at:Date.now(),acknowledged:false};this.dialogue.persist();this.emit({topicId:topic.id,job:topic.chatJob});}
+ update(topic,state,label){const at=Date.now();topic.chatJob={...topic.chatJob,state,label,at,finishedAt:['done','attention'].includes(state)?at:null,acknowledged:false};this.dialogue.persist();this.emit({topicId:topic.id,job:topic.chatJob});}
+ finishForeground(id,state,result){
+  const topic=this.dialogue.state.topics.find(t=>t.id===id);
+  if(!topic?.chatJob||this.busy(id)||!['done','attention'].includes(state))return false;
+  // Replace the old question before emitting completion; listeners must never replay it.
+  if(result&&typeof result==='object'&&typeof result.text==='string')topic.lastChatResult={...result,topicId:id,messages:undefined,topics:undefined};
+  else delete topic.lastChatResult;
+  this.update(topic,state,state==='done'?'Готово':result?.question?'Нужно уточнение':'Нужно внимание');return true;
+ }
  start(id,projectId,text){
   if(typeof text!=='string'||!text.trim()||text.length>4000)throw Error('Введите запрос до 4000 символов.');
   const d=this.dialogue,project=d.state.projects.find(p=>p.id===projectId);if(!project||project.archived)throw Error('Проект не найден или находится в архиве.');

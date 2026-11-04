@@ -25,7 +25,7 @@ const streamedVoice=new window.StreamingSpeech({
   const encoded=await window.petya.synthesizeVoice(text);if(epoch!==streamedVoice.epoch)throw Error('Отменено');if(!encoded)return;
   await new Promise((resolve,reject)=>{
    streamingURL=URL.createObjectURL(new Blob([Uint8Array.from(atob(encoded),c=>c.charCodeAt(0))],{type:'audio/wav'}));
-   const audio=new Audio(streamingURL);window.answerVoiceSegment?.(audio,text);streamingAudio=audio;streamingReject=reject;audio.preservesPitch=true;audio.defaultPlaybackRate=1.15;audio.playbackRate=1.15;
+   const audio=new Audio(streamingURL);window.answerVoiceSegment?.(audio,text);streamingAudio=audio;streamingReject=reject;audio.preservesPitch=true;audio.defaultPlaybackRate=1.0;audio.playbackRate=1.0;
    const finish=error=>{if(streamingAudio!==audio)return;streamingReject=null;cancelStreamingAudio();if(error)reject(error);else resolve();};
    audio.onended=()=>{window.answerVoiceSegmentEnd?.();finish();};audio.onerror=()=>finish(Error('Не удалось воспроизвести фрагмент.'));
    let lastPosition=0,lastProgress=Date.now();streamingWatch=setInterval(()=>{if(audio.currentTime>lastPosition){lastPosition=audio.currentTime;lastProgress=Date.now();}if(audio.ended||Number.isFinite(audio.duration)&&audio.duration>0&&audio.currentTime>=audio.duration)finish();else if(Date.now()-lastProgress>5000)finish(Error('Воспроизведение остановилось.'));},250);
@@ -69,8 +69,8 @@ async function speakReply(text,{continueConversation=false}={}){
   const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
   replyAudioURL=URL.createObjectURL(new Blob([bytes],{type:'audio/wav'}));
   const source=new Audio(replyAudioURL);window.answerVoiceSegment?.(source,text);replyAudioSource=source;
-  // Let the model pronounce complete phonemes, then compress time with pitch correction.
-  source.preservesPitch=true;source.defaultPlaybackRate=1.15;source.playbackRate=1.15;
+  // Preserve the synthesized cadence without browser time compression.
+  source.preservesPitch=true;source.defaultPlaybackRate=1.0;source.playbackRate=1.0;
   source.onended=done;
   source.onerror=()=>{if(epoch!==speechEpoch)return;done();notice(text+'\nНе удалось воспроизвести ответ.');};
   // Media events may be lost when the output device changes or playback stalls.
@@ -120,6 +120,7 @@ async function refreshTopics(){const state=await window.petya.dialogueTopics();t
 async function selectDialogueTopic(id,{internal=false}={}){if(!internal&&(window.chatStartPending||commandProgress.busy||planning||workspaceBusy))throw Error('Дождитесь завершения текущего действия.');window.chatSwitchPending=true;try{window.leaveBackgroundChat?.();window.stopStreamedVoice?.();if(window.chatQueue?.active){window.chatQueue.paused=true;throw Error('В очереди остались запросы этой темы. Выполните или удалите их перед сменой темы.');}document.dispatchEvent(new Event('petya-topic-changed'));const topic=await window.petya.dialogueSelect(id);chatHistory=[];showDialogueMessages(topic?.messages||[]);dialogueChoices.replaceChildren();dialogueTitle.textContent=topic?.title||'Диалог с Петей';window.offerReportShare?.(topic?.workReport?.id,dialogueChoices);await refreshTopics();window.activateChatQueue?.(id,topicSelect.dataset.projectId);if(typeof refreshAttachments==='function')await refreshAttachments();await window.restoreChatJob?.(id);}finally{window.chatSwitchPending=false;}}
 topicSelect.onchange=run(()=>selectDialogueTopic(topicSelect.value));newTopic.onclick=run(()=>selectDialogueTopic(''));
 async function showDialogueReply(result,spoken=false){
+ voiceReply=null;
  document.dispatchEvent(new CustomEvent('petya-topic-changed',{detail:{preserveScroll:!result.topicId||result.topicId===topicSelect.value}}));
  if(result.projectChanged){voiceReply=null;voiceTurn.reset();await refreshTopics();await selectDialogueTopic(topicSelect.value,{internal:true});}
  if(result.projectMemoryReply)voiceReply=async answer=>showDialogueReply(await window.petya.projectMemoryReply(answer),spoken);
@@ -180,7 +181,7 @@ async function showDialogueReply(result,spoken=false){
  const voiceText=result.text+(options.length?' Варианты: '+options.join('; '):'');
  if(spoken&&result.answerStreamId===spokenStreamId){if(result.error){if(!streamedVoice.stopped){stopStreamedVoice();await speakReply(voiceText,{continueConversation:true});}}else streamedVoice.finish(voiceText);}
  else if(spoken)await speakReply(voiceText,{continueConversation:true});else if(mic.active&&voiceReply)voiceTurn.arm();
- window.finishForegroundChat?.(result);
+ await window.finishForegroundChat?.(result);
  if(result.repairHandoff)await handleDoHandoff(result.repairHandoff);
 }
 refreshTopics().then(async()=>{if(topicSelect.value&&!dialogueMessages.childElementCount&&!commandProgress.busy)await selectDialogueTopic(topicSelect.value);}).catch(e=>notice(e.message,true));

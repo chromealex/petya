@@ -8,7 +8,7 @@ const section=source.slice(source.indexOf('let speechEpoch=0,'),source.indexOf('
  const pending=vm.runInContext("speakReply('Привет')",context);context.stopSpeech.onclick();resolveAudio('audio');await pending;
  assert.equal(starts,0);assert.equal(stops,1);assert.equal(context.window.petyaSpeaking,false);assert.equal(arms,0);
  const next=vm.runInContext("speakReply('Ещё ответ')",context);assert.equal(context.window.petyaSpeaking,false,'microphone stays available during synthesis');resolveAudio('audio');await next;assert.equal(starts,1);assert.equal(context.window.petyaSpeaking,true,'suppress microphone only while playing');
- assert.equal(audio[0].playbackRate,1.15);assert.equal(audio[0].preservesPitch,true);
+ assert.equal(audio[0].playbackRate,1.0);assert.equal(audio[0].preservesPitch,true);
  audio[0].onended();assert.equal(context.window.petyaSpeaking,false);assert.equal(arms,0,'ordinary reply must not arm the microphone');assert.equal(revoked,1);
  context.voiceReply=async()=>{};const question=vm.runInContext("speakReply('Какой проект?')",context);resolveAudio('audio');await question;audio[1].onended();assert.equal(arms,1,'explicit clarification may accept a reply');context.voiceReply=null;
  const last=vm.runInContext("speakReply('Останови')",context);resolveAudio('audio');await last;context.stopSpeech.onclick();assert.equal(revoked,3);assert.equal(audio[2].onended,null);

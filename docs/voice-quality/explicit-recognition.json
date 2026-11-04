@@ -1,0 +1,14 @@
+[
+  {
+    "file": "explicit-en.wav",
+    "text": "Version 1.19.0 has 12 tasks and three open bugs."
+  },
+  {
+    "file": "explicit-mixed.wav",
+    "text": "В Банкер Ворс версия 1.19.0. В Джира осталось 12 задач. Please check slick."
+  },
+  {
+    "file": "explicit-ru.wav",
+    "text": "Версия 1.19.0 найдено 0 багов, 12 задач и 3 открытых. Готово 25 процентов."
+  }
+]
