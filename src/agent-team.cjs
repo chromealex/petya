@@ -23,14 +23,58 @@ function enumerated(command=''){
  const {actionRequest}=require('./dialogue.cjs');
  return {tasks:items.map(v=>{const request=v[0].toLocaleUpperCase('ru')+v.slice(1);return {title:request.slice(0,80),request,action:!!actionRequest?.(request)};})};
 }
+// A request that touches several independent areas: Petya offers agents instead of starting them.
+const AREAS=[/(?:задач|таск|тикет|баг|jira|джир|спринт|релиз|эпик)/iu,/(?:slack|слак)/iu,/(?:(?:^|[\s(])гит|git|коммит|ветк|верси[яюи] проекта|pull request|пулл?-?реквест)/iu,/(?:почт|письм|gmail|outlook)/iu,/(?:telegram|телеграм|(?:^|\s)тг(?:\s|$))/iu,/(?:в интернете|погод|курс (?:доллар|евро|валют)|новост)/iu,/(?:команд[аеуы]|коллег|загрузк)/iu,/(?:notion|ноушн|ноушен|confluence|конфлю|asana|асан)/iu];
+function complexRequest(command=''){
+ const text=String(command).trim();
+ if(text.length<25||text.length>4000||EXTERNAL.test(text)||EXPLICIT.test(text))return false;
+ if(/^(?:не\s|что такое|что значит|объясни|почему|как работает|расскажи про|переведи)/iu.test(text))return false;
+ // One command with details («Заполни команду: Полина — релизы», «Создай задачу: …») is not several requests.
+ if(/^(?:петя[,!\s]+)?(?:пожалуйста[,\s]+)?(?:заполни|запомни|напомни|забудь|создай|заведи|отправь|напиши|ответь|переименуй|удали|закрой|назначь|переназначь|добавь|измени|обнови|сделай коммит|закоммить|запушь)/iu.test(text))return false;
+ if(!/[,;:]|\s(?:и|а также|плюс|ещё|еще)\s/iu.test(text))return false;
+ return AREAS.filter(r=>r.test(text)).length>=2;
+}
+const OFFER={run:'Раздать агентам',single:'Ответить одним сообщением',always:'Всегда раздавать',never:'Всегда одним сообщением'};
 const STATES={queued:'В очереди',running:'Работает',done:'Готово',attention:'Нужно внимание',cancelled:'Остановлен',action:'Ждёт тебя'};
 class AgentTeam{
- constructor({dialogue,jobs,plan,summarize,emit=()=>{},now=Date.now,interval=1000,max=6}){Object.assign(this,{dialogue,jobs,plan,summarize,emit,now,interval,max});this.active=new Map();}
+ constructor({dialogue,jobs,plan,summarize,emit=()=>{},preference=()=>'ask',remember=()=>{},now=Date.now,interval=1000,max=6}){Object.assign(this,{dialogue,jobs,plan,summarize,emit,preference,remember,now,interval,max});this.active=new Map();this.offers=new Map();this.skip=new Set();}
+ // Ask-mode: «Раздать агентам» / «Ответить одним сообщением», optionally remembered.
+ // Returns a reply, {continueWith} to answer the original request normally, or null.
+ async offer(command,topic){
+  if(!topic||topic.agentOf)return null;
+  const text=String(command).trim(),pending=this.offers.get(topic.id);
+  if(this.skip.delete(text))return null;
+  const mode=this.preference();
+  if(/^(?:спрашивай|снова спрашивай|сбрось выбор)(?:\s+(?:про|перед|насч[её]т))?\s+агент/iu.test(text)){this.remember('ask');this.offers.delete(topic.id);return {handled:true,text:'Хорошо, снова буду спрашивать, раздавать ли сложные задачи агентам.',by:'агенты Пети'};}
+  if(pending&&this.now()-pending.at<30*60000){
+   const choice=Object.entries(OFFER).find(([,label])=>label.toLowerCase()===text.toLowerCase().replace(/[.!]+$/u,''))?.[0];
+   if(choice){this.offers.delete(topic.id);this.drop(topic,pending);
+    if(choice==='always')this.remember('always');if(choice==='never')this.remember('never');
+    const note=choice==='always'?' Запомнил: сложные задачи буду сразу раздавать агентам. Сказать «спрашивай про агентов» — чтобы снова спрашивал.':choice==='never'?' Запомнил: буду отвечать одним сообщением. «Спрашивай про агентов» — чтобы снова спрашивал.':'';
+    if(choice==='run'||choice==='always'){const r=await this.start(pending.command,topic,pending.planned);if(r&&note){r.text+=note;topic.messages.at(-1).text=r.text;}return r||{continueWith:pending.command};}
+    this.skip.add(pending.command);return {continueWith:pending.command,note};}
+  }
+  if(mode==='never'||!complexRequest(text))return null;
+  let planned;try{planned=await this.plan(text);}catch{return null;} // no model: answer as usual
+  if(this.tasksFrom(planned).length<2)return null;
+  if(mode==='always')return this.start(text,topic,planned);
+  const tasks=this.tasksFrom(planned);
+  const question='Эту задачу можно раздать агентам — '+tasks.length+' параллельно:\n'+tasks.map((t,i)=>(i+1)+'. '+t.title+(t.action?' (меняет данные — запустишь сам)':'')).join('\n')+'\nРаздать или ответить одним сообщением?';
+  const asked={role:'user',text,at:this.now()},reply={role:'assistant',text:question,at:this.now(),by:'агенты Пети'};
+  topic.messages.push(asked,reply);this.offers.set(topic.id,{command:text,planned,at:this.now(),messages:[asked,reply]});this.dialogue.persist();
+  return {handled:true,question:true,text:question,by:'агенты Пети',clarificationOptions:Object.values(OFFER),topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
+ }
+ drop(topic,pending){for(const m of pending.messages||[]){const i=topic.messages.indexOf(m);if(i>=0)topic.messages.splice(i,1);}}
+ tasksFrom(planned){return (Array.isArray(planned?.tasks)?planned.tasks:[]).filter(t=>t&&typeof t.request==='string'&&t.request.trim()).slice(0,this.max).map(t=>({id:randomUUID(),title:String(t.title||t.request).trim().slice(0,80),request:String(t.request).trim().slice(0,1500),action:!!t.action,state:'queued',label:STATES.queued}));}
  // Returns a handled reply (the plan) or null when the request is not for agents.
  async turn(command,topic){
   if(!agentRequest(command)||!topic||topic.agentOf)return null;
-  const planned=enumerated(command)||await this.plan(command);
-  const tasks=(Array.isArray(planned?.tasks)?planned.tasks:[]).filter(t=>t&&typeof t.request==='string'&&t.request.trim()).slice(0,this.max).map(t=>({id:randomUUID(),title:String(t.title||t.request).trim().slice(0,80),request:String(t.request).trim().slice(0,1500),action:!!t.action,state:'queued',label:STATES.queued}));
+  let planned=enumerated(command);
+  if(!planned)try{planned=await this.plan(command);}catch(e){return {handled:true,error:true,text:'Чтобы разбить задачу для агентов, нужна локальная модель: '+e.message};}
+  return this.start(command,topic,planned);
+ }
+ async start(command,topic,planned){
+  const tasks=this.tasksFrom(planned);
   if(tasks.length<2)return null; // one task: the normal pipeline answers it
   const plan={id:randomUUID(),command,state:'running',startedAt:this.now(),tasks};
   topic.messages.push({role:'user',text:command,at:this.now()});
@@ -76,4 +120,4 @@ class AgentTeam{
   this.emit({topicId:topic.id,job:topic.chatJob,agentPlan:plan});
  }
 }
-module.exports={agentRequest,enumerated,AgentTeam};
+module.exports={agentRequest,complexRequest,enumerated,AgentTeam,OFFER};

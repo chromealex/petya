@@ -15,9 +15,16 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     const namePreference=!choice?require('./name-preference.cjs').preference(original,ctx.settings):null;
     if(namePreference){ctx.saveSettings(namePreference.patch);ctx.dialogue.rememberAction(original,namePreference.text);return {handled:true,text:namePreference.text,topicId:ctx.dialogue.active()?.id,messages:ctx.dialogue.active()?.messages};}
     // A complex request for agents: subtasks run as parallel background chats of this project.
-    if(!choice&&require('./agent-team.cjs').agentRequest(original)&&!ctx.dialogue.active()?.agentOf){
-      let topic=ctx.dialogue.active();if(!topic){topic={id:ctx.randomUUID(),projectId:ctx.dialogue.state.activeProjectId||'general',title:original.slice(0,80),kind:'chat',messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;delete ctx.dialogue.state.newChat;}
-      const team=await ctx.agentTeam.turn(original,topic);if(team)return team;
+    // Explicit («раздай агентам») runs at once; a request over several areas gets an offer first
+    // («Раздать агентам» / «Ответить одним сообщением», the choice can be remembered).
+    if(!choice&&!ctx.dialogue.active()?.agentOf){
+      const team=require('./agent-team.cjs'),explicit=team.agentRequest(original);
+      if(explicit||team.complexRequest(original)||ctx.agentTeam.offers.has(ctx.dialogue.active()?.id)||/агент/iu.test(original)){
+        let topic=ctx.dialogue.active();if(!topic){topic={id:ctx.randomUUID(),projectId:ctx.dialogue.state.activeProjectId||'general',title:original.slice(0,80),kind:'chat',messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;delete ctx.dialogue.state.newChat;}
+        const reply=explicit?await ctx.agentTeam.turn(original,topic):await ctx.agentTeam.offer(original,topic);
+        if(reply?.continueWith){const next=await pipeline(reply.continueWith,choice,background);if(reply.note&&next?.text){next.text+=reply.note;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&last.text===next.text.slice(0,-reply.note.length)){last.text=next.text;ctx.dialogue.persist();}}return next;}
+        if(reply)return reply;
+      }
     }
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
     if(gitRoute){

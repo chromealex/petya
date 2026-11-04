@@ -26,6 +26,17 @@ const assert=require('node:assert/strict');const {agentRequest,AgentTeam}=requir
   state.topics.splice(state.topics.findIndex(t=>t.id===a.topicId),1);state.topics.push({id:'tasks',messages:[{role:'assistant',text:'28 задач'}],chatJob:{command:'Мои задачи?',startedAt:Date.now(),state:'done'}});
   const bt=state.topics.find(t=>t.id===b.topicId);bt.messages.push({role:'assistant',text:'ok'});bt.chatJob={state:'done'};
   await new Promise(r=>setTimeout(r,60));assert.equal(a.topicId,'tasks');assert.equal(topic.messages.at(-1).text,'done:28 задач|done:ok');}
+ // offer: ask, run, single answer, remember
+ {const {complexRequest,OFFER}=require('../src/agent-team.cjs');assert(complexRequest('Подготовь отчёт по релизу: что закрыто в Jira, что обсуждали в Slack и что изменилось в гите'));assert(complexRequest('Покажи мои задачи и что нового в слаке'));assert(!complexRequest('Покажи мои задачи в работе'));assert(!complexRequest('Какие баги открыты в BW и MW2?'));
+  let mode='ask';const t4={id:'p4',projectId:'p',messages:[],title:'T4'};state.topics.push(t4);
+  const team4=new AgentTeam({dialogue,jobs,interval:5,preference:()=>mode,remember:v=>{mode=v;},plan:async()=>({tasks:[{title:'Задачи',request:'Покажи мои задачи',action:false},{title:'Slack',request:'Что нового в Slack?',action:false}]}),summarize:async()=>'итог'});
+  const ask=await team4.offer('Покажи мои задачи и что нового в слаке',t4);assert(ask.question);assert.deepEqual(ask.clarificationOptions,Object.values(OFFER));assert.match(ask.text,/1\. Задачи/);assert.equal(t4.messages.length,2);
+  const single=await team4.offer('Ответить одним сообщением',t4);assert.equal(single.continueWith,'Покажи мои задачи и что нового в слаке');assert.equal(t4.messages.length,0);assert.equal(await team4.offer(single.continueWith,t4),null);
+  await team4.offer('Покажи мои задачи и что нового в слаке',t4);const run=await team4.offer('Всегда раздавать',t4);assert(run.agentPlan);assert.equal(mode,'always');assert.match(run.text,/Запомнил/);
+  const auto=await team4.offer('Покажи мои задачи и что нового в слаке',t4);assert(auto.agentPlan);
+  assert.match((await team4.offer('Спрашивай про агентов',t4)).text,/снова буду спрашивать/);assert.equal(mode,'ask');
+  mode='never';assert.equal(await team4.offer('Покажи мои задачи и что нового в слаке',t4),null);
+  for(const e of team4.active.values())clearTimeout(e.timer);team4.active.clear();}
  // single task → normal pipeline; agent chats never spawn agents
  const one=new AgentTeam({dialogue,jobs,plan:async()=>({tasks:[{title:'x',request:'Мои задачи',action:false}]}),summarize:async()=>''});assert.equal(await one.turn('Раздай агентам мои задачи',topic),null);
  assert.equal(await team.turn('Раздай агентам: a и b',state.topics.find(t=>t.id==='c1')),null);
