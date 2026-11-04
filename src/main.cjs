@@ -165,7 +165,12 @@ const projectOperations=new Set(['prepareVoice','converse','interpret','attachme
 const foregroundAnswers=new Map();
 const cancellableAnswers=new Set(['converse','attachmentInspect','plan','draft','dailyBrief','webSearchContinue']);
 function handle(name, fn) { ipcMain.handle('petya:' + name, async (event, ...args) => {
-  if (event.sender !== win.webContents || event.senderFrame !== win.webContents.mainFrame || event.senderFrame.url !== entry) throw new Error('Недопустимый источник запроса.');
+  // Queued renderer requests can arrive after Electron starts destroying the window.
+  if (!win || win.isDestroyed() || event.sender.isDestroyed()) return;
+  const contents = win.webContents;
+  if (contents.isDestroyed()) return;
+  const frame = event.senderFrame;
+  if (event.sender !== contents || !frame || frame !== contents.mainFrame || frame.url !== entry) throw new Error('Недопустимый источник запроса.');
   if(switchingCompany)throw Error('Переключаю компанию. Дождитесь открытия Пети.');
   const controller=cancellableAnswers.has(name)?new AbortController():null,answerTopic=dialogue?.state.activeId||'';if(controller){if(!foregroundAnswers.has(answerTopic))foregroundAnswers.set(answerTopic,new Set());foregroundAnswers.get(answerTopic).add(controller);}
   activeOperations++;try{return await require('./answer-cancel.cjs').run(controller?.signal,()=>requestProgress.run(name,label=>{if(!event.sender.isDestroyed())event.sender.send('request-progress',label);},()=>require('./answer-stream.cjs').run(chunk=>{if(!event.sender.isDestroyed())event.sender.send('answer-chunk',chunk);},()=>modules.withProject(projectOperations.has(name)?dialogue?.state.projects.find(p=>p.id===dialogue.state.activeProjectId):null,()=>projectOperations.has(name)&&dialogue?dialogue.within(dialogue.state.activeId,dialogue.state.activeProjectId,()=>fn(...args)):fn(...args)))));}finally{activeOperations--;if(controller){foregroundAnswers.get(answerTopic)?.delete(controller);if(!foregroundAnswers.get(answerTopic)?.size)foregroundAnswers.delete(answerTopic);}}
@@ -606,12 +611,17 @@ else {
         const hidden = !win.isVisible(), dockHidden = process.platform !== 'darwin' || !app.dock.isVisible();
         const startedInTray = hidden && !tray.isDestroyed() && dockHidden;
         if (!startedInTray) console.log('Tray start check: ' + JSON.stringify({ windowHidden: hidden, dockHidden, tray: !tray.isDestroyed() }));
-        show();
+        tray.emit('click');
         const openedFromTray = win.isVisible();
         win.close();
         const closedToTray = !win.isDestroyed() && !win.isVisible() && !tray.isDestroyed();
-        valid = valid && startedInTray && openedFromTray && closedToTray;
-        console.log('Tray lifecycle: ' + JSON.stringify({ startedInTray, openedFromTray, closedToTray }));
+        tray.emit('click');
+        const reopenedFromTray = win.isVisible() && await win.webContents.executeJavaScript(
+          'window.petya.chatNavigation().then(result => Array.isArray(result.projects))'
+        );
+        win.close();
+        valid = valid && startedInTray && openedFromTray && closedToTray && reopenedFromTray && !win.isVisible();
+        console.log('Tray lifecycle: ' + JSON.stringify({ startedInTray, openedFromTray, closedToTray, reopenedFromTray }));
         try { if (process.env.PETYA_VERIFY_ZOOM === '1') { const state = await inspectZoomWindows(true); console.log('Zoom diagnostic: ' + JSON.stringify({ permission: state.permission, zoomOpen: state.zoomOpen, windows: state.windows.length, electronPermission: systemPreferences.getMediaAccessStatus('screen') })); } if (process.env.PETYA_VERIFY_SPEECH === '1') { await win.webContents.executeJavaScript('window.petya.ensureSpeech()'); console.log('Packaged speech startup verified'); } console.log(valid ? 'Packaged app verified' : 'Packaged app failed'); speech.stop(); qwenSpeech.stop(); app.exit(valid ? 0 : 1); } catch (error) { console.error(error); speech.stop(); qwenSpeech.stop(); app.exit(1); }
       });
     }

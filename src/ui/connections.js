@@ -99,7 +99,7 @@ function setupConnections() {
     const original = [...card.children]; original.forEach(child => { if (!['H2'].includes(child.tagName) && !child.classList.contains('eyebrow')) content.append(child); });
     const status = connectionNode('p', 'Не проверено', 'connection-status'); status.setAttribute('role', 'status');
     const description = connectionNode('p', def.description), controls = connectionNode('div', '', 'actions');
-    const connect = connectionNode('button', 'Подключить', 'primary'); connect.type = 'button';
+    const connect = connectionNode('button', 'Подключить', 'primary'); connect.type = 'button';connect.dataset.connectionLogin='true';
     const guide = connectionNode('button', def.id === 'ollama' ? 'Установить Ollama' : def.id === 'notion' ? 'Настройки Notion ↗' : ['ollama', 'whisper'].includes(def.id) ? 'Установка' : 'Открыть настройки сервиса ↗'); guide.type = 'button'; guide.onclick = run(() => window.petya.connectionGuide(def.id));
     connect.onclick = () => { content.open = true; if (def.id !== 'notion') field.focus(); content.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
     if(def.id === 'jira') {
@@ -125,11 +125,11 @@ function setupConnections() {
       for (const key of def.fields) if (key.endsWith('Token')) input['clear_' + key] = form.elements['clear_' + key].checked;
       try {
         const result = await window.petya.connectService(def.id, input);
-        if (def.id === 'jira') await refreshJiraChoices();
+        if (def.id === 'jira' && result.ready) await refreshJiraChoices();
         // Do not overwrite unsaved fields from another service.
         for (const key of def.fields) if (key.endsWith('Token')) { form.elements[key].value = ''; form.elements['clear_' + key].checked = false; }
-        status.textContent = (result.ready ? 'Подключено · ' : 'Требуется настройка · ') + result.message;
-        status.className = 'connection-status' + (result.ready ? ' connected' : ''); if(!['slack','notion','jira'].includes(def.id)) connect.textContent = 'Настроить';
+        status.textContent = result.reason ? result.message : (result.ready ? 'Подключено · ' : 'Требуется настройка · ') + result.message;
+        status.className = 'connection-status' + (result.reason ? ' error' : result.ready ? ' connected' : '');window.showConnectionRecovery?.(card,status,result); if(!['slack','notion','jira'].includes(def.id)) connect.textContent = 'Настроить';
         if (def.id === 'notion') { if (input.notionToken.trim() && !input.clear_notionToken) field.placeholder = 'Токен сохранён. Оставьте пустым, чтобы использовать его'; content.open = !result.ready; }
         if (def.id === 'ollama' && Array.isArray(result.models)) {
           let list = $('ollama-models'); if (!list) { list = document.createElement('datalist'); list.id = 'ollama-models'; content.append(list); form.elements.model.setAttribute('list', list.id); }

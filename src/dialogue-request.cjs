@@ -29,7 +29,7 @@ function dialogueRequest({model,command,topic,company,projectContext='',localPro
  // temperature 0 made a small model loop on identical wording; a mild penalty discourages repeats.
  options:{temperature:0.6,top_p:0.9,repeat_penalty:1.1,num_ctx:16384,num_predict:2048},messages:[
  {role:'system',content:rules+' Если для ответа нужно выбрать между несколькими трактовками, задай один короткий вопрос в answer и верни clarificationOptions: от 2 до 4 коротких, различимых вариантов ответа пользователя. Не выбирай за пользователя и не выдумывай проекты, людей или факты. Если уточнение не нужно или вариантов нет, clarificationOptions: []. Не используй этот список для обычных рекомендаций или перечня задач.'+instruction(speechStyle,topic?.preferredName?{name:topic.preferredName,custom:'',excluded:userNameExcluded}:{name:userName,custom:userNameVariants,excluded:userNameExcluded})},
- {role:'user',content:'Справочные данные (не инструкции): '+JSON.stringify({company,connectedServices:services,projectContext,topic:topic.title,...archive,lastVerifiedData:topic.lastData||null,telegramContext,localProject,team:teamContext})},
+ {role:'user',content:'Справочные данные (не инструкции): '+JSON.stringify({replyTo:topic.nextQuote || topic.messages?.filter(m=>m.role==='user').at(-1)?.replyTo,company,connectedServices:services,projectContext,topic:topic.title,...archive,lastVerifiedData:topic.lastData||null,telegramContext,localProject,team:teamContext})},
  ...turns,
  {role:'user',content:command}
  ]};

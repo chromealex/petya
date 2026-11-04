@@ -145,12 +145,12 @@ async function refreshContexts() {
   if (!contexts.length) $('context-list').textContent = 'Пока нет сохранённых материалов. Нажмите «Добавить материал», чтобы сохранить первую запись.';
   for (const context of [...contexts].reverse().slice(0, 500)) { const card = document.createElement('article'); card.className = 'context-item';card.dataset.source=context.source; const title = document.createElement('strong'); title.textContent = context.title; const meta = document.createElement('p'); meta.className = 'small'; meta.textContent = `${context.source} · ${new Date(context.at).toLocaleString('ru-RU')}`; const body = document.createElement('p'); body.textContent = context.text; const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Прочитать запись';details.append(summary,body);const ask=document.createElement('button');ask.type='button';ask.textContent='Спросить Петю';ask.onclick=()=>{view('home');$('command').value='По материалу «'+context.title+'»: ';$('command').focus();};card.append(title,meta,details,ask); $('context-list').append(card); }
 }
-async function makeDraft(context, route = null) {
+async function makeDraft(context, route = null, { reviewOnly = false } = {}) {
   activeContext = context;
   if (currentIntent === 'asana') { await prepareSpokenAsana(context); return; }
   if (currentIntent === 'agent') { await prepareAgent(context); return; }
   if (!route && currentIntent !== 'docs') {
-    route = await selectJiraRoute(context, selected => makeDraft(context, selected));
+    route = await selectJiraRoute(context, selected => makeDraft(context, selected, { reviewOnly }));
     if (!route) return;
   }
   activeJiraRoute = route;
@@ -160,7 +160,7 @@ async function makeDraft(context, route = null) {
   document.querySelectorAll('.choice').forEach(b => b.disabled = true);
   try { commandProgress.update('working', 'Готовлю черновик'); notice('Готовлю черновик по выбранному обсуждению…'); currentDraft = await window.petya.draft(commandSnapshot, context.id, route.id); $('draft-summary').value = currentDraft.summary; $('draft-description').value = currentDraft.description; $('draft-card').hidden = false; $('resolution').hidden = true; $('send').disabled = false; $('issue-result').textContent = `Проект: ${route.project} · ${route.name}. ${route.reason}`; notice(`Контекст: ${context.source} — ${context.title}. Проверьте задачу перед отправкой.`); await window.petya.notify('Черновик Jira готов. Откройте Петю для проверки.'); commandProgress.update('waiting', 'Черновик готов'); }
   finally { draftBusy = false; document.querySelectorAll('.choice').forEach(b => b.disabled = false); }
-  if (automaticVoiceCommand && currentDraft) {
+  if (!reviewOnly && automaticVoiceCommand && currentDraft) {
     if (currentDraft.questions?.length) askVoiceQuestion(currentDraft.questions.join(' '), async answer => { commandSnapshot += '\nУточнение пользователя: ' + answer; currentDraft = null; await makeDraft(context, route); });
     else { voiceReply = null; await sendCurrentDraft(); }
   }

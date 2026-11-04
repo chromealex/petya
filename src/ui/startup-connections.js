@@ -17,6 +17,7 @@ async function checkConnectionsOnOpen() {
         // A manual check, edit or sign-in always takes precedence over this result.
         if (status.textContent !== checking) return;
         status.textContent = result.message; status.className = 'connection-status ' + result.state;
+        window.showConnectionRecovery?.(card,status,result);
         if (service === 'confluence') card.dataset.reconnect = String(result.action === 'reconnect');
       } catch (e) {
         if (status.textContent !== checking) return;
