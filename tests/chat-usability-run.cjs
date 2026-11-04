@@ -1,0 +1,1 @@
+const path=require('node:path');const root=path.resolve(__dirname,'..');process.env.PETYA_SMOKE_TEST='1';const smoke=require.resolve('./smoke.cjs');require.cache[smoke]={id:smoke,filename:smoke,loaded:true,exports:require('./chat-usability-ui.cjs')};require(path.join(root,'src/main.cjs'));

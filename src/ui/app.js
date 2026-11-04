@@ -175,7 +175,7 @@ async function processCommand(command, at = Date.now(), automatic = false) {
   const completed = await commandProgress.start(command, () => executeCommand(command, at, automatic));
   if (!completed && commandProgress.state === 'error') {
     if(!$('command').value)$('command').value=command;
-    notice(commandProgress.label, true);
+    if(window.showChatRequestError)window.showChatRequestError(command,commandProgress.label);else notice(commandProgress.label,true);
     if (automatic) await speakReply(commandProgress.label);
   }
 }
