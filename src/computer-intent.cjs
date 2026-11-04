@@ -1,14 +1,18 @@
 const aliases=[['вася','васи','васю','василий','василия','василию'],['саша','саши','сашу','александр','александра','александру'],['петя','пети','петю','петр','петра'],['ваня','вани','ваню','иван','ивана'],['маша','маши','машу','мария','марии'],['дима','димы','диму','дмитрий','дмитрия']];
 const normalize=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/ё/g,'е').trim();
-function searchName(name){const parts=String(name).trim().split(/\s+/);return parts.map(p=>aliases.find(a=>a.includes(normalize(p)))?.[0]||p).join(' ');}
-function matchesContact(row,query){const q=normalize(query);if(q.startsWith('@'))return normalize(row.username)===q.slice(1)||normalize(row.name).split(/[^\p{L}\p{N}_]+/u).includes(q.slice(1));const words=normalize(row.name+' '+row.username).split(/[^\p{L}\p{N}_]+/u);return q.split(/\s+/).every(token=>{const forms=aliases.find(a=>a.includes(token))||[token];return words.some(w=>forms.includes(w)||(token.length>=3&&w.startsWith(token)));});}
+// Names come from speech in any grammatical case («найди Любимую»), while Telegram
+// search matches by prefix. Search by the word stem so «Любимую» finds «Любимая Машка».
+const endings=['ыми','ими','ого','его','ому','ему','ую','юю','ая','яя','ой','ей','ою','ею','ый','ий','ым','им','ом','ем','ых','их','у','ю','а','я','е','ы','и','о'];
+function stem(word){const w=normalize(word);if(!/^[а-я-]+$/u.test(w))return w;for(const e of endings)if(w.endsWith(e)&&w.length-e.length>=3)return w.slice(0,-e.length);return w;}
+function searchName(name){const parts=String(name).trim().split(/\s+/);return parts.map(p=>aliases.find(a=>a.includes(normalize(p)))?.[0]||p.slice(0,stem(p).length)).join(' ');}
+function matchesContact(row,query){const q=normalize(query);if(q.startsWith('@'))return normalize(row.username)===q.slice(1)||normalize(row.name).split(/[^\p{L}\p{N}_]+/u).includes(q.slice(1));const words=normalize(row.name+' '+row.username).split(/[^\p{L}\p{N}_]+/u);return q.split(/\s+/).every(token=>{const forms=aliases.find(a=>a.includes(token))||[token];const base=stem(token);return words.some(w=>forms.includes(w)||(token.length>=3&&w.startsWith(token))||(base.length>=3&&(w.startsWith(base)||stem(w)===base)));});}
 function clean(text){return String(text).replace(/^петя[,\s]+/iu,'').trim();}
 function denied(text){return /(?:^|\s)(?:не\s+(?:найди|ищи|открывай|переключай|вводи|нажимай)|как\s+(?:найти|открыть|искать)|например|допустим|объясни|что значит|если бы)(?:\s|$)/iu.test(text);}
 const telegram=/(?:в\s+)?(?:телеграм(?:м)?(?:е|ме)?|telegram|тг)/iu;
 function direct(text){
  const s=clean(text);if(denied(s))return null;
  if(telegram.test(s)&&/(?:найди|поищи|отыщи|найдешь|найдёшь|можешь найти)/iu.test(s)){
- let q=s.replace(telegram,'').replace(/^(?:пожалуйста[,\s]*|можешь\s+|можно\s+|ты\s+)*/iu,'').replace(/(?:найди|поищи|отыщи|найдешь|найдёшь|найти)/iu,'').replace(/(?:^|\s)(?:мне|пожалуйста|контакт|человека|по имени)(?=\s|$)/giu,' ').replace(/^[\s,:«»"']+|[\s,.!?«»"']+$/gu,'').trim();
+ let q=s.replace(telegram,'').replace(/^(?:сходи|зайди|загляни|открой|перейди)\s*(?:и\s+)?/iu,'').replace(/^\s*и\s+/iu,'').replace(/(?:^|\s)там(?=\s|$)/giu,' ').replace(/^(?:пожалуйста[,\s]*|можешь\s+|можно\s+|ты\s+)*/iu,'').replace(/(?:найди|поищи|отыщи|найдешь|найдёшь|найти)/iu,'').replace(/(?:^|\s)(?:мне|пожалуйста|контакт|человека|по имени)(?=\s|$)/giu,' ').replace(/^[\s,:«»"']+|[\s,.!?«»"']+$/gu,'').trim();
  if(q&&!/[\n;]|(?:\sи\s|сообщени|отправ|напиш)/iu.test(q)&&q.length<=120)return {intent:'contact_search',app:'Telegram',query:q};
  }
  return null;
@@ -43,4 +47,4 @@ class ComputerIntent{
  const result=await this.computer.execute(route.intent==='scroll'?{type:'scroll',direction:route.direction,amount:route.amount}:{type:'key',key:route.key});return {handled:true,text:result.text};
  }
 }
-module.exports={ComputerIntent,routingRequest,parseRoute,direct,candidate,matchesContact,searchName};
+module.exports={ComputerIntent,routingRequest,parseRoute,direct,candidate,matchesContact,searchName,stem};

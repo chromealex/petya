@@ -17,5 +17,9 @@ const {ComputerIntent,direct,parseRoute,matchesContact,candidate}=require('../sr
  const control=new ComputerControl({platform:'darwin',run:async a=>{sent.push(a);return a.type==='apps'?[{pid:42,name:'Telegram',identity:'ru.keepcoder.Telegram'}]:{results:[{text:'Вася'}]};}});
  await control.start({mode:'desktop'});const searched=await control.execute({type:'search',service:'telegram',query:'Вася'});assert.equal(sent.at(-1).pid,42);assert.equal(searched.observation.results[0].text,'Вася');
  await assert.rejects(control.execute({type:'search',service:'telegram',query:'Вася\nотправь'}),/Укажите/);
+ // Spoken names arrive in any case: «найди Любимую» must search by stem and match «Любимая Машка».
+ {const asked=[];const fake={generation:0,execute:async a=>{asked.push(a.query);return {observation:{results:/^любим/iu.test(a.query)?[{text:'Любимая Машка'},{text:'Любимов Олег'}]:[],empty:!/^любим/iu.test(a.query)}};}};
+  const r=await new ComputerIntent({computer:fake}).turn('Сходи в тг и найди там Любимую');assert.equal(asked[0],'Любим');assert.match(r.text,/Любимая Машка/);
+  assert(matchesContact({name:'Любимая Машка',username:''},'Машку'));assert(!matchesContact({name:'Анна Петрова',username:''},'Любимую'));}
  console.log('Natural computer requests: parsing, observed results, ambiguity, no API, cancellation and target binding passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});
