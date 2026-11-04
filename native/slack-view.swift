@@ -19,5 +19,8 @@ while !pending.isEmpty && visited<1800 && Date()<deadline && total<50000 {
  if depth<35,let children=attribute(node,kAXChildrenAttribute) as? [AXUIElement] { pending.append(contentsOf:children.reversed().map{($0,depth+1)}) }
 }
 // Start at the thread heading; do not treat the channel's message history as an opened thread.
-let marker=texts.firstIndex { ["thread","тред","ветка","обсуждение"].contains($0.lowercased().trimmingCharacters(in:.whitespacesAndNewlines)) }
-output(["thread":marker != nil,"title":attribute(element,kAXTitleAttribute) as? String ?? "Slack","text":marker.map{Array(texts[$0...]).joined(separator:"\n")} ?? "","urls":marker.map { start in zip(urls,urlPositions).filter{$0.1 >= start}.map{$0.0} } ?? []])
+// --window: return all visible text of the Slack window (e.g. a channel and its member list), not only an open thread.
+let wholeWindow=CommandLine.arguments.contains("--window")
+let threadStart=texts.firstIndex(where: { ["thread","тред","ветка","обсуждение"].contains($0.lowercased().trimmingCharacters(in:.whitespacesAndNewlines)) })
+let marker:Int? = wholeWindow ? (texts.isEmpty ? nil : 0) : threadStart
+output(["thread":threadStart != nil,"title":attribute(element,kAXTitleAttribute) as? String ?? "Slack","text":marker.map{Array(texts[$0...]).joined(separator:"\n")} ?? "","urls":marker.map { start in zip(urls,urlPositions).filter{$0.1 >= start}.map{$0.0} } ?? []])

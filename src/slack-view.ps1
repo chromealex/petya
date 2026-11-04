@@ -1,3 +1,5 @@
+# -Window: return all visible text of the Slack window, not only an open thread.
+param([switch]$Window)
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
@@ -23,6 +25,7 @@ try {
   if($depth -lt 35){$children=[System.Collections.Generic.List[object]]::new();$child=$walker.GetFirstChild($node);while($null -ne $child -and $children.Count -lt 1000 -and [DateTime]::UtcNow -lt $deadline){$children.Add($child);$child=$walker.GetNextSibling($child)};for($i=$children.Count-1;$i -ge 0;$i--){$stack.Push(@($children[$i],($depth+1)))}}
  }
  $marker=-1;for($i=0;$i -lt $texts.Count;$i++){if($texts[$i].Trim() -match '^(Thread|Тред|Ветка|Обсуждение)$'){$marker=$i;break}}
+ $thread=($marker -ge 0);if($Window -and $texts.Count -gt 0){$marker=0}
  $content='';if($marker -ge 0){$content=($texts.GetRange($marker,$texts.Count-$marker) -join "`n")}
- @{thread=($marker -ge 0);title=$root.Current.Name;text=$content;urls=@()} | ConvertTo-Json -Compress
+ @{thread=$thread;title=$root.Current.Name;text=$content;urls=@()} | ConvertTo-Json -Compress
 } catch { @{error='Не удалось прочитать видимое обсуждение Slack через UI Automation.'} | ConvertTo-Json -Compress }
