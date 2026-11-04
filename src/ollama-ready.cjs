@@ -17,9 +17,9 @@ class OllamaReady {
     this.state = { phase: 'idle', busy: false, message: '' };
   }
   update(phase, message, extra = {}) { this.state = { phase, message, busy: !['idle', 'done', 'error', 'cancelled'].includes(phase), ...extra }; this.emit(this.state); return this.state; }
-  start(model) {
+  start(model, {forcePull=false}={}) {
     if (this.pending) return this.pending;
-    this.selectedModel = model;
+    this.selectedModel = model;this.forcePull=forcePull;
     this.controller = new AbortController();
     this.pending = this.prepare().catch(e => this.update(this.controller.signal.aborted ? 'cancelled' : 'error', this.controller.signal.aborted ? 'Запуск отменён. Загрузку модели можно продолжить следующей попыткой.' : e.message)).finally(() => { this.pending = null; });
     return this.pending;
@@ -58,7 +58,7 @@ class OllamaReady {
       }
     }
     model ||= DEFAULT_MODEL;
-    if (!tags.models.some(m => m.name === model || m.name === model + ':latest')) {
+    if (this.forcePull || !tags.models.some(m => m.name === model || m.name === model + ':latest')) {
       this.update('pulling', `Загружаю модель ${model}…`);
       const response = await request('/api/pull', { model, stream: true }, 2 * 3600000);
       if (!response.body) throw new Error('Ollama не начал загрузку модели.');

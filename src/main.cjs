@@ -990,6 +990,9 @@ function setupHandlers() {
   handle('attachmentVisionInstall',()=>{if(ollamaReady.state.busy)throw Error('Дождитесь подготовки Ollama.');visionReady.start();return visionReady.state;});
   handle('attachmentVisionStatus',()=>visionReady.state);handle('attachmentVisionCancel',()=>visionReady.cancel());
   app.on('will-quit',()=>visionReady.cancel());
+  const modelUpdates=new (require('./model-updates.cjs').ModelUpdates)({settings:()=>settings,ready:ollamaReady});
+  handle('modelUpdates',force=>smoke?{items:[],checkedAt:Date.now(),error:''}:modelUpdates.check(force===true));
+  handle('modelUpdateInstall',model=>{if(visionReady.state.busy)throw Error('Дождитесь подготовки модели изображений.');return modelUpdates.install(text(model,180));});
   handle('installBrain',()=>{if(visionReady.state.busy)throw Error('Дождитесь подготовки модели изображений.');return ollamaReady.start('qwen3.5:9b');});
   handle('installOllama', () => {if(visionReady.state.busy)throw Error('Дождитесь загрузки модели для изображений.');return ollamaReady.start();});
   handle('ollamaInstallStatus', () => ollamaReady.state);

@@ -34,6 +34,7 @@ const json = value => new Response(JSON.stringify(value));
  const upgradeFailure=new OllamaReady({...options,fetcher:async url=>new URL(url).pathname==='/api/tags'?json({models:[]}):new Response('{"error":"download interrupted"}\n')});
  assert.equal((await upgradeFailure.start('qwen3.5:9b')).phase,'error');assert.equal(config.model,old);
  assert.equal((await new OllamaReady(options).start('qwen3.5:9b')).model,'qwen3.5:9b');assert.equal(config.model,'qwen3.5:9b');
+ const forced=new OllamaReady({...options,fetcher:async(url,opts)=>new URL(url).pathname==='/api/tags'?json({models:[{name:config.model}]}):options.fetcher(url,opts)});const pullsBefore=pulls;assert.equal((await forced.start(config.model,{forcePull:true})).ready,true);assert.equal(pulls,pullsBefore+1);
  config={ollamaUrl:'https://example.com',model:''};assert.equal((await new OllamaReady(options).start()).phase,'error');
  console.log('Ollama ready: default download, reuse text model, skip embedding, single flight, probe before save, partial streams and local-only endpoint passed');
 })().catch(e=>{console.error(e);process.exitCode=1});

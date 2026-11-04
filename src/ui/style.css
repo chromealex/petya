@@ -716,3 +716,14 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .project-chat-row:has(>.chat-job-dot)>.project-sidebar-chat{padding-right:26px}
 .project-chat-row:hover>.project-sidebar-chat,.project-chat-row:focus-within>.project-sidebar-chat{padding-right:32px}
 @media(hover:none){.project-chat-row>.project-sidebar-chat{padding-right:32px}}
+
+.notification-bell{position:relative;display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;padding:0;background:transparent;border:0;-webkit-app-region:no-drag}
+.notification-count{position:absolute;right:0;top:0;min-width:13px;height:13px;line-height:13px;text-align:center;border-radius:8px;background:var(--green);color:#182117;font-size:9px;padding:0 3px}
+.notification-bell.is-working{color:var(--green)}
+.notification-center{position:fixed;z-index:2100;width:min(380px,calc(100vw - 16px));overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 16px 40px #0006;scrollbar-width:thin;-webkit-app-region:no-drag}
+.notification-center:not([hidden]){animation:ui-arrive var(--motion-enter) var(--motion-ease) both}
+.notification-head,.notification-item-title{display:flex;align-items:center;gap:8px}.notification-head{margin-bottom:12px}.notification-head strong,.notification-item-title strong{flex:1;min-width:0;overflow-wrap:anywhere}
+.notification-head button,.notification-item-title button{padding:4px 7px;border:0;background:transparent;font-size:12px}
+.notification-center>button{width:100%;font-size:12px;padding:8px}.notification-check-status{font-size:11px;margin:8px 0 12px}
+.notification-item{border-top:1px solid var(--line);padding:12px 0}.notification-item p{font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin:7px 0}.notification-item strong{font-size:13px}.notification-item time{display:block;font-size:10px;color:var(--muted);margin-top:8px}.notification-item progress{width:100%;height:4px;accent-color:var(--green)}
+.notification-actions{display:flex;gap:8px;flex-wrap:wrap}.notification-actions button{font-size:12px;padding:6px 10px}.notification-item[data-kind=error] .notification-item-title{color:#ffb2a7}.notification-item[data-kind=attention] .notification-item-title{color:#edce8f}.notification-empty{font-size:13px;text-align:center;margin:24px 0}
