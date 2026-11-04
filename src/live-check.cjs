@@ -28,7 +28,9 @@ module.exports=async(win,out)=>{
  try{
   for(const scenario of SCENARIOS){
    // Git needs the folders of the user's own project; its chat is archived right after.
-   const target=scenario.userProject&&before.activeProjectId?before.activeProjectId:project.id;
+   // Prefer the active project when it has folders, otherwise the first project that has some.
+   const withFolders=(before.projects||[]).filter(p=>p.folder||p.folders?.length||p.memoryId);
+   const target=scenario.userProject?((withFolders.find(p=>p.id===before.activeProjectId)||withFolders[0])?.id||before.activeProjectId||project.id):project.id;
    await js(`window.petya.chatProjectSelect(${JSON.stringify(target)})`);await js(`window.petya.dialogueSelect('')`);
    const turns=[];
    for(const text of scenario.turns){const started=Date.now();let r;
