@@ -35,6 +35,14 @@
 
 - Several agents may work in this folder at the same time. Before starting, check `git status` and `git log -5`; edit files in place instead of overwriting them from an old copy.
 - Commit in small, complete steps, only your own files (`git add <files>`, not `git add -A`), with tests passing.
+- Prefer your own git worktree (`git worktree add ../Peter-<task> -b <task>`) over editing the shared folder; uncommitted edits in the shared folder block everyone else's `git pull`. Commit after every finished step.
+
+# Adding a feature
+
+- New functionality goes into a feature module in `src/features/` and one line in `src/features.cjs`, not into `src/main.cjs`.
+- A feature exports `{ name, defaults, validate(next), setup(services) }`: `defaults` are its settings, `validate` checks them on save, `setup` creates its services and IPC handlers (`services.handle(...)`) and returns the services other code may use (they become `services.<name>`, e.g. `services.agentTeam` in `converse.cjs`).
+- `services` gives live access to shared state (`settings`, `dialogue`, `chatJobs`, `request`, `win`, …). Features are set up last, so everything they read already exists.
+- Larger groups of existing main-process code live in `src/*-setup.cjs`; move code out of `main.cjs` rather than adding to it.
 
 # Background operations and notifications
 
