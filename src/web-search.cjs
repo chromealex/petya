@@ -1,5 +1,14 @@
 function queryText(text){if(text.length>500)throw Error('Сформулируйте короткий поисковый запрос до 500 символов.');if(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|(?:api[_ -]?key|token|password|пароль|секрет|токен)\s*[:=]\s*\S+|\b(?:sk-|ghp_|xox[baprs]-)[\w-]+|https?:\/\/\S+[?@]/i.test(text))throw Error('В запросе есть адрес почты, ключ или ссылка с параметрами. Уберите личные данные и повторите.');return text.trim();}
-function searchCommand(command,topic){const explicit=/^(?:найди|поищи|посмотри|проверь|найти)(?:\s+мне)?\s+(?:в интернете|в сети|в гугле|в google)(?:\s*[:,—-]\s*|\s+)?(.*)$/iu.exec(command)||/^(?:загугли|погугли)\s+(.*)$/iu.exec(command);if(explicit)return {query:explicit[1]||'',fresh:true};if(topic?.webQuery&&/^(?:а (?:для|на|если|как|что)|покажи другой способ|найди другой способ|обнови(?: ответ)?$)/iu.test(command))return {query:topic.webQuery+' '+command,fresh:false};return null;}
+// Questions that cannot be answered without current data: weather, exchange rates, quotes, news.
+// Definitions («что такое курс») and work news («новости по проекту») are not web searches.
+function freshQuestion(command){
+ const s=String(command||'').trim().replace(/^петя[\s,:.!?—-]*/iu,'');
+ if(/^(?:а\s+)?(?:что такое|что значит|объясни|почему|как работает|как устроен|не\s)/iu.test(s)||/[«"“]/u.test(s))return null;
+ if(/(?:погод[аеуы]|прогноз погоды|температур\p{L}* (?:на улице|в|за окном))/iu.test(s)||/(?:курс\p{L}* (?:доллар|евро|рубл|юан|валют|биткоин|bitcoin|btc|eth)|котировк|стоимость (?:акци|биткоин))/iu.test(s))return s.replace(/[?!.]+$/u,'');
+ if(/новост/iu.test(s)&&!/(?:проект|задач|команд|релиз|спринт|slack|слак|телеграм|telegram|почт|канал|jira|джир)/iu.test(s))return s.replace(/[?!.]+$/u,'');
+ return null;
+}
+function searchCommand(command,topic){const explicit=/^(?:найди|поищи|посмотри|проверь|найти)(?:\s+мне)?\s+(?:в интернете|в сети|в гугле|в google)(?:\s*[:,—-]\s*|\s+)?(.*)$/iu.exec(command)||/^(?:загугли|погугли)\s+(.*)$/iu.exec(command);if(explicit)return {query:explicit[1]||'',fresh:true};const fresh=freshQuestion(command);if(fresh)return {query:fresh,fresh:true,implicit:true};if(topic?.webQuery&&/^(?:а (?:для|на|если|как|что)|покажи другой способ|найди другой способ|обнови(?: ответ)?$)/iu.test(command))return {query:topic.webQuery+' '+command,fresh:false};return null;}
 class WebSearch{
  constructor({enabled,model,read,searchAPI}){Object.assign(this,{enabled,model,read,searchAPI});this.busy=false;}
  async search(raw,{resume=false}={}){if(!this.enabled())throw Error('Включите модуль «Поиск в интернете» в «Подключениях».');const query=queryText(raw);if(!query)throw Error('Что найти в интернете? Произнесите команду вместе с вопросом.');if(this.busy)throw Error('Дождитесь текущего поиска.');this.busy=true;
@@ -20,4 +29,4 @@ class WebSearch{
   catch{return {query,text:'Страницы найдены и прочитаны, но локальная модель не смогла подготовить ответ. Откройте источники ниже.',sources:pages.map(({title,url})=>({title,url})),verified:false};}
  }finally{this.busy=false;}}
 }
-module.exports={WebSearch,queryText,searchCommand};
+module.exports={freshQuestion,WebSearch,queryText,searchCommand};

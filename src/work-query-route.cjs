@@ -16,6 +16,8 @@ function classify(command,topic){
  if(/(?:нагруз|загруз).*(?:процессор|сервер|CPU|GPU|диск|памят|страниц|файл|приложен)/iu.test(text))return null;
  if(/^кто отвечает за/iu.test(text)&&!/(?:задач|проект)/iu.test(text))return {kind:'chat'};
  if(!work)return null;
+ // Notion and Asana have their own readers: leave such questions to them instead of the Jira work route.
+ if(/(?:asana|асан|notion|ноушен|ноушн)/iu.test(text)&&!/(?:задач|таск|тикет)/iu.test(text))return null;
  if(/(?:asana|асана|асане|notion|ноушен|trello|github|гитхаб|linear|clickup)/iu.test(text))return {kind:'clarify',text:'Этот рабочий список читается из Jira. Уточни нужный сервис и проект; данные разных сервисов не буду смешивать.'};
  if(/(?:\sи\s|;|\.\s).*(?:отправ|переназнач|удал|закр|созда|опублику|покажи|проверь)/iu.test(text))return {kind:'clarify',text:'В запросе несколько действий. Сначала уточни, какой список или статус проверить; отправку и изменения разберём отдельно.'};
  if(/(?:вчера|завтра|сегодня|неделю назад|за прошл|на следующ|к концу|на этой неделе)/iu.test(text))return {kind:'clarify',text:'Уточни период и что он означает: срок задачи, дата создания, изменение статуса или состояние на тот момент. Это разные выборки Jira.'};
