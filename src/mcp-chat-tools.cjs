@@ -46,7 +46,7 @@ function register(server, z, ctx) {
     });
   }
   tool('list_chat_projects','Проекты и владельцы черновиков новых чатов.',page,a=>list(projects().map(p=>({id:p.id,name:p.name,draftOwner:'draft:'+p.id})),a));
-  tool('list_chats','Доступные чаты. ID чата также служит владельцем его черновика.',{projectId:id.optional(),...page},a=>list(chats().filter(t=>!a.projectId || t.projectId===a.projectId).map(({id,title,projectId})=>({id,title,projectId})),a));
+  tool('list_chats','Доступные чаты. ID чата также служит владельцем его черновика.',{projectId:id.optional(),...page},a=>list(chats().filter(t=>!a.projectId || t.projectId===a.projectId).map(t=>({id:t.id,title:t.title,projectId:t.projectId,attention:require('./chat-location.cjs').attention(t)})),a));
   const draftText = owner => shared.chatDrafts()[owner] || '';
   const draftFiles = owner => [...ctx.attachments.pending.values()].filter(f => f.owner===owner);
   tool('get_chat_draft','Текст и список вложений черновика.',draft,({owner})=>({revision:revision(ctx,owner),text:draftText(owner),files:draftFiles(owner).map(({id,name,note})=>({id,name,note}))}));
@@ -74,11 +74,17 @@ function register(server, z, ctx) {
     const {index,count}=shared.chatWorkspaceInfo(t.id);
     return {index,count,revision:revision(ctx,t.id)};
   });
-  tool('read_chat_version','Прочитать сообщения любой версии без переключения.',{...chat,version:index.optional(),...page},(a,t)=>{
+  tool('read_chat_version','Прочитать сообщения любой версии без переключения.',{...chat,version:index.optional(),query:z.string().trim().max(300).optional(),...page},(a,t)=>{
     const {index,count}=shared.chatWorkspaceInfo(t.id), version=a.version ?? index;
     if(version>=count)throw Error('Версия недоступна.');
     const messages=(version===index?t:t.versions[version]).messages;
-    return list(messages.map(({role,text,at,attachments,usedMaterials},index)=>({index,role,text,at,usedMaterials,files:attachments?.map(({id,name})=>({id,name}))})),a);
+    const term=a.query?.toLowerCase();
+    const hits=messages.flatMap((m,index)=>!term||String(m.text).toLowerCase().includes(term)?[index]:[]);
+    return {total:hits.length,items:hits.slice(a.offset,a.offset+a.limit).map(index=>{
+      const {role,text,at,attachments,usedMaterials}=messages[index];
+      const link=role==='assistant'&&ctx.companyId?require('./chat-location.cjs').link(ctx.companyId,t,version,index):undefined;
+      return {index,role,text,at,usedMaterials,files:attachments?.map(({id,name})=>({id,name})),link};
+    })};
   });
   tool('select_chat_version','Переключить версию в чате Пети.',{...chat,revision:id,version:index},(a,t)=>shared.chatVersionSelect(t.id,a.version),true);
   tool('prepare_chat_version','Создать версию от сообщения пользователя для правки или повторного ответа. Вопрос останется в черновике для отправки в приложении.',{...chat,revision:id,version:index,messageIndex:index,original:z.string().min(1).max(4000),text:z.string().trim().min(1).max(4000).optional()},(a,t)=>{

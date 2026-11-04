@@ -208,7 +208,26 @@ function saveSettings(input, internal = false) {
     if (settings.zoomAutoRecord === 'false') meetingMonitor?.pause();
     return publicSettings();
 }
+const chatLocation=require('./chat-location.cjs');
+let pendingMessageLink=process.argv.find(arg=>chatLocation.parse(arg)) || '';
+function receiveMessageLink(raw){
+  if(!chatLocation.parse(raw))return;
+  pendingMessageLink=raw;
+  if(win && !win.isDestroyed()){show();win.webContents.send('message-link-ready');}
+}
+app.on('open-url',(event,url)=>{event.preventDefault();receiveMessageLink(url);});
 function setupHandlers() {
+  handle('takeMessageLink',()=>{const raw=pendingMessageLink;pendingMessageLink='';return raw;});
+  handle('messageLink',(id,index,text,at)=>{
+    const topic=dialogue.state.topics.find(t=>t.id===id),message=topic?.messages[index];
+    if(!message || message.text!==text || message.at!==at)throw Error('Сообщение изменилось. Откройте его ещё раз.');
+    return chatLocation.link(companyId,topic,topic.versionIndex||0,index);
+  });
+  handle('resolveMessageLink',raw=>{
+    const location=chatLocation.parse(raw);if(!location)throw Error('Некорректная ссылка на сообщение.');
+    companies.get(location.company);
+    return location.company===companyId?chatLocation.resolve(dialogue.state,location):{company:location.company};
+  });
   let projectMemory;
   const {computer,computerApproval,computerIntent}=require('./computer-setup.cjs')({get BrowserWindow(){return BrowserWindow;},get app(){return app;},get companyId(){return companyId;},get core(){return core;},get dialogue(){return dialogue;},get fs(){return fs;},get handle(){return handle;},get path(){return path;},get powerMonitor(){return powerMonitor;},get request(){return request;},get settings(){return settings;},get slackDigest(){return slackDigest;},get smoke(){return smoke;},get systemPreferences(){return systemPreferences;},get teamFill(){return teamFill;},get text(){return text;}});
 
@@ -506,7 +525,7 @@ function setupHandlers() {
     summarize:async(command,results)=>{requestProgress.report('Собираю общий ответ агентов');return agentModel('Ты Петя. Агенты выполнили части просьбы пользователя. Дай один общий ответ по-русски, на «ты»: сначала главное, затем коротко по каждой части. Опирайся только на ответы агентов, ничего не придумывай. Если агент не справился, ждёт уточнения или задача ждёт пользователя (state action), прямо скажи об этом.'+require('./speech-style.cjs').instruction(settings.speechStyle),{request:command,results},null,1500);}
   });
   const stopChatMcp = require('./mcp-setup.cjs')({
-    handle, dialogue, attachments, chatJobs, memory, addContext,
+    handle, dialogue, attachments, chatJobs, memory, addContext, companyId,
     check() { if (switchingCompany || quitting) throw Error('Компания закрывается.'); },
     async run(work) { activeOperations++; try { return await work(); } finally { activeOperations--; } },
     changed(event) { if (!win.isDestroyed()) win.webContents.send('mcp-chat-changed',event); }
@@ -540,14 +559,15 @@ function setupHandlers() {
   handle('companies',()=>({...companies.list(),activeId:companyId}));
   handle('companyCreate',name=>companies.create(name,settings));
   handle('companyRename',(id,name)=>{companies.rename(id,name);win.setTitle('Петя · '+companies.get(companyId).name);refreshTrayMenu();return {...companies.list(),activeId:companyId};});
-  handle('companySwitch',id=>{
+  handle('companySwitch',(id,raw)=>{
+    if(raw && chatLocation.parse(raw)?.company!==id)throw Error('Некорректная ссылка на компанию.');
     companies.get(id);if(id===companyId)return {unchanged:true};if(chatJobs.any())throw Error('Дождитесь завершения запросов в чатах перед сменой компании.');
     if(ollamaReady.state.busy||visionReady.state.busy)throw Error('Подготавливается локальная модель. Дождитесь завершения загрузки в настройках.');if(backgroundBusy)throw Error('Обновляются материалы компании. Дождитесь завершения синхронизации.');if(activeOperations>1)throw Error('Петя завершает текущую операцию. Статус виден в верхней панели; переключите компанию после завершения.');
     companies.select(id);
     if(smoke){companies.select(companyId);return {testOnly:true};}
     switchingCompany=true;serviceAccess?.clear();serviceBrowser?.stop();formatReader?.clear();require('./format-sandbox.cjs').stopFormats();telegramSource?.stop();clearInterval(backgroundTimer);buildRepair?.reset();buildQuestion?.reset();buildWatch?.reset();slackLogs?.reset();slackSync?.reset();stopWebSearch();
     win.webContents.send('pause-all');
-    app.relaunch({args:[...process.argv.slice(1).filter(a=>a!=='--petya-company-open'),'--petya-company-open']});
+    app.relaunch({args:[...process.argv.slice(1).filter(a=>a!=='--petya-company-open'&&!chatLocation.parse(a)),'--petya-company-open',...(raw?[raw]:[])]});
     setTimeout(()=>app.quit(),200);return {restarting:true};
   });
   require('./telegram-setup.cjs')({get app(){return app;},get clientDefaults(){return clientDefaults;},get handle(){return handle;},get memory(){return memory;},get modules(){return modules;},get saveSettings(){return saveSettings;},get settings(){return settings;},get shell(){return shell;},get telegramSource(){return telegramSource;},set telegramSource(v){telegramSource=v;}});
@@ -585,9 +605,10 @@ function setupHandlers() {
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.setAppUserModelId('com.petya.desktop');
-  app.on('second-instance', () => { if (win) show(); });
+  app.on('second-instance', (_event,args) => {const raw=args.find(s=>chatLocation.parse(s));if(raw)receiveMessageLink(raw);else if(win)show();});
   try { companies=new (require('./companies.cjs').Companies)(app.getPath('userData'));companyId=companies.state.activeId;dataRoot=companies.directory(companyId);fs.mkdirSync(dataRoot,{recursive:true});app.setPath('sessionData',dataRoot); }catch(error){require('electron').dialog.showErrorBox('Петя: компании недоступны',error.message);app.exit(1);}
   app.whenReady().then(() => {
+    if(app.isPackaged && process.platform==='win32')app.setAsDefaultProtocolClient('petya');
     try { loadSettings(); loadMemory(); } catch (error) { console.error(error); require('electron').dialog.showErrorBox('Петя: память недоступна', 'Не удалось прочитать настройки или контекст. Файлы не перезаписаны. ' + error.message); app.quit(); return; }
     win = new BrowserWindow({ show: false, skipTaskbar: true, ...(process.platform==='darwin'?{titleBarStyle:'hidden',trafficLightPosition:{x:16,y:24}}:process.platform==='win32'?{titleBarStyle:'hidden',titleBarOverlay:{color:'#18231f',symbolColor:'#eef4e9',height:64}}:{}), width: 1180, height: 840, minWidth: 880, minHeight: 640, backgroundColor: '#111415', title: 'Петя · '+companies.get(companyId).name, icon: appIconPath, webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false, autoplayPolicy:'no-user-gesture-required' } });
     require('./external-links.cjs')(win.webContents,
@@ -612,7 +633,7 @@ else {
       start: () => win.webContents.executeJavaScript('window.petyaStartAutomaticMeeting()', true),
       stop: () => win.webContents.executeJavaScript('window.petyaStopAutomaticMeeting(true)', true)
     });
-    win.webContents.once('did-finish-load', () => { if(process.argv.includes('--petya-company-open'))show(); if (!smoke && process.env.PETYA_VERIFY_BUILD !== '1') { backgroundTimer = setInterval(backgroundTick, 5000); backgroundTick(); } });
+    win.webContents.once('did-finish-load', () => { if(pendingMessageLink||process.argv.includes('--petya-company-open'))show(); if (!smoke && process.env.PETYA_VERIFY_BUILD !== '1') { backgroundTimer = setInterval(backgroundTick, 5000); backgroundTick(); } });
     if (process.env.PETYA_VERIFY_BUILD === '1') {
       win.webContents.once('did-finish-load', async () => {
         let valid = await win.webContents.executeJavaScript('document.title === "Петя" && typeof window.petya.plan === "function"');

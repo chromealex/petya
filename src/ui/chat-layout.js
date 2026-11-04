@@ -63,12 +63,36 @@
  dialogueCard.remove();hero.remove();grid.remove();
  // Draft approvals and clarification cards remain reachable in the message area.
  for(const node of [...home.children])if(node!==shell)feed.append(node);
- const latest=document.createElement('button');latest.type='button';latest.className='chat-latest';latest.textContent='Новые сообщения ↓';latest.hidden=true;composer.before(latest);
- let follow=true;
- feed.addEventListener('scroll',()=>{follow=feed.scrollHeight-feed.clientHeight-feed.scrollTop<70;if(follow)latest.hidden=true;if(feed.scrollTop<80)loadOlderChatMessages();});
+ const latest=document.createElement('button');latest.type='button';latest.className='chat-latest';latest.textContent='↓ Новый ответ';latest.hidden=true;composer.before(latest);
+ let follow=true,restoring=false;
+ const positions=new Map();
+ window.saveChatPosition=id=>{
+   if(!id || !feed.clientHeight)return;
+   if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<70){positions.delete(id);return;}
+   const top=feed.getBoundingClientRect().top;
+   const anchor=[...dialogueMessages.querySelectorAll('[data-message-index]')].find(n=>n.getBoundingClientRect().bottom>top);
+   if(anchor){const index=Number(anchor.dataset.messageIndex);positions.set(id,{index,at:chatHistory[index]?.at,offset:anchor.getBoundingClientRect().top-top,last:chatHistory.at(-1)?.at});}
+ };
+ window.restoreChatPosition=async id=>{
+   const saved=positions.get(id);
+   if(!saved){window.chatScrollToLatest();return;}
+   let index=saved.index;
+   if(chatHistory[index]?.at!==saved.at)index=chatHistory.findIndex(m=>m.at===saved.at);
+   if(index<0){window.chatScrollToLatest();return;}
+   restoring=true;follow=false;
+   try{
+     if(index<chatHistoryStart){chatHistoryStart=index;showDialogueMessages(chatHistory);}
+     await new Promise(r=>requestAnimationFrame(r));
+     const node=dialogueMessages.querySelector('[data-message-index="'+index+'"]');
+     if(node)feed.scrollTop+=node.getBoundingClientRect().top-feed.getBoundingClientRect().top-saved.offset;
+     latest.hidden=saved.last===chatHistory.at(-1)?.at || chatHistory.at(-1)?.role!=='assistant';
+   }finally{restoring=false;}
+ };
+ feed.addEventListener('scroll',()=>{follow=feed.scrollHeight-feed.clientHeight-feed.scrollTop<70;if(follow)latest.hidden=true;if(!restoring && feed.scrollTop<80)loadOlderChatMessages();});
  window.chatScrollToLatest=()=>{feed.scrollTop=feed.scrollHeight;follow=true;latest.hidden=true;};latest.onclick=window.chatScrollToLatest;
  let historyPrepended=false;document.addEventListener('petya-history-prepended',()=>{historyPrepended=true;});
- const sync=()=>{welcome.hidden=dialogueMessages.childElementCount>0;if(historyPrepended){historyPrepended=false;return;}if(follow)window.chatScrollToLatest();else latest.hidden=false;};
+ let previousLast;
+ const sync=()=>{const last=chatHistory.at(-1),newAnswer=last?.role==='assistant'&&previousLast!==last.at;previousLast=last?.at;welcome.hidden=dialogueMessages.childElementCount>0;if(historyPrepended){historyPrepended=false;return;}if(restoring)return;if(follow)window.chatScrollToLatest();else if(newAnswer)latest.hidden=false;};
  new MutationObserver(sync).observe(dialogueMessages,{childList:true});sync();
  document.addEventListener('petya-topic-changed',event=>{if(event.detail?.preserveScroll)return;follow=true;requestAnimationFrame(window.chatScrollToLatest);});
  window.placeChatProgress=panel=>{

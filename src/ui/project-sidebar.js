@@ -9,13 +9,23 @@
  const manage=button('+ Проект',()=>window.openProjectSettings());manage.title='Добавить проект';
  const search=node('input');search.type='search';search.placeholder='Поиск по всем чатам';search.setAttribute('aria-label',search.placeholder);search.maxLength=200;
  const list=node('nav',null,'project-sidebar-tree');list.setAttribute('aria-label','Чаты по проектам');
- panel.append(head,manage,search,status,list);home.prepend(panel);home.append(toggle);home.classList.add('with-project-sidebar');const chatTitle=node('span',null,'chat-title-label');shell.querySelector('.chat-heading').append(chatTitle);topicControls.hidden=true;dialogueTitle.hidden=true;const syncTitle=()=>{chatTitle.textContent=topicSelect.value?(topicSelect.selectedOptions[0]?.textContent||'Чат'):'Новый чат';};new MutationObserver(syncTitle).observe(topicSelect,{childList:true});syncTitle();
+ const attention=node('details',null,'project-attention'),attentionLabel=node('summary'),attentionRows=node('div');
+ attention.append(attentionLabel,attentionRows);attention.hidden=true;
+ function refreshAttention(state){
+   const rows=state.topics.filter(t=>t.attention&&!t.archived&&state.projects.some(p=>p.id===t.projectId&&!p.archived));
+   attention.hidden=!rows.length;attentionLabel.textContent='Требуют внимания · '+rows.length;attentionRows.replaceChildren();
+   for(const t of rows){
+     const b=button(t.title,action(async()=>{if(t.projectId!==topicSelect.dataset.projectId)await window.petya.chatProjectSelect(t.projectId);await selectDialogueTopic(t.id);view('home');}));
+     b.append(node('small',t.attention));attentionRows.append(b);
+   }
+ }
+ panel.append(head,manage,search,status,attention,list);home.prepend(panel);home.append(toggle);home.classList.add('with-project-sidebar');const chatTitle=node('span',null,'chat-title-label');shell.querySelector('.chat-heading').append(chatTitle);topicControls.hidden=true;dialogueTitle.hidden=true;const syncTitle=()=>{chatTitle.textContent=topicSelect.value?(topicSelect.selectedOptions[0]?.textContent||'Чат'):'Новый чат';};new MutationObserver(syncTitle).observe(topicSelect,{childList:true});syncTitle();
  function setCollapsed(value){home.classList.toggle('projects-collapsed',value);toggle.setAttribute('aria-expanded',String(!value));toggle.title=value?'Показать проекты':'Свернуть проекты';toggle.setAttribute('aria-label',toggle.title);try{localStorage.setItem('petya-projects-collapsed',String(value));}catch{}}
  let collapsed=false;try{collapsed=localStorage.getItem('petya-projects-collapsed')==='true';}catch{}setCollapsed(collapsed||matchMedia('(max-width:800px)').matches);
  const guard=()=>{if(window.chatStartPending||commandProgress.busy||chatQueue?.active||(voiceReply&&!window.backgroundClarification)||currentDraft||workspaceBusy)throw Error('Завершите текущий запрос, уточнение или очередь перед переключением.');};
  const action=fn=>async()=>{status.hidden=true;try{guard();window.chatNavigationPending=true;await fn();}catch(e){status.textContent=e.message;status.hidden=false;}finally{window.chatNavigationPending=false;}};
  let revision=0,timer,latestState;
- async function refresh(){const revisionAtStart=++revision;try{const state=await window.petya.chatNavigation(search.value);if(revisionAtStart!==revision)return;latestState=state;draw(state);await refreshContext();}catch(e){if(revisionAtStart===revision){status.textContent=e.message;status.hidden=false;}}}
+ async function refresh(){const revisionAtStart=++revision;try{const state=await window.petya.chatNavigation(search.value);if(revisionAtStart!==revision)return;const attentionState=search.value?await window.petya.chatNavigation(''):state;if(revisionAtStart!==revision)return;latestState=state;refreshAttention(attentionState);draw(state);await refreshContext();}catch(e){if(revisionAtStart===revision){status.textContent=e.message;status.hidden=false;}}}
  const expanded=new Set();let archiveMode=false,dragging='';
  const archiveButton=button('Архив',()=>{archiveMode=!archiveMode;archiveButton.textContent=archiveMode?'← Все проекты':'Архив';refresh();});archiveButton.className='project-archive-toggle';panel.append(archiveButton);
  const menu=node('div',null,'project-context-menu');menu.hidden=true;menu.setAttribute('role','menu');document.body.append(menu);

@@ -11,7 +11,7 @@ const {Dialogue}=require('../src/dialogue.cjs');
   const topic={id:'one',projectId:'general',title:'Вопрос',at:Date.now(),messages:[{role:'user',text:'Как дела?',at:1},{role:'assistant',text:'Ответ',at:2}],attachments:[{id:'f',name:'a.txt',text:'Файл'}]};
   dialogue.state.topics.push(topic,{...topic,id:'hidden',archived:true});
   const notes=[];
-  const ctx={dialogue,attachments:new Attachments({}),chatJobs:{busy:()=>busy},memory:{prune:()=>notes},addContext:note=>{const item={...note,id:'note'};notes.push(item);return item;},check(){},changed(){},run:fn=>fn()};
+  const ctx={companyId:'default',dialogue,attachments:new Attachments({}),chatJobs:{busy:()=>busy},memory:{prune:()=>notes},addContext:note=>{const item={...note,id:'note'};notes.push(item);return item;},check(){},changed(){},run:fn=>fn()};
   const endpoint=await startMcp(ctx,{port:0});
   const client=new Client({name:'petya-test',version:'1'});
   try{
@@ -44,6 +44,9 @@ const {Dialogue}=require('../src/dialogue.cjs');
     await call('remove_draft_attachment',{owner:'draft:general',fileId:file.id},true);
     await call('remove_draft_attachment',{owner:'one',revision:await stamp('one'),fileId:file.id});
     const chat={chatId:'one'};
+    const hits=await call('read_chat_version',{...chat,query:'ответ'});
+    assert.equal(hits.total,1);assert.equal(hits.items[0].index,1);
+    assert.equal(require('../src/chat-location.cjs').parse(hits.items[0].link).company,'default');
     assert.equal((await call('list_chat_versions',chat)).count,1);
     busy=true;
     const edit={...chat,revision:await stamp('one'),version:0,messageIndex:0,original:'Как дела?',text:'Что нового?'};

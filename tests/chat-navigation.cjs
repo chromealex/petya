@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict');
+const {link,parse,resolve,attention}=require('../src/chat-location.cjs');
+const original={role:'assistant',at:42,text:'Решение'};
+const t={id:'topic',projectId:'general',versionIndex:1,versions:[{messages:[original]},null],messages:[]};
+const state={projects:[{id:'general'}],topics:[t]};
+const ref=parse(link('default',t,0,0));
+assert.deepEqual(resolve(state,ref),{chat:'topic',project:'general',version:0,index:0});
+t.versions[0].messages.unshift({role:'user',text:'Запрос'});
+assert.equal(resolve(state,ref).index,1);
+t.versions[0].messages.pop();assert.throws(()=>resolve(state,ref));
+assert.equal(parse('petya://message/../../etc/passwd'),null);
+assert.equal(attention({chatJob:{state:'attention',acknowledged:true},lastChatResult:{computerApproval:true}}),'Разрешить управление компьютером');
+assert.equal(attention({chatJob:{state:'done'}}),'');
+console.log('Message links: version lookup, moved indices, expired messages and attention passed');
