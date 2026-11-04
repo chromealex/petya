@@ -5,5 +5,6 @@ module.exports=[
  require('./features/agents.cjs'),
  require('./features/highlights.cjs'),
  require('./features/address.cjs'),
- require('./features/chat-tasks.cjs')
+ require('./features/chat-tasks.cjs'),
+ require('./features/fresh-data.cjs')
 ];
