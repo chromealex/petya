@@ -1,0 +1,5 @@
+.chat-return-summary,.chat-branch-origin{max-width:800px;margin-inline:auto}
+.chat-return-summary{display:flex;align-items:center;gap:10px;padding:6px 10px;font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.chat-return-summary[hidden]{display:none}.chat-return-summary button,.chat-context-preview{padding:3px 7px;font-size:12px}
+.chat-unread-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:11px;margin:10px auto;width:min(100%,800px)}
+.chat-unread-divider::before,.chat-unread-divider::after{content:'';height:1px;background:var(--line);flex:1}

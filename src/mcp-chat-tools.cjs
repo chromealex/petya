@@ -93,6 +93,12 @@ function register(server, z, ctx) {
     shared.chatVersionEdit(t.id,a.messageIndex,a.text ?? a.original,true);
     return shared.chatWorkspaceInfo(t.id).index;
   },true);
+  const continuity=require('./features/chat-return.cjs');
+  tool('summarize_chat','Краткая тема текущей версии чата, одним предложением.',chat,(_,t)=>continuity.recap(ctx,t));
+  tool('branch_chat_at_message','Создать отдельный чат в том же проекте до выбранного сообщения включительно.',{...chat,url:z.string().max(600)},(a,t)=>{
+    if(require('./chat-location.cjs').parse(a.url)?.chat!==t.id)throw Error('Ссылка относится к другому чату.');
+    return continuity.branch(ctx.dialogue,ctx.companyId,a.url);
+  },true);
   const library=require('./features/chat-library.cjs');
   tool('search_chat_files','Найти совпадения в тексте файлов текущей версии чата (номера строк с единицы).',{...chat,query:z.string().trim().min(1).max(300),...page},(a,t)=>library.searchFiles(t,a.query,a.offset,a.limit));
   tool('list_saved_answers','Сохранённые ответы проекта выбранного чата.',{...chat,...page},(a,t)=>list(library.savedAnswers(state,t.projectId),a));

@@ -66,6 +66,7 @@
  const latest=document.createElement('button');latest.type='button';latest.className='chat-latest';latest.textContent='↓ Новый ответ';latest.hidden=true;composer.before(latest);
  let follow=true,restoring=false;
  const positions=new Map();
+ window.hasChatPosition=id=>positions.has(id);
  window.saveChatPosition=id=>{
    if(!id || !feed.clientHeight)return;
    if(feed.scrollHeight-feed.scrollTop-feed.clientHeight<70){positions.delete(id);return;}

@@ -107,8 +107,10 @@
   const quotes=new Map(), quoteBar=el('div');
   quoteBar.className='composer-quote';
   document.querySelector('.chat-composer').prepend(quoteBar);
+  window.peekChatQuote=()=>quotes.get(id());
   function drawQuote(){
     const quote=quotes.get(id());
+    document.dispatchEvent(new Event('petya-quote-changed'));
     quoteBar.hidden=!quote;
     quoteBar.replaceChildren();
     if(quote)quoteBar.append(el('span','В ответ на: '+quote.text),button('Убрать цитату',()=>{quotes.delete(id());drawQuote();},'×'));
@@ -180,7 +182,7 @@
     for(const row of rows){
       const label=el('label');label.className='chat-material-check';
       const check=el('input');check.type='checkbox';check.checked=row.enabled;
-      check.onchange=async()=>{check.disabled=true;try{await window.toggleChatMaterial(owner,row.type,row.id,check.checked,label,()=>check.checked=true);}catch(e){check.checked=!check.checked;notice(e.message,true);}finally{check.disabled=false;}};
+      check.onchange=async()=>{check.disabled=true;try{await window.toggleChatMaterial(owner,row.type,row.id,check.checked,label,()=>check.checked=true);document.dispatchEvent(new Event('petya-context-updated'));}catch(e){check.checked=!check.checked;notice(e.message,true);}finally{check.disabled=false;}};
       label.append(check,el('span',row.name));box.append(label);
     }
   });
