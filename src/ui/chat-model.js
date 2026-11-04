@@ -24,3 +24,5 @@
  place();refresh();
  new MutationObserver(place).observe(document.getElementById('home')||document.body,{childList:true,subtree:true});
 })();
+// Agents UI ships next to the model picker until it gets its own <script> tag in index.html.
+(()=>{const s=document.createElement('script');s.src='agent-plan.js';document.body.append(s);})();

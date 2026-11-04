@@ -1,0 +1,15 @@
+/* Petya's agents: plan card in the chat. */
+.agent-plan{margin:8px 0 2px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
+.agent-plan-head{display:flex;align-items:center;gap:10px;margin-bottom:6px;color:var(--muted);font-size:12px}
+.agent-plan-title{flex:1}
+.agent-plan-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.agent-task{display:flex;align-items:center;gap:8px;min-width:0}
+.agent-dot{width:7px;height:7px;border-radius:50%;flex:none;background:var(--muted)}
+.agent-task[data-state=running] .agent-dot{background:var(--green);animation:step-pulse 1.2s ease-in-out infinite}
+.agent-task[data-state=done] .agent-dot{background:var(--green)}
+.agent-task[data-state=attention] .agent-dot,.agent-task[data-state=action] .agent-dot{background:#f0b45a}
+.agent-task[data-state=cancelled] .agent-dot{background:var(--line)}
+.agent-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agent-state{color:var(--muted);font-size:12px;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.agent-plan button{font-size:12px;padding:2px 8px;min-height:0;border-radius:6px}
+@media (prefers-reduced-motion:reduce){.agent-task[data-state=running] .agent-dot{animation:none}}

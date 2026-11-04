@@ -14,6 +14,11 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     if(choice)ctx.draftAnswers.clear();else ctx.draftAnswers.commit(original,ctx.voicePreparationKey());
     const namePreference=!choice?require('./name-preference.cjs').preference(original,ctx.settings):null;
     if(namePreference){ctx.saveSettings(namePreference.patch);ctx.dialogue.rememberAction(original,namePreference.text);return {handled:true,text:namePreference.text,topicId:ctx.dialogue.active()?.id,messages:ctx.dialogue.active()?.messages};}
+    // A complex request for agents: subtasks run as parallel background chats of this project.
+    if(!choice&&require('./agent-team.cjs').agentRequest(original)&&!ctx.dialogue.active()?.agentOf){
+      let topic=ctx.dialogue.active();if(!topic){topic={id:ctx.randomUUID(),projectId:ctx.dialogue.state.activeProjectId||'general',title:original.slice(0,80),kind:'chat',messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;delete ctx.dialogue.state.newChat;}
+      const team=await ctx.agentTeam.turn(original,topic);if(team)return team;
+    }
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
     if(gitRoute){
       if(gitRoute.action==='clarify')return {handled:true,text:gitRoute.question,question:true};
