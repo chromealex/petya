@@ -86,3 +86,7 @@ Chat drafts appear in the project sidebar. Hold Ctrl and press Tab or Shift+Tab 
 ### Extension-rendered chat replies
 
 Ask “Сколько каких задач у меня в Jira?” to see counts by issue type, or ask for counts by status. Jira searches issues assigned to the connected account within the chat's authorized project scope. The provider supplies both the text and the image. Both stay on the assistant message when reopening a chat or viewing an older version. MCP clients may request saved visuals with `read_chat_version` and `includeImages: true` under the existing chat access scope.
+
+After four hours away, reopening a conversation offers a one-sentence recap of the earlier discussion. The unread divider uses a per-company, per-version reading position. The message menu can branch the history up to that message within the same project. MCP offers `branch_chat_at_message` (edit access) and `summarize_chat`. Read receipts, navigation history, the composer preview and approval of outbound Jira submissions belong to the desktop UI.
+
+Confluence also renders chart replies. Ask “Сколько страниц в Confluence по пространствам?” for a horizontal bar chart of accessible pages grouped by space. A configured space limits the report. Bundled providers may import `../chart-reply.cjs` and call `chartReply({ kind, title, rows, emptyText })` with `bars` or `donut` and rows of `{label, count}`, or return their own image.
