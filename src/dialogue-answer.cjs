@@ -43,7 +43,8 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
   if(!parsed||typeof parsed.understood!=='boolean'||typeof parsed.answer!=='string'||(parsed.understood&&!parsed.answer.trim())){
    // Reasoning can consume the entire generation budget. Retry locally once,
    // with the same question/context and no thinking; never reinterpret an outage.
-   if(attempt===0&&response?.done_reason==='length')continue;
+   // Small models occasionally break the JSON format; one more try is cheaper than an error.
+   if(attempt===0)continue;
    return {text:'Локальная модель вернула некорректный ответ. Повторите запрос; если ошибка повторится, проверьте модель в «Подключения → Ollama».',error:true};
   }
   const answer=parsed.answer.trim().slice(0,12000);

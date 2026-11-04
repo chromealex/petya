@@ -43,7 +43,7 @@ const {localAnswer,prohibitionReply,greetingReply}=require(root+'/src/dialogue-a
  assert.equal(calls.length,2,'Exhaustion retry is bounded');
  calls=[];
  assert((await localAnswer({...options,request:async(o)=>{calls.push(o);return {message:{content:'invalid'}};}})).error);
- assert.equal(calls.length,1,'Unrelated malformed output is not retried');
+ assert.equal(calls.length,2,'Malformed output is retried once, then reported');
  // Never the same answer twice: regenerate once, then admit the loop with a non-repeating phrase.
  const same='В доступных данных нет информации о текущем состоянии Git-репозитория, только папка проекта.';
  const looped={title:'Git',messages:[{role:'user',text:'Посмотри гит'},{role:'assistant',text:same},{role:'user',text:'А сейчас можешь гит посмотреть'}]};

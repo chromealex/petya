@@ -1,6 +1,14 @@
 // Only fully specified integer calculations. No eval, service facts or inferred operands.
+// Spoken operators between two numbers: «17 умножить на 23», «100 разделить на 4», «17 на 23»,
+// and verb-first forms «умножь 17 на 23», «раздели 100 на 4», «сложи 2 и 3», «вычти 5 из 9».
+function spokenOperators(text){
+ let s=text.replace(/^(?:петя[\s,]+)?(умножь|помножь|раздели|подели|сложи|вычти)\s+(\d+)\s+(?:на|и|из)\s+(\d+)([?!.]*)$/iu,(_,verb,a,b,end)=>{const v=verb.toLowerCase();return 'посчитай '+(v==='вычти'?b+'-'+a:a+({умножь:'*',помножь:'*',раздели:'/',подели:'/',сложи:'+'})[v]+b)+end;});
+ const ops=[[/(?:разделить|раздели|поделить|подели|делить|делённое|деленное)\s+на/giu,'/'],[/(?:умножить|умножь|помножить|помножь|умноженное)\s+на/giu,'*'],[/(?:плюс|прибавить|прибавь)/giu,'+'],[/(?:минус|отнять|вычесть)/giu,'-']];
+ for(const [word,op] of ops)s=s.replace(new RegExp('(\\d)\\s*'+word.source+'\\s*(?=\\d)','giu'),'$1'+op);
+ return s.replace(/(\d)\s+на\s+(?=\d)/giu,'$1*');
+}
 function explicitCalculation(command=''){
- const text=String(command).trim();
+ const text=spokenOperators(String(command).trim());
  if(/(?:^|\s)(?:но|кроме|без|не)(?=\s)|дубл|приоритет|просроч/iu.test(text))return null;
  if(text.length>500||/[«»"“”]/u.test(text)||/если|допустим|предполож|процент|процентн|скидк|налог|отправ|создай|удали|проверь|сохрани|запиши|объясни|почему|докажи/iu.test(text))return null;
  if(!/сколько|вычисли|посчитай|чему рав|ответь|^[\d\s()+*/×÷−-]+[?!.]*$/iu.test(text))return null;

@@ -136,7 +136,7 @@ class Dialogue {
    if(!forcedKind&&!taskListRequest(text)&&actionRequest(text)){return {handled:false};}
    let kind=forcedKind||intent(text,active);
    const back=/^(?:верн[её]мся|вернись|продолжим|вернуться)/iu.test(text);
-   if(back){const terms=core.words(text).filter(w=>!['вернемся','вернёмся','вернись','продолжим','вернуться','теме','тема','давай'].includes(w));const matches=this.scoped().filter(t=>text.toLowerCase().includes(t.title.toLowerCase())||(kind!=='chat'&&t.kind===kind)||(terms.length&&terms.some(w=>core.words(t.title).some(v=>w.length>=4&&v.startsWith(w.slice(0,Math.min(w.length,5)))))));if(matches.length===1){this.state.activeId=matches[0].id;active=matches[0];kind=active.kind;}else return {handled:true,text:'К какой теме вернуться?',topicChoices:this.list().topics};}
+   if(back){const terms=core.words(text).filter(w=>!['вернемся','вернёмся','вернись','продолжим','вернуться','теме','тема','давай'].includes(w));const matches=this.scoped().filter(t=>text.toLowerCase().includes(t.title.toLowerCase())||(kind!=='chat'&&t.kind===kind)||(terms.length&&terms.some(w=>core.words(t.title).some(v=>w.length>=4&&v.startsWith(w.slice(0,Math.min(w.length,4)))))));if(matches.length===1){this.state.activeId=matches[0].id;active=matches[0];kind=active.kind;}else return {handled:true,text:'К какой теме вернуться?',topicChoices:this.list().topics};}
    let newTopic=!!this.state.newChat||/^(?:новая тема|другая тема|теперь поговорим)/iu.test(text);
    let suggestedTitle='',unclear=false;
    if(kind==='chat'&&!discussionOnly(text)&&!forcedKind&&!back&&!newTopic&&this.routeTopic){
@@ -152,7 +152,9 @@ class Dialogue {
    active.at=this.now();active.messages.push({role:'user',text,at:this.now()});this.persist();
    let result;
    try{
-    if(back){const last=active.messages.filter(m=>m.role==='assistant').at(-1);result={text:'Вернулись к теме «'+active.title+'». '+(last?'Последний сохранённый ответ от '+new Date(last.at).toLocaleString('ru-RU')+': '+last.text+' Для свежих данных скажите «обнови».':'Что обсудим?')};}
+    // «Вернёмся к багам» shows the saved answer; «Вернёмся к книгам: посоветуй ещё одну» asks a new question in that topic.
+    const followUp=back&&/[:,—]\s*\S{3,}|\s(?:и|а)\s+(?:посоветуй|расскажи|покажи|объясни|назови|напомни|скажи|дай|что|как|какой|какая|какие|сколько|почему)/iu.test(text.replace(/^(?:верн[её]мся|вернись|продолжим|вернуться)/iu,''));
+    if(back&&!followUp){const last=active.messages.filter(m=>m.role==='assistant').at(-1);result={text:'Вернулись к теме «'+active.title+'». '+(last?'Последний сохранённый ответ от '+new Date(last.at).toLocaleString('ru-RU')+': '+last.text+' Для свежих данных скажите «обнови».':'Что обсудим?')};}
     else if(kind==='bugs'||kind==='anr'||kind==='tasks'){
      result=await this.readers[kind](text,active,active.contextHint||this.context());
      if(result.question){active.pending={command:text,kind,field:result.field,options:result.options||[]};result.text=result.question;}
