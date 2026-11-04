@@ -1,11 +1,14 @@
 """Expand numeric tokens before synthesis; never change the displayed answer."""
 import re
+import json
+from pathlib import Path
+_CATALOG=json.loads(Path(__file__).with_name('language-catalog.json').read_text())
 from num2words import num2words
 
 
 def spoken_numbers(text, language='ru'):
-    text = re.sub(r'(?<![\w])[-−](?=\d)', 'минус ' if language == 'ru' else 'minus ', text)
-    point = ' точка ' if language == 'ru' else ' point '
+    text = re.sub(r'(?<![\w])[-−](?=\d)', ('минус' if language == 'ru' else _CATALOG.get(language,{}).get('minus','minus'))+' ', text)
+    point = ' '+('точка' if language == 'ru' else _CATALOG.get(language,{}).get('point','point'))+' '
     digits = lambda value: ' '.join(num2words(int(c), lang=language) for c in value)
     def integer(value):
         return digits(value) if len(value) > 1 and value.startswith('0') or len(value) > 15 else num2words(int(value), lang=language)
@@ -21,4 +24,4 @@ def spoken_numbers(text, language='ru'):
             return integer(whole) + point + digits(fraction)
         return integer(value)
     text = re.sub(r'\d+(?:[.,]\d+)?', number, text)
-    return text.replace('%', ' процентов' if language == 'ru' else ' percent')
+    return text.replace('%', ' '+('процентов' if language == 'ru' else _CATALOG.get(language,{}).get('percent','percent')))

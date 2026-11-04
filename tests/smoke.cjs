@@ -401,5 +401,6 @@ module.exports = async (win, workspace) => {
   })()`);
 
   await require('./chat-jobs-ui.cjs')(win);
+  await require('./voice-languages-ui.cjs')(win);
 
 };

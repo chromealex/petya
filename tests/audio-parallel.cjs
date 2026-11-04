@@ -50,5 +50,7 @@ const tick = () => new Promise(resolve => setImmediate(resolve));
   fourRequests[3].resolve('4');fourRequests[2].resolve('3');fourRequests[1].resolve('2');await tick();assert.equal(fourTexts.length,0);
   fourRequests[0].resolve('1');await tick();assert.equal(fourRequests.length,5);
   fourRequests[4].resolve('5');await fourDrain;assert.deepEqual(fourTexts,['1','2','3','4','5']);
+  let unrecognized=0;context.window.petya.transcribe=async()=>null;
+  const noise=new context.Listener(()=>{throw Error('Noise reached chat');},e=>{throw e;},{onUnrecognized:()=>unrecognized++});Object.assign(noise,{active:true,queue:[{wav:0}]});await noise.drain(0);assert.equal(unrecognized,0,'Filtered noise must not trigger a spoken clarification');
   console.log('Parallel speech: live dispatch, ordered results, overlap, stop, resource limits, two/four workers, four ordered fragments and serial fallback passed');
 })().catch(error=>{console.error(error);process.exitCode=1;});

@@ -166,7 +166,7 @@ class AudioListener {
           const text = item.overlap ? stitchSpeech(this.previousText, result || '') : result;
           if (result) this.previousText = result;
           if (text) {this.options.onState?.('Текст распознан');await this.onText(text, item.at, item.endedAt, item.direct);}
-          else if (!result) this.options.onUnrecognized?.();
+          else if (result === '') this.options.onUnrecognized?.();
         }
         fill();
       }

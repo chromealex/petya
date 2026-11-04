@@ -22,7 +22,7 @@ const streamedVoice=new window.StreamingSpeech({
  onError:error=>{releaseStreamingMic();notice('Потоковое озвучивание прервалось: '+error.message);},
  speak:async text=>{
   const epoch=streamedVoice.epoch;window.petyaSpeaking=true;document.dispatchEvent(new Event('petya-speaking'));voiceTurn.reset();
-  const encoded=await window.petya.synthesizeVoice(text);if(epoch!==streamedVoice.epoch)throw Error('Отменено');if(!encoded)return;
+  const encoded=await window.petya.synthesizeVoice(text);if(epoch!==streamedVoice.epoch)throw Error('Отменено');if(encoded?.languageRequired){window.offerVoiceLanguage?.(text,encoded.languageRequired);stopStreamedVoice();releaseStreamingMic();return;}if(!encoded)return;
   await new Promise((resolve,reject)=>{
    streamingURL=URL.createObjectURL(new Blob([Uint8Array.from(atob(encoded),c=>c.charCodeAt(0))],{type:'audio/wav'}));
    const audio=new Audio(streamingURL);window.answerVoiceSegment?.(audio,text);streamingAudio=audio;streamingReject=reject;audio.preservesPitch=true;audio.defaultPlaybackRate=1.0;audio.playbackRate=1.0;
@@ -65,6 +65,7 @@ async function speakReply(text,{continueConversation=false}={}){
  try {
   const encoded=await window.petya.synthesizeVoice(text);
   if(epoch!==speechEpoch)return;
+  if(encoded?.languageRequired){window.offerVoiceLanguage?.(text,encoded.languageRequired);done();return;}
   if(!encoded){done();return;}
   const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
   replyAudioURL=URL.createObjectURL(new Blob([bytes],{type:'audio/wav'}));
@@ -128,6 +129,7 @@ async function showDialogueReply(result,spoken=false){
  if(result.teamFillReply)voiceReply=async answer=>showDialogueReply(await window.petya.teamFillReply(answer),spoken);
  if(result.messages)showDialogueMessages(result.messages);else {const message={role:'assistant',text:result.text,at:Date.now(),sources:result.sources||[],evidence:result.evidence||[]};chatHistory.push(message);dialogueMessages.append(renderDialogueMessage(message));}
  const newest=[...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1);if(!result.error&&!result.computerApproval)window.revealAnswer?.(newest,result.text,{spoken,initial:result.answerStreamId===spokenStreamId||result.answerStreamId?answerShown:0});
+ if(result.text)window.checkVoiceLanguages?.(result.text,newest);
  window.applyChatPlaceholder($('command'),chatHistory,result);
  dialogueTitle.textContent=result.topicTitle||'Диалог с Петей';dialogueChoices.replaceChildren();window.offerReportShare?.(result.reportShareId,dialogueChoices);if(result.computerApproval)window.showComputerApproval(result.computerApproval,newest,spoken);
  if(result.gitDiscovery){const found=result.gitDiscovery;for(const root of found.repositories){const b=document.createElement('button');b.type='button';b.textContent='Работать с '+root;b.onclick=run(async()=>{await window.petya.gitSelect(root,found.projectId);await processCommand(result.gitCommand||'статус гита');});dialogueChoices.append(b);}if(!found.repositories.length&&!found.partial&&!found.warnings.length)for(const folder of found.missing){const b=document.createElement('button');b.type='button';b.textContent='Создать Git в '+folder;b.onclick=run(async()=>{b.disabled=true;try{const created=await window.petya.gitInit(folder,found.projectId);await showDialogueReply({handled:true,text:created.text},spoken);}finally{b.disabled=false;}});dialogueChoices.append(b);}}

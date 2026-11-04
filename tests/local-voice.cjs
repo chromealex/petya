@@ -3,7 +3,7 @@ const { EventEmitter } = require('node:events');
 const { PassThrough } = require('node:stream');
 const { LocalVoice, spokenText } = require('../src/local-voice.cjs');
 (async()=>{
- assert.equal(spokenText('**Привет!**\n[Документ](https://example.com)'),'Привет!. Документ');
+ assert.equal(spokenText('**Привет!**\n[Документ](https://example.com)'),'Привет! Документ');
  assert.throws(()=>spokenText('x'.repeat(12001)));
  const voice = new LocalVoice({roots:[]});
  assert.throws(()=>voice.speak('Привет'),/не установлен/);

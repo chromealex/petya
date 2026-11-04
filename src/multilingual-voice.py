@@ -10,6 +10,7 @@ import textwrap
 import wave
 from pathlib import Path
 from voice_numbers import spoken_numbers
+from voice_language import detect_languages, missing_languages, load_numbers, CATALOG
 
 os.environ['HF_HUB_OFFLINE'] = '1'
 os.environ['HF_HUB_DISABLE_TELEMETRY'] = '1'
@@ -21,13 +22,18 @@ with contextlib.redirect_stdout(sys.stderr):
 reference = str(Path(sys.argv[1]) / 'reference.wav')
 for line in sys.stdin:
     try:
-        text = json.loads(line)['text']
+        request=json.loads(line)
+        text = request['text']
         if not isinstance(text, str) or not text.strip() or len(text) > 12000:
             raise ValueError('Invalid speech text')
-        russian = bool(re.search('[А-Яа-яЁё]', text))
-        english = bool(re.search('[A-Za-z]', text))
-        language = 'auto' if russian and english else 'english' if english else 'russian'
-        normalized = spoken_numbers(text, 'ru' if russian or not english else 'en')
+        directory=os.environ.get('PETYA_LANGUAGES_DIR','')
+        missing=missing_languages(text,directory,request.get('language','ru'))
+        if missing: raise ValueError('Сначала установи язык: '+', '.join(item['label'] for item in missing))
+        languages=detect_languages(text,request.get('language','ru'))
+        code=languages[0]
+        for language_code in languages: load_numbers(language_code,directory)
+        language='auto' if len(languages)>1 else {'ru':'russian','en':'english',**{key:item['model'] for key,item in CATALOG.items()}}[code]
+        normalized=spoken_numbers(text,code)
         with contextlib.redirect_stdout(sys.stderr):
             mx.random.seed(42)
             results = []
