@@ -1118,7 +1118,8 @@ else {
       });
     }
     win.loadFile(path.join(__dirname, 'ui/index.html'));
-    app.on('activate', show);
+    // The build check launches the app from a script; macOS may activate it, which must not count as a visible start.
+    if (process.env.PETYA_VERIFY_BUILD !== '1') app.on('activate', show);
   });
   app.on('will-quit', () => { clearInterval(backgroundTimer); speech.stop(); qwenSpeech.stop(); localVoice.stop(); });
 app.on('before-quit', () => { quitting = true; });
