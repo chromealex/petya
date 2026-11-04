@@ -72,7 +72,7 @@ class OllamaReady {
       await readProgress(response.body, value => this.update('pulling', `Загружаю модель ${model}…`, { received: value.completed || 0, total: value.total || 0 }));
     }
     this.update('warming', `Проверяю модель ${model}… Первый запуск может занять несколько минут.`);
-    const result = await (await request('/api/chat', { model, stream: false, think: false, messages: [{ role: 'user', content: 'Ответь одним словом: готов.' }], options: { num_predict: 32 }, keep_alive: '10m' }, 300000)).json();
+    const result = await (await request('/api/chat', { model, stream: false, think: false, options: { num_ctx: require('./model-context.cjs').SIZE }, messages: [{ role: 'user', content: 'Ответь одним словом: готов.' }], options: { num_predict: 32 }, keep_alive: '10m' }, 300000)).json();
     if (result.error || !result.message?.content?.trim()) throw new Error('Модель не ответила на проверку. Повторите запуск.');
     this.controller.signal.throwIfAborted();
     if (original.ollamaUrl !== this.settings().ollamaUrl || original.model !== this.settings().model) throw new Error('Настройки изменились во время запуска. Повторите запуск.');

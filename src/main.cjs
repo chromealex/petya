@@ -153,6 +153,7 @@ async function directRequest(url, options = {}) {
   require('./answer-cancel.cjs').check();
   const cancelSignal=require('./answer-cancel.cjs').signal();
   if(cancelSignal)options={...options,signal:options.signal?AbortSignal.any([options.signal,cancelSignal]):cancelSignal};
+  if(typeof options.body==='string')options={...options,body:require('./model-context.cjs').normalize(url,options.body)};
   const {onAnswerChunk,...fetchOptions}=options;
   const response = await fetch(url, { ...fetchOptions, redirect: 'error', signal: options.signal ? AbortSignal.any([options.signal,AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000) });
   if (!response.ok) { let detail='';if(!/slack\.com$/.test(new URL(url).hostname))try{detail=(await response.text()).slice(0,500);}catch{} const retryAfter = Math.max(1, Number(response.headers.get('retry-after')) || 60); const slack = new URL(url).hostname === 'slack.com'; const error = new Error(slack && response.status === 429 ? `Slack временно ограничил запросы (HTTP 429). Повторите через ${Math.ceil(retryAfter)} с. Это ограничение Slack, а не голоса или обычного диалога Пети.` : `Сервис вернул HTTP ${response.status}${response.status === 429 ? '. Достигнут лимит запросов; повторите позже.' : ''}`); error.status = response.status; error.retryAfter = retryAfter; if(detail)error.detail=detail; throw error; }
