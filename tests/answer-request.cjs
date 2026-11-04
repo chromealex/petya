@@ -11,6 +11,12 @@ assert.match(dialogueRequest({model:'qwen3:4b',command:'Что такое АНР
 assert.equal(request.messages.at(-1).content,'Назови кодовое слово.');
 assert.match(request.messages[1].content,/Лира/);
 assert.equal(JSON.stringify(topic),original,'Building a request must not mutate dialogue memory');
+// History is sent as chat turns (follow-ups keep context), the current command is not duplicated.
+const follow=dialogueRequest({model:'qwen3:4b',command:'А какое оно?',topic:{title:'Т',messages:[{role:'user',text:'Кодовое слово Лира'},{role:'assistant',text:'Запомнил.'},{role:'user',text:'А какое оно?'}]}});
+assert.deepEqual(follow.messages.slice(2).map(m=>[m.role,m.content]),[['user','Кодовое слово Лира'],['assistant','Запомнил.'],['user','А какое оно?']]);
+assert(!/"history"/.test(follow.messages[1].content),'Recent history is not duplicated inside reference data');
+assert(follow.options.temperature>0&&follow.options.repeat_penalty>1,'Greedy decoding made the small model repeat itself');
+assert(follow.messages[0].content.length<2600,'Base prompt stays short for small local models');
 for(const model of ['llama3.2:3b','gemma3:4b'])assert.equal(dialogueRequest({model,command:'Привет',topic}).think,false);
 const {localAnswer,prohibitionReply,greetingReply}=require(root+'/src/dialogue-answer.cjs');
 (async()=>{
