@@ -1089,7 +1089,11 @@ else {
     if (process.env.PETYA_VERIFY_BUILD === '1') {
       win.webContents.once('did-finish-load', async () => {
         let valid = await win.webContents.executeJavaScript('document.title === "Петя" && typeof window.petya.plan === "function"');
-        const startedInTray = !win.isVisible() && !tray.isDestroyed() && (process.platform !== 'darwin' || !app.dock.isVisible());
+        // app.dock.hide() settles asynchronously on macOS; give it a moment before judging the tray start.
+        for (let i = 0; i < 20 && process.platform === 'darwin' && app.dock.isVisible(); i++) await new Promise(r => setTimeout(r, 100));
+        const hidden = !win.isVisible(), dockHidden = process.platform !== 'darwin' || !app.dock.isVisible();
+        const startedInTray = hidden && !tray.isDestroyed() && dockHidden;
+        if (!startedInTray) console.log('Tray start check: ' + JSON.stringify({ windowHidden: hidden, dockHidden, tray: !tray.isDestroyed() }));
         show();
         const openedFromTray = win.isVisible();
         win.close();
