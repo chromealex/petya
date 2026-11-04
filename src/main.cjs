@@ -149,7 +149,7 @@ async function request(url, options = {}) {
 }
 async function directRequest(url, options = {}) {
   const {onAnswerChunk,...fetchOptions}=options;
-  const response = await fetch(url, { ...fetchOptions, redirect: 'error', signal: AbortSignal.timeout(90000) });
+  const response = await fetch(url, { ...fetchOptions, redirect: 'error', signal: options.signal ? AbortSignal.any([options.signal,AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000) });
   if (!response.ok) { const retryAfter = Math.max(1, Number(response.headers.get('retry-after')) || 60); const slack = new URL(url).hostname === 'slack.com'; const error = new Error(slack && response.status === 429 ? `Slack временно ограничил запросы (HTTP 429). Повторите через ${Math.ceil(retryAfter)} с. Это ограничение Slack, а не голоса или обычного диалога Пети.` : `Сервис вернул HTTP ${response.status}${response.status === 429 ? '. Достигнут лимит запросов; повторите позже.' : ''}`); error.status = response.status; error.retryAfter = retryAfter; throw error; }
   if (response.status === 204) return null;
   if(onAnswerChunk)return require('./answer-stream.cjs').consume(response,onAnswerChunk);
@@ -373,6 +373,20 @@ function setupHandlers() {
     return {handled:true,...result};
   });
   const readProjectJira=(command,topic,context,kind)=>{const binding=projectMemory?.get(topic.projectMemoryId)?.jira;if(!topic.jiraProject&&binding?.site===settings.jiraUrl&&require('./jira-selection.cjs').keys(settings.jiraProjects||settings.jiraProject).includes(binding.key))topic.jiraProject=binding.key;return jiraInsights.read(command,topic,context,kind);};
+  const draftAnswers=new (require('./speculative-answer.cjs').SpeculativeAnswer)();
+  const answerDialogue=async(command,topic,unclear,draft=null)=>{
+      if(!draft)requestProgress.report(topic.attachments?.length?'Читаю прикреплённые материалы':'Готовлю ответ по контексту разговора');
+      const capability=require('./capabilities-reply.cjs').answer(command,topic,settings,instructionSkills.list());if(capability)return capability;
+      const confirmation=require('./action-evidence.cjs').actionConfirmation(command,topic);if(confirmation)return confirmation;
+      if(topic.attachments?.length){try{return await analyzeMaterials(topic,command);}catch(e){return {text:e.message,error:true};}}
+      let localProject=null;
+      const chatProject=dialogue.state.projects.find(p=>p.id===topic.projectId);const localRepos=require('./project-folders.cjs').projectFolders(chatProject,projectMemory?.get(chatProject?.memoryId||topic.projectMemoryId));
+      if(localRepos.length){const projects=[];for(const folder of localRepos){try{const data=await require('./local-project.cjs').readProject(folder,command);let budget=Math.floor(14000/localRepos.length);data.files=data.files.map(file=>{const text=file.text.slice(0,Math.max(0,budget));budget-=text.length;return {...file,text,truncated:file.truncated||text.length<file.text.length};}).filter(file=>file.text);projects.push(data);}catch(error){projects.push({root:folder,error:'Папка проекта недоступна: '+error.message});}}localProject=projects.length===1?projects[0]:{projects};}
+      const telegramQuestion=/(?:телеграм|telegram|(?:^|\s)тг(?:\s|$))/iu.test(command)||topic.telegram;
+      const telegramContext=telegramQuestion?memory.prune().filter(c=>c.source==='Telegram').slice(-5).map(c=>({title:c.title,text:c.text.slice(-3000),at:c.at,url:c.url})):null;
+      if(telegramQuestion){topic.telegram=true;if(!modules.enabled(settings,'telegram'))return 'Включите модуль Telegram в подключениях.';if(!telegramContext.length)return 'Сначала подключите Telegram, выберите чаты и нажмите «Обновить контекст».';if(!settings.model)return 'В памяти есть сообщения Telegram. Настройте локальную модель Ollama для ответа по их содержимому. Их можно посмотреть во вкладке «Контекст».';}
+      return require('./dialogue-answer.cjs').localAnswer({model:settings.model,command,topic,settings,chooseKnowledgeModel:()=>require('./knowledge-model.cjs').selectKnowledgeModel(settings,draft?(url,options)=>directRequest(url,{...options,signal:draft.signal}):request),skills:instructionSkills.list(),teamMembers:team.members(settings),teamNotes:settings.teamRoles||'',supplementalContext:[chatProject?.context,localProject&&JSON.stringify(localProject),telegramContext&&JSON.stringify(telegramContext)].filter(Boolean).join('\n'),telegram:telegramQuestion,uncertain,clarify:()=>draft||topic.background?{text:'Уточни вопрос: что именно нужно выяснить?',question:true}:interpret(command,topic),request:async(overrides={})=>{const body={...require('./dialogue-request.cjs').dialogueRequest({model:settings.model,command,topic,company:companies.get(companyId).name,services:Object.entries({jira:'Jira',confluence:'Confluence',slack:'Slack',notion:'Notion',gmail:'Gmail',telegram:'Telegram',asana:'Asana',googleplay:'Google Play'}).filter(([key])=>modules.enabled(settings,key)).map(([,name])=>name),projectContext:chatProject?.context||'',localProject,telegramContext,teamContext:team.context(settings,command),speechStyle:settings.speechStyle,communicationLanguage:settings.communicationLanguage,userName:settings.userName,userNameVariants:settings.userNameVariants,userNameExcluded:settings.userNameExcluded}),...overrides,stream:true};if(draft)return draft.capture(body,signal=>directRequest(core.localEndpoint(settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...body,stream:false}),signal}));const cached=await draftAnswers.consume(body);if(cached)return cached;return request(core.localEndpoint(settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),onAnswerChunk:require('./answer-stream.cjs').report});}});
+    };
   dialogue=new (require('./dialogue.cjs').Dialogue)({state:dialogueState,days:()=>settings.contextDays,
     save:state=>{if(!safeStorage.isEncryptionAvailable())throw new Error('Хранилище ОС недоступно.');fs.writeFileSync(dialogueFile+'.tmp',JSON.stringify({encrypted:safeStorage.encryptString(JSON.stringify(state)).toString('base64')}),{mode:0o600});fs.renameSync(dialogueFile+'.tmp',dialogueFile);},
     context:()=>memory.prune().slice(-10).map(c=>c.title+' '+c.text).join('\n').slice(-16000),
@@ -384,19 +398,7 @@ function setupHandlers() {
       return parseRoute(response,topics)||{unclear:true};
     },
     readers:{tasks:(command,topic,context)=>readProjectJira(command,topic,context,'tasks'),bugs:(command,topic,context)=>readProjectJira(command,topic,context,'bugs'),anr:(...args)=>googlePlay.read(...args)},
-    answer:async(command,topic,unclear)=>{
-      requestProgress.report(topic.attachments?.length?'Читаю прикреплённые материалы':'Готовлю ответ по контексту разговора');
-      const capability=require('./capabilities-reply.cjs').answer(command,topic,settings,instructionSkills.list());if(capability)return capability;
-      const confirmation=require('./action-evidence.cjs').actionConfirmation(command,topic);if(confirmation)return confirmation;
-      if(topic.attachments?.length){try{return await analyzeMaterials(topic,command);}catch(e){return {text:e.message,error:true};}}
-      let localProject=null;
-      const chatProject=dialogue.state.projects.find(p=>p.id===topic.projectId);const localRepos=require('./project-folders.cjs').projectFolders(chatProject,projectMemory?.get(chatProject?.memoryId||topic.projectMemoryId));
-      if(localRepos.length){const projects=[];for(const folder of localRepos){try{const data=await require('./local-project.cjs').readProject(folder,command);let budget=Math.floor(14000/localRepos.length);data.files=data.files.map(file=>{const text=file.text.slice(0,Math.max(0,budget));budget-=text.length;return {...file,text,truncated:file.truncated||text.length<file.text.length};}).filter(file=>file.text);projects.push(data);}catch(error){projects.push({root:folder,error:'Папка проекта недоступна: '+error.message});}}localProject=projects.length===1?projects[0]:{projects};}
-      const telegramQuestion=/(?:телеграм|telegram|(?:^|\s)тг(?:\s|$))/iu.test(command)||topic.telegram;
-      const telegramContext=telegramQuestion?memory.prune().filter(c=>c.source==='Telegram').slice(-5).map(c=>({title:c.title,text:c.text.slice(-3000),at:c.at,url:c.url})):null;
-      if(telegramQuestion){topic.telegram=true;if(!modules.enabled(settings,'telegram'))return 'Включите модуль Telegram в подключениях.';if(!telegramContext.length)return 'Сначала подключите Telegram, выберите чаты и нажмите «Обновить контекст».';if(!settings.model)return 'В памяти есть сообщения Telegram. Настройте локальную модель Ollama для ответа по их содержимому. Их можно посмотреть во вкладке «Контекст».';}
-      return require('./dialogue-answer.cjs').localAnswer({model:settings.model,command,topic,settings,chooseKnowledgeModel:()=>require('./knowledge-model.cjs').selectKnowledgeModel(settings,request),skills:instructionSkills.list(),teamMembers:team.members(settings),teamNotes:settings.teamRoles||'',supplementalContext:[chatProject?.context,localProject&&JSON.stringify(localProject),telegramContext&&JSON.stringify(telegramContext)].filter(Boolean).join('\n'),telegram:telegramQuestion,uncertain,clarify:()=>topic.background?{text:'Уточни вопрос: что именно нужно выяснить?',question:true}:interpret(command,topic),request:(overrides={})=>request(core.localEndpoint(settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...require('./dialogue-request.cjs').dialogueRequest({model:settings.model,command,topic,company:companies.get(companyId).name,services:Object.entries({jira:'Jira',confluence:'Confluence',slack:'Slack',notion:'Notion',gmail:'Gmail',telegram:'Telegram',asana:'Asana',googleplay:'Google Play'}).filter(([key])=>modules.enabled(settings,key)).map(([,name])=>name),projectContext:chatProject?.context||'',localProject,telegramContext,teamContext:team.context(settings,command),speechStyle:settings.speechStyle,communicationLanguage:settings.communicationLanguage,userName:settings.userName,userNameVariants:settings.userNameVariants,userNameExcluded:settings.userNameExcluded}),...overrides,stream:true}),onAnswerChunk:require('./answer-stream.cjs').report})});
-    }
+    answer:answerDialogue
   });
   const reviewFile=path.join(dataRoot,'review-memory.json');
   const reviewState=fs.existsSync(reviewFile)?JSON.parse(safeStorage.decryptString(Buffer.from(JSON.parse(fs.readFileSync(reviewFile,'utf8')).encrypted,'base64'))):{lessons:[],watches:[]};
@@ -680,11 +682,23 @@ function setupHandlers() {
   const computerLock=(()=>{let tail=Promise.resolve();return work=>{const run=tail.then(work,work);tail=run.catch(()=>{});return run;};})();
   const voicePreparation=new (require('./voice-preparation.cjs').VoicePreparation)(value=>dialogue.prepareRoute(value));
   const voicePreparationKey=()=>JSON.stringify([companyId,settings,dialogue.state]);
-  handle('prepareVoice',value=>{if(value===null){voicePreparation.clear();return;}const command=text(value,4000);if(command.length>=8&&settings.model)voicePreparation.update(command,voicePreparationKey());return {preparing:true};});
+  handle('prepareVoice',value=>{
+    if(value===null){voicePreparation.clear();draftAnswers.clear();return;}
+    const command=text(value,4000),scope=voicePreparationKey(),active=dialogue.active();
+    if(command.length<8||!settings.model){draftAnswers.clear();return;}
+    voicePreparation.update(command,scope);
+    // No tools, live readers, attachment analysis or history writes during dictation.
+    if(active?.pending||active?.attachments?.length||require('./dialogue.cjs').actionRequest(command)||require('./dialogue.cjs').intent(command,active)!=='chat'){draftAnswers.clear();return;}
+    const topic=active&&!dialogue.state.newChat?structuredClone(active):{title:command.slice(0,80),kind:'chat',messages:[],projectId:dialogue.state.activeProjectId};
+    topic.messages.push({role:'user',text:command,at:Date.now()});
+    draftAnswers.update(command,scope,(signal,capture)=>answerDialogue(command,topic,false,{signal,capture}));
+    return {preparing:true};
+  });
   const converseTurn=async(command,choice,background=false)=>{
     // Label replies produced by shortcut handlers before the model, so misrouting is visible in the chat.
     const via=(source,reply)=>{if(reply&&typeof reply==='object'&&!reply.by){reply.by=source;const last=dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&!last.by&&last.text===reply.text){last.by=source;dialogue.persist();}}return reply;};
     if(!background&&chatJobs.busy(dialogue.active()?.id))throw Error('В этом чате ещё выполняется запрос.');const original=text(command,4000);let value=original,applied=[];
+    if(choice)draftAnswers.clear();else draftAnswers.commit(original,voicePreparationKey());
     const namePreference=!choice?require('./name-preference.cjs').preference(original,settings):null;
     if(namePreference){saveSettings(namePreference.patch);dialogue.rememberAction(original,namePreference.text);return {handled:true,text:namePreference.text,topicId:dialogue.active()?.id,messages:dialogue.active()?.messages};}
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
