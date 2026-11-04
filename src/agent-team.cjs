@@ -52,7 +52,9 @@ class AgentTeam{
  watch(id){const tick=()=>{const entry=this.active.get(id);if(!entry)return;this.check(entry).catch(e=>console.error(e)).finally(()=>{if(this.active.has(id))entry.timer=setTimeout(tick,this.interval);});};this.active.get(id).timer=setTimeout(tick,this.interval);}
  async check(entry){
   const {plan,topic}=entry;let changed=false;
-  for(const task of plan.tasks){if(!task.topicId||['done','attention','cancelled'].includes(task.state))continue;const child=this.dialogue.state.topics.find(t=>t.id===task.topicId);const job=child?.chatJob;
+  for(const task of plan.tasks){if(!task.topicId||['done','attention','cancelled'].includes(task.state))continue;let child=this.dialogue.state.topics.find(t=>t.id===task.topicId);
+   // The pipeline may answer in an existing chat (e.g. «Мои задачи»); the agent's empty chat is then removed.
+   if(!child){const moved=this.dialogue.state.topics.find(t=>t.chatJob?.command===task.request&&t.chatJob.startedAt>=plan.startedAt);if(moved){child=moved;task.topicId=moved.id;}}const job=child?.chatJob;
    const state=!child?'cancelled':job?.state||'queued';const label=!child?'Чат удалён':job?.label||STATES[state]||'';
    if(state!==task.state||label!==task.label){task.state=state;task.label=label;changed=true;}}
   const open=plan.tasks.filter(t=>['queued','running'].includes(t.state)).length;

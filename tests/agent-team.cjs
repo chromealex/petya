@@ -20,6 +20,12 @@ const assert=require('node:assert/strict');const {agentRequest,AgentTeam}=requir
  await new Promise(r=>setTimeout(r,60));
  assert.equal(r.agentPlan.state,'done');assert.equal(topic.messages.at(-1).text,'Итог: всё проверено.');assert.equal(summarized[0].answer,'В BW 3 бага.');assert.equal(summarized[1].state,'attention');
  assert.equal(topic.chatJob.state,'done');assert(events.some(e=>e.agentPlan));
+ // the answer may land in another chat
+ {const team3=new AgentTeam({dialogue,jobs,interval:5,plan:async()=>({tasks:[{title:'a',request:'Мои задачи?',action:false},{title:'b',request:'B?',action:false}]}),summarize:async(c,r)=>r.map(x=>x.state+':'+x.answer).join('|')});
+  const r3=await team3.turn('Сделай параллельно: мои задачи и B',topic);const [a,b]=r3.agentPlan.tasks;
+  state.topics.splice(state.topics.findIndex(t=>t.id===a.topicId),1);state.topics.push({id:'tasks',messages:[{role:'assistant',text:'28 задач'}],chatJob:{command:'Мои задачи?',startedAt:Date.now(),state:'done'}});
+  const bt=state.topics.find(t=>t.id===b.topicId);bt.messages.push({role:'assistant',text:'ok'});bt.chatJob={state:'done'};
+  await new Promise(r=>setTimeout(r,60));assert.equal(a.topicId,'tasks');assert.equal(topic.messages.at(-1).text,'done:28 задач|done:ok');}
  // single task → normal pipeline; agent chats never spawn agents
  const one=new AgentTeam({dialogue,jobs,plan:async()=>({tasks:[{title:'x',request:'Мои задачи',action:false}]}),summarize:async()=>''});assert.equal(await one.turn('Раздай агентам мои задачи',topic),null);
  assert.equal(await team.turn('Раздай агентам: a и b',state.topics.find(t=>t.id==='c1')),null);
