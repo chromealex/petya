@@ -129,7 +129,7 @@ function refreshTrayMenu() {
   quit: () => app.quit()
  }));
 }
-function show() { if (!win || win.isDestroyed()) return; if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
+function show() { if (process.env.PETYA_VERIFY_BUILD === '1') console.log('show() from ' + (new Error().stack.split('\n')[2] || '').trim()); if (!win || win.isDestroyed()) return; if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
 function notify(body) { if (!smoke && Notification.isSupported()) { const n = new Notification({ icon: appIconPath, title: 'Петя · '+companies.get(companyId).name, body: String(body).slice(0, 250) }); n.on('click', show); n.show(); } }
 function text(value, max = 50000) { if (typeof value !== 'string' || !value.trim() || value.length > max) throw new Error('Некорректный или слишком длинный текст.'); return value.trim(); }
 function addContext(data) {
