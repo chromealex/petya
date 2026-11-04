@@ -833,4 +833,10 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 ::highlight(petya-find){background:#725e27;color:white}::highlight(petya-find-current){background:#d3ed92;color:#152017}
 .project-attention{padding:4px 8px;font-size:12px}.project-attention summary{color:#e4cd84;cursor:pointer}.project-attention>div{max-height:25vh;overflow:auto}.project-attention button{display:block;text-align:left;width:100%}.project-attention small{display:block;color:var(--muted)}
 .chat-queue-row>span{white-space:pre-wrap;overflow-wrap:anywhere}
-.message-actions-menu{position:relative}.message-actions-menu summary{cursor:pointer;list-style:none;padding:2px 5px}.message-actions-menu[open] button{position:absolute;left:0;bottom:100%;z-index:6;white-space:nowrap;background:var(--panel)}
+.message-actions-menu{position:relative}.message-actions-menu summary{cursor:pointer;list-style:none;padding:2px 5px}.answer-menu-items{position:absolute;bottom:100%;left:0;z-index:6;display:grid;gap:2px;padding:4px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}.answer-menu-items button{white-space:nowrap;text-align:left}
+
+.sidebar-draft-mark{position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}.project-chat-row:has(.sidebar-draft-mark) .project-sidebar-chat{padding-right:26px}.project-chat-row:has(.sidebar-draft-mark) .chat-job-dot:not([data-state=attention]),.project-chat-row:hover .sidebar-draft-mark,.project-chat-row:focus-within .sidebar-draft-mark{opacity:0}
+.chat-find select{width:auto}.chat-find:has(.chat-file-matches:not(:empty)){flex-wrap:wrap;width:min(520px,90%)}.chat-file-matches{flex:1 0 100%;max-height:32vh;overflow:auto}.chat-file-matches:empty{display:none}.chat-file-matches button{display:block;width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere}
+.inline-chat-undo{font-size:12px;color:var(--muted);padding:4px 8px}.inline-chat-undo button{padding:3px 7px}
+.saved-answers header,.saved-answers>div>div{display:flex;align-items:center;justify-content:space-between;gap:8px}.saved-answers>div>div{margin-top:6px}.saved-answers small{display:block;color:var(--muted)}.saved-answers button:first-child{text-align:left}
+.message-actions-menu[open]{z-index:7}

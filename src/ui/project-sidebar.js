@@ -23,6 +23,7 @@
  function setCollapsed(value){home.classList.toggle('projects-collapsed',value);toggle.setAttribute('aria-expanded',String(!value));toggle.title=value?'Показать проекты':'Свернуть проекты';toggle.setAttribute('aria-label',toggle.title);try{localStorage.setItem('petya-projects-collapsed',String(value));}catch{}}
  let collapsed=false;try{collapsed=localStorage.getItem('petya-projects-collapsed')==='true';}catch{}setCollapsed(collapsed||matchMedia('(max-width:800px)').matches);
  const guard=()=>{if(window.chatStartPending||commandProgress.busy||chatQueue?.active||(voiceReply&&!window.backgroundClarification)||currentDraft||workspaceBusy)throw Error('Завершите текущий запрос, уточнение или очередь перед переключением.');};
+ window.guardChatNavigation=guard;
  const action=fn=>async()=>{status.hidden=true;try{guard();window.chatNavigationPending=true;await fn();}catch(e){status.textContent=e.message;status.hidden=false;}finally{window.chatNavigationPending=false;}};
  let revision=0,timer,latestState;
  async function refresh(){const revisionAtStart=++revision;try{const state=await window.petya.chatNavigation(search.value);if(revisionAtStart!==revision)return;const attentionState=search.value?await window.petya.chatNavigation(''):state;if(revisionAtStart!==revision)return;latestState=state;refreshAttention(attentionState);draw(state);await refreshContext();}catch(e){if(revisionAtStart===revision){status.textContent=e.message;status.hidden=false;}}}
@@ -44,6 +45,15 @@
   target.ondragleave=()=>target.classList.remove('chat-drop-target');
   target.ondrop=e=>{target.classList.remove('chat-drop-target');if(!dragging)return;e.preventDefault();e.stopPropagation();const id=dragging;dragging='';action(async()=>{const result=await window.petya.chatReorder(id,projectId,beforeId);window.offerChatUndo?.(result.undoToken,'Чат перемещён');await refreshTopics();await refresh();})();};
  }
+ function showDraft(row,b,draft){
+   if(!draft || (!draft.line&&!draft.files))return;
+   const hint=['Черновик',draft.line,draft.files?'Вложений: '+draft.files:''].filter(Boolean).join(' · ');
+   b.title=hint;
+   if(!row.querySelector('.chat-job-dot[data-state="attention"]')){
+     const pencil=node('span','✎','sidebar-draft-mark');
+     pencil.setAttribute('aria-label',hint);row.append(pencil);
+   }
+ }
  function chatRow(t){const row=node('div',null,'project-chat-row'),b=button('',action(async()=>{if(t.archived||latestState.projects.find(p=>p.id===t.projectId)?.archived)throw Error('Сначала восстановите чат или проект из архива через меню «…».');await selectDialogueTopic(t.id);if(t.job)await window.petya.chatJobAcknowledge(t.id,t.job.at);await refresh();if(t.index>=0)await window.jumpToChatMessage(t.index);if(matchMedia('(max-width:800px)').matches)setCollapsed(true);}));b.className='project-sidebar-chat';b.title=t.title;b.setAttribute('aria-current',String(t.id===latestState.activeId));if(t.pinned)b.prepend(node('span','⌁ ','chat-pin-mark'));
   const label=node('span',t.title,'project-chat-title');b.append(label);titleSizes.observe(label);
   if(t.job){const running=['running','queued'].includes(t.job.state),unread=!t.job.acknowledged&&['done','attention'].includes(t.job.state);if(running||unread){b.dataset.jobState=t.job.state;const description=t.job.state==='running'?'В процессе':t.job.state==='queued'?'В очереди':t.job.state==='attention'?'Нужно внимание':'Работа завершена';b.setAttribute('aria-label',t.title+' — '+description);if(unread){const dot=node('span',null,'chat-job-dot');dot.dataset.state=t.job.state;dot.title=description;dot.setAttribute('aria-hidden','true');row.append(dot);}}}if(t.snippet)b.append(node('small',t.snippet));
@@ -53,7 +63,7 @@
    [t.pinned?'Открепить':'Закрепить',action(async()=>{await window.petya.chatPin(t.id,!t.pinned);await refresh();})],
    ['Переименовать',()=>renameChat(t)],['Перенести в проект…',()=>chooseDestination(t,options)],
    ['Настройки проекта',()=>window.openProjectSettings(t.projectId)],['В архив',action(()=>archive('chat',t.id,true))]
-  ]);row.append(b,options);row.dataset.chatId=t.id;
+  ]);row.append(b,options);row.dataset.chatId=t.id;showDraft(row,b,latestState.drafts?.[t.id]);
   row.draggable=!t.archived&&!['running','queued'].includes(t.job?.state);row.ondragstart=e=>{dragging=t.id;e.dataTransfer.setData('application/x-petya-chat',t.id);e.dataTransfer.effectAllowed='move';};row.ondragend=()=>{dragging='';document.querySelectorAll('.chat-drop-target').forEach(n=>n.classList.remove('chat-drop-target'));};if(!archiveMode)bindDrop(row,t.projectId,t.id);return row;
  }
  const titleSizes=new ResizeObserver(entries=>{for(const {target}of entries)target.classList.toggle('is-truncated',target.scrollWidth>target.clientWidth+1);});
@@ -69,10 +79,21 @@
   const options=more('Действия с проектом «'+p.name+'»',()=>p.archived?[
    ['Восстановить',action(()=>archive('project',p.id,false))],['Настройки проекта',()=>window.openProjectSettings(p.id)]
   ]:[['Новый чат',newChat],['Настройки проекта',()=>window.openProjectSettings(p.id)],...(p.id==='general'?[]:[[p.pinned?'Открепить':'Закрепить',action(async()=>{await window.petya.chatProjectPin(p.id,!p.pinned);await refresh();})],['В архив',action(()=>archive('project',p.id,true))]])]);bar.append(select,add,options);group.append(bar);if(!archiveMode)bindDrop(bar,p.id);
+  if(!archiveMode){
+    const unsent=state.drafts?.['draft:'+p.id];
+    if(unsent){const row=node('div',null,'project-chat-row'),b=button('Новый чат',newChat);b.className='project-sidebar-chat';row.append(b);showDraft(row,b,unsent);group.append(row);}
+    const saved=state.projects.find(project=>project.id===p.id)?.savedCount;
+    if(saved){const b=button('Сохранённые ответы · '+saved,()=>window.showProjectAnswers(p.id));b.className='project-view-all';group.append(b);}
+  }
   const pinned=rows.filter(t=>t.pinned),ordinary=rows.filter(t=>!t.pinned);const visible=search.value||expanded.has(p.id)?ordinary:ordinary.slice(0,5);for(const t of [...pinned,...visible])group.append(chatRow(t));
   if(!search.value&&ordinary.length>5){const all=button(expanded.has(p.id)?'Свернуть':'View all ('+ordinary.length+')',()=>{expanded.has(p.id)?expanded.delete(p.id):expanded.add(p.id);draw(state);});all.className='project-view-all';group.append(all);}
   if(!rows.length&&p.id===state.activeProjectId)group.append(node('small','Пока нет чатов'));list.append(group);
  }if(!list.children.length)list.append(node('p','Ничего не найдено'));}
+ let draftTimer;
+ const redrawDrafts=()=>{clearTimeout(draftTimer);draftTimer=setTimeout(refresh,200);};
+ for(const event of ['petya-drafts-updated','petya-bookmarks-updated'])document.addEventListener(event,redrawDrafts);
+ let previousFiles='';
+ document.addEventListener('petya-attachments',e=>{const ids=e.detail.map(f=>f.id).join(',');if(ids!==previousFiles){previousFiles=ids;redrawDrafts();}});
  search.oninput=()=>{++revision;clearTimeout(timer);timer=setTimeout(refresh,180);};
  // Show actual source bindings; do not infer a Jira/Slack association from a name.
  const context=node('details',null,'chat-project-context'),summary=node('summary','Контекст'),body=node('div',null,'chat-context-body');context.append(summary,body);shell.querySelector('.chat-heading').after(context);

@@ -4,7 +4,7 @@ let attachmentRefreshRevision=0;
 async function refreshAttachments(){
  const revision=++attachmentRefreshRevision,files=await window.petya.attachmentList();if(revision!==attachmentRefreshRevision)return;
  const list=$('attachment-list');list.replaceChildren();window.pendingChatFiles=files;
- for(const a of files){const row=document.createElement('p'),label=document.createElement('span'),remove=document.createElement('button');label.textContent=a.name+' · '+a.note+' ';remove.type='button';remove.textContent='Убрать';remove.onclick=run(async()=>{await window.petya.attachmentRemove(a.id);await refreshAttachments();});row.append(label,remove);list.append(row);}
+ for(const a of files){const row=document.createElement('p'),label=document.createElement('span'),remove=document.createElement('button');label.textContent=a.name+' · '+a.note+' ';remove.type='button';remove.textContent='Убрать';remove.onclick=run(async()=>{await window.removeComposerFile(a.id);});row.append(label,remove);list.append(row);}
  document.dispatchEvent(new CustomEvent('petya-attachments',{detail:files}));
  const topic=await window.petya.attachmentTopic();if(revision!==attachmentRefreshRevision)return;$('attachment-topic').textContent=topic?.files?'В этой теме: '+topic.files.map(a=>a.name).join(', '):'';$('attachment-forget').hidden=!topic?.files;$('attachment-forget').dataset.topic=topic?.id||'';if(typeof refreshFormats==='function')await refreshFormats();
 }

@@ -8,6 +8,22 @@
  }
  bar.append(button('↑','Предыдущее совпадение',()=>move(-1)),button('↓','Следующее совпадение',()=>move(1)),button('×','Закрыть поиск',close));
  const heading=document.querySelector('.chat-heading');heading.after(bar);
+ const scope=document.createElement('select'),fileRows=document.createElement('div');
+ scope.setAttribute('aria-label','Область поиска');scope.add(new Option('Сообщения','messages'));scope.add(new Option('Файлы','files'));
+ fileRows.className='chat-file-matches';bar.prepend(scope);bar.append(fileRows);
+ scope.onchange=()=>{find();query.focus();};
+ async function findFiles(offset=0){
+   const ticket=++revision,owner=topicSelect.value,term=query.value.trim();matches=[];selected=-1;
+   CSS.highlights.delete('petya-find');CSS.highlights.delete('petya-find-current');fileRows.replaceChildren();
+   if(!term || !owner){count.textContent=term?'Нет файлов':'';return;}
+   try{const {items,total}=await window.petya.searchChatFiles(owner,term,offset);
+     if(ticket!==revision||owner!==topicSelect.value||bar.hidden)return;
+     count.textContent=total?'Найдено: '+total:'Совпадений нет';
+     if(offset)fileRows.append(button('Назад','Предыдущие совпадения',()=>findFiles(Math.max(0,offset-40))));
+     for(const item of items){fileRows.append(button(item.name+' · '+item.line+' — '+item.snippet,'Открыть '+item.name+', строка '+item.line,()=>window.openChatAttachment(item,owner,{query:term,ordinal:item.ordinal})));}
+     if(total>offset+items.length)fileRows.append(button('Дальше','Следующие совпадения',()=>findFiles(offset+items.length)));
+   }catch(e){if(ticket===revision)count.textContent=e.message;}
+ }
  let matches=[],selected=-1,revision=0,returnFocus;
  function close(){revision++;bar.hidden=true;CSS.highlights.delete('petya-find');CSS.highlights.delete('petya-find-current');returnFocus?.focus({preventScroll:true});}
  function open(){
@@ -55,11 +71,12 @@
    if(current){const feed=document.querySelector('.chat-feed');feed.scrollTop+=current.getBoundingClientRect().top-feed.getBoundingClientRect().top-feed.clientHeight*.35;}
  }
  function find(){
+   if(scope.value==='files'){findFiles();return;}fileRows.replaceChildren();
    const term=query.value.trim().toLowerCase();
    matches=chatHistory.flatMap((m,index)=>collect(String(m.text||'').toLowerCase(),term).map((_,ordinal)=>({index,ordinal})));
    selected=matches.length?0:-1;reveal();
  }
- function move(delta){if(!matches.length)return;selected=(selected+delta+matches.length)%matches.length;reveal();}
+ function move(delta){if(scope.value==='files'){fileRows.querySelector('button')?.focus();return;}if(!matches.length)return;selected=(selected+delta+matches.length)%matches.length;reveal();}
  query.oninput=find;bar.onsubmit=e=>{e.preventDefault();move(1);};
  query.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();move(e.shiftKey?-1:1);}};
  document.addEventListener('petya-topic-changed',e=>{if(!bar.hidden&&!e.detail?.preserveScroll)close();});
@@ -69,16 +86,24 @@
    if(message.role!=='assistant'||!message.at)return;
    const menu=document.createElement('details'),trigger=document.createElement('summary');
    menu.className='message-actions-menu';trigger.textContent='•••';trigger.setAttribute('aria-label','Действия с ответом');
-   menu.append(trigger,button('Скопировать ссылку','Скопировать ссылку на ответ',async()=>{
+   const menuItems=document.createElement('div');menuItems.className='answer-menu-items';menu.append(trigger,menuItems);
+   menuItems.append(button('Скопировать ссылку','Скопировать ссылку на ответ',async()=>{
      try{const raw=await window.petya.messageLink(topicSelect.value,Number(node.dataset.messageIndex),message.text,message.at);
        await navigator.clipboard.writeText(raw);menu.open=false;notice('Ссылка на ответ скопирована.');
      }catch(e){notice(e.message,true);}
+   }));
+   menuItems.append(button('Сохранить в проект','Сохранить ответ в проект',async()=>{
+     try{
+       const raw=await window.petya.messageLink(topicSelect.value,Number(node.dataset.messageIndex),message.text,message.at);
+       await window.petya.bookmarkAnswer(raw,true);menu.open=false;notice('Ответ сохранён в проекте.');
+       document.dispatchEvent(new Event('petya-bookmarks-updated'));
+     }catch(e){notice(e.message,true);}
    }));node.querySelector('.message-meta')?.append(menu);
  };
- async function receive(){
+ window.openPetyaAnswer=async url=>{
    try{
      await window.chatNavigationReady;
-     const url=await window.petya.takeMessageLink();if(!url)return;
+     if(!url)return;
      const target=await window.petya.resolveMessageLink(url);
      if(target.company){await window.petya.companySwitch(target.company,url);return;}
      if(commandProgress.busy||planning||workspaceBusy||window.chatQueue?.active)throw Error('Завершите текущее действие и откройте ссылку ещё раз.');
@@ -89,6 +114,7 @@
      await window.jumpToChatMessage(target.index);
    }catch(e){notice(e.message,true);}
  }
+ async function receive(){await window.chatNavigationReady;await window.openPetyaAnswer(await window.petya.takeMessageLink());}
  window.petyaEvents.onMessageLink(receive);
  window.chatNavigationReady.then(receive).catch(e=>notice(e.message,true));
  showDialogueMessages(chatHistory);

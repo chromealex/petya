@@ -1,5 +1,5 @@
 // Version snapshots contain conversation data. Project placement and sidebar state belong to the chat.
-const shared = new Set(['id', 'projectId', 'title', 'order', 'pinned', 'archived', 'versions', 'versionIndex']);
+const shared = new Set(['id', 'projectId', 'title', 'order', 'pinned', 'archived', 'versions', 'versionIndex','savedAnswers']);
 function snapshot(topic) {
   return structuredClone(Object.fromEntries(Object.entries(topic).filter(([key]) => !shared.has(key))));
 }
