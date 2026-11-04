@@ -3,7 +3,7 @@
  const panel=document.createElement('article');panel.className='message-assistant chat-running-reply chat-job-status';panel.hidden=true;panel.setAttribute('role','status');
  const text=document.createElement('span'),retry=document.createElement('button');retry.type='button';retry.textContent='Повторить';retry.hidden=true;const author=document.createElement('strong');author.textContent='Петя';const bar=document.createElement('progress');bar.setAttribute('aria-label','Петя выполняет запрос');const elapsed=document.createElement('span');elapsed.className='chat-running-time';elapsed.setAttribute('aria-hidden','true');panel.append(author,text,bar,elapsed,retry);
  window.chatJobBusy=id=>['queued','running'].includes(jobs.get(id)?.state);
- function paint(){const job=jobs.get(topicSelect.value);panel.hidden=!job||job.state==='done';if(panel.hidden)panel.remove();bar.hidden=job?.state==='attention';elapsed.hidden=!['queued','running'].includes(job?.state);text.textContent=job?.label||'';if(!panel.hidden&&panel.parentElement!==dialogueMessages)dialogueMessages.append(panel);retry.hidden=job?.state!=='attention';retry.onclick=()=>{if(job?.command&&!$('command').value){$('command').value=job.command;$('command').focus();}};panel.dataset.state=job?.state||'';}
+ function paint(){const job=jobs.get(topicSelect.value);panel.hidden=!job||job.state==='done';if(panel.hidden)panel.remove();bar.hidden=job?.state==='attention';elapsed.hidden=!['queued','running'].includes(job?.state);text.textContent=job?.label||'';if(!panel.hidden)window.placeChatProgress(panel);retry.hidden=job?.state!=='attention';retry.onclick=()=>{if(job?.command&&!$('command').value){$('command').value=job.command;$('command').focus();}};panel.dataset.state=job?.state||'';}
  window.tryBackgroundChat=async command=>{
   if(starting||voiceReply||currentDraft||workspaceBusy||planning||commandProgress.busy)return false;
   starting=true;window.chatStartPending=true;
@@ -19,7 +19,7 @@
  });
  window.leaveBackgroundChat=()=>{if(window.backgroundClarification){window.backgroundClarification=false;voiceReply=null;commandProgress.update('idle','');}};
  window.finishForegroundChat=async result=>{const id=topicSelect.value;if(applying||!id||window.chatJobBusy(id)||!jobs.has(id))return;finishing.add(id);try{await window.petya.chatJobFinish(id,result.error||result.question||voiceReply?'attention':'done',result);const state=await window.petya.chatJobState(id);if(state?.job)jobs.set(id,state.job);paint();}finally{finishing.delete(id);}};
- new MutationObserver(()=>{if(!panel.hidden&&panel.parentElement!==dialogueMessages)dialogueMessages.append(panel);}).observe(dialogueMessages,{childList:true});setInterval(()=>{const job=jobs.get(topicSelect.value);elapsed.textContent=job?.startedAt?'Время: '+Math.max(0,Math.floor(((['queued','running'].includes(job.state)?Date.now():job.finishedAt||job.at)-job.startedAt)/1000))+' с':'';},1000);
+ new MutationObserver(()=>{if(!panel.hidden)window.placeChatProgress(panel);}).observe(dialogueMessages,{childList:true});setInterval(()=>{const job=jobs.get(topicSelect.value);elapsed.textContent=job?.startedAt?'Время: '+Math.max(0,Math.floor(((['queued','running'].includes(job.state)?Date.now():job.finishedAt||job.at)-job.startedAt)/1000))+' с':'';},1000);
  document.addEventListener('petya-dialogue-state',()=>{paint();});
  window.restoreChatJob(topicSelect.value).catch(()=>{});
 })();

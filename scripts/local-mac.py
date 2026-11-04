@@ -40,12 +40,14 @@ subprocess.run(['ditto', str(runtime), str(output)], check=True)
 resources = output / 'Contents/Resources'
 app_dir = resources / 'app'
 app_dir.mkdir()
-for name in ('src', 'assets'):
+for name in ('assets',):
     shutil.copytree(root / name, app_dir / name)
 subprocess.run(['xcrun', 'swiftc', '-module-cache-path', str(staging / 'swift-cache'), str(root / 'native/claude-send.swift'), '-o', str(app_dir / 'assets/claude-send')], check=True)
 subprocess.run(['codesign', '--force', '--sign', identity, str(app_dir / 'assets/claude-send')], check=True)
 subprocess.run(['xcrun', 'swiftc', '-module-cache-path', str(staging / 'swift-cache'), str(root / 'native/slack-view.swift'), '-o', str(app_dir / 'assets/native/slack-view')], check=True)
 subprocess.run(['codesign', '--force', '--sign', identity, str(app_dir / 'assets/native/slack-view')], check=True)
+# Capture UI and application code after native compilation to minimize concurrent-edit races.
+shutil.copytree(root / 'src', app_dir / 'src')
 subprocess.run([sys.executable, str(root / 'scripts/verify-package.py'), str(root / 'src'), str(app_dir / 'src')], check=True)
 # Ship the server, its libraries and the multilingual model with the app.
 voice = app_dir / 'runtime'

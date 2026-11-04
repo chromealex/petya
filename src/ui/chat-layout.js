@@ -71,6 +71,12 @@
  const sync=()=>{welcome.hidden=dialogueMessages.childElementCount>0;if(historyPrepended){historyPrepended=false;return;}if(follow)window.chatScrollToLatest();else latest.hidden=false;};
  new MutationObserver(sync).observe(dialogueMessages,{childList:true});sync();
  document.addEventListener('petya-topic-changed',event=>{if(event.detail?.preserveScroll)return;follow=true;requestAnimationFrame(window.chatScrollToLatest);});
+ window.placeChatProgress=panel=>{
+  const user=[...dialogueMessages.querySelectorAll(':scope>.message-user')].at(-1);
+  if(!user){if(panel.parentElement!==dialogueMessages)dialogueMessages.append(panel);return;}
+  let anchor=user;while(anchor.nextElementSibling?.classList.contains('chat-running-reply')&&anchor.nextElementSibling!==panel)anchor=anchor.nextElementSibling;
+  if(anchor.nextElementSibling!==panel)anchor.after(panel);
+ };
  window.appendChatRequest=text=>{
   dialogueMessages.append(window.renderMessage({role:'user',text,at:Date.now(),attachments:window.pendingChatFiles||[]}));window.chatScrollToLatest?.();
  };

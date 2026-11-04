@@ -1,11 +1,28 @@
 (()=>{
  const card=document.createElement('article');card.className='card';card.id='voice-languages';
  const title=document.createElement('h2');title.textContent='Языки общения';
- const description=document.createElement('p');description.className='small';description.textContent='Русский и английский доступны по умолчанию. Остальные языки загружаются только по твоему выбору. Многоязычная голосовая модель общая — повторно скачивать её не нужно.';
+ const description=document.createElement('p');description.className='small';description.textContent='Русский и английский уже доступны. Остальные языки можно добавить по необходимости — они используют общую голосовую модель.';
  const rows=document.createElement('div'),label=document.createElement('label'),select=document.createElement('select'),status=document.createElement('p');
- label.textContent='Язык ответов';select.setAttribute('aria-label','Язык ответов');label.append(select);status.className='small';status.setAttribute('role','status');card.append(title,description,rows,label,status);
+ rows.className='voice-language-list';label.className='voice-language-selection';label.textContent='Язык ответов';select.setAttribute('aria-label','Язык ответов');label.append(select);status.className='small';status.setAttribute('role','status');card.append(title,description,rows,label,status);
  document.getElementById('speech-style')?.closest('.card')?.after(card);
- async function render(){const state=await window.petya.voiceLanguages();rows.replaceChildren();select.replaceChildren();for(const language of state.languages){const row=document.createElement('div');row.className='row';const name=document.createElement('span');name.textContent=language.label+' — '+(language.installed?'установлен':'не установлен');row.append(name);if(language.installed)select.add(new Option(language.label,language.code));else{const install=document.createElement('button');install.type='button';install.textContent='Скачать';install.dataset.language=language.code;install.onclick=async()=>{install.disabled=true;status.textContent='Загружаю '+language.label.toLowerCase()+'…';try{await window.petya.voiceLanguageInstall(language.code);status.textContent='Язык установлен.';await render();}catch(e){status.textContent=e.message;install.disabled=false;}};row.append(install);}rows.append(row);}select.value=state.selected;}
+ async function render(){
+  const state=await window.petya.voiceLanguages();rows.replaceChildren();select.replaceChildren();
+  for(const language of state.languages){
+   const row=document.createElement('div');row.className='voice-language-row';
+   const identity=document.createElement('div');identity.className='voice-language-identity';
+   const code=document.createElement('span');code.className='voice-language-code';code.textContent=language.code.toUpperCase();code.setAttribute('aria-hidden','true');
+   const name=document.createElement('span');name.className='voice-language-name';name.textContent=language.label;identity.append(code,name);row.append(identity);
+   if(language.installed){
+    select.add(new Option(language.label,language.code));const installed=document.createElement('span');installed.className='voice-language-installed';installed.innerHTML='<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 10 4 4 8-8"/></svg>';installed.append(document.createTextNode('Установлен'));row.append(installed);
+   }else{
+    const install=document.createElement('button');install.className='voice-language-download';install.type='button';install.dataset.language=language.code;install.setAttribute('aria-label','Скачать язык: '+language.label);
+    const paint=()=>{install.innerHTML='<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9m-4-4 4 4 4-4M4 14v3h12v-3"/></svg>';install.append(document.createTextNode('Скачать'));};paint();if(language.downloading){install.disabled=true;install.textContent='Загрузка…';install.setAttribute('aria-busy','true');}
+    install.onclick=async()=>{install.disabled=true;install.textContent='Загрузка…';install.setAttribute('aria-busy','true');status.textContent='Загружаю '+language.label.toLowerCase()+'…';try{await window.petya.voiceLanguageInstall(language.code);status.textContent='Язык установлен.';await render();}catch(e){status.textContent=e.message;install.disabled=false;install.removeAttribute('aria-busy');paint();}};row.append(install);
+   }
+   rows.append(row);
+  }
+  select.value=state.selected;
+ }
  select.onchange=async()=>{select.disabled=true;try{await window.petya.saveSettings({communicationLanguage:select.value});status.textContent='Язык ответов сохранён.';}catch(e){status.textContent=e.message;await render();}finally{select.disabled=false;}};
  const dismissed=new Set();
  window.offerVoiceLanguage=(text,missing,target)=>{
@@ -18,5 +35,6 @@
   const skip=document.createElement('button');skip.type='button';skip.textContent='Пропустить озвучку';skip.onclick=()=>{dismissed.add(text);box.remove();};box.append(skip);message.append(box);
  };
  window.checkVoiceLanguages=async (text,target)=>{try{const check=await window.petya.voiceLanguageCheck(text);window.offerVoiceLanguage(text,check.missing,target);}catch{/* Explicit speech requests surface detector errors through the normal error path. */}};
+ window.petyaEvents.onVoiceLanguageProgress(state=>{if(!state.busy)render().catch(()=>{});});
  document.addEventListener('petya-settings-displayed',()=>render().catch(e=>{status.textContent=e.message;}));render().catch(e=>{status.textContent=e.message;});
 })();

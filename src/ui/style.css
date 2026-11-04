@@ -727,3 +727,32 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .notification-center>button{width:100%;font-size:12px;padding:8px}.notification-check-status{font-size:11px;margin:8px 0 12px}
 .notification-item{border-top:1px solid var(--line);padding:12px 0}.notification-item p{font-size:12px;line-height:1.5;overflow-wrap:anywhere;margin:7px 0}.notification-item strong{font-size:13px}.notification-item time{display:block;font-size:10px;color:var(--muted);margin-top:8px}.notification-item progress{width:100%;height:4px;accent-color:var(--green)}
 .notification-actions{display:flex;gap:8px;flex-wrap:wrap}.notification-actions button{font-size:12px;padding:6px 10px}.notification-item[data-kind=error] .notification-item-title{color:#ffb2a7}.notification-item[data-kind=attention] .notification-item-title{color:#edce8f}.notification-empty{font-size:13px;text-align:center;margin:24px 0}
+
+/* Clarification choices stay attached to the composer while history scrolls. */
+#home .chat-composer>.clarification-list.actions{width:100%;max-width:none;max-height:min(34dvh,280px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;margin:0 0 10px;padding:0 0 10px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;gap:4px;align-items:stretch;flex-direction:column;flex-wrap:nowrap}
+#home .chat-composer>.clarification-list:empty{display:none}
+.clarification-prompt{flex-shrink:0;margin:0 4px 6px;color:var(--ink);font-size:13px;line-height:1.5}
+#home .chat-composer .clarification-option{flex-shrink:0;padding:8px 10px;font-size:13px}
+#home .chat-composer .clarification-custom{flex-shrink:0}
+
+/* Compact, aligned language availability and installation controls. */
+.voice-language-list{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:16px 0}
+.voice-language-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;min-height:52px;padding:9px 12px;background:#ffffff02}
+.voice-language-row+.voice-language-row{border-top:1px solid var(--line)}
+.voice-language-identity{display:flex;align-items:center;gap:10px;min-width:0}
+.voice-language-code{display:grid;place-items:center;flex:0 0 30px;height:30px;border-radius:8px;background:#ffffff07;font-size:10px;letter-spacing:.4px;color:var(--muted)}
+.voice-language-name{font-size:13px;overflow-wrap:anywhere}
+.voice-language-installed{display:inline-flex;align-items:center;justify-content:flex-end;gap:6px;color:#b6d39b;font-size:11px;white-space:nowrap}
+.voice-language-download{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:112px;min-height:32px;padding:6px 10px;font-size:12px;border-radius:8px;background:transparent}
+.voice-language-selection{display:block;margin:0;max-width:340px}.voice-language-selection select{margin-top:7px}
+#voice-languages>[role=status]:empty{display:none}
+@media(max-width:450px){.voice-language-row{gap:8px;padding:9px 10px}.voice-language-code{display:none}.voice-language-download{min-width:100px}}
+
+/* Compact notifications keep actions and progress close to their status. */
+.notification-center{width:min(344px,calc(100vw - 16px));padding:0;border-radius:12px}
+.notification-head{position:sticky;top:0;z-index:1;background:var(--panel);padding:10px 12px;margin:0;border-bottom:1px solid var(--line);gap:4px}
+.notification-head strong{font-size:13px}.notification-head button{height:26px;min-width:26px;padding:3px 6px}.notification-head .notification-refresh{font-size:20px;padding:0}
+.notification-check-status{font-size:11px;line-height:1.4;margin:0;padding:7px 12px;color:var(--muted)}.notification-check-status:empty{display:none}
+.notification-list{padding:0 12px}.notification-item{padding:9px 0}.notification-item-title{gap:6px;min-height:20px}.notification-item strong{font-size:12px;line-height:1.4}
+.notification-item time{display:inline;font-size:10px;white-space:nowrap;margin:0;flex-shrink:0}.notification-item-title button{width:22px;height:22px;padding:0;font-size:16px;flex-shrink:0}
+.notification-item p{font-size:12px;line-height:1.4;margin:3px 0 0}.notification-item progress{display:block;margin:7px 0 2px;height:3px}.notification-actions{gap:6px;margin-top:7px}.notification-actions button{font-size:11px;line-height:16px;min-height:26px;padding:4px 8px;border-radius:7px}.notification-empty{font-size:12px;margin:18px 0}

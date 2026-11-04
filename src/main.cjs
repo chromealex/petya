@@ -88,7 +88,7 @@ const { bundledModel, upgradeBundledModel } = require('./speech-model.cjs');
 const localModel = bundledModel(runtimeCandidates);
 const runtimeRoot = localModel ? path.resolve(path.dirname(localModel), '../..') : runtimeCandidates[0];
 const localBinary = path.join(runtimeRoot, 'runtime/whisper-build/bin', process.platform === 'win32' ? 'whisper-server.exe' : 'whisper-server');
-const languagePacks = new (require('./language-packs.cjs').LanguagePacks)({directory:path.join(app.getPath('userData'),'voice-languages'),roots:runtimeCandidates});
+const languagePacks = new (require('./language-packs.cjs').LanguagePacks)({directory:path.join(app.getPath('userData'),'voice-languages'),roots:runtimeCandidates,emit:state=>{if(win&&!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('voice-language-progress',state);}});
 const localVoice = new (require('./local-voice.cjs').LocalVoice)({ roots: runtimeCandidates, languageDir:languagePacks.directory });
 const imageInstallRoot=path.join(app.getPath('userData'),'image-generator');
 const localImages = new (require('./local-images.cjs').LocalImages)({roots:[imageInstallRoot,...runtimeCandidates]});
@@ -1048,6 +1048,7 @@ function setupHandlers() {
   // Window discovery uses CoreGraphics; it must not depend on screen-stream enumeration.
   handle('inspectZoom', () => inspectZoomWindows(true));
   handle('pauseAutoMeeting', () => meetingMonitor?.pause());
+  handle('voiceLanguageStatus',()=>languagePacks.statuses());
   handle('voiceLanguages',()=>({languages:languagePacks.list(),selected:settings.communicationLanguage}));
   handle('voiceLanguageInstall',async code=>{await languagePacks.install(code);localVoice.stop();return {languages:languagePacks.list(),selected:settings.communicationLanguage};});
   handle('voiceLanguageCheck',value=>languagePacks.check(require('./spoken-text.cjs').spokenText(value),settings.communicationLanguage));

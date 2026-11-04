@@ -35,3 +35,11 @@
 
 - Several agents may work in this folder at the same time. Before starting, check `git status` and `git log -5`; edit files in place instead of overwriting them from an old copy.
 - Commit in small, complete steps, only your own files (`git add <files>`, not `git add -A`), with tests passing.
+
+# Background operations and notifications
+
+- Proactively integrate every new or changed user-visible download, installation, update, and long-running background operation with the notification center (`src/ui/notifications.js`). Do not wait for a separate user request.
+- Publish progress from the operation owner, independent of the settings view. Provide an IPC event and a current-state snapshot so reopening the window restores active progress.
+- Use one stable notification ID per operation, update its card in place, and report completion or actionable errors. Offer retry, cancellation, or navigation only when supported. Never reset unread state for every progress tick.
+- Show real progress percentages only when the total is known; otherwise show the actual stage with indeterminate progress. Do not imply that checking, downloading, and installing are the same stage.
+- Verify progress and completion with settings closed, failure handling, and duplicate-start behavior. Keep notifications compact and accessible.
