@@ -1,55 +1,55 @@
-# Общий вход Jira + Confluence для Пети
+# Shared Jira + Confluence sign-in for Petya
 
-Статус: OAuth-приложение Petya создано в Atlassian (Resource-level); серверная часть развёрнута; общий вход ещё не готов: ожидается делегирование DNS, HTTPS и настройка OAuth в консоли Atlassian. ID: 20c1cb45-4b70-42ab-8bb4-aac4e0259dd3.
+Status: the Petya OAuth app has been created in Atlassian (Resource-level); the server side is deployed; shared sign-in is not ready yet: waiting for DNS delegation, HTTPS and OAuth setup in the Atlassian console. ID: 20c1cb45-4b70-42ab-8bb4-aac4e0259dd3.
 
-Одно приложение Petya в Atlassian Developer Console, OAuth 2.0 (3LO), Resource-level: пользователь выбирает сайт. Клиентский секрет не включается в desktop-сборки. Размещение сервера и принятие условий разработчика требуют решения владельца.
+A single Petya app in the Atlassian Developer Console, OAuth 2.0 (3LO), Resource-level: the user selects the site. The client secret is not included in desktop builds. Hosting the server and accepting the developer terms require the owner's decision.
 
-## Схема
+## Flow
 
-1. Desktop создаёт одноразовую сессию входа на сервере авторизации и открывает системный браузер.
-2. Atlassian показывает согласие для Jira и Confluence. Callback на HTTPS-сервере проверяет state и привязку сессии.
-3. Сервер обменивает код на токены и шифрует их в постоянном хранилище. Секрет приложения хранится в secret environment хостинга.
-4. Desktop получает результат по защищённой одноразовой сессии. При нескольких сайтах пользователь выбирает сайт из accessible-resources.
-5. Jira запросы используют api.atlassian.com/ex/jira/{cloudId}; Confluence — api.atlassian.com/ex/confluence/{cloudId}. Текущий Basic auth сохраняется до готовности OAuth.
-6. Сервер последовательно обновляет rotating refresh token, атомарно сохраняет новую пару и обрабатывает отзыв доступа. Повторный вход требуется при отозванном/истёкшем refresh token.
-7. Отключение удаляет серверные токены и локальное подключение. Перед публикацией проверяются изоляция пользователей, неверный state, повтор callback, отмена входа, смена сайта и конкурентное обновление токенов.
+1. The desktop app creates a one-time sign-in session on the authorization server and opens the system browser.
+2. Atlassian shows the consent screen for Jira and Confluence. The callback on the HTTPS server checks the state and the session binding.
+3. The server exchanges the code for tokens and encrypts them in persistent storage. The app secret is kept in the hosting's secret environment.
+4. The desktop app receives the result over the protected one-time session. With several sites, the user selects a site from accessible-resources.
+5. Jira requests use api.atlassian.com/ex/jira/{cloudId}; Confluence — api.atlassian.com/ex/confluence/{cloudId}. The current Basic auth is kept until OAuth is ready.
+6. The server sequentially refreshes the rotating refresh token, atomically saves the new pair and handles access revocation. Signing in again is required when the refresh token is revoked/expired.
+7. Disconnecting deletes the server-side tokens and the local connection. Before publication, the following are checked: user isolation, invalid state, callback replay, sign-in cancellation, site change and concurrent token refresh.
 
-## Размещение
+## Hosting
 
-Сервер RUVDS RU2780310: 194.87.110.60, Ubuntu 24.04 LTS, 1 vCPU / 1 GB RAM / 20 GB HDD, 710 ₽ за первый месяц. Оплачен пользователем; автопродление отключено. Домен petya-app.ru зарегистрирован в Selectel. Телефон администратора подтверждён. A-запись auth.petya-app.ru указывает на сервер, но на 03.11.2026 19:46 МСК authoritative .ru ещё возвращает NXDOMAIN.
+RUVDS server RU2780310: 194.87.110.60, Ubuntu 24.04 LTS, 1 vCPU / 1 GB RAM / 20 GB HDD, 710 ₽ for the first month. Paid by the user; auto-renewal is disabled. The domain petya-app.ru is registered with Selectel. The administrator's phone number is verified. The A record for auth.petya-app.ru points to the server, but as of 03.11.2026 19:46 MSK the authoritative .ru servers still return NXDOMAIN.
 
-В /opt/petya-auth/gateway.cjs развёрнут брокер, systemd petya-auth работает от пользователя petya-auth и слушает только 127.0.0.1:8787. Хранилище /var/lib/petya-auth/tokens.enc шифруется AES-256-GCM, ключ в /etc/petya-auth.env (0600). Клиентский секрет Atlassian перевыпущен владельцем и установлен. Gateway обслуживает Atlassian, Slack и Notion; идентификаторы и секреты всех трёх приложений установлены. nginx публично отдаёт 503 до настройки HTTPS. Шифрованное файловое хранилище рассчитано на один процесс, лимит 10 000 подключений; перед масштабированием нужна миграция на транзакционную БД и настройка внешних резервных копий.
+The broker is deployed in /opt/petya-auth/gateway.cjs; the systemd service petya-auth runs as the user petya-auth and listens only on 127.0.0.1:8787. The storage /var/lib/petya-auth/tokens.enc is encrypted with AES-256-GCM, the key is in /etc/petya-auth.env (0600). The Atlassian client secret was reissued by the owner and installed. The gateway serves Atlassian, Slack and Notion; the identifiers and secrets of all three apps are installed. nginx publicly returns 503 until HTTPS is configured. The encrypted file storage is designed for a single process, with a limit of 10 000 connections; before scaling, migration to a transactional DB and setup of external backups are required.
 
-Клиент OAuth добавлен в src/atlassian-oauth.cjs и интегрирован в исходники desktop. Секрет подключения хранится через safeStorage; client secret и refresh token в desktop не передаются. Установленная Petya.app пока НЕ обновлена. Полный набор прежних тестов, новые тесты маршрутизации и брокера проходят. Сквозной вход реального пользователя ещё НЕ проверен.
+The OAuth client has been added in src/atlassian-oauth.cjs and integrated into the desktop sources. The connection secret is stored via safeStorage; the client secret and refresh token are not passed to the desktop app. The installed Petya.app has NOT been updated yet. The full set of previous tests and the new routing and broker tests pass. End-to-end sign-in by a real user has NOT been verified yet.
 
-SSH-ключ хоста изменился при первичной подготовке сервера; сверено через аварийную консоль RUVDS: SHA256:fwXrMWya6H26xDCC/DFFVJtwrMTjkMHKWyjRtxCFufI. Только после сверки обновлён known_hosts. Административный ключ Mac установлен с явного разрешения пользователя.
+The host SSH key changed during the initial server preparation; it was verified via the RUVDS emergency console: SHA256:fwXrMWya6H26xDCC/DFFVJtwrMTjkMHKWyjRtxCFufI. known_hosts was updated only after verification. The Mac administrative key was installed with the user's explicit permission.
 
-Callback Atlassian и 10 API scopes сохранены. Пользователь подтвердил доступ и хранение секрета на сервере. Следующие шаги: дождаться NS в .ru; получить HTTPS-сертификат; настроить distribution; открыть HTTPS-прокси; сквозной тест входа/обновления/отключения; собрать и установить desktop.
+The Atlassian callback and 10 API scopes are saved. The user confirmed access and storage of the secret on the server. Next steps: wait for NS in .ru; obtain an HTTPS certificate; configure distribution; open the HTTPS proxy; end-to-end test of sign-in/refresh/disconnect; build and install the desktop app.
 
-При первоначальном переносе старого client secret TextEdit сохранил временные документы в iCloud. Документы удалены, пользователь уведомлён и перевыпустил секрет. На сервер установлен только новый секрет через заранее созданный локальный файл /tmp с правами 0600; файл удалён после передачи. Старый секрет не использовался сервером.
+During the initial transfer of the old client secret, TextEdit saved temporary documents to iCloud. The documents were deleted, the user was notified and reissued the secret. Only the new secret was installed on the server, via a pre-created local /tmp file with 0600 permissions; the file was deleted after the transfer. The old secret was never used by the server.
 
-Необходимые серверные переменные: PUBLIC_ORIGIN, ATLASSIAN_CLIENT_ID, ATLASSIAN_CLIENT_SECRET, TOKEN_STORE, TOKEN_ENCRYPTION_KEY. Секреты не коммитить и не выводить в журналы. Нужны резервные копии БД и сохранность ключа шифрования.
+Required server variables: PUBLIC_ORIGIN, ATLASSIAN_CLIENT_ID, ATLASSIAN_CLIENT_SECRET, TOKEN_STORE, TOKEN_ENCRYPTION_KEY. Do not commit secrets or print them to logs. DB backups and safekeeping of the encryption key are required.
 
-## Параметры регистрации
+## Registration parameters
 
-Скрипт scripts/prepare-oauth.cjs <HTTPS origin> <output directory> создаёт atlassian-registration.json с callback и запрашиваемыми правами. Это файл для заполнения консоли, а не манифест автоматической регистрации. offline_access запрашивается в OAuth URL для получения refresh token.
+The script scripts/prepare-oauth.cjs <HTTPS origin> <output directory> creates atlassian-registration.json with the callback and the requested scopes. This is a file for filling in the console, not a manifest for automatic registration. offline_access is requested in the OAuth URL to obtain a refresh token.
 
-Публикация для других пользователей — после рабочего сервера, тестового входа, настройки distribution и заполнения реальных данных владельца/политики конфиденциальности, если их потребует Atlassian.
+Publication for other users comes after a working server, a test sign-in, distribution setup and filling in the owner's real details/privacy policy, if Atlassian requires them.
 
-Официальная документация: https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/
+Official documentation: https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/
 
-Slack: приложение Petya A0CEDB1HFD3 создано в workspace T702E73EX (Azur Games), callback и шесть user scopes сохранены, ротация включена. Client ID/secret установлен на сервер. Установка в Azur Games требует одобрения администратора. Public Distribution пока не активирован.
+Slack: the Petya app A0CEDB1HFD3 has been created in workspace T702E73EX (Azur Games), the callback and six user scopes are saved, rotation is enabled. The Client ID/secret is installed on the server. Installation in Azur Games requires administrator approval. Public Distribution is not activated yet.
 
-UI smoke-тест обновлён для OAuth-кнопок и вложенного ручного подключения, прошёл. Сборка scripts/local-mac.py остановилась: актуальный скрипт требует Developer ID Application certificate, подходящего сертификата не найдено. Установленное приложение не заменено.
+The UI smoke test has been updated for the OAuth buttons and the nested manual connection, and it passed. The scripts/local-mac.py build stopped: the current script requires a Developer ID Application certificate, and no suitable certificate was found. The installed app was not replaced.
 
-Notion: OAuth-приложение 40dd872b-594c-81b7-8b7a-0037d20d3c37 создано, scope Public, callback сохранён. Update/Insert content выключены, No user information выбран. Секрет установлен на сервер через локальный /tmp-файл, затем файл удалён. /health возвращает providers: atlassian=true, slack=true, notion=true; это проверка наличия конфигурации, не сквозной авторизации.
+Notion: OAuth app 40dd872b-594c-81b7-8b7a-0037d20d3c37 has been created, scope Public, callback saved. Update/Insert content are disabled, No user information is selected. The secret was installed on the server via a local /tmp file, and the file was then deleted. /health returns providers: atlassian=true, slack=true, notion=true; this checks that configuration is present, not end-to-end authorization.
 
-Selectel: домен ACTIVE, NS a/b/c/d.ns.selectel.ru сохранены, предупреждений о подтверждении телефона нет. Authoritative .ru продолжает возвращать NXDOMAIN, поэтому HTTPS и сквозной вход остаются заблокированы делегацией.
+Selectel: domain ACTIVE, NS a/b/c/d.ns.selectel.ru saved, no phone verification warnings. The authoritative .ru servers keep returning NXDOMAIN, so HTTPS and end-to-end sign-in remain blocked by delegation.
 
-Публичные страницы подготовлены в oauth/server/public (privacy, terms, contact, index), маршруты добавлены в gateway. Владелец Alex Silaev, поддержка chrome.alex@gmail.com — указаны пользователем. Тексты пока НЕ опубликованы и НЕ развёрнуты; ожидается проверка владельцем. Проверки маршрутов, CSP, методов и регрессионные Slack/Notion OAuth-тесты прошли. При развёртывании gateway теперь обязательно копировать каталог public вместе с JS-файлами.
+Public pages have been prepared in oauth/server/public (privacy, terms, contact, index), and routes have been added to the gateway. Owner Alex Silaev, support chrome.alex@gmail.com — provided by the user. The texts have NOT been published or deployed yet; awaiting the owner's review. Route, CSP and method checks and the Slack/Notion OAuth regression tests passed. When deploying the gateway, the public directory must now always be copied together with the JS files.
 
-03.11.2026: владелец одобрил публикацию privacy/terms/contact. Каталог public и новый gateway развёрнуты на сервере, сервис перезапущен. nginx по HTTP открывает только /, /privacy, /terms, /contact; OAuth остаётся 503 до HTTPS. Внешняя проверка по IP с Host auth.petya-app.ru дала HTTP 200 и побайтовое совпадение всех трёх согласованных файлов. DNS auth.petya-app.ru у 1.1.1.1 пока без A-ответа; сертификата нет.
+03.11.2026: the owner approved publication of privacy/terms/contact. The public directory and the new gateway were deployed to the server, and the service was restarted. Over HTTP, nginx exposes only /, /privacy, /terms, /contact; OAuth remains 503 until HTTPS. An external check by IP with Host auth.petya-app.ru returned HTTP 200 and a byte-for-byte match of all three approved files. DNS for auth.petya-app.ru at 1.1.1.1 still has no A answer; there is no certificate.
 
-В Atlassian Distribution заполнены Alex Silaev, chrome.alex@gmail.com, https://auth.petya-app.ru/privacy и /terms. После выбора Personal data = Yes появилась обязательная декларация реализации Personal Data Reporting API. Она НЕ отмечена: механизм пока отсутствует. Форма НЕ сохранена, публичный доступ Atlassian остаётся выключенным. Требуется реализация учёта accountId/возраста данных, периодических отчётов и удаления/обновления всех локальных копий по ответам API перед правдивым подтверждением. Документация: https://developer.atlassian.com/cloud/jira/platform/user-privacy-developer-guide/ . Не переключать декларацию на No ради обхода требования.
+In Atlassian Distribution, Alex Silaev, chrome.alex@gmail.com, https://auth.petya-app.ru/privacy and /terms were filled in. After selecting Personal data = Yes, a mandatory declaration of implementing the Personal Data Reporting API appeared. It is NOT checked: the mechanism does not exist yet. The form is NOT saved, and Atlassian public access remains disabled. Before a truthful confirmation, it is necessary to implement tracking of accountId/data age, periodic reports, and deletion/update of all local copies according to API responses. Documentation: https://developer.atlassian.com/cloud/jira/platform/user-privacy-developer-guide/ . Do not switch the declaration to No to bypass the requirement.
 
-03.11.2026 20:32 МСК: DNS заработал. Получен сертификат Let’s Encrypt для auth.petya-app.ru (до 01.02.2027). Включён oauth/server/nginx-https.conf, nginx -t успешен. certbot.timer active; deploy-hook проверяет и перезагружает nginx после продления. Внешняя проверка HTTPS с проверкой сертификата: /privacy, /terms, /contact, /health — 200. Конфигурация всех трёх провайдеров присутствует. Реальный OAuth-вход по-прежнему не проверен; публичная дистрибуция Atlassian заблокирована отсутствием Personal Data Reporting API, Slack требует настройки дистрибуции/одобрения администратора.
+03.11.2026 20:32 MSK: DNS started working. A Let’s Encrypt certificate was obtained for auth.petya-app.ru (valid until 01.02.2027). oauth/server/nginx-https.conf is enabled, nginx -t succeeds. certbot.timer is active; a deploy-hook checks and reloads nginx after renewal. External HTTPS check with certificate verification: /privacy, /terms, /contact, /health — 200. Configuration for all three providers is present. A real OAuth sign-in has still not been verified; Atlassian public distribution is blocked by the missing Personal Data Reporting API, and Slack requires distribution setup/administrator approval.
