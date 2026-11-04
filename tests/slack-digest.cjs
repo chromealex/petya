@@ -9,7 +9,7 @@ const assert=require('node:assert/strict');const {question,SlackDigest}=require(
  let d=make(items),r=await d.turn('Что нового в Slack?');
  assert.match(r.text,/сборка 1\.19 готова/);assert.equal(summarized.m.length,1);assert.equal(summarized.m[0].text,'Сборка готова');assert.equal(r.sources[0].url,'https://app.slack.com/archives/C1/p1');assert.equal(r.by,'Slack: сводка');
  assert.equal(await d.turn('Как дела?'),null);
- d=make([]);r=await d.turn('Что нового в Slack?');assert(r.question);assert.equal(synced,1);assert.equal(r.clarificationOptions.length,2);
+ let fresh=0;d=make([],{background:()=>false,keepFresh:()=>{fresh++;}});r=await d.turn('Что нового в Slack?');assert(r.question);assert.equal(synced,1);assert.equal(fresh,1);assert.match(r.text,/раз в 15 минут/);assert.equal(r.clarificationOptions.length,2);
  r=await d.turn('Да, прочитай с экрана');assert.equal(screens,1);assert.match(r.text,/с экрана/);assert.equal(summarized.a.screen,true);
  r=await d.turn('Что нового в Slack?');r=await d.turn('Нет, подожду обновления');assert.match(r.text,/в фоне/);
  d=make([],{screen:async()=>{const e=Error('нужно разрешение');e.code='COMPUTER_PERMISSION_REQUIRED';throw e;},approve:(c,a)=>({handled:true,text:'approve',action:a})});await d.turn('Что нового в Slack?');r=await d.turn('да');assert.equal(r.action.type,'slackDigestScreen');
