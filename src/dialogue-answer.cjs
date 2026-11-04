@@ -63,7 +63,8 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
    if(attempt===0)continue;
    return {text:'Локальная модель вернула некорректный ответ. Повторите запрос; если ошибка повторится, проверьте модель в «Подключения → Ollama».',error:true};
   }
-  const answer=parsed.answer.trim().slice(0,12000);
+  // Always «ты»: rewrite slips into «вы»/«ваш»/«проверьте» deterministically.
+  const answer=require('./informal.cjs').informal(parsed.answer.trim().slice(0,12000));
   // A repeated answer never helps: regenerate once with more variety, then admit the loop.
   if(parsed.understood&&repeat.repeated(answer,topic)){if(!repeatRetry){repeatRetry=true;modelOverrides={...modelOverrides,think:false,options:{temperature:1,top_p:0.95,repeat_penalty:1.3,num_ctx:lowMemory?4096:16384,num_predict:lowMemory?1024:2048}};attempt--;continue;}return mark('защита от повторов',repeat.fallback(topic));}
   const choices=Array.isArray(parsed.clarificationOptions)?[...new Set(parsed.clarificationOptions.filter(v=>typeof v==='string').map(v=>v.trim().slice(0,160)).filter(Boolean))].slice(0,4):[];
