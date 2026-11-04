@@ -31,5 +31,6 @@ window.renderMessage = function(message){
  // Finished steps stay out of the way: a small toggle in the hover row next to the source.
  if(message.role!=='user'&&Array.isArray(message.steps)&&message.steps.length>1)meta.append(window.renderSteps(message.steps));
  copy.onclick=async()=>{try{await navigator.clipboard.writeText(message.text||'');paint(true);setTimeout(()=>paint(false),1800);}catch{notice('Не удалось скопировать сообщение. Выделите текст и нажмите ⌘C / Ctrl+C.',true);}};meta.append(copy);node.append(meta);
+ window.enhanceChatMessage?.(node,message);
  return node;
 };

@@ -73,7 +73,8 @@ function scopedState(dialogue,target){
 // A background chat job shows the user's question at once as a pending message; the pipeline
 // takes it over instead of recording the question a second time.
 // One job runs per chat, so a pending question is this request's even if a correction changed its text.
-function takePlaceholder(topic,text){const last=topic?.messages?.at(-1);if(last?.role==='user'&&last.pending)topic.messages.pop();}
+function takePlaceholder(topic,text){const last=topic?.messages?.at(-1);if(last?.role==='user'&&last.pending){if(last.attachments?.length)topic.pendingEditAttachments=last.attachments;topic.messages.pop();}}
+function userMessage(topic,text,at){const attachments=topic.pendingEditAttachments;delete topic.pendingEditAttachments;return {role:'user',text,at,...(attachments?.length?{attachments}:{})};}
 class Dialogue {
  get state(){return this._state;}
  set state(value){this._state=scopedState(this,value||{topics:[],activeId:''});}
@@ -112,7 +113,7 @@ class Dialogue {
  select(id){this.prune();if(id&&!this.state.topics.some(t=>t.id===id))throw new Error('Тема больше недоступна.');this.state.activeId=id;if(!id)this.state.newChat=true;this.persist();return this.active()||null;}
  rememberAction(command,message,project='',receipt=null){
   this.prune();let t=this.active();if(!t){t={id:randomUUID(),title:'Задачи'+(project?' · '+project:''),kind:'work',messages:[],at:this.now()};this.state.topics.push(t);this.state.activeId=t.id;}
-  if(project)t.jiraProject=project;if(receipt)require('./action-evidence.cjs').recordReceipt(t,receipt);t.at=this.now();takePlaceholder(t,command);t.messages.push({role:'user',text:command,at:t.at},{role:'assistant',text:message,at:t.at});this.persist();
+  if(project)t.jiraProject=project;if(receipt)require('./action-evidence.cjs').recordReceipt(t,receipt);t.at=this.now();takePlaceholder(t,command);t.messages.push(userMessage(t,command,t.at),{role:'assistant',text:message,at:t.at});this.persist();
  }
  clear(){this.state={topics:[],activeId:''};this.persist();}
  actionContext(){const t=this.active();if(!t)return null;return {id:'dialogue-'+t.id,projectMemoryId:t.projectMemoryId,title:t.title,source:'Диалог',at:t.at,text:t.messages.map(m=>(m.role==='user'?'Пользователь: ':'Петя: ')+m.text).join('\n').slice(-30000)};}
@@ -155,7 +156,7 @@ class Dialogue {
     if(!this.state.topics.includes(active))this.state.topics.push(active);this.state.activeId=active.id;
    }
    const before=structuredClone(active);
-   active.at=this.now();(takePlaceholder(active,text),active.messages.push({role:'user',text,at:this.now()}));this.persist();
+   active.at=this.now();(takePlaceholder(active,text),active.messages.push(userMessage(active,text,this.now())));this.persist();
    let result;
    try{
     // «Вернёмся к багам» shows the saved answer; «Вернёмся к книгам: посоветуй ещё одну» asks a new question in that topic.
@@ -169,15 +170,15 @@ class Dialogue {
    }catch(error){result={text:'Не удалось проверить данные: '+error.message,error:true};}
    require('./answer-cancel.cjs').check();
    if(result.title && before.lastData && result.title!==before.title){
-    const changed={...active,id:randomUUID(),messages:[{role:'user',text,at:this.now()}]};
+    const changed={...active,id:randomUUID(),messages:[userMessage(active,text,this.now())]};
     Object.assign(active,before);
     active=this.scoped().find(t=>t.title===result.title&&t.kind===kind)||changed;
-    if(active!==changed)(takePlaceholder(active,text),active.messages.push({role:'user',text,at:this.now()}));else this.state.topics.push(active);
+    if(active!==changed)(takePlaceholder(active,text),active.messages.push(userMessage(active,text,this.now())));else this.state.topics.push(active);
     this.state.activeId=active.id;
    }
    if(result.title)active.title=result.title;
    if(result.data)active.lastData=result.data;
-   active.messages.push({role:'assistant',text:result.text,sources:result.sources||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
+   active.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
    return {handled:true,...result,topicId:active.id,topicTitle:active.title,messages:active.messages,topics:this.list()};
   }finally{this.running.delete(runningKey);}
  }

@@ -28,5 +28,6 @@
  }
  window.petyaEvents.onVoiceLanguageProgress(languageProgress);
  window.petya.voiceLanguageStatus().then(states=>states.forEach(languageProgress)).catch(()=>{});
+ document.addEventListener('petya-ui-notification',event=>{const {id,...data}=event.detail;put(id,data);});
  window.petyaEvents.onWindowShown(()=>checkUpdates(false));setTimeout(()=>checkUpdates(false),2000);draw();
 })();
