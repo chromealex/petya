@@ -4,11 +4,18 @@ const {execFile}=require('node:child_process');
 const {promisify}=require('node:util');
 const {createHash}=require('node:crypto');
 const exec=promisify(execFile);
-const reads=new Set(['status','diff','log','branches']);
+const reads=new Set(['status','diff','log','branches','version']);
 const actions=new Set([...reads,'stage','unstage','commit','createBranch','switchBranch','fetch','pull','push']);
 function redact(s){return String(s||'').replace(/(https?:\/\/)[^\s/@]+@/g,'$1[скрыто]@').replace(/\x1b\[[0-9;]*m/g,'').slice(0,16000);}
 function parseStatus(raw){const parts=raw.split('\0'),files=[];for(let i=0;i<parts.length;i++){const row=parts[i];if(!row)continue;const status=row.slice(0,2),file={path:row.slice(3),status,staged:![' ','?'].includes(status[0]),unstaged:status[1]!==' ',conflict:/U/.test(status)||['AA','DD'].includes(status)};if(/[RC]/.test(status))file.oldPath=parts[++i];files.push(file);}return files;}
 // Read requests in conversational form; never infer a write from a question.
+// Version numbers declared in common project manifests (Node, Unity), read-only.
+async function manifestVersions(root){
+ const fs=require('node:fs/promises'),path=require('node:path'),found=[];
+ try{const p=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));if(typeof p.version==='string')found.push('Версия в package.json: '+p.version);}catch{}
+ try{const u=await fs.readFile(path.join(root,'ProjectSettings','ProjectSettings.asset'),'utf8');const m=u.match(/^\s*bundleVersion:\s*(.+)$/m);if(m)found.push('Версия Unity (bundleVersion): '+m[1].trim());}catch{}
+ return found;
+}
 function conversationalRead(value){
  const s=value.toLowerCase().replace(/[.!?]+$/u,'').trim();
  if(/^(?:не |не надо |как |зачем |почему |что такое |объясни |если |[«"“`])/u.test(s)||/(?:^|\s)не\s|[«"“`]/u.test(s))return null;
@@ -20,6 +27,15 @@ function conversationalRead(value){
  if(/^(?:что (?:сейчас )?(?:в гите|в git|с гитом)|какие изменения (?:в гите|в git|в репозитории)|(?:какой|покажи) (?:сейчас )?статус (?:гита|git|репозитория))(?: проекта)?$/u.test(body))return {action:'status'};
  if(/^(?:какая (?:сейчас |текущая )?ветка(?: (?:в гите|git|проекта))?|на какой (?:мы )?ветке|покажи (?:текущую )?ветку)$/u.test(body))return {action:'branches'};
  if(/^(?:(?:покажи|посмотри|какой) (?:последний коммит|последние коммиты)|(?:покажи|посмотри) историю (?:гита|git|репозитория))(?: (?:в гите|в git|проекта))?$/u.test(body))return {action:'log'};
+ // Version questions: «посмотри версию в гите», «какой последний тег», «какая версия проекта».
+ const mentionsGit=/(?:^|[\s,])(?:git|гит(?:а|е|у|ом)?|репозитори\p{L}*)(?=[\s,]|$)/u.test(body);
+ const read=/^(?:посмотри|посмотреть|проверь|проверить|покажи|показать|глянь|скажи|узнай|какая|какой|какие|что|сколько|есть ли)(?=[\s,])/u;
+ // Compound requests («посмотри гит и запушь») are not a single read; leave them to the full pipeline.
+ const compound=/(?:\s|,)(?:и|а|потом|затем|после)\s|;/u.test(body);
+ if(compound)return null;
+ if(read.test(body)&&(mentionsGit&&/(?:верси|тег|релиз)/u.test(body)||/(?:^|\s)(?:верси[яюи]) (?:проекта|приложения|сборки|игры|билда)(?=\s|$)|(?:последн|текущ)\p{L}* (?:тег|верси|релиз)/u.test(body)))return {action:'version'};
+ // Any other read-style question about git shows the repository status instead of going to the model.
+ if(read.test(body)&&mentionsGit)return {action:'status'};
  return null;
 }
 function commandRoute(value){
@@ -98,6 +114,17 @@ class GitWorkspace{
    let args,network=false;
    if(input.action==='status')return {state,text:summary(state)};
    if(input.action==='branches')return {state,text:'Текущая ветка: '+(state.branch||'detached HEAD')+'\n'+([...state.branches,...state.remoteBranches].join('\n')||'Нет коммитов и веток.')};
+   if(input.action==='version'){
+    if(!state.head)return {state,text:'В репозитории ещё нет коммитов.'};
+    const quiet=async args=>{try{return (await this.git(repo.root,args)).trim();}catch{return '';}};
+    const tag=await quiet(['describe','--tags','--abbrev=0']),described=await quiet(['describe','--tags','--always','--dirty']);
+    const last=await quiet(['log','-1','--date=short','--format=%h %ad %s']),tagDate=tag?await quiet(['log','-1','--date=short','--format=%ad',tag]):'';
+    const lines=[tag?'Последний тег: '+tag+(tagDate?' ('+tagDate+')':''):'Тегов версий в репозитории нет.'];
+    if(described&&described!==tag)lines.push('Текущее состояние: '+described+(tag?' (коммиты после тега и -dirty, если есть незакоммиченные изменения)':''));
+    for(const v of await manifestVersions(repo.root))lines.push(v);
+    lines.push('Последний коммит: '+(last||state.head));
+    return {state,text:lines.join('\n')};
+   }
    if(input.action==='log'){if(!state.head)return {state,text:'В репозитории ещё нет коммитов.'};args=['log','-30','--date=short','--format=%h %ad %s'];}
    if(input.action==='diff')args=['diff','--no-ext-diff','--no-textconv',...(input.staged?['--cached']:[]),'--'];
    if(['stage','unstage'].includes(input.action)){
