@@ -26,6 +26,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
         if(reply)return reply;
       }
     }
+    if(!choice){const important=ctx.highlights?.turn(original);if(important)return important;}
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
     if(gitRoute){
       if(gitRoute.action==='clarify')return {handled:true,text:gitRoute.question,question:true};

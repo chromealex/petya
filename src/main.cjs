@@ -600,7 +600,11 @@ function setupHandlers() {
   handle('notify', body => notify(text(body, 250)));
   handle('listening', (enabled,meeting) => { trayListening=enabled===true;trayMeeting=meeting===true;refreshTrayMenu(); });
   // Features last: everything they may need is set up by now.
-  for (const feature of features) for (const [key, value] of Object.entries(feature.setup(services) || {})) Object.defineProperty(services, key, { value, enumerable: true, configurable: true });
+  // A feature returns services (added to `services`) and optionally `ipc` methods, reachable from the UI as
+  // window.petya.feature(name, method, ...args) — so features need no preload or main.cjs edits either.
+  const featureIpc = new Map();
+  for (const feature of features) { const { ipc, ...provided } = feature.setup(services) || {}; if (ipc) featureIpc.set(feature.name, ipc); for (const [key, value] of Object.entries(provided)) Object.defineProperty(services, key, { value, enumerable: true, configurable: true }); }
+  handle('feature', (name, method, ...args) => { const ipc = featureIpc.get(name); if (typeof name !== 'string' || typeof method !== 'string' || !ipc || !Object.hasOwn(ipc, method) || typeof ipc[method] !== 'function') throw Error('Неизвестная функция.'); return ipc[method](...args); });
 }
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
