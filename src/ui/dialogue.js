@@ -120,6 +120,7 @@ async function refreshTopics(){const state=await window.petya.dialogueTopics();t
 async function selectDialogueTopic(id,{internal=false}={}){if(!internal&&(window.chatStartPending||commandProgress.busy||planning||workspaceBusy))throw Error('Дождитесь завершения текущего действия.');window.chatSwitchPending=true;try{window.leaveBackgroundChat?.();window.stopStreamedVoice?.();if(window.chatQueue?.active){window.chatQueue.paused=true;throw Error('В очереди остались запросы этой темы. Выполните или удалите их перед сменой темы.');}document.dispatchEvent(new Event('petya-topic-changed'));const topic=await window.petya.dialogueSelect(id);chatHistory=[];showDialogueMessages(topic?.messages||[]);dialogueChoices.replaceChildren();dialogueTitle.textContent=topic?.title||'Диалог с Петей';window.offerReportShare?.(topic?.workReport?.id,dialogueChoices);await refreshTopics();window.activateChatQueue?.(id,topicSelect.dataset.projectId);if(typeof refreshAttachments==='function')await refreshAttachments();await window.restoreChatJob?.(id);}finally{window.chatSwitchPending=false;}}
 topicSelect.onchange=run(()=>selectDialogueTopic(topicSelect.value));newTopic.onclick=run(()=>selectDialogueTopic(''));
 async function showDialogueReply(result,spoken=false){
+ voiceReply=null;
  document.dispatchEvent(new CustomEvent('petya-topic-changed',{detail:{preserveScroll:!result.topicId||result.topicId===topicSelect.value}}));
  if(result.projectChanged){voiceReply=null;voiceTurn.reset();await refreshTopics();await selectDialogueTopic(topicSelect.value,{internal:true});}
  if(result.projectMemoryReply)voiceReply=async answer=>showDialogueReply(await window.petya.projectMemoryReply(answer),spoken);
@@ -180,7 +181,7 @@ async function showDialogueReply(result,spoken=false){
  const voiceText=result.text+(options.length?' Варианты: '+options.join('; '):'');
  if(spoken&&result.answerStreamId===spokenStreamId){if(result.error){if(!streamedVoice.stopped){stopStreamedVoice();await speakReply(voiceText,{continueConversation:true});}}else streamedVoice.finish(voiceText);}
  else if(spoken)await speakReply(voiceText,{continueConversation:true});else if(mic.active&&voiceReply)voiceTurn.arm();
- window.finishForegroundChat?.(result);
+ await window.finishForegroundChat?.(result);
  if(result.repairHandoff)await handleDoHandoff(result.repairHandoff);
 }
 refreshTopics().then(async()=>{if(topicSelect.value&&!dialogueMessages.childElementCount&&!commandProgress.busy)await selectDialogueTopic(topicSelect.value);}).catch(e=>notice(e.message,true));

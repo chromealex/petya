@@ -9,6 +9,15 @@ module.exports=async win=>win.webContents.executeJavaScript(`(async()=>{
  await selectDialogueTopic('');assert(chatQueue.items.length===0,'Queue leaked to another chat');
  await selectDialogueTopic(first);assert(chatQueue.items.length===1&&chatQueue.items[0].text==='Сохранённый черновик','Queue lost on switching chats');chatQueue.remove(chatQueue.items[0].id);chatQueue.paused=false;
  const inactiveQueue=chatQueue;inactiveQueue.paused=true;inactiveQueue.add('Привет');await selectDialogueTopic('');inactiveQueue.paused=false;for(let i=0;i<150;i++){const s=await window.petya.chatJobState(first);if(s.messages.filter(m=>m.role==='user').length===2&&s.job.state==='done')break;await new Promise(r=>setTimeout(r,20));}assert(topicSelect.value==='','Inactive queue switched the selected chat');assert((await window.petya.chatJobState(first)).messages.filter(m=>m.role==='user').length===2,'Inactive chat queue did not continue');await selectDialogueTopic(first);
+ const question={handled:true,question:true,text:'Какую версию посмотреть?',clarificationOptions:['В репозитории','В Jira'],topicId:first};
+ await showDialogueReply(question,false);await new Promise(r=>setTimeout(r,100));
+ assert(dialogueChoices.querySelectorAll('.clarification-option').length===2,'Choices vanished after background completion');
+ assert(typeof voiceReply==='function','Clarification lost its answer handler');
+ assert((await window.petya.chatJobState(first)).result.question,'New clarification was not stored');
+ await showDialogueReply({handled:true,text:'Последний тег: release-1.18.11',topicId:first},false);await new Promise(r=>setTimeout(r,100));
+ assert(voiceReply===null,'Completed answer kept the old choice handler');
+ const completed=await window.petya.chatJobState(first);assert(completed.job.state==='done','Completed Git answer left attention status');assert(!completed.result.question&&!completed.result.clarificationOptions,'Old question survived completion');
+ await window.restoreChatJob(first);assert(dialogueChoices.querySelectorAll('.clarification-option').length===0,'Restoring a completed chat replayed old choices');
  const nav=await window.petya.chatNavigation('Привет');assert(nav.topics.some(t=>t.id===first&&t.index>=0),'Search cannot find background messages');
  await window.jumpToChatMessage(0);assert(dialogueMessages.querySelector('[data-message-index="0"]'),'Search result missing in transcript');
 })()`);
