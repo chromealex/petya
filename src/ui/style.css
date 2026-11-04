@@ -786,3 +786,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 #home .chat-feed .message-meta>.message-steps{margin:0;order:5}
 #home .chat-feed .message-meta>.message-steps[open]{flex-basis:100%;order:10}
 #home .chat-feed article:has(>.message-meta .message-steps[open])>.message-meta{opacity:1}
+
+/* Reveal project creation controls without shifting the row. */
+.project-new-chat{opacity:0;pointer-events:none}
+.project-sidebar-project:hover>.project-new-chat,.project-sidebar-project:focus-within>.project-new-chat{opacity:1;pointer-events:auto}
