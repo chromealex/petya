@@ -155,7 +155,7 @@ async function directRequest(url, options = {}) {
   if(onAnswerChunk)return require('./answer-stream.cjs').consume(response,onAnswerChunk);
   return response.json();
 }
-const projectOperations=new Set(['converse','interpret','attachmentInspect','attachmentImport','attachmentAdd','attachmentPick','attachmentVideoFile','plan','draft','prepareBatch','submitBatch','createIssue','skillsContinue','skillsDraft','webSearchOpen','webSearchContinue','dailyBrief','searchDocs','slackRequestReply','projectMemoryReply','teamFillReply','buildQuestionSelect','reviewSelect','repairSelect','reportShareOpen','reportShareSend','serviceBrowserRead','serviceBrowserOpen','integrationChoice','routeAgent','agentChat','prepareAgent','handoffBatch','routeJira','asanaVoicePrepare','asanaPreview','asanaApply']);
+const projectOperations=new Set(['prepareVoice','converse','interpret','attachmentInspect','attachmentImport','attachmentAdd','attachmentPick','attachmentVideoFile','plan','draft','prepareBatch','submitBatch','createIssue','skillsContinue','skillsDraft','webSearchOpen','webSearchContinue','dailyBrief','searchDocs','slackRequestReply','projectMemoryReply','teamFillReply','buildQuestionSelect','reviewSelect','repairSelect','reportShareOpen','reportShareSend','serviceBrowserRead','serviceBrowserOpen','integrationChoice','routeAgent','agentChat','prepareAgent','handoffBatch','routeJira','asanaVoicePrepare','asanaPreview','asanaApply']);
 function handle(name, fn) { ipcMain.handle('petya:' + name, async (event, ...args) => {
   if (event.sender !== win.webContents || event.senderFrame !== win.webContents.mainFrame || event.senderFrame.url !== entry) throw new Error('Недопустимый источник запроса.');
   if(switchingCompany)throw Error('Переключаю компанию. Дождитесь открытия Пети.');
@@ -678,6 +678,9 @@ function setupHandlers() {
   // in the foreground (IPC 'converse') or as a background chat job, so several chats run at once.
   // The mouse and keyboard are shared: computer control requests from different chats take turns.
   const computerLock=(()=>{let tail=Promise.resolve();return work=>{const run=tail.then(work,work);tail=run.catch(()=>{});return run;};})();
+  const voicePreparation=new (require('./voice-preparation.cjs').VoicePreparation)(value=>dialogue.prepareRoute(value));
+  const voicePreparationKey=()=>JSON.stringify([companyId,settings,dialogue.state]);
+  handle('prepareVoice',value=>{if(value===null){voicePreparation.clear();return;}const command=text(value,4000);if(command.length>=8&&settings.model)voicePreparation.update(command,voicePreparationKey());return {preparing:true};});
   const converseTurn=async(command,choice,background=false)=>{
     // Label replies produced by shortcut handlers before the model, so misrouting is visible in the chat.
     const via=(source,reply)=>{if(reply&&typeof reply==='object'&&!reply.by){reply.by=source;const last=dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&!last.by&&last.text===reply.text){last.by=source;dialogue.persist();}}return reply;};
@@ -804,7 +807,7 @@ function setupHandlers() {
       const offer=await serviceAccess.offer('Проверь Jira: '+value,dialogue.active());
       return offer||dialogue.turn(value,undefined,'tasks');
     }
-    let preparedTopicRoute;
+    let preparedTopicRoute=!choice?voicePreparation.take(value,voicePreparationKey()):undefined;
     // Existing explicit actions and pending choices keep their original execution path.
     if(!choice&&settings.semanticTools!=='false'&&!require('./dialogue.cjs').discussionOnly(value)&&settings.model&&!dialogue.active()?.pending&&!dialogue.active()?.attachments?.length&&!require('./dialogue.cjs').actionRequest(value)){
       const semantic=require('./semantic-tools.cjs'),recipes=mailSkill.list().filter(r=>r.enabled);let route;
@@ -812,7 +815,7 @@ function setupHandlers() {
         const base=new URL(core.localEndpoint(settings.ollamaUrl));
         const info=await request(new URL('/api/show',base).href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:settings.model})});
         if(info.remote_host||info.remote_model||/cloud/i.test(settings.model))throw Error('Нужна локальная модель.');
-        preparedTopicRoute=dialogue.prepareRoute(value);
+        preparedTopicRoute ||= dialogue.prepareRoute(value);
         const response=await request(base.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(semantic.routingRequest(settings.model,value,{company:companies.get(companyId).name,topic:dialogue.active(),recipes}))});
         route=semantic.parseRoute(response,recipes);
       }catch{} // Offline or malformed model output cannot trigger a tool.

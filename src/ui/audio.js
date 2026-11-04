@@ -130,7 +130,7 @@ class AudioListener {
         if(!this.voiced){this.started=Date.now()-chunks.reduce((n,c)=>n+c.length,0)/this.context.sampleRate*1000;this.direct=!!this.options.allowDirect?.();}
         this.voiced = this.voiced || speaking; this.quiet = speaking ? 0 : this.quiet + duration;
         this.chunks.push(...chunks); this.samples += chunks.reduce((n,c)=>n+c.length,0);
-        if (this.voiced && (this.quiet > 0.65 || this.samples / this.context.sampleRate >= 8)) {
+        if (this.voiced && (this.quiet > 0.65 || this.samples / this.context.sampleRate >= (this.options.segmentSeconds || 8))) {
           if (this.queue.length + this.inFlight >= 8) { this.stop(); this.onError(new Error('Распознавание не успевает за аудио. Выберите более быструю модель whisper и включите запись снова.')); return; }
           this.queue.push({ wav: toWav(this.chunks, this.context.sampleRate), at: this.started, endedAt: Date.now(), overlap: this.overlap, direct: this.direct });
           // Prefer a pause; retain 400 ms when continuous speech forces a cut.
