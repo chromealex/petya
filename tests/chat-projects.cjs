@@ -11,6 +11,6 @@ const {Dialogue}=require('../src/dialogue.cjs');
  d.move('old',p);assert(!d.list().topics.some(t=>t.id==='old'));d.projectSelect(p);assert(d.list().topics.some(t=>t.id==='old'));
  d.select('');await d.turn('Ещё задачи',undefined,'tasks');assert.notEqual(d.active().id,newId);d.projectRename(p,'Другое имя');assert.throws(()=>d.projectCreate('Другое имя'));assert.throws(()=>d.projectSelect('missing'));assert.throws(()=>d.projectCreate(' '));
  const restored=new Dialogue({state:saved});assert.equal(restored.list().activeProjectId,p);assert.equal(restored.list().topics.length,3);
- d.busy=true;assert.throws(()=>d.projectSelect('general'));assert.throws(()=>d.move('old','general'));
+ d.running.add('old');d.projectSelect('general');assert.throws(()=>d.move('old','general'),/Дождитесь/);d.running.delete('old');
  console.log('Projects: legacy migration, persistence, scoped routing, moving, naming and busy guard passed');
 })().catch(e=>{console.error(e);process.exit(1)});

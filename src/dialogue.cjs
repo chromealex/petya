@@ -29,8 +29,39 @@ function selectChoice(text,options){
  if(Number.isInteger(index))return options[index]?[options[index]]:[];
  return options.filter(o=>[o.id,o.label,o.label.split(' · ')[0].replace(/\s*\([^)]*\)$/,'')].some(n=>{n=String(n).toLowerCase();return value===n||(n.length>=3&&value.includes(n));}));
 }
+// Each request runs inside a chat scope: within it, «the active chat/project» means the chat the
+// request came from, so many chats can be served at once. Outside a scope the values are the
+// user's selection. A request that opens another chat moves the user there only if the user is
+// still looking at the request's chat.
+const {AsyncLocalStorage}=require('node:async_hooks');
+const chatScope=new AsyncLocalStorage();
+const SCOPED=new Set(['activeId','activeProjectId','newChat']);
+const RAW=Symbol('raw state');
+function scopedState(dialogue,target){
+ if(target&&target[RAW])target=target[RAW];
+ const store=()=>{const s=chatScope.getStore();return s&&s.dialogue===dialogue?s:null;};
+ const assign=(t,s,key,value)=>{
+  const following=t.activeId===s.activeId;
+  if(key==='activeId'&&following){if(value===undefined)delete t.activeId;else t.activeId=value;if(value)delete t.newChat;}
+  if(key==='activeProjectId'&&following&&value!==undefined)t.activeProjectId=value;
+  s[key]=value;
+ };
+ return new Proxy(target,{
+  get(t,key,receiver){if(key===RAW)return t;if(key==='toJSON')return ()=>({...t});const s=SCOPED.has(key)&&store();return s?s[key]:Reflect.get(t,key,receiver);},
+  set(t,key,value){const s=SCOPED.has(key)&&store();if(s)assign(t,s,key,value);else t[key]=value;return true;},
+  deleteProperty(t,key){const s=SCOPED.has(key)&&store();if(s)assign(t,s,key,undefined);else delete t[key];return true;}
+ });
+}
 class Dialogue {
- constructor({state={topics:[],activeId:''},save=()=>{},answer,readers,routeTopic,context=()=>'',days=()=>30,now=Date.now}){Object.assign(this,{state,save,answer,readers,routeTopic,context,days,now});this.busy=false;this.ensureProjects(true);this.prune();}
+ get state(){return this._state;}
+ set state(value){this._state=scopedState(this,value||{topics:[],activeId:''});}
+ // Run work as a request of chat `topicId` (empty for a new chat) in project `projectId`.
+ within(topicId,projectId,work){const raw=this.state[RAW];return chatScope.run({dialogue:this,activeId:topicId||'',activeProjectId:projectId||raw.activeProjectId,newChat:!topicId},work);}
+ scopedChat(){return chatScope.getStore()?.dialogue===this;}
+ // True while a request of chat `id` is running (busy() without id: any chat).
+ busyChat(id){return id===undefined?this.running.size>0:this.running.has(id||'new:'+this.state.activeProjectId);}
+ get busy(){return this.busyChat(this.active()?.id||'');}
+ constructor({state={topics:[],activeId:''},save=()=>{},answer,readers,routeTopic,context=()=>'',days=()=>30,now=Date.now}){Object.assign(this,{state,save,answer,readers,routeTopic,context,days,now});this.running=new Set();this.ensureProjects(true);this.prune();}
  prune(){const oldCount=(this.state.topics||[]).length;const cutoff=this.now()-Number(this.days())*86400000;const expiredRoute=this.state.lastRouting?.at<cutoff;if(expiredRoute)delete this.state.lastRouting;this.state.topics=(this.state.topics||[]).filter(t=>t.at>=cutoff);if(!this.active())this.state.activeId='';if(oldCount!==this.state.topics.length||expiredRoute)this.persist();}
  active(){return this.state.topics.find(t=>t.id===this.state.activeId);}
  ensureProjects(migrate=false){
@@ -41,22 +72,22 @@ class Dialogue {
   for(const t of this.state.topics)if(!this.state.projects.some(p=>p.id===t.projectId)){t.projectId=migrate?this.state.projects[0].id:this.state.activeProjectId;if(!migrate&&!t.projectMemoryId){const memoryId=this.state.projects.find(p=>p.id===t.projectId)?.memoryId;if(memoryId)t.projectMemoryId=memoryId;}}
   const active=this.active();if(active){this.state.activeProjectId=active.projectId;delete this.state.newChat;}
  }
- persist(){this.ensureProjects();const topic=this.active();if(topic)require('./conversation-archive.cjs').refreshArchive(topic);this.save(this.state);}
+ persist(){this.ensureProjects();const topic=this.active();if(topic)require('./conversation-archive.cjs').refreshArchive(topic);this.save(this.state[RAW]);}
  scoped(){return this.state.topics.filter(t=>t.projectId===this.state.activeProjectId&&!t.archived);}
  projectName(name){if(typeof name!=='string'||!name.trim()||name.trim().length>80)throw Error('Введите название проекта от 1 до 80 символов.');return name.trim();}
- projectCreate(name){if(this.busy)throw Error('Дождитесь ответа Пети.');name=this.projectName(name);if(this.state.projects.some(p=>p.name.toLocaleLowerCase()===name.toLocaleLowerCase()))throw Error('Проект с таким названием уже есть.');const project={id:randomUUID(),name};this.state.projects.push(project);this.state.activeId='';this.state.activeProjectId=project.id;this.persist();return this.list();}
- projectSelect(id){if(this.busy)throw Error('Дождитесь ответа Пети.');if(!this.state.projects.some(p=>p.id===id&&!p.archived))throw Error('Проект не найден или находится в архиве.');this.state.activeId='';this.state.activeProjectId=id;this.state.newChat=true;delete this.state.lastRouting;this.persist();return this.list();}
+ projectCreate(name){name=this.projectName(name);if(this.state.projects.some(p=>p.name.toLocaleLowerCase()===name.toLocaleLowerCase()))throw Error('Проект с таким названием уже есть.');const project={id:randomUUID(),name};this.state.projects.push(project);this.state.activeId='';this.state.activeProjectId=project.id;this.persist();return this.list();}
+ projectSelect(id){if(!this.state.projects.some(p=>p.id===id&&!p.archived))throw Error('Проект не найден или находится в архиве.');this.state.activeId='';this.state.activeProjectId=id;this.state.newChat=true;delete this.state.lastRouting;this.persist();return this.list();}
  projectRename(id,name){if(id==='general')throw Error('Название общего проекта изменить нельзя.');name=this.projectName(name);const project=this.state.projects.find(p=>p.id===id);if(!project)throw Error('Проект не найден.');if(this.state.projects.some(p=>p.id!==id&&p.name.toLocaleLowerCase()===name.toLocaleLowerCase()))throw Error('Проект с таким названием уже есть.');project.name=name;this.persist();return this.list();}
- move(id,projectId){if(this.busy)throw Error('Дождитесь ответа Пети.');const topic=this.state.topics.find(t=>t.id===id);if(!topic||!this.state.projects.some(p=>p.id===projectId))throw Error('Чат или проект не найден.');if(topic.projectId!==projectId){topic.projectId=projectId;topic.projectMemoryId=this.state.projects.find(p=>p.id===projectId).memoryId||'';for(const key of ['jiraProject','versionId','lastData','slackSource','pending','lastChatResult'])delete topic[key];}this.persist();return this.list();}
+ move(id,projectId){if(this.running.has(id))throw Error('Дождитесь ответа Пети.');const topic=this.state.topics.find(t=>t.id===id);if(!topic||!this.state.projects.some(p=>p.id===projectId))throw Error('Чат или проект не найден.');if(topic.projectId!==projectId){topic.projectId=projectId;topic.projectMemoryId=this.state.projects.find(p=>p.id===projectId).memoryId||'';for(const key of ['jiraProject','versionId','lastData','slackSource','pending','lastChatResult'])delete topic[key];}this.persist();return this.list();}
 
  archive(kind,id,archived){const row=(kind==='project'?this.state.projects:this.state.topics).find(r=>r.id===id);if(!row)throw Error('Запись не найдена.');if(kind==='project'&&id==='general')throw Error('Общее нельзя архивировать.');row.archived=!!archived;if(archived&&(kind==='project'&&this.state.activeProjectId===id||kind==='chat'&&this.state.activeId===id)){this.state.activeId='';if(kind==='project')this.state.activeProjectId='general';}this.persist();return this.list();}
 
  pin(id,pinned){const topic=this.state.topics.find(t=>t.id===id);if(!topic)throw Error('Чат не найден.');topic.pinned=!!pinned;this.persist();return this.list();}
- reorder(id,projectId,beforeId=''){if(this.busy)throw Error('Дождитесь ответа.');const topic=this.state.topics.find(t=>t.id===id),before=beforeId?this.state.topics.find(t=>t.id===beforeId&&t.projectId===projectId):null;if(!topic||beforeId&&!before)throw Error('Чат больше недоступен.');if(beforeId===id)return this.list();this.move(id,projectId);if(before)topic.pinned=!!before.pinned;const rows=this.state.topics.filter(t=>t.projectId===projectId&&t.id!==id).sort((a,b)=>(a.order??-a.at)-(b.order??-b.at));const index=before?rows.findIndex(t=>t.id===beforeId):rows.length;rows.splice(index,0,topic);rows.forEach((t,i)=>t.order=i);this.persist();return this.list();}
+ reorder(id,projectId,beforeId=''){const topic=this.state.topics.find(t=>t.id===id),before=beforeId?this.state.topics.find(t=>t.id===beforeId&&t.projectId===projectId):null;if(!topic||beforeId&&!before)throw Error('Чат больше недоступен.');if(beforeId===id)return this.list();this.move(id,projectId);if(before)topic.pinned=!!before.pinned;const rows=this.state.topics.filter(t=>t.projectId===projectId&&t.id!==id).sort((a,b)=>(a.order??-a.at)-(b.order??-b.at));const index=before?rows.findIndex(t=>t.id===beforeId):rows.length;rows.splice(index,0,topic);rows.forEach((t,i)=>t.order=i);this.persist();return this.list();}
 
  list(){this.prune();return {activeId:this.state.activeId,activeProjectId:this.state.activeProjectId,projects:this.state.projects.map(p=>({...p,count:this.state.topics.filter(t=>t.projectId===p.id).length})),topics:this.scoped().map(({id,title,kind,at,projectId})=>({id,title,kind,at,projectId}))};}
  rename(id,title){const topic=this.state.topics.find(t=>t.id===id);if(!topic)throw Error('Тема больше недоступна.');title=String(title||'').trim().slice(0,160);if(!title)throw Error('Введите название темы.');topic.title=title;this.persist();return this.list();}
- select(id){if(this.busy)throw Error('Дождитесь ответа Пети.');this.prune();if(id&&!this.state.topics.some(t=>t.id===id))throw new Error('Тема больше недоступна.');this.state.activeId=id;if(!id)this.state.newChat=true;this.persist();return this.active()||null;}
+ select(id){this.prune();if(id&&!this.state.topics.some(t=>t.id===id))throw new Error('Тема больше недоступна.');this.state.activeId=id;if(!id)this.state.newChat=true;this.persist();return this.active()||null;}
  rememberAction(command,message,project='',receipt=null){
   this.prune();let t=this.active();if(!t){t={id:randomUUID(),title:'Задачи'+(project?' · '+project:''),kind:'work',messages:[],at:this.now()};this.state.topics.push(t);this.state.activeId=t.id;}
   if(project)t.jiraProject=project;if(receipt)require('./action-evidence.cjs').recordReceipt(t,receipt);t.at=this.now();t.messages.push({role:'user',text:command,at:t.at},{role:'assistant',text:message,at:t.at});this.persist();
@@ -80,7 +111,7 @@ class Dialogue {
   return {handled:true,text,topicId:topic.id,topicTitle:topic.title,messages:topic.messages,topics:this.list()};
  }
  async turn(text,choice,forcedKind,preparedRoute){
-  if(this.busy)throw new Error('Дождитесь ответа Пети.');this.busy=true;
+  const runningKey=this.active()?.id||'new:'+this.state.activeProjectId;if(this.running.has(runningKey))throw new Error('Дождитесь ответа Пети.');this.running.add(runningKey);
   try{
    this.prune();let active=this.active();
    if(choice){if(!active?.pending||!active.pending.options.some(o=>o.id===choice))throw new Error('Уточнение устарело.');active[active.pending.field]=choice;text=active.pending.field==='versionId'?active.pending.command.replace(/последн[а-я]*|свеж[а-я]*|текущ[а-я]*|предыдущ[а-я]*/giu,''):active.pending.command;forcedKind=active.pending.kind;delete active.pending;}
@@ -123,7 +154,7 @@ class Dialogue {
    if(result.data)active.lastData=result.data;
    active.messages.push({role:'assistant',text:result.text,sources:result.sources||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
    return {handled:true,...result,topicId:active.id,topicTitle:active.title,messages:active.messages,topics:this.list()};
-  }finally{this.busy=false;}
+  }finally{this.running.delete(runningKey);}
  }
 }
-module.exports={Dialogue,taskListRequest,intent,actionRequest,selectChoice,discussionOnly};
+module.exports={chatScope,RAW,Dialogue,taskListRequest,intent,actionRequest,selectChoice,discussionOnly};

@@ -1,5 +1,6 @@
 const fs = require('fs');
 module.exports = async (win, workspace) => {
+  if(process.env.PETYA_E2E_PARALLEL==='1'){await require('./parallel-chats-e2e.cjs')(win);return;}
   await require('./local-project-ui.cjs')(win);
   await require('./microphone-picker-ui.cjs')(win);
   await require('./slack-help-ui.cjs')(win);
