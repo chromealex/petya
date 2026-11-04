@@ -13,13 +13,23 @@ function agentRequest(command=''){
  const items=text.split('\n').filter(line=>/^\s*(?:[-•*]|\d+[.)])\s+\S/u.test(line));
  return items.length>=2;
 }
+// Items the user already enumerated are taken word for word: the planner only splits free text.
+function enumerated(command=''){
+ const text=String(command).trim().replace(/^[^:\n]{0,80}:\s*/u,m=>/агент|параллельн|одновременно/iu.test(m)?'':m);
+ let items=text.split('\n').map(l=>l.trim()).filter(l=>/^(?:[-•*]|\d+[.)])\s+\S/u.test(l)).map(l=>l.replace(/^(?:[-•*]|\d+[.)])\s+/u,''));
+ if(items.length<2)items=text.split(/(?:^|[\s,;])\d+[.)]\s+/u).map(v=>v.trim()).filter(Boolean);
+ items=items.map(v=>v.replace(/[,;]\s*(?:и|а также)?\s*$/u,'').replace(/[,;]$/u,'').trim()).filter(v=>v.length>2);
+ if(items.length<2)return null;
+ const {actionRequest}=require('./dialogue.cjs');
+ return {tasks:items.map(v=>{const request=v[0].toLocaleUpperCase('ru')+v.slice(1);return {title:request.slice(0,80),request,action:!!actionRequest?.(request)};})};
+}
 const STATES={queued:'В очереди',running:'Работает',done:'Готово',attention:'Нужно внимание',cancelled:'Остановлен',action:'Ждёт тебя'};
 class AgentTeam{
  constructor({dialogue,jobs,plan,summarize,emit=()=>{},now=Date.now,interval=1000,max=6}){Object.assign(this,{dialogue,jobs,plan,summarize,emit,now,interval,max});this.active=new Map();}
  // Returns a handled reply (the plan) or null when the request is not for agents.
  async turn(command,topic){
   if(!agentRequest(command)||!topic||topic.agentOf)return null;
-  const planned=await this.plan(command);
+  const planned=enumerated(command)||await this.plan(command);
   const tasks=(Array.isArray(planned?.tasks)?planned.tasks:[]).filter(t=>t&&typeof t.request==='string'&&t.request.trim()).slice(0,this.max).map(t=>({id:randomUUID(),title:String(t.title||t.request).trim().slice(0,80),request:String(t.request).trim().slice(0,1500),action:!!t.action,state:'queued',label:STATES.queued}));
   if(tasks.length<2)return null; // one task: the normal pipeline answers it
   const plan={id:randomUUID(),command,state:'running',startedAt:this.now(),tasks};
@@ -64,4 +74,4 @@ class AgentTeam{
   this.emit({topicId:topic.id,job:topic.chatJob,agentPlan:plan});
  }
 }
-module.exports={agentRequest,AgentTeam};
+module.exports={agentRequest,enumerated,AgentTeam};

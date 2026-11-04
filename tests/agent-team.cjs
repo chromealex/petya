@@ -26,5 +26,7 @@ const assert=require('node:assert/strict');const {agentRequest,AgentTeam}=requir
  // stop
  const team2=new AgentTeam({dialogue,jobs,interval:1000,plan:async()=>({tasks:[{title:'a',request:'A?',action:false},{title:'b',request:'B?',action:false}]}),summarize:async()=>''});
  const r2=await team2.turn('Сделай параллельно: A и B',topic);assert.equal(team2.stop(r2.agentPlan.id).stopped,2);for(const e of team2.active.values())clearTimeout(e.timer);team2.active.clear();
+ {const {enumerated}=require('../src/agent-team.cjs');const e=enumerated('Раздай агентам: 1) какие задачи на мне в работе, 2) что нового в Slack, 3) какая версия проекта');assert.deepEqual(e.tasks.map(t=>t.request),['Какие задачи на мне в работе','Что нового в Slack','Какая версия проекта']);
+  assert.equal(enumerated('1. Проверь баги BW\n2. Создай задачу на ANR').tasks[1].action,true);assert.equal(enumerated('Раздай агентам проверку багов и статус'),null);}
  console.log('Agent team: detection, plan to parallel chats, actions held for the user, live states, combined answer, no nesting and stop passed');
 })().catch(e=>{console.error(e);process.exit(1);});
