@@ -9,11 +9,13 @@ module.exports = async win => {
        return originalStep.call(this,key,label,action,retryable);
      };
      await processCommand('Сохранённая команда');
-     if(progressPanel.hidden||commandProgress.state!=='error'||!commandProgress.failed||retryCommand.hidden||$('command').value!=='Сохранённая команда')throw Error('Failed command is not recoverable');
+     // A failed request is shown in the chat with «Повторить»; the command stays in the input.
+     const failed=dialogueMessages.querySelector('.message-assistant[data-error=true]:last-child');
+     if(!failed||commandProgress.state!=='error'||!commandProgress.failed||![...failed.querySelectorAll('button')].some(b=>b.textContent==='Повторить')||$('command').value!=='Сохранённая команда')throw Error('Failed command is not recoverable');
      view('settings');
-     if($('chrome-status').hidden||$('chrome-status').dataset.state!=='error'||getComputedStyle(progressPanel).display!=='none')throw Error('Background command status missing from company bar: '+JSON.stringify({hidden:$('chrome-status').hidden,state:$('chrome-status').dataset.state,display:getComputedStyle(progressPanel).display,view:document.body.dataset.view}));
+     if($('chrome-status').hidden||$('chrome-status').dataset.state!=='error'||progressPanel.isConnected&&getComputedStyle(progressPanel).display!=='none')throw Error('Background command status missing from company bar: '+JSON.stringify({hidden:$('chrome-status').hidden,state:$('chrome-status').dataset.state,display:getComputedStyle(progressPanel).display,view:document.body.dataset.view}));
      $('chrome-status').click();
-     if($('home').hidden||!$('chrome-status').hidden||getComputedStyle(progressPanel).display==='none')throw Error('Status did not reopen assistant details');
+     if($('home').hidden||!$('chrome-status').hidden||!dialogueMessages.querySelector('.message-assistant[data-error=true]'))throw Error('Status did not reopen the failed request in the chat');
      commandProgress.busy=true;notice('Обрабатываю запрос');voiceTurn.status('Распознаю последние слова…');if($('notice').textContent!=='Обрабатываю запрос')throw Error('Background audio overwrote active command status');commandProgress.busy=false;
      fail=false;await processCommand('Петя, повтори');
      if(!progressPanel.hidden||commandProgress.state!=='done'||commandProgress.failed||!retryCommand.hidden)throw Error('Retry did not finish');

@@ -96,6 +96,8 @@ const imageInstaller=new (require('./image-installer.cjs').ImageInstaller)({root
 const qwenSpeech = new (require('./qwen-speech.cjs').QwenSpeech)({roots:runtimeCandidates});
 defaults.whisperBinary = fs.existsSync(localBinary) ? localBinary : '';
 defaults.whisperModel = fs.existsSync(localModel) ? localModel : '';
+// Stop whisper-server processes left by a Petya that was killed or crashed (each holds ~700 MB).
+if (process.env.PETYA_SMOKE_TEST !== '1') { const stale = require('./speech.cjs').cleanupOrphans(path.join(app.getPath('userData'), 'whisper-pids.json'), [localBinary]); if (stale.length) console.log('Stopped stale whisper-server: ' + stale.length); }
 const secrets = ['telegramCredential','teamMembers','microsoftCredential','gmailCredential','googlePlayCredential','asanaCredential', 'slackCredential', 'notionCredential', 'atlassianCredential', 'jiraToken', 'slackToken', 'notionToken'];
 const entry = pathToFileURL(path.join(__dirname, 'ui/index.html')).href;
 const file = () => path.join(dataRoot, 'settings.json');
