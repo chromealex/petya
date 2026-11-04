@@ -1093,6 +1093,14 @@ else {
         try { if (process.env.PETYA_VERIFY_ZOOM === '1') { const state = await inspectZoomWindows(true); console.log('Zoom diagnostic: ' + JSON.stringify({ permission: state.permission, zoomOpen: state.zoomOpen, windows: state.windows.length, electronPermission: systemPreferences.getMediaAccessStatus('screen') })); } if (process.env.PETYA_VERIFY_SPEECH === '1') { await win.webContents.executeJavaScript('window.petya.ensureSpeech()'); console.log('Packaged speech startup verified'); } console.log(valid ? 'Packaged app verified' : 'Packaged app failed'); speech.stop(); qwenSpeech.stop(); app.exit(valid ? 0 : 1); } catch (error) { console.error(error); speech.stop(); qwenSpeech.stop(); app.exit(1); }
       });
     }
+    // Live self-check (read-only questions in a separate project), also in the packaged app: PETYA_LIVE_CHECK=<report.json>
+    if (process.env.PETYA_LIVE_CHECK && process.env.PETYA_SMOKE_TEST !== '1') {
+      win.webContents.once('did-finish-load', async () => {
+        try { await require('./live-check.cjs')(win, process.env.PETYA_LIVE_CHECK); console.log('Live check written to ' + process.env.PETYA_LIVE_CHECK); }
+        catch (error) { console.error(error); }
+        app.exit(0);
+      });
+    }
     if (!app.isPackaged && process.env.PETYA_SMOKE_TEST === '1') {
       win.webContents.once('did-finish-load', async () => {
         try { await require('../tests/smoke.cjs')(win, workspace); console.log('UI smoke test passed'); app.exit(0); }
