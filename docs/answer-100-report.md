@@ -1,59 +1,59 @@
-# Проверка ответов Пети: 100 диалогов
+# Petya answer check: 100 dialogues
 
-Дата: 4 ноября 2026. Модель: локальная Ollama `qwen3:4b` (Q4_K_M). 100 двухшаговых диалогов, всего 200 реплик в каждом полном прогоне.
+Date: 4 November 2026. Model: local Ollama `qwen3:4b` (Q4_K_M). 100 two-step dialogues, 200 turns in total in each full run.
 
-До изменений: **185/200 реплик, 85/100 диалогов**. После: **200/200 реплик, 100/100 диалогов**.
+Before the changes: **185/200 turns, 85/100 dialogues**. After: **200/200 turns, 100/100 dialogues**.
 
-| Категория | До, реплик | После, реплик |
+| Category | Before, turns | After, turns |
 |---|---:|---:|
-| Вычисления | 20/20 | 20/20 |
-| Общие знания | 17/20 | 20/20 |
-| Память | 20/20 | 20/20 |
-| Поправки | 20/20 | 20/20 |
-| Переводы | 19/20 | 20/20 |
-| Неизвестные рабочие данные | 17/20 | 20/20 |
-| Запреты | 13/20 | 20/20 |
-| Подтверждение действий | 19/20 | 20/20 |
-| Инструкции внутри цитат | 20/20 | 20/20 |
-| Смена темы | 20/20 | 20/20 |
+| Calculations | 20/20 | 20/20 |
+| General knowledge | 17/20 | 20/20 |
+| Memory | 20/20 | 20/20 |
+| Corrections | 20/20 | 20/20 |
+| Translations | 19/20 | 20/20 |
+| Unknown work data | 17/20 | 20/20 |
+| Prohibitions | 13/20 | 20/20 |
+| Action confirmation | 19/20 | 20/20 |
+| Instructions inside quotations | 20/20 | 20/20 |
+| Topic change | 20/20 | 20/20 |
 
-## Изменения
+## Changes
 
-- Переписана инструкция генератора: общеизвестные факты отделены от закрытых рабочих данных; уточнены поправки, смена темы, формат ответа, запреты и подтверждение действий.
-- Сохранена справка ANR (Application Not Responding) для вопросов об этом термине; она предотвращает подмену сетевой ошибкой при продолжении разговора.
-- Для Qwen3 включено рассуждение, лимит генерации увеличен до 2048 токенов. Для других семейств режим рассуждения автоматически не включается.
-- При исчерпании лимита и отсутствии корректного JSON выполняется один локальный повтор без рассуждения. Сохраняются вопрос, история и формат. Сетевые ошибки не запускают повтор или интерпретацию; повторный обрыв остаётся явной ошибкой.
-- Простые приветствия получают прямой ответ на «ты», без вызова модели; вопросы и команды после приветствия не перехватываются.
-- Однозначные одиночные запреты подтверждаются прямо, без вызова модели. Вопросы, цитаты и составные просьбы проходят обычную обработку.
-- В основной обработчик приложения и существующий живой тест передаётся параметр повтора. Веса модели не менялись.
+- The generator instruction was rewritten: common knowledge is separated from private work data; corrections, topic changes, answer format, prohibitions and action confirmation were clarified.
+- The ANR (Application Not Responding) reference note was kept for questions about this term; it prevents substitution with a network error when the conversation continues.
+- Reasoning is enabled for Qwen3, and the generation limit was increased to 2048 tokens. For other model families, reasoning mode is not enabled automatically.
+- When the limit is exhausted and there is no valid JSON, one local retry without reasoning is performed. The question, history and format are preserved. Network errors do not trigger a retry or interpretation; a repeated cutoff remains an explicit error.
+- Simple greetings get a direct answer using the informal «ты» ("you", informal), without calling the model; questions and commands after a greeting are not intercepted.
+- Unambiguous single prohibitions are confirmed directly, without calling the model. Questions, quotations and compound requests go through normal processing.
+- The retry parameter is passed to the app's main handler and to the existing live test. The model weights were not changed.
 
-## Найденные ошибки
+## Errors found
 
-Исходная версия путала спутник Земли с Марсом, отвечала «нет данных об исполнителе» на вопрос о Пушкине, называла кислород при фотосинтезе, переводила moon как «лунь», теряла смысл запрета и однажды утверждала, что купила билет. На промежуточном варианте короткие запреты также могли вызывать приветствие или ложное «настройки сохранены»; прямое подтверждение исключает эти ответы для однозначного запрета. В промежуточном режиме рассуждения обнаружены обрывы без итогового JSON; для них добавлено ограниченное восстановление.
+The original version confused the Earth's satellite with Mars, answered «нет данных об исполнителе» ("no data about the assignee") to a question about Pushkin, named oxygen in connection with photosynthesis, translated moon as «лунь» (harrier, a bird), lost the meaning of a prohibition and once claimed that it had bought a ticket. On an intermediate variant, short prohibitions could also trigger a greeting or a false «настройки сохранены» ("settings saved"); direct confirmation rules out these answers for an unambiguous prohibition. In the intermediate reasoning mode, cutoffs without a final JSON were found; limited recovery was added for them.
 
-Промежуточная замена только инструкции не дала достаточного улучшения и не установлена. Промежуточный полный прогон с рассуждением остановлен после воспроизведения обрыва; вариант с восстановлением проверен заново на всех 100 диалогах. Затем для выявленной нестабильности коротких запретов добавлен прямой ответ и повторены все 10 затронутых диалогов (20 реплик). Дополнительная проверка через маршрутизатор обнаружила неверную расшифровку ANR; восстановлена справка из прежней инструкции и повторены все 11 затронутых диалогов (22 реплики). При ручной проверке найдены два обращения на «вы» в приветствиях: добавлен прямой ответ на простые приветствия и общий критерий обращения на «ты», затем группа с приветствиями/ANR повторена ещё раз. Итоговая таблица использует последние результаты; предыдущие попытки этих реплик сохранены в поле previousAttempt.
+An intermediate replacement of the instruction alone did not give enough improvement and was not installed. An intermediate full run with reasoning was stopped after the cutoff was reproduced; the variant with recovery was re-checked on all 100 dialogues. Then, for the detected instability of short prohibitions, a direct answer was added and all 10 affected dialogues (20 turns) were repeated. An additional check through the router found an incorrect expansion of ANR; the reference note from the previous instruction was restored and all 11 affected dialogues (22 turns) were repeated. During the manual review, two instances of the formal «вы» ("you", formal) in greetings were found: a direct answer to simple greetings and a general criterion of informal «ты» address were added, and then the greetings/ANR group was repeated once more. The final table uses the latest results; previous attempts of these turns are saved in the previousAttempt field.
 
-Через существующий маршрутизатор дополнительно проверены семь многошаговых сценариев (22 реплики), включая подтверждённое действие в истории. Результаты до и после восстановления справки ANR вложены в routingRegression итогового JSON. Уточнены критерии приветствий и честных ответов об отсутствии сведений: они больше не ошибочно помечаются как выдуманный исполнитель.
+Seven multi-step scenarios (22 turns), including a confirmed action in the history, were additionally checked through the existing router. The results before and after restoring the ANR reference note are nested in routingRegression of the final JSON. The criteria for greetings and honest answers about missing information were refined: they are no longer mistakenly flagged as an invented assignee.
 
-## Воспроизведение
+## Reproduction
 
-- `npm run test:answers` — проверки запроса и обработчика, без Ollama.
-- `npm run test:answers:live` — все 100 диалогов через локальную Ollama; реальные внешние сервисы не вызываются.
-- `PETYA_TEST_MODEL` выбирает модель; `PETYA_REPORT` задаёт путь отчёта. По умолчанию отчёт сохраняется в системный временный каталог.
-- На этом Mac системный Node 14 слишком старый. Используется `ELECTRON_RUN_AS_NODE=1 node_modules/electron/dist/Electron.app/Contents/MacOS/Electron tests/answer-100-live.cjs`.
+- `npm run test:answers` — checks of the request and the handler, without Ollama.
+- `npm run test:answers:live` — all 100 dialogues through the local Ollama; real external services are not called.
+- `PETYA_TEST_MODEL` selects the model; `PETYA_REPORT` sets the report path. By default, the report is saved to the system temporary directory.
+- On this Mac, the system Node 14 is too old. `ELECTRON_RUN_AS_NODE=1 node_modules/electron/dist/Electron.app/Contents/MacOS/Electron tests/answer-100-live.cjs` is used.
 
-Исходные сценарии: `tests/fixtures/answer-100.json`. Полные реплики, ответы и длительности: `docs/answer-100-before.json` и `docs/answer-100-after.json`.
+Source scenarios: `tests/fixtures/answer-100.json`. Full turns, answers and durations: `docs/answer-100-before.json` and `docs/answer-100-after.json`.
 
-## Скорость и границы проверки
+## Speed and limits of the check
 
-Медиана времени реплики: до 0.25 с, после 4.01 с. P95: до 0.57 с, после 13.94 с. Повторов из-за лимита в итоговом прогоне: 4. Рассуждение повышает задержку; это время текстового вызова, а не полного голосового ответа. Это не контролируемый бенчмарк: часть дополнительных проверок шла одновременно и создавала очередь к Ollama.
+Median turn time: 0.25 s before, 4.01 s after. P95: 0.57 s before, 13.94 s after. Retries due to the limit in the final run: 4. Reasoning increases latency; this is the time of the text call, not of a full voice answer. This is not a controlled benchmark: some of the additional checks ran at the same time and created a queue for Ollama.
 
-Проверяются настоящие `dialogueRequest` и `localAnswer` на синтетической истории. Эти 100 диалогов изолируют генератор ответа: они не проверяют распознавание речи, маршрутизацию через интерфейс или достоверность данных реальных сервисов.
+The real `dialogueRequest` and `localAnswer` are tested on a synthetic history. These 100 dialogues isolate the answer generator: they do not test speech recognition, routing through the interface or the accuracy of data from real services.
 
-Автоматическая оценка использует критерии смысла и формата на регулярных выражениях. Она допускает е/ё и несколько корректных формулировок отсутствия данных. Одинаковые критерии применены к обоим прогонам. Полные ответы доступны для ручной проверки; успешный набор не гарантирует отсутствие ошибок на любых вопросах.
+Automatic scoring uses meaning and format criteria based on regular expressions. It allows е/ё and several correct phrasings of missing data. The same criteria were applied to both runs. Full answers are available for manual review; a passing set does not guarantee the absence of errors for arbitrary questions.
 
-## Проверки проекта и упаковки
+## Project and packaging checks
 
-После установки изменений прошли 77 тестовых файлов JavaScript. macOS-сборка запущена проверкой сборщика и сохраняет Developer ID Application: Alexander Silaev (2CGDESX4ZX).
+After the changes were installed, 77 JavaScript test files passed. The macOS build was launched by the builder check and keeps Developer ID Application: Alexander Silaev (2CGDESX4ZX).
 
-Во время упаковки Windows обнаружена ложная ошибка состава из-за Python-кэша. Проверка теперь исключает только `.pyc`/`.pyo` внутри `__pycache__`; настоящие исходники, лишние файлы и отсутствующие локальные импорты по-прежнему проверяются. Добавлены шесть тестов: `python3 tests/package-verifier.py`.
+During Windows packaging, a false package-contents error caused by the Python cache was found. The check now excludes only `.pyc`/`.pyo` inside `__pycache__`; real sources, extra files and missing local imports are still checked. Six tests were added: `python3 tests/package-verifier.py`.

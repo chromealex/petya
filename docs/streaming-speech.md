@@ -1,43 +1,43 @@
-# Распознавание во время диктовки
+# Recognition during dictation
 
-AudioListener отправляет фрагмент после 650 мс тишины либо через 8 секунд непрерывной речи. Короткая пауза в 180 мс больше не разрезает фразу. Запись продолжается во время распознавания. При принудительном разрезании сохраняются 400 мс перекрытия; совпадающие слова на границе удаляются при сборке. Это эвристика: неточное распознавание слов на стыке может оставить повтор.
+AudioListener sends a chunk after 650 ms of silence or after 8 seconds of continuous speech. A short 180 ms pause no longer cuts a phrase. Recording continues during recognition. When a chunk is cut forcibly, 400 ms of overlap are kept; matching words at the boundary are removed during assembly. This is a heuristic: inaccurate recognition of words at the seam may leave a repetition.
 
-Одновременно обрабатываются до четырёх фрагментов, результаты публикуются в порядке записи. Лимит выбирается по ресурсам компьютера: четыре при ≥32 ГБ RAM и ≥16 доступных CPU, два при ≥16 ГБ и ≥8 CPU, иначе один. Это консервативная эвристика, а не автоматический бенчмарк. SpeechPool прогревает дополнительные локальные whisper-server с той же моделью на свободных loopback-портах: один сервер Whisper блокирует параллельные inference-запросы mutex. Каждый процесс использует штатные четыре вычислительных потока; каждый дополнительный процесс требует памяти под модель. Если дополнительный runtime недоступен, запросы выполняются последовательно основным сервером. Внешний сервер при завершении Пети не останавливается.
+Up to four chunks are processed at the same time, and results are published in recording order. The limit is chosen based on the computer's resources: four with ≥32 GB RAM and ≥16 available CPUs, two with ≥16 GB and ≥8 CPUs, otherwise one. This is a conservative heuristic, not an automatic benchmark. SpeechPool warms up additional local whisper-server instances with the same model on free loopback ports: a single Whisper server blocks parallel inference requests with a mutex. Each process uses the standard four compute threads; each additional process needs memory for the model. If an additional runtime is unavailable, requests are executed sequentially by the main server. An external server is not stopped when Petya quits.
 
-VoiceTurn накапливает части одной команды и ждёт завершения речи и всех распознаваний перед выполнением. Пауза после законченной фразы — 1,2 секунды вместо 1,8. Во время обработки хвоста отображается «Распознаю последние слова…», а не «Дослушиваю». Если после последней активности или результата распознавание не завершилось за 12 секунд, команда отменяется и микрофон останавливается; частично распознанная просьба не выполняется. Непрерывная активность/шум ограничены 60 секундами на одну команду. Поздние результаты остановленной записи отбрасываются. Промежуточные слова не запускают действия. Во время ответа Пети собственный голос и устаревшие результаты игнорируются. При остановке/перезапуске старые результаты не попадают в новую запись. Очередь ограничена восемью фрагментами; перегрузка сообщается явно.
+VoiceTurn accumulates the parts of one command and waits for speech and all recognitions to finish before executing it. The pause after a finished phrase is 1.2 seconds instead of 1.8. While the tail is being processed, «Распознаю последние слова…» ("Recognizing the last words…") is shown instead of «Дослушиваю» ("Still listening"). If recognition has not finished within 12 seconds after the last activity or result, the command is cancelled and the microphone is stopped; a partially recognized request is not executed. Continuous activity/noise is limited to 60 seconds per command. Late results from a stopped recording are discarded. Intermediate words do not trigger actions. While Petya is answering, its own voice and stale results are ignored. On stop/restart, old results do not get into the new recording. The queue is limited to eight chunks; overload is reported explicitly.
 
-Проверки: tests/audio-parallel.cjs, tests/audio-onset.cjs, tests/speech.cjs, tests/voice-turn.cjs. Реальные задержки зависят от модели, GPU/CPU и длины речи; параллелизм не гарантирует двукратного ускорения.
+Tests: tests/audio-parallel.cjs, tests/audio-onset.cjs, tests/speech.cjs, tests/voice-turn.cjs. Real latencies depend on the model, GPU/CPU and the length of speech; parallelism does not guarantee a twofold speedup.
 
-## Замер 4 ноября 2026
+## Measurement of 4 November 2026
 
-Apple M3 Ultra, 96 ГБ RAM, 28 CPU, ggml-base. Одинаковый 4-секундный фрагмент с реальной речью, mono PCM 16 кГц; очередь из 12 запросов после прогрева, медиана трёх запусков. Текст проверен.
+Apple M3 Ultra, 96 GB RAM, 28 CPUs, ggml-base. The same 4-second chunk with real speech, mono PCM 16 kHz; a queue of 12 requests after warm-up, median of three runs. The text was checked.
 
-| Обработчики | Вся очередь | Медиана отдельного запроса |
+| Workers | Whole queue | Median single request |
 |---|---:|---:|
-| 1 | 1110 мс | 92 мс |
-| 2 | 588 мс | 98 мс |
-| 3 | 447 мс | 112 мс |
-| 4 | 323 мс | 107 мс |
+| 1 | 1110 ms | 92 ms |
+| 2 | 588 ms | 98 ms |
+| 3 | 447 ms | 112 ms |
+| 4 | 323 ms | 107 ms |
 
-Это измерение пропускной способности Whisper на одной записи, без времени запуска серверов, захвата речи и ответа языковой модели. Больше обработчиков помогает при очереди; задержка одного запроса может расти.
+This measures Whisper throughput on a single recording, excluding server startup time, speech capture and the language model's response. More workers help when there is a queue; the latency of a single request may increase.
 
-Фрагменты с пометками Whisper «[музыка]», «[шум]» и похожими не выполняются как команды. Для аудио до пяти секунд словарь имён/терминов не подмешивается; температурный fallback отключён. Приход текста из Whisper не считается новой речевой активностью и не продлевает ожидание от текущего времени. Остаток аудиобуфера учитывается отдельно от свежей активности микрофона.
+Chunks with Whisper tags such as «[музыка]» ("[music]"), «[шум]» ("[noise]") and similar are not executed as commands. For audio up to five seconds long, the dictionary of names/terms is not mixed in; temperature fallback is disabled. Text arriving from Whisper is not counted as new speech activity and does not extend the wait from the current time. The remainder of the audio buffer is tracked separately from fresh microphone activity.
 
-При ручном включении микрофона (кнопкой или из трея) открывается выбор устройства. Последний успешно запущенный вход запоминается локально и предлагается при следующем включении; запись начинается после кнопки «Включить». Если устройство пропало, нужно явно выбрать другое. Захват использует точный deviceId, а имя выбранного входа показано в статусе. Отмена/ Escape не запускают распознавание. Список обновляется при подключении и отключении устройств. При отсутствии названий Chromium кратко открывает и сразу закрывает поток для получения списка; этот поток не передаётся в распознавание.
+When the microphone is turned on manually (with the button or from the tray), a device picker opens. The last successfully started input is remembered locally and offered the next time; recording starts after the «Включить» (Turn on) button. If the device has disappeared, another one must be chosen explicitly. Capture uses the exact deviceId, and the name of the selected input is shown in the status. Cancel/Escape do not start recognition. The list is updated when devices are connected and disconnected. When device names are missing, Chromium briefly opens and immediately closes a stream to obtain the list; this stream is not passed to recognition.
 
-## Защита от ложных команд
+## Protection against false commands
 
-После обычного ответа больше нет автоматического arm: новое высказывание требует «Петя». Исключение — явный ожидаемый ответ на уточнение (voiceReply). Это исключает запуск команд по случайной расшифровке после озвучивания.
+After an ordinary answer there is no longer an automatic arm: a new utterance requires «Петя» ("Petya"). The exception is an explicitly expected answer to a clarifying question (voiceReply). This prevents commands from being triggered by a random transcription after speech playback.
 
-Перед живым распознаванием проверяется PCM16 mono 16 кГц: полная цифровая тишина и одиночные импульсы (менее 320 ненулевых PCM-сэмплов) не отправляются в Whisper. Повторный порог RMS и обрезание пауз удалены: дополнительная проверка отбрасывала тихую/короткую речь. Исходные отсчёты и паузы сохраняются. Это не нейросетевой VAD. Из live-запросов убрана подсказка со списком имён команды, которая могла влиять на распознавание шума. Повторы одного слова/короткой фразы и характерный блок титров «редактор субтитров … корректор» отклоняются целиком, без выполнения оставшегося префикса. Обычные запросы о субтитрах и короткие повторения сохраняются. Исходная аудиозапись пользовательского сбоя не сохранена, поэтому эти фильтры проверены на тестовом PCM и расшифровках со скриншотов, а не на исходном звуке.
+Before live recognition, PCM16 mono 16 kHz is checked: complete digital silence and isolated impulses (fewer than 320 non-zero PCM samples) are not sent to Whisper. The repeated RMS threshold and pause trimming have been removed: the extra check was discarding quiet/short speech. The original samples and pauses are kept. This is not a neural-network VAD. The hint with the list of team names, which could influence the recognition of noise, has been removed from live requests. Repetitions of a single word/short phrase and the characteristic subtitle-credits block «редактор субтитров … корректор» ("subtitle editor … proofreader") are rejected entirely, without executing the remaining prefix. Ordinary requests about subtitles and short repetitions are kept. The original audio recording of the user's failure was not saved, so these filters were tested on test PCM and on transcriptions from screenshots rather than on the original sound.
 
-При подготовке звука TTS микрофон продолжает распознавать речь. Подавление собственного голоса включается перед воспроизведением и снимается после него. Пустая расшифровка отображается в «Последней реплике» даже без активной команды.
+While TTS audio is being prepared, the microphone keeps recognizing speech. Suppression of Petya's own voice is enabled before playback and removed after it. An empty transcription is shown in «Последней реплике» ("Last utterance") even without an active command.
 
 
-## Короткие русские фразы: проверка 4 ноября 2026
+## Short Russian phrases: test of 4 November 2026
 
-В macOS-сборку добавлена multilingual Whisper Small (SHA-1 `55356645c2b361a969dfd0ef2c5a50d530afd8d5`), выбранная вместо встроенной Base. Пользовательские пути к моделям сохраняются; без Small остаётся Base. Источник модели: https://huggingface.co/ggerganov/whisper.cpp.
+The multilingual Whisper Small model (SHA-1 `55356645c2b361a969dfd0ef2c5a50d530afd8d5`) has been added to the macOS build and is selected instead of the bundled Base. User paths to models are kept; without Small, Base remains. Model source: https://huggingface.co/ggerganov/whisper.cpp.
 
-На шести синтезированных Silero фразах («Как дела?», «Петя, как дела?», «Ты здесь?», «Какие проекты у тебя есть?», «Проверь почту.», «Не создавай задачу.») Small с greedy распознала слова 6/6, Base 5/6; пунктуация и регистр не учитывались. Время запроса Small 64–275 мс, Base 31–73 мс после загрузки модели. Beam 5 не улучшил результат Small, а для Base дал 4/6, поэтому настройки поиска оставлены прежними. Это не проверка живого микрофона и не замер полного времени ответа.
+On six phrases synthesized with Silero («Как дела?» ("How are you?"), «Петя, как дела?» ("Petya, how are you?"), «Ты здесь?» ("Are you there?"), «Какие проекты у тебя есть?» ("What projects do you have?"), «Проверь почту.» ("Check the mail."), «Не создавай задачу.» ("Don't create a task.")), Small with greedy decoding recognized the words in 6/6 and Base in 5/6; punctuation and case were not taken into account. Request time was 64–275 ms for Small and 31–73 ms for Base after the model was loaded. Beam 5 did not improve the Small result and gave 4/6 for Base, so the search settings were left unchanged. This is not a test of a live microphone and not a measurement of the full response time.
 
-Фоновые статусы распознавания больше не перекрывают статус выполняющейся команды. Ошибки продолжают отображаться.
+Background recognition statuses no longer override the status of a command being executed. Errors are still displayed.

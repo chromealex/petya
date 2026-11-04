@@ -1,55 +1,55 @@
-# Ещё 100 рабочих диалогов Пети
+# Another 100 Petya work dialogues
 
-Дата: 4 ноября 2026. Локальная Ollama, Qwen3:4b. Новый набор: 100 диалогов, по две реплики — 200 проверок. Данные проектов, команды и задач полностью тестовые; рабочие сервисы не вызываются.
+Date: 4 November 2026. Local Ollama, Qwen3:4b. New set: 100 dialogues with two turns each — 200 checks. Project, team and task data are entirely synthetic; work services are not called.
 
-До изменений: **171/200 реплик, 74/100 диалогов**. Последние результаты после исправлений: **200/200 реплик, 100/100 диалогов**.
+Before the changes: **171/200 turns, 74/100 dialogues**. Latest results after the fixes: **200/200 turns, 100/100 dialogues**.
 
-| Категория | До | После |
+| Category | Before | After |
 |---|---:|---:|
-| Статус, исполнитель, срок, приоритет | 20/20 | 20/20 |
-| Переключение проектов и ключей | 20/20 | 20/20 |
-| Роль и фактическая занятость | 19/20 | 20/20 |
-| Количество задач и свободное время | 20/20 | 20/20 |
-| Отсутствующие сведения | 13/20 | 20/20 |
-| Сохранённые и текущие статусы | 17/20 | 20/20 |
-| Тёзки и одинаковые задачи | 10/20 | 20/20 |
-| Блокеры и гарантии релиза | 20/20 | 20/20 |
-| Новая карточка после старого ответа | 20/20 | 20/20 |
-| Планы, черновики и инструкции в описании | 12/20 | 20/20 |
+| Status, assignee, due date, priority | 20/20 | 20/20 |
+| Switching projects and keys | 20/20 | 20/20 |
+| Role and actual workload | 19/20 | 20/20 |
+| Number of tasks and free time | 20/20 | 20/20 |
+| Missing information | 13/20 | 20/20 |
+| Saved and current statuses | 17/20 | 20/20 |
+| Namesakes and identical tasks | 10/20 | 20/20 |
+| Blockers and release guarantees | 20/20 | 20/20 |
+| New card after an old answer | 20/20 | 20/20 |
+| Plans, drafts and instructions in the description | 12/20 | 20/20 |
 
-## Что обнаружено и исправлено
+## What was found and fixed
 
-- Jira не запрашивала исполнителя, срок, дату изменения и связи. Сокращённые карточки багов теряли дополнительные поля. Теперь нужные поля доходят до сохранённого снимка и следующего вопроса. В контекст не копируются лишние поля профиля и вложенных карточек связей.
-- Модель выводила текущую занятость и руководство проектом из роли; считала процент спринта без его состава; угадывала количество скрытых задач; смешивала отсутствие сведений об отпуске с отсутствием отпуска. Добавлены ограничения по наличию подтверждённых данных.
-- На старые карточки модель отвечала как на свежую проверку и иногда утверждала, что обратилась к сервису. Генератор теперь прямо различает сохранённый снимок и новый сетевой запрос.
-- Тёзки и одинаковые названия задач теперь дают конкретные варианты с проектами или ключами. Явный ключ не заменяется старой темой.
-- Описание задачи с посторонней инструкцией могло подменить статус или исполнителя. Однозначные вопросы о структурированных полях теперь получают ответ непосредственно из карточки; свободный текст не переопределяет поле.
-- В черновике была перепутана сторона блокирующей связи. Для простого запроса черновика о блокере используется направление связи, а не догадка модели. Обсуждение и подготовка текста не подтверждают отправку или изменение задач.
-- В рекомендации по дедлайну модель приписывала человеку работу прямо сейчас по статусу задачи. Простой запрос такого совета теперь опирается только на сохранённый срок и формулирует вопросы, не выдумывая текущую активность.
+- Jira did not request the assignee, due date, last-modified date and links. Shortened bug cards lost additional fields. Now the required fields reach the saved snapshot and the next question. Extra profile fields and nested link cards are not copied into the context.
+- The model inferred current workload and project leadership from the role; calculated a sprint percentage without its contents; guessed the number of hidden tasks; confused the absence of information about a vacation with the absence of a vacation. Restrictions based on the presence of confirmed data have been added.
+- The model answered about old cards as if it were a fresh check and sometimes claimed it had contacted the service. The generator now explicitly distinguishes a saved snapshot from a new network request.
+- Namesakes and identical task names now produce specific options with projects or keys. An explicit key is not replaced by an old topic.
+- A task description containing an unrelated instruction could override the status or assignee. Unambiguous questions about structured fields are now answered directly from the card; free text does not override a field.
+- In a draft, the side of a blocking link was mixed up. For a simple request for a draft about a blocker, the link direction is used instead of the model's guess. Discussing and preparing text do not confirm sending or changing tasks.
+- In a deadline recommendation, the model attributed work happening right now to a person based on the task status. A simple request for such advice now relies only on the saved due date and phrases questions without inventing current activity.
 
-Изменены инструкции и обработка ответов приложения; веса Qwen3 не дообучались. Прямые ответы используются только для распознанных однозначных вопросов. Нестандартные формулировки, сложные вопросы и обсуждения остаются у модели.
+The instructions and the app's answer processing were changed; the Qwen3 weights were not fine-tuned. Direct answers are used only for recognized unambiguous questions. Non-standard phrasings, complex questions and discussions remain with the model.
 
-## Как проверено
+## How it was checked
 
-Сначала выполнен полный прогон 100 диалогов на исходном обработчике, затем полный прогон на исправленном. После следующих узких изменений повторены все затронутые сценарии. При аудите фикстур согласованы даты сохранения и обновления карточек в 20 сценариях; они повторены на обеих версиях. Итог использует последние фактически полученные ответы каждого шага. Предыдущие ответы и версии исходников сохранены в JSON.
+First, a full run of the 100 dialogues was performed on the original handler, then a full run on the fixed one. After subsequent narrow changes, all affected scenarios were repeated. During the fixture audit, the save and update dates of cards were reconciled in 20 scenarios; these were repeated on both versions. The final result uses the latest answers actually received for each step. Previous answers and source versions are saved in JSON.
 
-Критерии одинаковы для обеих версий: обязательные смысловые признаки, запрет конкретных неподтверждённых утверждений и ручной просмотр ответов. Корректные краткие «да», «никто», «не указано в данных» и «не отправлено» не считаются ошибкой сами по себе; у вопроса об отпуске голое «нет» не принимается за отсутствие сведений. После ручной проверки добавлены проверки направления блокировки, объяснения команды закрытия и неподтверждённой текущей занятости.
+The criteria are the same for both versions: required semantic features, a ban on specific unconfirmed claims and manual review of the answers. Correct short answers such as «да» ("yes"), «никто» ("nobody"), «не указано в данных» ("not specified in the data") and «не отправлено» ("not sent") are not counted as errors in themselves; for the vacation question, a bare «нет» ("no") is not accepted as an absence of information. After the manual review, checks were added for the blocking direction, the explanation of the closing command and unconfirmed current workload.
 
-Из последних 200 ответов: 100 прямых ответов приложения, 100 ответов с обращением к локальной модели. Отчёт проверяет весь обработчик ответа, а не только сырую генерацию Qwen3. Нулевое число запросов в строке означает прямой ответ, а не имитацию вызова модели.
+Of the last 200 answers: 100 direct answers from the app and 100 answers involving a call to the local model. The report checks the entire answer handler, not just raw Qwen3 generation. A zero request count in a row means a direct answer, not a simulated model call.
 
-Отдельно проверена связка JiraInsights → Dialogue → запрос/обработчик ответа: запрошенные поля не теряются, вопрос об исполнителе использует карточку. Проверены имена без назначения, неоднозначность, неподдерживаемые форматы, явные факты, арифметические гипотезы, направления связей и сохранение подтверждённых действий в истории.
+The JiraInsights → Dialogue → request/answer handler chain was checked separately: requested fields are not lost, and the question about the assignee uses the card. Names without an assignment, ambiguity, unsupported formats, explicit facts, arithmetic hypotheses, link directions and saving of confirmed actions in the history were checked.
 
-Старый общий набор сохранён. Его 200 запросов к модели без рабочих данных совпадают с прежними; 200 шагов обработчика дополнительно прошли повтор на сохранённых ответах. Это контроль совместимости, не новый живой прогон старого набора.
+The old general set has been kept. Its 200 model requests without work data match the previous ones; the 200 handler steps were additionally replayed on the saved answers. This is a compatibility check, not a new live run of the old set.
 
-## Файлы и запуск
+## Files and running
 
-- Сценарии: `tests/fixtures/work-dialogue-100.json`.
-- Полные ответы: `docs/work-dialogue-100-before.json` и `docs/work-dialogue-100-after.json`.
-- `npm run test:work-dialogues` — проверки обработчика и передачи данных Jira, без Ollama.
-- `npm run test:work-dialogues:live` — 100 диалогов через локальную Ollama.
-- `PETYA_TEST_MODEL` выбирает модель, `PETYA_REPORT` — файл отчёта; `PETYA_WORK_IDS=27,43` повторяет выбранные сценарии.
-- На этом Mac с системным Node 14 используется `ELECTRON_RUN_AS_NODE=1 node_modules/electron/dist/Electron.app/Contents/MacOS/Electron tests/work-dialogue-live.cjs`.
+- Scenarios: `tests/fixtures/work-dialogue-100.json`.
+- Full answers: `docs/work-dialogue-100-before.json` and `docs/work-dialogue-100-after.json`.
+- `npm run test:work-dialogues` — checks of the handler and Jira data transfer, without Ollama.
+- `npm run test:work-dialogues:live` — 100 dialogues through the local Ollama.
+- `PETYA_TEST_MODEL` selects the model, `PETYA_REPORT` the report file; `PETYA_WORK_IDS=27,43` repeats the selected scenarios.
+- On this Mac with the system Node 14, `ELECTRON_RUN_AS_NODE=1 node_modules/electron/dist/Electron.app/Contents/MacOS/Electron tests/work-dialogue-live.cjs` is used.
 
-## Границы результата
+## Limits of the result
 
-Это текстовые проверки на синтетических данных, без микрофона и без запросов к реальной Jira. Они не гарантируют качество любых свободных формулировок или полноту подключённых источников. Отсутствующие поля не додумываются: старые сохранённые карточки могут потребовать обновления для получения исполнителя и срока. Прямой ответ не выполняет действия в сервисах. Время в JSON включает очередь к локальной модели при нескольких контрольных прогонах и не является сравнительным бенчмарком скорости.
+These are text checks on synthetic data, without a microphone and without requests to a real Jira. They do not guarantee quality for arbitrary free-form phrasings or the completeness of connected sources. Missing fields are not made up: old saved cards may need to be refreshed to get the assignee and due date. A direct answer does not perform actions in services. The times in the JSON include queueing for the local model during several control runs and are not a comparative speed benchmark.

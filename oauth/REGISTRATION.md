@@ -1,62 +1,62 @@
-# Общие OAuth-приложения Пети
+# Petya's shared OAuth apps
 
-Пользователь подключает сервис кнопкой и разрешает доступ в браузере. Регистрировать собственные приложения или вводить токены ему не нужно. Client secrets и refresh tokens хранятся только на сервере, зашифрованные токены подключений — отдельно для каждого сервиса. Desktop хранит непрозрачный ключ подключения через safeStorage и получает access token для прямых API-запросов.
+The user connects a service with a button and grants access in the browser. They do not need to register their own apps or enter tokens. Client secrets and refresh tokens are stored only on the server; encrypted connection tokens are stored separately for each service. The desktop app stores an opaque connection key via safeStorage and obtains an access token for direct API requests.
 
-Сервер: https://auth.petya-app.ru, RUVDS 194.87.110.60. Точка входа: oauth/server/gateway.cjs. Пока DNS/HTTPS не готовы, публичный nginx возвращает 503. Исходники клиента обновлены, установленное приложение ещё не заменено.
+Server: https://auth.petya-app.ru, RUVDS 194.87.110.60. Entry point: oauth/server/gateway.cjs. Until DNS/HTTPS are ready, the public nginx returns 503. The client sources have been updated; the installed app has not been replaced yet.
 
-## Регистрация
+## Registration
 
-`node scripts/prepare-oauth.cjs https://auth.petya-app.ru <новая папка>` генерирует параметры, без регистрации и без секретов.
+`node scripts/prepare-oauth.cjs https://auth.petya-app.ru <новая папка>` (`<новая папка>` = new folder) generates the parameters, without registration and without secrets.
 
-| Сервис | Callback | Права |
+| Service | Callback | Permissions |
 |---|---|---|
-| Atlassian | /oauth/atlassian/callback | Jira и поиск Confluence, перечень ниже |
-| Slack | /oauth/slack/callback | channels:read, groups:read, channels:history, groups:history, im:history, mpim:history; только user scopes |
-| Notion | /oauth/notion/callback | Read content; без записи и чтения email |
+| Atlassian | /oauth/atlassian/callback | Jira and Confluence search, list below |
+| Slack | /oauth/slack/callback | channels:read, groups:read, channels:history, groups:history, im:history, mpim:history; user scopes only |
+| Notion | /oauth/notion/callback | Read content; no write access and no email reading |
 
-Переменные сервера: PUBLIC_ORIGIN, TOKEN_ENCRYPTION_KEY, ATLASSIAN_CLIENT_ID, ATLASSIAN_CLIENT_SECRET, ATLASSIAN_SCOPES, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET, NOTION_CLIENT_ID, NOTION_CLIENT_SECRET. Секреты не включать в сборки, репозиторий или журналы.
+Server variables: PUBLIC_ORIGIN, TOKEN_ENCRYPTION_KEY, ATLASSIAN_CLIENT_ID, ATLASSIAN_CLIENT_SECRET, ATLASSIAN_SCOPES, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET, NOTION_CLIENT_ID, NOTION_CLIENT_SECRET. Do not include secrets in builds, the repository or logs.
 
-Slack использует confidential OAuth V2 через HTTPS и обязательную ротацию user tokens. Установка может требовать одобрения администратора workspace. Распространение между workspace и Marketplace настраиваются отдельно после сквозного теста.
+Slack uses confidential OAuth V2 over HTTPS and mandatory rotation of user tokens. Installation may require approval by the workspace administrator. Distribution across workspaces and the Marketplace are configured separately after an end-to-end test.
 
-Notion использует OAuth с выбором страниц пользователем. Capability Read content. Права на страницы ограничены выбором пользователя. Токены обновляются с сохранением новой пары; при отсутствии expires_in обновление выполняется раз в час при обращении.
+Notion uses OAuth with page selection by the user. Capability: Read content. Page permissions are limited to the user's selection. Tokens are refreshed and the new pair is saved; if expires_in is absent, a refresh is performed once an hour on access.
 
-Atlassian: Resource-level 3LO; выбор сайта из accessible-resources. Callback и 10 API scopes сохранены в консоли; offline_access дополнительно запрашивается при входе. Секрет перевыпущен владельцем и установлен на сервер. Distribution ещё не включён, реальный вход не проверен.
+Atlassian: Resource-level 3LO; site selection from accessible-resources. The callback and 10 API scopes are saved in the console; offline_access is additionally requested at login. The secret was reissued by the owner and installed on the server. Distribution is not enabled yet; a real login has not been tested.
 
-| Функция | Scope для настройки |
+| Feature | Scope to configure |
 |---|---|
-| Jira: задачи, проекты, версии | `read:jira-work` |
-| Jira: создание, правка и удаление при откате | `write:jira-work` |
-| Jira: профиль и исполнители | `read:jira-user` |
-| Jira Software: спринты | `read:sprint:jira-software`, `write:sprint:jira-software` |
-| Jira Software: список досок | `read:board-scope:jira-software`, `read:project:jira` |
-| Jira Software: возврат в backlog | `write:board-scope:jira-software` |
-| Jira Software: снимок issue | `read:issue:jira-software` |
-| Confluence: CQL поиск с текстом страниц | `search:confluence` |
-| Продление авторизации | `offline_access` |
+| Jira: issues, projects, versions | `read:jira-work` |
+| Jira: creating, editing and deleting on rollback | `write:jira-work` |
+| Jira: profile and assignees | `read:jira-user` |
+| Jira Software: sprints | `read:sprint:jira-software`, `write:sprint:jira-software` |
+| Jira Software: board list | `read:board-scope:jira-software`, `read:project:jira` |
+| Jira Software: moving back to the backlog | `write:board-scope:jira-software` |
+| Jira Software: issue snapshot | `read:issue:jira-software` |
+| Confluence: CQL search with page text | `search:confluence` |
+| Authorization renewal | `offline_access` |
 
 [Jira 3LO](https://developer.atlassian.com/cloud/jira/platform/oauth-2-3lo-apps/), [Board](https://developer.atlassian.com/cloud/jira/software/rest/api-group-board/), [Sprint](https://developer.atlassian.com/cloud/jira/software/rest/api-group-sprint/), [Agile issue](https://developer.atlassian.com/cloud/jira/software/rest/api-group-issue/), [Backlog](https://developer.atlassian.com/cloud/jira/software/rest/api-group-backlog/), [Confluence CQL](https://developer.atlassian.com/cloud/confluence/rest/v1/api-group-content/).
 
-## Локальные сервисы
+## Local services
 
-Zoom получает системный звук через разрешения ОС. Ollama и Whisper работают локально; OAuth и ключи для них не требуются.
+Zoom receives system audio through OS permissions. Ollama and Whisper run locally; they do not require OAuth or keys.
 
-## Проверки
+## Tests
 
-Общий набор тестов и UI smoke проходят. Новые тесты: неверный state/cookie, повтор callback, одноразовый claim, зашифрованное хранение, ротация при конкурентных запросах, изоляция провайдеров и подключений, отключение, запрет подмены credentials из renderer. Моки не заменяют сквозной вход у провайдеров.
+The general test suite and UI smoke pass. New tests: invalid state/cookie, callback replay, one-time claim, encrypted storage, rotation under concurrent requests, isolation of providers and connections, disconnection, prevention of credential substitution from the renderer. Mocks do not replace an end-to-end login with the providers.
 
-Официальные инструкции: [Slack OAuth](https://docs.slack.dev/authentication/installing-with-oauth/), [ротация Slack](https://docs.slack.dev/authentication/using-token-rotation/), [Notion OAuth](https://developers.notion.com/docs/authorization).
+Official documentation: [Slack OAuth](https://docs.slack.dev/authentication/installing-with-oauth/), [Slack rotation](https://docs.slack.dev/authentication/using-token-rotation/), [Notion OAuth](https://developers.notion.com/docs/authorization).
 
-Идентификаторы приложений: Atlassian 20c1cb45-4b70-42ab-8bb4-aac4e0259dd3; Slack A0CEDB1HFD3; Notion 40dd872b-594c-81b7-8b7a-0037d20d3c37. Notion создан с публичной областью установки, правами Read content, без записи, комментариев и профилей пользователей.
+App identifiers: Atlassian 20c1cb45-4b70-42ab-8bb4-aac4e0259dd3; Slack A0CEDB1HFD3; Notion 40dd872b-594c-81b7-8b7a-0037d20d3c37. The Notion app was created with a public installation scope and Read content permissions, without write access, comments or user profiles.
 
 
-Asana: API app Petya, client ID 1220193688170618. Callback https://auth.petya-app.ru/oauth/asana/callback. Четыре права: workspaces:read projects:read tasks:read tasks:write; Full permissions и Delete выключены. Manage distribution: Any workspace, сохранено. Секрет в ASANA_CLIENT_SECRET на сервере; ASANA_CLIENT_ID установлен. Адаптер oauth/server/asana-provider.cjs, отдельное шифрованное хранилище asana.enc. Запросы refresh сохраняют прежний refresh token, если Asana не вернула новый. Публичная политика дополнена Asana. Регрессионные тесты и UI smoke прошли.
+Asana: API app Petya, client ID 1220193688170618. Callback https://auth.petya-app.ru/oauth/asana/callback. Four permissions: workspaces:read projects:read tasks:read tasks:write; Full permissions and Delete are turned off. Manage distribution: Any workspace, saved. The secret is in ASANA_CLIENT_SECRET on the server; ASANA_CLIENT_ID is set. Adapter oauth/server/asana-provider.cjs, separate encrypted storage asana.enc. Refresh requests keep the previous refresh token if Asana did not return a new one. The public policy has been updated with Asana. Regression tests and UI smoke passed.
 
-На Mac установлена обновлённая Petya.app с прежней Developer ID подписью; резервная копия Petya-before-asana-20261103.app. Обычная сборка остановилась из-за места на диске; её временный каталог удалён. Обновление подготовлено через APFS clone установленного пакета с заменой src и повторной подписью, codesign --verify --deep --strict успешен.
+The updated Petya.app with the same Developer ID signature is installed on the Mac; backup copy Petya-before-asana-20261103.app. The regular build stopped because of insufficient disk space; its temporary directory was deleted. The update was prepared via an APFS clone of the installed package with src replaced and re-signing; codesign --verify --deep --strict succeeded.
 
-При проверке Safari исправлены две ошибки общего брокера: no-referrer создавал Origin:null у POST формы (теперь same-origin, без отправки Referer внешним сайтам); CSP form-action self блокировал внешний редирект формы (теперь после проверки выводится явная noreferrer-ссылка на провайдера). Проверки state/cookie/form и чужого Origin не ослаблены. OAuth-тесты прошли после обоих изменений; обновление развёрнуто.
+While testing in Safari, two bugs in the shared broker were fixed: no-referrer caused Origin:null on the form POST (now same-origin, without sending Referer to external sites); CSP form-action self blocked the form's external redirect (now, after the check, an explicit noreferrer link to the provider is shown). The state/cookie/form and foreign Origin checks were not weakened. The OAuth tests passed after both changes; the update has been deployed.
 
-Сквозная проверка Asana завершена: вход из установленной Petya.app через Safari, совпадение кода, подтверждение четырёх согласованных прав, callback, сохранение подключения Azur Games. В разделе Asana успешно загружены первая страница проектов (выбран ASO Tasks) и первая страница задач; кнопки дальнейшей пагинации отображаются. Реальные задачи не создавались и не изменялись. Создание/изменение, конфликт, повтор и смена подключения проверены тестами на mock API; реальное обновление access token по времени пока не проверено.
+The end-to-end Asana test is complete: login from the installed Petya.app via Safari, code match, confirmation of the four agreed permissions, callback, saving of the Azur Games connection. In the Asana section, the first page of projects (ASO Tasks selected) and the first page of tasks loaded successfully; the buttons for further pagination are displayed. No real tasks were created or modified. Creation/modification, conflict, retry and connection change were tested on a mock API; a real time-based access token refresh has not been tested yet.
 
-## Иконки приложений
+## App icons
 
-04.11.2026: в консолях Slack (A0CEDB1HFD3), Notion (40dd872b-594c-81b7-8b7a-0037d20d3c37), Atlassian для Jira/Confluence (20c1cb45-4b70-42ab-8bb4-aac4e0259dd3) и Asana (1220193688170618) установлена иконка `assets/app-icon.png`. Сохранение и отображение проверены в интерфейсах сервисов; Atlassian дополнительно проверен после перезагрузки страницы.
+04.11.2026: the icon `assets/app-icon.png` was set in the consoles of Slack (A0CEDB1HFD3), Notion (40dd872b-594c-81b7-8b7a-0037d20d3c37), Atlassian for Jira/Confluence (20c1cb45-4b70-42ab-8bb4-aac4e0259dd3) and Asana (1220193688170618). Saving and display were checked in the services' interfaces; Atlassian was additionally checked after a page reload.

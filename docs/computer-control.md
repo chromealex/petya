@@ -1,53 +1,53 @@
-# Управление компьютером
+# Computer control
 
-Раскройте «Управление компьютером» внизу окна Пети, выберите режим и нажмите «Включить управление». В macOS разрешите универсальный доступ и, при запросе системы, автоматизацию System Events.
+Expand «Управление компьютером» (Computer control) at the bottom of Petya's window, choose a mode and click «Включить управление» (Enable control). On macOS, grant Accessibility access and, if the system asks, automation of System Events.
 
-Доступ теперь сохраняется после обычного завершения Пети, перезапуска приложения и компьютера. Включите его один раз в обновлённой версии: прежние версии держали выбор только в оперативной памяти. Петя восстанавливает выбор при своём следующем запуске; эта настройка не включает автозапуск самого приложения. Разрешения macOS или Windows по-прежнему должны быть выданы системой.
+Access is now kept after Petya quits normally, after the app restarts and after the computer restarts. Enable it once in the updated version: previous versions kept the choice only in memory. Petya restores the choice the next time it starts; this setting does not make the app itself launch automatically. macOS or Windows permissions must still be granted by the system.
 
-Выбор общий для этого компьютера и профиля пользователя, не зависит от выбранной компании. Файл `computer-access.json` находится в каталоге пользовательских данных Пети. Он содержит режим и идентификатор приложения, но не введённый текст и не историю действий. Для macOS сохраняется bundle ID, для Windows — путь исполняемого файла. Старые PID после перезапуска не используются. Если выбранное приложение закрыто или найдено несколько его экземпляров, действие не выполняется.
+The choice is shared for this computer and user profile and does not depend on the selected company. The file `computer-access.json` is located in Petya's user data directory. It contains the mode and the application identifier, but not typed text or action history. On macOS the bundle ID is stored; on Windows, the path to the executable. Old PIDs are not reused after a restart. If the selected application is closed or several instances of it are found, the action is not performed.
 
-## Режимы
+## Modes
 
-- **Одно приложение:** ввод текста, отдельные клавиши и стандартные сочетания Cmd (Mac) или Ctrl (Windows) с A/C/V/X/Y/Z/S/F/N/P/O/W, в том числе с Shift. Перед каждым действием приложение определяется заново и активируется. Это маршрутизация ввода, а не изолированная песочница для самого приложения.
-- **Весь компьютер:** ввод в активное окно, сочетания Ctrl/Cmd/Alt/Shift с буквами, цифрами, F1–F12 и навигационными клавишами; прокрутка под курсором; переключение запущенных приложений; клики и перетаскивание. При вводе из интерфейса Пети учитывайте, что активным может быть её собственное окно. Голосовая команда позволяет оставить нужное окно активным.
+- **Single application:** typing text, individual keys and standard Cmd (Mac) or Ctrl (Windows) shortcuts with A/C/V/X/Y/Z/S/F/N/P/O/W, including with Shift. Before each action the application is located again and activated. This is input routing, not an isolated sandbox for the application itself.
+- **Whole computer:** typing into the active window; Ctrl/Cmd/Alt/Shift shortcuts with letters, digits, F1–F12 and navigation keys; scrolling under the cursor; switching between running applications; clicks and dragging. When typing from Petya's interface, keep in mind that the active window may be Petya's own. A voice command lets you keep the desired window active.
 
-## Команды
+## Commands
 
-- `введи текст Привет`
-- `нажми ввод`, `нажми сохранить`, `нажми отменить`, `нажми повторить`
-- `нажми копировать`, `нажми вставить`, `нажми вырезать`, `нажми выделить всё`
-- `нажми Cmd+Shift+S` на Mac; `нажми Ctrl+Shift+S` в Windows
-- `нажми Alt+Tab`, `нажми Ctrl+F5`
-- `прокрути вниз 5`, `прокрути вверх`, `прокрути вправо 3` — от 1 до 100 шагов, по умолчанию 3
-- `клик 500 300`, `двойной клик 500 300`, `правый клик 500 300`
-- `перетащи 100 200 в 400 500`
-- `переключись на приложение Safari` — точное название из списка запущенных приложений
-- `останови управление`
+- `введи текст Привет` (type the text "Hello")
+- `нажми ввод`, `нажми сохранить`, `нажми отменить`, `нажми повторить` (press Enter, press save, press undo, press redo)
+- `нажми копировать`, `нажми вставить`, `нажми вырезать`, `нажми выделить всё` (press copy, press paste, press cut, press select all)
+- `нажми Cmd+Shift+S` (press Cmd+Shift+S) on Mac; `нажми Ctrl+Shift+S` (press Ctrl+Shift+S) on Windows
+- `нажми Alt+Tab`, `нажми Ctrl+F5` (press Alt+Tab, press Ctrl+F5)
+- `прокрути вниз 5`, `прокрути вверх`, `прокрути вправо 3` (scroll down 5, scroll up, scroll right 3) — from 1 to 100 steps, 3 by default
+- `клик 500 300`, `двойной клик 500 300`, `правый клик 500 300` (click, double-click, right-click at 500 300)
+- `перетащи 100 200 в 400 500` (drag from 100 200 to 400 500)
+- `переключись на приложение Safari` (switch to the Safari app) — the exact name from the list of running applications
+- `останови управление` (stop control)
 
-Координаты отсчитываются от верхнего левого угла основного экрана, допускаются отрицательные значения для дополнительных мониторов. Прокрутка, мышь, переключение приложений и системные сочетания доступны только в режиме всего компьютера.
+Coordinates are measured from the top-left corner of the main screen; negative values are allowed for additional monitors. Scrolling, the mouse, application switching and system shortcuts are available only in whole-computer mode.
 
-## Остановка и ограничения
+## Stopping and limitations
 
-Кнопка «Остановить управление», одноимённая команда и Ctrl+Shift+F12 (Command+Shift+F12 на Mac) отключают доступ сейчас и после последующих запусков. Обычный выход сохраняет выбор, но отменяет ожидающее действие. Уже отправленный ввод не отменяется. После прерывания перетаскивания Петя пытается отпустить кнопку мыши.
+The «Остановить управление» (Stop control) button, the command of the same name and Ctrl+Shift+F12 (Command+Shift+F12 on Mac) turn off access now and for subsequent launches. A normal quit keeps the choice but cancels any pending action. Input that has already been sent is not undone. If a drag is interrupted, Petya tries to release the mouse button.
 
-Это отдельные команды без автономного анализа экрана и планирования многошаговых задач. Петя не запускает произвольный код из команды и не открывает закрытое приложение по неточному названию. Повышенные окна Windows и системные ограничения фокуса могут отклонить действие. Windows-реализация требует проверки на реальном компьютере.
+These are individual commands with no autonomous screen analysis and no planning of multi-step tasks. Petya does not run arbitrary code from a command and does not open a closed application by an inexact name. Elevated Windows windows and system focus restrictions may reject an action. The Windows implementation needs to be verified on a real computer.
 
-## Обычные просьбы и поиск через интерфейс
+## Ordinary requests and search through the interface
 
-Пример: «В телеграмме найди мне контакт Васи». Петя разбирает просьбу локальной моделью Ollama; распространённые формулировки поиска работают также без модели. Он определяет Telegram, находит подписанное поле поиска через macOS Accessibility / Windows UI Automation, проверяет фокус, вводит имя и читает строки списка рядом с полем. Telegram API, отдельный вход в аккаунт и API-ключи для этого не используются.
+Example: «В телеграмме найди мне контакт Васи» ("Find Vasya's contact for me in Telegram"). Petya parses the request with the local Ollama model; common search phrasings also work without the model. It identifies Telegram, finds the labelled search field via macOS Accessibility / Windows UI Automation, checks focus, types the name and reads the list rows next to the field. The Telegram API, a separate account login and API keys are not used for this.
 
-Telegram должен быть запущен, а Пете разрешено управление всем компьютером либо именно Telegram. Если окно скрывает поиск, полей несколько или список недоступен системным средствам, Петя сообщает о невозможности надёжно выполнить шаг. При нескольких списках он не выдаёт содержимое открытой переписки за результат поиска. Он не нажимает Enter в неизвестном поле и не отправляет сообщений. Ответ «ничего не найдено» допустим лишь при прочитанном соответствующем состоянии интерфейса; отсутствие доступных строк означает невозможность прочитать результат.
+Telegram must be running, and Petya must be allowed to control the whole computer or Telegram specifically. If the window hides the search, there are several fields, or the list is not accessible to system tools, Petya reports that it cannot perform the step reliably. When there are several lists, it does not present the contents of an open chat as the search result. It does not press Enter in an unknown field and does not send messages. The answer «ничего не найдено» ("nothing found") is allowed only when the corresponding interface state has actually been read; the absence of accessible rows means the result could not be read.
 
-Результаты выводятся в ответе Пети по реально прочитанным строкам. Автоматический выбор первого одноимённого человека и открытие переписки не выполняются. Разговорные просьбы переключить запущенное приложение, прокрутить экран, скопировать/вставить или отменить действие также разбираются локальной моделью. Это набор поддерживаемых намерений, а не универсальное выполнение любой задачи в любом приложении.
+Results are shown in Petya's reply based on the rows actually read. It does not automatically pick the first person with that name or open a chat. Conversational requests to switch to a running application, scroll the screen, copy/paste or undo an action are also parsed by the local model. This is a set of supported intents, not universal execution of any task in any application.
 
-Проверка реализации включает моделирование дерева доступности и защиту от неоднозначного поля. Для проверки в реальном окне требуется системное разрешение; тестовый osascript в среде разработки может не иметь того доступа, который выдан установленному Petya.app.
+Verification of the implementation includes simulation of the accessibility tree and protection against an ambiguous field. Checking in a real window requires a system permission; a test osascript in the development environment may not have the access granted to the installed Petya.app.
 
-## Курсор и значок управления
+## Cursor and control badge
 
-Во время выполнения действия поверх рабочего стола появляются бирюзовый указатель с подписью «Петя» и плашка с иконкой Пети у верхнего правого края управляемого окна. Плашка сообщает действие и название приложения. Сохранённое разрешение само по себе не включает индикатор: он означает именно текущее действие.
+While an action is being performed, a turquoise pointer labelled «Петя» (Petya) appears over the desktop, along with a badge with Petya's icon near the top-right edge of the controlled window. The badge shows the action and the application name. A saved permission on its own does not turn on the indicator: the indicator means an action is in progress right now.
 
-Указатель отмечает точку клика, следует за шагами перетаскивания и показывает поле, в которое Петя вводит поисковый запрос. Для клавиатурного действия отмечается текущее положение мыши. Это отдельный визуальный указатель поверх обычного системного курсора. Геометрию окна и положение цели передаёт системный помощник; учитываются отрицательные координаты дополнительных мониторов и масштаб Windows.
+The pointer marks the click point, follows the steps of a drag and shows the field into which Petya types the search query. For a keyboard action, the current mouse position is marked. This is a separate visual pointer on top of the normal system cursor. The window geometry and target position are provided by the system helper; negative coordinates of additional monitors and Windows scaling are taken into account.
 
-Оба прозрачных окна не активируются, не забирают фокус, отсутствуют в панели задач и пропускают клики к приложению под ними. При успешном завершении на 650 мс появляется «Готово». При отмене, ошибке, блокировке экрана и выходе индикаторы скрываются. Показ поверх защищённого рабочего стола Windows и системных экранов безопасности не поддерживается.
+Both transparent windows are never activated, do not take focus, are absent from the taskbar and pass clicks through to the application below them. On successful completion, «Готово» (Done) appears for 650 ms. On cancellation, error, screen lock and quit, the indicators are hidden. Display over the Windows secure desktop and system security screens is not supported.
 
-Проверки: `tests/computer-overlay.cjs` проверяет жизненный цикл, остановку, масштаб и несколько мониторов; `tests/computer-overlay-smoke.cjs` запускается через Electron без `ELECTRON_RUN_AS_NODE`, проверяет реальную отрисовку, отсутствие фокуса и сохранение снимков в системный временный каталог.
+Tests: `tests/computer-overlay.cjs` checks the lifecycle, stopping, scaling and multiple monitors; `tests/computer-overlay-smoke.cjs` runs via Electron without `ELECTRON_RUN_AS_NODE` and checks real rendering, absence of focus and saving of snapshots to the system temporary directory.
