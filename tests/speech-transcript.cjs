@@ -12,3 +12,6 @@ assert.equal(commandTranscript('Кричка Плеча '.repeat(12)),'');
 assert.equal(commandTranscript('Проверь субтитры к ролику'),'Проверь субтитры к ролику');
 assert.equal(commandTranscript('Кирилл, проверь задачу. Кирилл отвечает за сервер.'),'Кирилл, проверь задачу. Кирилл отвечает за сервер.');
 assert.equal(commandTranscript('Да, да, да'),'Да, да, да');
+for(const noise of ['嗯。嗯。','嗯','呃，嗯。','ммм...','um, um','...','♪'])assert.equal(commandTranscript(noise),'',noise);
+for(const speech of ['Да','Нет','1','Go','Bonjour','嗯，我在这里','Как дела?','Ändere das Projekt'])assert.equal(commandTranscript(speech),speech,speech);
+const {transcriptResult}=require('../src/speech-transcript.cjs');assert.equal(transcriptResult('嗯。嗯。'),null);assert.equal(transcriptResult(''),'');

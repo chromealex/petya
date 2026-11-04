@@ -82,13 +82,14 @@ const { ServiceOAuth } = require('./service-oauth.cjs');
 const serviceOAuth = { asana: new ServiceOAuth('asana', directRequest), slack: new ServiceOAuth('slack', directRequest), notion: new ServiceOAuth('notion', directRequest) };
 const modules = require('./modules.cjs');
 const team = require('./team.cjs');
-const defaults = { ...modules.defaults, speechStyle:'0', semanticTools:'true', teamMembers:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', gmailCredential:'', microsoftCredential:'', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto',googlePlayCredential:'', asanaCredential: '', asanaWorkspace: '', slackCredential: '', notionCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', notionToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'false', slackInterval: '5', zoomAutoRecord: 'false', zoomWindowTitle: '', zoomCaptureMic: 'true' };
+const defaults = { ...modules.defaults, speechStyle:'0', userName:'', userNameVariants:'', userNameExcluded:'', communicationLanguage:'ru', semanticTools:'true', teamMembers:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', gmailCredential:'', microsoftCredential:'', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto',googlePlayCredential:'', asanaCredential: '', asanaWorkspace: '', slackCredential: '', notionCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', notionToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'false', slackInterval: '5', zoomAutoRecord: 'false', zoomWindowTitle: '', zoomCaptureMic: 'true' };
 const runtimeCandidates = [path.resolve(__dirname, '..'), process.platform === 'darwin' ? path.resolve(process.resourcesPath, '../../..') : path.dirname(process.resourcesPath)];
 const { bundledModel, upgradeBundledModel } = require('./speech-model.cjs');
 const localModel = bundledModel(runtimeCandidates);
 const runtimeRoot = localModel ? path.resolve(path.dirname(localModel), '../..') : runtimeCandidates[0];
 const localBinary = path.join(runtimeRoot, 'runtime/whisper-build/bin', process.platform === 'win32' ? 'whisper-server.exe' : 'whisper-server');
-const localVoice = new (require('./local-voice.cjs').LocalVoice)({ roots: runtimeCandidates });
+const languagePacks = new (require('./language-packs.cjs').LanguagePacks)({directory:path.join(app.getPath('userData'),'voice-languages'),roots:runtimeCandidates});
+const localVoice = new (require('./local-voice.cjs').LocalVoice)({ roots: runtimeCandidates, languageDir:languagePacks.directory });
 const imageInstallRoot=path.join(app.getPath('userData'),'image-generator');
 const localImages = new (require('./local-images.cjs').LocalImages)({roots:[imageInstallRoot,...runtimeCandidates]});
 const imageInstaller=new (require('./image-installer.cjs').ImageInstaller)({root:imageInstallRoot,roots:[imageInstallRoot,...runtimeCandidates],ready:()=>localImages.status().ready});
@@ -170,6 +171,9 @@ function saveSettings(input, internal = false) {
     for (const name of ['slack', 'notion']) if (!internal && settings[name+'Credential'] && input[name+'Token']) throw new Error('Сначала отключите вход '+name+' через браузер.');
     if(typeof input.teamMembers==='string')next.teamMembers=JSON.stringify(team.validate(JSON.parse(input.teamMembers)));
     if(typeof input.integrationChoices==='string'){const choices=JSON.parse(input.integrationChoices);if(!choices||typeof choices!=='object'||Array.isArray(choices)||Object.entries(choices).some(([key,value])=>!require('./service-access.cjs').services[key]||value!=='browser'))throw Error('Некорректный выбор способа доступа.');next.integrationChoices=JSON.stringify(choices);}
+    if(!languagePacks.installed(next.communicationLanguage))throw Error('Сначала установи выбранный язык в настройках.');
+    if(next.userName!==settings.userName&&typeof input.userNameVariants!=='string')next.userNameVariants='';
+    const nameProfile=require('./ui/name-profile.js').NameProfile.validate(next.userName,next.userNameVariants,next.userNameExcluded);next.userNameExcluded=nameProfile.excluded;next.userName=nameProfile.name;next.userNameVariants=nameProfile.custom;
     next.speechStyle = require('./speech-style.cjs').validate(next.speechStyle);
     next.contextDays = String(retention(next.contextDays));
     if (!['1', '5', '15'].includes(next.slackInterval)) throw new Error('Интервал Slack: 1, 5 или 15 минут.');
@@ -391,7 +395,7 @@ function setupHandlers() {
       const telegramQuestion=/(?:телеграм|telegram|(?:^|\s)тг(?:\s|$))/iu.test(command)||topic.telegram;
       const telegramContext=telegramQuestion?memory.prune().filter(c=>c.source==='Telegram').slice(-5).map(c=>({title:c.title,text:c.text.slice(-3000),at:c.at,url:c.url})):null;
       if(telegramQuestion){topic.telegram=true;if(!modules.enabled(settings,'telegram'))return 'Включите модуль Telegram в подключениях.';if(!telegramContext.length)return 'Сначала подключите Telegram, выберите чаты и нажмите «Обновить контекст».';if(!settings.model)return 'В памяти есть сообщения Telegram. Настройте локальную модель Ollama для ответа по их содержимому. Их можно посмотреть во вкладке «Контекст».';}
-      return require('./dialogue-answer.cjs').localAnswer({model:settings.model,command,topic,settings,chooseKnowledgeModel:()=>require('./knowledge-model.cjs').selectKnowledgeModel(settings,request),skills:instructionSkills.list(),teamMembers:team.members(settings),teamNotes:settings.teamRoles||'',supplementalContext:[chatProject?.context,localProject&&JSON.stringify(localProject),telegramContext&&JSON.stringify(telegramContext)].filter(Boolean).join('\n'),telegram:telegramQuestion,uncertain,clarify:()=>topic.background?{text:'Уточни вопрос: что именно нужно выяснить?',question:true}:interpret(command,topic),request:(overrides={})=>request(core.localEndpoint(settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...require('./dialogue-request.cjs').dialogueRequest({model:settings.model,command,topic,company:companies.get(companyId).name,services:Object.entries({jira:'Jira',confluence:'Confluence',slack:'Slack',notion:'Notion',gmail:'Gmail',telegram:'Telegram',asana:'Asana',googleplay:'Google Play'}).filter(([key])=>modules.enabled(settings,key)).map(([,name])=>name),projectContext:chatProject?.context||'',localProject,telegramContext,teamContext:team.context(settings,command),speechStyle:settings.speechStyle}),...overrides,stream:true}),onAnswerChunk:require('./answer-stream.cjs').report})});
+      return require('./dialogue-answer.cjs').localAnswer({model:settings.model,command,topic,settings,chooseKnowledgeModel:()=>require('./knowledge-model.cjs').selectKnowledgeModel(settings,request),skills:instructionSkills.list(),teamMembers:team.members(settings),teamNotes:settings.teamRoles||'',supplementalContext:[chatProject?.context,localProject&&JSON.stringify(localProject),telegramContext&&JSON.stringify(telegramContext)].filter(Boolean).join('\n'),telegram:telegramQuestion,uncertain,clarify:()=>topic.background?{text:'Уточни вопрос: что именно нужно выяснить?',question:true}:interpret(command,topic),request:(overrides={})=>request(core.localEndpoint(settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...require('./dialogue-request.cjs').dialogueRequest({model:settings.model,command,topic,company:companies.get(companyId).name,services:Object.entries({jira:'Jira',confluence:'Confluence',slack:'Slack',notion:'Notion',gmail:'Gmail',telegram:'Telegram',asana:'Asana',googleplay:'Google Play'}).filter(([key])=>modules.enabled(settings,key)).map(([,name])=>name),projectContext:chatProject?.context||'',localProject,telegramContext,teamContext:team.context(settings,command),speechStyle:settings.speechStyle,communicationLanguage:settings.communicationLanguage,userName:settings.userName,userNameVariants:settings.userNameVariants,userNameExcluded:settings.userNameExcluded}),...overrides,stream:true}),onAnswerChunk:require('./answer-stream.cjs').report})});
     }
   });
   const reviewFile=path.join(dataRoot,'review-memory.json');
@@ -678,6 +682,8 @@ function setupHandlers() {
     // Label replies produced by shortcut handlers before the model, so misrouting is visible in the chat.
     const via=(source,reply)=>{if(reply&&typeof reply==='object'&&!reply.by){reply.by=source;const last=dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&!last.by&&last.text===reply.text){last.by=source;dialogue.persist();}}return reply;};
     if(!background&&chatJobs.busy(dialogue.active()?.id))throw Error('В этом чате ещё выполняется запрос.');const original=text(command,4000);let value=original,applied=[];
+    const namePreference=!choice?require('./name-preference.cjs').preference(original,settings):null;
+    if(namePreference){saveSettings(namePreference.patch);dialogue.rememberAction(original,namePreference.text);return {handled:true,text:namePreference.text,topicId:dialogue.active()?.id,messages:dialogue.active()?.messages};}
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
     if(gitRoute){
       if(gitRoute.action==='clarify')return {handled:true,text:gitRoute.question,question:true};
@@ -1025,19 +1031,22 @@ function setupHandlers() {
   // Window discovery uses CoreGraphics; it must not depend on screen-stream enumeration.
   handle('inspectZoom', () => inspectZoomWindows(true));
   handle('pauseAutoMeeting', () => meetingMonitor?.pause());
-  handle('synthesizeVoice', text => localVoice.speak(text));
+  handle('voiceLanguages',()=>({languages:languagePacks.list(),selected:settings.communicationLanguage}));
+  handle('voiceLanguageInstall',async code=>{await languagePacks.install(code);localVoice.stop();return {languages:languagePacks.list(),selected:settings.communicationLanguage};});
+  handle('voiceLanguageCheck',value=>languagePacks.check(require('./spoken-text.cjs').spokenText(value),settings.communicationLanguage));
+  handle('synthesizeVoice', async value => {const check=await languagePacks.check(require('./spoken-text.cjs').spokenText(value),settings.communicationLanguage);if(check.missing.length)return {languageRequired:check.missing};return localVoice.speak(value,settings.communicationLanguage);});
   handle('stopVoice', () => localVoice.stop());
   handle('ensureSpeech', () => qwenSpeech.available?qwenSpeech.ensure():speech.ensure(settings));
   handle('transcribe', async bytes => {
     if (!(bytes instanceof ArrayBuffer) || bytes.byteLength < 44 || bytes.byteLength > 4e6) throw new Error('Некорректное аудио.');
-    const audio=require('./speech-audio.cjs').prepareCommandAudio(bytes);if(!audio)return '';
-    if(qwenSpeech.available)return require('./speech-transcript.cjs').commandTranscript(await qwenSpeech.transcribe(audio));
+    const audio=require('./speech-audio.cjs').prepareCommandAudio(bytes);if(!audio)return null;
+    if(qwenSpeech.available)return require('./speech-transcript.cjs').transcriptResult(await qwenSpeech.transcribe(audio));
     const form = new FormData(); form.append('file', new Blob([audio], { type: 'audio/wav' }), 'audio.wav'); form.append('language', 'ru'); form.append('response_format', 'json'); form.append('temperature', '0'); form.append('temperature_inc', '0'); form.append('suppress_non_speech', 'true');
     const endpoint = core.localEndpoint(settings.whisperUrl);
     try {
       const result = await speech.run({ ...settings }, target => request(core.localEndpoint(target), { method: 'POST', body: form }));
       if (typeof result?.text !== 'string') throw new Error('Сервер вернул неверный ответ распознавания. Проверьте адрес whisper.cpp.');
-      return require('./speech-transcript.cjs').commandTranscript(result.text);
+      return require('./speech-transcript.cjs').transcriptResult(result.text);
     } catch (error) { throw speechError(error, endpoint); }
   });
   handle('plan', (command, before, sessionId) => {

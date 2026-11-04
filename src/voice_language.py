@@ -1,0 +1,56 @@
+"""Detect language and load only explicitly installed pronunciation resources."""
+import hashlib
+import importlib.util
+import json
+import re
+from pathlib import Path
+from langdetect import detect_langs, DetectorFactory
+DetectorFactory.seed = 0
+CATALOG = json.loads(Path(__file__).with_name('language-catalog.json').read_text())
+
+
+def detect_languages(text, preferred='ru'):
+    found = []
+    def add(code):
+        if code not in found: found.append(code)
+    if re.search('[А-Яа-яЁё]', text): add('ru')
+    for segment in re.findall(r'[A-Za-zÀ-ž][A-Za-zÀ-ž\s\d,\'’:%-]*', text):
+        value = segment.strip()
+        greetings = {'bonjour':'fr', 'guten morgen':'de', 'buenos días':'es', 'hola':'es'}
+        if value.lower() in greetings:
+            add(greetings[value.lower()]); continue
+        if len(re.findall(r'[A-Za-zÀ-ž]+', value)) < 3:
+            continue  # Project names alone must not trigger installation.
+        try:
+            result = detect_langs(value)[0]
+            if result.prob >= .90: add(result.lang)
+        except Exception: pass
+    if not found: add(preferred if preferred in ['ru','en',*CATALOG] and preferred!='ru' else 'en' if re.search('[A-Za-z]',text) else 'ru')
+    return found
+
+
+def installed(code, directory):
+    if code in ('ru','en'): return True
+    item = CATALOG.get(code)
+    if not item: return False
+    target = Path(directory) / code / 'numbers.py'
+    return target.is_file() and hashlib.sha256(target.read_bytes()).hexdigest() == item['sha256']
+
+
+def missing_languages(text, directory, preferred='ru'):
+    return [{'code':code,'label':CATALOG.get(code,{}).get('label',code),'available':code in CATALOG}
+            for code in detect_languages(text,preferred) if not installed(code,directory)]
+
+
+def load_numbers(code, directory):
+    if code in ('ru','en'): return
+    if not installed(code,directory): raise ValueError('Language pack is not installed')
+    import num2words
+    spec=importlib.util.spec_from_file_location('num2words.petya_'+code, Path(directory)/code/'numbers.py')
+    module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+    num2words.CONVERTER_CLASSES[code]=getattr(module,'Num2Word_'+CATALOG[code]['module'])()
+
+if __name__ == '__main__':
+    import sys
+    request=json.load(sys.stdin)
+    print(json.dumps({'missing':missing_languages(request['text'],sys.argv[1],request.get('preferred','ru'))}))
