@@ -703,3 +703,16 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .clarification-list>.clarification-option:hover,.clarification-list>.clarification-option:focus-visible{background:#d0f59612}
 .clarification-option:hover::before{border-color:var(--green)}
 .clarification-list>.clarification-custom{align-self:flex-start;border:0;background:transparent;color:var(--muted);padding:8px 12px;font-size:12px}
+
+/* Status and overflow menu share a fixed slot at the end of the chat row. */
+.project-chat-row{position:relative}
+.project-chat-row>.chat-job-dot{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;transition:opacity var(--motion-fast)}
+.project-chat-row:hover>.chat-job-dot,.project-chat-row:focus-within>.chat-job-dot{opacity:0}
+@media(hover:none){.project-chat-row>.chat-job-dot{display:none}}
+
+/* Hidden menu does not reserve space: a quiet chat title uses the whole row. */
+.project-chat-row>.project-more{position:absolute;right:0;top:0;bottom:0;height:auto}
+.project-chat-row>.project-sidebar-chat{padding-right:8px}
+.project-chat-row:has(>.chat-job-dot)>.project-sidebar-chat{padding-right:26px}
+.project-chat-row:hover>.project-sidebar-chat,.project-chat-row:focus-within>.project-sidebar-chat{padding-right:32px}
+@media(hover:none){.project-chat-row>.project-sidebar-chat{padding-right:32px}}
