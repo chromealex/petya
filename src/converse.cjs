@@ -161,7 +161,6 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
         }
       });
       if(routed)return {...routed,selectedTool:route.tool};
-      step('Готовлю ответ');
     }
     const reply=await ctx.dialogue.turn(value,typeof choice==='string'?choice:undefined,undefined,preparedTopicRoute);
     if(applied.length&&reply.handled){const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user');if(m){m.originalText=original;ctx.dialogue.persist();}}

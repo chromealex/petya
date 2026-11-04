@@ -790,3 +790,9 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 /* Reveal project creation controls without shifting the row. */
 .project-new-chat{opacity:0;pointer-events:none}
 .project-sidebar-project:hover>.project-new-chat,.project-sidebar-project:focus-within>.project-new-chat{opacity:1;pointer-events:auto}
+/* Per-chat model picker: quiet, same weight as the microphone control. */
+.chat-model{display:inline-flex;align-items:center;min-width:0}
+.chat-model select{appearance:none;background:transparent;border:0;color:var(--muted);font:inherit;font-size:12px;padding:4px 18px 4px 8px;max-width:220px;text-overflow:ellipsis;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 9px) 55%,calc(100% - 5px) 55%;background-size:4px 4px;background-repeat:no-repeat;border-radius:6px}
+.chat-model select:hover,.chat-model select:focus-visible{color:var(--ink);background-color:#ffffff0d;outline:none}
+.chat-model[data-custom="true"] select{color:var(--green)}
+.chat-model select:disabled{opacity:.5;cursor:default}
