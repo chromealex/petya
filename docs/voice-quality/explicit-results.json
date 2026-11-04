@@ -1,0 +1,20 @@
+[
+  {
+    "case": "ru",
+    "spoken_text": "Версия один точка девятнадцать точка ноль: найдено ноль багов, двенадцать задач и три открытых. Готово двадцать пять процентов.",
+    "synthesis_seconds": 7.25,
+    "audio_seconds": 10.48
+  },
+  {
+    "case": "mixed",
+    "spoken_text": "В Bunker Wars версия один точка девятнадцать точка ноль. В Jira осталось двенадцать задач. Please check Slack.",
+    "synthesis_seconds": 2.81,
+    "audio_seconds": 8.64
+  },
+  {
+    "case": "en",
+    "spoken_text": "Version one point nineteen point zero has twelve tasks and three open bugs.",
+    "synthesis_seconds": 1.77,
+    "audio_seconds": 5.68
+  }
+]

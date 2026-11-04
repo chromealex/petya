@@ -8,6 +8,7 @@ import sys
 import wave
 from pathlib import Path
 from voice_languages import language_parts
+from voice_numbers import spoken_numbers
 
 with contextlib.redirect_stdout(sys.stderr):
     import torch
@@ -45,11 +46,9 @@ for line in sys.stdin:
             chunks = [(language, chunk) for language, segment in language_parts(text)
                       for chunk in textwrap.wrap(segment, width=350, break_long_words=False, break_on_hyphens=False)]
             for index, (language, chunk) in enumerate(chunks):
-                if chunk[-1] not in '.!?;:…':
-                    chunk += '.'
-                parts.append(synthesize(language, chunk))
+                parts.append(synthesize(language, spoken_numbers(chunk, language)))
                 if index < len(chunks) - 1:
-                    parts.append(torch.zeros(3840))
+                    parts.append(torch.zeros(960))
             # Silence outside the waveform protects consonants at playback boundaries.
             parts.append(torch.zeros(9600))
             audio = torch.cat(parts)

@@ -15,9 +15,10 @@ class LocalVoice {
   start() {
     if (this.child) return;
     const binary = process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python';
-    const root = this.roots.find(root => fs.existsSync(path.join(root, 'runtime/tts', binary)) && fs.existsSync(path.join(root, 'runtime/models/petya-voice.pt')));
+    const unified = process.platform === 'darwin' && this.roots.find(root => fs.existsSync(path.join(root, 'runtime/tts-multilingual', binary)) && fs.existsSync(path.join(root, 'runtime/models/qwen-tts-base/READY')) && fs.existsSync(path.join(root, 'runtime/models/qwen-tts-base/reference.wav')));
+    const root = unified || this.roots.find(root => fs.existsSync(path.join(root, 'runtime/tts', binary)) && fs.existsSync(path.join(root, 'runtime/models/petya-voice.pt')));
     if (!root) throw Error('Локальный мужской голос ещё не установлен. Выполните scripts/setup-voice.py в папке Пети.');
-    const child = this.spawnProcess(path.join(root, 'runtime/tts', binary), ['-u', path.join(__dirname, 'local-voice.py'), path.join(root, 'runtime/models/petya-voice.pt')], { shell: false, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
+    const child = this.spawnProcess(path.join(root, unified ? 'runtime/tts-multilingual' : 'runtime/tts', binary), ['-u', path.join(__dirname, unified ? 'multilingual-voice.py' : 'local-voice.py'), path.join(root, unified ? 'runtime/models/qwen-tts-base' : 'runtime/models/petya-voice.pt')], { shell: false, windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
     this.child = child;
     child.stderr.resume();
     child.stdin.on('error', () => this.fail(child));

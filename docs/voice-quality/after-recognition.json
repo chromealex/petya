@@ -1,0 +1,14 @@
+[
+  {
+    "file": "after-en.wav",
+    "text": "Version one point nineteen point zero has twelve tasks and three open bugs."
+  },
+  {
+    "file": "after-mixed.wav",
+    "text": "Бункер Варс. Версия один точка девятнадцать точка ноль. Джира. Осталось двенадцать задач. Плиз, чек Slack."
+  },
+  {
+    "file": "after-ru.wav",
+    "text": "Версия 1.19.0. Найдено 0 багов. 12 задач и 3 открытых. Готово 25 процентов."
+  }
+]
