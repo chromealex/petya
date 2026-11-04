@@ -1,17 +1,17 @@
-# Статусы и голосовое восстановление
+# Statuses and voice recovery
 
-При выполнении команды панель показывает этап и прошедшее время. Уточнения и варианты ответа озвучиваются. На вопрос можно ответить именем, номером или словами «первый», «второй», «третий».
+While a command is running, the panel shows the stage and the elapsed time. Clarifying questions and answer options are spoken aloud. A question can be answered with a name, a number, or the words «первый» (first), «второй» (second), «третий» (third).
 
-После безопасного сбоя чтения вложений или выбора контекста скажите «Петя, повтори» (либо «повтори» в активном диалоге). Петя сохраняет исходную команду в памяти окна и использует результаты уже завершённых этапов. Доступна также кнопка повтора. Повторное нажатие во время выполнения не запускает второй запрос. Перезапуск приложения очищает состояние повтора.
+After a safe failure while reading attachments or selecting context, say «Петя, повтори» (Petya, repeat) (or «повтори» (repeat) in an active dialog). Petya keeps the original command in the window's memory and uses the results of stages already completed. A retry button is also available. Pressing it again during execution does not start a second request. Restarting the app clears the retry state.
 
-Для вопроса «что с билдом» в Slack однозначный адресат не требует подтверждения. После ошибки поиска можно сказать «повтори». Повтор привязан к компании, подключению и теме; срок — 10 минут. Отправленное сообщение и отправка с неизвестным результатом повторно не отправляются. При неоднозначности получателя Петя озвучивает варианты.
+For the question «что с билдом» (what's up with the build) in Slack, an unambiguous recipient does not require confirmation. After a search error you can say «повтори» (repeat). A retry is tied to the company, connection and topic; it is valid for 10 minutes. A sent message and a send with an unknown result are not sent again. If the recipient is ambiguous, Petya reads out the options.
 
-Автоматический повтор произвольных внешних действий не включён: если результат отправки неизвестен, интерфейс сохраняет текст и сообщает о необходимости проверить результат. Отмена уже отправленного внешнего действия этой функцией не поддерживается.
+Automatic retry of arbitrary external actions is not enabled: if the result of a send is unknown, the interface keeps the text and reports that the result needs to be checked. Cancelling an external action that has already been sent is not supported by this feature.
 
-## Повторные реплики, 4 ноября 2026
+## Repeated utterances, November 4, 2026
 
-Добавлен `tests/voice-conversation.cjs`: пять последовательных PCM-реплик через AudioListener и VoiceTurn, с подавлением эха ответа, пропущенным событием `ended`, зависшим `play()`, восстановлением suspended AudioContext и отменой. После голосового ответа открывается 12-секундное окно продолжения без повторного «Петя». После него требуется обращение снова. Тишина сама запрос не отправляет.
+Added `tests/voice-conversation.cjs`: five consecutive PCM utterances through AudioListener and VoiceTurn, with suppression of the reply's echo, a missed `ended` event, a hung `play()`, recovery of a suspended AudioContext, and cancellation. After a voice reply, a 12-second follow-up window opens without needing to say «Петя» (Petya) again. After it, addressing Petya is required again. Silence by itself does not send a request.
 
-Проигрыватель проверяет продвижение currentTime: при завершении без события или отсутствии продвижения 5 секунд освобождает микрофон. Захват пробует возобновить приостановленный AudioContext; если PCM-кадры не поступают 6 секунд, выводит явную ошибку. Добавлен индикатор уровня и состояния микрофона без записи аудио на диск.
+The player checks that currentTime is advancing: if playback finishes without an event or there is no progress for 5 seconds, it releases the microphone. Capture tries to resume a suspended AudioContext; if no PCM frames arrive for 6 seconds, it shows an explicit error. Added a microphone level and state indicator, without writing audio to disk.
 
-На машине найден старый Base-сервер на 8080, который принимался за текущий сервер. Теперь встроенный локальный пул использует собственный основной порт и выбранную модель. Чужой процесс не завершается. Три последовательных синтетических фразы успешно распознаны реальным Small-сервером при занятом 8080. Это не проверка живого USB-микрофона; его симптом остаётся непроверенным до повторной диктовки в обновлённой сборке.
+An old Base server on port 8080 was found on the machine and was being mistaken for the current server. Now the built-in local pool uses its own main port and the selected model. The other process is not terminated. Three consecutive synthetic phrases were successfully recognized by a real Small server while 8080 was occupied. This is not a test of a live USB microphone; its symptom remains unverified until dictation is repeated in the updated build.

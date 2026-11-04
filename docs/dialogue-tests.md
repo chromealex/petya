@@ -1,17 +1,17 @@
-# Проверки диалогов
+# Dialogue checks
 
-Прогон 4 ноября 2026: 61 шаг в `tests/dialogue-scenarios.cjs` и отдельные сценарии памяти проектов прошли. Живой прогон Qwen3:4b: 22/22 реплики в семи многошаговых сценариях. Полные входы, ответы и время — в `dialogue-live-results.json`.
+Run of November 4, 2026: 61 steps in `tests/dialogue-scenarios.cjs` and separate project memory scenarios passed. Live Qwen3:4b run: 22/22 utterances in seven multi-step scenarios. Full inputs, answers and timings are in `dialogue-live-results.json`.
 
-Покрытие: приветствие после старой опечатки и после багов; список проектов; уточнение по имени, номеру и порядковому слову; неверный номер; переключение Альфа/Бета; предыдущая версия; продолжение «сколько осталось»; смена темы и возврат к сохранённому ответу; явное обновление; ошибка сервиса; отмена; отрицания и цитаты команд; неизвестный исполнитель; отсутствие фактической отправки сообщения; изоляция каналов Slack по проектам и компаниям; устаревшее уточнение.
+Coverage: greeting after an old typo and after bugs; project list; clarification by name, number and ordinal word; wrong number; switching between Альфа/Бета (Alpha/Beta); previous version; the follow-up «сколько осталось» (how many are left); changing topic and returning to a saved answer; explicit refresh; service error; cancellation; negations and quoted commands; unknown assignee; no actual sending of a message; isolation of Slack channels by project and company; stale clarification.
 
-Обнаружены и исправлены: потеря продолжения при смене проекта, старое уточнение после смены темы, выполнение проверки при отрицании, трактовка номера выбора как нового имени проекта, выдуманный ответственный, возврат к багам на приветствие, ошибочная расшифровка ANR, вывод служебных полей. Производственный запрос модели вынесен в `src/dialogue-request.cjs`; живые тесты используют его же.
+Found and fixed: losing the follow-up when switching project, an old clarification after changing topic, running a check despite a negation, treating a selection number as a new project name, a made-up assignee, falling back to bugs on a greeting, an incorrect expansion of ANR, output of internal fields. The production model request has been moved to `src/dialogue-request.cjs`; the live tests use the same one.
 
-Запуск из корня репозитория с современным Node:
+Run from the repository root with a modern Node:
 
-- `npm run test:dialogues` — сценарии с контролируемыми данными, также входят в `npm test`.
-- `npm run test:dialogues:live` — настоящий локальный Ollama на 127.0.0.1:11434; модель по умолчанию `qwen3:4b`. Переопределение: `PETYA_TEST_MODEL`.
-- `PETYA_TEST_REPORT=/tmp/petya-results.json npm run test:dialogues:live` — сохранить отчёт.
+- `npm run test:dialogues` — scenarios with controlled data, also included in `npm test`.
+- `npm run test:dialogues:live` — real local Ollama at 127.0.0.1:11434; default model `qwen3:4b`. Override: `PETYA_TEST_MODEL`.
+- `PETYA_TEST_REPORT=/tmp/petya-results.json npm run test:dialogues:live` — save a report.
 
-На этом Mac вместо системного Node используется Electron: `ELECTRON_RUN_AS_NODE=1 node_modules/electron/dist/Electron.app/Contents/MacOS/Electron tests/dialogue-scenarios.cjs` (аналогично для dialogue-live).
+On this Mac, Electron is used instead of the system Node: `ELECTRON_RUN_AS_NODE=1 node_modules/electron/dist/Electron.app/Contents/MacOS/Electron tests/dialogue-scenarios.cjs` (similarly for dialogue-live).
 
-Ограничения: это текстовые диалоги, без микрофона и проверки Whisper. Реальные рабочие сервисы не вызываются, их ответы — фикстуры. Живой прогон проверяет локальный маршрутизатор тем и генератор ответа, а не весь IPC-маршрут приложения; основной интерфейс проверяется отдельным Electron smoke-тестом. Автоматические критерии проверяют конкретные свойства ответа, не гарантируют качество любых формулировок. Ответы просмотрены вручную: местами остаются стилистические и грамматические шероховатости. Время в отчёте не является полной задержкой голосового ответа. Прогон выполняется явно, без фонового расписания.
+Limitations: these are text dialogues, without a microphone or Whisper checks. Real work services are not called; their responses are fixtures. The live run checks the local topic router and the answer generator, not the app's entire IPC route; the main interface is checked by a separate Electron smoke test. Automated criteria check specific properties of an answer and do not guarantee the quality of arbitrary phrasings. Answers were reviewed manually: some stylistic and grammatical rough edges remain in places. The time in the report is not the full latency of a voice reply. The run is executed explicitly, without a background schedule.

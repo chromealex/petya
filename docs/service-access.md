@@ -1,11 +1,11 @@
-# Контекст без интеграции
+# Context without an integration
 
-Для запросов чтения Slack, Jira, Confluence, Asana, Notion, Gmail, Telegram и Google Play Console Петя проверяет, включён ли модуль и сохранены ли данные подключения. Если подключения нет, предлагает настроить интеграцию или использовать встроенный браузер. Это проверка наличия настроек, не проверка срока действия токена.
+For read requests to Slack, Jira, Confluence, Asana, Notion, Gmail, Telegram and Google Play Console, Petya checks whether the module is enabled and connection data is saved. If there is no connection, it offers to set up the integration or to use the built-in browser. This checks that settings exist; it does not check whether the token has expired.
 
-Выбор «Без интеграции: браузер» (голосом — «нет», «не надо», «через браузер») сохраняется отдельно для сервиса и компании. Следующий такой запрос открывает браузер без повторного предложения. Действующее подключение имеет приоритет. В настройках «Как получать контекст сервисов» можно вернуть предложения подключения.
+The choice «Без интеграции: браузер» (No integration: browser) (by voice — «нет» (no), «не надо» (don't), «через браузер» (via browser)) is saved separately for each service and company. The next such request opens the browser without asking again. A working connection takes priority. In the «Как получать контекст сервисов» (How to get service context) settings you can bring the connection offers back.
 
-Пользователь сам входит в сервис, проходит CAPTCHA и открывает нужную страницу/переписку. Затем нажимает в диалоге «Прочитать открытую страницу» или говорит «готово». Петя передаёт доступный текст страницы локальному анализатору вместе с исходным вопросом и сохраняет контекст для продолжения диалога. Кнопка подключения открывает настройки; после подключения исходный вопрос можно повторить кнопкой.
+The user signs in to the service, completes the CAPTCHA and opens the needed page/conversation themselves. Then they press «Прочитать открытую страницу» (Read open page) in the dialog or say «готово» (done). Petya passes the available page text to the local analyzer together with the original question and saves the context for continuing the dialog. The connect button opens the settings; after connecting, the original question can be repeated with a button.
 
-Браузерные сессии сохраняются отдельно по сервисам и компаниям. Чтение ограничено доменами выбранного сервиса и 40 000 символов. Формы, поля ввода, черновики и скрытые элементы исключаются. Полная история чатов, вложения, изображения и видео этим способом не читаются. Страница не даёт Пете полномочий отправлять сообщения или менять данные: браузер используется для чтения.
+Browser sessions are stored separately by service and company. Reading is limited to the domains of the selected service and 40 000 characters. Forms, input fields, drafts and hidden elements are excluded. Full chat history, attachments, images and videos are not read this way. The page does not give Petya permission to send messages or change data: the browser is used for reading.
 
-Некоторые сервисы блокируют вход во встроенном браузере. В этом случае нужны интеграция или прикреплённый файл/скриншот. Реальные входы в аккаунты зависят от политики сервиса и не проверяются автоматическими тестами.
+Some services block sign-in in the built-in browser. In that case an integration or an attached file/screenshot is needed. Real sign-ins to accounts depend on the service's policy and are not verified by automated tests.

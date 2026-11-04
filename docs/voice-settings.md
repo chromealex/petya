@@ -4,7 +4,7 @@ German, French, Spanish, Italian, Portuguese, Japanese and Korean are optional r
 
 Detected missing languages produce an installation offer beside the answer. Declining leaves the text available. Installation does not rerun the original command; playback can be requested afterward. Detection is conservative for short names and may not identify very short foreign phrases.
 
-Name settings support familiar forms specific to each name, custom aliases and persistent excluded forms. Direct requests such as “Не называй меня Санёк” update the exclusion setting before routing to a model. Matching ignores case and the Russian е/ё distinction. Exclusions apply across chats and are editable in settings. Names remain blank by default. Familiar forms and optional informal openings depend on the selected speech style.
+Name settings support familiar forms specific to each name, custom aliases and persistent excluded forms. Direct requests such as “Не называй меня Санёк” (Don't call me Sanyok) update the exclusion setting before routing to a model. Matching ignores case and the Russian е/ё distinction. Exclusions apply across chats and are editable in settings. Names remain blank by default. Familiar forms and optional informal openings depend on the selected speech style.
 
 Speech cleanup omits commit hashes, UUIDs, URLs and markup while preserving visible answers and meaningful numbers. Recognized nonlexical filler and punctuation-only noise are discarded without submitting a chat request or asking the speaker to repeat.
 

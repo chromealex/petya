@@ -2,7 +2,7 @@
 
 ## Unified Russian and English voice on Apple Silicon
 
-The current local installation uses Qwen3-TTS 12Hz 0.6B Base, MLX 4-bit, through `mlx-audio==0.6.4`. Both languages use the same synthetic Eugene reference (`assets/voice-reference-eugene.wav`, transcript: «Привет, я здесь. С какого проекта начнём?»). This replaces switching between Silero Eugene and Kokoro Fenrir. The reference was synthesized by Silero, not recorded from a person.
+The current local installation uses Qwen3-TTS 12Hz 0.6B Base, MLX 4-bit, through `mlx-audio==0.6.4`. Both languages use the same synthetic Eugene reference (`assets/voice-reference-eugene.wav`, transcript: «Привет, я здесь. С какого проекта начнём?» (Hi, I'm here. Which project shall we start with?)). This replaces switching between Silero Eugene and Kokoro Fenrir. The reference was synthesized by Silero, not recorded from a person.
 
 Install with Python 3.10+: `python3 scripts/setup-multilingual-voice.py`. The isolated environment is `runtime/tts-multilingual`; model weights, reference and READY marker are in `runtime/models/qwen-tts-base`. Model revision: `0d6bb6fe33f92d47a507e23b9148940e8366ab5b`. Dependencies are pinned in `scripts/multilingual-voice-requirements.txt`. These runtime files remain beside the application; copying Petya.app alone does not transfer the installation.
 
