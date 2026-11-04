@@ -10,7 +10,7 @@ function similar(a,b){
 }
 const recentAnswers=(topic,limit=6)=>(topic?.messages||[]).filter(m=>m.role==='assistant'&&typeof m.text==='string').slice(-limit).map(m=>m.text);
 const repeated=(answer,topic)=>recentAnswers(topic).some(previous=>similar(answer,previous));
-const variants=['Я уже отвечал так же, и, похоже, это не помогло. Скажи, что именно не так или чего не хватает, — попробую иначе.','Повторять тот же ответ не буду. Переформулируй, пожалуйста, или подскажи, где искать нужные сведения.'];
+const variants=['Похоже, я хожу по кругу: нужных сведений у меня нет, а прошлый ответ не помог. Подскажи, где их взять, или спроси иначе — попробую по-другому.','Кажется, я снова отвечаю то же самое — значит, у меня не хватает данных. Скажи, что именно нужно или откуда это узнать.'];
 // Never returns the text of the previous answer, so the guard itself cannot loop.
 function fallback(topic){const last=recentAnswers(topic,1)[0];const used=new Set(recentAnswers(topic,10));return variants.find(v=>!used.has(v))||variants.find(v=>v!==last);}
 module.exports={similar,repeated,fallback,recentAnswers};

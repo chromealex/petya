@@ -51,7 +51,7 @@ const {localAnswer,prohibitionReply,greetingReply}=require(root+'/src/dialogue-a
  calls=[];const fresh=await localAnswer({...options,topic:looped,command:'А сейчас можешь гит посмотреть',request:async o=>{calls.push(o);return {message:{content:JSON.stringify({understood:true,answer:calls.length===1?same:'Подключи папку с .git в настройках проекта — тогда покажу ветку и последние коммиты.'})}};}});
  assert.match(fresh,/Подключи папку/);assert.equal(calls.length,2);assert(calls[1].options.temperature>calls[0]?.options?.temperature||calls[1].options.temperature===1);
  calls=[];const stuck=await localAnswer({...options,topic:looped,command:'А сейчас можешь гит посмотреть',request:async o=>{calls.push(o);return {message:{content:JSON.stringify({understood:true,answer:same+(calls.length===2?' Увы.':'')})}};}});
- assert.notEqual(stuck,same);assert.match(stuck,/уже отвечал|не буду/);assert.equal(calls.length,2,'Repeat retry is bounded');
+ assert.notEqual(stuck,same);assert.match(stuck,/по кругу|то же самое/);assert.equal(calls.length,2,'Repeat retry is bounded');
  const twice={...looped,messages:[...looped.messages,{role:'assistant',text:stuck},{role:'user',text:'Ну?'}]};
  assert.notEqual(await localAnswer({...options,topic:twice,command:'Ну?',request:async()=>({message:{content:JSON.stringify({understood:true,answer:stuck})}})}),stuck,'The loop notice itself is never repeated');
  assert.equal(await localAnswer({...options,topic:{title:'M',messages:[{role:'user',text:'2+2?'},{role:'assistant',text:'4'},{role:'user',text:'А 3+1?'}]},command:'А 3+1?',request:async()=>({message:{content:JSON.stringify({understood:true,answer:'4'})}})}),'4','Short factual answers may coincide');
