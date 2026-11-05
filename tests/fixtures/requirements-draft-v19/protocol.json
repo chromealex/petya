@@ -1,0 +1,17 @@
+{
+  "hashes": {
+    "train.jsonl": "0df8523726c16b564b804c145e0902bf675c1b7b57084070a0bd27157051b1e6",
+    "acquisition.jsonl": "d42cd3c5104f35b7ef46a773f608ff94d94a9e5dcce381b1431f1f419a1327dd",
+    "semantic-variants.jsonl": "7cdf74fc8ec12da6975197bfa32ec8d2f34eb043a16c3a51967816ce9eac4038",
+    "check.jsonl": "0f96a2a63d852da7bfa84766249fd716f182bde9f10a8fdd35e3575482d31dcf"
+  },
+  "parent": "../requirements-draft-v18/question-adapter",
+  "steps": 913,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 5e-06,
+  "gate": "Retain all 569 familiar cases. No lost parent successes on independent structured and diverse checks; bounds/sorts/names/permissions preserved. Runtime integration and generated live dialogue remain required for release.",
+  "selection": "Fixed full run from selected v18 parent, never probe weights. Acquisition-only repair requires a new frozen protocol before candidate fresh inference.",
+  "limits": "Capacity and data both change; no isolated causal conclusion. Synthetic non-blind evaluation."
+}

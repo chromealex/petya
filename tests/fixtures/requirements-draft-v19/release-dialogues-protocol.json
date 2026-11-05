@@ -1,0 +1,8 @@
+{
+  "data_sha256": "1672d0907e7b185ad79d19ee87d76bd8044b5a9b79c92e58f08cd504ee058bf7",
+  "count": 16,
+  "training_use": false,
+  "gate": "All sixteen final requirement sets correct, no lost parent successes; real runtime and generated multi-turn evaluation additionally required.",
+  "review": "Non-blind manual semantics; preserve explicit exclusions, requested questions, exact labels and accurate headings. Equivalent wording accepted. Cosmetic phrasing recorded separately.",
+  "limits": "Synthetic fixed histories in known failure categories; not broad reliability evidence."
+}
