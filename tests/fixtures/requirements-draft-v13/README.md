@@ -9,3 +9,9 @@ The acquisition set includes all 77 retained v12 targets and all 40 previous fre
 Manual non-blind draft review accepts semantic paraphrases and grammatical awkwardness, but requires all agreed decisions, fields, recipients, exclusions, exact quoted labels and only genuinely unresolved questions. Independent literal checks preserve case, ё and leading zeros. Compare individual cases, not just totals: a higher aggregate score must not hide newly broken answers. Any acquisition-only repair must be frozen before candidate fresh answers are generated or examined.
 
 Live prompts, dialogue roles, sampling, repeat guard, application model selection and MCP remain unchanged. These are research fixtures and experimental weights, not an application capability or automatic petya-v1 release. Small related synthetic checks do not establish broad reliability.
+
+## Balanced same-value repair before fresh inference
+
+The initial adapter exactly passes 116/117 familiar cases. Both requested fixes pass, but `v13-upper-0` now turns the approved upper-only bound -93 into exact -93. This is a real retention regression. The initial recipe gives additional weight to the exact-value correction without equal additional weight to its same-number controls; this is a plausible source of interference, not a proven causal attribution.
+
+Before any candidate fresh inference, a 229-step repair at 0.000005 is frozen in `repair-protocol.json`: all 117 retention cases once, twelve additional copies of each of the four -93 states (exact, upper-only, lower-only, unapproved), and all 64 prior numerical variants once. The initial artifact and raw failure are preserved. The fresh set, rubric and gate remain unchanged.

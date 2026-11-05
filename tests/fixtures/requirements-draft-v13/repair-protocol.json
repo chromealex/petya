@@ -1,0 +1,12 @@
+{
+  "parent": "adapter",
+  "steps": 229,
+  "epochs": 1,
+  "layers": 13,
+  "seed": 42,
+  "learning_rate": 5e-06,
+  "training_sha256": "060b8e43a5b8148e73f3ee27df401dd1694e599aba3b877f1bd311c71a0a08aa",
+  "fresh_sha256": "1e66aaf5efd739100a8c2383f449961bfe98bed41bbd1e98cda7ada00e61d4d8",
+  "reason": "116/117 exact; upper-only -93 collapsed to exact -93 after fixing exact -93. Equal rehearsal of all four states at the same number, plus complete retention and numeric rehearsal.",
+  "selection": "Frozen before any candidate fresh inference. Require all 117 familiar cases correct after reload."
+}
