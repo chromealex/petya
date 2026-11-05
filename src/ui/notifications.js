@@ -20,7 +20,7 @@
  window.petyaEvents.onOllamaInstall(installation);window.petya.ollamaInstallStatus().then(installation).catch(()=>{});
  Promise.all([connectionsReady,modulesReady]).then(()=>{for(const card of document.querySelectorAll('[data-service]')){const status=card.querySelector('.connection-status');if(!status)continue;const id='connection:'+card.dataset.service,title=card.querySelector('h2')?.textContent||card.dataset.service;let failed=false;const update=()=>{if(status.classList.contains('error')){failed=true;put(id,{title:title+' · нужно внимание',text:status.textContent,kind:'error',actions:[['Настроить',()=>{setOpen(false);view('settings');window.revealSettings?.(card);}]]});}else if(failed&&status.classList.contains('connected')){failed=false;put(id,{title:title,text:'Подключение восстановлено.',kind:'success'});}};new MutationObserver(update).observe(status,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']});update();}}).catch(()=>{});
  function chatNotification(topic){
-  const job=topic.job,id='chat:'+topic.id,waiting=job?.state==='attention';
+  const job=topic.job,id='chat:'+topic.id,waiting=job?.state==='attention',busy=job?.state==='running';
   if(topic.archived || job?.acknowledged || (topicSelect.value===topic.id && !$('home').hidden))return;
   const question=waiting && topic.needsReply;
   const open=async()=>{
@@ -30,10 +30,10 @@
     if(question)$('command').focus();
     items.delete(id);draw();
   };
-  put(id,{title:topic.title,text:waiting?(topic.attention||job.label):'Ответ готов.',kind:waiting?'attention':'success',version:String(job.at),actions:[[question?'Ответить':'Открыть чат',open]]});
+  put(id,{title:topic.title,text:busy||waiting||job.state==='cancelled'?(topic.attention||job.label):'Ответ готов.',busy,kind:waiting?'attention':busy?'info':'success',version:busy?'running:'+job.startedAt:String(job.at),actions:[[question?'Ответить':'Открыть чат',open],...(busy?[['Остановить',()=>window.petya.chatAnswerStop(topic.id)]]:[])]});
  }
  window.petyaEvents.onChatJob(async event=>{
-   if(!['attention','done'].includes(event.job.state)){if(items.delete('chat:'+event.topicId))draw();return;}
+   if(!['attention','done'].includes(event.job.state)&&!(event.job.clarification&&['running','cancelled'].includes(event.job.state))){if(items.delete('chat:'+event.topicId))draw();return;}
    try{
      const state=await window.petya.chatNavigation(''),topic=state.topics.find(t=>t.id===event.topicId);
      if(topic?.job?.at===event.job.at && state.projects.some(p=>p.id===topic.projectId&&!p.archived))chatNotification(topic);
@@ -41,7 +41,7 @@
  });
  window.chatNavigationReady?.then(async()=>{
    const state=await window.petya.chatNavigation('');
-   for(const topic of state.topics)if(topic.job?.state==='attention' && state.projects.some(p=>p.id===topic.projectId&&!p.archived))chatNotification(topic);
+   for(const topic of state.topics)if((topic.job?.state==='attention'||topic.job?.clarification&&['running','done','cancelled'].includes(topic.job.state)) && state.projects.some(p=>p.id===topic.projectId&&!p.archived))chatNotification(topic);
  }).catch(error=>console.warn('Chat notifications unavailable',error.message));
  function meetingProgress(state){put('meeting:'+state.id,{title:'Встреча Zoom',text:state.message,busy:['recording','processing'].includes(state.phase),percent:state.percent,version:state.phase,kind:state.phase==='error'?'error':state.phase==='done'?'success':'info',actions:state.phase==='error'?[['Повторить обработку',()=>window.petya.feature('meetingMemory','retry',state.id)]]:[]});if(state.phase==='done')refreshContexts().catch(()=>{});}
  window.petyaEvents.onMeetingMemory(meetingProgress);

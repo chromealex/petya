@@ -39,7 +39,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     }
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
     if(gitRoute){
-      if(gitRoute.action==='clarify')return require('./input-required.cjs').ask({text:gitRoute.question,label:'Параметры Git'},answer=>pipeline((gitRoute.input?.prefix||'')+answer+(gitRoute.input?.suffix||''),undefined,background));
+      if(gitRoute.action==='clarify')return require('./input-required.cjs').ask({text:gitRoute.question,label:'Параметры Git',restart:{kind:'git-input',prefix:gitRoute.input?.prefix||'',suffix:gitRoute.input?.suffix||''}},answer=>pipeline((gitRoute.input?.prefix||'')+answer+(gitRoute.input?.suffix||''),undefined,background));
       if(gitRoute.action==='help')return {handled:true,text:'Git: «статус гита», «покажи diff», «история коммитов», «добавь в коммит путь/файл», «сделай коммит: описание», «создай ветку feature/name», «переключись на ветку main», «git fetch», «git pull», «git push». Git автоматически определяется по папкам текущего проекта. Панель открывается кнопкой Git в чате.'};
       ctx.dialogue.rememberAction(original,'Выполняю Git…');const topic=ctx.dialogue.active(),message=topic.messages.at(-1);
       try{ctx.requestProgress.report('Выполняю Git: '+gitRoute.action);const result=gitRoute.action==='init'?await ctx.gitWorkspace.init(null,(await ctx.gitWorkspace.discover()).projectId):await ctx.gitWorkspace.execute(gitRoute);message.text=result.text;}catch(error){message.text=error.message;message.error=!error.gitDiscovery;if(error.gitDiscovery){message.gitDiscovery=error.gitDiscovery;message.question=true;}}
@@ -52,7 +52,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     }
     const drawing=!choice?require('./local-images.cjs').imagePrompt(original):null;
     if(drawing!==null){
-      if(!drawing)return require('./input-required.cjs').ask({text:'Что нарисовать?',label:'Описание картинки',placeholder:'Например: кот-космонавт на Луне'},answer=>pipeline('Нарисуй '+answer,undefined,background));
+      if(!drawing)return require('./input-required.cjs').ask({restart:{kind:'drawing-input'},text:'Что нарисовать?',label:'Описание картинки',placeholder:'Например: кот-космонавт на Луне'},answer=>pipeline('Нарисуй '+answer,undefined,background));
       if(ctx.attachments.list().length)return {handled:true,text:'Пока я создаю изображения по описанию. Уберите вложения и опишите новую картинку.'};
       const artist = ctx.settings.artistEnabled === 'true' && ctx.artist;
       if(!artist && !ctx.localImages.status().ready)return require('./input-required.cjs').ask({text:'Для этого рисунка нужен Художник. Добавить расширение и продолжить? Перед загрузкой модели покажу её размер и спрошу разрешение.',label:'Генерация изображений',options:['Добавить Художника','Отмена'],strictChoices:true},()=>{ctx.saveSettings({artistEnabled:'true'});return pipeline(original,undefined,background);});

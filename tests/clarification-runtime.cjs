@@ -1,0 +1,23 @@
+const assert=require('node:assert/strict');
+const {Dialogue}=require('../src/dialogue.cjs'),feature=require('../src/features/clarifications.cjs'),{ask}=require('../src/input-required.cjs');
+const cancellation=require('../src/answer-cancel.cjs');
+(async()=>{
+ let saved,executed=0;const events=[];
+ const state={projects:[{id:'general',name:'Общее'}],activeProjectId:'general',activeId:'a',topics:[{id:'a',projectId:'general',title:'A',messages:[],at:Date.now()},{id:'b',projectId:'general',title:'B',messages:[],at:Date.now()}]};
+ const create=state=>{const dialogue=new Dialogue({state,save:s=>{saved=structuredClone(s);}});const services={dialogue,settings:{},companyId:'default',chatJobs:{busy:()=>false,cancel:()=>false,emit:e=>events.push(e),converse:async command=>{executed++;assert.equal(dialogue.active().id,'a');return {handled:true,text:command};}}};return {...services,...feature.setup(services)};};
+ let s=create(state),c=s.clarifications;
+ let result=await c.run('создай ветку',()=>ask({text:'Имя ветки?',restart:{kind:'git-input',prefix:'создай ветку '}},()=>{throw Error('Old closure used');}));
+ assert.equal(saved.pendingClarifications.length,1);
+ s=create(saved);c=s.clarifications;s.dialogue.select('b');
+ result=await s.dialogue.within('a','general',()=>c.answer(result.clarificationId,'feature/test',()=>{},()=>{},'MCP · Test'));
+ assert.equal(result.text,'создай ветку feature/test');assert.equal(executed,1);assert.equal(s.dialogue.active().id,'b');assert.equal(saved.pendingClarifications.length,0);assert.equal(s.dialogue.state.topics[0].chatJob.state,'done');assert.equal(c.history('a')[0].actor,'MCP · Test');
+ s.dialogue.select('a');
+ const unsupported=await c.run('Сохранённый запрос',()=>ask({text:'Что выбрать?'},()=>++executed));s=create(saved);c=s.clarifications;
+ assert.equal(c.list()[0].canResume,false);assert((await c.answer(unsupported.clarificationId,'Да')).recoveryRequired);assert.equal(executed,1);await c.answer(unsupported.clarificationId,'отмена');assert.equal(c.list().length,0);
+ let started;const ready=new Promise(r=>started=r);
+ const pending=await c.run('Долгий запрос',()=>ask({text:'Продолжить?'},async()=>{started();await new Promise((resolve,reject)=>cancellation.signal().addEventListener('abort',()=>reject(cancellation.stopped()),{once:true}));executed++;}));
+ const running=c.answer(pending.clarificationId,'Да');await ready;assert.equal(s.dialogue.active().chatJob.state,'running');assert(s.chatJobs.busy('a'));assert(s.chatJobs.cancel('a'));result=await running;assert(result.cancelled);assert.equal(executed,1);assert.equal(s.dialogue.active().chatJob.state,'cancelled');assert.equal(c.history('a').at(-1).state,'cancelled');assert(!s.chatJobs.busy('a'));assert.equal(saved.pendingClarifications.length,0);
+ const interrupted=structuredClone(saved);interrupted.topics[0].clarificationHistory.at(-1).state='running';s=create(interrupted);assert.equal(s.clarifications.history('a').at(-1).state,'interrupted');assert(!s.dialogue.active().lastChatResult.question);
+ assert(events.some(e=>e.job.state==='running'));assert(events.some(e=>e.job.state==='done'));
+ console.log('Clarification lifecycle: restart descriptors, scoped restore, unsupported-step safety, actor history, cancellation and interrupted-write protection passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

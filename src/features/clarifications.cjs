@@ -8,17 +8,18 @@ class Clarifications {
  list(){return [...this.pending.entries()].filter(([,row])=>this.now()<=row.expiresAt&&row.scope===this.scope(row.owner)).map(([id,row])=>({
   id,...row.owner,request:row.command,question:row.spec.text,input:row.result.clarificationInput,
   options:(row.spec.options||[]).map((label,index)=>({id:String(index+1),label})),createdAt:row.at,expiresAt:row.expiresAt,
-  active:row.scope===this.scope(),requiresActiveChat:false
+  active:row.scope===this.scope(),requiresActiveChat:false,canResume:!row.recoveryRequired
  }));}
  offer(command,spec,resume,previous={}){
   const id=randomUUID(),result={...previous,handled:true,question:true,text:spec.text,clarificationId:id,clarificationInput:{label:spec.label||'Уточнение',placeholder:spec.placeholder||'Напишите ответ…',submit:'Продолжить',files:!!spec.files},clarificationOptions:spec.options||[]};
   for(const key of ['teamFillReply','slackRequestReply','slackRequestChoices'])delete result[key];
   this.record?.(command,result);
   const scope=this.scope();for(const [key,row] of this.pending)if(row.scope===scope||this.now()>row.expiresAt)this.pending.delete(key);
-  this.pending.set(id,{scope,owner:this.context(),command,resume,spec,result,at:this.now(),expiresAt:this.now()+Math.min(TTL,spec.ttlMs||TTL),busy:false});return result;
+  this.pending.set(id,{scope,owner:this.context(),command,resume,spec,result,at:this.now(),expiresAt:this.now()+Math.min(TTL,spec.ttlMs||TTL),busy:false});this.save?.();return result;
  }
  async run(command,work){
   for(const [id,row] of this.pending)if(row.scope===this.scope())this.pending.delete(id);
+  this.save?.();
   try{
    const result=await work(),resume=this.resolve?.(result);
    return resume?this.offer(command,{text:result.text,...result.clarificationInput,ttlMs:600000,options:(result.slackRequestChoices||[]).map(o=>o.label)},resume,result):result;
@@ -34,9 +35,10 @@ class Clarifications {
   if(row.busy)return {...row.result,text:'Уже продолжаю этот запрос. Дождитесь результата.'};
   const value=String(answer||'').trim();
   if(!value||value.length>4000)return {...row.result,text:'Введите ответ до 4000 символов.'};
-  if(/^(?:отмена|отмени|стоп|не надо)[.!]?$/iu.test(value)){this.pending.delete(id);recordAnswer(value);if(row.resume.cancel)return this.run(row.command,()=>row.resume.cancel());return {handled:true,text:'Запрос отменён.'};}
+  if(/^(?:отмена|отмени|стоп|не надо)[.!]?$/iu.test(value)){this.pending.delete(id);this.save?.();recordAnswer(value);if(row.resume.cancel)return this.run(row.command,()=>row.resume.cancel());return {handled:true,text:'Запрос отменён.'};}
   if(row.spec.strictChoices&&!row.spec.options?.some(option=>option.toLocaleLowerCase()===value.toLocaleLowerCase()))return {...row.result,text:'Выберите один из предложенных вариантов.'};
-  row.busy=true;this.pending.delete(id);recordAnswer(value);
+  if(row.recoveryRequired)return row.result;
+  row.busy=true;this.pending.delete(id);this.save?.();recordAnswer(value);
   // Consume before resuming: a technical failure must never automatically replay external writes.
   return this.run(row.command,()=>{authorize();return row.resume(value);});
  }
@@ -59,8 +61,9 @@ module.exports={name:'clarifications',Clarifications,register,setup(s){
   const last=topic?.messages.at(-1);if(last){last.clarificationId=result.clarificationId;s.dialogue.persist();}
   Object.assign(result,{topicId:topic?.id,messages:topic?.messages});
  }});
+ const runtime=require('./clarification-runtime.cjs')(s,clarifications);
  sessions.set(s.dialogue,clarifications);
- return {clarifications,ipc:{latest:()=>clarifications.latest(),answer:(id,value)=>clarifications.answer(id,value)}};
+ return {clarifications,ipc:{stop:runtime.stop,history:runtime.history,latest:()=>clarifications.latest(),answer:(id,value)=>clarifications.answer(id,value)}};
 }};
 
 function register(server,z,ctx){
@@ -91,19 +94,21 @@ function register(server,z,ctx){
   const project=ctx.dialogue.state.projects.find(p=>p.id===row.projectId);
   const version=topic.versionIndex||0;
   let result;
-  try{result=await require('../modules.cjs').withProject(project,()=>session.answer(row.id,answer,check,value=>{topic.messages.push({role:'user',text:value,at:Date.now(),by:'MCP'});ctx.dialogue.persist();}));}
+  try{result=await require('../modules.cjs').withProject(project,()=>session.answer(row.id,answer,check,value=>{topic.messages.push({role:'user',text:value,at:Date.now(),by:args.assistant?'MCP · '+args.assistant:'MCP'});ctx.dialogue.persist();},args.assistant?'MCP · '+args.assistant:'MCP'));}
   catch(error){ctx.check();if(ctx.dialogue.active()===topic)ctx.changed?.({owner:topic.id,name:'answer_chat_clarification',result:{handled:true,error:true,text:error.message}});throw error;}
   check();if(topic.archived||(topic.versionIndex||0)!==version||topic.projectId!==row.projectId)throw Error('Контекст изменился во время продолжения.');
   // The owner handles persistence where possible. Plain results still belong in the chat.
   if(ctx.dialogue.active()===topic&&!topic.archived){
    const last=topic.messages.at(-1);
    if(result.text&&(last?.role!=='assistant'||last.text!==result.text)){topic.messages.push({role:'assistant',text:result.text,at:Date.now(),error:!!result.error});ctx.dialogue.persist();}
-   ctx.chatJobs?.finishForeground?.(topic.id,result.error||result.question?'attention':'done',result);
    ctx.changed?.({owner:topic.id,name:cancel?'cancel_chat_clarification':'answer_chat_clarification',result:{...result,topicId:topic.id,messages:topic.messages}});
   }
-  return {status:result.error?'error':result.question?'waiting':cancel?'cancelled':'completed',text:result.text,error:!!result.error,clarification:result.clarificationId?visible().find(r=>r.id===result.clarificationId):null};
+  return {status:result.cancelled?'cancelled':result.error?'error':result.question?'waiting':cancel?'cancelled':'completed',text:result.text,error:!!result.error,clarification:result.clarificationId?visible().find(r=>r.id===result.clarificationId):null};
   });
  }
- tool('answer_chat_clarification','Ответить на вопрос и продолжить сохранённый запрос. Может выполнить исходное действие во внешнем сервисе. Нужны права edit. Открывать чат в Пете не требуется. Передайте answer или optionId. Повторная отправка использованного ID не выполняет действие снова.',{chatId:id,clarificationId:id,answer:z.string().trim().min(1).max(4000).optional(),optionId:id.optional()},args=>respond(args),true);
+ tool('answer_chat_clarification','Ответить на вопрос и продолжить сохранённый запрос. Может выполнить исходное действие во внешнем сервисе. Нужны права edit. Открывать чат в Пете не требуется. Передайте answer или optionId. Повторная отправка использованного ID не выполняет действие снова.',{chatId:id,clarificationId:id,answer:z.string().trim().min(1).max(4000).optional(),optionId:id.optional(),assistant:z.string().trim().min(1).max(80).optional()},args=>respond(args),true);
+ const accessible=chatId=>{const topic=ctx.dialogue.state.topics.find(t=>t.id===chatId&&!t.archived);if(!topic||ctx.access?.projectId&&topic.projectId!==ctx.access.projectId||!ctx.dialogue.state.projects.some(p=>p.id===topic.projectId&&!p.archived))throw Error('Чат недоступен.');return topic;};
+ tool('stop_chat_continuation','Остановить выполняющееся продолжение. Уже выполненные действия не откатываются.',{chatId:id},args=>{accessible(args.chatId);return {stopped:session.stop(args.chatId)};},true);
+ tool('list_chat_continuations','История продолжений: кто ответил, состояние и результат. Имя ассистента — необязательная метка клиента, не подтверждённая личность.',{chatId:id,...page},args=>{accessible(args.chatId);const rows=session.history(args.chatId);return {total:rows.length,items:rows.slice(args.offset,args.offset+args.limit)};});
  tool('cancel_chat_clarification','Отменить ожидающее уточнение без выполнения сохранённого запроса.',{chatId:id,clarificationId:id},args=>respond(args,true),true);
 }

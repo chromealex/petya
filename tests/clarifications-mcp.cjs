@@ -40,6 +40,8 @@ const {Attachments}=require('../src/attachments.cjs');
   p=await askOne();a.versionIndex=1;assert.equal((await call('list_chat_clarifications')).total,0);
   p=await askOne();a.archived=true;await call('get_chat_clarification',{chatId:'a',clarificationId:p.clarificationId},true);a.archived=false;
   p=await c.run('Заполни команду',()=>({handled:true,question:true,teamFillReply:true,text:'Какой канал?'}));const team=await call('answer_chat_clarification',{chatId:'a',clarificationId:p.clarificationId,answer:'#dev'});assert.equal(team.text,'Команда: #dev');
+  let begin;const ready=new Promise(resolve=>begin=resolve);p=await c.run('Долго',()=>ask({text:'Начать?'},async()=>{begin();await new Promise((resolve,reject)=>require('../src/answer-cancel.cjs').signal().addEventListener('abort',()=>reject(require('../src/answer-cancel.cjs').stopped()),{once:true}));return {text:'Не должно выполниться'};}));
+  const ongoing=call('answer_chat_clarification',{chatId:'a',clarificationId:p.clarificationId,answer:'Да',assistant:'Внешний помощник'});await ready;assert((await call('stop_chat_continuation',{chatId:'a'})).stopped);assert.equal((await ongoing).status,'cancelled');const audit=await call('list_chat_continuations',{chatId:'a'});assert.equal(audit.items.at(-1).actor,'MCP · Внешний помощник');assert.equal(audit.items.at(-1).state,'cancelled');await call('list_chat_continuations',{chatId:'b'},true);
   valid=false;await call('list_chat_clarifications',{},true);assert.equal(writes,1);
  }finally{await peer.close();}
  console.log('MCP clarifications: scoped listing, read/drafts denial, inactive chat isolation, choices, multistep continuation, cancellation, replay, stale connection/version and UI events passed');
