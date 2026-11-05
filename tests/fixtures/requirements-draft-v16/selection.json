@@ -1,0 +1,11 @@
+{
+  "adapter": "adapter",
+  "sha256": "e169f876763b8e3c53a67337d070d59015b35b08c92a93d6c0addd3a9125e2e2",
+  "acquisition_exact": 292,
+  "acquisition_correct": 293,
+  "total": 293,
+  "prior_targets": 225,
+  "last_round_cases": 68,
+  "basis": "Selected after all familiar targets correct; one harmless summary elaboration manually reviewed. Candidate fresh inference not generated or inspected.",
+  "repair": false
+}

@@ -1,0 +1,8 @@
+{
+  "v16-failure-0-0": {
+    "passed": true,
+    "reason": "Description and questions exactly match; summary only specifies the same indexing failure already in the source dialogue.",
+    "expected_summary": "Уведомление о сбое",
+    "actual_summary": "Уведомление о сбое индексации"
+  }
+}
