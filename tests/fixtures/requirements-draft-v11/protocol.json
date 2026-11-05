@@ -1,0 +1,19 @@
+{
+  "hashes": {
+    "train.jsonl": "9f00fc2a96b836726157a519189f4006a07ae3f0b932742f7e44383650bce0f8",
+    "corrections.jsonl": "9221f0240e87b224a0d383674bf54c1cd6a7261c1193d86d0fb4a9efa9719a6e",
+    "variants.jsonl": "16932759d3d6d0c0260e9f6ca9a0533d5350e3ab7d0326ceb06774acae914a8d",
+    "acquisition.jsonl": "b2d106279395bdb7e4a857d6fe10f67ce085e7cf45e40abb4f93c8ef52aabfdb",
+    "check.jsonl": "a8f09fea94e7498292c8edb2675393754e18f8f39616dfb41163ab0acf2e7689"
+  },
+  "parent": "../requirements-draft-v10/repaired-adapter",
+  "layers": 13,
+  "epochs": 1,
+  "learning_rate": 1e-05,
+  "seed": 42,
+  "steps": 424,
+  "unique_prompts": 133,
+  "selection": "One fixed candidate before fresh-case assessment.",
+  "gate": "All 45 acquired cases correct after reload. New complete drafts exceed both base and immediate parent; numeric/general do not regress. Report v8 historical comparator. Exact literal UI names in description required where declared; all independent cancellation/prohibition members must pass to claim reliability.",
+  "limits": "Synthetic related cases, non-blind semantic review, no deployment or automatic release."
+}

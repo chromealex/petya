@@ -1,0 +1,130 @@
+{
+  "name-0-01": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: True",
+      "Address/content retained"
+    ],
+    "group": "labels-order-0"
+  },
+  "name-0-10": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: False",
+      "Address/content retained"
+    ],
+    "group": "labels-order-0"
+  },
+  "name-0-00": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: False",
+      "Address/content retained"
+    ],
+    "group": "labels-order-0"
+  },
+  "name-0-11": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: True",
+      "Address/content retained"
+    ],
+    "group": "labels-order-0"
+  },
+  "name-1-01": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: True",
+      "Address/content retained"
+    ],
+    "group": "labels-order-1"
+  },
+  "name-1-10": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: False",
+      "Address/content retained"
+    ],
+    "group": "labels-order-1"
+  },
+  "name-1-00": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: False",
+      "Address/content retained"
+    ],
+    "group": "labels-order-1"
+  },
+  "name-1-11": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: True",
+      "Address/content retained"
+    ],
+    "group": "labels-order-1"
+  },
+  "report-00": {
+    "criteria": [
+      "Section manager, service code replaces request code, result for every recipient",
+      "Owner receives: False",
+      "Technician phone shown: False"
+    ],
+    "group": "recipient-field"
+  },
+  "report-10": {
+    "criteria": [
+      "Section manager, service code replaces request code, result for every recipient",
+      "Owner receives: True",
+      "Technician phone shown: False"
+    ],
+    "group": "recipient-field"
+  },
+  "report-01": {
+    "criteria": [
+      "Section manager, service code replaces request code, result for every recipient",
+      "Owner receives: False",
+      "Technician phone shown: True"
+    ],
+    "group": "recipient-field"
+  },
+  "report-11": {
+    "criteria": [
+      "Section manager, service code replaces request code, result for every recipient",
+      "Owner receives: True",
+      "Technician phone shown: True"
+    ],
+    "group": "recipient-field"
+  },
+  "scope": {
+    "criteria": [
+      "Registrar, reference number/date with exact format",
+      "Hidden applicant",
+      "Scanner purchase excluded"
+    ],
+    "group": null
+  },
+  "print": {
+    "criteria": [
+      "Three fields and date format",
+      "No receiver name",
+      "No search"
+    ],
+    "group": null
+  },
+  "failure": {
+    "criteria": [
+      "Administrator only on failure",
+      "Sync number not error code and cause",
+      "Hidden operator"
+    ],
+    "group": null
+  },
+  "repeat": {
+    "criteria": [
+      "Ready-order count",
+      "Final 151 not stale 167",
+      "Hidden names"
+    ],
+    "group": null
+  }
+}
