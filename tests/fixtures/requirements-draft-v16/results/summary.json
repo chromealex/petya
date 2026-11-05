@@ -1,0 +1,115 @@
+{
+  "retention": {
+    "correct": 293,
+    "exact": 292,
+    "total": 293,
+    "prior_targets": 225,
+    "last_round_cases": 68,
+    "original_buyer_contradiction_fixed": true,
+    "manual_exception": "v16-failure-0-0: same description/questions, accurate expanded summary"
+  },
+  "fresh_candidate": {
+    "bounds": {
+      "passed": 20,
+      "total": 20
+    },
+    "general": {
+      "passed": 28,
+      "total": 28
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 24,
+      "total": 28
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 8,
+      "total": 8
+    },
+    "polarity": {
+      "passed": 4,
+      "total": 8
+    },
+    "sorting": {
+      "passed": 24,
+      "total": 24
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 76,
+      "total": 76
+    }
+  },
+  "fresh_parent": {
+    "bounds": {
+      "passed": 20,
+      "total": 20
+    },
+    "general": {
+      "passed": 27,
+      "total": 28
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 25,
+      "total": 28
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 8,
+      "total": 8
+    },
+    "polarity": {
+      "passed": 5,
+      "total": 8
+    },
+    "sorting": {
+      "passed": 23,
+      "total": 24
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 76,
+      "total": 76
+    }
+  },
+  "fresh_passed": 72,
+  "fresh_total": 76,
+  "paired_gains": [
+    "sort-4-1-0"
+  ],
+  "paired_regressions": [
+    "polarity-0-00"
+  ],
+  "retention_gate_passed": true,
+  "numeric_gate_passed": true,
+  "literal_gate_passed": true,
+  "sorting_preserved": true,
+  "no_case_regression_gate_passed": false,
+  "narrow_experiment_gate_passed": false,
+  "all_targeted_states_passed": false,
+  "broad_reliability_established": false,
+  "release_petya_v1": false,
+  "live_model_changed": false,
+  "decision": "Preserve experimental artifact; do not promote. Known buyer contradiction fixed and sorting improves, but one new identifier-replacement regression offsets that gain.",
+  "limitations": "Small related synthetic sample with a newly frozen wording/polarity family; non-blind semantic review. All familiar retention targets were trained."
+}
