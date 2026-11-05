@@ -148,6 +148,7 @@ const {Dialogue}=require('../src/dialogue.cjs');
       assert.ok((await peer.callTool({name:'read_chat_material',arguments:{chatId:'one',type:'material',key:'note'}})).isError);
     }finally{await peer.close();await limited.close();}
   }
+  await require('./extension-agent.cjs')();
   await require('./layout-mcp.cjs')(ctx);
   await require('./unity-mcp.cjs')(ctx);
   await require('./blender-motion.cjs')(ctx);

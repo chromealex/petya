@@ -3,6 +3,8 @@ const { UriTemplate } = require('@modelcontextprotocol/sdk/shared/uriTemplate.js
 
 const name = z.string().min(1).max(160);
 const specs = {
+  apply_agent_proposal:{description:'Применить предложенную Петей правку после подтверждения в текущем чате.',schema:z.object({proposalId:z.string().uuid()}).strict()},
+  assist:{description:'Разобрать запрос по данным Unity, выбрать инструменты и предложить правку.',schema:z.object({command:z.string().trim().min(1).max(4000)}).strict()},
   discover: {description:'Показать инструменты, схемы параметров и ресурсы подключённого Unity Editor.',schema:z.object({}).strict()},
   call_tool: {description:'Вызвать опубликованный инструмент MCP for Unity с указанными параметрами.',schema:z.object({
     name, arguments:z.record(z.string(),z.unknown()).refine(value=>JSON.stringify(value).length<=8000,'Параметры превышают 8000 символов.')

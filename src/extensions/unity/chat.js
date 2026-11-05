@@ -44,7 +44,7 @@ window.renderUnityPrefab=function(node,query){
 window.renderUnityRequest = function(parent,message) {
   const box=document.createElement('section'), controls=document.createElement('div'), output=document.createElement('div');
   const owner=topicSelect.value;
-  let instance;
+  let instance=message.unityInstance;
   const call=async(method,args)=>{
     const reply=await window.petya.feature('unity','invoke',owner,method,args,instance);
     if(reply.editors){
@@ -61,6 +61,7 @@ window.renderUnityRequest = function(parent,message) {
   };
   function show(reply) {
     output.replaceChildren();
+    if(reply.structuredContent?.steps)renderAgent(reply.structuredContent);
     for(const block of reply.content || []) {
       if(block.type==='image' && ['image/png','image/jpeg','image/webp'].includes(block.mimeType)){
         const image=document.createElement('img');
@@ -100,7 +101,21 @@ window.renderUnityRequest = function(parent,message) {
     }
     if(!controls.childNodes.length)output.textContent='Редактор не опубликовал инструменты или ресурсы.';
   }
+  function renderAgent(data){
+    const details=document.createElement('details'),summary=document.createElement('summary'),steps=document.createElement('pre');
+    summary.textContent='Что проверил Петя';
+    steps.textContent=(data.steps||[]).map((s,i)=>(i+1)+'. '+s.name+'\n'+s.result).join('\n\n');
+    details.append(summary,steps);output.append(details);
+    if(data.proposal){
+      const proposal=document.createElement('pre');
+      proposal.textContent=data.proposal.name+'\n'+JSON.stringify(data.proposal.arguments,null,2);
+      output.append(proposal,button('Применить предложенную правку',async()=>{
+        const result=await call('apply_agent_proposal',{proposalId:data.proposalId});show(result);
+      }));
+    }
+  }
+  if(message.unityAgent)renderAgent(message.unityAgent);
   const request=message.unityRequest;
-  if(request.name)box.append(button(request.name==='read_console'?'Прочитать консоль':'Показать иерархию',async()=>show(await call('call_tool',request))));
+  if(request.name)box.append(button(request.name==='read_console'?'Прочитать консоль':request.name==='assist'?'Проверить по запросу':'Показать иерархию',async()=>show(await call(request.name==='assist'?'assist':'call_tool',request.name==='assist'?request.arguments:request))));
   box.append(button('Инструменты и ресурсы Unity',catalog),controls,output);parent.append(box);
 };

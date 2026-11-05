@@ -134,6 +134,23 @@ prefers native `manage_asset`; older servers and the directional preview/open wo
 
 Extensions may provide `result.cjs` with an `id`, `describe(message, topic, services)` and, for direct actions, `perform(action, result, services, check)`. Descriptors supply a stable object key, title, subtitle and action IDs/labels. Command actions use the normal chat pipeline. Direct actions recheck ownership and availability after asynchronous work and before side effects. The shared result cards and composer selector retain the selection (or explicit reset) within the company, project, chat and version. Multiple objects require an explicit choice. Imported files expose folder navigation only when their original local path was recorded by the native picker.
 
+### Extension-driven diagnostics
+
+Adapters may export an `agent` capability description and `agentTurn(services, command, check)`.
+The local model selects an adapter from those descriptions when no direct route matches. The shared
+`src/extensions/agent.cjs` runner discovers tool schemas, validates arguments, reads results and
+requests the next step through native model tool calls. It limits each run to eight observations,
+twelve planning turns and up to three completion reviews, rejects
+repeated calls and checks chat scope and cancellation between steps. Tool results are untrusted data.
+Each adapter supplies its read-only action policy. All other calls become proposals with evidence.
+
+Unity supports `unity_assist` (command, chatId, optional instance) through MCP and contextual chat.
+It reads scene objects, resources, physics and console data through the selected live editor.
+Proposed edits are not executed during diagnosis. `unity_apply_agent_proposal` takes the returned
+proposalId, verifies the original chat/version/connection, shows the exact operation for local
+confirmation and consumes the proposal once. The chat card shows observations and an apply button.
+Both tools require MCP edit access. A changed chat, model or connection interrupts the workflow.
+
 ### Unity layout extension (0.8.3)
 
 **Вёрстка Unity** imports Figma frames and Zeplin screens into the active Unity scene as a UI Toolkit `UIDocument`, with a separate UXML, `PanelSettings`, image files and supplied TTF/OTF files. Enable Unity Editor and configure either a Figma personal token (`file_content:read`) or a Zeplin access token. Tokens use the company-scoped OS-encrypted settings store and are redacted from public settings. Personal-token connections do not provision an OAuth application or provide an application icon setting.

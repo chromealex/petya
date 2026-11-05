@@ -26,6 +26,7 @@ module.exports={
   setup(s,dialog=()=>require('electron').dialog){
     const available=project=>{if(s.settings.module_unity!=='true'||project?.disabledServices?.includes('unity'))throw Error('Включите Unity Editor в каталоге и настройках проекта.');};
     const findResults=new WeakMap();
+    const proposals=new Map();
     let operation;
     function progress(text,busy,error=false){
       operation={id:'unity-mcp',title:'Unity Editor',text,busy,kind:error?'error':'info'};
@@ -36,6 +37,26 @@ module.exports={
       progress('Ожидаю подтверждения действия…',true);
       try{const result=await perform(...args);progress(result.isError?'Unity сообщила об ошибке.':'Ответ Unity получен.',false,!!result.isError);return result;}
       catch(error){progress(error.message,false,true);throw error;}
+    }
+    async function assistTurn(command,verify=()=>{}) {
+      let topic=s.dialogue.active();
+      if(!topic){
+        topic={id:require('node:crypto').randomUUID(),projectId:s.dialogue.state.activeProjectId||'general',title:command.slice(0,80),kind:'chat',messages:[],at:Date.now()};
+        s.dialogue.state.topics.push(topic);s.dialogue.state.activeId=topic.id;delete s.dialogue.state.newChat;s.dialogue.persist();
+      }
+      const result=await invoke(topic.id,'assist',{command},verify);
+      const data=result.structuredContent;
+      const text='Использую расширение «Unity Editor».\n'+(data?.answer || result.content?.find(b=>b.type==='text')?.text || 'Выберите редактор.');
+      s.dialogue.rememberAction(command,text);
+      const message=topic.messages.at(-1);
+      message.by='Unity Editor';
+      message.unityRequest={name:'assist',arguments:{command}};
+      message.unityAgent=data;
+      message.unityInstance=result.instance;
+      const proposal=proposals.get(data?.proposalId);
+      if(proposal)proposal.owner=message;
+      s.dialogue.persist();
+      return {handled:true,text,by:message.by,topicId:topic.id,messages:topic.messages};
     }
     function turn(command){
       const topic=s.dialogue.active(),selected=s.chatResults?s.chatResults.current(topic,'unitySelection'):require('../previous-reply.cjs')(topic)?.unitySelection;
@@ -84,7 +105,12 @@ module.exports={
       }
       check();if(!Object.hasOwn(tools,tool))throw Error('Неизвестное действие Unity.');
       const parsed=tools[tool].schema.parse(args);
-      const response=await dialog().showMessageBox(s.win,{type:'question',message:tools[tool].description,detail:[url,instance||'Редактор будет проверен перед вызовом',tool==='call_tool'?parsed.name:tool,JSON.stringify(parsed.arguments||parsed,null,2)].join('\n'),buttons:['Продолжить','Отмена'],defaultId:1,cancelId:1});
+      const proposal=tool==='apply_agent_proposal' && proposals.get(parsed.proposalId);
+      if(tool==='apply_agent_proposal' && (!proposal || proposal.topic!==topic || proposal.owner!==owner ||
+          proposal.version!==version || proposal.project!==project || proposal.company!==company || proposal.url!==url || proposal.token!==token))
+        throw Error('Предложение устарело. Повторите диагностику.');
+      if(proposal)instance=proposal.instance;
+      const response=await dialog().showMessageBox(s.win,{type:'question',message:tools[tool].description,detail:[url,instance||'Редактор будет проверен перед вызовом',tool==='call_tool'?parsed.name:tool,JSON.stringify(proposal?.call || parsed.arguments||parsed,null,2)].join('\n'),buttons:['Продолжить','Отмена'],defaultId:1,cancelId:1});
       if(response.response!==0)throw Error('Действие отменено.');
       check();
       progress('Выполняю запрос MCP…',true);
@@ -99,7 +125,22 @@ module.exports={
           if(!editors.some(e=>e.id===instance))throw Error('Выбранный редактор Unity недоступен. Повторите поиск.');
           await target(client,instance);
         }else if(instance)throw Error('Сервер больше не подтверждает выбранный редактор Unity.');
-        check();const data=Object.hasOwn(native.specs,tool)?await native.execute(client,tool,parsed,check):await prefabs.execute(client,tool,parsed,check);return {...data,instance};
+        check();
+        if(proposal){
+          if(proposals.get(parsed.proposalId)!==proposal)throw Error('Предложение уже применено.');
+          proposals.delete(parsed.proposalId);
+          return {...await native.execute(client,'call_tool',proposal.call,check),instance};
+        }
+        if(tool==='assist'){
+          const data=await require('./agent.cjs').assist(s,client,parsed.command,check,text=>{progress(text,true);s.requestProgress?.report(text);});
+          if(data.proposal){
+            data.proposalId=require('node:crypto').randomUUID();
+            proposals.set(data.proposalId,{topic,owner,version,project,company,url,token,instance,call:data.proposal});
+            if(proposals.size>40)proposals.delete(proposals.keys().next().value);
+          }
+          return {structuredContent:data,content:[{type:'text',text:data.answer}],instance};
+        }
+        const data=Object.hasOwn(native.specs,tool)?await native.execute(client,tool,parsed,check):await prefabs.execute(client,tool,parsed,check);return {...data,instance};
       });
       check();
       if(tool==='find_prefabs'&&Array.isArray(result.structuredContent?.matches))findResults.set(topic,{instance,url,rows:result.structuredContent.matches});
@@ -110,7 +151,7 @@ module.exports={
       }
       return result;
     }
-    return {unity:{turn,invoke},ipc:{status:()=>operation,invoke:(id,tool,args,instance)=>invoke(id,tool,args,()=>{},instance),async test(){
+    return {unity:{turn,invoke,assistTurn},ipc:{status:()=>operation,invoke:(id,tool,args,instance)=>invoke(id,tool,args,()=>{},instance),async test(){
       available();return connect(s.settings,async client=>{
         const editors=await inspect(client);const catalog=await native.discover(client,()=>available());
         return 'Unity подключена · инструментов: '+catalog.tools.length+(editors?' · редакторов: '+editors.length:'');
