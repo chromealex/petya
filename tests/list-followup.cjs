@@ -26,6 +26,11 @@ const f=require('../src/features/list-followup.cjs');
  // a truncated list says the answer covers the shown part
  topic.messages=[{role:'assistant',text:list}];const part=await listFollowup.turn('Какие из них на паузе?');assert.match(part.text,/показаны 6 из 431/);
  topic.messages=[{role:'assistant',text:list}];const missing=await listFollowup.turn('А какие из них в работе?');assert.match(missing.text,/«задачи MW2 в работе»/);
+ // the chat moved on (a calculation in a new chat): the latest list of the project is used and its chat becomes active
+ {const state={activeProjectId:'p',activeId:'calc',topics:[{id:'tasks',projectId:'p',messages:[{role:'assistant',text:mine,at:Date.now()-60000}]},{id:'bugs',projectId:'p',messages:[{role:'assistant',text:'Баги:\nBW-1 — Краш (Open)\nBW-2 — Лаг (To Do)',at:Date.now()-120000}]},{id:'calc',projectId:'p',messages:[{role:'assistant',text:'300'}]}]};
+  const s2={...s,dialogue:{state,active:()=>state.topics.find(t=>t.id===state.activeId),rememberAction:(c,t)=>state.topics.find(x=>x.id===state.activeId).messages.push({role:'user',text:c},{role:'assistant',text:t}),persist(){}}};
+  const {listFollowup:lf}=f.setup(s2);let x=await lf.turn('Вернёмся к задачам: какие из них на ревью?');assert.equal(x.topicId,'tasks');assert.match(x.text,/на ревью — 2/);
+  state.activeId='calc';x=await lf.turn('Вернёмся к багам: какие из них не начаты?');assert.equal(x.topicId,'bugs');assert.match(x.text,/BW-2/);}
  // no list in the chat: the usual pipeline answers
  topic.messages=[{role:'assistant',text:'Привет'}];assert.equal(await listFollowup.turn('Какие из этих задач сделать сначала?'),null);
  console.log('List follow-up: «какие из этих сначала» and status filters («на ревью», «в работе») answer from the latest shown list, closed items skipped, partial lists named, no list → pipeline passed');

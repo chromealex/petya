@@ -33,7 +33,13 @@ module.exports={
   const model=async(system,data)=>{const response=await s.request(s.core.localEndpoint(s.settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:s.settings.model,stream:false,think:false,options:{temperature:0.2,num_predict:900},messages:[{role:'system',content:system},{role:'user',content:JSON.stringify(data)}]})});return String(response?.message?.content||'').trim();};
   const turn=async command=>{
    const choose=question(command),group=!choose&&filterQuestion(command);if(!choose&&!group)return null;
-   const topic=s.dialogue.active();const list=lastList(topic?.messages);if(!list)return null; // no list in this chat: the usual pipeline answers
+   let topic=s.dialogue.active();let list=lastList(topic?.messages);
+   // The conversation may have moved to another chat since the list (a calculation, «вернёмся к задачам»):
+   // take the latest list of this project from the last 30 minutes, preferring one about what is named.
+   if(!list){const home=topic?.projectId||s.dialogue.state?.activeProjectId,since=Date.now()-30*60000,want=/баг/iu.test(command)?/баг/iu:/задач/iu.test(command)?/задач/iu:null;
+    const found=(s.dialogue.state?.topics||[]).filter(t=>t!==topic&&!t.archived&&t.projectId===home).map(t=>{const m=[...(t.messages||[])].reverse().find(m=>m.role==='assistant'&&items(m.text).length>=2);return m&&(m.at||t.at||0)>=since?{t,m}:null;}).filter(Boolean).sort((a,b)=>Number(!!want&&want.test(b.m.text))-Number(!!want&&want.test(a.m.text))||(b.m.at||0)-(a.m.at||0))[0];
+    if(found){topic=found.t;list=lastList(found.t.messages);s.dialogue.state.activeId=found.t.id;}}
+   if(!list)return null; // no list in this chat: the usual pipeline answers
    const all=list.rows,total=shownOf(list.text),partial=total>all.length?' (в списке показаны '+all.length+' из '+total+')':'';
    if(group){const rows=pick(all,group);
     let text=rows.length?'Из показанного списка '+group.name+' — '+rows.length+partial+':\n'+rows.map(r=>r.key+' — '+r.title+(r.status?' ('+r.status+')':'')).join('\n'):'В показанном списке'+partial+' задач со статусом «'+group.name+'» нет. Статусы в списке: '+[...new Set(all.map(r=>r.status).filter(Boolean))].join(', ')+'.';

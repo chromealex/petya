@@ -14,6 +14,17 @@ function weatherQuestion(command=''){
  const city=/\s(?:в|во)\s+((?:\p{Lu}[\p{L}-]*)(?:[\s-]+\p{Lu}[\p{L}-]*)*)/u.exec(text)?.[1]||/\s(?:в|во)\s+([\p{L}-]{3,}(?:\s+[\p{L}-]+)?)\s*(?:сегодня|завтра|послезавтра|сейчас)?[?.!]*$/iu.exec(text)?.[1]||'';
  return {day,city:city.replace(/\s+(?:сегодня|завтра|послезавтра|сейчас)$/iu,'').trim()};
 }
+// «Нет, в Казани», «А в Питере?», «а завтра?» right after a weather answer continue the weather question.
+function weatherFollowup(command='',last=null){
+ if(!last||last.by!=='открытые данные'||!/(?:погод|сейчас|сегодня|завтра|°)/iu.test(String(last.text||'')))return null;
+ const text=String(command).trim().replace(/^петя[\s,:.!?—-]*/iu,'').replace(/[?!.]+$/u,'');
+ const m=/^(?:(?:нет|не|а|ну)[\s,]+)*(?:(?:в|во)\s+([\p{L}-]+(?:[\s-]+[\p{L}-]+)?))?\s*(сегодня|завтра|послезавтра)?$/iu.exec(text);
+ if(!m||!m[1]&&!m[2])return null;
+ // «А в задачах?» is not a city: lowercase work words stay with the usual pipeline.
+ if(m[1]&&!/^\p{Lu}/u.test(m[1])&&/задач|баг|слак|slack|jira|джир|проект|чат|команд|почт|гит|git|релиз|верси|списк/iu.test(m[1]))return null;
+ const previous=/^(.+?)(?: сейчас| —)/u.exec(String(last.text))?.[1]?.split(',')[0]||'';
+ return {day:m[2]?(/послезавтра/iu.test(m[2])?2:/завтра/iu.test(m[2])?1:0):0,city:(m[1]||previous).trim(),followup:true};
+}
 function rateQuestion(command=''){const m=RATE.exec(String(command));if(!m)return null;const word=m[1].toLowerCase();const code=Object.entries(CODES).find(([k])=>word.startsWith(k))?.[1];return code&&code!=='RUB'?{code}:null;}
 // «Москве» → «Москва», «Петербурге» → «Петербург», «Казани» → «Казань».
 // Nominative forms first («в Казани» → «Казань»): geocoders match the inflected word to other places.
@@ -26,7 +37,7 @@ function cityVariants(city){const c=city.trim().replace(/(^|[\s-])(\p{Ll})/gu,(m
  out.push(c);return [...new Set(out)].filter(v=>v.length>1).slice(0,4);}
 module.exports={
  name:'fresh-data',
- weatherQuestion,rateQuestion,cityVariants,
+ weatherQuestion,weatherFollowup,rateQuestion,cityVariants,
  setup(s){
   // Short timeouts: a slow provider must not hold the answer for a minute.
   const get=async(url,ms=8000)=>s.request(url,{headers:{Accept:'application/json'},signal:AbortSignal.timeout(ms)});
@@ -64,8 +75,12 @@ module.exports={
   };
   const turn=async command=>{
    if(!s.modules.enabled(s.settings,'web'))return null;
-   const w=weatherQuestion(command),r=!w&&rateQuestion(command);if(!w&&!r)return null;
-   try{return w?await weather(command,w):await rate(command,r);}catch(e){if(e.notFound)return {handled:true,question:true,text:e.message,by:'открытые данные'};console.error('Fresh data:',e.message,e.cause?.code||'');return null;} // fall back to the web search
+   const last=s.dialogue.active()?.messages?.filter(m=>m.role==='assistant').at(-1);
+   const w=weatherQuestion(command)||weatherFollowup(command,last),r=!w&&rateQuestion(command);if(!w&&!r)return null;
+   try{return w?await weather(command,w):await rate(command,r);}catch(e){if(e.notFound)return w?.followup?null:{handled:true,question:true,text:e.message,by:'открытые данные'};console.error('Fresh data:',e.message,e.cause?.code||'');
+    // Weather is not searched on Google (it answers with a CAPTCHA): say so at once. Rates fall back to the web search.
+    if(w)return reply(command,'Сервисы погоды (Open-Meteo и wttr.in) сейчас не ответили. Спроси ещё раз через минуту.',[]);
+    return null;}
   };
   return {freshData:{turn}};
  }

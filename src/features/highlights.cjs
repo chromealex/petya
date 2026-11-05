@@ -47,8 +47,17 @@ module.exports={
     if(scope&&['chat','project'].includes(scope)){const target=owner(state(),topicId,scope);if(target!==holder){holder.highlights.splice(i,1);target.highlights=target.highlights||[];target.highlights.push(h);}}
     save();return list(state(),topicId);}
   };
+  // «Что важно не забыть?», «Что я отмечал как важное?» — the marks themselves, not a model guess or a Jira query.
+  // Marks of this chat and project first; when there are none, marks of the project's other chats from the last day.
+  const RECALL=/^(?:петя[,!\s]+)?(?:а\s+)?(?:что|какие|покажи|напомни)(?=[\s,]).{0,40}?(?:важн\p{L}*\s+(?:не\s+забыть|помнить)|отмеча\p{L}*\s+(?:как\s+)?важн|отметк\p{L}*(?!\p{L})|важное(?!\p{L})\s*(?:$|[?.!]|в\s|по\s|из\s|для\s)|важные\s+(?:отметки|пункты|моменты))/iu;
+  const recall=command=>{if(!RECALL.test(String(command).trim()))return null;const topic=s.dialogue.active();
+   let marks=topic?collect(state(),topic):[];
+   if(!marks.length){const since=Date.now()-86400000,home=topic?.projectId||state().activeProjectId;marks=state().topics.filter(t=>t!==topic&&!t.archived&&t.projectId===home).flatMap(t=>(t.highlights||[]).filter(h=>(h.at||0)>=since).map(h=>clean(h.text)));marks=[...new Set(marks)];}
+   const text=marks.length?'Отмечено как важное:\n'+marks.map(m=>'• '+m).join('\n'):'Важных отметок пока нет. Выдели текст в ответе и нажми «Важно» или скажи «Запомни как важное: …».';
+   s.dialogue.rememberAction(command,text);const t=s.dialogue.active();const last=t?.messages?.at(-1);if(last?.role==='assistant')last.by='важное';save();
+   return {handled:true,text,by:'важное',topicId:t?.id,topicTitle:t?.title,messages:t?.messages};};
   // Voice: «Запомни как важное: релиз 20 ноября», «… для проекта: тестирует Полина».
-  const turn=command=>{const m=SAY.exec(String(command).trim());if(!m)return null;let topic=s.dialogue.active();
+  const turn=command=>{const m=SAY.exec(String(command).trim());if(!m)return recall(command);let topic=s.dialogue.active();
    if(!topic){topic={id:randomUUID(),projectId:state().activeProjectId||'general',title:'Важное',kind:'chat',messages:[],at:Date.now()};state().topics.push(topic);state().activeId=topic.id;delete state().newChat;}
    const scope=m[1]?'project':'chat';add(topic.id,{text:m[2],scope});
    const text='Отметил как важное'+(scope==='project'?' для всего проекта':' для этого чата')+': «'+clean(m[2])+'». Буду учитывать это в ответах.';
