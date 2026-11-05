@@ -19,6 +19,7 @@ module.exports=[
  require('./features/list-followup.cjs'),
  require('./features/selftest.cjs'),
  require('./features/morning-brief.cjs'),
+ require('./features/optional-models.cjs'),
  require('./features/extension-replies.cjs'),
  require('./features/chat-results.cjs'),
  require('./features/chat-changes.cjs')

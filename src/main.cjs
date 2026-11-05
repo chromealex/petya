@@ -477,7 +477,7 @@ function setupHandlers() {
   const services={
     get workspace(){return workspace;},
     get dataRoot(){return dataRoot;}, get speech(){return speech;}, get qwenSpeech(){return qwenSpeech;}, get speechError(){return speechError;},
-    get win(){return win;},get smoke(){return smoke;},get snapshots(){return snapshots;},get handle(){return handle;},get directRequest(){return directRequest;},get team(){return team;},get memory(){return memory;},get slackSync(){return slackSync;},
+    get win(){return win;},get smoke(){return smoke;},get ollamaReady(){return ollamaReady;},get ollamaInstaller(){return ollamaInstaller;},get OllamaReady(){return OllamaReady;},get snapshots(){return snapshots;},get handle(){return handle;},get directRequest(){return directRequest;},get team(){return team;},get memory(){return memory;},get slackSync(){return slackSync;},
     get agents(){return agents;},
     get allowedMedia(){return allowedMedia;},
     get analyzeMaterials(){return analyzeMaterials;},

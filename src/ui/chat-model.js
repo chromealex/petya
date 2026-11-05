@@ -12,11 +12,17 @@
   const options=[new Option('Модель: '+(state.defaultModel||'по умолчанию'),'')];options[0].title='По умолчанию из «Подключения → Ollama»';
   for(const m of state.models){if(m.name===state.defaultModel)continue;const o=new Option(m.name+(m.size?' · '+size(m.size):''),m.name);options.push(o);}
   if(state.current&&!state.models.some(m=>m.name===state.current))options.push(new Option(state.current+' · не найдена',state.current));
+  // Optional models are not kept on disk: offer to download the ones that are missing.
+  let optional=[];try{optional=(await window.petya.feature('optional-models','list')).models.filter(m=>!m.installed&&!state.models.some(x=>x.name===m.name));}catch{}
+  if(epoch!==loading)return;
+  if(optional.length){const group=document.createElement('optgroup');group.label='Скачать при необходимости';for(const m of optional){const o=new Option('Скачать '+m.name+' · '+size(m.size),'download:'+m.name);o.title=m.purpose;group.append(o);}options.push(group);}
   select.replaceChildren(...options);select.value=state.current||'';
   select.disabled=!state.models.length&&!state.current;wrap.title=state.error||'Модель для ответов в этом чате';
   wrap.dataset.custom=state.current?'true':'';
  }
- select.onchange=async()=>{const value=select.value;try{const r=await window.petya.chatModelSet(value);wrap.dataset.custom=r.current?'true':'';notice(r.current?'В этом чате отвечает '+r.current+'.':'В этом чате отвечает модель по умолчанию.');}catch(e){notice(e.message,true);refresh();}};
+ select.onchange=async()=>{const value=select.value;
+  if(value.startsWith('download:')){const name=value.slice(9);try{const r=await window.petya.feature('optional-models','download',name);notice('Скачиваю '+r.model+' (~'+size(r.size)+'). Прогресс — в уведомлениях; после загрузки модель появится в списке.');}catch(e){notice(e.message);}refresh();return;}
+ try{const r=await window.petya.chatModelSet(value);wrap.dataset.custom=r.current?'true':'';notice(r.current?'В этом чате отвечает '+r.current+'.':'В этом чате отвечает модель по умолчанию.');}catch(e){notice(e.message,true);refresh();}};
  select.onfocus=()=>refresh();
  function place(){const mic=document.querySelector('#home .mic-control');if(mic&&wrap.previousElementSibling!==mic)mic.after(wrap);}
  document.addEventListener('petya-topic-changed',()=>{place();refresh();});
