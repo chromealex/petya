@@ -1,0 +1,42 @@
+{
+  "name-0-01": {
+    "passed": true,
+    "missing": []
+  },
+  "name-0-10": {
+    "passed": false,
+    "missing": [
+      "Пропуска-07"
+    ]
+  },
+  "name-0-00": {
+    "passed": true,
+    "missing": []
+  },
+  "name-0-11": {
+    "passed": false,
+    "missing": [
+      "Пропуска-07"
+    ]
+  },
+  "name-1-01": {
+    "passed": true,
+    "missing": []
+  },
+  "name-1-10": {
+    "passed": false,
+    "missing": [
+      "Счёты-04"
+    ]
+  },
+  "name-1-00": {
+    "passed": true,
+    "missing": []
+  },
+  "name-1-11": {
+    "passed": false,
+    "missing": [
+      "Счёты-04"
+    ]
+  }
+}

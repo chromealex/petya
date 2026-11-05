@@ -1,0 +1,12 @@
+{
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "data_sha256": "eadf19f556c2eb0d34f71700294e5ab9bbdeaaec3e73871b527816bf652dab73",
+  "adapter": null,
+  "temperature": 0,
+  "thinking": false,
+  "max_tokens": {
+    "draft": 450,
+    "other": 120
+  },
+  "reference_in_prompt": false
+}
