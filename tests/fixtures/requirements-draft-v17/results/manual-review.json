@@ -1,0 +1,440 @@
+{
+  "base": {
+    "name-0-01": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-0-10": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-0-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-0-11": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-1-01": [
+      false,
+      "Cancels the approved amber color."
+    ],
+    "name-1-10": [
+      false,
+      "Applies amber despite canceled color change."
+    ],
+    "name-1-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-1-11": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-10": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-01": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-11": [
+      false,
+      "Keeps buyer prohibition after permission granted."
+    ],
+    "report-1-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-1-10": [
+      false,
+      "Omits retained primary recipient secretary."
+    ],
+    "report-1-01": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-1-11": [
+      false,
+      "Contains contradictory recipient instructions and fabricated interpretation of the final answer."
+    ],
+    "polarity-0-000": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-001": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-010": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-011": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-100": [
+      false,
+      "Reopens settled field and visibility decisions."
+    ],
+    "polarity-0-101": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-110": [
+      false,
+      "Adds an unrequested blocking question about code format."
+    ],
+    "polarity-0-111": [
+      false,
+      "Invents recipient-specific visibility and reopens the agreed visibility."
+    ],
+    "polarity-1-000": [
+      false,
+      "Requests reconfirmation of the settled recipient list."
+    ],
+    "polarity-1-001": [
+      false,
+      "Contradicts showing expert name and reopens settled decisions."
+    ],
+    "polarity-1-010": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-011": [
+      false,
+      "Adds removal of unspecified other recipients."
+    ],
+    "polarity-1-100": [
+      false,
+      "Reopens all settled requirements."
+    ],
+    "polarity-1-101": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-110": [
+      false,
+      "Invents removing expert recipient and asks to reconfirm settled decisions."
+    ],
+    "polarity-1-111": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "failure-0-0": [
+      false,
+      "Omits required author name and adds unrelated open questions."
+    ],
+    "failure-0-1": [
+      false,
+      "Adds unrequested format/audience questions after requirements settled."
+    ],
+    "scope": [
+      false,
+      "Changes sending to an interface task, omits procurement exclusion and adds questions."
+    ],
+    "repeat": [
+      false,
+      "Invents avatar or status replacement for hidden names."
+    ]
+  },
+  "parent": {
+    "name-0-01": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-0-10": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-0-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-0-11": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-1-01": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-1-10": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-1-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-1-11": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-10": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-01": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-11": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-1-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-1-10": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-1-01": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-1-11": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-000": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-001": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-010": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-011": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-100": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-101": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-110": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-111": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-000": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-001": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-010": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-011": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-100": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-101": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-110": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-111": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "failure-0-0": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "failure-0-1": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "scope": [
+      false,
+      "Wrong procurement heading and omitted explicit procurement exclusion."
+    ],
+    "repeat": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ]
+  },
+  "historical": {
+    "name-0-01": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-0-10": [
+      false,
+      "Wrong color and missing old exact label in description."
+    ],
+    "name-0-00": [
+      false,
+      "Changes color despite cancellation."
+    ],
+    "name-0-11": [
+      false,
+      "Old exact label absent from description."
+    ],
+    "name-1-01": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "name-1-10": [
+      false,
+      "Changes canceled color and loses exact labels."
+    ],
+    "name-1-00": [
+      false,
+      "Omits preserved address and content."
+    ],
+    "name-1-11": [
+      false,
+      "Splits exact labels into name and number."
+    ],
+    "report-0-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-10": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-0-01": [
+      false,
+      "Hides field that must be shown."
+    ],
+    "report-0-11": [
+      false,
+      "Hides field that must be shown."
+    ],
+    "report-1-00": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "report-1-10": [
+      false,
+      "Retains canceled recipient prohibition."
+    ],
+    "report-1-01": [
+      false,
+      "Hides field that must be shown."
+    ],
+    "report-1-11": [
+      false,
+      "Hides field that must be shown."
+    ],
+    "polarity-0-000": [
+      false,
+      "Contradictory ban on primary recipient."
+    ],
+    "polarity-0-001": [
+      false,
+      "Adds prohibited recipient and hides field that must be shown."
+    ],
+    "polarity-0-010": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-011": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-100": [
+      false,
+      "Simultaneously prohibits and allows sending to primary recipient."
+    ],
+    "polarity-0-101": [
+      false,
+      "Adds prohibited recipient and hides field that must be shown."
+    ],
+    "polarity-0-110": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-0-111": [
+      false,
+      "Shows obsolete code and hides required visible address."
+    ],
+    "polarity-1-000": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-001": [
+      false,
+      "Invents expert recipient and hides required visible name."
+    ],
+    "polarity-1-010": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-011": [
+      false,
+      "Adds canceled replacement field."
+    ],
+    "polarity-1-100": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-101": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-110": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "polarity-1-111": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "failure-0-0": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "failure-0-1": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ],
+    "scope": [
+      false,
+      "Omits explicit exclusion of scanner procurement."
+    ],
+    "repeat": [
+      true,
+      "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
+    ]
+  }
+}
