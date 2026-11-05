@@ -44,6 +44,8 @@ const SCENARIOS=[
  {name:'Свежие 2',turns:['Курс евро','Какая погода завтра в Казани?']},
  {name:'Шум',turns:['ыва','Петя','?']}
 ];
+// PETYA_LIVE_SET=500 runs the 500 graded cases of src/live-cases.cjs instead of the short scenario list.
+const CASES=process.env.PETYA_LIVE_SET==='500'?require('./live-cases.cjs'):SCENARIOS;
 module.exports=async(win,out)=>{
  const js=code=>win.webContents.executeJavaScript(code);
  const withTimeout=(promise,ms)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(Error('Нет ответа за '+ms/1000+' с')),ms))]);
@@ -57,14 +59,14 @@ module.exports=async(win,out)=>{
  try{
   // PETYA_LIVE_ONLY=<regex> runs only the scenarios whose name matches (e.g. «Агент»).
   const only=process.env.PETYA_LIVE_ONLY?new RegExp(process.env.PETYA_LIVE_ONLY,'iu'):null;
-  for(const scenario of SCENARIOS.filter(x=>!only||only.test(x.name))){const models=require('./model-context.cjs');models.stats({reset:true});
+  for(const scenario of CASES.filter(x=>!only||only.test(x.name))){const models=require('./model-context.cjs');models.stats({reset:true});
    // Git needs the folders of the user's own project; its chat is archived right after.
    // Prefer the active project when it has folders, otherwise the first project that has some.
    const withFolders=(before.projects||[]).filter(p=>p.folder||p.folders?.length||p.memoryId);
    const target=scenario.userProject?((withFolders.find(p=>p.id===before.activeProjectId)||withFolders[0])?.id||before.activeProjectId||project.id):project.id;
    await js(`window.petya.chatProjectSelect(${JSON.stringify(target)})`);await js(`window.petya.dialogueSelect('')`);
    const turns=[];
-   for(const text of scenario.turns){const started=Date.now();let r;
+   for(const turn of scenario.turns){const [text,checks]=Array.isArray(turn)?turn:[turn,{}];const started=Date.now();let r;
     try{r=await withTimeout(js(`window.petya.converse(${JSON.stringify(text)}).then(r=>({text:r.text||'',topicId:r.topicId||'',by:r.by||(r.messages||[]).filter(m=>m.role==='assistant').at(-1)?.by||'',handled:r.handled,question:!!r.question,error:!!r.error,steps:(r.steps||[]).map(s=>s.label),options:(r.options||r.clarificationOptions||r.skillChoices||r.integrationOffers||r.mediaChoices||[]).map(o=>o.label||o).slice(0,6)}))`),150000);}
     catch(e){r={text:'',error:true,failure:e.message};}
     // Agents answer later: wait for the combined answer in the parent chat.
@@ -72,7 +74,7 @@ module.exports=async(win,out)=>{
      // Agent chats must sit under this chat in the sidebar (agentOf) and stay within the model cap.
      if(id){const nav=await js('window.petya.chatNavigation("")');r.agentChats=nav.topics.filter(t=>t.agentOf===id).map(t=>t.title+' — '+(t.job?.state||''));}}
     {const m=require('./model-context.cjs').stats({reset:true});r.models={peak:m.peak,maxWaiting:m.maxWaiting,limit:m.limit};}
-    turns.push({input:text,ms:Date.now()-started,...r});
+    turns.push({input:text,ms:Date.now()-started,...r,fail:require('./live-grade.cjs').grade(r,checks)});
     fs.writeFileSync(out,JSON.stringify({...report,scenarios:[...report.scenarios,{name:scenario.name,turns}]},null,1));
    }
    report.scenarios.push({name:scenario.name,turns});
@@ -80,10 +82,11 @@ module.exports=async(win,out)=>{
    if(target!==project.id){const id=(await js('window.petya.dialogueTopics()')).activeId;if(id)try{await js(`window.petya.chatArchive('chat',${JSON.stringify(id)},true)`);}catch{}}
   }
  }finally{
+  report.summary=require('./live-grade.cjs').summary(report);
   fs.writeFileSync(out,JSON.stringify(report,null,1));
   // Leave the user's chats as they were: remove the test project and the chats this run opened (and leftovers of
   // older runs), then return to the previous chat.
-  try{const turns=SCENARIOS.flatMap(x=>x.turns);report.cleanup=await js(`window.petya.feature('selftest','cleanup',${JSON.stringify({since:Date.parse(report.at)-1000,turns,legacy:true})})`);fs.writeFileSync(out,JSON.stringify(report,null,1));}catch(e){try{await js(`window.petya.chatArchive('project',${JSON.stringify(project.id)},true)`);}catch{}}
+  try{const turns=CASES.flatMap(x=>x.turns.map(t=>Array.isArray(t)?t[0]:t));report.cleanup=await js(`window.petya.feature('selftest','cleanup',${JSON.stringify({since:Date.parse(report.at)-1000,turns,legacy:true})})`);fs.writeFileSync(out,JSON.stringify(report,null,1));}catch(e){try{await js(`window.petya.chatArchive('project',${JSON.stringify(project.id)},true)`);}catch{}}
   if(process.env.PETYA_LIVE_MODEL)try{await js(`window.petya.saveSettings(${JSON.stringify({model:previousModel})})`);}catch{}
   try{if(before.activeProjectId)await js(`window.petya.chatProjectSelect(${JSON.stringify(before.activeProjectId)})`);if(before.activeId)await js(`window.petya.dialogueSelect(${JSON.stringify(before.activeId)})`);}catch{}
  }
