@@ -1,0 +1,128 @@
+{
+  "parent": {
+    "bounds": {
+      "passed": 20,
+      "total": 20
+    },
+    "general": {
+      "passed": 28,
+      "total": 28
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 34,
+      "total": 36
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 8,
+      "total": 8
+    },
+    "polarity": {
+      "passed": 16,
+      "total": 16
+    },
+    "sorting": {
+      "passed": 24,
+      "total": 24
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 84,
+      "total": 84
+    }
+  },
+  "base": {
+    "bounds": {
+      "passed": 16,
+      "total": 20
+    },
+    "general": {
+      "passed": 21,
+      "total": 28
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 16,
+      "total": 36
+    },
+    "rename": {
+      "passed": 6,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 4,
+      "total": 8
+    },
+    "polarity": {
+      "passed": 5,
+      "total": 16
+    },
+    "sorting": {
+      "passed": 17,
+      "total": 24
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 81,
+      "total": 84
+    }
+  },
+  "historical": {
+    "bounds": {
+      "passed": 11,
+      "total": 20
+    },
+    "general": {
+      "passed": 18,
+      "total": 28
+    },
+    "literal_labels": {
+      "passed": 5,
+      "total": 8
+    },
+    "draft": {
+      "passed": 16,
+      "total": 36
+    },
+    "rename": {
+      "passed": 3,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 1,
+      "total": 8
+    },
+    "polarity": {
+      "passed": 9,
+      "total": 16
+    },
+    "sorting": {
+      "passed": 14,
+      "total": 24
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 84,
+      "total": 84
+    }
+  }
+}

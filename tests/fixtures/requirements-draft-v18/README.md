@@ -8,4 +8,8 @@ Reserve 84 fresh structured cases and sixteen newly authored release dialogues b
 
 Manual semantic review checks complete requirements, explicit exclusions, recipient direction, unresolved questions, coherent headings and exact names; wording may differ. Preserve strict numeric scoring and paired regressions. Small related synthetic tests are not proof of broad reliability. No release unless all gates pass, including diverse release dialogues, generated multi-turn behavior with normal sampling, artifact provenance and real runtime loading/integration.
 
-Training and inference have not yet started. `protocol.json` and `release-dialogues-protocol.json` freeze input hashes. `verify.py` checks completed stages explicitly and never asserts release readiness from a partial evaluation.
+Structured baseline inference completed and the frozen training run is active. `protocol.json` and `release-dialogues-protocol.json` freeze input hashes. `verify.py` checks completed stages explicitly and never asserts release readiness from a partial evaluation.
+
+## Supplementary prompt correction
+
+The first supplementary parent run used the bounds system instruction accidentally selected from the first acquisition row. Its numerical-schema replies are invalid test evidence, not model draft failures. Original inputs, hash and raw answers are preserved in `results/invalid-release-prompt`. Before any candidate fresh inference, only the system instruction was corrected to the existing draft instruction; histories and references are unchanged. The amendment is recorded in `release-dialogues-protocol.json`. Training inputs are unchanged. The corrected parent test must be rerun sequentially after the active GPU job. The verifier now checks system instructions against task type.

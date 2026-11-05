@@ -1,0 +1,440 @@
+{
+  "parent": {
+    "name-0-01": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-0-10": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-0-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-0-11": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-1-01": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-1-10": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-1-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-1-11": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-0-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-0-10": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-0-01": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-0-11": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-1-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-1-10": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-1-01": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-1-11": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-000": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-001": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-010": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-011": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-100": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-101": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-110": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-111": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-000": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-001": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-010": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-011": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-100": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-101": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-110": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-111": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "failure-0-0": [
+      false,
+      "Hides the author email despite explicit permission to show it."
+    ],
+    "failure-0-1": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "scope": [
+      false,
+      "Recasts excluded procurement as the task and loses the intended recipient."
+    ],
+    "repeat": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ]
+  },
+  "base": {
+    "name-0-01": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-0-10": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-0-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-0-11": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-1-01": [
+      false,
+      "Loses the approved color change."
+    ],
+    "name-1-10": [
+      false,
+      "Applies canceled color change."
+    ],
+    "name-1-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-1-11": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-0-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-0-10": [
+      false,
+      "Keeps revoked tenant prohibition."
+    ],
+    "report-0-01": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-0-11": [
+      false,
+      "Keeps revoked tenant prohibition."
+    ],
+    "report-1-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-1-10": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-1-01": [
+      false,
+      "Invents header/footer placement for the email."
+    ],
+    "report-1-11": [
+      false,
+      "Invents recipient-specific old/new identifiers and visibility."
+    ],
+    "polarity-0-000": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-001": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-010": [
+      false,
+      "Reopens settled identifier."
+    ],
+    "polarity-0-011": [
+      false,
+      "Reopens settled identifier and recipients."
+    ],
+    "polarity-0-100": [
+      false,
+      "Adds unrequested identifier-source question."
+    ],
+    "polarity-0-101": [
+      false,
+      "Contradictory visibility and added questions."
+    ],
+    "polarity-0-110": [
+      false,
+      "Truncated invalid JSON and reopens settled visibility."
+    ],
+    "polarity-0-111": [
+      false,
+      "Invalid JSON and reopens settled requirements."
+    ],
+    "polarity-1-000": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-001": [
+      false,
+      "Excludes visible address in final field restriction."
+    ],
+    "polarity-1-010": [
+      false,
+      "Invents different visibility per recipient and reopens decisions."
+    ],
+    "polarity-1-011": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-100": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-101": [
+      false,
+      "Reopens settled recipients."
+    ],
+    "polarity-1-110": [
+      false,
+      "Reopens settled fields and recipients."
+    ],
+    "polarity-1-111": [
+      false,
+      "Hides the address despite final show decision."
+    ],
+    "failure-0-0": [
+      false,
+      "Reopens already settled visibility."
+    ],
+    "failure-0-1": [
+      false,
+      "Omits explicit email hiding and adds unrelated questions."
+    ],
+    "scope": [
+      false,
+      "Invents procurement trigger, message template and open questions."
+    ],
+    "repeat": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ]
+  },
+  "historical": {
+    "name-0-01": [
+      false,
+      "Omits preserved address."
+    ],
+    "name-0-10": [
+      false,
+      "Wrong color and missing old exact label in description."
+    ],
+    "name-0-00": [
+      false,
+      "Changes canceled color."
+    ],
+    "name-0-11": [
+      false,
+      "Omits exact old label and explicit renaming."
+    ],
+    "name-1-01": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-1-10": [
+      false,
+      "Loses exact labels including numeric suffix."
+    ],
+    "name-1-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "name-1-11": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-0-00": [
+      false,
+      "Keeps old code and hides correct replacement."
+    ],
+    "report-0-10": [
+      false,
+      "Keeps old code and hides correct replacement."
+    ],
+    "report-0-01": [
+      false,
+      "Hides address that must be shown."
+    ],
+    "report-0-11": [
+      false,
+      "Hides address that must be shown."
+    ],
+    "report-1-00": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "report-1-10": [
+      false,
+      "Keeps revoked recipient prohibition."
+    ],
+    "report-1-01": [
+      false,
+      "Hides email that must be shown."
+    ],
+    "report-1-11": [
+      false,
+      "Hides email that must be shown."
+    ],
+    "polarity-0-000": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-001": [
+      false,
+      "Replaces show decision with recipient-specific hiding and omits sending prohibition."
+    ],
+    "polarity-0-010": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-011": [
+      false,
+      "Hides the retained identifier."
+    ],
+    "polarity-0-100": [
+      false,
+      "Omits explicit sending to auditor and invents broader ban on supplier actions."
+    ],
+    "polarity-0-101": [
+      false,
+      "Omits explicit sending to auditor and invents broader ban on supplier actions."
+    ],
+    "polarity-0-110": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-0-111": [
+      false,
+      "Invents separate letter and recipient-specific visibility."
+    ],
+    "polarity-1-000": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-001": [
+      false,
+      "Contradictory delivery to banned client and wrong visibility."
+    ],
+    "polarity-1-010": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-011": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-100": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-101": [
+      false,
+      "Contradictory sending and wrong visibility."
+    ],
+    "polarity-1-110": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "polarity-1-111": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "failure-0-0": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "failure-0-1": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ],
+    "scope": [
+      false,
+      "Omits procurement exclusion."
+    ],
+    "repeat": [
+      true,
+      "Preserves final requirements; equivalent wording accepted."
+    ]
+  }
+}
