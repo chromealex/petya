@@ -3,18 +3,29 @@
 // they work on. Every value is copied from the service, never guessed.
 const team=require('./team.cjs');
 const norm=v=>String(v||'').toLocaleLowerCase().replace(/ё/g,'е').replace(/\s+/g,' ').trim();
-// Slack: one users.list walk (a single API method, light on rate limits); a limit or an error leaves cards as they are.
-async function slackProfiles(settings,request){
- const token=settings.slackToken||'';if(settings.module_slack==='false'||!token)return [];
- const out=[];let cursor='';
- for(let page=0;page<10;page++){
-  const data=await request('https://slack.com/api/users.list?'+new URLSearchParams({limit:'200',...cursor?{cursor}:{}}),{headers:{Authorization:'Bearer '+token}});
-  if(!data?.ok||!Array.isArray(data.members))break;
-  for(const u of data.members){if(u.deleted||u.is_bot||u.is_app_user||u.id==='USLACKBOT')continue;const p=u.profile||{};
-   out.push({slackId:u.id,names:[p.real_name,u.real_name,p.display_name,u.name].filter(Boolean).map(norm),name:String(p.real_name||u.real_name||'').trim(),title:String(p.title||'').trim(),email:typeof p.email==='string'?p.email:''});}
-  cursor=String(data.response_metadata?.next_cursor||'').trim();if(!cursor)break;
- }
- return out;
+// Slack: users.list until every wanted person is found (large workspaces have thousands of members and guests),
+// waiting once when Slack limits requests; then users.lookupByEmail for those with a known e-mail.
+// The result says whether the walk was complete, so the reply never claims «no job title» for an unseen profile.
+async function slackProfiles(settings,request,wanted=[],{wait=ms=>new Promise(r=>setTimeout(r,ms)),maxPages=50}={}){
+ const token=settings.slackToken||'';const result={profiles:[],complete:false,limited:false};if(settings.module_slack==='false'||!token)return result;
+ const call=async url=>{for(let attempt=0;attempt<2;attempt++){try{return await request(url,{headers:{Authorization:'Bearer '+token}});}catch(e){if(attempt||!(e.status===429||/429|ratelimit|ограничил/iu.test(e.message||'')))throw e;result.limited=true;await wait(Math.min(30,Number(e.retryAfter)||20)*1000);}}};
+ const add=u=>{if(!u||u.deleted||u.is_bot||u.is_app_user||u.id==='USLACKBOT')return;const p=u.profile||{};
+  if(!result.profiles.some(x=>x.slackId===u.id))result.profiles.push({slackId:u.id,names:[p.real_name,u.real_name,p.display_name,p.real_name_normalized,p.display_name_normalized,u.name].filter(Boolean).map(norm),name:String(p.real_name||u.real_name||'').trim(),title:String(p.title||'').trim(),email:typeof p.email==='string'?p.email:''});};
+ const names=wanted.map(w=>norm(w.name)).filter(Boolean),found=()=>names.every(n=>result.profiles.some(p=>p.names.includes(n)));
+ let cursor='';
+ try{
+  for(let page=0;page<maxPages;page++){
+   const data=await call('https://slack.com/api/users.list?'+new URLSearchParams({limit:'200',...cursor?{cursor}:{}}));
+   if(!data?.ok||!Array.isArray(data.members)){if(data?.error==='ratelimited')result.limited=true;break;}
+   data.members.forEach(add);
+   cursor=String(data.response_metadata?.next_cursor||'').trim();
+   if(!cursor){result.complete=true;break;}
+   if(names.length&&found()){result.complete=true;break;}
+  }
+ }catch(e){if(e.status===429||/429/.test(e.message||''))result.limited=true;else throw e;}
+ for(const w of wanted)if(w.email&&!result.profiles.some(p=>p.names.includes(norm(w.name))||p.email===w.email)){
+  try{const data=await call('https://slack.com/api/users.lookupByEmail?'+new URLSearchParams({email:w.email}));if(data?.ok)add(data.user);}catch{}}
+ return result;
 }
 // Jira: components and labels of the person's issues in the last 90 days, most frequent first.
 async function jiraWork(workspace,people){
@@ -31,17 +42,21 @@ async function jiraWork(workspace,people){
 }
 const top=(map,n)=>[...map.entries()].sort((a,b)=>b[1]-a[1]).slice(0,n).map(([k])=>k);
 // Fills only empty fields; the evidence says where each value came from.
-function enrich(rows,profiles=[],work=new Map()){
+function enrich(rows,slack=[],work=new Map()){
+ const profiles=Array.isArray(slack)?slack:slack.profiles||[];
  return rows.map(row=>{const m={...row.member},notes=[];
   const name=norm(m.name);
-  const profile=profiles.find(p=>m.slackId&&p.slackId===m.slackId)||profiles.find(p=>p.names.includes(name));
+  // By Slack ID, by name, or by the e-mail Jira knows (names often differ between Slack and Jira).
+  const jiraEmail=(m.jiraId&&work.get(m.jiraId)?.email)||[...work.values()].find(w=>w.name===name)?.email||'';
+  const profile=profiles.find(p=>m.slackId&&p.slackId===m.slackId)||profiles.find(p=>p.names.includes(name))||profiles.find(p=>p.email&&(p.email===m.email||p.email===jiraEmail));
+  m.slackProfile=profile?(profile.title?'title':'empty'):'missing';
   if(profile){if(!m.role&&profile.title){m.role=profile.title;notes.push('роль из профиля Slack');}if(!m.slackId)m.slackId=profile.slackId;if(!m.email&&profile.email)m.email=profile.email;}
   const job=(m.jiraId&&work.get(m.jiraId))||[...work.entries()].find(([,w])=>w.name===name||profile&&profile.names.includes(w.name))?.[1];
   const id=m.jiraId||[...work.entries()].find(([,w])=>w===job)?.[0];
   if(job){if(!m.jiraId&&id)m.jiraId=id;if(!m.projects&&job.projects.size)m.projects=top(job.projects,4).join(', ');
    const topics=top(job.topics,4);if(!m.responsibilities&&topics.length){m.responsibilities=topics.join(', ');notes.push('обязанности по компонентам и меткам задач Jira');}
    if(!m.email&&job.email)m.email=job.email;}
-  let member=row.member;try{member=team.validate([m])[0];}catch{}
-  return {...row,member,evidence:row.evidence+(notes.length?' · '+notes.join(', '):'')};});
+  const slackProfile=m.slackProfile;delete m.slackProfile;let member=row.member;try{member=team.validate([m])[0];}catch{}
+  return {...row,member,slackProfile,evidence:row.evidence+(notes.length?' · '+notes.join(', '):'')};});
 }
 module.exports={slackProfiles,jiraWork,enrich};
