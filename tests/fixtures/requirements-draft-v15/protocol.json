@@ -1,0 +1,18 @@
+{
+  "hashes": {
+    "train.jsonl": "b1a4fe1d3b01aa1b40a17fdc3b37061157cca3cf048d1882bd29a15ba04bd326",
+    "acquisition.jsonl": "5595a3602c2e1c06db283a4f17e59aa1ae4c8cb5486a7157fc5a1f153da8144f",
+    "balanced-corrections.jsonl": "b295c53ce17b7944c59dbb2c84cbefb6272a7b32f70a44bad3066056f3b1cccb",
+    "negative-variants.jsonl": "88cc38ae0a0c1b2c2846ec92251fc0a7d552c025f1c64a48aa47b38528e52738",
+    "check.jsonl": "57d3749380df1ed0b975c9ab235cdbc2464ea3274299010a251910f8aed16862"
+  },
+  "parent": "../requirements-draft-v14/adapter",
+  "steps": 449,
+  "layers": 13,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 5e-06,
+  "gate": "All 225 familiar cases correct. Fresh sorting improves versus parent; drafts do not regress (allow parent ceiling); numeric 20/20, labels 8/8, no individual parent success lost. Every targeted state must pass before claiming full coverage; no automatic release.",
+  "selection": "Fixed run; only acquisition-based repair before fresh candidate inference.",
+  "limits": "Small related synthetic sample; non-blind manual draft review."
+}
