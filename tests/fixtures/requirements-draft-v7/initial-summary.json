@@ -1,0 +1,15 @@
+{
+  "base": {
+    "bounds": 7,
+    "general": 8
+  },
+  "parent": {
+    "bounds": 12,
+    "general": 6
+  },
+  "candidate": {
+    "bounds": 13,
+    "general": 6
+  },
+  "familiarExact": 7
+}
