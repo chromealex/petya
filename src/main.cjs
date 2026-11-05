@@ -103,6 +103,9 @@ defaults.whisperModel = fs.existsSync(localModel) ? localModel : '';
 if (process.env.PETYA_SMOKE_TEST !== '1') { const stale = require('./speech.cjs').cleanupOrphans(path.join(app.getPath('userData'), 'whisper-pids.json'), [localBinary]); if (stale.length) console.log('Stopped stale whisper-server: ' + stale.length); }
 const secrets = [...features.flatMap(feature=>feature.secrets||[]),'unityToken','telegramCredential','teamMembers','microsoftCredential','gmailCredential','googlePlayCredential','asanaCredential', 'slackCredential', 'notionCredential', 'atlassianCredential', 'jiraToken', 'slackToken', 'notionToken'];
 const entry = pathToFileURL(path.join(__dirname, 'ui/index.html')).href;
+// Chromium and Node encode file URLs differently («RUNNER~1» vs «RUNNER%7E1» in Windows short paths): compare the paths.
+const entryPath = path.join(__dirname, 'ui/index.html');
+const isEntry = url => { try { const a = path.normalize(require('node:url').fileURLToPath(url)), b = path.normalize(entryPath); return process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b; } catch { return false; } };
 const file = () => path.join(dataRoot, 'settings.json');
 function loadSettings() {
   settings = { ...defaults };
@@ -159,6 +162,12 @@ async function directRequest(url, options = {}) {
   if(cancelSignal)options={...options,signal:options.signal?AbortSignal.any([options.signal,cancelSignal]):cancelSignal};
   if(typeof options.body==='string')options={...options,body:require('./model-context.cjs').normalize(url,options.body)};
   const {onAnswerChunk,...fetchOptions}=options;
+  // At most a few local-model generations at once (agents, background chats); the rest wait their turn.
+  const modelContext=require('./model-context.cjs');
+  if(modelContext.isModelRequest(url,options.body))return modelContext.slot(options.signal,()=>sendRequest(url,options,onAnswerChunk,fetchOptions));
+  return sendRequest(url,options,onAnswerChunk,fetchOptions);
+}
+async function sendRequest(url,options,onAnswerChunk,fetchOptions){
   const response = await fetch(url, { ...fetchOptions, redirect: 'error', signal: options.signal ? AbortSignal.any([options.signal,AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000) });
   if (!response.ok) { let detail='';if(!/slack\.com$/.test(new URL(url).hostname))try{detail=(await response.text()).slice(0,500);}catch{} const retryAfter = Math.max(1, Number(response.headers.get('retry-after')) || 60); const slack = new URL(url).hostname === 'slack.com'; const error = new Error(slack && response.status === 429 ? `Slack временно ограничил запросы (HTTP 429). Повторите через ${Math.ceil(retryAfter)} с. Это ограничение Slack, а не голоса или обычного диалога Пети.` : `Сервис вернул HTTP ${response.status}${response.status === 429 ? '. Достигнут лимит запросов; повторите позже.' : ''}`); error.status = response.status; error.retryAfter = retryAfter; if(detail)error.detail=detail; throw error; }
   if (response.status === 204) return null;
@@ -174,7 +183,7 @@ function handle(name, fn) { ipcMain.handle('petya:' + name, async (event, ...arg
   const contents = win.webContents;
   if (contents.isDestroyed()) return;
   const frame = event.senderFrame;
-  if (event.sender !== contents || !frame || frame !== contents.mainFrame || frame.url !== entry) throw new Error('Недопустимый источник запроса.');
+  if (event.sender !== contents || !frame || frame !== contents.mainFrame || !isEntry(frame.url)) throw new Error('Недопустимый источник запроса.');
   if(switchingCompany)throw Error('Переключаю компанию. Дождитесь открытия Пети.');
   const controller=cancellableAnswers.has(name)?new AbortController():null,answerTopic=dialogue?.state.activeId||'';if(controller){if(!foregroundAnswers.has(answerTopic))foregroundAnswers.set(answerTopic,new Set());foregroundAnswers.get(answerTopic).add(controller);}
   activeOperations++;try{return await require('./answer-cancel.cjs').run(controller?.signal,()=>requestProgress.run(name,label=>{if(!event.sender.isDestroyed())event.sender.send('request-progress',label);},()=>require('./answer-stream.cjs').run(chunk=>{if(!event.sender.isDestroyed())event.sender.send('answer-chunk',chunk);},()=>modules.withProject(projectOperations.has(name)?dialogue?.state.projects.find(p=>p.id===dialogue.state.activeProjectId):null,()=>projectOperations.has(name)&&dialogue?dialogue.within(dialogue.state.activeId,dialogue.state.activeProjectId,()=>fn(...args)):fn(...args)))));}finally{activeOperations--;if(controller){foregroundAnswers.get(answerTopic)?.delete(controller);if(!foregroundAnswers.get(answerTopic)?.size)foregroundAnswers.delete(answerTopic);}}
@@ -468,7 +477,7 @@ function setupHandlers() {
   const services={
     get workspace(){return workspace;},
     get dataRoot(){return dataRoot;}, get speech(){return speech;}, get qwenSpeech(){return qwenSpeech;}, get speechError(){return speechError;},
-    get win(){return win;},get handle(){return handle;},get directRequest(){return directRequest;},get team(){return team;},get memory(){return memory;},get slackSync(){return slackSync;},
+    get win(){return win;},get smoke(){return smoke;},get ollamaReady(){return ollamaReady;},get ollamaInstaller(){return ollamaInstaller;},get OllamaReady(){return OllamaReady;},get snapshots(){return snapshots;},get handle(){return handle;},get directRequest(){return directRequest;},get team(){return team;},get memory(){return memory;},get slackSync(){return slackSync;},
     get agents(){return agents;},
     get allowedMedia(){return allowedMedia;},
     get analyzeMaterials(){return analyzeMaterials;},
@@ -626,7 +635,7 @@ else {
     require('./external-links.cjs')(win.webContents,
       url => smoke ? Promise.resolve() : require('electron').shell.openExternal(url),
       error => require('electron').dialog.showErrorBox('Не удалось открыть ссылку', error.message));
-    installCapture({ session: session.defaultSession, win, entry, desktopCapturer, platform: process.platform });
+    installCapture({ session: session.defaultSession, win, entry, isEntry, desktopCapturer, platform: process.platform });
     if (process.platform === 'darwin' && app.dock) app.dock.hide();
     const icon = nativeImage.createFromPath(path.join(__dirname, process.platform === 'darwin' ? '../assets/trayTemplate.png' : '../assets/tray.png'));
     if (process.platform === 'darwin') icon.setTemplateImage(true);

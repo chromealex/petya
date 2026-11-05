@@ -81,14 +81,14 @@ module.exports = async (win, workspace) => {
     if((await window.petya.teamList()).members.length)throw Error('Team removal failed');
     view('home');
 
-    if (document.querySelectorAll('[data-module]').length !== 10) throw new Error('Missing module selection');
+    if (document.querySelectorAll('[data-module]').length !== optionalModules.length) throw new Error('Missing module selection');
     const repairDisabled=await window.petya.converse('Почини падающую сборку');if(!repairDisabled.text.includes('Включите модуль Claude'))throw Error('Repair must require an enabled executor');
-    const buildQuestionDisabled=await window.petya.converse('Петя, что с билдом');if(!buildQuestionDisabled.integrationOffers?.some(o=>o.service==='slack'))throw Error('Build question should offer Slack connection or browser');
+    const buildQuestionDisabled=await window.petya.converse('Петя, что с билдом');if(!buildQuestionDisabled.integrationOffers?.some(o=>o.service==='slack')&&!(buildQuestionDisabled.computerApproval||/Slack недоступен как сервис/.test(buildQuestionDisabled.text)))throw Error('Build question should offer Slack connection, browser or reading the Slack window');
     if (!document.getElementById('attachment-pick')) throw new Error('Missing attachments UI');
     const attachment = await window.petya.attachmentAdd('smoke.txt',new TextEncoder().encode('Проверочный документ: версия 42.').buffer);
     const previous = await window.petya.settings();await window.petya.saveSettings({model:''});
     const attachmentReply = await window.petya.attachmentInspect([attachment.id],'Что в файле?');
-    const attachmentTopic = await window.petya.attachmentTopic();if(!attachmentReply.messages?.[0]?.attachments?.some(f=>f.name==='smoke.txt'))throw Error('Sent message lost its attachment');if(!attachmentTopic?.files.some(f=>f.name==='smoke.txt')) throw new Error('Attachment topic not saved');
+    const attachmentTopic = await window.petya.attachmentTopic();if(!attachmentReply.messages?.some(m=>m.role==='user'&&m.attachments?.some(f=>f.name==='smoke.txt')))throw Error('Sent message lost its attachment');if(!attachmentTopic?.files.some(f=>f.name==='smoke.txt')) throw new Error('Attachment topic not saved');
     const reviewFile=await window.petya.attachmentAdd('build.log',new TextEncoder().encode('Android build 123\\nError: Cannot find module ./modules.cjs').buffer);
     const reviewTopic=await window.petya.attachmentInspect([reviewFile.id],'Почему падает?');
     const proof=await window.petya.converse('Покажи, откуда ты это взял');await showDialogueReply(proof);
@@ -98,8 +98,8 @@ module.exports = async (win, workspace) => {
     const lessons=await window.petya.converse('покажи сохранённые решения');if(!lessons.text.includes('Smoke'))throw Error('Lesson was not persisted');
     await window.petya.converse('забудь решение 1');
     const watch=await window.petya.converse('следи за этим билдом');if(!watch.text.includes('точная ссылка'))throw Error('Watch must require an actual thread');
-    await window.petya.attachmentForget(reviewTopic.topicId);
-    await window.petya.attachmentForget(attachmentReply.topicId);if(await window.petya.attachmentTopic()) throw new Error('Attachment deletion failed');
+    // Attachment analysis now stays in the same conversation: forget each chat once.
+    for(const id of new Set([reviewTopic.topicId,attachmentReply.topicId]))await window.petya.attachmentForget(id);if(await window.petya.attachmentTopic()) throw new Error('Attachment deletion failed');
     await window.petya.saveSettings({model:previous.model});
 
     if (!document.getElementById('mail-skill-form') || !document.getElementById('gmail-start')) throw new Error('Missing Gmail teaching UI');

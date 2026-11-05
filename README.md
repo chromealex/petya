@@ -1,6 +1,6 @@
 # Petya
 
-A voice assistant for macOS and Windows (Electron, version 0.8.3). It lives in the tray, responds to "Петя", and works with context: Zoom meetings, Slack, Jira, Confluence, Notion, email, Telegram, and local projects. Speech recognition and the language model run locally (whisper.cpp / Qwen ASR, Ollama). The assistant itself speaks Russian.
+A voice assistant for macOS and Windows (Electron, version 0.9.1). It lives in the tray, responds to "Петя", and works with context: Zoom meetings, Slack, Jira, Confluence, Notion, email, Telegram, and local projects. Speech recognition and the language model run locally (whisper.cpp / Qwen ASR, Ollama). The assistant itself speaks Russian.
 
 What it does, in short:
 

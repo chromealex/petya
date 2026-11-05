@@ -1,0 +1,46 @@
+name: Release
+# A version tag (v0.9.1) — or a manual run on main, which creates the tag from package.json — builds
+# the Windows installer on Windows, runs the same package and tray start checks as the Tests workflow
+# and attaches Petya-Setup.exe to the GitHub release.
+# The macOS build is signed with the local Developer ID and stays a local build.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --no-audit --no-fund
+      - name: The version from package.json
+        id: version
+        shell: bash
+        run: |
+          tag="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then test "$tag" = "$GITHUB_REF_NAME"; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+      - name: Build and verify the Windows installer
+        run: python scripts/build.py --win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          PYTHONIOENCODING: utf-8
+      - name: Publish the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          notes=$(awk -v v="## ${tag#v}" 'index($0,v)==1{f=1;print;next} f&&/^## /{exit} f' docs/HISTORY.md)
+          if gh release view "$tag" >/dev/null 2>&1; then gh release upload "$tag" Petya-Setup.exe --clobber
+          else gh release create "$tag" Petya-Setup.exe --target "$GITHUB_SHA" --title "Петя ${tag#v}" --notes "${notes:-Petya ${tag#v}}"; fi

@@ -67,6 +67,7 @@
   row.draggable=!t.archived&&!['running','queued'].includes(t.job?.state);row.ondragstart=e=>{dragging=t.id;e.dataTransfer.setData('application/x-petya-chat',t.id);e.dataTransfer.effectAllowed='move';};row.ondragend=()=>{dragging='';document.querySelectorAll('.chat-drop-target').forEach(n=>n.classList.remove('chat-drop-target'));};if(!archiveMode)bindDrop(row,t.projectId,t.id);return row;
  }
  const titleSizes=new ResizeObserver(entries=>{for(const {target}of entries)target.classList.toggle('is-truncated',target.scrollWidth>target.clientWidth+1);});
+ const agentView=new Map();
  function draw(state){titleSizes.disconnect();list.replaceChildren();for(const p of [...state.projects].sort((a,b)=>Number(b.id==='general')-Number(a.id==='general')||Number(!!b.pinned)-Number(!!a.pinned))){const allRows=state.topics.filter(t=>t.projectId===p.id),rows=allRows.filter(t=>archiveMode?p.archived||t.archived:!t.archived).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||(a.order??-a.at)-(b.order??-b.at));if(!archiveMode&&p.archived)continue;if(archiveMode&&!p.archived&&!rows.length&&p.id!=='general')continue;if(search.value&&!rows.length&&p.id!=='general')continue;
   const group=node('div',null,'project-sidebar-group'),bar=node('div',null,'project-sidebar-project');group.dataset.projectId=p.id;
   const select=button('',action(async()=>{if(p.archived)throw Error('Восстановите проект через меню «…».');if(p.id!==state.activeProjectId){await window.petya.chatProjectSelect(p.id);await selectDialogueTopic('');}await refresh();}));
@@ -85,7 +86,16 @@
     const saved=state.projects.find(project=>project.id===p.id)?.savedCount;
     if(saved){const b=button('Сохранённые ответы · '+saved,()=>window.showProjectAnswers(p.id));b.className='project-view-all';group.append(b);}
   }
-  const pinned=rows.filter(t=>t.pinned),ordinary=rows.filter(t=>!t.pinned);const visible=search.value||expanded.has(p.id)?ordinary:ordinary.slice(0,5);for(const t of [...pinned,...visible])group.append(chatRow(t));
+  // Agent chats sit under the chat that started them; an agent whose parent is hidden stays at top level.
+  const parents=new Set(rows.map(t=>t.id)),agents=new Map();for(const t of rows)if(t.agentOf&&t.agentOf!==t.id&&parents.has(t.agentOf)){if(!agents.has(t.agentOf))agents.set(t.agentOf,[]);agents.get(t.agentOf).push(t);}
+  const nested=new Set([...agents.values()].flat().map(t=>t.id)),top=rows.filter(t=>!nested.has(t.id));
+  const pinned=top.filter(t=>t.pinned),ordinary=top.filter(t=>!t.pinned);const visible=search.value||expanded.has(p.id)?ordinary:ordinary.slice(0,5);
+  for(const t of [...pinned,...visible]){group.append(chatRow(t));const children=(agents.get(t.id)||[]).sort((a,b)=>a.at-b.at);if(!children.length)continue;
+   // Open while agents work or wait to be read; folds itself once they are done. A click overrides that.
+   const live=children.some(c=>['running','queued'].includes(c.job?.state)||c.job&&!c.job.acknowledged&&['done','attention'].includes(c.job.state));
+   const open=!!search.value||children.some(c=>c.id===state.activeId)||(agentView.has(t.id)?agentView.get(t.id):live),box=node('div',null,'agent-chat-list');box.hidden=!open;for(const c of children){const row=chatRow({...c,title:c.title.replace(/^Агент\s*·\s*/u,'')||c.title});row.classList.add('agent-chat-row');box.append(row);}
+   const toggle=button((open?'▾ ':'▸ ')+'Агенты · '+children.length,()=>{agentView.set(t.id,!open);draw(state);});toggle.className='agent-chat-toggle';toggle.setAttribute('aria-expanded',String(open));
+   const running=children.filter(c=>['running','queued'].includes(c.job?.state)).length;if(running)toggle.append(node('span',' · в работе '+running,'agent-chat-running'));group.append(toggle,box);}
   if(!search.value&&ordinary.length>5){const all=button(expanded.has(p.id)?'Свернуть':'View all ('+ordinary.length+')',()=>{expanded.has(p.id)?expanded.delete(p.id):expanded.add(p.id);draw(state);});all.className='project-view-all';group.append(all);}
   if(!rows.length&&p.id===state.activeProjectId)group.append(node('small','Пока нет чатов'));list.append(group);
  }if(!list.children.length)list.append(node('p','Ничего не найдено'));}

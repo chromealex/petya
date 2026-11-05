@@ -4,10 +4,12 @@ function read(memory, {sessionId = '', offset = 0, limit = 100} = {}) {
  return {scope:'company', total:rows.length, items:rows.slice(offset,offset+limit)};
 }
 module.exports = {
- name:'meetingMemory', defaults:{zoomAutoRecord:'true', zoomMemoryMigration:'0'}, validate(){}, read,
+ name:'meetingMemory', defaults:{zoomAutoRecord:'false', zoomMemoryMigration:'0'}, validate(){}, read,
  setup(s) {
-  // Enable the new default once for existing installations; subsequent opt-outs persist.
-  if(s.settings.zoomMemoryMigration !== '1') s.saveSettings({zoomAutoRecord:'true',zoomMemoryMigration:'1'});
+  // Recording meetings needs the user's explicit choice: it is off by default and never switched on by an update.
+  // Migration 1 had switched it on for every installation; migration 2 switches that back off once.
+  if(s.settings.zoomMemoryMigration === '1') s.saveSettings({zoomAutoRecord:'false',zoomMemoryMigration:'2'});
+  else if(s.settings.zoomMemoryMigration !== '2') s.saveSettings({zoomMemoryMigration:'2'});
   const {safeStorage}=require('electron');
   const recording=new (require('../meeting-recording.cjs').MeetingRecording)({
    directory:require('node:path').join(s.dataRoot,'meeting-recordings'),days:()=>s.settings.contextDays,

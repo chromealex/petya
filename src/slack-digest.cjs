@@ -13,7 +13,7 @@ function question(command=''){
  return {days,mentions};
 }
 class SlackDigest{
- constructor({settings,enabled,ready,items,sync,status,summarize,screen,approve,fallback,now=Date.now}){Object.assign(this,{settings,enabled,ready,items,sync,status,summarize,screen,approve,fallback,now});this.pending=null;}
+ constructor({settings,enabled,ready,items,sync,status,summarize,screen,approve,fallback,background=()=>true,keepFresh=()=>{},now=Date.now}){Object.assign(this,{settings,enabled,ready,items,sync,status,summarize,screen,approve,fallback,background,keepFresh,now});this.pending=null;}
  reply(text,extra={}){return {handled:true,text,by:'Slack: сводка',...extra};}
  async turn(command){
   const p=this.pending;
@@ -30,11 +30,14 @@ class SlackDigest{
   const rows=this.items().filter(i=>i.source==='Slack'&&Array.isArray(i.messages)).map(i=>({...i,messages:i.messages.filter(m=>m.at>=since)})).filter(i=>i.messages.length).sort((a,b)=>b.at-a.at);
   const status=this.status()||{};
   if(!rows.length){
-   if(this.fallback)return this.fallback(command);
+   // Keep Slack fresh in the background from now on, so the next digest answers from synced messages.
+   if(this.fallback){if(!this.background()){try{this.keepFresh();}catch{}}return this.fallback(command);}
    try{const started=this.sync();started?.catch?.(()=>{});}catch{}
+   // Keep Slack fresh in the background from now on, so the next digest answers at once.
+   let fresh='';if(!this.background()){try{this.keepFresh();fresh=' Включил фоновое обновление Slack раз в 15 минут — дальше сводка будет готова сразу (выключается в «Подключения → Slack»).';}catch{}}
    this.pending={command,ask,at:this.now()};
    const limited=/лимит|ограничил/iu.test(status.message||'');
-   return this.reply((limited?'Slack сейчас ограничил запросы. ':'В памяти нет сообщений Slack за '+(ask.days===1?'последние сутки':ask.days+' дн.')+'. ')+'Запустил обновление — из-за лимитов Slack оно идёт примерно по каналу в минуту. Могу сразу прочитать открытое окно Slack с экрана. Прочитать?',{question:true,clarificationOptions:['Да, прочитай с экрана','Нет, подожду обновления']});
+   return this.reply((limited?'Slack сейчас ограничил запросы. ':'В памяти нет сообщений Slack за '+(ask.days===1?'последние сутки':ask.days+' дн.')+'. ')+'Запустил обновление — из-за лимитов Slack оно идёт примерно по каналу в минуту.'+fresh+' Могу сразу прочитать открытое окно Slack с экрана. Прочитать?',{question:true,clarificationOptions:['Да, прочитай с экрана','Нет, подожду обновления']});
   }
   const messages=rows.flatMap(i=>i.messages.map(m=>({channel:i.channel,thread:i.title,at:m.at,user:m.user,text:String(m.text||'').slice(0,600)}))).sort((a,b)=>b.at-a.at).slice(0,80);
   const answer=await this.summarize(command,messages,ask);

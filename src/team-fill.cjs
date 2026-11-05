@@ -81,6 +81,8 @@ class TeamFill {
   if(!String(view?.text||'').trim()){this.pending={kind:'screen',command,scope:this.scope(),at:this.now(),wait:30};return this.reply('В окне Slack не нашёл текста. Открой в Slack канал команды или список участников и скажи «да» — посмотрю ещё раз.',{question:true,teamFillReply:true});}
   return this.turn(command,false,[{title:view.title||'Экран Slack',text:String(view.text).slice(0,32000)}]);
  }
+ // The question was recorded into a chat created for it: the pending answer belongs to that chat now.
+ rescope(){if(this.pending)this.pending.scope=this.scope();}
  askDetails(text){this.pending={kind:'details',scope:this.scope(),at:this.now()};return this.reply(text,{question:true,teamFillReply:true});}
  question(){const p=this.pending,c=p.conflicts[0],member=JSON.parse(p.baseline)[c.index];return this.reply(p.summary+' '+member.name+', '+labels[c.key]+': сохранено «'+member[c.key]+'», найдено «'+c.value+'» ('+c.source+'). Оставить прежнее или заменить?',{teamUpdated:true,question:true,teamFillReply:true});}
  respond(command){

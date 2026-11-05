@@ -194,7 +194,7 @@
     if(!selected || currentDraft || draftBusy || commandProgress.busy)throw Error('Сначала завершите текущий черновик или запрос.');
     const text=selected;
     task.hidden=true;
-    const material=await window.petya.addContext({source:'Заметка',title:text.slice(0,100),text});
+    const material=await window.petya.feature('chat-tasks','prepare',text.slice(0,100),text);
     currentIntent='jira';automaticVoiceCommand=false;commandSnapshot='Создай задачу по выделенному тексту';voiceReply=null;
     await makeDraft(material, null, {reviewOnly:true});
   });

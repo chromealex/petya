@@ -18,7 +18,7 @@ def verify(source, packaged):
         changed = sorted(k for k in expected.keys() & actual.keys() if expected[k] != actual[k])
         raise RuntimeError(f'Incomplete package: missing={missing}, extra={extra}, changed={changed}')
     for path in packaged.rglob('*.cjs'):
-        for name in re.findall(r"require\(['\"](\.[^'\"]+)['\"]\)", path.read_text()):
+        for name in re.findall(r"require\(['\"](\.[^'\"]+)['\"]\)", path.read_text(encoding='utf-8')):
             target = (path.parent / name).resolve()
             try:
                 target.relative_to(packaged.resolve())

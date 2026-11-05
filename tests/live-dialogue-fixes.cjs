@@ -4,7 +4,8 @@ const {explicitCalculation}=require('../src/explicit-calculation.cjs');const {Di
 (async()=>{
  // «17 умножить на 23» was answered by the model as 401.
  for(const [q,a] of [['Сколько будет 17 умножить на 23?','391'],['Сколько будет 17 на 23?','391'],['Раздели 100 на 4','25'],['Умножь 17 на 23','391'],['Сложи 2 и 3','5'],['Вычти 5 из 9','4'],['Сколько будет 10 минус 3 плюс 2?','9']])assert.equal(explicitCalculation(q),a,q);
- for(const q of ['Сколько будет 100 разделить на 3?','Сколько будет 15 процентов от 200?','Раздели задачу на 3 части','Сколько задач на 23 число?'])assert.equal(explicitCalculation(q),null,q);
+ for(const q of ['Сколько будет 100 разделить на 3?','Раздели задачу на 3 части','Сколько задач на 23 число?'])assert.equal(explicitCalculation(q),null,q);
+ assert.equal(explicitCalculation('Сколько будет 15 процентов от 200?'),'30');assert.equal(explicitCalculation('Корень из 144'),'12');assert.equal(explicitCalculation('2 в степени 10'),'1024');
  // «Вернёмся к книгам: посоветуй ещё одну» replayed the old answer instead of answering.
  const d=new Dialogue({answer:async t=>'новый ответ на: '+t});
  await d.turn('Посоветуй книгу по программированию');const books=d.active().id;await d.turn('Новая тема: сколько будет 2+2');await d.turn('Новая тема: погода');

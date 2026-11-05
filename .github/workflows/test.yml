@@ -36,3 +36,28 @@ jobs:
       - name: Parallel chats end-to-end
         timeout-minutes: 5
         run: xvfb-run -a env PETYA_SMOKE_TEST=1 PETYA_E2E_PARALLEL=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci
+  windows:
+    # The Windows installer is built on Windows (no wine), its app.asar is checked against src/,
+    # and the unpacked app has to pass the same tray start check as the Mac build.
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --no-audit --no-fund
+      - name: Build and verify the Windows installer
+        run: python scripts/build.py --win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          PYTHONIOENCODING: utf-8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Petya-Setup
+          path: Petya-Setup.exe
+          retention-days: 7

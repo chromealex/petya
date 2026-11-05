@@ -16,4 +16,10 @@ assert.throws(()=>ipc.add('t1',{text:' '}),/Выделите/);assert.throws(()=
 const v=highlights.turn('Запомни как важное для проекта: демо в пятницу');assert.match(v.text,/для всего проекта/);assert(state.projects[0].highlights.some(h=>h.text==='демо в пятницу'));
 assert.equal(highlights.turn('Запомни: у нас это чинится так'),null);
 assert(highlights.keep('Когда релиз 1.19?',state.topics[0]));assert(!highlights.keep('Расскажи анекдот',state.topics[0]));
-console.log('Highlights: chat and project marks, agents inherit, model context, edit/move/remove, limits and voice command passed');
+{const other={id:'t9',projectId:'p',title:'Анекдоты',messages:[]};state.topics.push(other);assert(feature.collect(state,other,'Когда релиз 1.19?').some(v=>/1\.19/.test(v)));assert(!feature.collect(state,other,'Расскажи анекдот').some(v=>/1\.19/.test(v)));}
+// «Что важно не забыть?» lists the marks; in a chat without marks — the project's marks from other chats
+{const fresh={id:'t10',projectId:'q',title:'Расчёт',messages:[]},marked={id:'t11',projectId:'q',title:'Задачи',messages:[],highlights:[{id:'h',text:'BW-4350 нужно закрыть до релиза',at:Date.now()}]};state.projects.push({id:'q',name:'MW'});state.topics.push(fresh,marked);
+ state.activeId='t11';let a=highlights.turn('Что важно не забыть по задачам?');assert.match(a.text,/• BW-4350 нужно закрыть до релиза/);assert.equal(a.by,'важное');
+ state.activeId='t10';a=highlights.turn('Что я отмечал как важное?');assert.match(a.text,/BW-4350/);
+ for(const q of ['Что важнее: баги или задачи?','Какие задачи важные?','Что такое важное событие?'])assert.equal(highlights.turn(q),null,q);}
+console.log('Highlights: chat and project marks, agents inherit, model context, edit/move/remove, limits, voice command and «что важно не забыть» passed');

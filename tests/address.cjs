@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');const feature=require('../src/features/address.cjs');const {informal}=require('../src/informal.cjs');const {dialogueRequest}=require('../src/dialogue-request.cjs');
+assert.equal(feature.guess('Alex'),'m');assert.equal(feature.guess('Саша'),'m');assert.equal(feature.guess('Полина Иванова'),'f');assert.equal(feature.guess('Никита'),'m');
+const settings={userName:'Полина',userGender:''};const topic={id:'t',messages:[]};let saved={};
+const s={get settings(){return settings;},saveSettings:v=>{Object.assign(settings,v);saved=v;},dialogue:{active:()=>topic,rememberAction(){} }};
+const {address}=feature.setup(s);
+assert.equal(informal('Вы сделали коммит?'),'Ты сделала коммит?');
+assert.match(dialogueRequest({model:'q',command:'x',topic:{title:'t',messages:[]}}).messages[0].content,/женском роде/);
+assert.match(address.turn('Обращайся ко мне в мужском роде').text,/мужском/);assert.equal(saved.userGender,'m');
+assert.equal(informal('Вы сделали коммит?'),'Ты сделал коммит?');assert.doesNotMatch(dialogueRequest({model:'q',command:'x',topic:{title:'t',messages:[]}}).messages[0].content,/женском роде/);
+address.turn('Я девушка');assert.equal(settings.userGender,'f');assert.equal(address.turn('Покажи задачи'),null);
+const v={userGender:'x'};feature.validate(v);assert.equal(v.userGender,'');
+console.log('Address: gender from the name or the setting, «ты сделал/сделала», model rule and voice command passed');

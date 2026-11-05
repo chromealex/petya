@@ -93,7 +93,8 @@
  window.chatScrollToLatest=()=>{feed.scrollTop=feed.scrollHeight;follow=true;latest.hidden=true;};latest.onclick=window.chatScrollToLatest;
  let historyPrepended=false;document.addEventListener('petya-history-prepended',()=>{historyPrepended=true;});
  let previousLast;
- const sync=()=>{const last=chatHistory.at(-1),newAnswer=last?.role==='assistant'&&previousLast!==last.at;previousLast=last?.at;welcome.hidden=dialogueMessages.childElementCount>0;if(historyPrepended){historyPrepended=false;return;}if(restoring)return;if(follow)window.chatScrollToLatest();else if(newAnswer)latest.hidden=false;};
+ // A message without a timestamp is still new: compare the last message by time, text and history length.
+ const sync=()=>{const last=chatHistory.at(-1),key=last?[last.at??'',chatHistory.length,String(last.text||'').slice(0,60)].join('|'):'',newAnswer=last?.role==='assistant'&&previousLast!==key;previousLast=key;welcome.hidden=dialogueMessages.childElementCount>0;if(historyPrepended){historyPrepended=false;return;}if(restoring)return;if(follow)window.chatScrollToLatest();else if(newAnswer)latest.hidden=false;};
  new MutationObserver(sync).observe(dialogueMessages,{childList:true});sync();
  document.addEventListener('petya-topic-changed',event=>{if(event.detail?.preserveScroll)return;follow=true;requestAnimationFrame(window.chatScrollToLatest);});
  window.placeChatProgress=panel=>{

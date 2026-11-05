@@ -7,7 +7,7 @@
   SetDetailsPrint both
   DetailPrint "Setting up Ollama. Internet required; download is 1.68 GB."
   SetOutPath "$PLUGINSDIR"
-  File /oname=install-ollama.ps1 "${PROJECT_DIR}/scripts/install-ollama.ps1"
+  File /oname=install-ollama.ps1 "${PROJECT_DIR}\scripts\install-ollama.ps1"
   ollama_retry:
   ; No timeout: the download can take several minutes on a slow connection.
   nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\install-ollama.ps1"'

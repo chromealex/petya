@@ -70,8 +70,15 @@ function setup(s) {
     const pick=!files.length && last?.project===project && requested && last.choices?.find(key=>key.toLowerCase()===requested.toLowerCase());
     const continuing=refresh||!!pick,query=continuing?last.query:command;
     const matches = providers.filter(p => (!files.length || p.acceptsFiles?.(files)) && (!continuing||p.type===last.provider) && p.matches(query, context));
-    if (!matches.length && !files.length) {
-      const selected=await require('../extensions/agent.cjs').select(s,command,providers);
+    // Requests Petya's own handlers own (Jira tasks and bugs, work reports, Slack digest, weather, rates) never go to
+    // the model-picked extension: «Какие на мне таски?» was sent to Unity. Naming the extension still selects it.
+    const named=providers.some(p=>[p.name,p.type].filter(Boolean).some(n=>String(command).toLowerCase().includes(String(n).toLowerCase())));
+    if (!matches.length && !files.length && (named || !ownedByPetya(command,topic))) {
+      // Only extensions turned on for this company and project can be picked: a disabled one only produced
+      // «Включите … в каталоге» instead of Petya's own answer («Заполни команду» went to Unity).
+      const projectRow=dialogue.state.projects?.find(p=>p.id===project);
+      const usable=providers.filter(p=>s.settings['module_'+p.type]!=='false'&&(!('module_'+p.type in s.settings)||s.settings['module_'+p.type]==='true')&&!projectRow?.disabledServices?.includes(p.type));
+      const selected=usable.length?await require('../extensions/agent.cjs').select(s,command,usable):null;
       check();
       if(selected){
         s.requestProgress.report('Использую расширение «'+selected.name+'».');
@@ -125,6 +132,7 @@ function setup(s) {
   return { extensionReplies:{turn}, ipc:{ catalog, progress:()=>[...progress.values()], limit:() => s.settings[limitKey],
     setLimit(value) { validate({[limitKey]:value}); s.saveSettings({[limitKey]:value}); } } };
 }
+function ownedByPetya(command,topic){try{return require('../dialogue.cjs').intent(command)!=='chat'||require('../team-fill.cjs').isTeamFill(command)||!!require('../work-query-route.cjs').classify(command,topic||{})||!!require('../slack-digest.cjs').question(command)||!!require('./fresh-data.cjs').weatherQuestion(command)||!!require('./fresh-data.cjs').rateQuestion(command);}catch{return false;}}
 async function turnForAttachments(s,ids,command) {
   const files = s.attachments.list();
   if (!files.length || !Array.isArray(ids) || files.length !== ids.length || !files.every(f=>ids.includes(f.id))) return null;
@@ -162,5 +170,5 @@ function register(server,z,ctx) {
     } catch(error) { return {isError:true,content:[{type:'text',text:error.message}]}; }
   });
 }
-module.exports = {name:'extensionReplies', setup, register, turnForAttachments, needsApproval, validate,
+module.exports = {name:'extensionReplies', setup, register, turnForAttachments, ownedByPetya, needsApproval, validate,
   defaults:{[limitKey]:'100',...Object.fromEntries(providers.map(p=>[flag(p),'false']))}};

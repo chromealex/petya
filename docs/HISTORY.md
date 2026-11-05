@@ -1,12 +1,44 @@
 # Petya — feature history by version
 
-Detailed notes for versions 0.2–0.8.3. Project overview: [README](../README.md).
+Detailed notes for versions 0.2–0.9.1. Project overview: [README](../README.md).
 
 
 
 Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications, the «Петя» ("Petya") wake word, meeting and Slack context, clarification of ambiguity, and creating an issue in Jira Cloud.
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
+
+## 0.9.1 — agent chats in the sidebar, list follow-ups, Windows CI
+
+**Agents.** Agent chats sit under the chat that started them as a collapsible «Агенты · N» sub-list that folds itself when they are done and read; they go to the archive, come back and move to another project with their parent. An agent's chat always keeps its own answer, even when the pipeline also answered in another chat. «Ответить одним сообщением» answers every planned part and joins them into one reply; the combined answer has no greetings or forms of address.
+
+**List follow-ups.** Questions about the list just shown are answered from it: «Какие из этих задач сделать сначала?» orders 3–5 open items with a reason each; «А какие из них на ревью / в работе / на паузе / не начаты?» filter by status groups («Owner Review» and «QA Review» count as review). Closed items are skipped, a partly shown list is named as such, and the latest list in the chat is used even after an empty answer. Jira task lists show open tasks first.
+
+**Bugs.** When the current version has no open bugs, the answer also names the project's open bugs without a version and lists the five most recently updated.
+
+**Windows.** Every push builds the installer on Windows in CI, checks its package against `src/` and starts the unpacked app for the tray check; a version tag publishes `Petya-Setup.exe` as a GitHub release. Fixed on the way: every IPC call was rejected when the app path contained a Windows short name (`RUNNER~1`), the bundled Ollama setup script was not found by makensis on Windows, the build lock used POSIX-only `fcntl`, and package verification read sources as cp1252.
+
+**Privacy.** Recording Zoom meetings is off by default again and is never switched on by an update; installations that a one-off migration had switched on are switched back off once.
+
+**Long dialogues.** A list follow-up after the conversation moved to another chat uses the project's latest list; weather answers «нет, в Казани» / «а завтра?» and no longer falls back to Google; «Что важно не забыть?» lists the «Важно» marks. A team-fill conflict answered by voice («замени») is saved again.
+
+**Live check.** `PETYA_LIVE_ONLY=<regex>` runs only matching scenarios; turns record the peak number of simultaneous local generations; new scenarios cover agents across projects, list follow-ups and long mixed dialogues.
+
+## 0.9.0 — agents, «Важно», live self-check
+
+**Conversation quality.** Answers that repeat themselves are regenerated or replaced; self-corrections inside one phrase («Альфа, нет, Бета», «создай задачу, нет, не создавай») are applied before routing; names («зови меня Алекс») are kept exactly; Petya always says «ты» — model answers pass a deterministic rewrite of «вы/ваш/проверьте», with the user's gender from the name or the setting; an unsure tool router hands the turn to the dialogue model instead of asking «which tool?».
+
+**Chats.** Many chats answer in parallel (background jobs with the full pipeline); answers stream as they are written; a compact one-line progress shows the current step and expands into «Ход работы», which stays behind the answer's hover row; each chat can pick its own local model.
+
+**Petya's agents.** «Раздай агентам …», «сделай параллельно …» or a numbered list split into 2–6 background chats with a live plan card and one combined answer; requests over several areas get an offer («Раздать агентам» / «Ответить одним сообщением», the choice can be remembered); actions that change data are never started automatically.
+
+**«Важно».** The user marks a message or its part (button on selection, star in the hover row, «запомни как важное: …»); marks go into every answer of the chat or the whole project.
+
+**Work data.** «Мои задачи» across all projects with status filters and follow-ups («а из todo?», «а просроченные?», «покажи закрытые на мне»); Git status is short, branches/history/version are recognised in plain words; «Что нового в Slack?» summarises synced messages and falls back to reading the Slack window; a Jira draft can be made from the chat («создай задачу по этому обсуждению»); weather (Open-Meteo, wttr.in) and Bank of Russia rates come without a web search; a weekday morning brief («присылай сводку по утрам в 9:30»).
+
+**Stability.** One context size for every local-model request and at most three generations at once (Ollama had grown to ~40 GB); a crashed Ollama runner restarts Ollama («Перезапустить Ollama» in connections); whisper-server processes left by a killed Petya are stopped on start.
+
+**Code.** `main.cjs` is split into `src/*-setup.cjs` modules and feature modules in `src/features/` (defaults, validation, services and IPC per feature, see AGENTS.md); a live self-check (`PETYA_LIVE_CHECK`, 80 requests against the real model and services) cleans up after itself.
 
 ## Recognition fix (0.5.1)
 

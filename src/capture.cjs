@@ -9,8 +9,8 @@ function configureCapture({ app, platform, electronVersion }) {
   app.commandLine.appendSwitch('disable-features', [...disabled].join(','));
 }
 
-function installCapture({ session, win, entry, desktopCapturer, platform }) {
-  const trusted = contents => contents === win.webContents && contents.getURL() === entry;
+function installCapture({ session, win, entry, isEntry = url => url === entry, desktopCapturer, platform }) {
+  const trusted = contents => contents === win.webContents && isEntry(contents.getURL());
   session.setPermissionCheckHandler((contents, permission) => trusted(contents) && ['media', 'display-capture'].includes(permission));
   session.setPermissionRequestHandler((contents, permission, callback, details = {}) => {
     // Display video is required by getDisplayMedia even when only audio is consumed.

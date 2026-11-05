@@ -7,7 +7,18 @@ function spokenOperators(text){
  for(const [word,op] of ops)s=s.replace(new RegExp('(\\d)\\s*'+word.source+'\\s*(?=\\d)','giu'),'$1'+op);
  return s.replace(/(\d)\s+на\s+(?=\d)/giu,'$1*');
 }
+// Percent of a number, square root and power: «15% от 2400», «корень из 144», «2 в степени 10».
+function special(text){
+ const t=text.replace(/^(?:петя[\s,]+)?(?:сколько (?:будет|получится)|вычисли|посчитай|чему равн\p{L}*)\s*/iu,'').replace(/[?!.]+$/u,'').replace(/\s*ответь только числом$/iu,'').trim();
+ const n=v=>Number(String(v).replace(',','.'));
+ const out=v=>Number.isFinite(v)?String(Math.round(v*10000)/10000).replace('.',','):null;
+ let m=/^(\d+(?:[.,]\d+)?)\s*(?:%|процент(?:а|ов)?)\s+от\s+(\d+(?:[.,]\d+)?)$/iu.exec(t);if(m)return out(n(m[1])*n(m[2])/100);
+ m=/^(?:квадратный\s+)?корень(?:\s+квадратный)?\s+из\s+(\d+(?:[.,]\d+)?)$/iu.exec(t);if(m)return out(Math.sqrt(n(m[1])));
+ m=/^(\d+(?:[.,]\d+)?)\s+в\s+(?:степени\s+)?(\d{1,3})(?:-?(?:й|ой|ей|ую))?(?:\s+степени)?$/iu.exec(t);if(m){const v=n(m[1])**n(m[2]);return v<=1e15?out(v):null;}
+ return null;
+}
 function explicitCalculation(command=''){
+ {const value=special(String(command).trim());if(value!==null)return value;}
  const text=spokenOperators(String(command).trim());
  if(/(?:^|\s)(?:но|кроме|без|не)(?=\s)|дубл|приоритет|просроч/iu.test(text))return null;
  if(text.length>500||/[«»"“”]/u.test(text)||/если|допустим|предполож|процент|процентн|скидк|налог|отправ|создай|удали|проверь|сохрани|запиши|объясни|почему|докажи/iu.test(text))return null;
