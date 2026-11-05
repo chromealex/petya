@@ -1,0 +1,11 @@
+{
+  "adapter": "adapter",
+  "sha256": "141eb18c69a34a21bc28a45d353d95f6c87e49c86bcc37315dfacd75c4a6d463",
+  "acquisition_exact": 165,
+  "total": 165,
+  "prior_targets": 117,
+  "last_round_cases": 48,
+  "basis": "Selected after all 165 familiar answers match; candidate fresh answers not generated or inspected.",
+  "repair": false,
+  "execution_retry": true
+}
