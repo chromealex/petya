@@ -8,7 +8,7 @@ Reserve 84 fresh structured cases and sixteen newly authored release dialogues b
 
 Manual semantic review checks complete requirements, explicit exclusions, recipient direction, unresolved questions, coherent headings and exact names; wording may differ. Preserve strict numeric scoring and paired regressions. Small related synthetic tests are not proof of broad reliability. No release unless all gates pass, including diverse release dialogues, generated multi-turn behavior with normal sampling, artifact provenance and real runtime loading/integration.
 
-Structured baseline inference completed and the frozen training run is active. `protocol.json` and `release-dialogues-protocol.json` freeze input hashes. `verify.py` checks completed stages explicitly and never asserts release readiness from a partial evaluation.
+Structured baseline inference and all 801 training updates completed. Training took 883.6 seconds with 6,094,848 trainable parameters and approximately 16.5 GiB peak allocation. Parent/data/weight hashes and finite losses passed. Familiar acquisition is running; candidate fresh inference has not started. `protocol.json` and `release-dialogues-protocol.json` freeze input hashes. `verify.py` checks completed stages explicitly and never asserts release readiness from a partial evaluation.
 
 ## Supplementary prompt correction
 
