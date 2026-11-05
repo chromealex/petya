@@ -3,13 +3,23 @@
 window.renderSteps = function(steps,{live=false,open=false}={}){
  const rows=(Array.isArray(steps)?steps:[]).filter(s=>s&&typeof s.label==='string'&&s.label).slice(0,40);
  const box=document.createElement('details');box.className='message-steps'+(live?' live':'');box.open=open;
- const summary=document.createElement('summary');const seconds=ms=>ms>=1000?(ms/1000).toLocaleString('ru-RU',{maximumFractionDigits:1})+' с':ms+' мс';
+ const summary=document.createElement('summary'),label=document.createElement('span'),time=document.createElement('span');
+ const seconds=ms=>Math.max(0,Math.round(ms/1000))+' с';
  const total=rows.reduce((sum,s)=>sum+(Number(s.ms)||0),0);
- summary.textContent='Ход работы · '+rows.length+' '+(rows.length%10===1&&rows.length%100!==11?'шаг':rows.length%10>=2&&rows.length%10<=4&&(rows.length%100<10||rows.length%100>=20)?'шага':'шагов')+(total&&!live?' · '+seconds(total):'');
+ label.className='steps-label';label.textContent=live?(rows.at(-1)?.label||'Думаю…'):'Ход работы · '+rows.length+' '+(rows.length%10===1&&rows.length%100!==11?'шаг':rows.length%10>=2&&rows.length%10<=4&&(rows.length%100<10||rows.length%100>=20)?'шага':'шагов');
+ time.className='steps-duration';time.textContent=seconds(total);if(live)time.dataset.started=String(Date.now()-total);summary.append(label,time);
  const list=document.createElement('ol');
- rows.forEach((s,i)=>{const li=document.createElement('li');const current=live&&i===rows.length-1;li.className=current?'current':'done';li.setAttribute('aria-label',(current?'Выполняется: ':'Готово: ')+s.label);const mark=document.createElement('span');mark.className='step-mark';mark.setAttribute('aria-hidden','true');mark.textContent=current?'•':'✓';const text=document.createElement('span');text.textContent=s.label;li.append(mark,text);if(!current&&Number(s.ms)>=100){const time=document.createElement('span');time.className='step-time';time.textContent=seconds(Number(s.ms));li.append(time);}list.append(li);});
+ rows.forEach((s,i)=>{
+  const li=document.createElement('li'),current=live&&i===rows.length-1;
+  li.className=current?'current':'done';li.setAttribute('aria-label',(current?'Выполняется: ':'Выполнено: ')+s.label);
+  if(typeof s.detail==='string'&&s.detail.trim()){
+   const details=document.createElement('details'),heading=document.createElement('summary'),body=document.createElement('pre');heading.textContent=s.label;body.textContent=s.detail;details.append(heading,body);li.append(details);
+  }else{const text=document.createElement('span');text.textContent=s.label;li.append(text);}
+  list.append(li);
+ });
  box.append(summary,list);return box;
 };
+window.setInterval?.(()=>{for(const node of document.querySelectorAll('.message-steps.live .steps-duration[data-started]'))node.textContent=Math.max(0,Math.round((Date.now()-Number(node.dataset.started))/1000))+' с';},1000);
 window.renderMessage = function(message){
  const node=document.createElement('article');node.className=message.role==='user'?'message-user':'message-assistant';node.dataset.messageText=message.text||'';
  const role=document.createElement('span');role.className='sr-only';role.textContent=message.role==='user'?'Вы: ':'Петя: ';node.append(role);
