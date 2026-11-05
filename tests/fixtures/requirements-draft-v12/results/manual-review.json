@@ -196,5 +196,71 @@
       true,
       "Final states, fields, exclusions and literals retained; no invented open questions."
     ]
+  },
+  "candidate": {
+    "name-0-01": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-0-10": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-0-00": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-0-11": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-1-01": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-1-10": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-1-00": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-1-11": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "report-0-00": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "report-0-10": [
+      false,
+      "Customer delivery remains forbidden after explicit permission."
+    ],
+    "report-0-01": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "report-0-11": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "failure-0-0": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "failure-0-1": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "scope": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "repeat": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ]
   }
 }
