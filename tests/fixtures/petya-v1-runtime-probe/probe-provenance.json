@@ -1,0 +1,9 @@
+{
+  "status": "feasibility only; not an inference service or released model",
+  "source_request_sha256": "3a0432f9646c4126b2e45692fc8cde666ee3f0ae8937b91d5bfd5063403f782e",
+  "script_sha256": "982f1acedd8a45e5733e2d24cae413b2f7b834a3de1c84213206c732dd99ea74",
+  "result_sha256": "582a3ffd5c742c3418f36d997b5ad4e2e064d2653e6d5e66de1d5107a2f9defa",
+  "outlines_wheel_sha256": "0e185dd5a0cfeb62e0268018972d3c22bb9b7d43db3dc1f39f3b754175a82c54",
+  "upstream_documentation": "https://github.com/dottxt-ai/outlines/blob/main/docs/features/models/mlxlm.md",
+  "dependencies_isolated_from_training": true
+}
