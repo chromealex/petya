@@ -4,6 +4,6 @@
   "total_exact": 36,
   "total": 37,
   "failed": "v10-f-ban-10",
-  "reason": "Restores prohibited tenant delivery instead of honoring removal of that prohibition.",
+  "reason": "Keeps the tenant excluded after the user explicitly allows delivery.",
   "candidate_fresh_answers_inspected": false
 }

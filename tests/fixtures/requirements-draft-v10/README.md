@@ -2,7 +2,7 @@
 
 Previous narrow-adapter experiments acquired examples but inconsistently transferred cancellations and explicit exclusions. Auditing the v9 training sets found no identical prompts with conflicting completions. This experiment changes adaptation depth from five to thirteen blocks, starting from the retained v9 `repaired-adapter`, not the rejected decision experiment. New LoRA contributions initialize to zero; existing parent tensors are checked for exact equality before updates. The base model is frozen. Recurrent training uses differentiable operations, with ordinary inference used after reload.
 
-The one-example probe completed with a finite loss, 6,094,848 trainable parameters and approximately 16.1 GB peak allocation. `probe.json` preserves its metadata. Probe weights are not used as the training parent. The initial GPU permission review timed out without execution; a reduced retry succeeded. No user approval or resource-access block remains.
+The one-example probe completed with a finite loss, 6,094,848 trainable parameters and approximately 16.1 GB peak allocation. `probe.json` preserves its metadata. Probe weights are not used as the training parent.
 
 The fixed training run uses one epoch at 0.00001 over 668 presentations: 464 previous decision-training rows, twelve copies of each of the seven outstanding corrections, and four copies of each of the prior 30 acquisition targets. There are 293 distinct prompts and no conflicting completions for identical prompts. Depth and data both change, so success cannot be attributed uniquely to depth.
 
@@ -13,3 +13,11 @@ Semantic draft assessment is manual and non-blind, against `rubric.json`. Equiva
 The improvement gate requires all 37 acquisition targets semantically correct, no numeric/general regression, and more complete new drafts than base and parent. Also report v8 as a historical comparator. A reliable cancellation/prohibition claim requires every targeted member to pass. Synthetic related families and a small manually graded sample do not establish broad live-dialogue or release readiness. No model is automatically promoted to petya-v1.
 
 Training reuses `../requirements-draft-v7/train.py` with `--layers 13 --attention --mlp --epochs 1 --lr 0.00001`; evaluation reuses `../requirements-draft-v8/evaluate.py` and its strict scorer. These evaluate saved weights with greedy no-thinking diagnostics, without changing live chat sampling or repeat protection.
+
+## Runtime continuity and acquisition-only repair
+
+The initial training completed all 668 steps, but its temporary Python environment disappeared before inference. The weights were immediately saved and hash-verified in `adapter`. Evaluation was restored under Python 3.12.0 with the same core versions (MLX 0.32.4, mlx-lm 0.32.2, Transformers 5.22.1). Full restored package pins are in `evaluation-requirements.txt`. Repeating the parent model on all 32 fixed cases produced identical raw answers; `results/runtime-validation.json` records this observed control, not a claim that every dependency behavior is identical.
+
+The initial 13-block adapter exactly retained all 30 previous targets but acquired only six of seven new ones. It continued excluding the tenant in `v10-f-ban-10` after the user explicitly allowed delivery. No new-case candidate answers were generated or inspected before repair selection.
+
+A precommitted 196-step repair at 0.00001 replays all 37 acquisition targets four times and all four historical recipient/field states twelve times. The fourth state adds one consistency control, bringing the repair acquisition check to 38 cases (37 requested/prior targets plus one control). The original fresh check and its criteria remain unchanged. Both initial and repaired artifacts must be retained and reported; success on the repaired training targets alone does not establish transfer.
