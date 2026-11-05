@@ -31,12 +31,14 @@ module.exports={
   // A question about something the user marked stays in that chat instead of starting a new topic.
   const keep=(text,topic)=>{const marks=collect(state(),topic);if(!marks.length)return false;const asked=new Set(words(text).filter(w=>w.length>=4||/\d/.test(w)).map(key));return marks.some(m=>words(m).some(w=>(w.length>=4||/\d/.test(w))&&asked.has(key(w))));};
   s.dialogue.keepTopic=keep;
-  const add=(topicId,{text,messageIndex=null,scope='chat'}={})=>{
-   const value=clean(text);if(value.length<2)throw Error('Выделите текст, который нужно отметить.');
+  const add=(topicId,{text,messageIndex=null,scope='chat',wholeMessage=false}={})=>{
+   const topic=state().topics.find(t=>t.id===topicId);
+   if(wholeMessage&&(!Number.isInteger(messageIndex)||topic?.messages[messageIndex]?.text!==text))throw Error('Сообщение изменилось. Откройте его заново.');
+   const value=wholeMessage?String(text):clean(text);if(value.length>100000)throw Error('Сообщение слишком большое для отметки.');if(value.length<2)throw Error('Выделите текст, который нужно отметить.');
    const holder=owner(state(),topicId,scope==='project'?'project':'chat');holder.highlights=holder.highlights||[];
-   if(holder.highlights.some(h=>clean(h.text)===value))return list(state(),topicId);
-   const total=holder.highlights.reduce((n,h)=>n+h.text.length,0);if(total+value.length>LIMIT)throw Error('Важного уже много — около '+LIMIT+' символов. Снимите старые отметки.');
-   holder.highlights.push({id:randomUUID(),text:value,topicId,messageIndex:Number.isInteger(messageIndex)?messageIndex:null,at:Date.now()});save();return list(state(),topicId);
+   const existing=holder.highlights.find(h=>h.text===value);if(existing){if(wholeMessage){Object.assign(existing,{wholeMessage:true,messageIndex,topicId});save();}return list(state(),topicId);}
+   const total=holder.highlights.reduce((n,h)=>n+clean(h.text).length,0);if(total+clean(value).length>LIMIT)throw Error('Важного уже много — около '+LIMIT+' символов. Снимите старые отметки.');
+   holder.highlights.push({id:randomUUID(),text:value,wholeMessage:!!wholeMessage,topicId,messageIndex:Number.isInteger(messageIndex)?messageIndex:null,at:Date.now()});save();return list(state(),topicId);
   };
   const ipc={
    list:topicId=>list(state(),topicId),

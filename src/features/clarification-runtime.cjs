@@ -50,7 +50,7 @@ module.exports=function runtime(s,session){
  session.save=()=>{d.state.pendingClarifications=[...session.pending].map(([id,row])=>({id,scope:row.scope,owner:row.owner,command:row.command,spec:row.spec,at:row.at,expiresAt:row.expiresAt}));d.persist();};
  for(const saved of d.state.pendingClarifications||[]){
   if(!saved.owner||saved.scope!==session.scope(saved.owner)||Date.now()>saved.expiresAt)continue;
-  const resume=restore(saved.spec.restart),result={handled:true,question:true,text:saved.spec.text,clarificationId:saved.id,clarificationOptions:saved.spec.options||[],clarificationInput:{label:saved.spec.label||'Уточнение',placeholder:saved.spec.placeholder||'Напишите ответ…',submit:'Продолжить',choicesOnly:!!saved.spec.strictChoices},...!resume?{recoveryRequired:true,originalRequest:saved.command}:{} };
+  const resume=restore(saved.spec.restart),result={handled:true,question:true,text:saved.spec.text,clarificationId:saved.id,clarificationOptions:saved.spec.options||[],clarificationInput:{label:saved.spec.label||'Уточнение',placeholder:saved.spec.placeholder||'Напишите ответ…',submit:'Продолжить',choicesOnly:!!(saved.spec.strictChoices||saved.spec.choicesOnly),cancelLabel:saved.spec.cancelLabel},...!resume?{recoveryRequired:true,originalRequest:saved.command}:{} };
   session.pending.set(saved.id,{...saved,result,resume:resume||(()=>({handled:true,question:true,...result})),recoveryRequired:!resume});
   const topic=d.state.topics.find(t=>t.id===saved.owner.chatId);if(topic){topic.lastChatResult=result;topic.chatJob={...topic.chatJob,state:'attention',label:resume?'Нужно уточнение':'Запрос сохранён. Нужно проверить продолжение.',at:Date.now(),acknowledged:false};}
  }

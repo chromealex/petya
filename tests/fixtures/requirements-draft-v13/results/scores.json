@@ -88,5 +88,35 @@
       "passed": 48,
       "total": 48
     }
+  },
+  "candidate": {
+    "bounds": {
+      "passed": 20,
+      "total": 20
+    },
+    "general": {
+      "passed": 7,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 19,
+      "total": 20
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 7,
+      "total": 8
+    },
+    "schema": {
+      "passed": 48,
+      "total": 48
+    }
   }
 }

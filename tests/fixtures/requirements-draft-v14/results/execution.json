@@ -1,0 +1,11 @@
+{
+  "successful_attempt": 2,
+  "failed_attempt_saved_weights": false,
+  "failed_last_reported_step": 512,
+  "overlapping_reported_intervals": 32,
+  "identical_reported_intervals": 32,
+  "successful_steps": 538,
+  "elapsed_seconds": 529.0638165420023,
+  "peak_memory_bytes": 16872872662,
+  "weights_sha256": "141eb18c69a34a21bc28a45d353d95f6c87e49c86bcc37315dfacd75c4a6d463"
+}

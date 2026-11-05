@@ -46,5 +46,18 @@
       "g1",
       "g2"
     ]
+  },
+  "candidate": {
+    "gains": [
+      "report-0-11",
+      "value-0-exact",
+      "value-1-exact",
+      "value-1-upper",
+      "value-2-exact",
+      "value-3-exact"
+    ],
+    "regressions": [
+      "g1"
+    ]
   }
 }

@@ -963,3 +963,49 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 #home .chat-feed .answer-menu-items>button{display:flex;align-items:center;gap:9px;min-height:32px;margin:0;padding:6px 9px;border:0;border-radius:6px;background:transparent;color:var(--ink);font-size:12px;line-height:18px;box-shadow:none;text-align:left}
 #home .chat-feed .answer-menu-items>button:is(:hover,:focus-visible){background:#ffffff12}
 .message-menu-icon{display:inline-flex;flex:0 0 16px;color:var(--muted)}
+.selection-task:not([hidden]){gap:2px;padding:4px;border-radius:9px;box-shadow:0 6px 20px #0005}
+.selection-task button{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:6px;background:transparent;color:var(--ink);font-size:12px;line-height:18px;padding:6px 9px;min-height:30px}
+.selection-task button:is(:hover,:focus-visible){background:#ffffff12}
+
+/* Chat utility panels use bounded, in-flow layouts rather than spilling into the sidebar. */
+.clarification-history>div{position:static;width:auto;max-height:220px;margin-top:6px;padding:8px 12px;box-shadow:none}
+#home .chat-heading:has(.clarification-history[open]) .clarification-history{flex:1 0 100%;min-width:0}
+.clarification-history p+p{border-top:1px solid var(--line)}
+.chat-find{position:static;inset:auto;width:100%;max-width:100%;box-sizing:border-box;margin:4px 0 10px;padding:6px;gap:6px;flex-wrap:wrap}
+.chat-find input{flex:1 1 140px;min-width:0;width:auto;margin:0;height:32px;font-size:12px}
+.chat-find select{flex:0 1 120px;max-width:140px;margin:0;height:32px;padding:4px 8px;font-size:12px}
+.chat-find button{width:28px;height:28px;min-height:28px;padding:0;border:0;background:transparent;flex:none}
+.chat-find input:focus-visible{outline:0;box-shadow:inset 0 0 0 1px var(--green)}
+.chat-context-body{padding:12px;max-height:30vh;font-size:12px;line-height:1.5}
+.chat-context-body>p{overflow-wrap:anywhere;margin:0 0 8px}
+.chat-context-body .chat-context-links{margin:10px 0 0;gap:6px}
+.chat-context-links button{background:transparent;padding:5px 8px}
+.chat-context-preview{margin:8px 0!important}
+.git-project-dialog{width:min(800px,calc(100vw - 48px));max-height:calc(100vh - 64px);box-sizing:border-box;overflow:auto;padding:16px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 60px #0006}
+.git-project-dialog::backdrop{background:#0008}
+.git-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.git-dialog-head h2{margin:0;font-size:17px}
+.git-dialog-close{width:28px;height:28px;min-height:28px;padding:0;border:0;background:transparent;font-size:20px}
+.git-project-dialog #git-card{border:0;padding:0;margin:0;background:transparent;display:grid;gap:10px;min-width:0}
+#git-card p{font-size:12px;margin:0;overflow-wrap:anywhere}#git-card .actions{margin:0;gap:6px;flex-wrap:wrap}#git-card button{font-size:12px;padding:5px 9px}
+.git-file-list{max-height:28vh;min-height:60px;overflow:auto;border-block:1px solid var(--line);padding-block:4px}
+#git-card .git-file-list label.check{display:flex;align-items:center;gap:8px;padding:5px 6px;margin:0;font-size:12px;line-height:18px;overflow-wrap:anywhere}
+#git-card .git-file-list label:hover{background:#ffffff08;border-radius:5px}#git-card .git-file-list input{flex:none;margin:0}
+#home .chat-heading .clarification-history{margin:0;padding:0;border:0;background:transparent}
+.clarification-history>summary{display:inline-flex;align-items:center;min-height:28px;padding:0;cursor:pointer}
+.git-advanced{margin:0;padding:0;border:0;background:transparent}.git-advanced>summary{padding:6px 0;font-size:12px;color:var(--muted)}.git-advanced .actions{padding-top:8px}
+#git-card>pre:empty{display:none}
+.git-file-list{scrollbar-width:thin;scrollbar-color:#647069 transparent}.git-file-list::-webkit-scrollbar{width:6px}.git-file-list::-webkit-scrollbar-track{background:transparent}.git-file-list::-webkit-scrollbar-thumb{background:#647069;border-radius:8px}
+.clarification-input.choices-only{align-items:center;gap:6px;padding:0 0 10px}
+.clarification-input.choices-only>button{font-size:12px;line-height:18px;min-height:30px;padding:6px 10px;border-radius:8px;background:transparent}
+.clarification-input.choices-only>button:first-child{background:#d2f79b18;border-color:#d2f79b55;color:var(--green)}
+
+.computer-approval.clarification-input{width:100%;flex:1 1 100%;gap:12px;padding:12px;border:1px solid #e8c75b30;border-radius:12px;background:linear-gradient(110deg,#e8c75b24 0%,#e8c75b10 60%,#e8c75b04 100%)}
+.computer-approval .approval-question{flex:1 1 260px;margin:0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.computer-approval .approval-buttons{display:flex;flex:none;gap:6px;margin-left:auto}
+.computer-approval .approval-buttons>button{font-size:12px;line-height:18px;min-height:30px;padding:6px 10px;border-radius:8px;background:transparent;white-space:nowrap}
+.computer-approval .approval-buttons>.primary{background:#d2f79b18;border-color:#d2f79b55;color:var(--green)}
+
+#home .chat-composer.card:has(.computer-approval){padding-top:0}
+#home .chat-composer>.actions:has(>.computer-approval){margin:0 -12px;width:calc(100% + 24px)}
+#home .chat-composer .computer-approval{border:0;border-bottom:1px solid #e8c75b30;border-radius:19px 19px 0 0;padding:12px 18px}
+@media(max-width:700px){#home .chat-composer>.actions:has(>.computer-approval){margin-inline:-10px;width:calc(100% + 20px)}}

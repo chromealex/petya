@@ -2,9 +2,17 @@
  const jobs=new Map(),finishing=new Set();let applying=false,starting=false;
  const panel=document.createElement('article');panel.className='message-assistant chat-running-reply chat-job-status';panel.hidden=true;panel.setAttribute('role','status');
  const text=document.createElement('span'),retry=document.createElement('button');retry.type='button';retry.textContent='Повторить';retry.hidden=true;const author=document.createElement('strong');author.textContent='Петя';const bar=document.createElement('progress');bar.setAttribute('aria-label','Петя выполняет запрос');const elapsed=document.createElement('span');elapsed.className='chat-running-time';elapsed.setAttribute('aria-hidden','true');panel.append(author,text,bar,elapsed,retry);
+ const expanded=new Map();let stepBox=null,stepOwner=null;
+ function paintSteps(job){
+  if(stepBox){expanded.set(stepOwner,stepBox.open);stepBox.remove();stepBox=null;}
+  stepOwner=topicSelect.value;
+  if(panel.hidden||!job?.steps?.length)return;
+  const now=Date.now();stepBox=window.renderSteps(job.steps.map(s=>({label:s.label,ms:Math.max(0,(s.done||now)-s.at)})),{live:['queued','running'].includes(job.state),open:expanded.get(stepOwner)||false});
+  const box=stepBox,owner=stepOwner;box.addEventListener('toggle',()=>{if(box.isConnected)expanded.set(owner,box.open);});panel.append(box);
+ }
  window.chatJobInfo=id=>jobs.get(id);
  window.chatJobBusy=id=>['queued','running'].includes(jobs.get(id)?.state);
- function paint(){const job=jobs.get(topicSelect.value);panel.hidden=!job||['done','cancelled'].includes(job.state)||job.state==='attention'&&!!chatHistory.at(-1)?.error;if(panel.hidden)panel.remove();bar.hidden=job?.state==='attention';elapsed.hidden=!['queued','running'].includes(job?.state);text.textContent=job?.label||'';if(!panel.hidden)window.placeChatProgress(panel);retry.hidden=job?.state!=='attention';retry.onclick=()=>{if(job?.command&&!$('command').value){$('command').value=job.command;$('command').focus();}};panel.dataset.state=job?.state||'';}
+ function paint(){const job=jobs.get(topicSelect.value);panel.hidden=!job||['done','cancelled'].includes(job.state)||job.state==='attention'&&!!chatHistory.at(-1)?.error;if(panel.hidden)panel.remove();bar.hidden=job?.state==='attention';elapsed.hidden=!['queued','running'].includes(job?.state);text.textContent=job?.label||'';if(!panel.hidden)window.placeChatProgress(panel);retry.hidden=job?.state!=='attention';retry.onclick=()=>{if(job?.command&&!$('command').value){$('command').value=job.command;$('command').focus();}};panel.dataset.state=job?.state||'';paintSteps(job);}
  window.tryBackgroundChat=async command=>{
   if(starting||voiceReply||currentDraft||workspaceBusy||planning||commandProgress.busy)return false;
   starting=true;window.chatStartPending=true;

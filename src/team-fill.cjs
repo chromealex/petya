@@ -73,7 +73,7 @@ class TeamFill {
   }catch(e){
    // Slack rate limit: offer to read the Slack app window instead of waiting.
    if(!screenSources&&(e.status===429||/HTTP 429|ограничил запросы/u.test(e.message||''))){const rows=await this.fromJira().catch(()=>null);if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}
-   if(!screenSources&&this.screen&&(e.status===429||/HTTP 429|ограничил запросы/u.test(e.message||''))){const wait=Math.ceil(e.retryAfter||30);this.pending={kind:'screen',command,scope:this.scope(),at:this.now(),wait};return this.reply('Slack временно ограничил запросы (повторить можно через '+wait+' с). Могу сам посмотреть в приложении Slack: переключусь на него и прочитаю то, что видно в окне, например открытый канал команды или список участников. Посмотреть? Скажи «да» или «нет».',{question:true,teamFillReply:true});}
+   if(!screenSources&&this.screen&&(e.status===429||/HTTP 429|ограничил запросы/u.test(e.message||''))){const wait=Math.ceil(e.retryAfter||30);this.pending={kind:'screen',command,scope:this.scope(),at:this.now(),wait};return this.reply('Slack временно ограничил запросы (повторить можно через '+wait+' с). Могу сам посмотреть в приложении Slack: переключусь на него и прочитаю то, что видно в окне, например открытый канал команды или список участников. Посмотреть?',{question:true,teamFillReply:true,clarificationOptions:['Посмотреть в Slack','Не сейчас'],clarificationInput:{choicesOnly:true,cancelLabel:'Не сейчас'}});}
    if(e.teamChannels||e.code==='SLACK_CHANNEL_LOOKUP_REQUIRED'){const lookup=e.channelInput||e.code==='SLACK_CHANNEL_LOOKUP_REQUIRED';const reply=this.askDetails(lookup?'Из какого канала Slack взять участников команды? Введите точное название с # или вставьте ссылку на канал.':e.message);if(lookup)reply.clarificationInput={label:'Канал Slack',placeholder:'#название или ссылка на канал',submit:'Продолжить'};this.pending.channelInput=lookup;this.pending.prefix='Заполни команду из Slack ';this.pending.channelOptions=e.channelOptions||[];return reply;}return this.reply('Не удалось заполнить команду: '+e.message,{error:true});}
   finally{this.busy=false;}
  }
@@ -97,7 +97,7 @@ class TeamFill {
   if(/^(?:отмена|стоп|не надо|отмени)$/.test(value)){this.pending=null;return this.reply('Уточнение отменено. Уже сохранённые сведения остались в команде.');}
   if(p.kind==='screen'){
    this.pending=null;
-   if(/^(?:да|давай|ага|ок|окей|хорошо|можно|посмотри|смотри|разрешаю|конечно)(?:[\s,!].*)?$/iu.test(value)){this.busy=false;return this.fromScreen(p.command);}
+   if(/^(?:да|давай|ага|ок|окей|хорошо|можно|посмотреть в slack|посмотри|смотри|разрешаю|конечно)(?:[\s,!].*)?$/iu.test(value)){this.busy=false;return this.fromScreen(p.command);}
    return this.reply('Хорошо. Повтори «Заполни команду» через '+p.wait+' с, когда Slack снимет ограничение.');
   }
   if(p.kind==='details'){

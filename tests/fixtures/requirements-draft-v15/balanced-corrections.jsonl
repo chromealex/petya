@@ -1,0 +1,4 @@
+{"id": "v15-sort-2-0-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив -47, -9, -22 по возрастанию."}, {"role": "assistant", "content": "[-47,-22,-9]"}]}
+{"id": "v15-sort-2-0-1", "task": "general", "messages": [{"role": "user", "content": "Расположи -47, -9, -22 от меньшего к большему. Только JSON-массив."}, {"role": "assistant", "content": "[-47,-22,-9]"}]}
+{"id": "v15-sort-2-1-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив -47, -9, -22 по убыванию."}, {"role": "assistant", "content": "[-9,-22,-47]"}]}
+{"id": "v15-sort-2-1-1", "task": "general", "messages": [{"role": "user", "content": "Расположи -47, -9, -22 от большего к меньшему. Только JSON-массив."}, {"role": "assistant", "content": "[-9,-22,-47]"}]}

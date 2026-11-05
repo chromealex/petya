@@ -1,0 +1,19 @@
+{
+  "hashes": {
+    "train.jsonl": "9bccfb9b8119bf425a7d4928217395c182f09494113ba4775eb2bc69695f17c9",
+    "acquisition.jsonl": "de09c901190275ef8d17f2bd56d9e0e35a1ad2986ea6ad19495b4f6f3ee47ad5",
+    "balanced-corrections.jsonl": "3476b2153d8838f354007d798df985eb62fda4cda3351e68bb3a861bacd3f912",
+    "sort-variants.jsonl": "ad39b349f561a74a41db44d34b220d63cb4ac79b487eda6858d61c7a6b27b9dd",
+    "report-variants.jsonl": "3f89c2401f84daf9fb042f5f83a93a09ed2fc6471eda4f8adb17529b7cd86467",
+    "check.jsonl": "ae55225a7fb235d6e0308e3301d2af2b88272ed66a8716b624d046297bd4319e"
+  },
+  "parent": "../requirements-draft-v13/repaired-adapter",
+  "steps": 538,
+  "layers": 13,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 5e-06,
+  "gate": "All 165 familiar cases correct after reload. Improve fresh drafts versus parent, labels 8/8, all 20 fresh numerical cases correct, and no previously correct fresh case regresses. Every decision state must pass to claim reliability; no automatic release.",
+  "selection": "Fixed run, acquisition-only repair allowed before candidate fresh inference.",
+  "limits": "Small related synthetic sample; non-blind semantic draft assessment."
+}

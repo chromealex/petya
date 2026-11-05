@@ -146,7 +146,7 @@ async function showDialogueReply(result,spoken=false){
  window.applyChatPlaceholder($('command'),chatHistory,result);
  if(window.showResultChoices)await window.showResultChoices(result);
  if(result.telegramConnect||result.telegramContacts)window.renderTelegramContacts?.(newest,result);
- dialogueTitle.textContent=result.topicTitle||'Диалог с Петей';dialogueChoices.replaceChildren();window.offerReportShare?.(result.reportShareId,dialogueChoices);if(result.computerApproval)window.showComputerApproval(result.computerApproval,newest,spoken);
+ dialogueTitle.textContent=result.topicTitle||'Диалог с Петей';dialogueChoices.replaceChildren();window.offerReportShare?.(result.reportShareId,dialogueChoices);
  if(result.gitDiscovery){const found=result.gitDiscovery;for(const root of found.repositories){const b=document.createElement('button');b.type='button';b.textContent='Работать с '+root;b.onclick=run(async()=>{await window.petya.gitSelect(root,found.projectId);await processCommand(result.gitCommand||'статус гита');});dialogueChoices.append(b);}if(!found.repositories.length&&!found.partial&&!found.warnings.length)for(const folder of found.missing){const b=document.createElement('button');b.type='button';b.textContent='Создать Git в '+folder;b.onclick=run(async()=>{b.disabled=true;try{const created=await window.petya.gitInit(folder,found.projectId);await showDialogueReply({handled:true,text:created.text},spoken);}finally{b.disabled=false;}});dialogueChoices.append(b);}}
 
 

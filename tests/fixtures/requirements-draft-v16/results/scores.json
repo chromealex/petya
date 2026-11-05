@@ -1,0 +1,128 @@
+{
+  "base": {
+    "bounds": {
+      "passed": 15,
+      "total": 20
+    },
+    "general": {
+      "passed": 21,
+      "total": 28
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 14,
+      "total": 28
+    },
+    "rename": {
+      "passed": 5,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 5,
+      "total": 8
+    },
+    "polarity": {
+      "passed": 2,
+      "total": 8
+    },
+    "sorting": {
+      "passed": 17,
+      "total": 24
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 75,
+      "total": 76
+    }
+  },
+  "parent": {
+    "bounds": {
+      "passed": 20,
+      "total": 20
+    },
+    "general": {
+      "passed": 27,
+      "total": 28
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 25,
+      "total": 28
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 8,
+      "total": 8
+    },
+    "polarity": {
+      "passed": 5,
+      "total": 8
+    },
+    "sorting": {
+      "passed": 23,
+      "total": 24
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 76,
+      "total": 76
+    }
+  },
+  "v8": {
+    "bounds": {
+      "passed": 14,
+      "total": 20
+    },
+    "general": {
+      "passed": 19,
+      "total": 28
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 12,
+      "total": 28
+    },
+    "rename": {
+      "passed": 4,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 3,
+      "total": 8
+    },
+    "polarity": {
+      "passed": 2,
+      "total": 8
+    },
+    "sorting": {
+      "passed": 15,
+      "total": 24
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 76,
+      "total": 76
+    }
+  }
+}

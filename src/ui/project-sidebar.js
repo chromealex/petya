@@ -110,13 +110,14 @@
  let contextRevision=0;
  async function refreshContext(){const current=++contextRevision;const value=await window.petya.chatProjectContext();if(current!==contextRevision)return;
   summary.textContent='Контекст'+(value.jira?' · '+value.jira:'')+(value.channels.length?' · Slack: '+value.channels.length:'')+(value.files.length?' · Файлы: '+value.files.length:'');
+  const manage=context.querySelector('.chat-materials-manage');
   body.replaceChildren();body.append(node('p','Проект: '+value.projectName));
   const sources=node('div',null,'chat-context-sources');sources.append(node('span','Jira: '+(value.jira||'не выбран')),node('span','Slack: '+(value.channels.map(c=>'#'+c.name).join(', ')||'каналы не выбраны')));body.append(sources);
   if(value.effectiveName)body.append(node('p','Связи рабочего проекта: '+value.effectiveName));
   if(value.files.length){const files=node('ul');for(const file of value.files)files.append(node('li',file.name+(file.scope==='draft'?' · прикреплён к следующему запросу':'')));body.append(files);}else body.append(node('p','В этом чате нет прикреплённых файлов.'));
-  body.append(node('p','Петя также может использовать сохранённые материалы компании. Ссылки на источники появляются под ответом, когда они доступны.','small'));
-  if(value.context)body.append(node('p',value.context));if(value.folder)body.append(node('p','Папка: '+value.folder));if(value.disabledServices.length)body.append(node('p','Отключены для проекта: '+value.disabledServices.join(', '),'small'));body.append(button('Настройки проекта',()=>window.openProjectSettings(value.projectId)));
-  const materials=button('Открыть материалы',()=>view('sources')),connections=button('Настроить подключения',()=>view('settings'));const links=node('div',null,'chat-context-links');links.append(materials,connections);body.append(links);
+  body.append(node('p','Источники использованных материалов появятся под ответом.','small'));
+  if(value.context)body.append(node('p',value.context));if(value.folder)body.append(node('p','Папка: '+value.folder));if(value.disabledServices.length)body.append(node('p','Отключены для проекта: '+value.disabledServices.join(', '),'small'));
+  const materials=button('Открыть материалы',()=>view('sources')),connections=button('Настроить подключения',()=>view('settings'));const links=node('div',null,'chat-context-links');links.append(button('Настройки проекта',()=>window.openProjectSettings(value.projectId)),materials,connections);if(manage)links.append(manage);body.append(links);
 
  }
  document.addEventListener('petya-dialogue-state',refresh);document.addEventListener('petya-chat-job',()=>{clearTimeout(timer);timer=setTimeout(refresh,80);});

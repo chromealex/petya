@@ -1,0 +1,330 @@
+{
+  "base": {
+    "name-0-01": [
+      true,
+      "Only color changes on the original named item; address/content retained and no rename instruction."
+    ],
+    "name-0-10": [
+      false,
+      "Cancelled mint color applied."
+    ],
+    "name-0-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-10": [
+      false,
+      "Cancelled amber color applied."
+    ],
+    "name-1-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-10": [
+      false,
+      "Owner permission ignored; unrequested generation trigger and validation added."
+    ],
+    "report-0-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-11": [
+      false,
+      "Owner permission ignored."
+    ],
+    "report-1-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-10": [
+      false,
+      "Output truncated at fixed token limit; incomplete JSON and contradictory recipient reasoning."
+    ],
+    "report-1-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-11": [
+      false,
+      "Contractor permission ignored."
+    ],
+    "failure-0-0": [
+      false,
+      "Approved author name hidden instead of shown."
+    ],
+    "failure-0-1": [
+      false,
+      "Narrows unspecified publication to article publication without agreement."
+    ],
+    "scope": [
+      false,
+      "Adds new-visit trigger and unrelated questions about future fields."
+    ],
+    "repeat": [
+      false,
+      "Invents metadata display and reopens settled privacy decision."
+    ]
+  },
+  "parent": {
+    "name-0-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "failure-0-0": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "failure-0-1": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "scope": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "repeat": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ]
+  },
+  "v8": {
+    "name-0-01": [
+      false,
+      "Cancelled rename applied."
+    ],
+    "name-0-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-00": [
+      false,
+      "Both cancelled changes applied."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      false,
+      "Address preservation omitted."
+    ],
+    "name-1-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-00": [
+      true,
+      "Blanket no-changes instruction for the original named item credited as retaining original color and address, with name/content explicitly retained."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      false,
+      "Obsolete code retained; explicit owner exclusion omitted."
+    ],
+    "report-0-10": [
+      false,
+      "Owner permission ignored."
+    ],
+    "report-0-01": [
+      false,
+      "Approved email hidden, obsolete code retained and owner exclusion omitted."
+    ],
+    "report-0-11": [
+      false,
+      "Owner delivery omitted, approved email hidden and obsolete code retained."
+    ],
+    "report-1-00": [
+      true,
+      "Only the manager receives the report; explicit only excludes the contractor. Complete content and hidden address retained."
+    ],
+    "report-1-10": [
+      false,
+      "Contractor permission ignored."
+    ],
+    "report-1-01": [
+      false,
+      "Approved address visibility rejected."
+    ],
+    "report-1-11": [
+      false,
+      "Contractor permission ignored and approved address hidden."
+    ],
+    "failure-0-0": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "failure-0-1": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "scope": [
+      false,
+      "Adds an after-visit trigger not agreed in the dialogue."
+    ],
+    "repeat": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ]
+  },
+  "candidate": {
+    "name-0-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-0-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-0-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "failure-0-0": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "failure-0-1": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "scope": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "repeat": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ]
+  }
+}

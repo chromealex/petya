@@ -1,0 +1,95 @@
+{
+  "retention": {
+    "exact": 117,
+    "total": 117,
+    "prior_targets": 77,
+    "last_round_cases": 40,
+    "current_two_fixes": true
+  },
+  "fresh_candidate": {
+    "bounds": {
+      "passed": 20,
+      "total": 20
+    },
+    "general": {
+      "passed": 7,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 19,
+      "total": 20
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 7,
+      "total": 8
+    },
+    "schema": {
+      "passed": 48,
+      "total": 48
+    }
+  },
+  "fresh_parent": {
+    "bounds": {
+      "passed": 15,
+      "total": 20
+    },
+    "general": {
+      "passed": 8,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 18,
+      "total": 20
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 6,
+      "total": 8
+    },
+    "schema": {
+      "passed": 48,
+      "total": 48
+    }
+  },
+  "fresh_passed": 46,
+  "fresh_total": 48,
+  "paired_gains": [
+    "report-0-11",
+    "value-0-exact",
+    "value-1-exact",
+    "value-1-upper",
+    "value-2-exact",
+    "value-3-exact"
+  ],
+  "paired_regressions": [
+    "g1"
+  ],
+  "diagnostic": {
+    "reloaded": true,
+    "reordered": true,
+    "raw_answers_identical": 2,
+    "total": 2,
+    "interpretation": "Both errors reproduced without the preceding 48-case sequence."
+  },
+  "no_case_regression_gate_passed": false,
+  "cancellation_prohibition_reliable": false,
+  "release_petya_v1": false,
+  "live_model_changed": false,
+  "decision": "Retain experimental adapter; no release because supplier permission and a new descending-sort regression remain.",
+  "limitations": "Small related synthetic cases, non-blind semantic review; all 117 retention targets were trained."
+}

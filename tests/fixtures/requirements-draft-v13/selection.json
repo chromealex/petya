@@ -1,0 +1,9 @@
+{
+  "adapter": "repaired-adapter",
+  "sha256": "d4d0010f79bc2aae1d0d27891529cc442a244cd88115bd8929b133a126968e75",
+  "acquisition_exact": 117,
+  "total": 117,
+  "prior_retention": 77,
+  "last_round_cases": 40,
+  "basis": "Selected after all 117 familiar answers match; no candidate fresh inference generated or inspected."
+}

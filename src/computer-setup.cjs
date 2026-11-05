@@ -17,7 +17,19 @@ module.exports=ctx=>{
     return ctx.request(base.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(require('./computer-intent.cjs').routingRequest(ctx.settings.model,command))});
   }});
   const computerApproval=new (require('./computer-approval.cjs').ComputerApproval)({computer,scope:()=>JSON.stringify([ctx.companyId,ctx.dialogue.state.activeProjectId,ctx.dialogue.state.activeId]),execute:async(command,action)=>{if(action?.type==='teamFillScreen')return ctx.teamFill.fromScreen(command);if(action?.type==='slackDigestScreen')return ctx.slackDigest.fromScreen(command);if(action?.type==='search'&&action.service==='telegram'){const query=require('./computer-intent.cjs').direct(command)?.query||action.query;const result=await computerIntent.search(query);return require('./extensions/telegram/contact-result.cjs').remember(ctx.dialogue,command,result,true,ctx.settings);}const result=await computer.execute(action);const rows=(result.observation?.results||[]).slice(0,12);return {handled:true,text:result.text+(rows.length?'\nНа экране:\n'+rows.map(r=>r.text).join('\n'):result.observation?.empty?'\nНичего не найдено.':'')};}});
-  ctx.handle('computerApprove',(id,allow)=>computerApproval.decide(id,allow));
+  ctx.handle('computerApprove',async(id,allow)=>{
+    const topic=ctx.dialogue.active();
+    const result=await computerApproval.decide(id,allow);
+    if(!result.needsSystemPermission&&topic?.lastChatResult?.computerApproval===id){
+      const last=topic.messages.at(-1);
+      if(result.text&&(last?.role!=='assistant'||last.text!==result.text))topic.messages.push({role:'assistant',text:result.text,at:Date.now(),error:!!result.error});
+      topic.lastChatResult={...result,topicId:topic.id,messages:undefined,topics:undefined};
+      if(topic.chatJob)topic.chatJob={...topic.chatJob,state:result.question?'attention':'done',label:result.question?'Нужно уточнение':'Готово',at:Date.now()};
+      ctx.dialogue.persist();
+      return {...result,topicId:topic.id,messages:topic.messages};
+    }
+    return result;
+  });
   ctx.handle('computerStatus',()=>computer.status());
   ctx.handle('computerApps',()=>computer.apps());
   ctx.handle('computerStart',options=>computer.start(options));

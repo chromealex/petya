@@ -23,3 +23,6 @@ assert(highlights.keep('Когда релиз 1.19?',state.topics[0]));assert(!h
  state.activeId='t10';a=highlights.turn('Что я отмечал как важное?');assert.match(a.text,/BW-4350/);
  for(const q of ['Что важнее: баги или задачи?','Какие задачи важные?','Что такое важное событие?'])assert.equal(highlights.turn(q),null,q);}
 console.log('Highlights: chat and project marks, agents inherit, model context, edit/move/remove, limits, voice command and «что важно не забыть» passed');
+
+// Whole-message marks retain long source text and validate the source message.
+{const text='Длинное сообщение '.repeat(200),topic={id:'whole',projectId:'p',messages:[{text}]};state.topics.push(topic);const result=ipc.add('whole',{text,messageIndex:0,wholeMessage:true});assert.equal(result.chat[0].text,text);assert(result.chat[0].wholeMessage);assert.throws(()=>ipc.add('whole',{text:'changed',messageIndex:0,wholeMessage:true}),/изменилось/);}

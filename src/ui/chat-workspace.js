@@ -186,7 +186,7 @@
       label.append(check,el('span',row.name));box.append(label);
     }
   });
-  context?.append(manage);
+  manage.classList.add('chat-materials-manage');(context?.querySelector('.chat-context-links')||context)?.append(manage);
   // Capture the selection before clicking the action collapses the browser selection.
   let selected='', selectedIndex=-1;
   const task=el('div');
@@ -204,6 +204,7 @@
     quotes.set(id(),{index:selectedIndex,at:message.at,text:message.text,excerpt:selected.slice(0,4000)});
     getSelection().removeAllRanges();task.hidden=true;drawQuote();$('command').focus();
   });
+  for(const [control,shape] of [[clarify,'<path d="M9 5 3 11l6 6M3 11h11a7 7 0 0 1 7 7"/>'],[create,'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="m8 12 3 3 5-6"/>']]){const icon=document.createElement('span');icon.setAttribute('aria-hidden','true');icon.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+shape+'</svg>';control.prepend(icon);}
   task.append(clarify,create);task.className='selection-task';task.hidden=true;task.onpointerdown=e=>e.preventDefault();document.body.append(task);
   document.addEventListener('selectionchange',()=>{
     const selection=getSelection();
