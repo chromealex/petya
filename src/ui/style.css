@@ -940,3 +940,11 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .action-result-card p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .action-result-card[data-state="unknown"] { border-color: #897348; }
 .remove-added-app { margin-left: auto; padding: 4px 9px; font-size: 12px; flex-shrink: 0; }
+
+/* Keep every message toolbar control on the same 24px centerline, including disclosures. */
+#home .chat-feed .message-meta>time,
+#home .chat-feed .message-meta>.message-source{display:flex;align-items:center;min-height:24px;line-height:16px}
+#home .chat-feed .message-meta>button{display:inline-flex;align-items:center;justify-content:center;height:24px;min-height:24px;line-height:16px;margin:0;box-sizing:border-box}
+#home .chat-feed .message-meta>details{margin:0;padding:0}
+#home .chat-feed .message-meta>details>summary{display:flex;align-items:center;min-height:24px;box-sizing:border-box;line-height:16px;margin:0;padding:0 4px}
+#home .chat-feed .message-meta>.message-steps>summary{padding-inline:0}
