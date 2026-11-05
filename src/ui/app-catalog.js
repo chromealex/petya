@@ -1,8 +1,11 @@
 (()=>{
  const descriptions={unity:'Поиск и просмотр префабов открытого проекта',telegram:'Сообщения и обсуждения команды',slack:'Каналы, сообщения и треды',notion:'Страницы и базы знаний',asana:'Поручения и задачи',jira:'Задачи, версии и отчёты',confluence:'Документы и пространства',ai:'Передача задач агентам',googleplay:'Ошибки и ANR приложений',gmail:'Почта и календарь',web:'Поиск по открытым источникам'};
  const glyph={telegram:'➤',asana:'∴',ai:'✧',googleplay:'▷',gmail:'@',web:'◎'};
+ window.removeAddedApp=async id=>{const item=optionalModules.find(([key])=>key===id);if(item){renderModules(await window.petya.saveSettings({['module_'+id]:'false'}));}else await window.extensionHost.remove(id);document.dispatchEvent(new Event('petya-extensions-changed'));notice('Удалено из добавленных. Можно подключить снова через каталог.');};
+ async function removeButtons(){for(const [id,name] of optionalModules){const card=document.querySelector('[data-service="'+id+'"]'),heading=card?.querySelector('h2');if(!heading||card.querySelector('.remove-added-app'))continue;const button=document.createElement('button');button.type='button';button.className='remove-added-app';button.textContent='Удалить';button.setAttribute('aria-label','Удалить '+name);button.onclick=async event=>{event.preventDefault();event.stopPropagation();button.disabled=true;try{await window.removeAddedApp(id);}catch(error){notice(error.message,true);}finally{button.disabled=false;}};(card.querySelector('summary')||heading.parentNode).append(button);}}
+ Promise.all([connectionsReady,modulesReady]).then(removeButtons);document.addEventListener('petya-extensions-changed',removeButtons);
  window.openAppCatalog=async function(term=''){
- const extensions=await window.petya.feature('extensionUI','catalog');
+ let extensions=await window.petya.feature('extensionUI','catalog');
   const previous=document.activeElement,d=document.createElement('dialog');d.className='app-catalog';
   const make=(tag,text)=>Object.assign(document.createElement(tag),{textContent:text||''});
   const head=make('header'),title=make('h2','Каталог приложений'),close=make('button','×'),search=make('input'),rows=make('div');
@@ -23,7 +26,9 @@
         if(!enabled){const check=moduleChecks.get(id);check.checked=true;await check.onchange();if(!moduleEnabled(id))return;}
         d.close();view('settings');const card=$('settings').querySelector('[data-service="'+id+'"]');if(card)window.revealSettings(card);
       }finally{action.disabled=false;}};
-      row.append(icon,copy,action);rows.append(row);
+      const controls=make('div');controls.className='actions';controls.append(action);
+      if(enabled){const remove=make('button','Удалить');remove.type='button';remove.setAttribute('aria-label','Удалить '+name);remove.onclick=async()=>{remove.disabled=true;try{await window.removeAddedApp(id);extensions=await window.petya.feature('extensionUI','catalog');draw();}catch(error){notice(error.message,true);remove.disabled=false;}};controls.append(remove);}
+      row.append(icon,copy,controls);rows.append(row);
     }
     if(!rows.children.length)rows.append(make('p','Приложение не найдено.'));
   }

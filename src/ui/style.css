@@ -934,3 +934,4 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .action-result-card small { opacity: .7; }
 .action-result-card p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .action-result-card[data-state="unknown"] { border-color: #897348; }
+.remove-added-app { margin-left: auto; padding: 4px 9px; font-size: 12px; flex-shrink: 0; }

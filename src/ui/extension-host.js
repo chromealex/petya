@@ -10,11 +10,11 @@
  }
  async function mount(entry){
   for(const [file] of entry.scripts)await load('../extensions/'+entry.id+'/'+file);
-  const card=document.querySelector('[data-extension="'+entry.id+'"]');if(card){card.hidden=false;fold(card);}
+  const card=document.querySelector('[data-extension="'+entry.id+'"]');if(card){card.hidden=entry.service?!moduleEnabled(entry.id):!entry.installed;fold(card);}
   document.dispatchEvent(new CustomEvent('petya-extension-open',{detail:entry.id}));
   document.dispatchEvent(new Event('petya-extensions-changed'));return card;
  }
- window.extensionHost={async render(parent,message){for(const entry of entries)for(const [key,handler] of Object.entries(entry.results||{})){if(!message[key])continue;try{await mount(entry);window[handler]?.(parent,message[key]);}catch(e){notice(e.message,true);}}},async open(id){entries=await window.petya.feature('extensionUI','install',id);const entry=entries.find(e=>e.id===id),card=await mount(entry);view('settings');if(card)window.revealSettings?.(card);else notice('Расширение добавлено. Используйте его в чате.');}};
+ window.extensionHost={async remove(id){entries=await window.petya.feature('extensionUI','uninstall',id);const card=document.querySelector('[data-extension="'+id+'"]');if(card)card.hidden=true;document.dispatchEvent(new Event('petya-extensions-changed'));},async render(parent,message){for(const entry of entries)for(const [key,handler] of Object.entries(entry.results||{})){if(!message[key])continue;try{await mount(entry);window[handler]?.(parent,message[key]);}catch(e){notice(e.message,true);}}},async open(id){entries=await window.petya.feature('extensionUI','install',id);const entry=entries.find(e=>e.id===id),card=await mount(entry);view('settings');if(card)window.revealSettings?.(card);else notice('Расширение добавлено. Используйте его в чате.');}};
  window.addEventListener('load',()=>{for(const card of document.querySelectorAll('[data-extension]'))fold(card);document.dispatchEvent(new Event('petya-extensions-changed'));});
  for(const entry of entries)if(entry.template){const form=document.getElementById('settings-form');form.querySelector(':scope>button[type=submit]').insertAdjacentHTML('beforebegin',entry.template);}
  const scripts=[];
