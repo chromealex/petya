@@ -885,3 +885,15 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .chat-result-picker small{color:var(--muted)}
 .chat-result-status{margin:0 0 8px}
 .chat-result-context[hidden],.chat-result-picker[hidden],.chat-result-status[hidden]{display:none}
+
+.chat-change-editor,.chat-change-card{padding:12px;border:1px solid var(--line,#35413a);border-radius:12px;margin:10px 0;min-width:0}
+.chat-change-editor{max-height:45vh;overflow:auto}
+.chat-change-editor textarea{width:100%;min-height:90px;max-height:25vh;resize:vertical;box-sizing:border-box;margin:8px 0}
+.chat-change-editor .actions,.chat-change-card .actions,.change-people{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.change-fields select{margin:8px 0}.change-diff{display:grid;grid-template-columns:1fr 1fr;gap:12px}.change-diff>div{min-width:0}
+.change-diff pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:240px;overflow:auto;padding:10px;border-radius:8px;background:#101714;font:inherit;font-size:12px}
+.chat-change-card h4{margin:12px 0 4px}.chat-change-card summary{margin-top:10px}.change-error{color:#ffb3a6}.change-people [aria-pressed=true]{outline:1px solid #d3f699}
+@media(max-width:600px){.change-diff{grid-template-columns:1fr}}
+
+#home .chat-feed article.message-assistant:has(.chat-change-card){width:100%;max-width:100%;box-sizing:border-box}
+.chat-change-card{box-sizing:border-box;width:100%}.message-assistant .change-diff pre{white-space:pre-wrap;overflow-wrap:anywhere}

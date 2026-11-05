@@ -4,6 +4,7 @@ contextBridge.exposeInMainWorld('petya', Object.fromEntries(calls.map(name => [n
 contextBridge.exposeInMainWorld('petyaEvents', {
   onExtensionInstall: callback => ipcRenderer.on('extension-install-progress', (_,item) => callback(item)),
   onUnityProgress: callback => ipcRenderer.on('unity-progress', (_,state) => callback(state)),
+  onChatChange: callback => ipcRenderer.on('chat-change-progress', (_,state) => callback(state)),
   onMotionProgress: callback => ipcRenderer.on('blender-motion-progress', (_,state) => callback(state)),
   onArtistProgress: callback => ipcRenderer.on('artist-progress', (_event, state) => callback(state)),
   onMcpChatChanged: callback => ipcRenderer.on('mcp-chat-changed', (_event, change) => callback(change)),

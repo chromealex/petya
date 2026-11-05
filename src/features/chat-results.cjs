@@ -60,6 +60,7 @@ function setup(s){
       if(!collect(topic,s).some(item=>item.id===row.id))throw Error('Объект изменился.');
     };
     check();
+    if(action.id==='edit')return s.chatChanges.start(row,expected);
     if(action.id==='details')return {handled:true,text:row.title+'\n'+row.subtitle,resultJump:row.index};
     const project=s.dialogue.state.projects.find(p=>p.id===(topic.projectId||'general'));
     const result=await require('../modules.cjs').withProject(project,()=>row.adapter.perform(action.id,row,s,check));
@@ -76,7 +77,7 @@ function setup(s){
   }
   async function turn(command){
     const normalized=command.trim().replace(/[.!?]+$/u,'').toLowerCase();
-    const actionId=new Map([['открой','open'],['обнови','refresh'],['обнови результат','refresh'],['обнови отчёт','refresh'],['обнови отчет','refresh'],
+    const actionId=new Map([['измени','edit'],['изменить','edit'],['открой','open'],['обнови','refresh'],['обнови результат','refresh'],['обнови отчёт','refresh'],['обнови отчет','refresh'],
       ['покажи подробнее','details'],['подробнее','details'],['поверни','rotate'],
       ['покажи в папке','reveal']]).get(normalized);
     if(!actionId)return null;

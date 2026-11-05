@@ -13,7 +13,7 @@ module.exports={
   describe(message,topic,s){
     const tasks=(message.jiraItems||[]).map(item=>({key:[item.site,item.key],item,
       title:'Jira · '+item.key,subtitle:item.summary,
-      actions:[{id:'open',label:'Открыть в Jira'},{id:'details',label:'К ответу'}]}));
+      actions:[{id:'open',label:'Открыть в Jira'},{id:'details',label:'К ответу'},{id:'edit',label:'Изменить'}]}));
     return [...reports.describe(message,topic,s),...tasks];
   },
   async perform(action,row,s,check){

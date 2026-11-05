@@ -1,0 +1,39 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs/promises');
+const path=require('node:path');
+const os=require('node:os');
+const feature=require('../src/features/chat-changes.cjs');
+const {scope}=require('../src/features/chat-results.cjs');
+(async()=>{
+ const dir=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'petya-changes-'))),file=path.join(dir,'note.txt');
+ try{
+  await fs.writeFile(file,'before\r\n');await fs.chmod(file,0o640);
+  const t={id:'chat',projectId:'general',messages:[]},events=[];
+  let active=t;
+  const s={companyId:'company',dialogue:{active:()=>active,state:{topics:[t],projects:[{id:'general'}]},persist(){}},win:{webContents:{send:(name,item)=>events.push(item)}}};
+  let api=feature.setup(s);const expected=scope(s,t),row={adapter:{id:'files'},file:{localSourcePath:file}};
+  let start=await api.chatChanges.start(row,expected),id=start.changeEditor;
+  await assert.rejects(api.ipc.prepare(expected,id,{text:'bad\0text'}),/символы/);
+  await api.ipc.prepare(expected,id,{text:'after\n'});
+  assert.equal(await fs.readFile(file,'utf8'),'before\r\n','Preview must not write');
+  api=feature.setup(s);await api.ipc.apply(expected,id);
+  assert.equal(await fs.readFile(file,'utf8'),'after\r\n');assert.equal((await fs.stat(file)).mode&0o777,0o640);
+  assert.equal(api.ipc.snapshot().items[0].state,'done');
+  await api.ipc.apply(expected,id);assert.equal(await fs.readFile(file,'utf8'),'after\r\n');
+  let snap=await api.ipc.undo(expected,id),undo=snap.items.at(-1).id;
+  assert.equal(await fs.readFile(file,'utf8'),'after\r\n','Undo needs confirmation');
+  await api.ipc.apply(expected,undo);assert.equal(await fs.readFile(file,'utf8'),'before\r\n');
+  assert.equal(api.ipc.snapshot().items[0].undone,true);
+  id=(await api.chatChanges.start(row,expected)).changeEditor;await api.ipc.prepare(expected,id,{text:'mine'});await fs.writeFile(file,'external');
+  await api.ipc.apply(expected,id);assert.equal(await fs.readFile(file,'utf8'),'external');assert.equal(api.ipc.snapshot().items.at(-1).state,'failed');
+  id=(await api.chatChanges.start(row,expected)).changeEditor;await api.ipc.prepare(expected,id,{text:'updated'});
+  const calls=await Promise.allSettled([api.ipc.apply(expected,id),api.ipc.apply(expected,id)]);assert.equal(calls.filter(x=>x.status==='rejected').length,1);
+  await fs.writeFile(file,'external again');await assert.rejects(api.ipc.undo(expected,id),/изменился/);
+  id=(await api.chatChanges.start(row,expected)).changeEditor;api.ipc.cancel(expected,id);await assert.rejects(api.ipc.prepare(expected,id,{text:'bad'}));
+  active={id:'other',projectId:'general'};await assert.rejects(api.ipc.apply(expected,id),/изменился/);active=t;
+  const pending=t.chatChanges[0];pending.state='applying';api=feature.setup(s);assert.equal(api.ipc.snapshot().items[0].state,'uncertain');await assert.rejects(api.ipc.apply(expected,pending.id));
+  assert(events.some(e=>e.busy));assert(events.some(e=>e.kind==='success'));assert(events.some(e=>e.kind==='error'));
+  await fs.writeFile(file,Buffer.from([0xff,0xfe,0]));await assert.rejects(api.chatChanges.start(row,expected),/UTF-8/);
+  console.log('chat changes: preview, restart, apply, duplicate, undo, conflict, scope, notifications passed');
+ }finally{await fs.rm(dir,{recursive:true,force:true});}
+})().catch(e=>{console.error(e);process.exitCode=1;});

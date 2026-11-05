@@ -9,5 +9,6 @@ module.exports=[
  require('./features/highlights.cjs'),
  require('./features/blender-motion.cjs'),
  require('./features/extension-replies.cjs'),
- require('./features/chat-results.cjs')
+ require('./features/chat-results.cjs'),
+ require('./features/chat-changes.cjs')
 ];

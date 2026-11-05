@@ -146,7 +146,8 @@ class History {
       }
     }
   }
-  async apply(id, confirmDelete = false) {
+  async apply(id, confirmDelete = false, authorize = () => {}, beforeWrite = () => {}) {
+    authorize();
     const p = this.previews.get(id);
     if (!p || Date.now() - p.at > 10 * 60e3) throw new Error('Предпросмотр устарел. Подготовьте изменение заново.');
     const { entry, s } = this.entry(p.entryId);
@@ -154,8 +155,9 @@ class History {
     this.w.inFlight.add(entry.id);
     try {
       // Check the whole batch before the first write; recheck each issue before its own write.
-      await this.validateTargets(p, s);
+      await this.validateTargets(p, s); authorize();
       for (const row of p.rows) if (!matches(await snapshot(this.w, row.key, s), row.before)) throw new Error('Данные изменились после предпросмотра: ' + row.key + '. Подготовьте изменение заново.');
+      authorize();
       const operation = { id: p.id, kind: p.kind, instruction: p.instruction, at: Date.now(), undoOf: p.undoOf || '', rows: p.rows.map(row => ({ ...clone(row), state: 'ready' })) };
       entry.operations ||= []; entry.operations.push(operation); entry.sealed = true;
       this.previews.delete(id); this.persist(); // A preview is single-use, including on timeout.
@@ -168,6 +170,7 @@ class History {
           if (!matches(current, row.before)) throw new Error('Задача изменилась после предпросмотра.');
           if (p.kind === 'delete') {
             row.state = 'sending'; this.persist(); pendingWrite = true;
+            authorize();beforeWrite();
             await this.w.api('/rest/api/3/issue/' + encodeURIComponent(row.key) + '?deleteSubtasks=false', { method: 'DELETE' }, s);
             pendingWrite = false; row.state = 'done'; stored.state = 'deleted'; stored.snapshot = null; stored.canDelete = false;
           } else {
@@ -181,6 +184,7 @@ class History {
             for (const step of steps) {
               if (!matches(await snapshot(this.w, row.key, s), current)) throw new Error('Задача изменилась во время применения.');
               row.state = 'sending'; row.step = step.route; this.persist(); pendingWrite = true; acknowledged = false;
+              authorize();beforeWrite();
               await this.w.api(step.route, { method: step.method, body: JSON.stringify(step.body) }, s);
               acknowledged = true;
               const after = await snapshot(this.w, row.key, s);

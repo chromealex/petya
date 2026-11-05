@@ -5,7 +5,7 @@ module.exports={
   describe(message){
     return (message.attachments||[]).map(file=>({key:file.id,file,title:file.name||'Файл',
       subtitle:file.localSourcePath||file.note||'Вложение чата',
-      actions:[{id:'open',label:'Открыть'},...(file.localSourcePath?[{id:'reveal',label:'Показать в папке'}]:[])]}));
+      actions:[{id:'open',label:'Открыть'},...(file.localSourcePath?[{id:'reveal',label:'Показать в папке'},{id:'edit',label:'Изменить'}]:[])]}));
   },
   async perform(action,row,s,check){
     check();

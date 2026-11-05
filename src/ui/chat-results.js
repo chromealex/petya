@@ -22,10 +22,11 @@
     const result=await call('action',expected,item.id,action.id);
     if(state.scope!==expected)return;
     picker.hidden=true;restricted=null;
+    if(result.changeEditor)await window.showChangeEditor?.();
     if(result.command)await processCommand(result.command);
     else if(result.attachment)await window.openChatAttachment(result.attachment,topicSelect.value);
     else if(Number.isInteger(result.resultJump))await window.jumpToChatMessage(result.resultJump);
-    else if(result.text){status.textContent=result.text;status.hidden=false;}
+    else if(result.text&&!result.changeEditor){status.textContent=result.text;status.hidden=false;}
     await refresh();
   }
   const choices=()=>[...new Map(state.items.map(item=>[item.objectId,item])).values()];
@@ -80,6 +81,7 @@
   document.addEventListener('pointerdown',e=>{if(!bar.contains(e.target)&&!picker.contains(e.target))picker.hidden=true;});
   window.showResultChoices=async result=>{
     await refresh();
+    if(result.changeEditor)await window.showChangeEditor?.();
     if(result.attachment)await window.openChatAttachment(result.attachment,topicSelect.value);
     if(Number.isInteger(result.resultJump))await window.jumpToChatMessage(result.resultJump);
     if(result.resultChoices?.length){restricted={ids:result.resultChoices,action:result.resultAction};paintPicker();picker.hidden=false;}
