@@ -1,0 +1,31 @@
+
+     __      __               .__  __  .__________
+    /  \    /  \_____  ______ |__|/  |_|__\_____  \
+    \   \/\/   /\__  \ \____ \|  \   __\  | _(__  <
+     \        /  / __ \|  |_> >  ||  | |  |/       \
+      \__/\  /  (____  /   __/|__||__| |__/______  /
+           \/        \/|__|                      \/
+Wapiti 3.2.3 (wapiti-scanner.github.io)
+[*] Saving scan state, please wait...
+
+[*] Launching module csp
+
+[*] Launching module http_headers
+Checking X-Frame-Options:
+X-Frame-Options is not set
+Checking X-Content-Type-Options:
+OK
+Checking Strict-Transport-Security:
+OK
+
+[*] Launching module cookieflags
+
+[*] Launching module ssl
+sslscan is not installed or not found in PATH, module will be skipped
+
+[*] Launching module redirect
+
+[*] Launching module crlf
+
+[*] Generating report...
+A report has been generated in the file zoom-bot/review/evidence/wapiti-initial.json

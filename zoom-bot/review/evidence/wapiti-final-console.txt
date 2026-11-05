@@ -1,0 +1,28 @@
+
+     __    __            _ _   _ _____
+    / / /\ \ \__ _ _ __ (_) |_(_)___ /
+    \ \/  \/ / _` | '_ \| | __| | |_ \
+     \  /\  / (_| | |_) | | |_| |___) |
+      \/  \/ \__,_| .__/|_|\__|_|____/
+                  |_|                 
+Wapiti 3.2.3 (wapiti-scanner.github.io)
+[*] Saving scan state, please wait...
+
+[*] Launching module csp
+
+[*] Launching module http_headers
+Checking X-Frame-Options:
+OK
+Checking X-Content-Type-Options:
+OK
+Checking Strict-Transport-Security:
+OK
+
+[*] Launching module cookieflags
+
+[*] Launching module redirect
+
+[*] Launching module crlf
+
+[*] Generating report...
+A report has been generated in the file zoom-bot/review/evidence/wapiti-final.json

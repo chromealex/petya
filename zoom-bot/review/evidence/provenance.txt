@@ -1,0 +1,9 @@
+Date: 2026-11-05
+Source baseline: 300a130ddf95bb63f34227304540c250b0c86d92
+Initial source archive SHA-256: 22285cf79e2262df0a7de69eb675e1facf407a9c68117d15747e057c54849f85
+Semgrep: 1.183.0, local Mac execution, metrics off
+Wapiti: 3.2.3, local Mac execution, bug reports off, HTTPS verification on
+Server Node archive: node-v22.23.4-linux-x64.tar.xz
+Node archive SHA-256: 1805bcd35e6815559bd2eb97db438d3fdb0eb3a5e6a977b7c1badca76337e9ce
+Tests passed locally and on server Node 22: oauth/server/test.cjs, oauth/server/test-providers.cjs, tests/zoom-bot-server.cjs
+Original Docker scanner setup failed with read-only container storage; no scan claimed from Docker. Separate local Python environments succeeded.

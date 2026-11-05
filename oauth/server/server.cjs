@@ -17,7 +17,7 @@ function createBroker(config, fetcher = fetch) {
   const sessions = new Map(), refreshing = new Map();
   let records = {};
   const seal = value => { const iv = crypto.randomBytes(12), cipher = crypto.createCipheriv('aes-256-gcm', key, iv); const data = Buffer.concat([cipher.update(JSON.stringify(value)), cipher.final()]); return Buffer.concat([iv, cipher.getAuthTag(), data]); };
-  const open = bytes => { const decipher = crypto.createDecipheriv('aes-256-gcm', key, bytes.subarray(0,12)); decipher.setAuthTag(bytes.subarray(12,28)); return JSON.parse(Buffer.concat([decipher.update(bytes.subarray(28)),decipher.final()])); };
+  const open = bytes => { const decipher = crypto.createDecipheriv('aes-256-gcm', key, bytes.subarray(0,12), {authTagLength:16}); decipher.setAuthTag(bytes.subarray(12,28)); return JSON.parse(Buffer.concat([decipher.update(bytes.subarray(28)),decipher.final()])); };
   if (fs.existsSync(config.file)) records = open(fs.readFileSync(config.file));
   const persist = () => { fs.mkdirSync(path.dirname(config.file), {recursive:true, mode:0o700}); const temp = config.file + '.tmp'; const fd = fs.openSync(temp,'w',0o600); try { fs.writeFileSync(fd,seal(records)); fs.fsyncSync(fd); } finally {fs.closeSync(fd);} fs.renameSync(temp,config.file); };
   const clean = () => { for(const [id,s] of sessions) if(s.expires < Date.now()) sessions.delete(id); };

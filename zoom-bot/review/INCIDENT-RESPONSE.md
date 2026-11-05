@@ -1,0 +1,12 @@
+# Incident management and response — Petya Zoom integration
+
+Version 1, 2026-11-05. Newly documented runbook. Owner: Alex Silaev (chrome.alex@gmail.com). No dedicated 24/7 team, automated incident detection service or completed incident exercise is claimed.
+
+1. **Receive and triage.** Record UTC detection time, reporter, affected version/service, symptoms and minimal redacted evidence in a restricted incident record. Suspected credential exposure, cross-tenant access or unauthorized recording is urgent. Do not reproduce using another customer's data.
+2. **Contain.** Identify affected connections and jobs. Stop only affected recording workers or disable the exposed route where feasible. Preserve service availability when safe. Coordinate credential revocation/rotation through authorized provider and server administration. Avoid deleting evidence or ending unrelated meetings.
+3. **Investigate.** Preserve hashes, relevant service status and minimal logs without tokens or recordings. Determine the time window, data categories and access boundaries affected. Record uncertainty. HTTP access logs are disabled; full request history may be unavailable. Normal worker error messages are sanitized and are not a complete forensic audit trail.
+4. **Remediate.** Fix the root cause, test negative authorization cases and repeat relevant scans. Replace exposed secrets securely. Confirm encrypted storage, service isolation and correct tenant mapping before restoration. Never paste a secret into an issue, chat or scanner report.
+5. **Communicate.** The owner determines affected parties and applicable contractual/legal notification duties and deadlines, using qualified advice where needed. Send factual notices through approved channels; do not promise a deadline unsupported by the applicable requirements. Coordinate with Zoom when its integration or data is involved.
+6. **Recover and learn.** Restore only validated components, monitor sanitized health/error signals, and document timeline, impact, fixes and remaining uncertainty. Update tests, threat analysis, privacy disclosures and this runbook. Archive the restricted incident record separately from public source code.
+
+Operational checks: inspect systemd status/journal and public HTTPS health, compare deployed source hashes, and verify that new jobs do not inherit unrelated credentials. Automated alerting, a disaster-recovery exercise and an independent incident drill remain unverified.

@@ -30,3 +30,9 @@ The SDK receives a private config under `/dev/shm` and deletes it after exit. Th
 ## Acceptance checks
 
 Run `tests/zoom-bot.cjs`, `tests/zoom-bot-server.cjs`, and the real MCP client in `tests/mcp.cjs`. Before deployment, additionally verify live OAuth login, waiting-room admission, recording permission, end-of-meeting completion, full transcript recovery after a desktop restart, company isolation, and zero local microphone capture. Windows UIAutomation and actual Zoom information controls need platform testing.
+
+## Security review and server runtime
+
+The 2026-11-05 review preparation is in `review/SUBMISSION-README.md`; original scanner outputs and coverage limits are preserved. API error/status behavior remains shared by the desktop and existing MCP tools. No new callable feature was added. Server AES-GCM readers explicitly require 16-byte authentication tags; encrypted data format is unchanged.
+
+The deployed broker and recorder use `/opt/node-v22.23.4-linux-x64/bin/node` through `/etc/systemd/system/<service>.service.d/runtime.conf`. Each drop-in clears `ExecStart` then sets it to that executable plus the original service script. The Ubuntu `/usr/bin/node` package is unchanged; do not use its unsupported Node 18 runtime for these services. The official archive SHA-256 is recorded in review evidence. Broker/provider/recorder tests passed on Node 22 before the service switch. Test future runtime upgrades before changing these overrides.

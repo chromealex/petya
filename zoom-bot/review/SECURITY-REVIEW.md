@@ -27,3 +27,7 @@ After an initial automatic approval-review block, the owner explicitly authorize
 ## Live diagnostic follow-up (2026-11-05)
 
 A retry reached OAuth/OBF token retrieval but the Meeting SDK rejected the join with `MEETING_FAIL_UNABLE_TO_JOIN_EXTERNAL_MEETING` (63), defined in the installed official SDK's `meeting_service_interface.h`. No audio was produced. A test meeting hosted by the developer account is still required. The service now preserves safe, stage-specific errors and numeric SDK failures instead of overwriting them with a generic worker-exit message. UI and existing MCP status/retry paths use the same result.
+
+## Review remediation follow-up (2026-11-05)
+
+Zoom returned the external beta request with "App Beta - Insufficient Evidence". No more detailed reviewer explanation was available. New first-party SSDLC/security/incident/vulnerability documents and original Semgrep/Wapiti reports are now prepared; see SUBMISSION-README.md and SCAN-RECORD.md. This supersedes the earlier statement that no SAST/DAST output was available, but no independent audit or pentest is claimed. The initial policies are pending owner adoption, the revised privacy notice is not yet public, and the expanded materials have not been re-submitted.

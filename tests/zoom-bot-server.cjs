@@ -5,7 +5,11 @@ const {Store}=require('../zoom-bot/server/store.cjs'),{createService}=require('.
  assert.match(failureMessage(Error('PETYA:failure:meeting:63')), /код 63/);
  assert(!failureMessage(Error('secret-token')).includes('secret-token'));
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'petya-zoom-api-')),key=crypto.randomBytes(32).toString('hex'),token=crypto.randomBytes(32).toString('base64url'),other=crypto.randomBytes(32).toString('base64url');
- const store=new Store(dir,key);let release,runs=0,ready=true;
+ const store=new Store(dir,key);
+ const tamperId=crypto.randomUUID();store.write(tamperId,{value:'test'});const sealed=fs.readFileSync(store.file(tamperId));
+ const changed=Buffer.from(sealed);changed[12]^=1;fs.writeFileSync(store.file(tamperId),changed);assert.throws(()=>store.read(tamperId));
+ fs.writeFileSync(store.file(tamperId),sealed.subarray(0,20));assert.throws(()=>store.read(tamperId));store.remove(tamperId);
+ let release,runs=0,ready=true;
  const service=createService({store,tenants:Object.fromEntries([[token,'one'],[other,'two']].map(([t,id])=>[crypto.createHash('sha256').update(t).digest('hex'),id])),ready:()=>ready,run:async(job,meeting,publish)=>{runs++;if(runs===2){publish({phase:'error',message:'Safe specific failure'});throw Error('worker failed');}await new Promise(r=>release=r);store.write(job.id+'-0',{wav:'aGVsbG8=',at:1});publish({phase:'recorded',segments:1});}});
  await new Promise(r=>service.server.listen(0,'127.0.0.1',r));const origin='http://127.0.0.1:'+service.server.address().port;
  const call=(route,method='GET',data,auth=token)=>fetch(origin+route,{method,headers:{Authorization:'Bearer '+auth},...(data?{body:JSON.stringify(data)}:{})});
