@@ -14,7 +14,7 @@ const figma={name:'Card',absoluteBoundingBox:box(100,200,320,240),fills:[{type:'
 const zeplin={name:'Card',rect:box(0,0,320,240),layers:[{name:'Panel',rect:box(20,30,280,180),layers:[{name:'Title',content:'Hello Unity',rect:box(16,16,220,32),text_styles:[{range:{location:0,length:11},style:{font_size:24,color:{r:255,g:0,b:0,a:1}}}]}]}]};
 let methods='',calls='';
 for(const [name,fixture] of Object.entries({figma,zeplin})){
- const result=markup.generate(fixture,name);
+ const result=markup.generate(fixture,name,{responsive:false});
  fs.writeFileSync(path.join(root,name+'.json'),JSON.stringify(fixture,null,2));
  methods+=`static string Import_${name}(){${markup.code(result.uxml)}}\n`;
  calls+=`Attach("${name}", Import_${name}());\n`;

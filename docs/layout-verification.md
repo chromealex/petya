@@ -1,34 +1,53 @@
 # Unity layout verification
 
-Verified on 2026-11-05 with Unity 6000.3.15f1 on macOS, against Petya 0.8.3 source code.
+Verified on 2026-11-05 with Unity 6000.3.15f1 on macOS, against Petya 0.8.3 sources. The installed Petya.app was not rebuilt by these tests.
 
-## Result
+## Scene import
 
-The extension imports basic fixed-position UI Toolkit layouts from Figma- and Zeplin-shaped design data. A real Unity process compiled and executed the production-generated C# importer in an isolated temporary project, loaded both UXML files as VisualTreeAsset objects, cloned them into an editor panel, and checked the resolved layout after the UI Toolkit layout pass.
+`tests/layout-scene-live.cjs` creates an isolated temporary Unity project. It runs the production resource-upload C# and final scene-import C#, with a valid PNG and actual local regular TTF. Both Figma- and Zeplin-shaped fixtures passed:
 
-Both providers passed these checks:
+- New UXML, texture, font and PanelSettings assets import successfully.
+- A UIDocument referencing the imported layout and panel is placed in the active scene.
+- Layout and resource references resolve in a real UI Toolkit panel.
+- Changing the panel from 320x240 to 640x480 changes image/text widths from 288 to 608 pixels.
+- Font size remains 24 logical pixels; image and font references remain intact.
+- Figma stretch and bottom-edge constraints retain the 16-pixel margins.
+- The scene is marked dirty without being saved; Undo removes the created document.
 
-- Root size: 320 by 240 pixels.
-- Nested panel offset: 20, 30 pixels.
-- Nested text offset: 16, 16 pixels, with final position 36, 46 relative to the root.
-- Text content: Hello Unity; dimensions: 220 by 32 pixels; font size: 24 pixels; color: red.
-- Separate imports produced separate asset paths.
+The image validation also rejected a corrupted PNG during development, before scene placement. The regression fixture now uses a valid deterministic PNG.
 
-The check found and fixed missing Zeplin text size and color: those values belong to `text_styles[].style`. Multiple text styles now produce a warning that only the first style is used. The importer now forces synchronous import and rejects a missing VisualTreeAsset instead of returning a path as success.
+## Complex interface stress test
+
+`tests/layout-complex-live.cjs` imports a synthetic Figma-shaped dashboard built by `tests/fixtures/layout-complex.cjs`: 446 source layers, 24 image cards, 36 table data rows, regular and bold TTF fonts, a fixed sidebar, toolbar and footer, wrapping card layout, and nested vertical/horizontal scroll views. It uses real Unity imports and computed UI Toolkit layout, not a browser imitation.
+
+| Viewport width | Card rows | Vertical scroll range | Horizontal table scroll range |
+| --- | --- | --- | --- |
+| 360 | 24 | 4921 | 558 |
+| 768 | 12 | 2799 | 150 |
+| 1440 | 5 | 1577 | 0 |
+
+Assertions passed for all widths: all cards remain inside the horizontal viewport, no cards intersect, cards reflow into fewer rows as width increases, the sidebar remains 80 pixels wide, the main region fills the remaining width, the footer remains inside the viewport, and both scroll axes work. All card image and font references resolve. The test also checks applying a scroll offset.
+
+## MCP and provider checks
+
+`tests/mcp.cjs` invokes `tests/layout-mcp.cjs` through an authenticated MCP client. It covers all five layout tools, scope/access rejection, missing font blocking, invalid font bytes, local picker cancellation, font assignment, duplicate starts, changed credentials and notifications. `tests/layout-assets.cjs` covers Figma rendered image URLs, Zeplin exports, token isolation from CDN requests, rejected URLs, missing exports, byte limits, confirmation cancellation and revoked authorization during the importer workflow.
+
+`tests/layout-unity-live.cjs` remains the historical fixed-layout regression: nested offsets, text geometry and colors in real Unity.
 
 ## Reproduction
 
 Run from the repository root with Node 22.12+ and a licensed Unity editor:
 
 ```sh
-PETYA_UNITY_EDITOR=/path/to/Unity PETYA_UNITY_VERSION=6000.3.15f1 node tests/layout-unity-live.cjs
 node tests/mcp.cjs
+PETYA_UNITY_EDITOR=/path/to/Unity PETYA_UNITY_VERSION=6000.3.15f1 PETYA_TEST_FONT=/path/to/regular.ttf node tests/layout-scene-live.cjs
+PETYA_UNITY_EDITOR=/path/to/Unity PETYA_UNITY_VERSION=6000.3.15f1 PETYA_TEST_FONT=/path/to/regular.ttf PETYA_TEST_FONT_BOLD=/path/to/bold.ttf node tests/layout-complex-live.cjs
 ```
 
-The live runner prints its temporary project directory and retains source fixtures, generated C#, imported assets, editor.log and verification.txt for diagnosis. It does not modify a user's Unity project. It checks computed geometry and styles, not screenshot similarity. The MCP suite separately exercises provider requests, access boundaries and import dispatch through an authenticated MCP client, with fixture service responses and a stub Unity invoker.
+On macOS the default test fonts are the system Arial and Arial Bold files. They are read for testing and copied only into temporary Unity projects, not committed to this repository. The runners print the temporary project directory and retain fixture JSON, generated C#, imported assets, editor.log, verification.txt and (for the stress test) measurements.txt.
 
-## Limits
+## Limits of this evidence
 
-This verifies the basic generator and importer, not complete reconstruction of arbitrary designs. There is no live Figma/Zeplin account or real user design in this test. Raster/vector assets, custom font files, effects, responsive constraints, mixed text styling and interactions are not reproduced. Import creates a UXML asset; it does not place an interface into a game scene or create a uGUI prefab. The installed Petya.app was not rebuilt in this task.
+These are deterministic source fixtures, not an authenticated live Figma/Zeplin account or a user's production design. The live tests check imported assets, scene wiring and computed geometry; they do not compare screenshots pixel by pixel or validate font licensing. The complex fixture references a shared test image in multiple cards. The importer preserves supplied layout rules; it cannot infer responsive redesigns or interaction logic absent from the source. Mixed text runs, unsupported effects and some container image transformations still require visual review as reported by the extension. Output is UI Toolkit, not a uGUI prefab.
 
-Reference for the corrected provider mapping: [Zeplin Layer Text Style](https://docs.zeplin.dev/reference/layer_text_style).
+Provider references: [Figma file and image endpoints](https://developers.figma.com/docs/rest-api/file-endpoints/), [Zeplin screen versions](https://docs.zeplin.dev/reference/screen_version), [Zeplin assets](https://docs.zeplin.dev/reference/asset), [Zeplin text styles](https://docs.zeplin.dev/reference/layer_text_style), and [Zeplin constraints](https://docs.zeplin.dev/reference/layer_constraints).

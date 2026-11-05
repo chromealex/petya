@@ -1,0 +1,40 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UIElements;
+public class LayoutSceneCheck : EditorWindow {
+ static LayoutSceneCheck window;static double deadline;static int phase;
+ static Dictionary<string,TemplateContainer> clones=new Dictionary<string,TemplateContainer>();
+ /* METHODS */
+ public static void Run(){try{
+ UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene);
+ window=GetWindow<LayoutSceneCheck>();window.position=new Rect(50,50,800,800);window.titleContent=new GUIContent("Petya responsive layout");
+ /* CALLS */
+ window.Show();deadline=EditorApplication.timeSinceStartup+12;EditorApplication.update+=Tick;
+ }catch(Exception e){Fail(e);}}
+ static void Attach(string provider,string folder){
+ var tree=AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(folder+"/layout.uxml");if(tree==null)throw new Exception("No UXML");
+ var panel=AssetDatabase.LoadAssetAtPath<PanelSettings>(folder+"/PanelSettings.asset");if(panel==null||panel.scaleMode!=PanelScaleMode.ScaleWithScreenSize)throw new Exception("No responsive panel");
+ var docs=UnityEngine.Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None);bool found=false;foreach(var doc in docs)if(doc.visualTreeAsset==tree&&doc.panelSettings==panel)found=true;if(!found)throw new Exception("UIDocument not placed in scene");
+ var clone=tree.CloneTree();clone.style.width=320;clone.style.height=240;clone.style.flexShrink=0;window.rootVisualElement.Add(clone);clones.Add(provider,clone);
+ }
+ static void Near(float a,float b,string name){if(float.IsNaN(a)||Math.Abs(a-b)>.2f)throw new Exception(name+": "+a+" != "+b);}
+ static void Tick(){try{
+ window.Repaint();if(EditorApplication.timeSinceStartup<deadline)return;
+ foreach(var pair in clones){
+ var root=pair.Value.Q<VisualElement>("layer-1");var image=pair.Value.Q<VisualElement>("layer-2");var text=pair.Value.Q<Label>("layer-3");
+ Near(root.resolvedStyle.width,phase==0?320:640,pair.Key+" root width");Near(root.resolvedStyle.height,phase==0?240:480,pair.Key+" root height");
+ Near(image.resolvedStyle.width,phase==0?288:608,pair.Key+" adaptive image width");Near(text.resolvedStyle.width,phase==0?288:608,pair.Key+" adaptive text width");Near(text.resolvedStyle.fontSize,24,"font size");
+ if(image.resolvedStyle.backgroundImage.texture==null)throw new Exception(pair.Key+": image reference missing");
+ if(text.resolvedStyle.unityFont==null&&text.resolvedStyle.unityFontDefinition.font==null&&text.resolvedStyle.unityFontDefinition.fontAsset==null)throw new Exception(pair.Key+": font reference missing");
+ if(pair.Key=="figma"){var footer=pair.Value.Q<VisualElement>("layer-4");Near(footer.resolvedStyle.width,phase==0?288:608,"stretch footer");Near(root.worldBound.yMax-footer.worldBound.yMax,16,"bottom anchored footer");}
+ }
+ if(phase==0){phase=1;foreach(var c in clones.Values){c.style.width=640;c.style.height=480;}deadline=EditorApplication.timeSinceStartup+5;return;}
+ var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();if(!scene.isDirty)throw new Exception("Scene was not marked dirty");
+ var before=UnityEngine.Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None).Length;Undo.PerformUndo();var after=UnityEngine.Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None).Length;if(after>=before)throw new Exception("Undo did not remove the imported document");
+ File.WriteAllText("verification.txt","PASS: Figma and Zeplin scene documents, imported PNG and TTF references, PanelSettings, responsive layout at 320x240 and 640x480, Figma edge constraints, dirty scene and Undo.");EditorApplication.update-=Tick;EditorApplication.Exit(0);
+ }catch(Exception e){Fail(e);}}
+ static void Fail(Exception e){File.WriteAllText("verification.txt",e.ToString());Debug.LogException(e);EditorApplication.Exit(1);}
+}

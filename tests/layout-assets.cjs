@@ -1,0 +1,23 @@
+const assert=require('node:assert/strict');
+const assets=require('../src/extensions/layout/assets.cjs'),markup=require('../src/extensions/layout/markup.cjs'),importer=require('../src/extensions/layout/import.cjs');
+const png=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR4nGP4z8DwH4QZYAwAR8oH+WdZbrcAAAAASUVORK5CYII=','base64');
+module.exports=async()=>{
+ const requests=[];
+ const root={id:'root',absoluteBoundingBox:{x:0,y:0,width:320,height:240},children:[{id:'image',type:'RECTANGLE',fills:[{type:'IMAGE',imageRef:'ref'}],absoluteBoundingBox:{x:0,y:0,width:20,height:20}}]};
+ const request=async(url,options)=>{requests.push({url,options});if(url.startsWith('https://api.figma.com/'))return new Response(JSON.stringify({images:{image:'https://cdn.figma.com/image.png'}}));assert.equal(options.headers,undefined);return new Response(png);};
+ const media=await assets.collect(root,{provider:'figma',key:'ABC'},'secret',{request});assert.equal(media.files.length,1);assert.equal(media.images.image,'images/image-0.png');assert.equal(requests[0].options.headers['X-Figma-Token'],'secret');
+ assert.throws(()=>assets.assetUrl('https://127.0.0.1/file'));assert.throws(()=>assets.assetUrl('https://figma.com.evil.example/file'));assert.throws(()=>assets.assetUrl('http://cdn.figma.com/file'));assert.throws(()=>assets.fontType(Buffer.from('not a font')));
+ await assert.rejects(assets.collect(root,{provider:'figma',key:'ABC'},'x',{request:async()=>new Response(JSON.stringify({images:{}}))}),/не экспортировала/);
+ await assert.rejects(assets.bytes(new Response(png,{headers:{'content-length':'999999999'}})),/размер/);
+ const zeplin={rect:{x:0,y:0,width:320,height:240},layers:[{id:'z',source_id:'s',exportable:true,rect:{x:0,y:0,width:20,height:20}}],assets:[{layer_source_id:'s',contents:[{format:'png',density:2,url:'https://cdn.zeplin.io/image.png'}]}]};
+ const z=await assets.collect(zeplin,{provider:'zeplin'},'secret',{request:async(url,options)=>{assert.equal(options.headers,undefined);return new Response(png);}});assert.equal(z.images.z,'images/image-0.png');
+ const calls=[];let closed=false,consent=false,revoked=false;
+ const client={getServerCapabilities:()=>({}),listTools:async()=>({tools:[{name:'execute_code'}]}),close:async()=>{closed=true;},callTool:async args=>{calls.push(args);const code=args.arguments.code;if(code.includes('return new {project='))return {structuredContent:{success:true,data:{result:{project:'/test/Assets',handle:7,name:'Test'}}}};return {structuredContent:{success:true,data:{result:code.includes('var go=')?{folder:'Assets/PetyaLayouts/Test',objectName:'UI'}:true}}};}};
+ const design={...markup.generate(root,'figma',{images:media.images}),fonts:[]};
+ const options={check:()=>{if(revoked)throw Error('revoked');},report(){},confirm:async()=>consent,connect:async()=>client};
+ await assert.rejects(importer.apply({unityUrl:'http://127.0.0.1:8080/mcp'},design,media.files,options),/отменён/);assert.equal(calls.length,1);assert.ok(closed);
+ consent=true;closed=false;calls.length=0;const result=await importer.apply({unityUrl:'http://127.0.0.1:8080/mcp'},design,media.files,options);assert.equal(result.objectName,'UI');assert.ok(calls.some(c=>c.arguments.code.includes('UIDocument')));assert.ok(calls.slice(1).every(c=>c.arguments.code.includes('Project or active scene changed')));assert.ok(closed);
+ calls.length=0;revoked=true;await assert.rejects(importer.apply({unityUrl:'http://127.0.0.1:8080/mcp'},design,media.files,options),/revoked/);assert.equal(calls.length,0);
+ assert.throws(()=>importer.uploadCode('a'.repeat(32),'../evil',png,0));
+ console.log('Layout assets: downloads, credential isolation, source exports, scoped transfers and confirmation passed');
+};
