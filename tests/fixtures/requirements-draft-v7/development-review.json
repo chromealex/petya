@@ -1,0 +1,175 @@
+{
+  "method": "Manual non-blind strict coverage. A vague statistic does not preserve an explicit count; harmless wording/translation in a title is accepted when the body identifies the original object correctly. All decisive failures are recorded.",
+  "models": {
+    "base": {
+      "receipt-new": {
+        "passed": true,
+        "finding": "All print fields, format and exclusions retained."
+      },
+      "failure-new": {
+        "passed": false,
+        "finding": "Adds unrequested questions."
+      },
+      "roles-new": {
+        "passed": true,
+        "finding": "Correct recipient, replacement field, result and exclusions."
+      },
+      "scope-new": {
+        "passed": false,
+        "finding": "Loses owner privacy, engineer and cooling exclusion; adds questions."
+      },
+      "format-new": {
+        "passed": false,
+        "finding": "Adopts unapproved GPX."
+      },
+      "period-new": {
+        "passed": true,
+        "finding": "Count retained in unchanged state with new interval and hidden names."
+      },
+      "rename-new": {
+        "passed": true,
+        "finding": "Correct reverted name and unchanged link/content; other unchanged boundaries are harmless restatement."
+      },
+      "status-new": {
+        "passed": true,
+        "finding": "All fields and open color preserved."
+      }
+    },
+    "parent": {
+      "receipt-new": {
+        "passed": false,
+        "finding": "Collapses print content into Russian."
+      },
+      "failure-new": {
+        "passed": true,
+        "finding": "Condition and both notification fields preserved."
+      },
+      "roles-new": {
+        "passed": false,
+        "finding": "Stops at report contents heading."
+      },
+      "scope-new": {
+        "passed": false,
+        "finding": "Contradicts unconditional display and changes engineer to dispatcher."
+      },
+      "format-new": {
+        "passed": true,
+        "finding": "Open format and export fields preserved."
+      },
+      "period-new": {
+        "passed": true,
+        "finding": "Quantity in the statistic title/body, interval and privacy preserved."
+      },
+      "rename-new": {
+        "passed": true,
+        "finding": "Reverted name, color and unchanged link/content retained."
+      },
+      "status-new": {
+        "passed": true,
+        "finding": "State text, date, privacy and sole color question retained."
+      }
+    },
+    "balanced": {
+      "receipt-new": {
+        "passed": true,
+        "finding": "Print fields and exclusions correct."
+      },
+      "failure-new": {
+        "passed": false,
+        "finding": "Invents long character restrictions and loses fields."
+      },
+      "roles-new": {
+        "passed": true,
+        "finding": "Correct recipient and fields; supervisor accepted as director synonym here."
+      },
+      "scope-new": {
+        "passed": false,
+        "finding": "Claims specification unapproved and loses requirements."
+      },
+      "format-new": {
+        "passed": false,
+        "finding": "Adds KML as an existing choice without source support."
+      },
+      "period-new": {
+        "passed": false,
+        "finding": "Changes statistic into screen shaking and omits connection count."
+      },
+      "rename-new": {
+        "passed": false,
+        "finding": "Retains the cancelled Events name."
+      },
+      "status-new": {
+        "passed": false,
+        "finding": "Omits the agreed text representation."
+      }
+    },
+    "attention": {
+      "receipt-new": {
+        "passed": true,
+        "finding": "Print fields and exclusions correct."
+      },
+      "failure-new": {
+        "passed": true,
+        "finding": "Correct failure condition and both fields."
+      },
+      "roles-new": {
+        "passed": false,
+        "finding": "Omits explicit no-director delivery exclusion."
+      },
+      "scope-new": {
+        "passed": true,
+        "finding": "Strict pressure, engineer, independent display and exclusions retained."
+      },
+      "format-new": {
+        "passed": true,
+        "finding": "Export fields and open format retained."
+      },
+      "period-new": {
+        "passed": false,
+        "finding": "Does not preserve the required connection count; generic connection statistics is insufficient."
+      },
+      "rename-new": {
+        "passed": false,
+        "finding": "Omits preserving link/content."
+      },
+      "status-new": {
+        "passed": false,
+        "finding": "Omits state-as-text requirement."
+      }
+    },
+    "preference": {
+      "receipt-new": {
+        "passed": true,
+        "finding": "All print fields and exclusions retained."
+      },
+      "failure-new": {
+        "passed": true,
+        "finding": "Despite awkward grammar, failure-only sending, run number, reason text and privacy remain clear."
+      },
+      "roles-new": {
+        "passed": true,
+        "finding": "Correct recipient, fields and privacy; excluding other recipients includes director."
+      },
+      "scope-new": {
+        "passed": false,
+        "finding": "Changes strict bound to inclusive and returns wrong JSON schema."
+      },
+      "format-new": {
+        "passed": true,
+        "finding": "Export fields and open format retained."
+      },
+      "period-new": {
+        "passed": false,
+        "finding": "Still omits connection count."
+      },
+      "rename-new": {
+        "passed": true,
+        "finding": "Correct original Russian name in body; translated Delivery in title adds no different task scope."
+      },
+      "status-new": {
+        "passed": true,
+        "finding": "Text representation, date, privacy and sole open color retained."
+      }
+    }
+  }
+}
