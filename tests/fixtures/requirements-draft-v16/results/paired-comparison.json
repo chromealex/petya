@@ -1,0 +1,69 @@
+{
+  "base": {
+    "gains": [
+      "polarity-0-01",
+      "polarity-0-11"
+    ],
+    "regressions": [
+      "name-0-10",
+      "name-1-01",
+      "name-1-10",
+      "report-0-10",
+      "report-0-11",
+      "report-1-10",
+      "failure-0-1",
+      "scope",
+      "polarity-0-00",
+      "polarity-1-00",
+      "polarity-1-10",
+      "polarity-1-01",
+      "polarity-1-11",
+      "value-0-lower",
+      "value-2-lower",
+      "value-3-lower",
+      "interval-0",
+      "interval-1",
+      "sort-0-1-0",
+      "sort-1-1-0",
+      "sort-2-1-0",
+      "sort-3-1-0",
+      "sort-3-1-1",
+      "sort-4-0-0"
+    ]
+  },
+  "v8": {
+    "gains": [
+      "polarity-0-10"
+    ],
+    "regressions": [
+      "name-0-01",
+      "name-1-01",
+      "name-1-10",
+      "name-1-00",
+      "report-0-01",
+      "report-0-11",
+      "report-1-10",
+      "report-1-01",
+      "report-1-11",
+      "scope",
+      "polarity-0-00",
+      "polarity-1-00",
+      "polarity-1-01",
+      "polarity-1-11",
+      "value-0-open",
+      "value-1-upper",
+      "value-1-open",
+      "value-2-open",
+      "value-3-open",
+      "interval-2",
+      "sort-0-1-0",
+      "sort-1-1-0",
+      "sort-2-1-0",
+      "sort-3-1-0",
+      "sort-3-1-1",
+      "sort-4-0-0",
+      "sort-5-0-0",
+      "sort-5-1-1"
+    ]
+  }
+}

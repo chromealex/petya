@@ -1,0 +1,344 @@
+{
+  "base": {
+    "name-0-01": [
+      true,
+      "Only color changes on original named item; address/content retained."
+    ],
+    "name-0-10": [
+      false,
+      "Cancelled emerald color applied."
+    ],
+    "name-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-0-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-01": [
+      false,
+      "Agreed ruby color cancelled."
+    ],
+    "name-1-10": [
+      false,
+      "Cancelled ruby color applied."
+    ],
+    "name-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-10": [
+      false,
+      "Applicant permission ignored; contradictory removal and retention of ban."
+    ],
+    "report-0-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-11": [
+      false,
+      "Introduces an email delivery channel and email routing requirements without agreement."
+    ],
+    "report-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-10": [
+      false,
+      "Contractor permission explicitly overridden."
+    ],
+    "report-1-01": [
+      true,
+      "Only-curator delivery explicitly excludes contractor; awkward preposition credited as the same delivery exclusion, not a separate sender prohibition."
+    ],
+    "report-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "failure-0-0": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "failure-0-1": [
+      false,
+      "Explicit hidden-analyst requirement omitted."
+    ],
+    "scope": [
+      false,
+      "Procurement exclusion omitted; status-change trigger and unrelated questions introduced."
+    ],
+    "repeat": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "polarity-0-00": [
+      false,
+      "Settled identifier and privacy decisions reopened."
+    ],
+    "polarity-0-10": [
+      false,
+      "Adds unrelated code-history and migration-notification questions."
+    ],
+    "polarity-0-01": [
+      true,
+      "Complete requested report and exclusion retained; result preservation in system read as retaining the agreed field, not a new storage feature."
+    ],
+    "polarity-0-11": [
+      true,
+      "Final identifier instruction explicitly rejects old identifier and uses control code; credited as correcting the preceding old-code wording. Both recipients/result/address retained."
+    ],
+    "polarity-1-00": [
+      false,
+      "Result delivery not explicitly retained; unrelated storage, numbering and broader privacy questions introduced."
+    ],
+    "polarity-1-10": [
+      false,
+      "Introduces identifier generation, history and unrelated open questions."
+    ],
+    "polarity-1-01": [
+      false,
+      "Invents identifier generation and audit storage as open requirements."
+    ],
+    "polarity-1-11": [
+      false,
+      "Introduces email channel by requiring verification of letter generation."
+    ]
+  },
+  "parent": {
+    "name-0-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-0-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-0-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "failure-0-0": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "failure-0-1": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "scope": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "repeat": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "polarity-0-00": [
+      true,
+      "Explicit final use-control-code-instead-of-old qualifier credited as replacement; recipient exclusion, result and hidden address retained."
+    ],
+    "polarity-0-10": [
+      false,
+      "Old statement code retained for both recipients; replacement control code omitted."
+    ],
+    "polarity-0-01": [
+      false,
+      "Old statement code retained instead of control code."
+    ],
+    "polarity-0-11": [
+      false,
+      "Old statement code retained for both recipients instead of control code."
+    ],
+    "polarity-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "polarity-1-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "polarity-1-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "polarity-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ]
+  },
+  "v8": {
+    "name-0-01": [
+      false,
+      "Cancelled rename applied."
+    ],
+    "name-0-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-0-00": [
+      true,
+      "Final blanket original-state instruction and summary preserve address/content; awkward cancellation list not interpreted as an instruction to modify them."
+    ],
+    "name-0-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "name-1-01": [
+      false,
+      "Address preservation omitted."
+    ],
+    "name-1-10": [
+      false,
+      "Cancelled ruby color applied."
+    ],
+    "name-1-00": [
+      false,
+      "Cancelled ruby color applied."
+    ],
+    "name-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-0-01": [
+      false,
+      "Prohibited applicant included and approved email hidden."
+    ],
+    "report-0-11": [
+      false,
+      "Approved email hidden."
+    ],
+    "report-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "report-1-10": [
+      false,
+      "Contractor permission ignored."
+    ],
+    "report-1-01": [
+      false,
+      "Old number retained and approved phone hidden."
+    ],
+    "report-1-11": [
+      false,
+      "Approved phone hidden."
+    ],
+    "failure-0-0": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "failure-0-1": [
+      true,
+      "Not-required-to-show wording credited as excluding analyst name, consistent with prior reviews."
+    ],
+    "scope": [
+      false,
+      "Unrelated offer task replaces the requested message."
+    ],
+    "repeat": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented open questions."
+    ],
+    "polarity-0-00": [
+      false,
+      "Old code retained; control-code phrase does not state replacement."
+    ],
+    "polarity-0-10": [
+      true,
+      "Summary explicitly sends to both; description contains full report and privacy. Access wording credited as delivery in this context."
+    ],
+    "polarity-0-01": [
+      false,
+      "Main recipient delivery denied and approved address hidden."
+    ],
+    "polarity-0-11": [
+      false,
+      "Approved address hidden."
+    ],
+    "polarity-1-00": [
+      false,
+      "Fields and privacy/exclusion decisions omitted."
+    ],
+    "polarity-1-10": [
+      true,
+      "Summary retains both recipients; description retains replacement/result and hidden email."
+    ],
+    "polarity-1-01": [
+      false,
+      "Privacy and required date-independent report detail omitted from description."
+    ],
+    "polarity-1-11": [
+      false,
+      "Required fields hidden, obsolete order number displayed."
+    ]
+  }
+}
