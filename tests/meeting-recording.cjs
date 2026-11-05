@@ -26,7 +26,7 @@ const {MeetingRecording}=require('../src/meeting-recording.cjs');
   const feature=require('../src/features/meeting-memory.cjs');assert.equal(feature.defaults.zoomAutoRecord,'false','meetings are recorded only after the user turns it on');
   // An update never switches recording on; the old one-off migration that did is reverted once, later choices persist.
   for(const [before,expected] of [[{zoomMemoryMigration:'1',zoomAutoRecord:'true'},{zoomAutoRecord:'false',zoomMemoryMigration:'2'}],[{zoomMemoryMigration:'0',zoomAutoRecord:'false'},{zoomMemoryMigration:'2'}],[{zoomMemoryMigration:'2',zoomAutoRecord:'true'},null]]){
-   const saved=[];const src=require('fs').readFileSync(require.resolve('../src/features/meeting-memory.cjs'),'utf8');const block=src.slice(src.indexOf('if(s.settings.zoomMemoryMigration'),src.indexOf("\n  const {safeStorage}"));
+   const saved=[];const src=require('fs').readFileSync(require.resolve('../src/features/meeting-memory.cjs'),'utf8');const block=src.slice(src.indexOf('if(s.settings.zoomMemoryMigration'),src.indexOf("\n  const {safeStorage"));
    new Function('s',block)({settings:before,saveSettings:p=>saved.push(p)});assert.deepEqual(saved[0]||null,expected);}
   assert.equal(feature.read({prune:()=>[...saved.values()]},{sessionId:id}).total,40);
   console.log('Meeting recording: deferred ASR, 40 segments, both sources, duplicate finish, encrypted spool cleanup, restart/retry, shared memory and no VoiceTurn passed');

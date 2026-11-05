@@ -35,12 +35,12 @@ function updateAudio() {
   $('mic').disabled = micStarting || !!window.petyaAutoMeetingActive;
   $('mic-action').textContent = window.petyaAutoMeetingActive ? 'Микрофон занят записью встречи' : mic.active ? 'Микрофон включён' : 'Микрофон выключен';
   renderMicrophoneChoices();
-  $('meeting').textContent = meeting.active ? '■  Остановить встречу' : 'Записывать системный звук';
-  $('status').textContent = mic.active ? (mic.deviceLabel || 'Микрофон включён') + ' · в активном окне — без обращения, в фоне — «Петя»' : meeting.active ? 'Записываю встречу' : 'Микрофон выключен';
-  $('status').classList.toggle('live', mic.active || meeting.active);
-  $('meeting-status').textContent = meeting.active ? 'Записываю встречу · обработка после завершения' : 'Встреча выключена · захват всего системного звука, не только Zoom';
+  $('meeting').textContent = !!window.petyaAutoMeetingActive ? '■  Остановить встречу' : 'Записывать системный звук';
+  $('status').textContent = mic.active ? (mic.deviceLabel || 'Микрофон включён') + ' · в активном окне — без обращения, в фоне — «Петя»' : !!window.petyaAutoMeetingActive ? 'Записываю встречу' : 'Микрофон выключен';
+  $('status').classList.toggle('live', mic.active || !!window.petyaAutoMeetingActive);
+  $('meeting-status').textContent = !!window.petyaAutoMeetingActive ? 'Записываю встречу · обработка после завершения' : 'Встреча выключена · захват всего системного звука, не только Zoom';
   updateChromeStatus();
-  window.petya.listening(mic.active,meeting.active||!!window.petyaAutoMeetingActive).catch(e => notice(e.message, true));
+  window.petya.listening(mic.active,!!window.petyaAutoMeetingActive||!!window.petyaAutoMeetingActive).catch(e => notice(e.message, true));
 }
 function audioError(error) { updateAudio(); notice(error.message, true); }
 const progressPanel = document.createElement('section');
@@ -148,7 +148,7 @@ document.addEventListener('petya-microphone-changed',run(async()=>{
  finally{micStarting=false;$('mic').disabled=false;microphoneSelect.disabled=false;updateAudio();}
 }));
 $('mic').onclick = run(toggleMic);
-$('meeting').onclick = run(async () => { $('meeting').disabled = true; try { if (meeting.active) { await window.petyaStopAutomaticMeeting(true); await window.petya.pauseAutoMeeting(); } else { await window.petyaStartMeetingRecording(); } } finally { $('meeting').disabled = false; updateAudio(); } });
+$('meeting').onclick = run(async () => { $('meeting').disabled = true; try { if (window.petyaAutoMeetingActive) { await window.petyaStopAutomaticMeeting(true); await window.petya.pauseAutoMeeting(); } else { await window.petyaStartMeetingRecording(); } } finally { $('meeting').disabled = false; updateAudio(); } });
 window.petyaEvents.onNavigate(page => [...document.querySelectorAll('.nav')].find(button => button.dataset.view === page)?.click());
 window.petyaEvents.onToggle(run(toggleMic));
 window.petyaEvents.onPause(run(async () => { await window.petya.pauseAutoMeeting(); mic.stop(); await window.petyaStopAutomaticMeeting(true); updateAudio(); }));

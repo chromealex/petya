@@ -1,37 +1,19 @@
-let autoStarting = false, autoGeneration = 0;
-window.petyaStartMeetingRecording = async () => {
-  if (autoStarting || meeting.active) return;
-  const config = await window.petya.settings();
-  if(config.zoomCaptureMode !== 'local')throw Error('Выбран отдельный участник Zoom. Подключите Петю через уведомление о встрече или настройки Zoom.');
-  autoStarting = true; const generation = ++autoGeneration;
-  window.petyaAutoMeetingActive = true; meetingId = '';
-  mic.stop(); updateAudio();
-  try {
-    meetingId = await window.petya.feature('meetingMemory','begin');
-    // Meeting audio never enters VoiceTurn or its command timeout.
-    if (generation !== autoGeneration) { await window.petyaStopAutomaticMeeting(true); return; }
-    await meeting.start(true);
-    if (generation !== autoGeneration) { await window.petyaStopAutomaticMeeting(true); return; }
-    if (config.zoomCaptureMic === 'true') await meetingMic.start(false,selectedMicrophone().id);
-    if (generation !== autoGeneration) { await window.petyaStopAutomaticMeeting(true); return; }
-    updateAudio(); notice('Записываю встречу Zoom. Расшифрую после её завершения и сохраню в общую память компании.');
-  } catch (e) { await window.petyaStopAutomaticMeeting(true); notice(e.message, true); throw e; }
-  finally { autoStarting = false; }
-};
-window.petyaStartAutomaticMeeting = async () => {
-  const config=await window.petya.settings();
-  if (config.zoomCaptureMode === 'local' && config.zoomAutoRecord === 'true') await window.petyaStartMeetingRecording();
-};
-window.petyaStopAutomaticMeeting = async () => {
-  ++autoGeneration;
-  const session = meetingId;
-  await Promise.all([meeting.finish(),meetingMic.finish()]);
-  window.petyaAutoMeetingActive = false; updateAudio();
-  if (session) await window.petya.feature('meetingMemory','finish',session);
-};
+// The dedicated capture renderer keeps recording independently of chat navigation.
+window.petyaStartMeetingRecording=()=>window.petya.feature('meetingMemory','startCapture');
+window.petyaStartAutomaticMeeting=()=>window.petyaStartMeetingRecording();
+window.petyaStopAutomaticMeeting=()=>window.petya.feature('meetingMemory','stopCapture');
+let localMeetingStatus;
+function localCaptureProgress(state){
+ localMeetingStatus=state;
+ window.petyaAutoMeetingActive=state.busy;
+ document.dispatchEvent(new CustomEvent('petya-voice-input-lock',{detail:{id:'local-meeting',locked:state.busy||state.present}}));
+ if(state.busy)mic.stop();updateAudio();
+}
+window.petyaEvents.onLocalMeeting(localCaptureProgress);
+window.petya.feature('meetingMemory','captureStatus').then(localCaptureProgress).catch(()=>{});
 function renderBackground(state) {
   if (state.error) $('background-status').textContent = state.error;
-  else $('background-status').textContent = `${state.zoom?.message || 'Автозапись выключена'} · ${state.slack?.message || 'Slack не обновлялся'}${state.slack?.pending ? ' · осталось запросов: ' + state.slack.pending : ''}`;
+  else $('background-status').textContent = `${localMeetingStatus?.message || state.zoom?.message || 'Автозапись выключена'} · ${state.slack?.message || 'Slack не обновлялся'}${state.slack?.pending ? ' · осталось запросов: ' + state.slack.pending : ''}`;
 }
 window.petyaEvents.onBackground(state => { renderBackground(state); if (state.slack?.updatedAt) refreshContexts().catch(e => notice(e.message, true)); });
 window.petya.backgroundStatus().then(renderBackground).catch(e => notice(e.message, true));
