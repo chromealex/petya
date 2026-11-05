@@ -1,0 +1,152 @@
+{
+  "boundsCorrect": 14,
+  "boundsTotal": 18,
+  "validDrafts": 6,
+  "draftTotal": 6,
+  "records": [
+    {
+      "id": "archive-format",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Изменение формата архива выгрузки: использование ZIP без пароля и переименование файла в номер обращения\",\n  \"description\": \"Необходимо изменить логику формирования архива при выгрузке данных:\\n1. Формат архива должен оставаться ZIP.\\n2. Пароль для архива не требуется (архив должен быть незашифрованным).\\n3. Имя файла архива должно формироваться на основе номера обращения (например: {номер_обращения}.zip).\\n\\nТребования согласованы, дополнительных изменений не требуется.\",\n  \"questions\": []\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "cooling",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Обновление требования к времени охлаждения камеры: 60 секунд заменено на 67 секунд (включительно)\",\n  \"description\": \"Необходимо обновить документацию и логику системы в соответствии с новым согласованным требованием по времени охлаждения камеры.\\n\\n**Изменения:**\\n- Старое требование (60 секунд) отменено.\\n- Новое требование: время охлаждения должно быть не меньше 67 секунд.\\n- Ограничение: указывать максимальное значение не требуется.\\n\\n**Дополнительные требования к данным:**\\n- Оператору необходимо передавать код камеры в качестве дополнительного поля данных.\",\n  \"questions\": [\n    \"Подтвердить, что оператору действительно требуется получать код камеры в ответе/интерфейсе, или это требование для внутренней логики обработки?\",\n    \"Требуется ли валидация формата кода камеры (например, только цифры, длина строки)?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "expiry-new",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Определение финального срока действия разовой ссылки\",\n  \"description\": \"Ссылка настроена на однократное использование (действует один раз). Требуется согласовать и зафиксировать точное время истечения срока действия ссылки. Предварительно обсуждался вариант 15 часов, однако окончательное решение будет принято после проверки.\",\n  \"questions\": [\n    \"Какое окончательное время (в часах) должно действовать разовая ссылка после проверки?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "printer",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Настройка принтера: печать ровно 3 копий по номеру накладной\",\n  \"description\": \"Необходимо настроить процесс печати документов в системе так, чтобы для принтера генерировалось ровно 3 копии документа. Критерий выбора документа для печати — только номер накладной. Имя сотрудника в запросе не участвует.\",\n  \"questions\": []\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "sound",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Настройка лимита громкости сигнала уведомления (макс. 58%) и назначение получателя (дежурный)\",\n  \"description\": \"Необходимо изменить параметры уведомления о сигнале согласно согласованным требованиям:\\n\\n1. **Громкость сигнала**: Установить максимальный уровень громкости на 58%. Значение 58% является допустимым (ранее обсуждалось 65%, но решение об отмене этого значения принято).\\n2. **Получатель уведомления**: Назначить получателя в качестве дежурного сотрудника.\\n\\n**Исключено**:\\n- Дублирование уведомления руководителю (требование отменено).\",\n  \"questions\": []\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "map",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Отображение на карте только остановок автобуса с подписью 'Название и номер маршрута'\",\n  \"description\": \"Реализовать функционал отображения на карте исключительно остановок общественного транспорта (автобусов). \\n\\nТребования:\\n1. На карте должны отображаться только объекты типа 'Автобусная остановка'.\\n2. Объекты других типов (например, остановки трамвая, метро, такси) на карте не отображать.\\n3. Для каждой точки остановки на карте должен быть добавлен текстовый лейбл (подпись).\\n4. Содержание подписи должно строго соответствовать формату: \\\"[Название остановки] ([Номер маршрута])\\\". Пример: \\\"Центр (15А)\\\".\\n\\nИсключено:\\n- Отображение магазинов и других коммерческих точек.\\n- Отображение остановок других видов транспорта.\",\n  \"questions\": [\n     \"Какой формат данных (JSON, GeoJSON, Shapefile) используется для загрузки списка остановок?\",\n     \"Какие поля данных обязательны для формирования подписи (название, номер маршрута)?\",\n     \"Какой стиль (цвет, размер шрифта, иконка) должен использоваться для отображения точек остановок на карте?\",\n     \"Какое поведение подписи при наведении курсора или клике (показывать/скрывать, открывать модальное окно)?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "regression-0",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 23,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-2",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 23,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-4",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 23,\n  \"upper\": 23,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-6",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+      "passed": false
+    },
+    {
+      "id": "regression-8",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 23,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-10",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-12",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 41,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-14",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 41,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-16",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+      "passed": false
+    },
+    {
+      "id": "regression-18",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 41,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+      "passed": false
+    },
+    {
+      "id": "regression-20",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 41,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-22",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-24",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-26",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-28",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 29,\n  \"upper\": 29,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "passed": true
+    },
+    {
+      "id": "regression-30",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+      "passed": false
+    },
+    {
+      "id": "regression-32",
+      "task": "bounds",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 29,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+      "passed": true
+    },
+    {
+      "id": "regression-34",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+      "passed": true
+    }
+  ]
+}

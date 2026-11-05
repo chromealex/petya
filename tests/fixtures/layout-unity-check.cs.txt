@@ -1,0 +1,61 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UIElements;
+public class LayoutCheck : EditorWindow {
+ static LayoutCheck window;
+ static double deadline;
+ static HashSet<string> importedPaths = new HashSet<string>();
+ static Dictionary<string, TemplateContainer> clones = new Dictionary<string, TemplateContainer>();
+ /* IMPORT_METHODS */
+ public static void Run() {
+  try {
+   window = GetWindow<LayoutCheck>();
+   window.titleContent = new GUIContent("Petya layout verification");
+   window.position = new Rect(100,100,400,560);
+   /* IMPORT_CALLS */
+   window.Show();
+   deadline = EditorApplication.timeSinceStartup + 15;
+   EditorApplication.update += Tick;
+  } catch(Exception error) { Fail(error); }
+ }
+ static void Attach(string provider, string assetPath) {
+  if(!importedPaths.Add(assetPath))throw new Exception("Import overwrote another layout");
+  var asset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(assetPath);
+  if(asset == null) throw new Exception(provider + ": no imported VisualTreeAsset");
+  var clone = asset.CloneTree();
+  clone.style.height = 260;
+  clones.Add(provider,clone);
+  window.rootVisualElement.Add(clone);
+ }
+ static void Near(float actual,float expected,string message) {
+  if(float.IsNaN(actual) || Math.Abs(actual-expected)>.1f) throw new Exception(message + ": " + actual + " != " + expected);
+ }
+ static void Tick() {
+  try {
+   window.Repaint();
+   if(EditorApplication.timeSinceStartup < deadline) return;
+   foreach(var pair in clones) {
+    var root=pair.Value.Q<VisualElement>("layer-1");
+    var panel=pair.Value.Q<VisualElement>("layer-2");
+    var label=pair.Value.Q<Label>("layer-3");
+    if(root==null||panel==null||label==null||label.text!="Hello Unity")throw new Exception(pair.Key+": wrong imported hierarchy/text");
+    Near(root.resolvedStyle.width,320,pair.Key+" root width");Near(root.resolvedStyle.height,240,pair.Key+" root height");
+    Near(panel.resolvedStyle.left,20,pair.Key+" panel x");Near(panel.resolvedStyle.top,30,pair.Key+" panel y");
+    Near(label.resolvedStyle.left,16,pair.Key+" label x");Near(label.resolvedStyle.top,16,pair.Key+" label y");
+    Near(label.resolvedStyle.width,220,pair.Key+" label width");Near(label.resolvedStyle.height,32,pair.Key+" label height");
+    Near(label.resolvedStyle.fontSize,24,pair.Key+" font size");
+    Near(label.resolvedStyle.color.r,1,pair.Key+" red");Near(label.resolvedStyle.color.g,0,pair.Key+" green");Near(label.resolvedStyle.color.b,0,pair.Key+" blue");
+    Near(label.worldBound.x-root.worldBound.x,36,pair.Key+" world x");
+    Near(label.worldBound.y-root.worldBound.y,46,pair.Key+" world y");
+   }
+   File.WriteAllText("verification.txt","PASS: Figma and Zeplin imported by production C#; actual UI Toolkit layout: 320x240 root, nested offsets 20,30 + 16,16, 220x32 text, 24px red font. Existing assets preserved by unique paths.");
+   EditorApplication.update-=Tick;EditorApplication.Exit(0);
+  } catch(Exception error) { Fail(error); }
+ }
+ static void Fail(Exception error) {
+  File.WriteAllText("verification.txt",error.ToString());Debug.LogException(error);EditorApplication.Exit(1);
+ }
+}

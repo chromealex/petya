@@ -1,0 +1,410 @@
+{
+  "numeric": {
+    "basic": {
+      "correct": 11,
+      "total": 12
+    },
+    "extended": {
+      "correct": 9,
+      "total": 12
+    }
+  },
+  "pairsBothCorrect": 8,
+  "pairsTotal": 12,
+  "validDrafts": 8,
+  "draftTotal": 8,
+  "records": [
+    {
+      "id": "ceiling-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":115,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 115,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "ceiling-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":115,\"lowerInclusive\":null,\"upperInclusive\":false}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 115,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "floor-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":205,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "expected": {
+        "status": "final",
+        "lower": 205,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "floor-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":206,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "expected": {
+        "status": "final",
+        "lower": 205,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "passed": false
+    },
+    {
+      "id": "exact-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":103,\"upper\":103,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": 103,
+        "upper": 103,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "exact-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "revoked-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "revoked-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":98,\"upper\":98,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": 98,
+        "upper": 98,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "other-topic-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":106,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 106,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "other-topic-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":104,\"lowerInclusive\":null,\"upperInclusive\":false}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 104,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "no-invention-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":12,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 12,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "no-invention-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\"status\":\"final\",\"lower\":6,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "expected": {
+        "status": "final",
+        "lower": 6,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "zero-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":0,\"upper\":0,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 0,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": false
+    },
+    {
+      "id": "zero-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":0,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+      "expected": {
+        "status": "final",
+        "lower": 0,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "negative-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-12,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": -12,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "negative-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-12,\"lowerInclusive\":null,\"upperInclusive\":false}",
+      "expected": {
+        "status": "final",
+        "lower": -12,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "passed": false
+    },
+    {
+      "id": "decimal-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":2.75,\"lowerInclusive\":null,\"upperInclusive\":false}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 2.75,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "decimal-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":2.75,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "expected": {
+        "status": "final",
+        "lower": 2.75,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "range-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":11,\"upper\":19,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": 11,
+        "upper": 19,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "range-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":11,\"upper\":19,\"lowerInclusive\":false,\"upperInclusive\":false}",
+      "expected": {
+        "status": "final",
+        "lower": 11,
+        "upper": 19,
+        "lowerInclusive": false,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "mixed-range-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":36,\"upper\":64,\"lowerInclusive\":true,\"upperInclusive\":false}",
+      "expected": {
+        "status": "final",
+        "lower": 36,
+        "upper": 64,
+        "lowerInclusive": true,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "mixed-range-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":36,\"upper\":64,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": 36,
+        "upper": 64,
+        "lowerInclusive": false,
+        "upperInclusive": true
+      },
+      "passed": false
+    },
+    {
+      "id": "decimal-exact-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"final\",\"lower\":1.25,\"upper\":1.25,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "expected": {
+        "status": "final",
+        "lower": 1.25,
+        "upper": 1.25,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "decimal-exact-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "menu-revert",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "{\"summary\": \"Добавить серый цвет кнопок в разделе «Счета»\", \"description\": \"В разделе «Счета» необходимо изменить цвет кнопок на серый. Содержимое и название раздела не меняются, ссылка на раздел также не меняется.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "backup-recipients",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "{\"summary\": \"Настроить отправку отчёта резервного копирования администратору\", \"description\": \"Настроить отправку отчёта резервного копирования администратору с показом времени завершения и результата. Путь к резервной копии скрывать. Отображать только отчёт резервного копирования.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "drawing-unresolved",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "{\"summary\": \"Определить и внедрить формат экспорта чертежа\", \"description\": \"В экспорт чертежа уже включены масштаб и номер версии. Масштаб согласован и не удалять. Осталось выбрать и утвердить формат экспорта. Временную версию SVG не утверждать.\", \"questions\": [\"Какой формат экспорта чертежа выбрать?\"]}",
+      "validJSON": true
+    },
+    {
+      "id": "refresh-correction",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "{\"summary\": \"Панель\", \"description\": \"Панель обновлять с интервалом ровно 18 секунд. Отображать только число активных заявок. Имена заявителей не показывать.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "explicit-trigger",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "{\"summary\": \"Отправлять уведомление дежурному только при неудачной проверке\", \"description\": \"Требования к отправке уведомления дежурному:\\n\\n1. Уведомление отправлять ИСКЛЮЧИТЕЛЬНО после неудачной проверки. При успешной проверке отправлять не нужно.\\n2. В теле уведомления включать код ошибки.\\n3. В теле уведомления НЕ показывать имя пользователя.\\n4. Получателями уведомления остаются дежурные.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "print-columns",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "{\"summary\": \"Русский интерфейс\", \"description\": \"Русский интерфейс\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "sensor-topic",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "{\"summary\": \"Показывать номер датчика при строгой температуре ниже 72 градусов\", \"description\": \"В интерфейсе показывать номер датчика только в том случае, если его температура строго меньше 72 градусов. Серийный номер владельца датчика скрывать. Другие функции датчика и вентилятора не добавлять.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "single-open-field",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "{\"summary\": \"Поля карточки заказа\", \"description\": \"Карточка заказа должна показывать статус и дату создания. Сумма показывать не нужно. Статус показывать строго текстом. Дата показывать строго.\", \"questions\": [\"Какой цвет выбрать для отображения статуса?\"]}",
+      "validJSON": true
+    }
+  ]
+}

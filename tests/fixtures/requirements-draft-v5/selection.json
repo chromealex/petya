@@ -1,0 +1,24 @@
+{
+  "selected": "epoch-4",
+  "validationGatePassed": true,
+  "summary": {
+    "base": {
+      "bounds": 4,
+      "drafts": 3
+    },
+    "epoch-1": {
+      "bounds": 4,
+      "drafts": 3
+    },
+    "epoch-2": {
+      "bounds": 4,
+      "drafts": 3
+    },
+    "epoch-4": {
+      "bounds": 5,
+      "drafts": 5
+    }
+  },
+  "testDataSHA256": "d78e5255cee0af1ad66a03793e4b7e95b94cc2fdc4c8821b9b09e368ca9f5ee5",
+  "protocolSHA256": "e04defd92f7cbcea4cd6b6259f34ec99a37024800a61f65a9c24c23e3c54eece"
+}

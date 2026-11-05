@@ -1,0 +1,17 @@
+{
+  "train": {
+    "records": 88,
+    "maxTokens": 231,
+    "sha256": "bff6a7f51eba83e30ce36948a1d9c0c98f21387feec8ddc93cccf821b3078e30"
+  },
+  "validation": {
+    "records": 12,
+    "maxTokens": 185,
+    "sha256": "0f731d5c89f978e310b3b35281f12188f62bf5187b74aede50954debd31dfc49"
+  },
+  "test": {
+    "records": 6,
+    "maxTokens": 192,
+    "sha256": "d78e5255cee0af1ad66a03793e4b7e95b94cc2fdc4c8821b9b09e368ca9f5ee5"
+  }
+}

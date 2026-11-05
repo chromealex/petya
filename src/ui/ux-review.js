@@ -33,17 +33,44 @@
  const controls=el('div',null,'ux-settings-controls');settingsHeading.after(controls);
  let group='services',state='all';const find=search('Найти сервис или настройку'),statusFilter=el('select');statusFilter.setAttribute('aria-label','Состояние подключения');for(const [v,t]of [['all','Все'],['connected','Подключённые'],['attention','Требуют внимания']])statusFilter.add(new Option(t,v));
  const cards=()=>[...settings.querySelectorAll('article.settings-card, #computer-control')];
- const category=card=>{const name=card.querySelector('h2')?.textContent||card.querySelector(':scope>summary')?.textContent||'';if(/Whisper|Ollama|Zoom|Манера|модел|Распознавание|Звук встречи|Запись системного/i.test(name))return 'voice';if(card.dataset.service)return 'services';return 'app';};
- const settingsEmpty=el('p','Нет подходящих сервисов. Выберите другую группу или включите нужные сервисы в разделе «Приложение».','small');controls.after(settingsEmpty);const catalog=el('div',null,'ux-service-catalog');controls.after(catalog);
- const filterSettings=()=>{for(const card of cards()){const status=card.querySelector('.connection-status');const connected=status?.classList.contains('connected');const visible=category(card)===group&&card.textContent.toLocaleLowerCase().includes(find.value.toLocaleLowerCase())&&(group!=='services'||state==='all'||(state==='connected'?connected:!connected));card.classList.toggle('ux-filtered',!visible);}statusFilter.hidden=group!=='services';catalog.replaceChildren();if(group==='services'&&state!=='connected'){for(const [id,name]of optionalModules){if(moduleEnabled(id)||!name.toLocaleLowerCase().includes(find.value.toLocaleLowerCase()))continue;const row=el('div',null,'ux-service-row');row.append(el('strong',name),el('span','Выключен','small'));row.append(button('Включить',run(async()=>{const check=moduleChecks.get(id);check.checked=true;await check.onchange();const card=settings.querySelector('[data-service="'+id+'"]');if(card&&moduleEnabled(id))window.revealSettings(card);})));catalog.append(row);}}settingsEmpty.hidden=!!catalog.children.length||cards().some(card=>!card.hidden&&!card.classList.contains('ux-filtered'));};
+ const serviceIds=new Set(optionalModules.map(([id])=>id));
+ const category=card=>{
+   if(serviceIds.has(card.dataset.service))return 'services';
+   const name=card.querySelector('h2')?.textContent||card.querySelector(':scope>summary')?.textContent||'';
+   if(card.dataset.service==='images'||/Whisper|Ollama|Zoom|Манера|модел|Распознавание|Звук встречи|Запись системного/i.test(name))return 'voice';
+   return 'app';
+ };
+ const settingsEmpty=el('p',null,'small');controls.after(settingsEmpty);
+ const filterSettings=()=>{
+   const services=group==='services',query=find.value.trim().toLocaleLowerCase();
+   let shown=false,added=false;
+   for(const card of cards()){
+     const selected=serviceIds.has(card.dataset.service)&&moduleSettings['module_'+card.dataset.service]==='true';
+     if(selected)added=true;
+     const connected=card.querySelector('.connection-status')?.classList.contains('connected');
+     const matchesState=state==='all'||(state==='connected'?connected:!connected);
+     const visible=category(card)===group&&card.textContent.toLocaleLowerCase().includes(query)&&(!services||(selected&&matchesState));
+     card.classList.toggle('ux-filtered',!visible);
+     if(visible&&!card.hidden)shown=true;
+   }
+   statusFilter.hidden=!services;catalogButton.hidden=!services;settingsEmpty.hidden=shown;
+   settingsEmpty.textContent=services&&!added?'Пока нет добавленных сервисов. Выберите приложение в каталоге.':'По этим фильтрам ничего не найдено.';
+ };
+ const catalogButton=button('Каталог приложений',()=>window.openAppCatalog());catalogButton.className='app-catalog-trigger';
  const settingsTabs=segmented(controls,[['services','Сервисы'],['voice','Голос и модели'],['app','Приложение']],id=>{group=id;filterSettings();});
- const filterRow=el('div',null,'ux-filters');filterRow.append(find,statusFilter);controls.append(filterRow);find.oninput=filterSettings;statusFilter.onchange=()=>{state=statusFilter.value;filterSettings();};
+ const filterRow=el('div',null,'ux-filters');filterRow.append(find,statusFilter,catalogButton);controls.append(filterRow);find.oninput=filterSettings;statusFilter.onchange=()=>{state=statusFilter.value;filterSettings();};
  window.revealSettings=card=>{find.value='';state='all';statusFilter.value='all';settingsTabs.select(category(card));const d=card.querySelector('.settings-disclosure');if(d)d.open=true;card.scrollIntoView({block:'nearest'});};
  for(const card of cards()){const heading=card.querySelector('h2');if(heading){heading.textContent=heading.textContent.replace(/whisper\.cpp/i,'Распознавание речи · Whisper').replace(/^Ollama$/,'Локальная модель · Ollama').replace('Zoom · звук встречи','Запись системного звука');}
- const source=card.querySelector('.connection-status');if(source){const meta=el('p',null,'small ux-check-time');source.after(meta);const update=()=>{const status=connectionBadge(source.textContent,[...source.classList],card.dataset.service);const summary=card.querySelector('.settings-summary-status');if(summary){summary.textContent=status.label;summary.title=source.textContent;}if(source.classList.contains('connected')||source.classList.contains('error')){meta.textContent='Результат проверки получен '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}filterSettings();};new MutationObserver(update).observe(source,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class']});update();}
+ const toggle=card.querySelector('.settings-disclosure>summary');
+ if(toggle&&serviceIds.has(card.dataset.service)){
+   const label='Настройки '+heading.textContent;
+   const gear=el('span','⚙︎','service-settings-gear');gear.title=label;gear.setAttribute('aria-hidden','true');
+   toggle.append(gear);toggle.setAttribute('aria-label',label);
+ }
+ const source=card.querySelector('.connection-status');if(source){const meta=el('p',null,'small ux-check-time');source.after(meta);const update=()=>{const status=connectionBadge(source.textContent,[...source.classList],card.dataset.service);const summary=card.querySelector('.settings-summary-status');if(summary){summary.textContent=serviceIds.has(card.dataset.service)&&['disconnected','setup'].includes(status.state)?'Требуется настройка':serviceIds.has(card.dataset.service)&&status.state==='connected'?'Подключён':status.label;summary.title=source.textContent;}if(source.classList.contains('connected')||source.classList.contains('error')){meta.textContent='Результат проверки получен '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}filterSettings();};new MutationObserver(update).observe(source,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class']});update();}
  }
  $('settings-form').addEventListener('invalid',event=>{const card=event.target.closest('article.settings-card');if(card)window.revealSettings(card);},true);
- settingsTabs.select('services');const chooseServices=button('Выбрать сервисы',()=>{const card=settings.querySelector('.module-picker')?.closest('article');if(card)window.revealSettings(card);});settingsEmpty.append(document.createTextNode(' '),chooseServices);document.addEventListener('petya-modules-changed',filterSettings);
+ settingsTabs.select('services');document.addEventListener('petya-modules-changed',filterSettings);
  const savePanel=settings.querySelector('.settings-save-panel');if(savePanel){savePanel.classList.add('ux-save-strip');const note=el('span','Изменений нет','small');note.title='Ручные поля сохраняются этой кнопкой. Вход в сервис, переключатели модулей и проверка доступа выполняются сразу.';savePanel.append(note);const save=savePanel.querySelector('button');save.textContent='Сохранить настройки';$('settings-form').addEventListener('input',()=>{note.textContent='Есть несохранённые изменения';save.classList.add('primary');});document.addEventListener('petya-settings-displayed',()=>{note.textContent='Настройки сохранены';});}
  // Permissions: keep long recovery advice available, without filling the whole page.
  const permissionList=$('permission-list');if(permissionList)new MutationObserver(()=>{for(const p of permissionList.querySelectorAll('p.small'))if(p.textContent.length>240&&!p.closest('details'))disclosure(p,'Как восстановить доступ');}).observe(permissionList,{childList:true});

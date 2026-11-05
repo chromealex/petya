@@ -7,6 +7,7 @@ function fixture(state={}){
  const args={state,save:()=>{if(saveFailure)throw Error('disk');saved=structuredClone(state);},settings:()=>settings,enabled:()=>enabled,dialogue:{state:{topics:[topic]},active:()=>topic,prune(){},persist(){}},context:()=>({projectChannels:[{id:binding}]}),now:()=>clock,request:async(url,options)=>{
   if(hook)await hook(url);
   if(url.endsWith('/auth.test'))return {ok:true,team_id:team,team:'Fixture'};
+  if(url.includes('conversations.info'))return {ok:true,channel:channels.find(c=>c.id===new URL(url).searchParams.get('channel'))};
   if(url.includes('conversations.list'))return {ok:true,channels};
   assert(url.endsWith('/chat.postMessage'));const data=JSON.parse(options.body);posts.push(data);if(mode==='timeout')throw Error('network');if(mode==='malformed')return {};if(mode==='wrong-channel')return {ok:true,channel:'C999',ts:'1234567890.123456'};if(mode==='rejected')return {ok:false,error:'not_in_channel'};if(mode==='disk-after')saveFailure=true;return {ok:true,channel:data.channel,ts:'1234567890.123456'};
  }};
@@ -36,5 +37,16 @@ const payload=(d,channel='C1',text='Проверенный отчёт')=>({id:d.
  for(const phase of ['auth.test','conversations.list']){f=fixture();f.setHook(url=>{if(url.includes(phase))f.s.clear();});await assert.rejects(()=>draft(f),/изменились/);assert.equal(f.s.drafts.size,0);assert.equal(f.posts.length,0);}
  f=fixture();d=await draft(f);await f.s.send(payload(d));assert.match(require('../src/action-evidence.cjs').actionConfirmation('Ты уже отправил сообщение в #jw-bw-dev?',f.args.dialogue.active()),/сообщение отправлено/);
  f=fixture();d=await draft(f);f.setMode('timeout');await f.s.send(payload(d));assert.match(require('../src/action-evidence.cjs').actionConfirmation('Ты уже отправил сообщение в #jw-bw-dev?',f.args.dialogue.active()),/не подтвердил/);
+ // Large directories become an inline lookup draft, retaining the original report.
+ f=fixture();const ordinary=f.args.request;let pages=0,infos=0;f.s.request=async(url,options)=>{
+  if(url.includes('conversations.list')){pages++;return {ok:true,channels:pages===4?[{id:'C99',name:'exact-channel'}]:[],response_metadata:{next_cursor:'page'+pages}};}
+  if(url.includes('conversations.info')){infos++;return {ok:true,channel:{id:'C99',name:'exact-channel'}};}
+  return ordinary(url,options);
+ };
+ d=await draft(f);assert(d.needsChannel);assert.equal(pages,3);assert.equal(d.text,f.report.text);
+ let lookup=await f.s.resolve('r1',d.id,'#exact-channel');assert.equal(lookup.selected,'C99');assert.equal(pages,4);assert.equal(f.posts.length,0);
+ lookup=await f.s.resolve('r1',d.id,'https://app.slack.com/archives/C99');assert.equal(infos,1);assert.equal(lookup.selected,'C99');
+ await f.s.send(payload(d,'C99','Отредактированный текст'));assert.equal(infos,2);assert.equal(f.posts.length,1);assert.equal(pages,4);
+ f.s.cancel(d.id);await assert.rejects(f.s.resolve('r1',d.id,'#exact-channel'),/устарел/);
  console.log('Report sharing: explicit destinations, exact text, provenance, no mass mentions, durable deduplication, token rotation, uncertain/rejected outcomes, stale context, archive/rename, disk failures and concurrency passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});

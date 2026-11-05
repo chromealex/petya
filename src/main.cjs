@@ -101,7 +101,7 @@ defaults.whisperBinary = fs.existsSync(localBinary) ? localBinary : '';
 defaults.whisperModel = fs.existsSync(localModel) ? localModel : '';
 // Stop whisper-server processes left by a Petya that was killed or crashed (each holds ~700 MB).
 if (process.env.PETYA_SMOKE_TEST !== '1') { const stale = require('./speech.cjs').cleanupOrphans(path.join(app.getPath('userData'), 'whisper-pids.json'), [localBinary]); if (stale.length) console.log('Stopped stale whisper-server: ' + stale.length); }
-const secrets = ['telegramCredential','teamMembers','microsoftCredential','gmailCredential','googlePlayCredential','asanaCredential', 'slackCredential', 'notionCredential', 'atlassianCredential', 'jiraToken', 'slackToken', 'notionToken'];
+const secrets = [...features.flatMap(feature=>feature.secrets||[]),'unityToken','telegramCredential','teamMembers','microsoftCredential','gmailCredential','googlePlayCredential','asanaCredential', 'slackCredential', 'notionCredential', 'atlassianCredential', 'jiraToken', 'slackToken', 'notionToken'];
 const entry = pathToFileURL(path.join(__dirname, 'ui/index.html')).href;
 // Chromium and Node encode file URLs differently («RUNNER~1» vs «RUNNER%7E1» in Windows short paths): compare the paths.
 const entryPath = path.join(__dirname, 'ui/index.html');
@@ -123,7 +123,7 @@ function useBundledSpeech(target) {
     if ((!target[key] || !fs.existsSync(target[key])) && defaults[key]) target[key] = defaults[key];
   }
 }
-function publicSettings() { return { ...settings, companyId, companyName:companies.get(companyId).name, telegramCredential:'',hasTelegram:!!settings.telegramCredential, microsoftCredential:'', gmailCredential:'', hasGmail:!!settings.gmailCredential, googlePlayCredential:'', hasGooglePlay:!!settings.googlePlayCredential, asanaCredential: '', hasAsanaOAuth: !!settings.asanaCredential, slackCredential: '', notionCredential: '', hasSlackOAuth: !!settings.slackCredential, hasNotionOAuth: !!settings.notionCredential, atlassianCredential: '', hasAtlassianOAuth: !!settings.atlassianCredential, jiraToken: '', slackToken: '', notionToken: '', hasNotionToken: !!settings.notionToken || !!settings.notionCredential, hasJiraToken: !!settings.jiraToken || !!settings.atlassianCredential, hasSlackToken: !!settings.slackToken || !!settings.slackCredential }; }
+function publicSettings() { return { ...settings, ...Object.fromEntries(features.flatMap(feature=>feature.secrets||[]).map(key=>[key,''])), unityToken:'', companyId, companyName:companies.get(companyId).name, telegramCredential:'',hasTelegram:!!settings.telegramCredential, microsoftCredential:'', gmailCredential:'', hasGmail:!!settings.gmailCredential, googlePlayCredential:'', hasGooglePlay:!!settings.googlePlayCredential, asanaCredential: '', hasAsanaOAuth: !!settings.asanaCredential, slackCredential: '', notionCredential: '', hasSlackOAuth: !!settings.slackCredential, hasNotionOAuth: !!settings.notionCredential, atlassianCredential: '', hasAtlassianOAuth: !!settings.atlassianCredential, jiraToken: '', slackToken: '', notionToken: '', hasNotionToken: !!settings.notionToken || !!settings.notionCredential, hasJiraToken: !!settings.jiraToken || !!settings.atlassianCredential, hasSlackToken: !!settings.slackToken || !!settings.slackCredential }; }
 let trayMeeting = false, trayListening = false, trayReady = false;
 function refreshTrayMenu() {
  if(!tray || tray.isDestroyed())return;
@@ -153,7 +153,8 @@ async function request(url, options = {}) {
   let target = await atlassianOAuth.rewrite(url, options, settings);
   for (const client of Object.values(serviceOAuth)) target = await client.rewrite(target.url, target.options, settings);
   if (service) modules.assertEnabled(settings, service);
-  return directRequest(target.url, target.options);
+  try{return await directRequest(target.url,target.options);}
+  catch(error){if(service)error.petyaService=service;throw error;}
 }
 async function directRequest(url, options = {}) {
   require('./answer-cancel.cjs').check();
@@ -193,6 +194,7 @@ function saveSettings(input, internal = false) {
     const next = { ...settings };
     for (const key of Object.keys(defaults)) if ((!(key.endsWith('Credential') || key === 'asanaWorkspace') || internal) && typeof input[key] === 'string') { if (!secrets.includes(key) || input[key]) next[key] = input[key].trim().slice(0, key==='telegramCredential'?100000:key==='teamMembers'?400000:['gmailCredential','microsoftCredential'].includes(key)?200000:key==='googlePlayCredential'?20000:2000); }
     for (const key of secrets) if ((!(key.endsWith('Credential') || key === 'asanaWorkspace') || internal) && input['clear_' + key] === true) next[key] = '';
+    if (next.unityUrl !== settings.unityUrl && !input.unityToken) next.unityToken = '';
     if (!internal && settings.atlassianCredential && (input.jiraToken || (input.jiraUrl && input.jiraUrl.replace(/\/$/, '') !== settings.jiraUrl))) throw new Error('Сначала отключите вход Atlassian через браузер.');
     for (const name of ['slack', 'notion']) if (!internal && settings[name+'Credential'] && input[name+'Token']) throw new Error('Сначала отключите вход '+name+' через браузер.');
     if(typeof input.teamMembers==='string')next.teamMembers=JSON.stringify(team.validate(JSON.parse(input.teamMembers)));
@@ -441,7 +443,7 @@ function setupHandlers() {
   handle('imageInstall',()=>imageInstaller.start());
   handle('imageInstallCancel',()=>imageInstaller.cancel());
   app.on('will-quit',()=>imageInstaller.cancel());
-  handle('imageCancel',()=>localImages.stop());
+  handle('imageCancel',()=>{localImages.stop();services.artist.stop();});
   handle('imageSave',async(topicId,messageId)=>{
     const topic=dialogue.state.topics.find(t=>t.id===topicId);
     const generated=topic?.messages.find(m=>m.id===messageId)?.generatedImage;
@@ -451,7 +453,7 @@ function setupHandlers() {
     if(result.canceled||!result.filePath)return false;
     await fs.promises.writeFile(result.filePath,bytes);return true;
   });
-  app.on('will-quit',()=>localImages.stop());
+  app.on('will-quit',()=>{localImages.stop();services.artist?.stop();});
   // The whole request pipeline of one chat. Runs inside that chat's scope (dialogue.within), either
   // in the foreground (IPC 'converse') or as a background chat job, so several chats run at once.
   // The mouse and keyboard are shared: computer control requests from different chats take turns.
@@ -533,7 +535,9 @@ function setupHandlers() {
   const chatJobs=new (require('./chat-jobs.cjs').ChatJobs)({dialogue,scope:projectId=>JSON.stringify([companyId,settings.model,settings.ollamaUrl,settings.jiraUrl,settings.jiraProjects,settings.module_jira,settings.jiraToken,settings.atlassianCredential,projectMemory.state.projects.filter(m=>dialogue.state.projects.find(p=>p.id===projectId)?.memoryId===m.id||dialogue.state.topics.some(t=>t.projectId===projectId&&t.projectMemoryId===m.id)),dialogue.state.projects.filter(p=>p.id===projectId).map(p=>({id:p.id,context:p.context,folder:p.folder,folders:p.folders,disabledServices:p.disabledServices}))]),emit:event=>{if(!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('chat-job',event);},// Background answers stream to the window tagged with their chat; the UI shows the stream of the open chat only.
     run:(work,progress,projectId,topicId)=>modules.withProject(dialogue.state.projects.find(p=>p.id===projectId),()=>requestProgress.run('converse',progress,()=>require('./answer-stream.cjs').run(chunk=>{if(!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('answer-chunk',{...chunk,topicId});},work))),converse:command=>converseTurn(command,undefined,true),limit:10});
   const stopChatMcp = require('./mcp-setup.cjs')({
+    invokeUnity:(...args)=>services.unity.invoke(...args),
     handle, dialogue, attachments, chatJobs, memory, addContext, companyId,
+    generatePainting: (args, check) => services.artist.generate(args, check),
     check() { if (switchingCompany || quitting) throw Error('Компания закрывается.'); },
     async run(work) { activeOperations++; try { return await work(); } finally { activeOperations--; } },
     changed(event) { if (!win.isDestroyed()) win.webContents.send('mcp-chat-changed',event); }

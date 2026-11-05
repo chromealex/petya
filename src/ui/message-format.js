@@ -24,6 +24,26 @@ window.renderMessage = function(message){
  }
  const content=document.createElement('div');content.className='message-content';content.append(...node.childNodes);node.append(content);
  const files=document.createElement('div');files.className='message-attachments';for(const file of (message.attachments||[]).slice(0,5)){const item=document.createElement('div');item.className='message-attachment';const name=document.createElement('span');name.textContent=file.name||'Файл';item.append(name);if(typeof file.thumbnail==='string'&&file.thumbnail.length<2*1024*1024&&/^[A-Za-z0-9+/=]+$/.test(file.thumbnail)){const image=document.createElement('img');image.src='data:image/png;base64,'+file.thumbnail;image.alt=file.name||'Изображение';image.loading='lazy';const open=document.createElement('button');open.type='button';open.setAttribute('aria-label','Открыть изображение '+(file.name||''));open.append(image);open.onclick=()=>{const dialog=document.createElement('dialog');dialog.className='chat-image-preview';const close=document.createElement('button');close.textContent='Закрыть';close.onclick=()=>dialog.close();const full=image.cloneNode();dialog.append(close,full);document.body.append(dialog);dialog.onclose=()=>dialog.remove();dialog.showModal();};item.prepend(open);}else{item.classList.add('document');item.title=file.note||file.name||'';}files.append(item);}if(files.childElementCount)content.append(files);
+ if(message.role==='assistant' && message.extensionResult){
+   const source=document.createElement('small');source.className='small';source.textContent='Источник: '+message.extensionResult.source;content.append(source);
+   const choices=message.extensionResult.choices;
+   if(choices?.length>1 && chatHistory.at(-1)===message){
+     const select=document.createElement('select');select.setAttribute('aria-label','Уточнить источник отчёта');
+     select.add(new Option('Выбрать источник…',''));
+     for(const key of choices)select.add(new Option(key,key));
+     select.value=message.extensionResult.selected||'';
+     select.onchange=run(async()=>{if(select.value)await processCommand('Только '+select.value);});
+     content.append(select);
+   }
+ }
+ if(message.role==='assistant' && message.serviceProblem && moduleChecks.has(message.serviceProblem.id)){
+     const actions=document.createElement('div');actions.className='actions';
+     const settings=document.createElement('button'),retry=document.createElement('button');
+     settings.type=retry.type='button';settings.textContent='Настройки '+message.by;retry.textContent='Повторить запрос';
+     settings.onclick=run(()=>window.openChatServiceSettings(message.serviceProblem.id));
+     retry.onclick=run(async()=>{retry.disabled=true;try{await processCommand(message.serviceProblem.query);}finally{retry.disabled=false;}});
+     actions.append(settings);if(message.serviceProblem.query && chatHistory.at(-1)===message)actions.append(retry);content.append(actions);
+ }
  if (message.role === 'assistant' && Array.isArray(message.extensionImages)) {
    for (const block of message.extensionImages) {
      if (!['image/svg+xml','image/png','image/jpeg','image/webp'].includes(block?.mimeType) || typeof block.data !== 'string' || block.data.length > 8*1024*1024) continue;
@@ -33,6 +53,8 @@ window.renderMessage = function(message){
      content.append(img);
    }
  }
+ if(message.layoutProposal)window.renderLayoutProposal?.(content,message.layoutProposal);
+ if (message.role === 'assistant' && ['clean','repair'].includes(message.motionMode)) window.renderMotionCard(content,message);
  const meta=document.createElement('div');meta.className='message-meta';
  const at=message.at?new Date(message.at):null;
  if(at&&!Number.isNaN(at.getTime())){const time=document.createElement('time');time.dateTime=at.toISOString();const today=at.toDateString()===new Date().toDateString();time.textContent=at.toLocaleString('ru-RU',today?{hour:'2-digit',minute:'2-digit'}:{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});time.title=at.toLocaleString('ru-RU');meta.append(time);}

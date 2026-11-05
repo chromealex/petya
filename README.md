@@ -90,3 +90,56 @@ Ask “Сколько каких задач у меня в Jira?” to see count
 After four hours away, reopening a conversation offers a one-sentence recap of the earlier discussion. The unread divider uses a per-company, per-version reading position. The message menu can branch the history up to that message within the same project. MCP offers `branch_chat_at_message` (edit access) and `summarize_chat`. Read receipts, navigation history, the composer preview and approval of outbound Jira submissions belong to the desktop UI.
 
 Confluence also renders chart replies. Ask “Сколько страниц в Confluence по пространствам?” for a horizontal bar chart of accessible pages grouped by space. A configured space limits the report. Bundled providers may import `../chart-reply.cjs` and call `chartReply({ kind, title, rows, emptyText })` with `bars` or `donut` and rows of `{label, count}`, or return their own image.
+
+### Blender animation edits
+
+Ask Petya to clean redundant animation keys or find a short movement spike. Choose a local `.blend` and, if prompted, the object with the active Action. Petya uses an installed Blender executable to prepare a looping schematic preview. Apply saves the inspected candidate beside the original as a separate file. A proposal expires after ten minutes. Linear simplification and spike detection support position, scale and Euler rotation channels. Complex NLA, IK and quaternion motion require separate diagnosis.
+
+The authenticated chat MCP server exposes `pick_animation_file`, `analyze_animation` and `apply_animation_edit` in edit mode. Provide the active `chatId` and use the opaque file and proposal IDs returned by Petya. The native file picker and confirmation dialogs run in Petya.
+
+
+### Artist (Художник)
+
+Enable **Художник** under **Подключения → Картинки**. Describe a scene in the card, select the canvas and quality, or ask Petya to draw in chat. The first local drawing asks before downloading the pinned stable-diffusion.cpp engine and Stable Diffusion 1.5 model (about 2.2 GB, 2.5 GB of free space required). Downloads are SHA-256 verified. Subsequent drawings run offline on the CPU. The optional WebUI address accepts loopback HTTP only. Disabling Artist returns chat drawing to the existing SD-Turbo integration.
+
+The authenticated MCP tool `generate_painting` requires edit access, an enabled Artist and confirmation in Petya. It accepts `prompt`, optional `quality` (draft, standard, high) and `format` (square, portrait, landscape), and returns a PNG image block. Allow up to an hour for the first download. Enablement and connection settings are managed inside Petya.
+
+### Contextual chat extensions
+
+Petya discovers trusted bundled adapters in `src/extensions/<id>/desktop-reply.cjs`. Each exports a unique
+`type`, a display `name`, a catalog `description`, and `matches(command, {files, topic, settings})`.
+Set `service: true` to run the service access check. Supply `scope(services, topic)` and
+`answer(command, scope)` returning MCP text/image blocks, or `turn(services, command, context)`
+for an interactive workflow. File-aware adapters opt in with `acceptsFiles(files)`. An ambiguous
+match falls through. Petya activates the selected bundled adapter per company on first use.
+The download confirmation threshold is in Connections > Chat extensions (100 MiB by default).
+Optional catalog installers export `downloadBytes(services)` and `install(services, check, report)`.
+The host checks the estimate (unknown sizes require approval), coalesces installs and publishes progress.
+The size policy is configured in the app; MCP clients cannot raise it. Other download owners must check actual remaining bytes with `needsApproval` before downloading.
+
+An authenticated MCP client can call `list_chat_extensions`. With edit access, `use_chat_extension`
+routes a request through the same adapter in the active authorized chat and returns its text and images.
+Interactive controls and connection approvals stay in Petya. Blender's file selection, preview and
+confirmed copy are also available via its dedicated MCP tools.
+
+In desktop 0.8.3, Settings → Services → «Каталог приложений» lists the available company modules. Enable Unity Editor, start the local HTTP server in MCP for Unity, enable execute_code and use «Сохранить и проверить». In chat, «Покажи префаб Tank» opens the extension's search. Results are scoped to Assets in the connected editor; previews and Prefab Mode use the selected asset GUID. An external assistant with edit access can request unity_find_prefabs, unity_preview_prefab and unity_open_prefab for the open chat. Each editor action requires confirmation in Petya.
+
+Unity uses live MCP discovery. In an active chat, ask for the Unity console, errors, scene hierarchy, or editor tools.
+The extension can display the server's advertised input schemas, invoke a native tool, and read published
+resources and resource templates. The same operations are exposed as `unity_discover`,
+`unity_call_tool` (name and arguments) and `unity_read_resource` (URI). Each requires edit access to the
+active chat, an enabled Unity connection and local approval in Petya. Review the tool name and exact
+arguments before approving an edit. Available operations depend on the connected editor. Prefab search
+prefers native `manage_asset`; older servers and the directional preview/open workflows use `execute_code`.
+
+Extensions may provide `result.cjs` with an `id`, `describe(message, topic, services)` and, for direct actions, `perform(action, result, services, check)`. Descriptors supply a stable object key, title, subtitle and action IDs/labels. Command actions use the normal chat pipeline. Direct actions recheck ownership and availability after asynchronous work and before side effects. The shared result cards and composer selector retain the selection (or explicit reset) within the company, project, chat and version. Multiple objects require an explicit choice. Imported files expose folder navigation only when their original local path was recorded by the native picker.
+
+### Unity layout extension (0.8.3)
+
+The chat extension **Вёрстка Unity** requires Unity Editor and either Figma or Zeplin. In settings, enter a Figma personal access token with `file_content:read` or a Zeplin access token, then paste a Figma frame URL containing `node-id` or `https://app.zeplin.io/project/PROJECT/screen/SCREEN`. Tokens use the existing OS-encrypted, company-specific settings store and are redacted from public settings. No OAuth application is provisioned; personal-token connections do not provide an application icon setting.
+
+The extension reads the selected frame/screen and prepares fixed-position UI Toolkit UXML. Review the markup before importing. Unity must expose `execute_code`; import requires the existing confirmation dialog in Petya and creates a uniquely named asset under `Assets/PetyaLayouts`, without overwriting existing files or changing the scene. Select the intended editor when multiple Unity instances are open. This is a basic layout scaffold: images, custom fonts, effects, responsive constraints, and interactions need manual work. Large frames are rejected with a request to select a smaller frame.
+
+MCP tools `prepare_unity_layout(chatId, url)` and `apply_unity_layout(chatId, proposalId, instance?)` use the same application logic as the UI, require edit access, and enforce chat/project scope and current dependencies. `list_chat_extensions` includes the extension; `use_chat_extension` accepts a layout request with a frame URL. Proposals are session-local: prepare again after restarting Petya or changing chat, company, or credentials. Background progress is shown in the notification center and restored from `layout.status` when the window reopens. Connection credentials can only be configured in the application settings.
+
+API references: [Figma file nodes](https://developers.figma.com/docs/rest-api/file-endpoints/), [Zeplin screen versions](https://docs.zeplin.dev/reference/screen_version), and [Zeplin layers](https://docs.zeplin.dev/reference/layer). Validation: `tests/layout-mcp.cjs` runs through the real MCP client from `tests/mcp.cjs`, using fixture design responses and a stub Unity invocation; live service credentials and a Unity Editor are not required for this check. A separate real-editor check, `tests/layout-unity-live.cjs`, verifies the imported hierarchy and resolved geometry, text size and color for both providers; see [verification results and reproduction](docs/layout-verification.md).

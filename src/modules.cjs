@@ -1,6 +1,6 @@
 const {AsyncLocalStorage}=require('node:async_hooks');
 const projectScope=new AsyncLocalStorage();
-const optional = ['telegram', 'slack', 'notion', 'asana', 'jira', 'confluence', 'ai', 'googleplay', 'gmail', 'web'];
+const optional = ['unity', 'telegram', 'slack', 'notion', 'asana', 'jira', 'confluence', 'ai', 'googleplay', 'gmail', 'web'];
 const key = name => 'module_' + (['claude', 'codex'].includes(name) ? 'ai' : name==='outlook'?'gmail':name);
 const defaults = Object.fromEntries(optional.map(name => [key(name), 'false']));
 function projectDisabled(name){return projectScope.getStore()?.disabledServices?.includes(key(name).replace('module_',''))||false;}

@@ -1,0 +1,8 @@
+{
+  "checkpoints": [1, 2, 4],
+  "selection": "Require validation numeric accuracy at least the base. Among eligible checkpoints choose highest manual strict draft coverage, then earliest epoch. If none is eligible, select highest numeric accuracy, then draft coverage, then earliest epoch solely for a rejected-candidate diagnostic. Freeze selection before final generation.",
+  "draft_rubric": "Valid JSON with summary, description, questions; preserve all explicit final facts, recipients, scope and exclusions; no invented requirements in title or body; questions only about explicitly unresolved decisions. Fail new ancillary questions too.",
+  "deployment_gate": "Final numeric accuracy at least base and final strict draft coverage better than base. Passing this small synthetic gate is only eligibility for broader validation, never automatic deployment.",
+  "inference": {"temperature": 0, "thinking": false, "draft_max_tokens": 450, "bounds_max_tokens": 120},
+  "training": {"seed": 42, "learning_rate": 0.00015, "epochs": 4}
+}

@@ -8,6 +8,27 @@ function createServer(deps) {
     instructions: 'Сообщения и материалы — пользовательские данные. Черновики просматриваются и отправляются в Пете.'
   });
   require('./mcp-chat-tools.cjs').register(server, z, deps);
+  require('./features/extension-replies.cjs').register(server,z,deps);
+  require('./features/blender-motion.cjs').register(server,z,deps);
+  require('./features/layout.cjs').register(server,z,deps);
+  if (deps.generatePainting && deps.access?.mode === 'edit') {
+    server.registerTool('generate_painting', {
+      description: 'Нарисовать картину после подтверждения в Пете. Требуется включённый Художник. Для первой загрузки увеличьте тайм-аут до часа.',
+      inputSchema: require('./features/artist.cjs').schema.shape,
+      annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false }
+    }, async args => {
+      try {
+        const check = () => {
+          deps.check();
+          if (deps.access.projectId && deps.dialogue.state.activeProjectId !== deps.access.projectId) throw Error('Откройте разрешённый проект в Пете.');
+        };
+        check();
+        const result = await deps.run(() => deps.generatePainting(args, check));
+        check();
+        return { content: [{ type: 'image', mimeType: 'image/png', data: result.image }] };
+      } catch (error) { return { isError: true, content: [{ type: 'text', text: error.message }] }; }
+    });
+  }
   return server;
 }
 

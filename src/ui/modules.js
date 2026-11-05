@@ -1,4 +1,4 @@
-const optionalModules = [['telegram','Telegram'], ['slack','Slack'], ['notion','Notion'], ['asana','Asana'], ['jira','Jira'], ['confluence','Confluence'], ['ai','Claude / Codex'], ['googleplay','Google Play Console'], ['gmail','Почта · Google / Microsoft'], ['web','Поиск в интернете']];
+const optionalModules = [['unity','Unity Editor'], ['telegram','Telegram'], ['slack','Slack'], ['notion','Notion'], ['asana','Asana'], ['jira','Jira'], ['confluence','Confluence'], ['ai','Claude / Codex'], ['googleplay','Google Play Console'], ['gmail','Почта · Google / Microsoft'], ['web','Поиск в интернете']];
 let moduleSettings = {};
 function moduleEnabled(name) { return moduleSettings['module_' + (['claude','codex'].includes(name) ? 'ai' : name)] !== 'false'; }
 const modulePicker = connectionNode('article', '', 'card');

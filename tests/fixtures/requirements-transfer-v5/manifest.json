@@ -1,0 +1,14 @@
+{
+  "testSHA256": "c828256e24a4d7cf11939b5bca39df5567c40af6a8e62222e8e32626979fb988",
+  "adapterSHA256": "e18071047755b0a6406c454a064ddbc56a74940250e72813a43d7b1ab15da93e",
+  "adapter": "../requirements-draft-v5/checkpoints/epoch-4",
+  "maxTokens": 238,
+  "baseRevision": "8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "temperature": 0,
+  "thinking": false,
+  "limits": {
+    "bounds": 120,
+    "draft": 450
+  },
+  "training": false
+}

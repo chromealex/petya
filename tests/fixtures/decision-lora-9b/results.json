@@ -1,0 +1,587 @@
+{
+  "scores": {
+    "ollama": {
+      "schema": 15,
+      "status": 14,
+      "bounds": 12,
+      "exact": 12,
+      "exact_without_fences": 12
+    },
+    "base": {
+      "schema": 10,
+      "status": 8,
+      "bounds": 8,
+      "exact": 7,
+      "exact_without_fences": 12
+    },
+    "adapter": {
+      "schema": 16,
+      "status": 15,
+      "bounds": 13,
+      "exact": 12,
+      "exact_without_fences": 12
+    }
+  },
+  "records": [
+    {
+      "id": 0,
+      "topic": "sail",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "exact_without_fences": true,
+        "schema": false,
+        "status": false,
+        "bounds": false,
+        "exact": false
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": false,
+        "bounds": true,
+        "exact": false
+      }
+    },
+    {
+      "id": 1,
+      "topic": "sail",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 9,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 9,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 9,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":9,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 2,
+      "topic": "sail",
+      "expected": {
+        "status": "final",
+        "lower": 9,
+        "upper": 9,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 9,\n  \"upper\": 9,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 9,\n  \"upper\": 9,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```",
+        "exact_without_fences": true,
+        "schema": false,
+        "status": false,
+        "bounds": false,
+        "exact": false
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":9,\"upper\":9,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 3,
+      "topic": "sail",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 13,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "ollama": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 12,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "exact_without_fences": false,
+        "schema": false,
+        "status": false,
+        "bounds": false,
+        "exact": false
+      },
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "exact_without_fences": false,
+        "schema": false,
+        "status": false,
+        "bounds": false,
+        "exact": false
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":13,\"lowerInclusive\":null,\"upperInclusive\":false}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 4,
+      "topic": "kilometers",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "adapter": {
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 5,
+      "topic": "kilometers",
+      "expected": {
+        "status": "final",
+        "lower": 55,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": 55,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": false,
+        "bounds": false,
+        "exact": false
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": 55,\n  \"upper\": null,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": false,
+        "bounds": true,
+        "exact": false
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":55,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 6,
+      "topic": "kilometers",
+      "expected": {
+        "status": "final",
+        "lower": 55,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 55,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 55,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":55,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 7,
+      "topic": "kilometers",
+      "expected": {
+        "status": "final",
+        "lower": 55,
+        "upper": 70,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 55,\n  \"upper\": 70,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 55,\n  \"upper\": 70,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```",
+        "exact_without_fences": true,
+        "schema": false,
+        "status": false,
+        "bounds": false,
+        "exact": false
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":55,\"upper\":70,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 8,
+      "topic": "bags",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "exact_without_fences": true,
+        "schema": false,
+        "status": false,
+        "bounds": false,
+        "exact": false
+      },
+      "adapter": {
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 9,
+      "topic": "bags",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 20,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 20,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 20,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":20,\"lowerInclusive\":null,\"upperInclusive\":false}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": true,
+        "bounds": false,
+        "exact": false
+      }
+    },
+    {
+      "id": 10,
+      "topic": "bags",
+      "expected": {
+        "status": "final",
+        "lower": 20,
+        "upper": 20,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 20,\n  \"upper\": 20,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 20,\n  \"upper\": 20,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```",
+        "exact_without_fences": true,
+        "schema": false,
+        "status": false,
+        "bounds": false,
+        "exact": false
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":20,\"upper\":20,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 11,
+      "topic": "bags",
+      "expected": {
+        "status": "final",
+        "lower": 20,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 20,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": true,
+        "bounds": false,
+        "exact": false
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": 20,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": false,
+        "bounds": false,
+        "exact": false
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":20,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": true,
+        "bounds": false,
+        "exact": false
+      }
+    },
+    {
+      "id": 12,
+      "topic": "break",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "adapter": {
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 13,
+      "topic": "break",
+      "expected": {
+        "status": "final",
+        "lower": 35,
+        "upper": 35,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 35,\n  \"upper\": 35,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 35,\n  \"upper\": 35,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":35,\"upper\":35,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    },
+    {
+      "id": 14,
+      "topic": "break",
+      "expected": {
+        "status": "final",
+        "lower": 15,
+        "upper": 35,
+        "lowerInclusive": false,
+        "upperInclusive": true
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 15,\n  \"upper\": 35,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": true,
+        "bounds": false,
+        "exact": false
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 35,\n  \"upper\": 35,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": true,
+        "bounds": false,
+        "exact": false
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":20,\"upper\":35,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "exact_without_fences": false,
+        "schema": true,
+        "status": true,
+        "bounds": false,
+        "exact": false
+      }
+    },
+    {
+      "id": 15,
+      "topic": "break",
+      "expected": {
+        "status": "final",
+        "lower": 25,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "ollama": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 25,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "base": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 25,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      },
+      "adapter": {
+        "answer": "{\"status\":\"final\",\"lower\":25,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "exact_without_fences": true,
+        "schema": true,
+        "status": true,
+        "bounds": true,
+        "exact": true
+      }
+    }
+  ]
+}

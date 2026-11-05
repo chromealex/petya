@@ -21,7 +21,7 @@ function renderHistory(records) {
     for (const [index, row] of record.rows.entries()) {
       const label = historyElement('label', '', 'check history-task'), check = document.createElement('input'); check.type = 'checkbox'; check.value = row.key || ''; check.checked = !!row.key && row.state !== 'deleted'; check.disabled = !check.checked; checks.push(check);
       const text = historyElement('span', `${index + 1}. ${row.key || 'Без ключа'} · ${row.title}`);if(row.key&&record.url){try{const url=new URL(record.url);url.pathname='/browse/'+row.key;url.search='';url.hash='';const link=historyElement('a','Открыть задачу');link.href=url.href;link.target='_blank';link.rel='noopener';text.append(document.createTextNode(' · '),link);}catch{}} label.append(check, text); card.append(label);
-      card.append(historyElement('p', (row.state === 'deleted' ? 'Удалена из Jira' : row.state === 'done' ? 'Создана' : states[row.state] || row.state) + (row.error ? ': ' + row.error : ''), 'small'));
+      card.append(historyElement('p', (row.state === 'deleted' ? 'Удалена из Jira' : row.state === 'done' && record.kind !== 'edit-existing' ? 'Создана' : (row.state === 'observed' ? 'Существующая задача' : states[row.state] || row.state)) + (row.error ? ': ' + row.error : ''), 'small'));
     }
     if (record.retentionExpired) { card.append(historyElement('p', 'Срок хранения истёк. Локальные снимки для правок и отката удалены.')); target.append(card); continue; }
     const instruction = document.createElement('textarea'); instruction.rows = 2; instruction.maxLength = 4000; instruction.placeholder = 'Например: переназначь вторую задачу на Машу и перенеси её в следующий спринт'; instruction.setAttribute('aria-label', 'Что изменить в выбранных задачах');
@@ -50,7 +50,7 @@ function renderHistory(records) {
       preview.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
     const edit = historyElement('button', 'Подготовить правку', 'primary'); edit.onclick = () => { const keys = selected(); return act(async () => showPreview(await window.petya.previewHistoryEdit(record.id, instruction.value, keys))); };
-    const undo = historyElement('button', 'Откатить создание'); undo.onclick = () => { const keys = selected(); return act(async () => showPreview(await window.petya.previewHistoryUndo(record.id, '', keys))); };
+    const undo = historyElement('button', 'Откатить создание'); undo.hidden = record.kind === 'edit-existing'; undo.onclick = () => { const keys = selected(); return act(async () => showPreview(await window.petya.previewHistoryUndo(record.id, '', keys))); };
     const editor=historyElement('details','','history-editor');editor.append(historyElement('summary','Изменить или откатить задачи'));controls.append(edit, undo); editor.append(instruction, controls, historyElement('p', 'Действия относятся к отмеченным задачам. Правка текстом использует Ollama. Откат создания удаляет задачи; откат правки возвращает прежние значения.', 'small'));card.append(editor);
     if (record.rows.some(r => r.key && !r.snapshot && r.state !== 'deleted')) card.append(historyElement('p', 'Для части задач нет снимка: откат недоступен. Правку можно подготовить по текущим данным Jira.', 'small'));
     for (const op of [...(record.operations || [])].reverse()) {

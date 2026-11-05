@@ -17,6 +17,14 @@
  function installation(state){if(!state||state.phase==='idle')return;installBusy=!!state.busy;refresh.disabled=installBusy;if(installBusy)checkStatus.textContent='Идёт подготовка модели.';const percent=state.total?Math.min(100,Math.floor(state.received*100/state.total)):undefined;put('model-install',{title:state.busy?'Подготовка модели':state.ready?'Модель готова':state.phase==='error'?'Не удалось подготовить модель':'Загрузка отменена',text:state.message+(state.total?' · '+percent+'% · '+size(state.received)+' из '+size(state.total):''),busy:state.busy,percent,kind:state.phase==='error'?'error':'model',version:state.phase,actions:state.busy?[['Отменить',()=>window.petya.cancelOllamaInstall()]]:[['Подключения',()=>{setOpen(false);view('settings');window.revealSettings?.(document.querySelector('[data-service="ollama"]'));}]]});if(state.busy){for(const id of [...items.keys()])if(id.startsWith('model-update:'))items.delete(id);draw();}if(state.ready)checkUpdates(true);}
  let checking=false,lastCheck=0;
  async function checkUpdates(force){if(checking||installBusy)return;if(!force&&Date.now()-lastCheck<6*3600000)return;checking=true;refresh.disabled=true;checkStatus.textContent='Проверяю обновления моделей…';try{const state=await window.petya.modelUpdates(force);lastCheck=Date.now();if(installBusy)return;checkStatus.textContent=state.error?'Не удалось проверить обновления: '+state.error:state.items.length?'Доступные модели показаны ниже.':state.unavailable?.length?'Для этой модели нет данных об обновлениях в реестре.':'Установленная модель актуальна.';const found=new Set(state.items.map(item=>'model-update:'+item.model));if(!state.error)for(const id of [...items.keys()])if(id.startsWith('model-update:')&&!found.has(id))items.delete(id);for(const item of state.items)put('model-update:'+item.model,{title:item.kind==='update'?'Обновление модели':'Доступна модель',text:item.model+' · размер модели '+size(item.size)+(item.current?'':' · после подготовки станет основной'),kind:'model',version:item.digest,actions:[[item.kind==='update'?'Обновить':'Загрузить',async()=>{if(installBusy)return;installBusy=true;try{installation(await window.petya.modelUpdateInstall(item.model));}finally{installBusy=false;}}]]});draw();}catch(error){checkStatus.textContent='Проверка недоступна: '+error.message;}finally{checking=false;refresh.disabled=installBusy;}}
+ function artist(state) {
+   if (!state || state.phase === 'idle') return;
+   put('artist', { title: 'Художник', text: state.message, busy: state.busy, version: state.phase,
+     percent: state.percent, kind: state.phase === 'error' ? 'error' : 'model',
+     actions: state.busy ? [['Остановить', () => window.petya.feature('artist', 'stop')]] : [] });
+ }
+ window.petyaEvents.onArtistProgress(artist);
+ window.petya.feature('artist', 'status').then(artist).catch(()=>{});
  window.petyaEvents.onOllamaInstall(installation);window.petya.ollamaInstallStatus().then(installation).catch(()=>{});
  Promise.all([connectionsReady,modulesReady]).then(()=>{for(const card of document.querySelectorAll('[data-service]')){const status=card.querySelector('.connection-status');if(!status)continue;const id='connection:'+card.dataset.service,title=card.querySelector('h2')?.textContent||card.dataset.service;let failed=false;const update=()=>{if(status.classList.contains('error')){failed=true;put(id,{title:title+' · нужно внимание',text:status.textContent,kind:'error',actions:[['Настроить',()=>{setOpen(false);view('settings');window.revealSettings?.(card);}]]});}else if(failed&&status.classList.contains('connected')){failed=false;put(id,{title:title,text:'Подключение восстановлено.',kind:'success'});}};new MutationObserver(update).observe(status,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']});update();}}).catch(()=>{});
  function chatNotification(topic){
@@ -51,6 +59,21 @@
  }
  window.petyaEvents.onVoiceLanguageProgress(languageProgress);
  window.petya.voiceLanguageStatus().then(states=>states.forEach(languageProgress)).catch(()=>{});
+ const installProgress = item => put(item.id,item);
+ window.petyaEvents.onExtensionInstall(installProgress);
+ window.petya.feature('extensionReplies','progress').then(items=>items.forEach(installProgress)).catch(()=>{});
+ const unityProgress = item => { if(item)put(item.id,item); };
+ window.petyaEvents.onUnityProgress(unityProgress);
+ window.petya.feature('unity','status').then(unityProgress).catch(()=>{});
+ const reportShareProgress = item => {if(item)put(item.id,item);};
+ window.petyaEvents.onReportShareProgress(reportShareProgress);
+ window.petya.reportShareProgress().then(items=>items.forEach(reportShareProgress)).catch(()=>{});
+ const changeProgress = item => {if(item)put(item.id,item);};
+ window.petyaEvents.onChatChange(changeProgress);
+ window.petya.feature('chatChanges','progress').then(items=>items.forEach(changeProgress)).catch(()=>{});
+ const motionProgress = item => { if (item) put(item.id,item); };
+ window.petyaEvents.onMotionProgress(motionProgress);
+ window.petya.feature('blenderMotion','status').then(motionProgress).catch(()=>{});
  document.addEventListener('petya-ui-notification',event=>{const {id,...data}=event.detail;put(id,data);});
  window.petyaEvents.onWindowShown(()=>checkUpdates(false));setTimeout(()=>checkUpdates(false),2000);draw();
 })();

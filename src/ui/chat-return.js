@@ -6,8 +6,8 @@
    return b;
  }
  const heading=document.querySelector('.chat-heading'),feed=document.querySelector('.chat-feed');
- const recap=$el('aside'),summary=$el('span'),origin=$el('div');
- recap.className='chat-return-summary';recap.hidden=true;origin.hidden=true;origin.className='chat-branch-origin';
+ const recap=$el('div'),summary=$el('span'),origin=$el('div');
+ recap.className='chat-return-summary';recap.setAttribute('role','note');recap.hidden=true;origin.hidden=true;origin.className='chat-branch-origin';
  recap.append(summary,button('×',()=>recap.hidden=true));recap.lastChild.setAttribute('aria-label','Скрыть сводку');
  heading.after(recap,origin);
  const stack=[];let searchOrigin,goingBack=false;

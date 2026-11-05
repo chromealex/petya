@@ -85,12 +85,43 @@ const {Dialogue}=require('../src/dialogue.cjs');
   }finally{await client.close();await endpoint.close();}
   dialogue.state.projects.push({id:'private',name:'Другой проект'});
   dialogue.state.topics.push({...topic,id:'private-chat',projectId:'private'});
-  for(const mode of ['read','drafts']){
+  const paintings = [];
+  ctx.generatePainting = async (args, check) => {
+    check();
+    paintings.push(args);
+    return { image: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jC1kAAAAASUVORK5CYII=' };
+  };
+  const extensions = require('../src/features/extension-replies.cjs');
+  const settings = {...extensions.defaults};
+  extensions.setup({...ctx,settings,saveSettings:patch=>Object.assign(settings,patch),requestProgress:{report(){} }});
+  dialogue.state.activeId = topic.id;
+  assert.equal(extensions.needsApproval(104857600,settings),false);
+  assert.equal(extensions.needsApproval(104857601,settings),true);
+  assert.equal(extensions.needsApproval(null,settings),true);
+  for(const mode of ['read','drafts','edit']){
     const limited=await startMcp({...ctx,access:{mode,projectId:'general'}},{port:0});
     const peer=new Client({name:'limited',version:'1'});
     try{
       await peer.connect(new StreamableHTTPClientTransport(new URL(limited.url),{requestInit:{headers:{Authorization:'Bearer '+limited.token}}}));
       const tools=(await peer.listTools()).tools.map(t=>t.name);
+      const catalog = await peer.callTool({name:'list_chat_extensions',arguments:{}});
+      assert.ok(JSON.parse(catalog.content[0].text).some(row=>row.id==='chat-stats'));
+      assert.equal(tools.includes('use_chat_extension'),mode==='edit');
+      if (mode==='edit') {
+        const invoke = chatId=>peer.callTool({name:'use_chat_extension',arguments:{chatId,command:'Сколько сообщений в этом чате?'}});
+        assert.ok((await invoke('private-chat')).isError);
+        const report = await invoke(topic.id);
+        assert.match(report.content[0].text,/Использую расширение «Статистика чата»/);
+        assert.equal(report.content[1].mimeType,'image/svg+xml');
+        assert.equal(settings['extension_chat-stats'],'true');
+      }
+      assert.equal(tools.includes('generate_painting'),mode==='edit');
+      if (mode === 'edit') {
+        const result = await peer.callTool({name:'generate_painting',arguments:{prompt:'Маяк',format:'portrait'}});
+        assert.equal(result.content[0].type, 'image');
+        assert.deepEqual(paintings, [{prompt:'Маяк',quality:'standard',format:'portrait'}]);
+        continue;
+      }
       assert.equal(tools.includes('set_chat_draft'),mode==='drafts');
       assert.ok(!tools.includes('add_chat_note'));
       assert.ok((await peer.callTool({name:'get_chat_draft',arguments:{owner:'private-chat'}})).isError);
@@ -98,4 +129,7 @@ const {Dialogue}=require('../src/dialogue.cjs');
       assert.ok((await peer.callTool({name:'read_chat_material',arguments:{chatId:'one',type:'material',key:'note'}})).isError);
     }finally{await peer.close();await limited.close();}
   }
+  await require('./layout-mcp.cjs')(ctx);
+  await require('./unity-mcp.cjs')(ctx);
+  await require('./blender-motion.cjs')(ctx);
 })().catch(e=>{console.error(e);process.exitCode=1;});

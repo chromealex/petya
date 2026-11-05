@@ -1,0 +1,152 @@
+{
+  "boundsCorrect": 17,
+  "boundsTotal": 18,
+  "validDrafts": 6,
+  "draftTotal": 6,
+  "records": [
+    {
+      "id": "archive-format",
+      "task": "draft",
+      "answer": "{\"summary\": \"Выгрузка архива с именем по номеру обращения\", \"description\": \"Архив выгружается в ZIP. Пароль не нужен. Имя файла — номер обращения.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "cooling",
+      "task": "draft",
+      "answer": "{\"summary\": \"Корректировка времени охлаждения и добавление кода камеры\", \"description\": \"Внести изменения в регламент по времени охлаждения и добавить требование по предоставлению кода камеры оператору.\\n\\nТребования:\\n1. Время охлаждения не меньше 67 секунд.\\n2. Старое требование по 60 секундам отменено.\\n3. Верхний предел по времени не задан.\\n4. Оператору необходимо сообщать код камеры.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "expiry-new",
+      "task": "draft",
+      "answer": "{\"summary\": \"Утверждение срока действия разовой ссылки\", \"description\": \"Ссылка настроена на однократное использование. Требуется утверждение срока её действия. Предварительно предложено 15 часов.\", \"questions\": [\"Утвердить срок действия ссылки на 15 часов?\"]}",
+      "validJSON": true
+    },
+    {
+      "id": "printer",
+      "task": "draft",
+      "answer": "{\"summary\": \"Печать ровно 3 копий\", \"description\": \"Настроить печать строго на 3 копии. Искать по номеру накладной. Имя сотрудника не добавлять.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "sound",
+      "task": "draft",
+      "answer": "{\"summary\": \"Настройка отправлять уведомления дежурному\", \"description\": \"При превышении порога громкости сигнала отправлять уведомление дежурному. Порог громкости строго не больше 58% (значение 58% — допустимо). Дублирование уведомления руководителю не требуется.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "map",
+      "task": "draft",
+      "answer": "{\"summary\": \"Поля\", \"description\": \"Поля\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "regression-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":23,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "regression-2",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":23,\"lowerInclusive\":null,\"upperInclusive\":false}",
+      "passed": true
+    },
+    {
+      "id": "regression-4",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":23,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "regression-6",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "regression-8",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "regression-10",
+      "task": "bounds",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "regression-12",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "regression-14",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":false}",
+      "passed": true
+    },
+    {
+      "id": "regression-16",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":41,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "regression-18",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "passed": false
+    },
+    {
+      "id": "regression-20",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "regression-22",
+      "task": "bounds",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "regression-24",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":29,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "regression-26",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":29,\"lowerInclusive\":null,\"upperInclusive\":false}",
+      "passed": true
+    },
+    {
+      "id": "regression-28",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":29,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "regression-30",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "regression-32",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "regression-34",
+      "task": "bounds",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": true
+    }
+  ]
+}

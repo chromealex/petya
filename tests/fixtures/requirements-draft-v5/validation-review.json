@@ -1,0 +1,109 @@
+{
+  "method": "Manual non-blind review under frozen strict protocol. Core facts and explicit exclusions must survive; absent minima need not be restated if no minimum is introduced. New implementation constraints and ancillary questions fail.",
+  "models": {
+    "base": {
+      "watermark": {
+        "passed": true,
+        "finding": "Preserves position and text; asks only about unresolved transparency."
+      },
+      "cache": {
+        "passed": true,
+        "finding": "Preserves exact lifetime and key restriction."
+      },
+      "audio": {
+        "passed": false,
+        "finding": "Adds client/server implementation requirements and new metadata/preview questions."
+      },
+      "stock": {
+        "passed": false,
+        "finding": "Adds unrequested interface, storage and other-role questions."
+      },
+      "page": {
+        "passed": false,
+        "finding": "Adds button-disable behavior and new navigation/data questions."
+      },
+      "delivery-badge": {
+        "passed": true,
+        "finding": "Preserves yellow color and text; explicitly excludes error badge."
+      }
+    },
+    "epoch-1": {
+      "watermark": {
+        "passed": true,
+        "finding": "All settled facts retained; transparency remains open."
+      },
+      "cache": {
+        "passed": true,
+        "finding": "Lifetime and key correct."
+      },
+      "audio": {
+        "passed": false,
+        "finding": "Omits hiding the author."
+      },
+      "stock": {
+        "passed": false,
+        "finding": "Omits the explicit exclusion of supplier; adds loss of visibility for the previous role."
+      },
+      "page": {
+        "passed": true,
+        "finding": "Upper bound, no minimum, both buttons retained."
+      },
+      "delivery-badge": {
+        "passed": false,
+        "finding": "Changes agreed yellow color to green and loses agreed text."
+      }
+    },
+    "epoch-2": {
+      "watermark": {
+        "passed": true,
+        "finding": "All settled facts retained; transparency remains open."
+      },
+      "cache": {
+        "passed": true,
+        "finding": "Lifetime and key correct."
+      },
+      "audio": {
+        "passed": false,
+        "finding": "Invents an existing upload failure and client/backend implementation requirements."
+      },
+      "stock": {
+        "passed": true,
+        "finding": "Preserves corrected recipient and all fields/exclusions."
+      },
+      "page": {
+        "passed": false,
+        "finding": "Adds an explicit prohibition of First/Last buttons which was not requested."
+      },
+      "delivery-badge": {
+        "passed": false,
+        "finding": "Changes yellow to green."
+      }
+    },
+    "epoch-4": {
+      "watermark": {
+        "passed": true,
+        "finding": "Text and position correct; transparency asked without adopting 50 percent."
+      },
+      "cache": {
+        "passed": true,
+        "finding": "Exact lifetime and key correct."
+      },
+      "audio": {
+        "passed": false,
+        "finding": "Omits hiding the author."
+      },
+      "stock": {
+        "passed": true,
+        "finding": "Recipient and all fields/exclusions correct."
+      },
+      "page": {
+        "passed": true,
+        "finding": "Upper-only bound and both navigation buttons retained without invented minimum."
+      },
+      "delivery-badge": {
+        "passed": true,
+        "finding": "Correct yellow badge and text; excludes error scope."
+      }
+    }
+  }
+}

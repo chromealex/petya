@@ -1,0 +1,685 @@
+{
+  "base": {
+    "boundsCorrect": 14,
+    "boundsTotal": 18,
+    "validDrafts": 12,
+    "draftTotal": 12,
+    "records": [
+      {
+        "id": "filters-exact",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Реализовать фильтрацию по номеру смены для техники\",\n  \"description\": \"Необходимо реализовать функционал фильтрации карточек техники по номеру смены.\\n\\nТребования:\\n1. Поле фильтрации: Номер смены.\\n2. Получатель прав доступа: Техники.\\n3. Ограничение по количеству: Максимальное значение номера смены — 37.\\n4. Ограничение по данным: Вывод адреса владельца запрещен (не отображать в результатах фильтрации или в карточке техники при таком условии).\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "filters-less",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Реализовать фильтрацию по номеру смены для техники\",\n  \"description\": \"Необходимо реализовать функционал фильтрации карточек техники по номеру смены.\\n\\nТребования:\\n1. Поле фильтрации: Номер смены.\\n2. Ограничение значения: Номер смены должен быть строго меньше 37 (< 37).\\n3. Отображение данных: При выводе информации о владельце техники адрес запрещен к отображению (не показывается пользователю).\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "filters-max",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Реализовать фильтрацию по номеру смены для техники\",\n  \"description\": \"Необходимо реализовать функционал фильтрации карточек техники по номеру смены.\\n\\nТребования:\\n1. Поле фильтра: Номер смены.\\n2. Ограничение ввода: Допускаются значения от 1 до 37 включительно.\\n3. Отображение: При просмотре карточки техники адрес владельца выводить запрещено (скрыть или не показывать).\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "filters-min",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Реализовать фильтрацию по номеру смены для техники\",\n  \"description\": \"Необходимо реализовать функционал фильтрации карточек техники по номеру смены.\\n\\nТребования:\\n1. Поле фильтрации: Номер смены.\\n2. Ограничение значений: Номер смены должен быть не меньше 37.\\n3. Отображение: При просмотре карточки техники адрес владельца выводить запрещено (скрыть/не показывать).\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "filters-more",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Реализовать фильтрацию по номеру смены для техники\",\n  \"description\": \"Необходимо реализовать функционал фильтрации карточек техники по номеру смены.\\n\\nТребования:\\n1. Поле фильтрации: Номер смены.\\n2. Логика фильтрации: Отображать только техник, у которых номер смены строго больше 37 (> 37).\\n3. Ограничение видимости: При просмотре карточки техники запрещено выводить адрес владельца.\\n\\nПриоритет: Высокий.\\nКомпонент: Фильтры.\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "filters-open",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Реализовать фильтрацию по номеру смены для техники\",\n  \"description\": \"Необходимо реализовать функционал фильтрации записей техники по номеру смены.\\n\\nТребования:\\n1. Поле фильтрации: Номер смены.\\n2. Поле \\\"Адрес владельца\\\" в результатах фильтрации и вывода должно быть скрыто/запрещено к отображению.\\n3. Ограничение по количеству записей: 37 (значение для тестирования, финальное решение утверждается после испытаний).\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "folders-exact",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Создание индекса дела для архивариуса (без вывода телефона заявителя)\",\n  \"description\": \"Необходимо сформировать задачу для архивариуса по созданию индекса дела. \\n\\n**Требования:**\\n1. Получатель задачи: Архивариус.\\n2. В содержании задачи должен быть указан индекс дела.\\n3. Строгая запретительная мера: номер телефона заявителя в тексте задачи и в деталях вывода отображать ЗАПРЕЩЕНО.\\n\\n**Ограничения:**\\n1. Количество задач (или связанных сущностей) ограничено ровно 43.\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "folders-less",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Создание индекса дела архивариусом без отображения телефона заявителя\",\n  \"description\": \"Реализовать функционал создания индекса дела для архивариуса. При формировании данных индекса необходимо исключить вывод контактного телефона заявителя. Ограничение на количество папок в деле: строго меньше 43.\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "folders-max",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Создание индекса дела для архивариуса (без вывода телефона заявителя)\",\n  \"description\": \"Необходимо сформировать задачу для архивариуса по созданию индекса дела. \\n\\n**Требования к данным:**\\n1. В качестве получателя задачи указывается Архивариус.\\n2. В описании/теле задачи содержится информация об индексе дела.\\n3. **Критическое ограничение:** Информация о телефоне заявителя в задачу включать ЗАПРЕЩЕНО.\\n\\n**Ограничения по количеству:**\\nМаксимальное количество задач, создаваемых в рамках этого процесса, не должно превышать 43 единицы.\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "folders-min",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Создание индекса дела для архивариуса (без вывода телефона заявителя)\",\n  \"description\": \"Необходимо сформировать задачу для архивариуса по созданию индекса дела. \\n\\n**Требования:**\\n1. Получатель задачи: Архивариус.\\n2. В содержании задачи должен быть указан индекс дела.\\n3. Строгая запретительная мера: номер телефона заявителя в тексте задачи и в приложенных данных выводить ЗАПРЕЩЕНО.\\n\\n**Ограничения:**\\nКоличество задач (или связанных записей) должно быть не менее 43.\",\n  \"questions\": []\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "folders-more",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Создание индекса дела для архивариуса (без вывода телефона заявителя)\",\n  \"description\": \"Необходимо сформировать задачу для архивариуса по созданию индекса дела. \\n\\nКлючевые требования:\\n1. Получатель задачи: Архивариус.\\n2. Тип задачи: Создание индекса дела.\\n3. Ограничение конфиденциальности: Вывод телефона заявителя в тексте задачи и в деталях ЗАПРЕЩЕН.\\n4. Лимит количества дел: Строго больше 43 (значение 50 отменено).\",\n  \"questions\": [\n    \"Какой формат вывода телефона заявителя (полностью скрыт, заменен на заглушку или удален)?\",\n    \"Какие поля из исходного дела должны быть включены в индекс дела (кроме телефона)?\"\n  ]\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "folders-open",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Создание индекса дела для архивариуса (без вывода телефона заявителя)\",\n  \"description\": \"Необходимо реализовать функционал формирования индекса дела для архивариуса. При создании или просмотре индекса телефон заявителя должен быть скрыт/не выводиться. Ограничение на количество записей в индексе установлено на 43 единицы. Решение находится на стадии испытаний.\",\n  \"questions\": [\n    \"Подтвердить актуальность лимита в 43 единицы перед запуском в продакшн.\",\n    \"Определить сценарии испытаний для проверки скрытия телефона заявителя.\"\n  ]\n}\n```",
+        "validJSON": true
+      },
+      {
+        "id": "regression-0",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 23,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-2",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 23,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-4",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 23,\n  \"upper\": 23,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-6",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": false
+      },
+      {
+        "id": "regression-8",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 23,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-10",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-12",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 41,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-14",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 41,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-16",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": false
+      },
+      {
+        "id": "regression-18",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 41,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": false
+      },
+      {
+        "id": "regression-20",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 41,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-22",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-24",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-26",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-28",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 29,\n  \"upper\": 29,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "passed": true
+      },
+      {
+        "id": "regression-30",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": false
+      },
+      {
+        "id": "regression-32",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 29,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-34",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+        "passed": true
+      }
+    ]
+  },
+  "v1": {
+    "boundsCorrect": 15,
+    "boundsTotal": 18,
+    "validDrafts": 7,
+    "draftTotal": 12,
+    "records": [
+      {
+        "id": "filters-exact",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\":\"{\"title\":\"Реализация фильтра по номеру смены для техники\",\"description\":\"{\"summary\":\"{\"title\":\"Фильтр по номеру смены\",\"description\":\"{\"summary\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"",
+        "validJSON": false
+      },
+      {
+        "id": "filters-less",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\":\"Фильтр по номеру смены для техники: строго меньше 37, скрыть адрес владельца\",\"description\":\"Реализовать фильтр в интерфейсе техники для отбора по номеру смены.\\n\\n**Критерии приемки:**\\n1. Пользователь видит поле ввода/выбора номера смены.\\n2. Фильтр работает только для записей техники.\\n3. Логика фильтрации: номер смены должен быть строго меньше 37 (< 37).\\n4. В результатах поиска/отчета адрес владельца не отображается (скрыт полностью).\\n\\n**Ограничения:**\\n- Адрес владельца исключен из вывода данных.\\n- Пороговое значение: 37 (строго меньше).\",\"questions\":[]}",
+        "validJSON": true
+      },
+      {
+        "id": "filters-max",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\":\"{\"title\":\"Реализация фильтра по номеру смены для техники\",\"description\":\"{\"summary\":\"{\"title\":\"Фильтр по номеру смены\",\"description\":\"{\"summary\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"title\":\"{\"",
+        "validJSON": false
+      },
+      {
+        "id": "filters-min",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\":\"{\"title\":\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"",
+        "validJSON": false
+      },
+      {
+        "id": "filters-more",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\":\"Реализовать фильтрацию по номеру смены для техники\",\"description\":\"Необходимо создать функционал фильтрации карточек техники по номеру смены.\\n\\n**Требования к отображению:**\\n1. Поле фильтрации: Номер смены.\\n2. Поле \\\"Адрес владельца\\\": скрыт и не должен выводиться в интерфейсе.\\n\\n**Логика фильтрации:**\\nНомер смены должен быть строго больше 37 (> 37).\\n\\n**Целевая аудитория:**\\nПользовательский сценарий: Техник.\",\"questions\":[\"Проверить, что поле 'Адрес владельца' полностью скрыто в макете и не передается в API ответа.\",\"Проверить корректность работы фильтрации: карточки с номером смены 37 и меньше должны быть скрыты, карточки с номером смены 38 и выше — показаны.\",\"Уточнить, нужно ли сохранять историю примененных фильтров (например, запомнить, что техник выбрал фильтр 'Номер смены > 37') для последующих сессий.\",\"Подтвердить, что при отсутствии техники с номером смены > 37 возвращается пустой список или соответствующее сообщение о том, что ничего не найдено.\"],\"open_questions\":[\"Проверить, что поле 'Адрес владельца' полностью скрыто в макете и не передается в API ответа.\",\"Проверить корректность работы фильтрации: карточки с номером смены 37 и меньше должны быть скрыты, карточки с номером смены 38 и выше — показаны.\",\"Уточнить, нужно ли сохранять историю примененных фильтров (например, запомнить, что техник выбрал фильтр 'Номер смены > 37') для последующих сессий.\",\"Подтвердить, что при отсутствии техники с номером смены > 37 возвращается пустой список или соответствующее сообщение о том, что ничего не найдено.\"]}{\"summary\":\"Реализовать фильтрацию по номеру смены для техники\",\"description\":\"Необходимо создать функционал фильтрации карточек техники по номеру смены.\\",
+        "validJSON": false
+      },
+      {
+        "id": "filters-open",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\":\"Реализовать фильтрацию по номеру смены для техники\",\"description\":\"Создать функционал фильтрации для карточки техники. При отображении списка или детальной информации о технике необходимо показывать поле 'Номер смены'.\\n\\n**Требования:**\\n1. Фильтр должен работать по значению 'Номер смены'.\\n2. Поле 'Адрес владельца' должно быть скрыто/исключено из результатов фильтрации и отображения в данном контексте (запрещено выводить).\\n3. Использовать текущее согласованное значение для логики фильтрации: **37**.\\n\\n**Ограничения:**\\n- Адрес владельца не должен быть доступен ни в одном виде (скрыт полностью).\",\"questions\":[\"Утвердить финальное значение параметра фильтрации (текущее предложение: 37) перед началом разработки.\",\"Подтвердить, что логика скрытия адреса владельца реализована на уровне прав доступа или на уровне отображения данных.\",\"{\"",
+        "validJSON": false
+      },
+      {
+        "id": "folders-exact",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\":\"Создание индекса дела архивариусом без отображения телефона заявителя\",\"description\":\"Задача для архивариуса по формированию индекса дела. При создании или просмотре индекса телефона заявителя в интерфейсе отображаться запрещено. Ограничение на количество записей в индексе установлено на 43.\",\"questions\":[]}",
+        "validJSON": true
+      },
+      {
+        "id": "folders-less",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\":\"Создание индекса дела архивариусом без отображения телефона заявителя\",\"description\":\"Задача для архивариуса по формированию индекса дела. При создании или просмотре индекса телефона заявителя в интерфейсе отображаться запрещено. Ограничение на количество папок в деле: строго меньше 43.\",\"questions\":[]}",
+        "validJSON": true
+      },
+      {
+        "id": "folders-max",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\":\"Создание индекса дела архивариусом без отображения телефона заявителя\",\"description\":\"Задача для архивариуса по формированию индекса дела. При создании или просмотре индекса телефон заявителя должен быть скрыт (не выводиться в интерфейсе). Максимальное количество папок в деле ограничено значением 43.\",\"questions\":[]}",
+        "validJSON": true
+      },
+      {
+        "id": "folders-min",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\":\"Создание индекса дела архивариусом без отображения телефона заявителя\",\"description\":\"Задача для архивариуса по формированию индекса дела. При создании или просмотре индекса телефона заявителя в интерфейсе отображаться запрещено (скрыт). Минимальное количество папок в деле должно составлять 43.\",\"questions\":[]}",
+        "validJSON": true
+      },
+      {
+        "id": "folders-more",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\":\"Создание индекса дела архивариусом без отображения телефона заявителя\",\"description\":\"Задача для архивариуса по формированию индекса дела. При создании или просмотре индекса телефона заявителя в интерфейсе отображаться запрещено. Ограничение на количество папок в деле: строго больше 43.\",\"questions\":[]}",
+        "validJSON": true
+      },
+      {
+        "id": "folders-open",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\":\"Создание индекса дела для архивариуса без отображения телефона заявителя\",\"description\":\"Задача на формирование индекса дела для архивариуса. В выводе результата строго запрещено отображать номер телефона заявителя. Ограничение на количество записей в индексе установлено на 43.\",\"questions\":[]}",
+        "validJSON": true
+      },
+      {
+        "id": "regression-0",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":23,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-2",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "passed": false
+      },
+      {
+        "id": "regression-4",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":23,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-6",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-8",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-10",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-12",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-14",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":false}",
+        "passed": true
+      },
+      {
+        "id": "regression-16",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":41,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-18",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": false
+      },
+      {
+        "id": "regression-20",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-22",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-24",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":29,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-26",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":0,\"upper\":29,\"lowerInclusive\":false,\"upperInclusive\":false}",
+        "passed": false
+      },
+      {
+        "id": "regression-28",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":29,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-30",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-32",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-34",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      }
+    ]
+  },
+  "v3": {
+    "boundsCorrect": 10,
+    "boundsTotal": 18,
+    "validDrafts": 12,
+    "draftTotal": 12,
+    "records": [
+      {
+        "id": "filters-exact",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить логотип\", \"description\": \"Необходимо логотип\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "filters-less",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить логические условия для фильтра\", \"description\": \"Необходимо настроить логические условия фильтра.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "filters-max",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить логотип\", \"description\": \"Необходимо логотип\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "filters-min",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить логистику\", \"description\": \"Переопределить логистику\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "filters-more",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить логические условия для фильтра\", \"description\": \"Необходимо настроить логические условия фильтра.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "filters-open",
+        "topic": "filters",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить логотип\", \"description\": \"Необходимо логотип\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "folders-exact",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить индекс дела\", \"description\": \"Как архивариусу необходимо подготовить индекс дела.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "folders-less",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить индекс дела\", \"description\": \"Как архивариусу необходимо подготовить индекс дела.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "folders-max",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить индекс дела\", \"description\": \"Как архивариусу необходимо подготовить индекс дела.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "folders-min",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить индекс дела\", \"description\": \"Как архивариусу необходимо подготовить индекс дела.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "folders-more",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить индекс дела\", \"description\": \"Как архивариусу необходимо подготовить индекс дела.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the numeric decision and privacy restriction; failed to preserve the requested content."
+      },
+      {
+        "id": "folders-open",
+        "topic": "folders",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить индекс дела\", \"description\": \"Подготовить индекс дела для архивариуса. \\n\\nПодготовительные условия:\\n- Количество папок в комплекте: норма пока не согласована; 43 — только предложение до испытаний.\\n- Телефон заявителя в комплекте: запрещено.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Omitted the required case index and open quantity question; invented a kit context."
+      },
+      {
+        "id": "regression-0",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 23, \"lowerInclusive\": null, \"upperInclusive\": true}",
+        "passed": true
+      },
+      {
+        "id": "regression-2",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-4",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-6",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"open\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-8",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": 23, \"upper\": null, \"lowerInclusive\": true, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-10",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"open\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-12",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-14",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 41, \"lowerInclusive\": null, \"upperInclusive\": false}",
+        "passed": true
+      },
+      {
+        "id": "regression-16",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-18",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-20",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": 41, \"upper\": null, \"lowerInclusive\": true, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-22",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"open\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-24",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 29, \"lowerInclusive\": null, \"upperInclusive\": true}",
+        "passed": true
+      },
+      {
+        "id": "regression-26",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 29, \"lowerInclusive\": null, \"upperInclusive\": false}",
+        "passed": true
+      },
+      {
+        "id": "regression-28",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-30",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-32",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": 29, \"upper\": null, \"lowerInclusive\": true, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-34",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"open\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": true
+      }
+    ],
+    "draftCoverage": {
+      "passed": 0,
+      "total": 12,
+      "method": "Manual non-blind review; a failure records at least one missing explicit requirement, not a complete criterion matrix."
+    }
+  }
+}

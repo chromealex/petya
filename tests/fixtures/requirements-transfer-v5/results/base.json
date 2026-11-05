@@ -1,0 +1,410 @@
+{
+  "numeric": {
+    "basic": {
+      "correct": 10,
+      "total": 12
+    },
+    "extended": {
+      "correct": 8,
+      "total": 12
+    }
+  },
+  "pairsBothCorrect": 6,
+  "pairsTotal": 12,
+  "validDrafts": 8,
+  "draftTotal": 8,
+  "records": [
+    {
+      "id": "ceiling-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 115,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 115,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "ceiling-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 115,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 115,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "floor-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 205,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+      "expected": {
+        "status": "final",
+        "lower": 205,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "floor-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 206,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+      "expected": {
+        "status": "final",
+        "lower": 205,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "passed": false
+    },
+    {
+      "id": "exact-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 103,\n  \"upper\": 103,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "expected": {
+        "status": "final",
+        "lower": 103,
+        "upper": 103,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "exact-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "revoked-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "passed": false
+    },
+    {
+      "id": "revoked-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 98,\n  \"upper\": 98,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```",
+      "expected": {
+        "status": "final",
+        "lower": 98,
+        "upper": 98,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "other-topic-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 106,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 106,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "other-topic-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 104,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 104,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "no-invention-0",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 12,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 12,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "no-invention-1",
+      "task": "bounds",
+      "group": "basic",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 6,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+      "expected": {
+        "status": "final",
+        "lower": 6,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "zero-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 0,\n  \"upper\": 0,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 0,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": false
+    },
+    {
+      "id": "zero-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 0,\n  \"upper\": null,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": null\n}",
+      "expected": {
+        "status": "final",
+        "lower": 0,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "negative-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": -12,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": -12,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "negative-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": -12,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}",
+      "expected": {
+        "status": "final",
+        "lower": -12,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "passed": false
+    },
+    {
+      "id": "decimal-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 2.75,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}",
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 2.75,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "decimal-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"open\",\n  \"lower\": 2.75,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+      "expected": {
+        "status": "final",
+        "lower": 2.75,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "passed": false
+    },
+    {
+      "id": "range-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 11,\n  \"upper\": 19,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "expected": {
+        "status": "final",
+        "lower": 11,
+        "upper": 19,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "range-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 11,\n  \"upper\": 19,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": false\n}",
+      "expected": {
+        "status": "final",
+        "lower": 11,
+        "upper": 19,
+        "lowerInclusive": false,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "mixed-range-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 36,\n  \"upper\": 64,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": false\n}\n```",
+      "expected": {
+        "status": "final",
+        "lower": 36,
+        "upper": 64,
+        "lowerInclusive": true,
+        "upperInclusive": false
+      },
+      "passed": true
+    },
+    {
+      "id": "mixed-range-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 36,\n  \"upper\": 64,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "expected": {
+        "status": "final",
+        "lower": 36,
+        "upper": 64,
+        "lowerInclusive": false,
+        "upperInclusive": true
+      },
+      "passed": false
+    },
+    {
+      "id": "decimal-exact-0",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 1.25,\n  \"upper\": 1.25,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "expected": {
+        "status": "final",
+        "lower": 1.25,
+        "upper": 1.25,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "passed": true
+    },
+    {
+      "id": "decimal-exact-1",
+      "task": "bounds",
+      "group": "extended",
+      "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "passed": true
+    },
+    {
+      "id": "menu-revert",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "```json\n{\n  \"summary\": \"Изменить цвет кнопок раздела «Счета» на серый\",\n  \"description\": \"Необходимо изменить визуальный стиль кнопок в разделе «Счета» на серый цвет.\\n\\n**Требования:**\\n1. Раздел называется «Счета» (переименование в «Оплата» отменено).\\n2. Ссылка на раздел не меняется.\\n3. Все кнопки внутри раздела должны иметь серый цвет.\\n\\n**Границы:**\\nИзменение касается только кнопок внутри указанного раздела «Счета».\",\n  \"questions\": [\n    \"Подтвердить, что серый цвет кнопок соответствует утвержденному дизайну (например, disabled state или конкретный shade из дизайн-системы).\",\n    \"Уточнить, применивается ли это изменение ко всем кнопкам раздела без исключений, или есть специфические кнопки, которые должны остаться активными/цветными.\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "backup-recipients",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "```json\n{\n  \"summary\": \"Изменить формат отчёта резервного копирования: скрыть путь к файлу, заменить дату на время завершения, отправить администратору.\",\n  \"description\": \"Необходимо внести изменения в логику формирования и отправки отчёта о резервном копировании:\\n\\n1. **Получатель**: Отправлять отчёт только администратору (не добавлять руководителя).\\n2. **Контент отчёта**:\\n   - Убрать поле с полным путем к файлу резервной копии.\\n   - Оставить поле с **результатом** (успешно/неудачно).\\n   - Заменить поле с **датой** на **время завершения** операции.\\n\\nПриоритет: Высокий.\\nКомпонент: Система резервного копирования.\",\n  \"questions\": [\n     \"Какой формат времени завершения требуется (например, YYYY-MM-DD HH:MM:SS)?\",\n     \"Нужно ли сохранять историю отчётов с изменённым форматом в базе данных или архиве?\",\n     \"Требуется ли уведомление администратора в случае неудачного завершения резервного копирования?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "drawing-unresolved",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "```json\n{\n  \"summary\": \"Определить и реализовать формат экспорта чертежа (масштаб и номер версии уже согласованы)\",\n  \"description\": \"Необходимо реализовать функционал экспорта чертежа. В экспортируемый файл должны быть включены:\\n1. Масштаб (требование согласовано, оставляем).\\n2. Номер версии (требование согласовано).\\n\\nФормат файла на данный момент не утвержден. Требуется выбрать подходящий формат для экспорта.\",\n  \"questions\": [\n    \"Какой формат файла выбрать для экспорта чертежа (SVG или другой)?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "refresh-correction",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "```json\n{\n  \"summary\": \"Обновление панели: интервал 18 секунд, отображение количества активных заявок\",\n  \"description\": \"Необходимо изменить логику обновления панели мониторинга:\\n1. Установить интервал автоматического обновления данных ровно на 18 секунд (ранее было 22 секунды).\\n2. На панели отображать текущее количество активных заявок.\\n3. Имена заявителей на панели не отображаются (данные скрыты).\",\n  \"questions\": []\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "explicit-trigger",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "```json\n{\n  \"summary\": \"Изменить логику отправки уведомления дежурному: отправлять только после неудачной проверки (без показа имени пользователя)\",\n  \"description\": \"Реализовать изменение логики отправки уведомления дежурному:\\n\\n1. Уведомление должно отправляться **только** в случае неудачной проверки.\\n2. В теле уведомления должен присутствовать **текст ошибки**.\\n3. **Имя пользователя** в уведомлении отображать **не нужно**.\\n4. Получателя уведомления (дежурного) менять **не нужно**.\\n\\nТекущая реализация требует пересмотра условий триггера отправки и состава сообщения.\",\n  \"questions\": [\n    \"Какой формат/структура текста ошибки должна быть в уведомлении (например, полный стектрейс, только сообщение об ошибке, логирование)?\",\n    \"Какие данные о проверке (например, тип проверки, ID запроса, время) должны быть включены в уведомление помимо текста ошибки?\",\n    \"Нужно ли сохранять историю неудачных проверок в логе дежурного или только отправлять последнее уведомление?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "print-columns",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "```json\n{\n  \"summary\": \"Реализовать печать накладной с выводом номера, даты (формат ДД.ММ.ГГГГ) и количества. Исключить печать телефона покупателя.\",\n  \"description\": \"Необходимо доработать функционал печати накладной. При генерации печатной формы должны отображаться следующие поля:\\n1. Номер накладной.\\n2. Дата накладной (формат: ДД.ММ.ГГГГ).\\n3. Количество.\\n\\nВажное ограничение: Поле 'Телефон покупателя' на печатной форме отображаться НЕ должно, несмотря на то, что может присутствовать в электронном виде накладной.\",\n  \"questions\": [\n    \"Какой шаблон/файл печатной формы используется в текущей реализации?\",\n    \"Нужно ли сохранять историю попыток печати или только генерировать файл на лету?\",\n    \"Требуется ли добавление подписи или печати ответственного лица на накладной?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "sensor-topic",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "```json\n{\n  \"summary\": \"Показание датчика температуры (строго ниже 72°C) с отображением номера датчика\",\n  \"description\": \"Реализовать функционал отображения данных с датчика температуры. Показывать температуру только в случае, если она строго ниже 72 градусов. При выполнении условия отображать номер датчика (технику).\",\n  \"questions\": [\n    \"Какой формат отображения номера датчика (например, 'Датчик #123' или просто '123')?\",\n    \"Какой формат отображения значения температуры (например, '69.5°C' или '69.5')?\",\n    \"Какой тип уведомления или виджет требуется для отображения этой информации (push-уведомление, строка в интерфейсе, лог)?\",\n    \"Какова периодичность проверки температуры (например, раз в минуту, раз в 5 минут)?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "single-open-field",
+      "task": "draft",
+      "group": "long-dialogue",
+      "answer": "```json\n{\n  \"summary\": \"Отображение статуса и даты создания на карточке заказа\",\n  \"description\": \"Реализовать отображение информации о заказе на карточке. Обязательные поля: статус (обязательно показывать текстом) и дата создания (обязательно показывать). Цвет статуса еще не согласован, требуется выбор.\",\n  \"questions\": [\n    \"Какой цвет использовать для отображения каждого статуса заказа?\"\n  ]\n}\n```",
+      "validJSON": true
+    }
+  ]
+}

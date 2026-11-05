@@ -45,6 +45,16 @@ function register(server, z, ctx) {
       } catch (error) { return {isError:true,content:[{type:'text',text:error.message}]}; }
     });
   }
+  if(ctx.invokeUnity && ctx.access?.mode==='edit'){
+    for(const [action,spec] of Object.entries(require('./extensions/unity/desktop.cjs').tools)){
+      server.registerTool('unity_'+action,{description:spec.description+' Требует подтверждения в открытом чате Пети.',inputSchema:{chatId:id,instance:z.string().min(1).max(250).optional(),...spec.schema.shape}},async({chatId,instance,...args})=>{
+        try{
+          const verify=()=>{ctx.check();topicFor(chatId);};
+          verify();return await ctx.run(()=>ctx.invokeUnity(chatId,action,args,verify,instance));
+        }catch(e){return {isError:true,content:[{type:'text',text:e.message}]};}
+      });
+    }
+  }
   tool('list_chat_projects','Проекты и владельцы черновиков новых чатов.',page,a=>list(projects().map(p=>({id:p.id,name:p.name,draftOwner:'draft:'+p.id})),a));
   tool('list_chats','Доступные чаты. ID чата также служит владельцем его черновика.',{projectId:id.optional(),...page},a=>list(chats().filter(t=>!a.projectId || t.projectId===a.projectId).map(t=>({id:t.id,title:t.title,projectId:t.projectId,attention:require('./chat-location.cjs').attention(t)})),a));
   const draftText = owner => shared.chatDrafts()[owner] || '';

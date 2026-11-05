@@ -1,3 +1,10 @@
+window.openChatServiceSettings=async function(id){
+  const service=id==='outlook'?'gmail':id;
+  if(!moduleChecks.has(service))return;
+  await modulesReady;renderModules(await window.petya.settings());
+  if(!moduleEnabled(service)){window.openAppCatalog(optionalModules.find(([key])=>key===service)[1]);return;}
+  view('settings');window.revealSettings(document.querySelector('[data-service="'+service+'"]'));
+};
 window.showConnectionRecovery=function(card,status,result){
   card.querySelector('.connection-recovery')?.remove();
   delete status.dataset.reason;
