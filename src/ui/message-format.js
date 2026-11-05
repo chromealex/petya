@@ -65,5 +65,22 @@ window.renderMessage = function(message){
  if(message.role!=='user'&&Array.isArray(message.steps)&&message.steps.length>1)meta.append(window.renderSteps(message.steps));
  copy.onclick=async()=>{try{await navigator.clipboard.writeText(message.text||'');paint(true);setTimeout(()=>paint(false),1800);}catch{notice('Не удалось скопировать сообщение. Выделите текст и нажмите ⌘C / Ctrl+C.',true);}};meta.append(copy);node.append(meta);
  window.enhanceChatMessage?.(node,message);
+ const menu=node.querySelector('.message-actions-menu');
+ if(menu){
+  const close=()=>{menu.open=false;};
+  node.addEventListener('pointerleave',event=>{if(!event.relatedTarget||!node.contains(event.relatedTarget))close();});
+  node.addEventListener('focusout',event=>{if(!node.contains(event.relatedTarget))close();});
+  menu.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();close();menu.querySelector('summary').focus();}});
+  const paths={
+   'Скопировать ссылку':'<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-2 2M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l2-2"/>',
+   'Сохранить в проект':'<path d="M6 3h12v18l-6-4-6 4z"/>',
+   'Продолжить в новом чате':'<path d="M7 4v10a4 4 0 0 0 4 4h6M13 14l4 4-4 4M3 8l4-4 4 4"/>'
+  };
+  for(const button of menu.querySelectorAll('.answer-menu-items>button')){
+   const path=paths[button.textContent];if(!path)continue;
+   const icon=document.createElement('span');icon.className='message-menu-icon';icon.setAttribute('aria-hidden','true');
+   icon.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+path+'</svg>';button.prepend(icon);
+  }
+ }
  return node;
 };

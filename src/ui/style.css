@@ -958,3 +958,8 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 #home .chat-feed .message-meta>details>summary:focus-visible{outline:1px solid var(--green);outline-offset:2px}
 #home .chat-feed .message-meta>.message-steps>summary{width:fit-content;max-width:100%;padding-inline:4px}
 @media(prefers-reduced-motion:reduce){#home .chat-feed .message-meta>button,#home .chat-feed .message-meta>details>summary{transition:none}}
+
+#home .chat-feed .answer-menu-items{gap:2px;padding:5px;min-width:210px;border-radius:10px;background:var(--panel);box-shadow:0 8px 24px #0005}
+#home .chat-feed .answer-menu-items>button{display:flex;align-items:center;gap:9px;min-height:32px;margin:0;padding:6px 9px;border:0;border-radius:6px;background:transparent;color:var(--ink);font-size:12px;line-height:18px;box-shadow:none;text-align:left}
+#home .chat-feed .answer-menu-items>button:is(:hover,:focus-visible){background:#ffffff12}
+.message-menu-icon{display:inline-flex;flex:0 0 16px;color:var(--muted)}
