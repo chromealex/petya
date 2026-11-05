@@ -113,7 +113,7 @@
     document.dispatchEvent(new Event('petya-quote-changed'));
     quoteBar.hidden=!quote;
     quoteBar.replaceChildren();
-    if(quote)quoteBar.append(el('span','В ответ на: '+quote.text),button('Убрать цитату',()=>{quotes.delete(id());drawQuote();},'×'));
+    if(quote)quoteBar.append(el('span','В ответ на: '+(quote.excerpt||quote.text)),button('Убрать цитату',()=>{quotes.delete(id());drawQuote();},'×'));
   }
   window.takeChatQuote=()=>{const value=quotes.get(id());quotes.delete(id());drawQuote();return value;};
   document.addEventListener('petya-dialogue-state',drawQuote);
@@ -188,8 +188,9 @@
   });
   context?.append(manage);
   // Capture the selection before clicking the action collapses the browser selection.
-  let selected='';
-  const task=button('Создать задачу',async()=>{
+  let selected='', selectedIndex=-1;
+  const task=el('div');
+  const create=button('Создать задачу',async()=>{
     if(!selected || currentDraft || draftBusy || commandProgress.busy)throw Error('Сначала завершите текущий черновик или запрос.');
     const text=selected;
     task.hidden=true;
@@ -197,11 +198,18 @@
     currentIntent='jira';automaticVoiceCommand=false;commandSnapshot='Создай задачу по выделенному тексту';voiceReply=null;
     await makeDraft(material, null, {reviewOnly:true});
   });
-  task.className='selection-task';task.hidden=true;task.onpointerdown=e=>e.preventDefault();document.body.append(task);
+  const clarify=button('Уточнить',()=>{
+    const message=chatHistory[selectedIndex];
+    if(!message || !selected)return;
+    quotes.set(id(),{index:selectedIndex,at:message.at,text:message.text,excerpt:selected.slice(0,4000)});
+    getSelection().removeAllRanges();task.hidden=true;drawQuote();$('command').focus();
+  });
+  task.append(clarify,create);task.className='selection-task';task.hidden=true;task.onpointerdown=e=>e.preventDefault();document.body.append(task);
   document.addEventListener('selectionchange',()=>{
     const selection=getSelection();
     const parent=selection?.anchorNode?.parentElement?.closest('.message-assistant .message-content');
     if(!parent || !parent.contains(selection.focusNode) || !selection.toString().trim()){task.hidden=true;return;}
+    selectedIndex=Number(parent.closest('article').dataset.messageIndex);
     selected=selection.toString().trim().slice(0,12000);
     const rect=selection.getRangeAt(0).getBoundingClientRect();task.hidden=false;
     task.style.left=Math.max(8,Math.min(innerWidth-task.offsetWidth-8,rect.left))+'px';

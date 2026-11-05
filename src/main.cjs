@@ -292,7 +292,7 @@ function setupHandlers() {
       if(!draft)requestProgress.report(topic.attachments?.length?'Читаю прикреплённые материалы':'Готовлю ответ по контексту разговора');
       const capability=require('./capabilities-reply.cjs').answer(command,topic,settings,instructionSkills.list());if(capability)return capability;
       const confirmation=require('./action-evidence.cjs').actionConfirmation(command,topic);if(confirmation)return confirmation;
-      if(topic.attachments?.length){try{return {text:await analyzeMaterials(topic,command),usedMaterials:require('./chat-attribution.cjs').fileRefs(topic.attachments)};}catch(e){return {text:e.message,error:true};}}
+      if(topic.attachments?.length){try{const text=await analyzeMaterials(topic,command);return {text,usedMaterials:require('./chat-attribution.cjs').fileRefs(topic.attachments,text)};}catch(e){return {text:e.message,error:true};}}
       let localProject=null;
       const chatProject=dialogue.state.projects.find(p=>p.id===topic.projectId);const localRepos=require('./project-folders.cjs').projectFolders(chatProject,projectMemory?.get(chatProject?.memoryId||topic.projectMemoryId));
       if(localRepos.length){const projects=[];for(const folder of localRepos){try{const data=await require('./local-project.cjs').readProject(folder,command);let budget=Math.floor(14000/localRepos.length);data.files=data.files.map(file=>{const text=file.text.slice(0,Math.max(0,budget));budget-=text.length;return {...file,text,truncated:file.truncated||text.length<file.text.length};}).filter(file=>file.text);projects.push(data);}catch(error){projects.push({root:folder,error:'Папка проекта недоступна: '+error.message});}}localProject=projects.length===1?projects[0]:{projects};}

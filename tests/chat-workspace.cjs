@@ -6,10 +6,14 @@ const {classify}=require('../src/connection-failure.cjs');
 const {register}=require('../src/chat-workspace.cjs');
 (async()=>{
   const {chatParagraphDiff}=require('../src/ui/version-diff.js');
-  const {contextExcerpt}=require('../src/chat-attribution.cjs');
+  const {contextExcerpt,fileRefs}=require('../src/chat-attribution.cjs');
   assert.deepEqual(chatParagraphDiff(['до','общий','после'],['до','правка','общий','после']).map(r=>r.kind),['same','added','same','same']);
   const excerpt=contextExcerpt([{id:'one',title:'А',text:'Заметка'},{id:'two',title:'Б',text:'Факты'}],5);
   assert.equal(excerpt.context,'Факты');assert.deepEqual(excerpt.contextRefs.map(r=>r.id),['two']);
+  const log={id:'log',name:'trace.log',text:'start\nerror\nend'};
+  const report='Ошибка\n\nИсходные строки (дословно):\ntrace.log:2\nerror\n\ntrace.log:3\nwrong';
+  assert.deepEqual(fileRefs([log],report)[0].lines,[2]);
+  assert.equal(fileRefs([log,{...log,id:'other'}],report)[0].lines,undefined);
   let stored;
   function setup(state){
     const calls={};
@@ -25,6 +29,8 @@ const {register}=require('../src/chat-workspace.cjs');
   calls.chatVersionEdit('one',0,'Уточнение');await dialogue.turn('Уточнение',undefined,'chat');
   assert.equal(dialogue.state.topics.length,1);
   calls.chatVersionSelect('one',0);assert.equal(topic.messages.at(-1).text,'Первый ответ');
+  calls.chatQuote('one',{index:1,text:'Первый ответ',at:12,excerpt:'ответ'});
+  assert.equal(topic.nextQuote.text,'ответ');
   calls.chatQuote('one',{index:1,text:'Первый ответ',at:12});
   await dialogue.turn('Объясни это',undefined,'chat');assert.equal(topic.messages.at(-2).replyTo.text,'Первый ответ');
   calls.chatVersionSelect('one',1);assert.equal(topic.messages[0].text,'Уточнение');

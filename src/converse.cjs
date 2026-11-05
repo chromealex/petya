@@ -114,7 +114,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
         if(!ctx.dialogue.state.topics.includes(topic))return {handled:true,text:'Тема удалена; результат не сохранён.'};
         answer=(contextualSlack?'Последнее просмотренное обсуждение (':'Последнее просмотренное обсуждение с логом (')+new Date(found.at).toLocaleString('ru-RU')+'). '+answer+(found.notes.length?'\n'+found.notes.join('\n'):'');
         const sources=found.url?[{title:'Тред Slack',url:found.url}]:[];
-        topic.messages.push({role:'assistant',text:answer,sources,usedMaterials:error?[]:require('./chat-attribution.cjs').fileRefs(topic.attachments),at:Date.now()});ctx.dialogue.persist();return {handled:true,text:answer,error,sources,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
+        topic.messages.push({role:'assistant',text:answer,sources,usedMaterials:error?[]:require('./chat-attribution.cjs').fileRefs(topic.attachments,answer),at:Date.now()});ctx.dialogue.persist();return {handled:true,text:answer,error,sources,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
       }catch(e){return {handled:true,text:e.message,error:true};}
     }
 
