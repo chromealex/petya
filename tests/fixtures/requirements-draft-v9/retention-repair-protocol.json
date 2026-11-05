@@ -1,0 +1,13 @@
+{
+  "parent": "adapter",
+  "epochs": 1,
+  "learning_rate": 1e-05,
+  "layers": 5,
+  "rows": 264,
+  "steps": 264,
+  "data_sha256": "2d42bdc2ad7b73f449fea45f24f14818799ac5e7d8274a6277dd813aa75447bb",
+  "trigger": "Initial candidate acquired all five new fixes but regressed on old new-n23 exclusive lower bound (29/30 exact).",
+  "selection": "Repair is chosen only from acquisition results. Initial candidate-check.jsonl has been generated but NOT inspected. Original check.jsonl stays reserved and is not used to alter repair data/hyperparameters. Evaluate repair acquisition before inspecting fresh dialogs.",
+  "composition": "Six replays of all 30 acquisition targets, 64 contrasts, twelve extra copies of the failed old boundary, unique historical general rehearsal.",
+  "gate": "All 30 acquisition cases correct; original frozen new-case gate unchanged."
+}

@@ -1,0 +1,8 @@
+{
+  "new_five_exact": 5,
+  "prior_25_exact": 24,
+  "total_exact": 29,
+  "total": 30,
+  "regression": "new-n23: lowerInclusive true instead of false",
+  "fresh_check_inspected": false
+}
