@@ -1,0 +1,14 @@
+{
+  "adapter": "preference-adapter",
+  "adapterSHA256": "a70bf7a39e38dcab0410bda1178da5e2bb48152cf8ef35d0990f5fdbfcdb1a41",
+  "acceptanceSHA256": "8ee8eda254dcf233244433b668f6f5d2a83155b3d37cec25f313ff06bf1b01da",
+  "developmentDraftCoverage": {
+    "base": 5,
+    "parent": 5,
+    "balanced": 2,
+    "attention": 4,
+    "preference": 6
+  },
+  "reason": "Meets preference protocol: improves strict draft coverage from 4 to 6, retains exact numeric score 13/16. General development results are contaminated by rehearsal and are not independent.",
+  "release": false
+}

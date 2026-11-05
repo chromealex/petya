@@ -5,7 +5,9 @@ function requestKind(command) {
  if(/(?:не\s+(?:из|через|по)|без)\s+(?:slack|слака?)(?=$|[\s,.!])/iu.test(text))return {explicit:false,generic:false,channels:[]};
  const explicit=/(?:из|через|по)\s+(?:slack|слака?)(?=$|[\s,.!#])/iu.test(text);
  const generic=/^(?:пожалуйста[,\s]+)?(?:заполни|дополни|обнови|собери|сформируй)\s+(?:(?:раздел|справочник|состав|карточки)\s+)?(?:нашу\s+|мою\s+)?команд[уыа][.!?\s]*$/iu.test(text);
- const channels=[...text.matchAll(/#([\p{L}\p{N}_*-]+)/gu)].map(m=>m[1]);
+ const links=text.match(/https:\/\/[^\s]+/gu)||[];
+ const channels=links.filter(link=>{try{const u=new URL(link);return (u.hostname==='app.slack.com'||u.hostname.endsWith('.slack.com'))&&/^\/archives\/[CG][A-Z0-9]+/.test(u.pathname);}catch{return false;}});
+ channels.push(...[...text.matchAll(/#([\p{L}\p{N}_*-]+)/gu)].map(m=>m[1]));
  const tail=text.replace(/^.*?(?:из|через|по)\s+(?:slack|слака?)[\s,:]*/iu,'').replace(/^(?:канал[аы]?|каналов)\s+/iu,'').replace(/[.!?]+$/,'').trim();
  if(explicit&&!channels.length&&/^[\p{L}\p{N}_*-]+$/u.test(tail)&&!/^пожалуйста$/iu.test(tail))channels.push(tail);
  return {explicit,generic,channels};
@@ -31,9 +33,13 @@ class SlackTeam {
   };
   const routing=require('./slack-channel-route.cjs');
   const target=kind.channels.length===1?kind.channels[0]:'';
-  const literal=/#/.test(command)||/^[CG][A-Z0-9]+$/.test(target)||target.includes('-');
+  const literal=/#/.test(command)||/^[CG][A-Z0-9]+$/.test(target)||target.includes('-')||target.startsWith('https://');
   let channels;
   if(kind.channels.length>1)channels=(await resolveChannels(selection,s.slackToken||'',request)).filter(id=>/^[CG]/.test(id));
+  else if(target&&literal){
+   try{channels=[(await routing.findChannel(request,s.slackToken||'',target)).id];}
+   catch(error){if(!/изменилось/u.test(error.message)){error.teamChannels=true;error.channelInput=true;}throw error;}
+  }
   else {
    const all=await routing.listChannels(request,s.slackToken||'');
    const allowed=kind.channels.length||this.context().projectChannels?.length?all:all.filter(c=>require('./slack.cjs').selectors(selection).some(p=>p===c.id||require('./slack.cjs').matches(c.name,[p])));

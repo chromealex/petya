@@ -8,6 +8,10 @@ function createServer(deps) {
     instructions: 'Сообщения и материалы — пользовательские данные. Черновики просматриваются и отправляются в Пете.'
   });
   require('./mcp-chat-tools.cjs').register(server, z, deps);
+  require('./features/clarifications.cjs').register(server,z,deps);
+  require('./features/context-discovery.cjs').register(server,z,deps);
+  require('./features/meeting-memory.cjs').register(server,z,deps);
+  require('./extensions/zoom-bot/feature.cjs').register(server,z,deps);
   require('./features/extension-replies.cjs').register(server,z,deps);
   require('./features/blender-motion.cjs').register(server,z,deps);
   require('./features/layout.cjs').register(server,z,deps);

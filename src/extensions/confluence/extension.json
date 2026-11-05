@@ -1,0 +1,14 @@
+{
+  "name": "Confluence",
+  "description": "Документы и пространства",
+  "setting": "module_confluence",
+  "service": "confluence",
+  "settings": true,
+  "scripts": [
+    [
+      "settings.js",
+      "connections.js"
+    ]
+  ],
+  "id": "confluence"
+}

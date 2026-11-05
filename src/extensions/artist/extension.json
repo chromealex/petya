@@ -1,0 +1,18 @@
+{
+  "name": "Художник",
+  "description": "Локальное рисование и свой сервер Stable Diffusion",
+  "setting": "artistEnabled",
+  "scripts": [
+    [
+      "settings.js",
+      "chat-extensions.js"
+    ],
+    [
+      "notifications.js",
+      "notifications.js"
+    ]
+  ],
+  "settings": true,
+  "id": "artist",
+  "feature": "feature.cjs"
+}

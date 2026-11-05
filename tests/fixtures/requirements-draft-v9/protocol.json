@@ -1,0 +1,21 @@
+{
+  "hashes": {
+    "train.jsonl": "43d540a8af49ecf198144a485ee3f1b08ac4bd694ab19bc6f2b48f23aa6a0b0d",
+    "new-corrections.jsonl": "11b04a10467d58b5a65b03fbec8894fecaa601fed65b15276bceedcc8ca12928",
+    "variants.jsonl": "ded5152868a6af990b19bc8df001244a07ce422b1316812f47b6c03ca52e90b8",
+    "retention.jsonl": "a0e4ee7b6bdcf99a437478c6ade9112206b67b3589ebc49dd711f308c0944707",
+    "acquisition.jsonl": "5820e8371e5399403a774d65fb42139ef0362a91fc3887514104ea7df9c2c893",
+    "check.jsonl": "6003f33b537d599309d55a33405b88041016d12418df9572a5f5711e9980a0d3"
+  },
+  "parent": "../requirements-draft-v8/stabilized-adapter",
+  "epochs": 1,
+  "learning_rate": 2e-05,
+  "layers": 5,
+  "seed": 42,
+  "rows": 525,
+  "distinct_training_prompts": 306,
+  "steps": 525,
+  "selection": "One fixed candidate, no selection on reserved checks.",
+  "gate": "All 30 acquired examples semantically correct after reload; new draft coverage greater than base and parent, no numeric/general regression; every cancellation/ban contrast must be reviewed individually. Full reliability requires all targeted cases, not only score improvement.",
+  "limits": "Synthetic related families; manual non-blind review; no production changes or automatic release."
+}

@@ -1,5 +1,5 @@
 const {z}=require('zod');
-const schema=z.object({url:z.string().url().max(2048)}).strict();
+const schema=z.object({url:z.string().url().max(2048),responsive:z.boolean().default(true)}).strict();
 function source(input){
  const {url}=schema.parse(input),u=new URL(url);
  if(u.protocol!=='https:'||u.username||u.password)throw Error('Нужна HTTPS-ссылка на макет.');
@@ -7,7 +7,7 @@ function source(input){
  if(['figma.com','www.figma.com'].includes(u.hostname)&&(match=/^\/(?:design|file)\/([a-zA-Z0-9]+)(?:\/|$)/.exec(u.pathname))){
   const id=u.searchParams.get('node-id')?.replace('-',':');
   if(!/^\d+:\d+$/.test(id||''))throw Error('В Figma выберите фрейм и скопируйте ссылку с node-id.');
-  return {provider:'figma',url,endpoint:'https://api.figma.com/v1/files/'+match[1]+'/nodes?ids='+encodeURIComponent(id),id};
+  return {provider:'figma',key:match[1],url,endpoint:'https://api.figma.com/v1/files/'+match[1]+'/nodes?ids='+encodeURIComponent(id),id};
  }
  if(u.hostname==='app.zeplin.io'&&(match=/^\/project\/([a-zA-Z0-9]+)\/screen\/([a-zA-Z0-9]+)\/?$/.exec(u.pathname)))
   return {provider:'zeplin',url,endpoint:'https://api.zeplin.dev/v1/projects/'+match[1]+'/screens/'+match[2]+'/versions/latest'};
@@ -26,6 +26,6 @@ async function read(ref,token,request=fetch){
   return node;
  }
  if(!Array.isArray(data.layers)||!Number.isFinite(data.width)||!Number.isFinite(data.height))throw Error('Zeplin не вернул размеры и слои экрана.');
- return {name:'Zeplin',rect:{x:0,y:0,width:data.width,height:data.height},layers:data.layers};
+ return {name:'Zeplin',rect:{x:0,y:0,width:data.width,height:data.height},layers:data.layers,assets:data.assets||[],fills:data.background_color?[{type:'color',color:data.background_color}]:[]};
 }
 module.exports={source,read,schema};

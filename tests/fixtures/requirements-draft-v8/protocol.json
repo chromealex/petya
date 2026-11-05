@@ -1,0 +1,25 @@
+{
+  "hashes": {
+    "train.jsonl": "1842a8c028b2633501db6e599252628058e9d7cea7546955b1cb6e98eaf0199e",
+    "corrections.jsonl": "8573c7591b62898a3e26b80df4633d2d37be75528c90e706f1d7950aaabd563e",
+    "variants.jsonl": "f48813dad480da466e6c9f01f509885e221397c7c0dfc1678a58902cb3946c28",
+    "check.jsonl": "b5515a0720e05c56bb2aa25bfa86772263e89ddf0a134fb3d174e6545f26bcad"
+  },
+  "parent": "../requirements-draft-v7/deep-adapter",
+  "epochs": 2,
+  "lr": 3e-05,
+  "layers": 5,
+  "seed": 42,
+  "training_rows": 364,
+  "steps": 728,
+  "new_cases": {
+    "bounds": 24,
+    "draft": 12,
+    "general": 8
+  },
+  "selection": "One fixed candidate; no checkpoint selection on reserved checks.",
+  "improvement_gate": "All seven corrected examples semantically correct after reload; numeric and general no worse than both parent and base; complete draft score greater than both on new cases.",
+  "release_gate": "All targeted numeric and draft checks pass, plus broader deployment validation; this research alone cannot authorize release.",
+  "draft_rubric": "Valid JSON summary/description strings and questions list of strings; all agreed constraints retained, no invented requirements or reopened settled questions. Semantically equivalent wording and logically entailed exclusions accepted. Manual non-blind assessment; no exact wording criterion.",
+  "limitations": "Synthetic related families, not real-user or broad intelligence evidence; greedy diagnostic inference only. Old deep-check is now development."
+}

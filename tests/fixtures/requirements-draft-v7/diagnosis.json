@@ -1,0 +1,336 @@
+[
+  {
+    "id": "floor-1",
+    "task": "bounds",
+    "tokens": 34,
+    "meanLoss": 0.09814293321811259,
+    "teacherAccuracy": 0.9411764705882353,
+    "errors": [
+      {
+        "position": 2,
+        "target": "\":",
+        "predicted": "\":\"",
+        "loss": 1.6004738807678223
+      },
+      {
+        "position": 12,
+        "target": "5",
+        "predicted": "6",
+        "loss": 1.7014997005462646
+      }
+    ],
+    "answer": "{\"status\":\"final\",\"lower\":206,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+    "exactJSON": false
+  },
+  {
+    "id": "zero-0",
+    "task": "bounds",
+    "tokens": 32,
+    "meanLoss": 0.06290563519980186,
+    "teacherAccuracy": 0.9375,
+    "errors": [
+      {
+        "position": 2,
+        "target": "\":",
+        "predicted": "\":\"",
+        "loss": 1.313395380973816
+      },
+      {
+        "position": 9,
+        "target": " null",
+        "predicted": " ",
+        "loss": 0.6936360001564026
+      }
+    ],
+    "answer": "{\"status\":\"final\",\"lower\":0,\"upper\":0,\"lowerInclusive\":true,\"upperInclusive\":true}",
+    "exactJSON": false
+  },
+  {
+    "id": "negative-1",
+    "task": "bounds",
+    "tokens": 33,
+    "meanLoss": 0.044240028994658696,
+    "teacherAccuracy": 0.9696969696969697,
+    "errors": [
+      {
+        "position": 9,
+        "target": " -",
+        "predicted": " null",
+        "loss": 0.7610897421836853
+      }
+    ],
+    "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-12,\"lowerInclusive\":null,\"upperInclusive\":false}",
+    "exactJSON": false
+  },
+  {
+    "id": "mixed-range-1",
+    "task": "bounds",
+    "tokens": 35,
+    "meanLoss": 0.08234332739829446,
+    "teacherAccuracy": 0.9428571428571428,
+    "errors": [
+      {
+        "position": 2,
+        "target": "\":",
+        "predicted": "\":\"",
+        "loss": 1.5020555257797241
+      },
+      {
+        "position": 32,
+        "target": " true",
+        "predicted": " false",
+        "loss": 0.8981900215148926
+      }
+    ],
+    "answer": "{\"status\":\"final\",\"lower\":36,\"upper\":64,\"lowerInclusive\":false,\"upperInclusive\":false}",
+    "exactJSON": false
+  },
+  {
+    "id": "backup-recipients",
+    "task": "draft",
+    "tokens": 59,
+    "meanLoss": 0.4706442350260181,
+    "teacherAccuracy": 0.8983050847457628,
+    "errors": [
+      {
+        "position": 5,
+        "target": "чёт",
+        "predicted": "правля",
+        "loss": 4.194273471832275
+      },
+      {
+        "position": 18,
+        "target": " ад",
+        "predicted": " от",
+        "loss": 2.905045509338379
+      },
+      {
+        "position": 23,
+        "target": " время",
+        "predicted": " от",
+        "loss": 5.933190822601318
+      },
+      {
+        "position": 25,
+        "target": " и",
+        "predicted": " резер",
+        "loss": 2.9832606315612793
+      },
+      {
+        "position": 42,
+        "target": "ит",
+        "predicted": "ителя",
+        "loss": 1.9149233102798462
+      },
+      {
+        "position": 45,
+        "target": " этот",
+        "predicted": " не",
+        "loss": 5.3296051025390625
+      }
+    ],
+    "answer": "{\"summary\": \"Отправлять отчёт резервного копирования администратору\", \"description\": \"Настроить отправку отчёта резервного копирования администратору. В содержании отчёта показывать время завершения резервного копирования и его результат. Путь к файлу резервной копии скрывать. Отправлять только отчёт резервного копирования.\", \"questions\": []}",
+    "exactJSON": false
+  },
+  {
+    "id": "explicit-trigger",
+    "task": "draft",
+    "tokens": 63,
+    "meanLoss": 0.49156693795967726,
+    "teacherAccuracy": 0.873015873015873,
+    "errors": [
+      {
+        "position": 4,
+        "target": "У",
+        "predicted": "От",
+        "loss": 1.924391269683838
+      },
+      {
+        "position": 8,
+        "target": " о",
+        "predicted": " де",
+        "loss": 6.577281951904297
+      },
+      {
+        "position": 19,
+        "target": "Т",
+        "predicted": "С",
+        "loss": 2.9822123050689697
+      },
+      {
+        "position": 29,
+        "target": " де",
+        "predicted": " уведом",
+        "loss": 1.4606900215148926
+      },
+      {
+        "position": 34,
+        "target": " проверки",
+        "predicted": " ошибки",
+        "loss": 1.2452290058135986
+      },
+      {
+        "position": 35,
+        "target": " и",
+        "predicted": ".",
+        "loss": 2.497408390045166
+      },
+      {
+        "position": 46,
+        "target": " После",
+        "predicted": " Получ",
+        "loss": 6.850132942199707
+      },
+      {
+        "position": 50,
+        "target": " уведом",
+        "predicted": " отправ",
+        "loss": 1.5131237506866455
+      }
+    ],
+    "answer": "{\"summary\": \"Отправлять уведомление дежурному только после неудачной проверки\", \"description\": \"В приложении внедрить логику отправки уведомления дежурному. Уведомление отправлять строго только в случае неудачной проверки. В содержании уведомления включать код проверки. Имя пользователя не добавлять в текст уведомления. Получателями оставаться\", \"questions\": []}",
+    "exactJSON": false
+  },
+  {
+    "id": "print-columns",
+    "task": "draft",
+    "tokens": 56,
+    "meanLoss": 0.34513187988034133,
+    "teacherAccuracy": 0.8928571428571429,
+    "errors": [
+      {
+        "position": 14,
+        "target": "П",
+        "predicted": "В",
+        "loss": 3.1216561794281006
+      },
+      {
+        "position": 17,
+        "target": " номер",
+        "predicted": " наклад",
+        "loss": 1.2298493385314941
+      },
+      {
+        "position": 22,
+        "target": " в",
+        "predicted": " и",
+        "loss": 3.041332721710205
+      },
+      {
+        "position": 43,
+        "target": ".",
+        "predicted": ".\",",
+        "loss": 2.468947410583496
+      },
+      {
+        "position": 45,
+        "target": " не",
+        "predicted": " по",
+        "loss": 4.276346683502197
+      },
+      {
+        "position": 46,
+        "target": " добав",
+        "predicted": " требуется",
+        "loss": 1.2368934154510498
+      }
+    ],
+    "answer": "{\"summary\": \"Печать накладной\", \"description\": \"В модуле печати накладной внедрить следующие изменения:\\n1. В шапке документа отобразить номер накладной и дату.\\n2. В основной части документа отобразить количество.\\n3. Исключить поле с номером телефона покупателя из печатной формы.\", \"questions\": []}",
+    "exactJSON": false
+  },
+  {
+    "id": "sensor-topic",
+    "task": "draft",
+    "tokens": 63,
+    "meanLoss": 0.8639155225214742,
+    "teacherAccuracy": 0.7777777777777778,
+    "errors": [
+      {
+        "position": 4,
+        "target": "Про",
+        "predicted": "По",
+        "loss": 4.898810863494873
+      },
+      {
+        "position": 7,
+        "target": " показания",
+        "predicted": " показ",
+        "loss": 3.2325685024261475
+      },
+      {
+        "position": 10,
+        "target": "\",",
+        "predicted": " температуры",
+        "loss": 1.733217477798462
+      },
+      {
+        "position": 15,
+        "target": "Т",
+        "predicted": "По",
+        "loss": 1.6859787702560425
+      },
+      {
+        "position": 19,
+        "target": " должна",
+        "predicted": " строго",
+        "loss": 3.416701555252075
+      },
+      {
+        "position": 20,
+        "target": " быть",
+        "predicted": " строго",
+        "loss": 0.9693983197212219
+      },
+      {
+        "position": 27,
+        "target": ";",
+        "predicted": ".",
+        "loss": 4.12766695022583
+      },
+      {
+        "position": 28,
+        "target": " ",
+        "predicted": " показ",
+        "loss": 5.419195175170898
+      },
+      {
+        "position": 31,
+        "target": " не",
+        "predicted": " град",
+        "loss": 4.471619129180908
+      },
+      {
+        "position": 32,
+        "target": " допускается",
+        "predicted": " подходит",
+        "loss": 8.870308876037598
+      },
+      {
+        "position": 34,
+        "target": " Техни",
+        "predicted": " По",
+        "loss": 4.632596969604492
+      },
+      {
+        "position": 50,
+        "target": ".",
+        "predicted": ".\",",
+        "loss": 2.608099937438965
+      },
+      {
+        "position": 54,
+        "target": " вне",
+        "predicted": " не",
+        "loss": 2.7170302867889404
+      },
+      {
+        "position": 55,
+        "target": " задачи",
+        "predicted": " этой",
+        "loss": 2.1666908264160156
+      }
+    ],
+    "answer": "{\"summary\": \"Показание датчика температуры\", \"description\": \"В интерфейсе дисплея техники внедрить показание датчика температуры. Требования к показанию:\\n1. Температура показывать только строго ниже 72 градусов.\\n2. Отображать номер датчика.\", \"questions\": []}",
+    "exactJSON": false
+  }
+]

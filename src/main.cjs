@@ -58,7 +58,7 @@ async function backgroundTick() {
     if (!smoke) await buildRepair?.tick();
     if (modules.enabled(settings, 'slack') && settings.slackAutoSync === 'true' && Date.now() - lastSlackRound >= Number(settings.slackInterval) * 60000) { lastSlackRound = Date.now(); slackSync.start().catch(e => { slackSync.status.message = e.message; }); }
     else if (modules.enabled(settings, 'slack') && slackSync.queue.length) slackSync.tick().catch(e => { slackSync.status.message = e.message; });
-    try { const state = await meetingMonitor.tick(settings.zoomAutoRecord === 'true'); if (state) monitorStatus = state; }
+    try { const state = await meetingMonitor.tick(settings.zoomCaptureMode === 'local' && settings.zoomAutoRecord === 'true'); if (state) monitorStatus = state; }
     catch (e) { monitorStatus = { message: e.message }; }
     win.webContents.send('background-status', { zoom: monitorStatus, slack: slackSync.status });
   } catch (e) { win.webContents.send('background-status', { error: e.message }); }
@@ -476,6 +476,7 @@ function setupHandlers() {
   // features add their own services here (see src/features.cjs) instead of editing main.cjs.
   const services={
     get workspace(){return workspace;},
+    get dataRoot(){return dataRoot;}, get speech(){return speech;}, get qwenSpeech(){return qwenSpeech;}, get speechError(){return speechError;},
     get win(){return win;},get smoke(){return smoke;},get snapshots(){return snapshots;},get handle(){return handle;},get directRequest(){return directRequest;},get team(){return team;},get memory(){return memory;},get slackSync(){return slackSync;},
     get agents(){return agents;},
     get allowedMedia(){return allowedMedia;},
@@ -537,6 +538,8 @@ function setupHandlers() {
   const stopChatMcp = require('./mcp-setup.cjs')({
     invokeUnity:(...args)=>services.unity.invoke(...args),
     handle, dialogue, attachments, chatJobs, memory, addContext, companyId,
+    meetingRecording: (...args)=>services.meetingRecording(...args),
+    zoomBot: (...args)=>services.zoomBot(...args),
     generatePainting: (args, check) => services.artist.generate(args, check),
     check() { if (switchingCompany || quitting) throw Error('Компания закрывается.'); },
     async run(work) { activeOperations++; try { return await work(); } finally { activeOperations--; } },

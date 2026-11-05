@@ -8,6 +8,8 @@
  const panel=el('details',null,'important-panel');panel.hidden=true;
  function place(){if(typeof dialogueMessages==='undefined'||!dialogueMessages.parentElement)return;if(panel.nextElementSibling!==dialogueMessages)dialogueMessages.before(panel);}
  function renderPanel(){
+  window.petyaHighlightState={topicId:typeof topicSelect==='undefined'?'':topicSelect.value,items:[...state.chat,...state.project]};
+  document.dispatchEvent(new CustomEvent('petya-highlights-changed',{detail:window.petyaHighlightState}));
   const items=[...state.chat,...state.project];panel.hidden=!items.length;place();
   const open=panel.open;panel.replaceChildren();panel.open=open;
   panel.append(el('summary','Важное · '+items.length));

@@ -1,0 +1,17 @@
+{
+  "name": "Вёрстка Unity",
+  "description": "Макеты Figma и Zeplin, изображения и шрифты",
+  "setting": "extension_layout",
+  "scripts": [
+    [
+      "settings.js",
+      "notifications.js"
+    ]
+  ],
+  "settings": true,
+  "id": "layout",
+  "feature": "feature.cjs",
+  "results": {
+    "layoutProposal": "renderLayoutProposal"
+  }
+}

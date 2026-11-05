@@ -1,0 +1,129 @@
+{
+  "f-rename-0-01": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: True",
+      "Address and content preserved"
+    ],
+    "group": "rename-order-0"
+  },
+  "f-rename-0-10": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: False",
+      "Address and content preserved"
+    ],
+    "group": "rename-order-0"
+  },
+  "f-rename-0-00": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: False",
+      "Address and content preserved"
+    ],
+    "group": "rename-order-0"
+  },
+  "f-rename-0-11": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: True",
+      "Address and content preserved"
+    ],
+    "group": "rename-order-0"
+  },
+  "f-rename-1-01": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: True",
+      "Address and content preserved"
+    ],
+    "group": "rename-order-1"
+  },
+  "f-rename-1-10": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: False",
+      "Address and content preserved"
+    ],
+    "group": "rename-order-1"
+  },
+  "f-rename-1-00": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: False",
+      "Address and content preserved"
+    ],
+    "group": "rename-order-1"
+  },
+  "f-rename-1-11": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: True",
+      "Address and content preserved"
+    ],
+    "group": "rename-order-1"
+  },
+  "f-ban-00": {
+    "criteria": [
+      "Manager recipient, statement number and result",
+      "Tenant receives: False",
+      "Reviewer email visible: False"
+    ],
+    "group": "recipient-field"
+  },
+  "f-ban-10": {
+    "criteria": [
+      "Manager recipient, statement number and result",
+      "Tenant receives: True",
+      "Reviewer email visible: False"
+    ],
+    "group": "recipient-field"
+  },
+  "f-ban-01": {
+    "criteria": [
+      "Manager recipient, statement number and result",
+      "Tenant receives: False",
+      "Reviewer email visible: True"
+    ],
+    "group": "recipient-field"
+  },
+  "f-ban-11": {
+    "criteria": [
+      "Manager recipient, statement number and result",
+      "Tenant receives: True",
+      "Reviewer email visible: True"
+    ],
+    "group": "recipient-field"
+  },
+  "f-topic": {
+    "criteria": [
+      "Mechanic/equipment/date with exact format",
+      "Hidden owner",
+      "No purchasing scope"
+    ],
+    "group": null
+  },
+  "f-print": {
+    "criteria": [
+      "Three fields with exact date format",
+      "No packer name",
+      "No search"
+    ],
+    "group": null
+  },
+  "f-notify": {
+    "criteria": [
+      "Analyst, only failure",
+      "Export number not error code, cause",
+      "Hidden operator"
+    ],
+    "group": null
+  },
+  "f-pronoun": {
+    "criteria": [
+      "Room number and area",
+      "Hidden resident address after pronoun follow-up"
+    ],
+    "group": null
+  }
+}

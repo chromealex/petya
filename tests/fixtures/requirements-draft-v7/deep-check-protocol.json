@@ -1,0 +1,8 @@
+{
+  "dataSHA256": "cdc066353585984d86cf171ac3ec42ecb7fc0407c4f0236d77826380541b955f",
+  "numeric": 16,
+  "drafts": 8,
+  "general": 8,
+  "gate": "Numeric and general at least base and v5, strict draft coverage greater than both. No automatic deployment.",
+  "novelty": "Fresh prompts and numbers, mixed numeric turn lengths, eight long drafts including two open questions. Related synthetic task families, not broad independent benchmark."
+}

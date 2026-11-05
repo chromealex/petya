@@ -5,6 +5,8 @@ app.whenReady().then(async () => {
   const win = new BrowserWindow({ show: false, width: 1180, height: 1000 });
   try {
     let html = fs.readFileSync(path.join(__dirname, '../src/ui/index.html'), 'utf8').replace(/<script[^>]*>[\s\S]*?<\/script>/g, '');
+    const template=fs.readFileSync(path.join(__dirname,'../src/extensions/jira/settings.html'),'utf8');
+    html=html.replace('<button class="primary" type="submit">Сохранить подключения</button>',template+'<button class="primary" type="submit">Сохранить подключения</button>');
     await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
     await win.webContents.insertCSS(fs.readFileSync(path.join(__dirname, '../src/ui/style.css'), 'utf8'));
     await win.webContents.executeJavaScript(`
@@ -25,7 +27,7 @@ app.whenReady().then(async () => {
       document.querySelectorAll('#settings article').forEach(a => { a.hidden = !a.querySelector('[name=jiraUrl]'); });
       document.querySelector('[name=jiraUrl]').value = 'https://company.atlassian.net';
     `);
-    await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, '../src/ui/jira-settings.js'), 'utf8'));
+    await win.webContents.executeJavaScript(fs.readFileSync(path.join(__dirname, '../src/extensions/jira/settings.js'), 'utf8'));
     await win.webContents.executeJavaScript(`(async () => {
       function check(condition, message) { if (!condition) throw new Error(message); }
       await refreshJiraChoices();

@@ -77,6 +77,8 @@ Open **Подключения → Доступ к чатам через MCP**, e
 - Inspect versions with `list_chat_versions` and `read_chat_version`. Use `select_chat_version` to switch, or `prepare_chat_version` to stage an edited or repeated question. The user sends it from Petya; preparing a version runs no commands.
 - Use `list_chat_materials`, `read_chat_material` and `set_chat_material_enabled` to inspect and change the selected chat's context. `add_chat_note` saves a note in the company's shared memory.
 
+Use `list_chat_clarifications` to discover pending questions and `get_chat_clarification` to inspect their original request, options, input requirements and expiry. With full edit access, `answer_chat_clarification` accepts either `answer` or an `optionId` and immediately resumes the saved request; `cancel_chat_clarification` cancels it. Answers run in the originating chat/project scope without opening it or changing the desktop selection. This can perform the original external action, so read-only and draft-only clients cannot answer. IDs are single-use after a valid answer; a new question returns a new ID. Changed connections, versions, expired questions and inaccessible projects are rejected. Results update the desktop chat. Pending questions and original requests are persisted, with a 30-minute lifetime (legacy Slack questions: 10 minutes). Restart-safe descriptors restore Git input, image-description and build-repair task questions after scope validation. Other callbacks survive only in memory: after restart their questions remain visible with `canResume: false` and a draft recovery action, never automatic replay. A running action interrupted by restart is marked for review, not retried. The tools cover the shared clarification mechanism, including adapted team-fill and Slack-channel questions. Technical failures and native permission dialogs are not converted into answerable questions.
+
 New MCP connections default to the current project and read-only access. Select draft editing or full editing before enabling the connection. Company-wide notes can only be created with full company access. A project-scoped client can read shared materials already referenced by messages in that project. Draft and version writes require the opaque `revision` from a fresh `get_chat_draft` or `list_chat_versions` call. On conflict, read again before proposing a new write.
 
 In an open chat, Ctrl/Cmd+F searches all loaded and older messages in that version. The message menu copies a local petya:// link to its version and message. MCP clients can use the optional query in `read_chat_version`; assistant messages include their local links. `list_chats` includes the reason for pending attention. Links open chats stored in the company's local Petya profile.
@@ -134,12 +136,69 @@ prefers native `manage_asset`; older servers and the directional preview/open wo
 
 Extensions may provide `result.cjs` with an `id`, `describe(message, topic, services)` and, for direct actions, `perform(action, result, services, check)`. Descriptors supply a stable object key, title, subtitle and action IDs/labels. Command actions use the normal chat pipeline. Direct actions recheck ownership and availability after asynchronous work and before side effects. The shared result cards and composer selector retain the selection (or explicit reset) within the company, project, chat and version. Multiple objects require an explicit choice. Imported files expose folder navigation only when their original local path was recorded by the native picker.
 
+### Extension-driven diagnostics
+
+Adapters may export an `agent` capability description and `agentTurn(services, command, check)`.
+The local model selects an adapter from those descriptions when no direct route matches. The shared
+`src/extensions/agent.cjs` runner discovers tool schemas, validates arguments, reads results and
+requests the next step through native model tool calls. It limits each run to eight observations,
+twelve planning turns and up to three completion reviews, rejects
+repeated calls and checks chat scope and cancellation between steps. Tool results are untrusted data.
+Each adapter supplies its read-only action policy. All other calls become proposals with evidence.
+
+Unity supports `unity_assist` (command, chatId, optional instance) through MCP and contextual chat.
+It reads scene objects, resources, physics and console data through the selected live editor.
+Proposed edits are not executed during diagnosis. `unity_apply_agent_proposal` takes the returned
+proposalId, verifies the original chat/version/connection, shows the exact operation for local
+confirmation and consumes the proposal once. The chat card shows observations and an apply button.
+Both tools require MCP edit access. A changed chat, model or connection interrupts the workflow.
+
 ### Unity layout extension (0.8.3)
 
-The chat extension **Вёрстка Unity** requires Unity Editor and either Figma or Zeplin. In settings, enter a Figma personal access token with `file_content:read` or a Zeplin access token, then paste a Figma frame URL containing `node-id` or `https://app.zeplin.io/project/PROJECT/screen/SCREEN`. Tokens use the existing OS-encrypted, company-specific settings store and are redacted from public settings. No OAuth application is provisioned; personal-token connections do not provide an application icon setting.
+**Вёрстка Unity** imports Figma frames and Zeplin screens into the active Unity scene as a UI Toolkit `UIDocument`, with a separate UXML, `PanelSettings`, image files and supplied TTF/OTF files. Enable Unity Editor and configure either a Figma personal token (`file_content:read`) or a Zeplin access token. Tokens use the company-scoped OS-encrypted settings store and are redacted from public settings. Personal-token connections do not provision an OAuth application or provide an application icon setting.
 
-The extension reads the selected frame/screen and prepares fixed-position UI Toolkit UXML. Review the markup before importing. Unity must expose `execute_code`; import requires the existing confirmation dialog in Petya and creates a uniquely named asset under `Assets/PetyaLayouts`, without overwriting existing files or changing the scene. Select the intended editor when multiple Unity instances are open. This is a basic layout scaffold: images, custom fonts, effects, responsive constraints, and interactions need manual work. Large frames are rejected with a request to select a smaller frame.
+Paste a Figma frame URL containing `node-id` or `https://app.zeplin.io/project/PROJECT/screen/SCREEN`. Preparation reads the design and downloads its images. The review panel lists required font families, weights and italic styles; choose the corresponding TTF/OTF files before applying. The service APIs do not supply font binaries, so Petya does not silently substitute missing fonts. Image downloads only use HTTPS provider/CDN hosts, never forward service tokens to asset URLs, reject redirects, and enforce byte limits.
 
-MCP tools `prepare_unity_layout(chatId, url)` and `apply_unity_layout(chatId, proposalId, instance?)` use the same application logic as the UI, require edit access, and enforce chat/project scope and current dependencies. `list_chat_extensions` includes the extension; `use_chat_extension` accepts a layout request with a frame URL. Proposals are session-local: prepare again after restarting Petya or changing chat, company, or credentials. Background progress is shown in the notification center and restored from `layout.status` when the window reopens. Connection credentials can only be configured in the application settings.
+Responsive mode maps horizontal/vertical Auto Layout, fill/hug sizing, padding, spacing, wrapping, edge/center/stretch/proportional constraints, and Figma scroll containers into UI Toolkit. It uses `PanelSettings.ScaleWithScreenSize` and the source reference resolution. Disable responsive mode for a fixed layout. It does not invent a mobile redesign or application behavior absent from the source. Mixed text runs, container effects, and unsupported styling produce review warnings. Figma leaf vector/image/effect layers use rendered PNG exports; Zeplin images require PNG/JPEG exports associated with layer source IDs. Exported Zeplin groups are flattened into images. Font selection must match the indicated family and style.
 
-API references: [Figma file nodes](https://developers.figma.com/docs/rest-api/file-endpoints/), [Zeplin screen versions](https://docs.zeplin.dev/reference/screen_version), and [Zeplin layers](https://docs.zeplin.dev/reference/layer). Validation: `tests/layout-mcp.cjs` runs through the real MCP client from `tests/mcp.cjs`, using fixture design responses and a stub Unity invocation; live service credentials and a Unity Editor are not required for this check. A separate real-editor check, `tests/layout-unity-live.cjs`, verifies the imported hierarchy and resolved geometry, text size and color for both providers; see [verification results and reproduction](docs/layout-verification.md).
+Applying requires `execute_code` in MCP for Unity and a confirmation dialog in Petya showing the editor, active scene, layer count and resources. The importer checks project/scene identity between transfers, validates file checksums and imported texture/font assets, then creates a uniquely named folder under `Assets/PetyaLayouts` and a new scene object. It never saves the scene automatically; Unity Undo removes the created object, while imported resources remain. A failure before placement creates no scene object; interrupted transfers can leave files in the target project's `Temp/PetyaLayout-*`, and a failed Unity asset import can leave its uniquely named asset folder for diagnosis. Retry starts a separate import.
+
+MCP tools use the same feature methods and edit-access/project/chat checks as the UI:
+
+- `prepare_unity_layout(chatId, url, responsive?)`: prepare the design, download images and return required fonts, warnings and resource sizes.
+- `get_unity_layout_proposal(chatId, proposalId)`: inspect the current review data.
+- `set_unity_layout_font(chatId, proposalId, fontKey, base64)`: supply the actual TTF/OTF data for a required font.
+- `pick_unity_layout_font(chatId, proposalId, fontKey)`: open the native font picker in Petya.
+- `apply_unity_layout(chatId, proposalId, instance?)`: import resources and place a document after local confirmation; returns editor choices when selection is ambiguous.
+
+The extension is also available through `list_chat_extensions` and `use_chat_extension`. Proposals are session-local and expire when the chat, company, version or credentials change. At most five proposals are retained. Limits: 1500 layers, 40 nesting levels, 100 downloaded images, 12 MiB per resource, 48 MiB total resource data, and 2 MiB UXML. Progress uses the notification center and is restored when the window reopens. Credentials and the choice of local font files remain in the application UI; supplied font bytes are also accepted through the scoped MCP tool.
+
+Validation includes authenticated MCP calls, provider/CDN fixture requests, real Unity asset import and scene placement, and a 446-layer responsive stress fixture. See [verification results and reproduction](docs/layout-verification.md).
+
+### Automatic work context
+
+Vague questions such as «посмотри что не так» resolve saved context before answering: the latest eligible Zoom session, otherwise team requests in synced Slack threads. Existing chat materials take precedence. Selected projects restrict Slack channels; ambiguous channels without a project require clarification. Zoom meetings are shared company context available across projects. Sources, timestamps and bounded text snapshots stay in the chat for follow-up questions. Missing recordings or unsynced Slack messages cannot be inferred.
+
+`resolve_work_context(chatId)` uses the same resolver and returns evidence for an MCP assistant to answer. It is read-only; project-scoped clients can only discover shared materials already referenced in their authorized project. Excluded materials and disabled project services remain excluded. Recording permissions, connection settings and sending messages remain in the application.
+
+### Automatic Zoom meeting memory
+
+Zoom meeting detection is enabled by default, including a one-time migration for existing profiles. Later opt-outs remain saved. OS permissions still require the app. Transcripts (including the local microphone) are stored in encrypted company memory, independently of the selected chat, for the configured 1–7 days. System audio capture includes other applications. Recording continues until the meeting ends; only then does recognition start. Encrypted audio segments survive recognition failures and restarts and are deleted after successful processing; stale pending audio is removed on startup or the next recording according to the context retention period. A dedicated meeting microphone never enters the voice-command timeout. The notification center shows recording, processing, completion and retryable errors.
+
+MCP `read_meeting_memory` reads complete transcript segments with optional `sessionId`, `offset`, and `limit` (up to 100); it requires company-wide access and cannot start capture or bypass OS permission. `resolve_work_context` can use shared Zoom sessions in any project; project-scoped MCP access retains its existing material restrictions.
+
+MCP `meeting_recording_status` exposes the same processing snapshot as the UI; `retry_meeting_processing(sessionId)` retries a failed saved recording and requires company-wide edit access. Audio capture and OS permission prompts remain app-only.
+
+### Separate Zoom participant
+
+The `zoom-bot` extension detects a live Zoom desktop meeting and reads its meeting information. Its settings select automatic joining, confirmation in Petya, or disabled joining. Bot mode never opens the computer microphone or system-audio capture. Chat voice input is suspended during a detected meeting; text chats remain usable. The optional local recorder remains a separate capture mode.
+
+A provisioned Linux Meeting SDK service and Zoom OAuth connection are required; a server alone is not enough. The service records encrypted audio until Zoom ends, then the desktop transcribes it and stores complete segments in shared company memory. It does not send transcription to the current chat. Confirmed memory writes are resumable; successful acknowledgment removes server audio. See [deployment and limitations](zoom-bot/README.md).
+
+MCP tools `zoom_bot_status`, `zoom_bot_join(id)`, `zoom_bot_dismiss(id)` and `zoom_bot_retry(id)` use the same controller as the interface. They require company-wide access; mutations require edit access. Join/retry through MCP require automatic mode. Manual joining confirmation, service configuration and OAuth login are app-only; MCP cannot bypass them.
+
+MCP `zoom_bot_request_access` opens the macOS Accessibility settings using the same action as the extension notification and settings button. It requires company-wide edit access and never grants OS permission itself. Once permission is granted, the controller retries discovery automatically and still respects manual/automatic joining mode.
+
+Zoom recorder requests pin the service URL and OAuth credential inside the encrypted meeting state before joining, so reauthorization cannot redirect an active job to another identity. An explicit UI or MCP `zoom_bot_retry` revalidates the current meeting and creates a fresh attempt after a terminal failure or an inaccessible legacy job; completed transcript processing is never silently reset.
+
+Chat continuations publish running, attention, completed and cancelled states through the existing chat jobs and notification center. `stop_chat_continuation` requests cooperative cancellation; completed external effects are not rolled back, and an unknown outcome is never retried automatically. `list_chat_continuations` returns the last 50 continuation records for an accessible chat. `answer_chat_clarification` accepts an optional `assistant` display label (self-reported, not authenticated identity). The chat header shows this history. Notifications restore from saved chat state, update in place, and provide Open/Stop actions.

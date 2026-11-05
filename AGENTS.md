@@ -51,3 +51,17 @@
 - Use one stable notification ID per operation, update its card in place, and report completion or actionable errors. Offer retry, cancellation, or navigation only when supported. Never reset unread state for every progress tick.
 - Show real progress percentages only when the total is known; otherwise show the actual stage with indeterminate progress. Do not imply that checking, downloading, and installing are the same stage.
 - Verify progress and completion with settings closed, failure handling, and duplicate-start behavior. Keep notifications compact and accessible.
+
+# Extension settings ownership
+
+- Each extension directory declares `extension.json`, including whether it has settings. Keep its settings markup, renderer, operation notifications and backend implementation in that directory.
+- Use the generic extension host and catalog. Do not add extension-specific settings controls, script tags or activation branches to the application shell.
+- Reuse shared credential adapters for service connections; do not duplicate credentials. Extensions without settings must explicitly declare that fact.
+- Validate extension discovery and installed/uninstalled behavior, including notifications while settings are closed.
+
+# Missing information in chat
+
+- Missing input, ambiguous targets and prerequisites are clarification states, not technical errors. Ask in chat, retain the original request and resume the exact unfinished step after the answer.
+- Use `input-required.cjs` with the scoped `clarifications` feature for new workflows, or an existing scoped continuation. Supply concrete choices when available, otherwise an inline input. Never ask the user to retype the original request.
+- Emit a clarification before side effects. Never retry an external write with an unknown outcome. Revalidate company, project, chat/version and connection before continuing; support cancellation and reject stale answers.
+- Test a multi-step clarification, invalid/missing input, cancellation, context changes and duplicate submission. Genuine connection, permission and execution failures must remain distinguishable from missing data.

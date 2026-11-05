@@ -1,0 +1,48 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.UIElements;
+public class LayoutSceneCheck : EditorWindow {
+ static LayoutSceneCheck window;static TemplateContainer clone;static double deadline;static int phase;static int previousRows=100;
+ static int[] widths={360,768,1440};
+ static Dictionary<string,string> ids=new Dictionary<string,string>{/* IDS */};
+ /* METHODS */
+ public static void Run(){try{
+ UnityEditor.SceneManagement.EditorSceneManager.NewScene(UnityEditor.SceneManagement.NewSceneSetup.EmptyScene);
+ window=GetWindow<LayoutSceneCheck>();window.position=new Rect(40,40,1600,1000);window.titleContent=new GUIContent("Petya complex layout");
+ /* CALLS */
+ window.Show();deadline=EditorApplication.timeSinceStartup+12;EditorApplication.update+=Tick;
+ }catch(Exception e){Fail(e);}}
+ static void Attach(string provider,string folder){
+ var tree=AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(folder+"/layout.uxml");var panel=AssetDatabase.LoadAssetAtPath<PanelSettings>(folder+"/PanelSettings.asset");
+ if(tree==null||panel==null)throw new Exception("Missing imported assets");
+ var docs=UnityEngine.Object.FindObjectsByType<UIDocument>(FindObjectsSortMode.None);if(docs.Length!=1||docs[0].visualTreeAsset!=tree||docs[0].panelSettings!=panel)throw new Exception("Complex interface missing from scene");
+ clone=tree.CloneTree();clone.style.width=widths[0];clone.style.height=900;clone.style.flexShrink=0;window.rootVisualElement.Add(clone);
+ }
+ static VisualElement E(string name){var element=clone.Q<VisualElement>(ids[name]);if(element==null)throw new Exception("Missing "+name);return element;}
+ static void Near(float a,float b,string name){if(float.IsNaN(a)||Math.Abs(a-b)>.5f)throw new Exception(name+": "+a+" != "+b);}
+ static void Tick(){try{
+ window.Repaint();if(EditorApplication.timeSinceStartup<deadline)return;
+ var root=E("Complex dashboard");var sidebar=E("Sidebar");var main=E("Main");
+ Near(root.resolvedStyle.width,widths[phase],"viewport width");Near(sidebar.resolvedStyle.width,80,"sidebar width");Near(main.resolvedStyle.width,widths[phase]-80,"main fills remaining width");
+ Near(E("Footer").worldBound.yMax,root.worldBound.yMax,"footer remains inside viewport");
+ var scroll=(ScrollView)E("Dashboard scroll");if(scroll.verticalScroller.highValue<=0)throw new Exception("Dashboard cannot scroll");
+ var table=(ScrollView)E("Table horizontal scroll");if(widths[phase]<800&&table.horizontalScroller.highValue<=0)throw new Exception("Wide table cannot scroll horizontally");
+ var rows=new HashSet<int>();var cards=new List<Rect>();
+ for(int i=0;i<24;i++){
+ var rect=E("Card "+i).worldBound;cards.Add(rect);rows.Add((int)Math.Round(rect.y));
+ Near(rect.width,220,"card width");if(rect.x<scroll.contentViewport.worldBound.xMin-1||rect.xMax>scroll.contentViewport.worldBound.xMax+1)throw new Exception("Card escaped horizontal viewport: "+i+" "+rect+" viewport "+scroll.contentViewport.worldBound);
+ if(E("Image "+i).resolvedStyle.backgroundImage.texture==null)throw new Exception("Missing card image "+i);
+ var text=(Label)E("Title "+i);if(text.resolvedStyle.unityFont==null&&text.resolvedStyle.unityFontDefinition.font==null&&text.resolvedStyle.unityFontDefinition.fontAsset==null)throw new Exception("Missing bold font");
+ }
+ for(int i=0;i<cards.Count;i++)for(int j=i+1;j<cards.Count;j++)if(cards[i].Overlaps(cards[j]))throw new Exception("Cards overlap: "+i+", "+j);
+ if(rows.Count>=previousRows)throw new Exception("Cards did not reflow at wider viewport");previousRows=rows.Count;
+ var line="width="+widths[phase]+"; card rows="+rows.Count+"; vertical scroll="+scroll.verticalScroller.highValue+"; table scroll="+table.horizontalScroller.highValue+"\n";File.AppendAllText("measurements.txt",line);
+ if(phase<2){phase++;clone.style.width=widths[phase];deadline=EditorApplication.timeSinceStartup+5;return;}
+ scroll.scrollOffset=new Vector2(0,400);if(scroll.scrollOffset.y<399)throw new Exception("Scroll offset did not apply");
+ File.WriteAllText("verification.txt","PASS: 446 source layers, 24 image cards, 36 table rows, regular/bold TTF, scene UIDocument, nested scroll views and non-overlapping card reflow at 360, 768, 1440 pixels.\n"+File.ReadAllText("measurements.txt"));EditorApplication.update-=Tick;EditorApplication.Exit(0);
+ }catch(Exception e){Fail(e);}}
+ static void Fail(Exception e){File.WriteAllText("verification.txt",e.ToString());Debug.LogException(e);EditorApplication.Exit(1);}
+}

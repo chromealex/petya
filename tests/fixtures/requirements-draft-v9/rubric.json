@@ -1,0 +1,129 @@
+{
+  "global_rule": "Valid schema and all agreed requirements; preserve explicit exclusions, retain latest decisions, no invented requirements or reopened questions. Accept equivalent wording. Manual non-blind review.",
+  "cases": {
+    "cancel-01": {
+      "criteria": [
+        "Rename active: False",
+        "Color change active: True",
+        "Address and data preserved"
+      ],
+      "pair": "rename-four-way"
+    },
+    "cancel-10": {
+      "criteria": [
+        "Rename active: True",
+        "Color change active: False",
+        "Address and data preserved"
+      ],
+      "pair": "rename-four-way"
+    },
+    "cancel-00": {
+      "criteria": [
+        "Rename active: False",
+        "Color change active: False",
+        "Address and data preserved"
+      ],
+      "pair": "rename-four-way"
+    },
+    "cancel-11": {
+      "criteria": [
+        "Rename active: True",
+        "Color change active: True",
+        "Address and data preserved"
+      ],
+      "pair": "rename-four-way"
+    },
+    "ban-00": {
+      "criteria": [
+        "Cashier recipient and return number/result",
+        "Buyer allowed: False",
+        "Courier phone visible: False"
+      ],
+      "pair": "recipient-field-four-way"
+    },
+    "ban-10": {
+      "criteria": [
+        "Cashier recipient and return number/result",
+        "Buyer allowed: True",
+        "Courier phone visible: False"
+      ],
+      "pair": "recipient-field-four-way"
+    },
+    "ban-01": {
+      "criteria": [
+        "Cashier recipient and return number/result",
+        "Buyer allowed: False",
+        "Courier phone visible: True"
+      ],
+      "pair": "recipient-field-four-way"
+    },
+    "ban-11": {
+      "criteria": [
+        "Cashier recipient and return number/result",
+        "Buyer allowed: True",
+        "Courier phone visible: True"
+      ],
+      "pair": "recipient-field-four-way"
+    },
+    "topic-return": {
+      "criteria": [
+        "Dispatcher, shift number, start time HH:MM",
+        "Hidden surname",
+        "Vacation schedule excluded"
+      ],
+      "pair": null
+    },
+    "double-cancel": {
+      "criteria": [
+        "Latest rename active after two reversals",
+        "Color and address unchanged"
+      ],
+      "pair": null
+    },
+    "print-fields": {
+      "criteria": [
+        "All three fields and exact date format",
+        "No payer name",
+        "No search"
+      ],
+      "pair": null
+    },
+    "notify-only": {
+      "criteria": [
+        "Secretary only on failure",
+        "Letter number not error code; cause",
+        "Sender name hidden"
+      ],
+      "pair": null
+    },
+    "open-questions": {
+      "criteria": [
+        "Text name and verification deadline",
+        "Hidden cost",
+        "Only color and order questions"
+      ],
+      "pair": null
+    },
+    "closed-question": {
+      "criteria": [
+        "Name/category and approved TSV",
+        "No reopened format question"
+      ],
+      "pair": null
+    },
+    "pronoun": {
+      "criteria": [
+        "Batch number and result",
+        "Address remains hidden despite follow-up pronoun"
+      ],
+      "pair": null
+    },
+    "repeat-correction": {
+      "criteria": [
+        "127 seconds not repeated stale 146",
+        "Count visible and names hidden"
+      ],
+      "pair": null
+    }
+  }
+}

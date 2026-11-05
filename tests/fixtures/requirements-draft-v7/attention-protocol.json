@@ -1,0 +1,6 @@
+{
+  "change": "Add only query/key LoRA projections to last full-attention block. Keep rank8, seed42, v5 parent, lr0.00015, 3 epochs and balanced dataset unchanged.",
+  "dataSHA256": "821e22822904165151b7ffdf566976c0269297b22dbd914056f4f03807b8edf8",
+  "evaluation": "Previously viewed v7 test becomes development evidence for architecture comparison. A new reserved set is required for final confirmation.",
+  "release": false
+}

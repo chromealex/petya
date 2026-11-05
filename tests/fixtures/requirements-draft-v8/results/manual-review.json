@@ -1,0 +1,152 @@
+{
+  "base": {
+    "d-export": [
+      false,
+      "XML treated as the selected format; invented time-format claim."
+    ],
+    "d-rename": [
+      false,
+      "Cancelled rename reinstated."
+    ],
+    "d-open": [
+      false,
+      "Question asks ordering of elements inside a card, not ordering of cards."
+    ],
+    "d-print": [
+      false,
+      "No-search exclusion omitted; multiple unrelated questions introduced."
+    ],
+    "d-failure": [
+      false,
+      "Hidden employee surname omitted; settled identifier decision reopened."
+    ],
+    "d-report": [
+      false,
+      "Hidden driver phone omitted; settled buyer exclusion reopened."
+    ],
+    "d-bound": [
+      false,
+      "Unconditional number visibility contradicted; settled hidden tenant question reopened."
+    ],
+    "d-refresh": [
+      false,
+      "Panel data refresh changed into countdown-timer refresh, an invented behavior."
+    ],
+    "d-approved": [
+      false,
+      "Invented mandatory YAML key names name/article."
+    ],
+    "d-partial": [
+      true,
+      "Rename retained, icon color/address/data unchanged."
+    ],
+    "d-resolved": [
+      false,
+      "Agreed black title color omitted."
+    ],
+    "d-shift": [
+      false,
+      "Settled payment and cleaning exclusions reopened as questions."
+    ]
+  },
+  "parent": {
+    "d-export": [
+      false,
+      "Invented existing implementation and time-format question; unapproved export format not represented clearly."
+    ],
+    "d-rename": [
+      false,
+      "Content preservation omitted."
+    ],
+    "d-open": [
+      true,
+      "Name as text, capacity, hidden address, size and card-order questions retained."
+    ],
+    "d-print": [
+      false,
+      "Room name incorrectly excluded; passport exclusion omitted."
+    ],
+    "d-failure": [
+      false,
+      "Error number substituted despite explicit rejection; internally contradictory."
+    ],
+    "d-report": [
+      false,
+      "Forbidden buyer included as recipient."
+    ],
+    "d-bound": [
+      true,
+      "Strict humidity constraint and independent visibility, exclusions retained."
+    ],
+    "d-refresh": [
+      true,
+      "Count, 97-second refresh and hidden names retained."
+    ],
+    "d-approved": [
+      true,
+      "YAML, name and SKU retained without questions."
+    ],
+    "d-partial": [
+      false,
+      "Address/data preservation omitted."
+    ],
+    "d-resolved": [
+      true,
+      "Name/author, black title, hidden price and sole order question retained."
+    ],
+    "d-shift": [
+      false,
+      "Explicit separation of cleaning scope omitted. Conservative complete-exclusion criterion, same for candidate."
+    ]
+  },
+  "candidate": {
+    "d-export": [
+      false,
+      "Claims fields already exist; XML status unclear and invented time-format statement."
+    ],
+    "d-rename": [
+      true,
+      "Original name, purple icon, content and address retained."
+    ],
+    "d-open": [
+      true,
+      "Name as text, capacity, hidden address and both correct open questions retained."
+    ],
+    "d-print": [
+      false,
+      "Room name incorrectly excluded; passport exclusion omitted."
+    ],
+    "d-failure": [
+      false,
+      "Rejected error number replaces reconciliation identifier."
+    ],
+    "d-report": [
+      false,
+      "Explicit buyer exclusion omitted; generic keep recipients cannot recover a standalone complete requirement."
+    ],
+    "d-bound": [
+      true,
+      "Strict humidity constraint, independent number visibility and both exclusions retained."
+    ],
+    "d-refresh": [
+      true,
+      "Count, 97-second refresh and hidden visitor names retained."
+    ],
+    "d-approved": [
+      true,
+      "YAML, name and SKU retained without questions."
+    ],
+    "d-partial": [
+      false,
+      "Cancelled orange icon change reinstated."
+    ],
+    "d-resolved": [
+      true,
+      "Name/author, hidden price, black title and sole ordering question retained."
+    ],
+    "d-shift": [
+      false,
+      "Explicit cleaning exclusion omitted. Mixed Cyrillic/Latin date tokens are not by themselves scored as an error."
+    ]
+  }
+}

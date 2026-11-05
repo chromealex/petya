@@ -1,0 +1,32 @@
+{"id": "temp-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\": -31,\"upper\": null,\"lowerInclusive\": false,\"upperInclusive\": null}", "exactJSON": true}
+{"id": "temp-under", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-31,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "temp-min", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-19,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "temp-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-19,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "weight-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":7.5,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "weight-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":7.5,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": false}
+{"id": "offset-a", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-4,\"upper\":9,\"lowerInclusive\":false,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "offset-b", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-4,\"upper\":9,\"lowerInclusive\":true,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "size-exact", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":126,\"upper\":126,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "size-open", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "count-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":517,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "count-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":517,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "range-closed", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":49,\"upper\":86,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "range-open", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":49,\"upper\":86,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "proposed", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "confirmed", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":3.75,\"upper\":3.75,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "label-print", "task": "draft", "answer": "{\"summary\": \"Печать транспортной этикетки\", \"description\": \"Создать функцию печати транспортной этикетки с выводом следующих полей:\\n1. Код груза\\n2. Дата передачи в строгом формате ДД/ММ/ГГГГ\\n3. Масса груза\\n\\nТелефон отправителя не добавлять и не показывать. Адрес отправителя не добавлять.\", \"questions\": []}", "exactJSON": false}
+{"id": "failed-scan", "task": "draft", "answer": "{\"summary\": \"Отправлять архивисту данные только при неудачном сканировании\", \"description\": \"Настроить отправку данных архивисту строго по сценарию неудачного сканирования. При успешном сканировании отправка не производится. Содержимое отправки:\", \"questions\": []}", "exactJSON": false}
+{"id": "packing-fields", "task": "draft", "answer": "{\"summary\": \"Заменить код доставки на код склада в отчёте приёмки\", \"description\": \"В отчёте приёмки, который показывать снабженцу, заменить поле «код доставки» на «код склада». Отображать только код склада и результат приёмки. Телефоны приёмщика не показывать. Отправлять отчёт не управляющему снабженцем.\", \"questions\": []}", "exactJSON": false}
+{"id": "motor-reading", "task": "draft", "answer": "{\"summary\": \"Экран дисплея мотора\", \"description\": \"Экран дисплея мотора должен показывать номер мотора и его текущую скорость. Скорость показывать строго меньше 745 оборотов в минуту. Номер мотора показывать всегда, независимо от показаний скорости.\", \"questions\": []}", "exactJSON": false}
+{"id": "diagram-format", "task": "draft", "answer": "{\"summary\": \"Экспорт диаграммы\", \"description\": \"Экспортируемая диаграмма должна содержать название оси и номер редакции. Формат экспорта пока не выбран; требуется выбрать и внедрить его в код.\", \"questions\": [\"Какой формат экспорта выбрать?\"]}", "exactJSON": false}
+{"id": "queue-refresh", "task": "draft", "answer": "{\"summary\": \"Изменить интервал обновления сводки\", \"description\": \"В сводке показывать количество ожидающих посетителей. Интервал обновления показывать ровно 47 секунд. Имена посетителей не показывать. Остальные поля и логика сохранить.\", \"questions\": []}", "exactJSON": false}
+{"id": "navigation-revert", "task": "draft", "answer": "{\"summary\": \"Изменить иконку пункта меню\", \"description\": \"В меню переименовать «История» в «События». Цвет иконки сохранить оранжевым.\", \"questions\": []}", "exactJSON": false}
+{"id": "asset-card", "task": "draft", "answer": "{\"summary\": \"Поля карточки инструмента\", \"description\": \"Карточка инструмента должна показывать название и дату проверки. Закупочную цену скрывать. Цвет названия пока не выбран.\", \"questions\": [\"Какой цвет использовать для названия?\"]}", "exactJSON": false}
+{"id": "math", "task": "general", "answer": "444", "exactJSON": true}
+{"id": "ordered", "task": "general", "answer": "{\"numbers\": [1, 6, 8]}", "exactJSON": false}
+{"id": "python", "task": "general", "answer": "4", "exactJSON": true}
+{"id": "word", "task": "general", "answer": "Хорошо", "exactJSON": false}
+{"id": "translate", "task": "general", "answer": "Отчёт готов.", "exactJSON": true}
+{"id": "json", "task": "general", "answer": "19", "exactJSON": true}
+{"id": "cancel", "task": "general", "answer": "нет", "exactJSON": true}
+{"id": "addition", "task": "general", "answer": "400", "exactJSON": true}

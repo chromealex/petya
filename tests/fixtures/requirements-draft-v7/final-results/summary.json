@@ -1,0 +1,54 @@
+{
+  "status": "measured_narrow_improvement_not_release_ready",
+  "grading": "Manual, non-blind semantic review. Complete requirements required; equivalent exclusions accepted when logically entailed. Exact draft wording is not scored. Related synthetic families; small sample, no statistical or broad-quality claim.",
+  "models": {
+    "base": {
+      "bounds": {
+        "passed": 12,
+        "total": 16
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 4,
+        "total": 8
+      }
+    },
+    "parent": {
+      "bounds": {
+        "passed": 11,
+        "total": 16
+      },
+      "general": {
+        "passed": 7,
+        "total": 8
+      },
+      "draft": {
+        "passed": 3,
+        "total": 8
+      }
+    },
+    "deep": {
+      "bounds": {
+        "passed": 12,
+        "total": 16
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 5,
+        "total": 8
+      }
+    }
+  },
+  "predeclared_improvement_gate_passed": true,
+  "familiar_corrections_after_reload": {
+    "passed": 8,
+    "total": 8,
+    "interpretation": "Acquisition only; these are training examples."
+  }
+}

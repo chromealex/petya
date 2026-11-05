@@ -3,6 +3,7 @@ const {Client}=require('@modelcontextprotocol/sdk/client/index.js');
 const {StreamableHTTPClientTransport}=require('@modelcontextprotocol/sdk/client/streamableHttp.js');
 const {startMcp}=require('../src/mcp.cjs');
 module.exports=async ctx=>{
+ await require('./layout-assets.cjs')();
  const feature=require('../src/features/layout.cjs'),source=require('../src/extensions/layout/source.cjs'),markup=require('../src/extensions/layout/markup.cjs');
  const url='https://www.figma.com/design/ABC/Test?node-id=1-2';
  assert.throws(()=>source.source({url:'https://evil.example/file/ABC?node-id=1-2'}));
@@ -16,7 +17,7 @@ module.exports=async ctx=>{
   if(pause)await new Promise(resolve=>{release=resolve;});
   if(endpoint.includes('figma')){assert.equal(options.headers['X-Figma-Token'],'private');return new Response(JSON.stringify({nodes:{'1:2':{document:node}}}));}
   assert.equal(options.headers.Authorization,'Bearer zeplin');return new Response(JSON.stringify({width:300,height:400,layers:[{type:'text',content:'Zeplin',text_styles:[{style:{font_size:24,color:{r:255,g:0,b:0,a:1}}}],rect:{x:10,y:20,width:30,height:40}}]}));
- });
+ },{dialog:{showMessageBox:async()=>({response:1}),showOpenDialog:async()=>({canceled:true})},importer:async(settings,design,files,options)=>{options.check();assert.ok(await options.confirm(options.instance));calls.push([design,files,options]);return {folder:'Assets/PetyaLayouts/Test',objectName:'Test UI'};}});
  for(const mode of ['read','edit']){
   const endpoint=await startMcp({...ctx,access:{mode,projectId:topic.projectId}},{port:0});const client=new Client({name:'layout-test',version:'1'});
   try{
@@ -27,11 +28,22 @@ module.exports=async ctx=>{
    settings.module_unity='false';assert.ok((await call('prepare_unity_layout',{url})).isError);settings.module_unity='true';
    settings.layoutFigmaToken='';assert.ok((await call('prepare_unity_layout',{url})).isError);settings.layoutFigmaToken='private';
    const result=await call('prepare_unity_layout',{url});assert.ok(!result.isError,JSON.stringify(result));const prepared=JSON.parse(result.content[0].text);
-   assert.match(prepared.uxml,/left: 10px; top: 20px/);assert.match(prepared.uxml,/&lt;Hello &amp; &quot;you&quot;&gt;/);assert.ok(!JSON.stringify(prepared).includes('private'));
-   assert.ok(!(await call('apply_unity_layout',{proposalId:prepared.id,instance:'EditorA'})).isError);assert.equal(calls.length,1);assert.equal(calls[0][4],'EditorA');assert.match(calls[0][2].arguments.code,/GenerateUniqueAssetPath/);
+   assert.match(prepared.uxml,/left: 10px[\s\S]*top: 20px/);assert.match(prepared.uxml,/&lt;Hello &amp; &quot;you&quot;&gt;/);assert.ok(!JSON.stringify(prepared).includes('private'));
+   assert.ok(!(await call('apply_unity_layout',{proposalId:prepared.id,instance:'EditorA'})).isError);assert.equal(calls.length,1);assert.equal(calls[0][2].instance,'EditorA');assert.equal(calls[0][0].responsive,true);
    assert.ok((await call('apply_unity_layout',{proposalId:prepared.id})).isError);
    const zeplin=await call('prepare_unity_layout',{url:'https://app.zeplin.io/project/abc/screen/def'});assert.ok(!zeplin.isError);assert.match(JSON.parse(zeplin.content[0].text).uxml,/Zeplin/);assert.match(JSON.parse(zeplin.content[0].text).uxml,/font-size: 24px/);assert.match(JSON.parse(zeplin.content[0].text).uxml,/color: rgba\(255,0,0,1\)/);
    const stale=JSON.parse(zeplin.content[0].text);s.companyId='another';assert.ok((await call('apply_unity_layout',{proposalId:stale.id})).isError);s.companyId=ctx.companyId;
+   node.children[0].style.fontFamily='Test Font';
+   const withFont=JSON.parse((await call('prepare_unity_layout',{url})).content[0].text);
+   assert.equal(withFont.ready,false);assert.ok((await call('apply_unity_layout',{proposalId:withFont.id})).isError);
+   const fontArgs={proposalId:withFont.id,fontKey:withFont.fonts[0].key};
+   assert.ok(!(await call('get_unity_layout_proposal',{proposalId:withFont.id})).isError);
+   assert.ok(!(await call('pick_unity_layout_font',fontArgs)).isError);
+   assert.ok((await call('set_unity_layout_font',{...fontArgs,base64:Buffer.from('bad font').toString('base64')})).isError);
+   const fontBytes=Buffer.alloc(32);fontBytes.write('OTTO');
+   const withFile=await call('set_unity_layout_font',{...fontArgs,base64:fontBytes.toString('base64')});assert.ok(!withFile.isError);assert.equal(JSON.parse(withFile.content[0].text).ready,true);
+   assert.ok(!(await call('apply_unity_layout',{proposalId:withFont.id})).isError);
+   delete node.children[0].style.fontFamily;
    pause=true;const pending=ipc.prepare({url});await new Promise(resolve=>setImmediate(resolve));await assert.rejects(ipc.prepare({url}),/Дождитесь/);settings.layoutFigmaToken='changed';release();await assert.rejects(pending,/изменились/);settings.layoutFigmaToken='private';pause=false;
    assert.equal(ipc.status().busy,false);assert.equal(ipc.status().kind,'error');assert.ok(events.some(([,e])=>e.busy));
   }finally{await client.close();await endpoint.close();}

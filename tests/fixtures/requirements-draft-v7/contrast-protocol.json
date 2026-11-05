@@ -1,0 +1,13 @@
+{
+  "pairs": 38,
+  "pairSHA256": "28cf9645883ec43b6e6b326ff0b7bba568a2cb4697b63c0c659de0e0735332e9",
+  "tokenDifferenceRange": [
+    -1,
+    1
+  ],
+  "meanTokenDifference": 0.21052631578947367,
+  "parent": "attention-adapter, not rejected omission-preference adapter",
+  "training": "Same beta0.1, lr0.00002, 3 epochs, 0.2 chosen SFT and 0.2 rehearsal SFT; only preference construction differs. Pair count may differ.",
+  "hypothesis": "The deletion experiment may reward verbosity; single-fact contradiction reduces that confound. This is a hypothesis, not established sole cause.",
+  "evaluation": "Both previously evaluated v7 sets are now development sets. No release without a further fresh check."
+}

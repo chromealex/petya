@@ -1,0 +1,192 @@
+[
+  {
+    "id": "export",
+    "chosenLogp": -0.5260363221168518,
+    "rejectedLogp": -30.23106575012207
+  },
+  {
+    "id": "backup",
+    "chosenLogp": -0.32119786739349365,
+    "rejectedLogp": -9.471110343933105
+  },
+  {
+    "id": "button",
+    "chosenLogp": -0.7220054864883423,
+    "rejectedLogp": -23.239242553710938
+  },
+  {
+    "id": "retry",
+    "chosenLogp": -0.9191341996192932,
+    "rejectedLogp": -32.57711410522461
+  },
+  {
+    "id": "filter",
+    "chosenLogp": -1.3416091203689575,
+    "rejectedLogp": -30.82839012145996
+  },
+  {
+    "id": "expiry",
+    "chosenLogp": -0.5905382037162781,
+    "rejectedLogp": -22.510099411010742
+  },
+  {
+    "id": "rename",
+    "chosenLogp": -0.5881698131561279,
+    "rejectedLogp": -15.255305290222168
+  },
+  {
+    "id": "notify",
+    "chosenLogp": -1.3549284934997559,
+    "rejectedLogp": -32.915653228759766
+  },
+  {
+    "id": "upload",
+    "chosenLogp": -0.7771895527839661,
+    "rejectedLogp": -10.311073303222656
+  },
+  {
+    "id": "sort",
+    "chosenLogp": -0.8299986720085144,
+    "rejectedLogp": -33.71528244018555
+  },
+  {
+    "id": "threshold",
+    "chosenLogp": -1.0465867519378662,
+    "rejectedLogp": -12.756057739257812
+  },
+  {
+    "id": "receipt",
+    "chosenLogp": -1.6040409803390503,
+    "rejectedLogp": -26.86652946472168
+  },
+  {
+    "id": "session",
+    "chosenLogp": -0.7944570183753967,
+    "rejectedLogp": -25.370529174804688
+  },
+  {
+    "id": "language",
+    "chosenLogp": -0.6581016778945923,
+    "rejectedLogp": -41.646217346191406
+  },
+  {
+    "id": "quota",
+    "chosenLogp": -0.49411097168922424,
+    "rejectedLogp": -25.82248878479004
+  },
+  {
+    "id": "report",
+    "chosenLogp": -0.9234676361083984,
+    "rejectedLogp": -27.39801597595215
+  },
+  {
+    "id": "books-exact",
+    "chosenLogp": -0.13887763023376465,
+    "rejectedLogp": -30.785907745361328
+  },
+  {
+    "id": "cable-less",
+    "chosenLogp": -0.18196508288383484,
+    "rejectedLogp": -9.9762601852417
+  },
+  {
+    "id": "pallet-max",
+    "chosenLogp": -0.40226179361343384,
+    "rejectedLogp": -28.697351455688477
+  },
+  {
+    "id": "bake-min",
+    "chosenLogp": -0.1913135051727295,
+    "rejectedLogp": -12.779980659484863
+  },
+  {
+    "id": "pressure-more",
+    "chosenLogp": -0.15003317594528198,
+    "rejectedLogp": -32.41645812988281
+  },
+  {
+    "id": "dry-open",
+    "chosenLogp": -0.8451483249664307,
+    "rejectedLogp": -39.1534423828125
+  },
+  {
+    "id": "vial-switch",
+    "chosenLogp": -0.3876417577266693,
+    "rejectedLogp": -14.767346382141113
+  },
+  {
+    "id": "paint-correction",
+    "chosenLogp": -0.27314943075180054,
+    "rejectedLogp": -20.358253479003906
+  },
+  {
+    "id": "backup-recipients",
+    "chosenLogp": -0.3481167256832123,
+    "rejectedLogp": -36.07939910888672
+  },
+  {
+    "id": "drawing-unresolved",
+    "chosenLogp": -0.6650071144104004,
+    "rejectedLogp": -28.683700561523438
+  },
+  {
+    "id": "refresh-correction",
+    "chosenLogp": -0.36416304111480713,
+    "rejectedLogp": -22.565629959106445
+  },
+  {
+    "id": "explicit-trigger",
+    "chosenLogp": -0.4935902953147888,
+    "rejectedLogp": -31.29621696472168
+  },
+  {
+    "id": "print-columns",
+    "chosenLogp": -1.4129222631454468,
+    "rejectedLogp": -31.783803939819336
+  },
+  {
+    "id": "sensor-topic",
+    "chosenLogp": -0.6365299224853516,
+    "rejectedLogp": -16.584156036376953
+  },
+  {
+    "id": "single-open-field",
+    "chosenLogp": -0.913978099822998,
+    "rejectedLogp": -27.602968215942383
+  },
+  {
+    "id": "inspection-message",
+    "chosenLogp": -0.93221515417099,
+    "rejectedLogp": -35.996585845947266
+  },
+  {
+    "id": "ticket-print",
+    "chosenLogp": -0.3101472556591034,
+    "rejectedLogp": -31.232397079467773
+  },
+  {
+    "id": "shipment-report",
+    "chosenLogp": -0.47863537073135376,
+    "rejectedLogp": -27.924570083618164
+  },
+  {
+    "id": "rotation-scope",
+    "chosenLogp": -0.6367229223251343,
+    "rejectedLogp": -26.541156768798828
+  },
+  {
+    "id": "vector-export",
+    "chosenLogp": -1.8188588619232178,
+    "rejectedLogp": -27.679235458374023
+  },
+  {
+    "id": "dashboard-period",
+    "chosenLogp": -0.2512687146663666,
+    "rejectedLogp": -23.09853172302246
+  },
+  {
+    "id": "parcel-card",
+    "chosenLogp": -0.6301787495613098,
+    "rejectedLogp": -29.46192741394043
+  }
+]

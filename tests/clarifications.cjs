@@ -1,0 +1,21 @@
+const assert=require('node:assert/strict');
+const {Clarifications}=require('../src/features/clarifications.cjs');
+const {ask}=require('../src/input-required.cjs');
+(async()=>{
+ let scope='company/project/chat/v1',writes=0,now=0;
+ const c=new Clarifications({scope:()=>scope,now:()=>now});
+ const first=await c.run('Исходный запрос',()=>ask({text:'Какой проект?'},project=>ask({text:'Кто исполнитель?'},name=>({handled:true,text:project+' '+name,write:++writes}))));
+ assert(first.question&&!first.error);assert.equal(c.latest().clarificationId,first.clarificationId);assert((await c.answer(first.clarificationId,'')).question);const second=await c.answer(first.clarificationId,'BW');assert(second.question);assert.equal(writes,0);
+ const done=await c.answer(second.clarificationId,'Анна');assert.equal(done.text,'BW Анна');assert.equal(writes,1);
+ assert((await c.answer(second.clarificationId,'Анна')).error);assert.equal(writes,1);
+ const pending=await c.run('Запрос',()=>ask({text:'Уточните'},()=>++writes));scope='other-chat';assert((await c.answer(pending.clarificationId,'Да')).error);assert.equal(writes,1);
+ const cancelled=await c.run('Запрос',()=>ask({text:'Уточните'},()=>++writes));assert.match((await c.answer(cancelled.clarificationId,'отмена')).text,/отменён/);assert.equal(writes,1);
+ const expired=await c.run('Запрос',()=>ask({text:'Уточните'},()=>++writes));now=1800001;assert((await c.answer(expired.clarificationId,'Да')).error);
+ const failed=await c.run('Запрос',()=>ask({text:'Уточните'},()=>{writes++;throw Error('Unknown write result');}));await assert.rejects(c.answer(failed.clarificationId,'Да'),/Unknown/);assert((await c.answer(failed.clarificationId,'Да')).error);assert.equal(writes,2);
+ await assert.rejects(c.run('Запрос',()=>{throw Error('Network failure');}),/Network failure/);
+ const obsolete=await c.run('Старый запрос',()=>ask({text:'Уточните'},()=>++writes));await c.run('Новый запрос',()=>({handled:true,text:'Новый ответ'}));assert((await c.answer(obsolete.clarificationId,'Да')).error);assert.equal(writes,2);
+ const {Dialogue}=require('../src/dialogue.cjs');const dialogue=new Dialogue({save(){}});dialogue.state.topics.push({id:'repair',projectId:'general',title:'Сборка',messages:[]});dialogue.state.activeId='repair';let requests=0;
+ const repair=new (require('../src/build-repair.cjs').BuildRepair)({state:{},save(){},sources:{read:async source=>{assert.equal(source.key,'APP-42');return {logs:[],notes:[]};},requestLog:async()=>{requests++;return {url:'https://example.test/APP-42'};}},agents:{records:[]},dialogue,store:{items:[],prune(){}},settings:()=>({jiraUrl:'https://example.atlassian.net'}),enabled:()=>true,notify(){}});
+ const needTask=await c.run('почини сборку',()=>repair.turn('почини сборку'));assert(needTask.question);const taskReply=await c.answer(needTask.clarificationId,'APP-42');assert(!taskReply.error);assert.equal(requests,1);
+ console.log('Clarifications: multistep resume, cancellation, scope, expiry, consumed callbacks and real errors passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

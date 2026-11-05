@@ -1,0 +1,23 @@
+const fs=require('node:fs'),path=require('node:path'),load=require('node:module').createRequire(path.resolve(__dirname,'../package.json'));
+process.env.PETYA_SMOKE_TEST='1';
+const {Dialogue}=load('./src/dialogue.cjs'),active=Dialogue.prototype.active;let dialogue;
+Dialogue.prototype.active=function(...args){dialogue=this;return active.apply(this,args);};
+const {ComputerControl}=load('./src/computer-control.cjs');let searches=0;
+ComputerControl.prototype.status=function(){return {mode:this.session?'desktop':'off',accessGranted:true,supported:true};};
+ComputerControl.prototype.start=async function(){this.session={mode:'desktop'};return this.status();};
+ComputerControl.prototype.execute=async function(action){if(!this.session)throw Object.assign(Error('Permission'),{code:'COMPUTER_PERMISSION_REQUIRED',action});searches++;return {observation:{results:[{text:'Любимая Машка · была недавно'}]},text:'Выполнено: поиск в Telegram'};};
+const key=load.resolve('./tests/smoke.cjs');require.cache[key]={id:key,filename:key,loaded:true,exports:async win=>{
+ const js=s=>win.webContents.executeJavaScript(s),sleep=n=>new Promise(r=>setTimeout(r,n));
+ const wait=async s=>{for(let i=0;i<100;i++){if(await js(s))return;await sleep(100);}throw Error('Timeout '+s);};
+ await js('window.chatNavigationReady');const topic={id:'contact-test',title:'Контакт Telegram',kind:'chat',projectId:'general',at:Date.now(),messages:[]};dialogue.state.topics.push(topic);dialogue.state.activeId=topic.id;dialogue.persist();
+ win.setContentSize(1100,820);win.show();await js("(async()=>{await selectDialogueTopic('contact-test');view('home');$('command').value='Найди в тг любимую';window.sendChatNow();})()");
+ await wait("!!document.querySelector('.computer-approval .primary')");if(searches)throw Error('Searched before consent');
+ await js("document.querySelector('.computer-approval .primary').click()");await wait("!!document.querySelector('.telegram-contact-card')");
+ if(searches!==1)throw Error('Search duplicate');if(await js("document.querySelector('.telegram-contact-card strong').textContent")!=='Любимая Машка')throw Error('Wrong contact');
+ await wait("!window.chatStartPending && !commandProgress.busy && !planning && !workspaceBusy");
+ await js("selectDialogueTopic('contact-test')");await wait("!!document.querySelector('.telegram-contact-card')");
+ if(!await js("dialogueMessages.textContent.includes('Telegram не подключён как сервис')"))throw Error('Missing service explanation');
+ await sleep(300);fs.writeFileSync(path.join(require('node:os').tmpdir(),'petya-telegram-contact.png'),(await win.webContents.capturePage()).toPNG());
+ await js("document.querySelector('.telegram-connect-offer button').click()");await wait("!!document.querySelector('.app-catalog')");if(await js("document.querySelectorAll('.app-catalog-row').length")!==1)throw Error('Wrong connection target');
+ console.log('Telegram UI: permission resumes search, card survives reopen, missing-service note and connection action passed');
+}};load('./src/main.cjs');

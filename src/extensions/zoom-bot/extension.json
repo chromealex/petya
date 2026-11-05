@@ -1,0 +1,18 @@
+{
+  "id": "zoom-bot",
+  "name": "Петя в Zoom",
+  "description": "Отдельный участник встречи и общая память",
+  "service": "zoom",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    [
+      "settings.js",
+      "background.js"
+    ],
+    [
+      "notifications.js",
+      "notifications.js"
+    ]
+  ]
+}

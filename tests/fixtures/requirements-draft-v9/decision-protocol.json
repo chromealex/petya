@@ -1,0 +1,16 @@
+{
+  "parent": "repaired-adapter",
+  "epochs": 1,
+  "learning_rate": 1e-05,
+  "layers": 5,
+  "steps": 464,
+  "hashes": {
+    "decision-train.jsonl": "a843efea242e9d0673f8881163f9d50e5c58a0dffd84328ec580aec00c847c07",
+    "decision-contrasts.jsonl": "77a98a63ff847080b0e9b3d8b95f7c69d8b832d15fdeb0ff128a1bc29ebd7f4c",
+    "confirmation.jsonl": "90e926eb3dcb6861cf7e2af9ab638f82617f097ddfa6e8ec5bd7245700fe8f0c"
+  },
+  "reason": "Repaired v9 retains 30/30 and handles all four recipient/field states, but collapses four rename/color states and sorts one descending case ascending.",
+  "selection": "Fixed one-pass decision-order/polarity expansion; no new-check selection.",
+  "gate": "Retain all 30 acquisition targets; numeric/general no worse than parent and base; draft completeness greater than both. Report rename and prohibition groups separately; do not claim reliability unless all group members pass.",
+  "limits": "New related synthetic families, non-blind semantic review; no automatic release."
+}

@@ -1,0 +1,9 @@
+{
+  "dataSHA256": "d1088f3712821ee1d2a5cde82cdcd09fcd57a7610baaa97f2f0ba2b9aeb99c5b",
+  "numeric": 24,
+  "drafts": 8,
+  "general": 8,
+  "translation": "Two semantically equivalent Russian translations explicitly accepted before inference. Other constrained general outputs exact.",
+  "use": "Fresh confirmation for expanded ordinary SFT; freeze before inspecting that candidate. Related synthetic families, not production proof.",
+  "gate": "Numeric and general at least base and v5; strict draft coverage greater than both; no automatic deployment."
+}

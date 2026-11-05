@@ -70,6 +70,16 @@ function setup(s) {
     const pick=!files.length && last?.project===project && requested && last.choices?.find(key=>key.toLowerCase()===requested.toLowerCase());
     const continuing=refresh||!!pick,query=continuing?last.query:command;
     const matches = providers.filter(p => (!files.length || p.acceptsFiles?.(files)) && (!continuing||p.type===last.provider) && p.matches(query, context));
+    if (!matches.length && !files.length) {
+      const selected=await require('../extensions/agent.cjs').select(s,command,providers);
+      check();
+      if(selected){
+        s.requestProgress.report('Использую расширение «'+selected.name+'».');
+        if(!await activate(selected,check))return {handled:true,text:'Установка отменена.'};
+        check();
+        return selected.agentTurn(s,command,authorize);
+      }
+    }
     if (matches.length !== 1) return null;
     const p = matches[0];
     check();

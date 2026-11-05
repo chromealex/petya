@@ -36,20 +36,22 @@ class ComputerIntent{
  async turn(command){if(!candidate(command))return null;const generation=this.computer.generation;let route;try{route=parseRoute(await this.model(command),command);}catch{}if(!route)route=direct(command);
  if(!route)return null;
  if(generation!==this.computer.generation)throw Error('Управление изменилось. Повторите просьбу.');
- if(route.intent==='clarify')return {handled:true,text:route.question};
- if(route.intent==='contact_search'){
- let q=searchName(route.query);let result=await this.computer.execute({type:'search',service:'telegram',query:q});
- let rows=(result.observation?.results||[]).filter(r=>matchesContact({name:r.text,username:''},route.query));
- if(!rows.length&&result.observation?.empty&&normalize(q)!==normalize(route.query)){if(generation!==this.computer.generation)throw Error('Управление изменилось. Повторите просьбу.');q=route.query;result=await this.computer.execute({type:'search',service:'telegram',query:q});rows=(result.observation?.results||[]).filter(r=>matchesContact({name:r.text,username:''},route.query));}
- if(rows.length)return {handled:true,text:'В результатах поиска Telegram по «'+q+'» вижу:\n'+rows.slice(0,12).map((r,i)=>(i+1)+'. '+r.text).join('\n')+(rows.length>1?'\nНайдено несколько совпадений.':''),computerResults:rows.slice(0,12)};
- if(result.observation?.empty)return {handled:true,text:'Telegram показал, что по запросу «'+q+'» ничего не найдено. Попробуйте фамилию или @username.'};
- return {handled:true,text:'Ввёл «'+q+'» в поле поиска Telegram, но не смог надёжно прочитать список результатов через интерфейс. '+(result.observation?.message||'Попробуйте развернуть окно Telegram и повторить просьбу.')};
- }
+ if(route.intent==='clarify')return {handled:true,question:true,text:route.question};
+ if(route.intent==='contact_search')return this.search(route.query);
  if(route.intent==='app_focus'){
  const names={'телеграм':'Telegram','телеграмм':'Telegram','telegram':'Telegram','сафари':'Safari','safari':'Safari','хром':'Google Chrome','гугл хром':'Google Chrome','chrome':'Google Chrome','google chrome':'Google Chrome','файндер':'Finder','finder':'Finder','слак':'Slack','slack':'Slack','блокнот':process.platform==='win32'?'notepad':'TextEdit','заметки':'Notes','notes':'Notes','терминал':'Terminal','terminal':'Terminal'};
  await this.computer.execute({type:'focus',name:names[normalize(route.app)]||route.app});return {handled:true,text:'Переключился в '+route.app+'.'};
  }
  const result=await this.computer.execute(route.intent==='scroll'?{type:'scroll',direction:route.direction,amount:route.amount}:{type:'key',key:route.key});return {handled:true,text:result.text};
+ }
+ async search(query){const generation=this.computer.generation;
+ let q=searchName(query);let result=await this.computer.execute({type:'search',service:'telegram',query:q});
+ let rows=(result.observation?.results||[]).filter(r=>matchesContact({name:r.text,username:''},query));
+ if(!rows.length&&result.observation?.empty&&normalize(q)!==normalize(query)){if(generation!==this.computer.generation)throw Error('Управление изменилось. Повторите просьбу.');q=query;result=await this.computer.execute({type:'search',service:'telegram',query:q});rows=(result.observation?.results||[]).filter(r=>matchesContact({name:r.text,username:''},query));}
+ if(rows.length)return {handled:true,text:rows.length===1?'В Telegram найдено совпадение: '+rows[0].text.split(' · ')[0]+'.':'В Telegram найдено несколько совпадений: '+rows.slice(0,12).map(r=>r.text.split(' · ')[0]).join(', ')+'.',computerResults:rows.slice(0,12),telegramContacts:require('./extensions/telegram/contact-result.cjs').contacts(rows)};
+ if(result.observation?.empty)return {handled:true,text:'Telegram показал, что по запросу «'+q+'» ничего не найдено. Попробуйте фамилию или @username.'};
+ return {handled:true,text:'Ввёл «'+q+'» в поле поиска Telegram, но не смог надёжно прочитать список результатов через интерфейс. '+(result.observation?.message||'Попробуйте развернуть окно Telegram и повторить просьбу.')};
+
  }
 }
 module.exports={ComputerIntent,routingRequest,parseRoute,direct,candidate,matchesContact,searchName,stem};

@@ -1,0 +1,15 @@
+{
+  "name": "Jira",
+  "description": "Задачи, версии и отчёты",
+  "setting": "module_jira",
+  "service": "jira",
+  "settings": true,
+  "scripts": [
+    [
+      "settings.js",
+      "connections.js"
+    ]
+  ],
+  "id": "jira",
+  "markup": "settings.html"
+}

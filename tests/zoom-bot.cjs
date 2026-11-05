@@ -1,0 +1,22 @@
+const assert=require('node:assert/strict');
+const {parseJoinURL,fromObservation}=require('../src/extensions/zoom-bot/meeting-link.cjs');
+const {ZoomBot}=require('../src/extensions/zoom-bot/controller.cjs');
+(async()=>{
+ const info=id=>({meetingActive:true,windows:[],meetingInfo:'Meeting ID: '+id+'\nInvite Link: https://us02web.zoom.us/j/'+id+'?pwd=abc'});
+ assert.equal(parseJoinURL('https://zoom.us.evil.test/j/123456789'),null);assert.equal(parseJoinURL('https://zoom.us/s/123456789'),null);
+ assert.equal(fromObservation({...info('123456789'),meetingActive:false}),null);
+ assert.throws(()=>fromObservation({...info('123456789'),meetingInfo:info('123456789').meetingInfo+'\n'+info('987654321').meetingInfo}),/несколько/);
+ assert.equal(fromObservation({meetingActive:true,windows:[],meetingInfo:'Meeting ID\n123 456 789\nPasscode\nsecret'}).password,'secret');
+ let mode='ask',current=info('123456789'),joined=0,phase='waiting',saved=[],asr=0,fail=false;const progress=[];
+ const bot=new ZoomBot({settings:()=>({zoomBotMode:mode}),inspect:async()=>current,emit:s=>progress.push(s),persist(){},save:rows=>saved.push(...rows),transcribe:async()=>{asr++;if(fail)throw Error('ASR offline');return 'Решение встречи';},remote:async(method,route)=>{if(route==='/v1/bots'){joined++;return {id:'remote'};}if(route.endsWith('/audio/0'))return {wav:Buffer.alloc(44).toString('base64'),at:Date.now()};if(route.endsWith('/ack'))return {};return {phase,segments:1};}});
+ await bot.tick();await bot.tick();assert.equal(bot.state.phase,'detected');assert.equal(joined,0);
+ await bot.action('join',bot.state.id);await bot.tick();assert.equal(joined,1);assert.equal(bot.state.phase,'waiting');assert.equal(asr,0);
+ phase='recording';await bot.tick();assert.equal(asr,0);phase='recorded';fail=true;await bot.tick();assert.equal(bot.state.phase,'error');fail=false;await bot.action('retry',bot.state.id);assert.equal(saved.length,1);assert.equal(bot.state.phase,'done');assert(!saved[0].chatId);assert(!saved[0].projectId);
+ await bot.tick();assert.equal(joined,1);
+ current={meetingActive:false,windows:[]};for(let i=0;i<3;i++)await bot.tick();mode='auto';current=info('987654321');await bot.tick();await bot.tick();assert.equal(joined,2);
+ const manual=new ZoomBot({settings:()=>({zoomBotMode:'ask'}),inspect:async()=>current,remote:async()=>assert.fail('must not join changed meeting'),save(){}});await manual.tick();await manual.tick();current=info('123456789');await assert.rejects(manual.action('join',manual.state.id),/изменилась/);
+ const off=new ZoomBot({settings:()=>({zoomBotMode:'off'}),inspect:()=>assert.fail('disabled observer'),remote(){},save(){}});await off.tick();
+ let permitted=false,permissionJoins=0;const permissionBot=new ZoomBot({settings:()=>({zoomBotMode:'auto'}),accessReady:()=>permitted,inspect:async()=>current,remote:async()=>{permissionJoins++;return {id:'allowed'};},save(){}});await permissionBot.tick();await permissionBot.tick();assert.equal(permissionBot.snapshot().needsPermission,true);assert.equal(permissionJoins,0);permitted=true;await permissionBot.tick();assert.equal(permissionJoins,1);assert.equal(permissionBot.snapshot().needsPermission,false);
+ assert(progress.some(s=>s.phase==='processing'));assert(progress.some(s=>s.phase==='done'));
+ console.log('Zoom bot: auto/manual/off, stable detection, no duplicate join, stale link rejection, completed-only ASR, retry and shared memory passed');
+})().catch(e=>{console.error(e);process.exitCode=1;});

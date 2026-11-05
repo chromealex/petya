@@ -1,0 +1,40 @@
+{"id": "voltage-gt", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-2.25,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "voltage-ge", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-2.25,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "voltage-lt", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-2.25,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "voltage-le", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-2.25,\"upper\":-2.25,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false}
+{"id": "freezer-gt", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-46,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "freezer-ge", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-46,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "freezer-lt", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-46,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "freezer-le", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-46,\"upper\":-46,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false}
+{"id": "tolerance-gt", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":5.125,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "tolerance-ge", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":5.125,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "tolerance-lt", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":5.125,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "tolerance-le", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":5.125,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "interval-closed", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-11,\"upper\":6,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "interval-open", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-11,\"upper\":6,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "interval-left-open", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-11,\"upper\":6,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": false}
+{"id": "interval-right-open", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-11,\"upper\":6,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": false}
+{"id": "duration-exact", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":143,\"upper\":143,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "duration-proposal", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "duration-revoke", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "duration-change", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":149,\"upper\":149,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "quota-gt", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":613,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "quota-le", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":613,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "quota-min", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":620,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "quota-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":605,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "part-passport", "task": "draft", "answer": "{\"description\":\"Печать паспорта детали. Выводить артикул, дату сборки в формате ГГГГ/ММ/ДД и количество. Имя сборщика не печатать. Поиск не добавлять.\",\"questions\":[],\"summary\":\"Печать паспорта детали\"}", "exactJSON": false}
+{"id": "failed-measure", "task": "draft", "answer": "{\"description\":\"Только при неудачном замере отправлять уведомление метрологу. В теле уведомления передавать исходные поля замера и объяснение причины. При успешном замере уведомление не отправлять. Исполнителя не показывать. В качестве причины использовать только код причины.\",\"questions\":[],\"summary\":\"Уведомление метролога\"}", "exactJSON": false}
+{"id": "warehouse-report", "task": "draft", "answer": "{\"description\":\"Название не задано. Описание не задано.\",\"questions\":[],\"summary\":\"Сводка возвратов\"}", "exactJSON": false}
+{"id": "humidity-display", "task": "draft", "answer": "{\"description\":\"Включить номер камеры и скрывать имя арендатора. Влажность должна быть строго меньше 68 процентов.\",\"questions\":[],\"summary\":\"Камера\"}", "exactJSON": false}
+{"id": "network-export", "task": "draft", "answer": "{\"description\":\"В экспорт сети включить количество узлов и номер схемы. Формат не выбран, предложили GraphML.\",\"questions\":[\"GraphML — это временное решение?\"],\"summary\":\"Экспорт сети\"}", "exactJSON": false}
+{"id": "progress-refresh", "task": "draft", "answer": "{\"description\":\"Обновлять число завершённых заданий каждые 69 секунд. Имена исполнителей скрывать. Число заданий оставить.\",\"questions\":[],\"summary\":\"Обновление панели заданий\"}", "exactJSON": false}
+{"id": "catalog-revert", "task": "draft", "answer": "{\"description\":\"Вкладку «Каталог» оставить прежним названием. Значок этой вкладке сохранить бирюзовым.\",\"questions\":[],\"summary\":\"Вкладка Каталог\"}", "exactJSON": false}
+{"id": "machine-card", "task": "draft", "answer": "{\"description\":\"Показывать режим и дату обслуживания. Инвентарную стоимость скрывать. Режим выводить текстом.\",\"questions\":[\"Какого цвета текст режима?\"],\"summary\":\"Карточка станка\"}", "exactJSON": false}
+{"id": "product", "task": "general", "answer": "247", "exactJSON": true}
+{"id": "list", "task": "general", "answer": "[3,7,10]", "exactJSON": true}
+{"id": "length", "task": "general", "answer": "5", "exactJSON": true}
+{"id": "copy-word", "task": "general", "answer": "Записано", "exactJSON": true}
+{"id": "translate", "task": "general", "answer": "Задача завершена.", "exactJSON": true}
+{"id": "extract", "task": "general", "answer": "21", "exactJSON": true}
+{"id": "cancelled", "task": "general", "answer": "нет", "exactJSON": true}
+{"id": "addition", "task": "general", "answer": "500", "exactJSON": true}

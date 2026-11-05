@@ -1,0 +1,32 @@
+{"id": "negative-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": true}
+{"id": "negative-under", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-29,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "negative-inclusive-min", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-54,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "negative-inclusive-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-54,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "fraction-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":9.625,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fraction-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":9.625,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "mixed-left", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-13,\"upper\":5,\"lowerInclusive\":false,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "mixed-right", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-13,\"upper\":5,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false, "schemaValid": true}
+{"id": "exact", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":157,\"upper\":157,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "revoked", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "count-min", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":719,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "count-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":719,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "range-closed", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":52,\"upper\":89,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "range-open", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":52,\"upper\":89,\"lowerInclusive\":false,\"upperInclusive\":true}", "exactJSON": false, "schemaValid": true}
+{"id": "proposal", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "approved", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":4.75,\"upper\":4.75,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "permit-print", "task": "draft", "answer": "{\"description\":\"Печатать пропуск с код посетителя, датой визита в формате ДД-ММ-ГГГГ и номером зала. Телефон посетителя не печатать. Поиск посетителя не добавлять.\",\"questions\":[],\"summary\":\"Печать пропуска\"}", "exactJSON": false, "schemaValid": true}
+{"id": "failed-calibration", "task": "draft", "answer": "{\"description\":\"Только при неудачной калибровке сообщать технику номер калибровки и текст причины. Имя заказчика скрывать. При удачной калибровке номер и имя не сообщать.\",\"questions\":[],\"summary\":\"Сообщать номер калибровки и причину только при неудачной калибровке\"}", "exactJSON": false, "schemaValid": true}
+{"id": "repair-report", "task": "draft", "answer": "{\"description\":\"Отправлять отчёт ремонта мастеру. В отчёте показывать код наряда и результат. Адрес механика скрывать.\",\"questions\":[],\"summary\":\"Отчёт ремонта\"}", "exactJSON": false, "schemaValid": true}
+{"id": "tank-reading", "task": "draft", "answer": "{\"description\":\"Уровень в баке должен быть строго меньше 83 процентов. Диспетчер видит номер бака независимо от уровня. Имя владельца не показывать. Управление насосом вне этой задачи.\",\"questions\":[],\"summary\":\"Контроль уровня бака\"}", "exactJSON": false, "schemaValid": true}
+{"id": "model-export", "task": "draft", "answer": "{\"description\":\"В экспорт включать масштаб и название детали. Формат пока не выбран; STEP — только предложение.\",\"questions\":[\"Какой формат экспорта модели выбрать?\"],\"summary\":\"Экспорт модели\"}", "exactJSON": true, "schemaValid": true}
+{"id": "monitor-refresh", "task": "draft", "answer": "{\"description\":\"Показывать количество работающих линий и скрывать имена операторов. Обновлять время обновления каждые 79 секунд.\",\"questions\":[],\"summary\":\"Обновление мониторинга линий\"}", "exactJSON": false, "schemaValid": true}
+{"id": "directory-revert", "task": "draft", "answer": "{\"description\":\"Сделать значок раздела «Справочник» коричневым. Название, содержимое и адрес сохранить.\",\"questions\":[],\"summary\":\"Значок справочника\"}", "exactJSON": true, "schemaValid": true}
+{"id": "two-open", "task": "draft", "answer": "{\"description\":\"Показывать название текстом и дату осмотра. Цену скрывать. Цвет названия и порядок карточек пока не выбраны.\",\"questions\":[\"Какой цвет названия выбрать?\",\"В каком порядке показывать карточки?\"],\"summary\":\"Карточки станций\"}", "exactJSON": false, "schemaValid": true}
+{"id": "multiply", "task": "general", "answer": "238", "exactJSON": true, "schemaValid": true}
+{"id": "sort", "task": "general", "answer": "[4,9,12]", "exactJSON": true, "schemaValid": true}
+{"id": "length", "task": "general", "answer": "6", "exactJSON": true, "schemaValid": true}
+{"id": "literal", "task": "general", "answer": "Сохранено", "exactJSON": true, "schemaValid": true}
+{"id": "expression", "task": "general", "answer": "x > 0", "exactJSON": true, "schemaValid": true}
+{"id": "extract", "task": "general", "answer": "27", "exactJSON": true, "schemaValid": true}
+{"id": "cancellation", "task": "general", "answer": "нет", "exactJSON": true, "schemaValid": true}
+{"id": "addition", "task": "general", "answer": "500", "exactJSON": true, "schemaValid": true}

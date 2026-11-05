@@ -17,18 +17,10 @@
  function installation(state){if(!state||state.phase==='idle')return;installBusy=!!state.busy;refresh.disabled=installBusy;if(installBusy)checkStatus.textContent='Идёт подготовка модели.';const percent=state.total?Math.min(100,Math.floor(state.received*100/state.total)):undefined;put('model-install',{title:state.busy?'Подготовка модели':state.ready?'Модель готова':state.phase==='error'?'Не удалось подготовить модель':'Загрузка отменена',text:state.message+(state.total?' · '+percent+'% · '+size(state.received)+' из '+size(state.total):''),busy:state.busy,percent,kind:state.phase==='error'?'error':'model',version:state.phase,actions:state.busy?[['Отменить',()=>window.petya.cancelOllamaInstall()]]:[['Подключения',()=>{setOpen(false);view('settings');window.revealSettings?.(document.querySelector('[data-service="ollama"]'));}]]});if(state.busy){for(const id of [...items.keys()])if(id.startsWith('model-update:'))items.delete(id);draw();}if(state.ready)checkUpdates(true);}
  let checking=false,lastCheck=0;
  async function checkUpdates(force){if(checking||installBusy)return;if(!force&&Date.now()-lastCheck<6*3600000)return;checking=true;refresh.disabled=true;checkStatus.textContent='Проверяю обновления моделей…';try{const state=await window.petya.modelUpdates(force);lastCheck=Date.now();if(installBusy)return;checkStatus.textContent=state.error?'Не удалось проверить обновления: '+state.error:state.items.length?'Доступные модели показаны ниже.':state.unavailable?.length?'Для этой модели нет данных об обновлениях в реестре.':'Установленная модель актуальна.';const found=new Set(state.items.map(item=>'model-update:'+item.model));if(!state.error)for(const id of [...items.keys()])if(id.startsWith('model-update:')&&!found.has(id))items.delete(id);for(const item of state.items)put('model-update:'+item.model,{title:item.kind==='update'?'Обновление модели':'Доступна модель',text:item.model+' · размер модели '+size(item.size)+(item.current?'':' · после подготовки станет основной'),kind:'model',version:item.digest,actions:[[item.kind==='update'?'Обновить':'Загрузить',async()=>{if(installBusy)return;installBusy=true;try{installation(await window.petya.modelUpdateInstall(item.model));}finally{installBusy=false;}}]]});draw();}catch(error){checkStatus.textContent='Проверка недоступна: '+error.message;}finally{checking=false;refresh.disabled=installBusy;}}
- function artist(state) {
-   if (!state || state.phase === 'idle') return;
-   put('artist', { title: 'Художник', text: state.message, busy: state.busy, version: state.phase,
-     percent: state.percent, kind: state.phase === 'error' ? 'error' : 'model',
-     actions: state.busy ? [['Остановить', () => window.petya.feature('artist', 'stop')]] : [] });
- }
- window.petyaEvents.onArtistProgress(artist);
- window.petya.feature('artist', 'status').then(artist).catch(()=>{});
  window.petyaEvents.onOllamaInstall(installation);window.petya.ollamaInstallStatus().then(installation).catch(()=>{});
  Promise.all([connectionsReady,modulesReady]).then(()=>{for(const card of document.querySelectorAll('[data-service]')){const status=card.querySelector('.connection-status');if(!status)continue;const id='connection:'+card.dataset.service,title=card.querySelector('h2')?.textContent||card.dataset.service;let failed=false;const update=()=>{if(status.classList.contains('error')){failed=true;put(id,{title:title+' · нужно внимание',text:status.textContent,kind:'error',actions:[['Настроить',()=>{setOpen(false);view('settings');window.revealSettings?.(card);}]]});}else if(failed&&status.classList.contains('connected')){failed=false;put(id,{title:title,text:'Подключение восстановлено.',kind:'success'});}};new MutationObserver(update).observe(status,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:['class']});update();}}).catch(()=>{});
  function chatNotification(topic){
-  const job=topic.job,id='chat:'+topic.id,waiting=job?.state==='attention';
+  const job=topic.job,id='chat:'+topic.id,waiting=job?.state==='attention',busy=job?.state==='running';
   if(topic.archived || job?.acknowledged || (topicSelect.value===topic.id && !$('home').hidden))return;
   const question=waiting && topic.needsReply;
   const open=async()=>{
@@ -38,10 +30,10 @@
     if(question)$('command').focus();
     items.delete(id);draw();
   };
-  put(id,{title:topic.title,text:waiting?(topic.attention||job.label):'Ответ готов.',kind:waiting?'attention':'success',version:String(job.at),actions:[[question?'Ответить':'Открыть чат',open]]});
+  put(id,{title:topic.title,text:busy||waiting||job.state==='cancelled'?(topic.attention||job.label):'Ответ готов.',busy,kind:waiting?'attention':busy?'info':'success',version:busy?'running:'+job.startedAt:String(job.at),actions:[[question?'Ответить':'Открыть чат',open],...(busy?[['Остановить',()=>window.petya.chatAnswerStop(topic.id)]]:[])]});
  }
  window.petyaEvents.onChatJob(async event=>{
-   if(!['attention','done'].includes(event.job.state)){if(items.delete('chat:'+event.topicId))draw();return;}
+   if(!['attention','done'].includes(event.job.state)&&!(event.job.clarification&&['running','cancelled'].includes(event.job.state))){if(items.delete('chat:'+event.topicId))draw();return;}
    try{
      const state=await window.petya.chatNavigation(''),topic=state.topics.find(t=>t.id===event.topicId);
      if(topic?.job?.at===event.job.at && state.projects.some(p=>p.id===topic.projectId&&!p.archived))chatNotification(topic);
@@ -49,8 +41,11 @@
  });
  window.chatNavigationReady?.then(async()=>{
    const state=await window.petya.chatNavigation('');
-   for(const topic of state.topics)if(topic.job?.state==='attention' && state.projects.some(p=>p.id===topic.projectId&&!p.archived))chatNotification(topic);
+   for(const topic of state.topics)if((topic.job?.state==='attention'||topic.job?.clarification&&['running','done','cancelled'].includes(topic.job.state)) && state.projects.some(p=>p.id===topic.projectId&&!p.archived))chatNotification(topic);
  }).catch(error=>console.warn('Chat notifications unavailable',error.message));
+ function meetingProgress(state){put('meeting:'+state.id,{title:'Встреча Zoom',text:state.message,busy:['recording','processing'].includes(state.phase),percent:state.percent,version:state.phase,kind:state.phase==='error'?'error':state.phase==='done'?'success':'info',actions:state.phase==='error'?[['Повторить обработку',()=>window.petya.feature('meetingMemory','retry',state.id)]]:[]});if(state.phase==='done')refreshContexts().catch(()=>{});}
+ window.petyaEvents.onMeetingMemory(meetingProgress);
+ window.petya.feature('meetingMemory','status').then(states=>states.forEach(meetingProgress)).catch(()=>{});
  window.petyaEvents.onBackground(state=>{if(state.error)put('background',{title:'Фоновое обновление',text:state.error,kind:'error',actions:[['Подключения',()=>{setOpen(false);view('settings');}]]});});
  document.addEventListener('petya-image-install',event=>{const state=event.detail;if(!state.busy&&!items.has('image-install'))return;put('image-install',{title:'Модель изображений',text:state.message||(state.ready?'Готова к работе':'Подготовка…'),busy:state.busy,version:state.phase,kind:state.phase==='error'?'error':'model',actions:state.busy?[['Отменить',()=>window.petya.imageInstallCancel()]]:[]});});
  function languageProgress(state){
@@ -68,6 +63,9 @@
  const reportShareProgress = item => {if(item)put(item.id,item);};
  window.petyaEvents.onReportShareProgress(reportShareProgress);
  window.petya.reportShareProgress().then(items=>items.forEach(reportShareProgress)).catch(()=>{});
+ const slackScreenProgress = item => {if(item)put(item.id,item);};
+ window.petyaEvents.onSlackScreenProgress(slackScreenProgress);
+ window.petya.feature('slackScreen','status').then(slackScreenProgress).catch(()=>{});
  const changeProgress = item => {if(item)put(item.id,item);};
  window.petyaEvents.onChatChange(changeProgress);
  window.petya.feature('chatChanges','progress').then(items=>items.forEach(changeProgress)).catch(()=>{});

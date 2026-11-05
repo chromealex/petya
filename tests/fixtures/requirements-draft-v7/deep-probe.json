@@ -1,0 +1,19 @@
+{
+  "attention_added": true,
+  "layers": 5,
+  "mlp_expanded": true,
+  "seed": 42,
+  "epochs": 1,
+  "steps": 1,
+  "learning_rate": 5e-05,
+  "optimizer_reset": true,
+  "trainable_parameters": 2457600,
+  "parent_sha256": "e18071047755b0a6406c454a064ddbc56a74940250e72813a43d7b1ab15da93e",
+  "training_sha256": "e6c2007bb5be21fc702347271eb3f2057119a698d31656e015a0892e519b0a9f",
+  "adapter_sha256": "6404a8aa8d755070de00bf45f0462f9daf6bdee0fef2343308dba1216ff4fdea",
+  "loss": [
+    1.2302677631378174
+  ],
+  "elapsed_seconds": 0.8733013750024838,
+  "peak_memory_bytes": 9510575770
+}

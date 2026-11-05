@@ -1,0 +1,33 @@
+{
+  "summary": {
+    "base": {
+      "bounds": 11,
+      "boundsTotal": 16,
+      "draftCoverage": 4,
+      "draftTotal": 8,
+      "validDrafts": 8
+    },
+    "parent": {
+      "bounds": 14,
+      "boundsTotal": 16,
+      "draftCoverage": 5,
+      "draftTotal": 8,
+      "validDrafts": 8
+    },
+    "candidate": {
+      "bounds": 13,
+      "boundsTotal": 16,
+      "draftCoverage": 4,
+      "draftTotal": 8,
+      "validDrafts": 8
+    }
+  },
+  "gatePassed": false,
+  "deployed": false,
+  "release": "petya-v1 not ready",
+  "decision": "Reject continuation candidate; retain previous artifact without replacing runtime.",
+  "knownCorrectionCoverage": {
+    "bounds": "0/4",
+    "drafts": "0/4"
+  }
+}

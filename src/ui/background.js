@@ -1,27 +1,33 @@
-let autoOwnMeeting = false, autoOwnMic = false, autoStarting = false, autoGeneration = 0;
-window.petyaStartAutomaticMeeting = async () => {
+let autoStarting = false, autoGeneration = 0;
+window.petyaStartMeetingRecording = async () => {
   if (autoStarting || meeting.active) return;
   const config = await window.petya.settings();
-  if (config.zoomAutoRecord !== 'true') return;
+  if(config.zoomCaptureMode !== 'local')throw Error('Выбран отдельный участник Zoom. Подключите Петю через уведомление о встрече или настройки Zoom.');
   autoStarting = true; const generation = ++autoGeneration;
+  window.petyaAutoMeetingActive = true; meetingId = '';
+  mic.stop(); updateAudio();
   try {
-    meetingId = crypto.randomUUID(); autoOwnMeeting = true; window.petyaAutoMeetingActive = true;
+    meetingId = await window.petya.feature('meetingMemory','begin');
+    // Meeting audio never enters VoiceTurn or its command timeout.
+    if (generation !== autoGeneration) { await window.petyaStopAutomaticMeeting(true); return; }
     await meeting.start(true);
-    if (generation !== autoGeneration) { meeting.stop(); return; }
-    if (config.zoomCaptureMic === 'true' && !mic.active) { autoOwnMic = true; await startSelectedMicrophone(); }
-    if (generation !== autoGeneration) { await window.petyaStopAutomaticMeeting(); return; }
-    updateAudio(); notice('Автоматически начата расшифровка Zoom. Захватывается весь системный звук' + (autoOwnMic ? ' и микрофон.' : '.'));
-    await window.petya.notify('Петя начал расшифровку встречи Zoom. Остановить можно в трее.');
-  } catch (e) { await window.petyaStopAutomaticMeeting(); notice(e.message, true); throw e; }
+    if (generation !== autoGeneration) { await window.petyaStopAutomaticMeeting(true); return; }
+    if (config.zoomCaptureMic === 'true') await meetingMic.start(false,selectedMicrophone().id);
+    if (generation !== autoGeneration) { await window.petyaStopAutomaticMeeting(true); return; }
+    updateAudio(); notice('Записываю встречу Zoom. Расшифрую после её завершения и сохраню в общую память компании.');
+  } catch (e) { await window.petyaStopAutomaticMeeting(true); notice(e.message, true); throw e; }
   finally { autoStarting = false; }
 };
-window.petyaStopAutomaticMeeting = async (flush = false) => {
+window.petyaStartAutomaticMeeting = async () => {
+  const config=await window.petya.settings();
+  if (config.zoomCaptureMode === 'local' && config.zoomAutoRecord === 'true') await window.petyaStartMeetingRecording();
+};
+window.petyaStopAutomaticMeeting = async () => {
   ++autoGeneration;
-  const owned = autoOwnMeeting;
-  if (flush) await Promise.all([autoOwnMeeting ? meeting.finish() : null, autoOwnMic ? mic.finish() : null]);
-  else { if (autoOwnMeeting) meeting.stop(); if (autoOwnMic) mic.stop(); }
-  autoOwnMeeting = false; autoOwnMic = false; window.petyaAutoMeetingActive = false; updateAudio();
-  if (owned) await window.petya.notify('Автоматическая расшифровка Zoom остановлена.');
+  const session = meetingId;
+  await Promise.all([meeting.finish(),meetingMic.finish()]);
+  window.petyaAutoMeetingActive = false; updateAudio();
+  if (session) await window.petya.feature('meetingMemory','finish',session);
 };
 function renderBackground(state) {
   if (state.error) $('background-status').textContent = state.error;

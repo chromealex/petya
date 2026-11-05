@@ -13,7 +13,7 @@ function question(command=''){
  return {days,mentions};
 }
 class SlackDigest{
- constructor({settings,enabled,ready,items,sync,status,summarize,screen,approve,background=()=>true,keepFresh=()=>{},now=Date.now}){Object.assign(this,{settings,enabled,ready,items,sync,status,summarize,screen,approve,background,keepFresh,now});this.pending=null;}
+ constructor({settings,enabled,ready,items,sync,status,summarize,screen,approve,fallback,background=()=>true,keepFresh=()=>{},now=Date.now}){Object.assign(this,{settings,enabled,ready,items,sync,status,summarize,screen,approve,fallback,background,keepFresh,now});this.pending=null;}
  reply(text,extra={}){return {handled:true,text,by:'Slack: сводка',...extra};}
  async turn(command){
   const p=this.pending;
@@ -24,12 +24,14 @@ class SlackDigest{
   }
   this.pending=null;
   const ask=question(command);if(!ask)return null;
-  if(!this.enabled())return null; // service-access offers to connect Slack
-  if(!this.ready())return null;
+  if(!this.enabled())return this.fallback?this.fallback(command):null; // service-access offers to connect Slack
+  if(!this.ready())return this.fallback?this.fallback(command):null;
   const since=this.now()-ask.days*DAY;
   const rows=this.items().filter(i=>i.source==='Slack'&&Array.isArray(i.messages)).map(i=>({...i,messages:i.messages.filter(m=>m.at>=since)})).filter(i=>i.messages.length).sort((a,b)=>b.at-a.at);
   const status=this.status()||{};
   if(!rows.length){
+   // Keep Slack fresh in the background from now on, so the next digest answers from synced messages.
+   if(this.fallback){if(!this.background()){try{this.keepFresh();}catch{}}return this.fallback(command);}
    try{const started=this.sync();started?.catch?.(()=>{});}catch{}
    // Keep Slack fresh in the background from now on, so the next digest answers at once.
    let fresh='';if(!this.background()){try{this.keepFresh();fresh=' Включил фоновое обновление Slack раз в 15 минут — дальше сводка будет готова сразу (выключается в «Подключения → Slack»).';}catch{}}

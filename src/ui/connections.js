@@ -251,31 +251,16 @@ function setupConnections() {
     connectionCards.set(def.id, { card, status, content });
     card.querySelectorAll('input,textarea,select').forEach(e => { const invalidate = () => { status.textContent = 'Настройки изменены · сохраните и проверьте'; status.className = 'connection-status'; }; e.addEventListener('input', invalidate); e.addEventListener('change', invalidate); });
   }
-  const confluence = connectionNode('article', '', 'card'); confluence.dataset.service = 'confluence';
-  const cs = connectionNode('p', 'Использует подключение Atlassian из карточки Jira', 'connection-status'); cs.setAttribute('role', 'status');
-  const cb = connectionNode('button', 'Подключить Confluence', 'primary'); cb.type = 'button';
-  cb.onclick = run(async () => {
-    if(!atlassianConnected || confluence.dataset.reconnect === 'true') return connectAtlassian(cs,cb,form);
-    const keys = ['jiraUrl', 'jiraEmail', 'jiraToken', 'confluenceSpace'];
-    if (!form.elements.jiraUrl.value || (!atlassianConnected && !form.elements.jiraEmail.value)) { connectionCards.get('jira').content.open = true; form.elements.jiraUrl.focus(); cs.textContent = 'Сначала укажите адрес Atlassian, email и токен в карточке Jira.'; return; }
-    cb.disabled = true; cs.textContent = 'Проверяю Confluence…'; cs.className = 'connection-status';
-    try { const r = await window.petya.connectService('confluence', Object.fromEntries(keys.map(k => [k, form.elements[k].value]))); form.elements.jiraToken.value = ''; cs.textContent = r.message; cs.className = 'connection-status' + (r.ready ? ' connected' : ''); }
-    catch (e) { cs.textContent = e.message; cs.className = 'connection-status error'; connectionCards.get('jira').content.open = true; }
-    finally { cb.disabled = false; }
-  });
-  confluence.append(form.elements.confluenceSpace.closest('label'));
-  confluence.append(connectionNode('h2', 'Confluence'), connectionNode('p', 'Документация Atlassian · общие учётные данные с Jira'), cs, cb); form.insertBefore(confluence, form.querySelector(':scope > button'));
-  for (const key of ['jiraUrl', 'jiraEmail', 'jiraToken', 'clear_jiraToken', 'confluenceSpace']) form.elements[key].addEventListener('input', () => { cs.textContent = 'Настройки Atlassian изменены · проверьте доступ заново'; cs.className = 'connection-status'; });
   const zoom = connectionNode('article', '', 'card'); zoom.dataset.service = 'zoom';
   const zs = connectionNode('p', 'Захват не проверен', 'connection-status'); zs.setAttribute('role', 'status');
-  const zb = connectionNode('button', 'Подключить звук встречи', 'primary'); zb.type = 'button';
+  const zb = connectionNode('button', 'Проверить доступ к звуку', 'primary'); zb.type = 'button';
   zb.onclick = run(async () => {
     zb.disabled = true; zs.textContent = 'Проверяю захват звука…'; zs.className = 'connection-status'; let stream;
-    try { stream = await captureMeetingAudio(); zs.textContent = 'Доступ к системному звуку проверен. Прослушивание выключено.'; zs.className = 'connection-status connected'; }
+    try { stream = await captureMeetingAudio(); zs.textContent = 'Доступ к системному звуку проверен. Встречи Zoom подхватываются автоматически, если автозапись включена.'; zs.className = 'connection-status connected'; }
     catch (e) { zs.textContent = 'Подключение не подтверждено · ' + meetingCaptureError(e).message; zs.className = 'connection-status error'; }
     finally { stream?.getTracks().forEach(t => t.stop()); zb.disabled = false; }
   });
-  zoom.append(connectionNode('h2', 'Zoom · звук встречи'), connectionNode('p', 'Петя получает контекст через системный звук. Выберите источник в системном диалоге, если он появится. Кнопка проверит доступ к звуковой дорожке и сразу остановит захват. Вход в аккаунт Zoom не требуется.'), zs, zb, connectionNode('p', 'Захватывается весь системный звук, не только Zoom. Для начала прослушивания используйте кнопку встречи в Ассистенте.', 'small')); form.prepend(zoom);
+  zoom.append(connectionNode('h2', 'Zoom · звук встречи'), connectionNode('p', 'Петя получает контекст через системный звук. Выберите источник в системном диалоге, если он появится. Кнопка проверит доступ к звуковой дорожке и сразу остановит захват. Вход в аккаунт Zoom не требуется.'), zs, zb, connectionNode('p', 'Захватывается весь системный звук, не только Zoom. Встречи Zoom подхватываются автоматически. Расшифровка сохраняется в общую память текущей компании и доступна в любом чате в течение срока хранения.', 'small')); form.prepend(zoom);
   return window.petya.settings().then(settings => connectionDefinitions.forEach(def => connectionStatus(def, settings))).catch(e => notice(e.message, true));
 }
 const connectionsReady = setupConnections();

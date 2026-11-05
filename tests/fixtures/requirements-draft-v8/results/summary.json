@@ -1,0 +1,79 @@
+{
+  "status": "fresh_set_improvement_but_retention_regression_stabilization_required",
+  "models": {
+    "base": {
+      "bounds": {
+        "passed": 18,
+        "total": 24
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 1,
+        "total": 12
+      },
+      "schema": {
+        "passed": 44,
+        "total": 44
+      }
+    },
+    "parent": {
+      "bounds": {
+        "passed": 16,
+        "total": 24
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 5,
+        "total": 12
+      },
+      "schema": {
+        "passed": 44,
+        "total": 44
+      }
+    },
+    "candidate": {
+      "bounds": {
+        "passed": 20,
+        "total": 24
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 6,
+        "total": 12
+      },
+      "schema": {
+        "passed": 44,
+        "total": 44
+      }
+    }
+  },
+  "corrections": {
+    "semantic_pass": 7,
+    "exact_json_pass": 6,
+    "total": 7
+  },
+  "limitations": [
+    "44 related synthetic cases, not broad independent real-world evaluation",
+    "Manual non-blind draft assessment with predeclared rubric",
+    "Deterministic diagnostic sampling, not live dialogue validation"
+  ],
+  "improvement_gate_passed": true,
+  "release_gate_passed": false,
+  "retention": {
+    "original_eight_exact": 7,
+    "original_eight_total": 8,
+    "regression": "negative-1: lower negative bound became upper bound",
+    "v7_development_numeric": 13,
+    "v7_development_numeric_total": 16,
+    "interpretation": "Development/rehearsal evidence, not fresh confirmation"
+  }
+}

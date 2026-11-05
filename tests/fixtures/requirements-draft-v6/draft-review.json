@@ -1,0 +1,107 @@
+{
+  "method": "Manual non-blind strict review under protocol; content can be distributed across title and description. Conditional sending on failure is accepted without requiring redundant repetition of no-success sending. Every failed case lists at least one decisive error.",
+  "models": {
+    "base": {
+      "inspection-message": {
+        "passed": false,
+        "finding": "Adds unrequested channel, audience, format and acknowledgment questions."
+      },
+      "ticket-print": {
+        "passed": false,
+        "finding": "Reopens settled time format and asks for new fields."
+      },
+      "shipment-report": {
+        "passed": true,
+        "finding": "Recipient/exclusion, replacement field, result and privacy preserved."
+      },
+      "screen-revert": {
+        "passed": true,
+        "finding": "White buttons on the unchanged named screen; contents and address retained."
+      },
+      "rotation-scope": {
+        "passed": false,
+        "finding": "Contradictory conditional display and already-answered questions."
+      },
+      "vector-export": {
+        "passed": false,
+        "finding": "Adopts explicitly unapproved DXF as a temporary format."
+      },
+      "dashboard-period": {
+        "passed": true,
+        "finding": "Correct 33-second interval, free-room count and hidden names."
+      },
+      "parcel-card": {
+        "passed": true,
+        "finding": "Preserves weight units, date, no cost and sole color question."
+      }
+    },
+    "parent": {
+      "inspection-message": {
+        "passed": true,
+        "finding": "Correct failed-inspection condition, mechanic, both fields and privacy."
+      },
+      "ticket-print": {
+        "passed": true,
+        "finding": "All print fields, time format, privacy and no-search constraint retained."
+      },
+      "shipment-report": {
+        "passed": false,
+        "finding": "Description ends at contents heading and omits report fields/privacy."
+      },
+      "screen-revert": {
+        "passed": true,
+        "finding": "Cancelled rename, contents/address and white buttons retained."
+      },
+      "rotation-scope": {
+        "passed": false,
+        "finding": "Invents conditional frequency display and drops explicit ventilation exclusion."
+      },
+      "vector-export": {
+        "passed": false,
+        "finding": "Invents PDF/Excel and omits measurement units."
+      },
+      "dashboard-period": {
+        "passed": true,
+        "finding": "Count preserved in title; interval and privacy in description."
+      },
+      "parcel-card": {
+        "passed": true,
+        "finding": "All fields, units, privacy and open color preserved."
+      }
+    },
+    "candidate": {
+      "inspection-message": {
+        "passed": true,
+        "finding": "Correct failed-inspection condition, mechanic, both fields and privacy."
+      },
+      "ticket-print": {
+        "passed": false,
+        "finding": "Omits every print requirement beyond the task name."
+      },
+      "shipment-report": {
+        "passed": false,
+        "finding": "Turns unspecified report outcome into a monetary total."
+      },
+      "screen-revert": {
+        "passed": true,
+        "finding": "Correct named screen, white buttons, preserved contents/address."
+      },
+      "rotation-scope": {
+        "passed": false,
+        "finding": "Changes recipient to dispatcher and omits the numeric limit."
+      },
+      "vector-export": {
+        "passed": true,
+        "finding": "Preserves revision and units, leaves format open without adopting DXF."
+      },
+      "dashboard-period": {
+        "passed": false,
+        "finding": "Omits interval, room count and privacy."
+      },
+      "parcel-card": {
+        "passed": true,
+        "finding": "Weight units, required date, no cost and sole open color retained."
+      }
+    }
+  }
+}

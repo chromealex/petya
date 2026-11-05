@@ -9,7 +9,7 @@ module.exports=async function(ctx) {
   const calls=[],prompts=[];
   let multiple=false;
   const guid='0123456789abcdef0123456789abcdef';
-  const tools=['read_console','manage_asset','manage_scene'].map(name=>({name,inputSchema:{type:'object'}}));
+  const tools=['read_console','manage_asset','manage_scene','manage_components'].map(name=>({name,inputSchema:{type:'object'}}));
   const editor=http.createServer(async(req,res)=>{
     const chunks=[];for await(const chunk of req)chunks.push(chunk);
     if (!chunks.length){res.writeHead(405).end();return;}
@@ -74,6 +74,41 @@ module.exports=async function(ctx) {
       await readPeer.connect(new StreamableHTTPClientTransport(new URL(reader.url),{requestInit:{headers:{Authorization:'Bearer '+reader.token}}}));
       assert.ok(!(await readPeer.listTools()).tools.some(t=>t.name.startsWith('unity_')));
     }finally{await readPeer.close();await reader.close();}
+    s.settings.model='test';s.settings.ollamaUrl='http://127.0.0.1:11434/api/chat';
+    const decisions=[
+      {action:'call',name:'read_console',arguments:'{"action":"get"}',text:'Читаю ошибки',evidence:[]},
+      {action:'call',name:'manage_components',arguments:'{"action":"set_property","target":42,"component_type":"BoxCollider","property":"enabled","value":true}',text:'Предлагаю включить коллайдер.',evidence:[1]}
+    ];
+    s.request=async(url,options)=>{
+      const item=decisions.shift();
+      if(JSON.parse(options.body).format)return {message:{content:JSON.stringify(item)}};
+      return {message:{content:item.text,tool_calls:[{id:'test',function:{name:item.name,arguments:JSON.parse(item.arguments)}}]}};
+    };
+    const before=calls.filter(c=>c.name==='manage_components').length;
+    const diagnosis=await call('assist',{command:'Проверь персонажа',instance:'B'});
+    assert.ok(!diagnosis.isError,diagnosis.content[0].text);
+    assert.equal(calls.filter(c=>c.name==='manage_components').length,before);
+    const proposalId=diagnosis.structuredContent.proposalId;
+    assert.ok(proposalId);
+    decision=1;
+    assert.ok((await call('apply_agent_proposal',{proposalId})).isError);
+    decision=0;
+    assert.ok(!(await call('apply_agent_proposal',{proposalId})).isError);
+    assert.equal(calls.filter(c=>c.name==='manage_components').length,before+1);
+    assert.ok((await call('apply_agent_proposal',{proposalId})).isError);
+    multiple=false;
+    decisions.push({id:'unity',confidence:.98},
+      {action:'call',name:'read_console',arguments:'{"action":"get"}',text:'Читаю ошибки',evidence:[]},
+      {action:'call',name:'manage_components',arguments:'{"action":"set_property","target":42,"component_type":"BoxCollider","property":"enabled","value":true}',text:'Предлагаю включить коллайдер.',evidence:[1]});
+    s.settings.semanticTools='true';
+    const app={...s,unity:feature,saveSettings:patch=>Object.assign(s.settings,patch),requestProgress:{report(){}}};
+    const extension=require('../src/features/extension-replies.cjs').setup(app).extensionReplies;
+    const chatReply=await extension.turn('Разберись почему персонаж проваливается сквозь пол');
+    assert.match(chatReply.text,/Предлагаю включить коллайдер/);
+    const proposed=topic.messages.at(-1).unityAgent;
+    assert.ok(proposed.proposalId);
+    topic.messages.push({role:'user',text:'Теперь другая задача'});
+    assert.ok((await call('apply_agent_proposal',{proposalId:proposed.proposalId})).isError);
     console.log('Unity discovery, native calls, resources, prefabs and access checks verified through two MCP endpoints');
   }finally{await peer.close();await endpoint.close();editor.closeAllConnections();await new Promise(r=>editor.close(r));}
 };

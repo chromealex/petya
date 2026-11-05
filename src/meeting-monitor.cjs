@@ -3,10 +3,10 @@ const path = require('node:path');
 const { promisify } = require('node:util');
 const exec = promisify(execFile);
 function unpacked(file) { return file.replace(/app\.asar([/\\])/u, 'app.asar.unpacked$1'); }
-async function desktopState() {
+async function desktopState({meetingLink=false}={}) {
   let stdout;
-  if (process.platform === 'darwin') ({ stdout } = await exec(unpacked(path.join(__dirname, '../assets/native/watch-macos')), [], { timeout: 10000, maxBuffer: 1024 * 1024 }));
-  else if (process.platform === 'win32') ({ stdout } = await exec('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', unpacked(path.join(__dirname, 'watch-windows.ps1'))], { timeout: 15000, windowsHide: true, maxBuffer: 1024 * 1024 }));
+  if (process.platform === 'darwin') ({ stdout } = await exec(unpacked(path.join(__dirname, '../assets/native/watch-macos')), meetingLink?['--meeting-link']:[], { timeout: 10000, maxBuffer: 1024 * 1024 }));
+  else if (process.platform === 'win32') ({ stdout } = await exec('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', unpacked(path.join(__dirname, 'watch-windows.ps1')), ...(meetingLink?['-MeetingLink']:[])], { timeout: 15000, windowsHide: true, maxBuffer: 1024 * 1024 }));
   else throw new Error('Автоопределение Zoom поддерживает macOS и Windows.');
   return JSON.parse(stdout.replace(/^\uFEFF/, '').trim());
 }

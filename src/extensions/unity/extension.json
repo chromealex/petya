@@ -1,0 +1,19 @@
+{
+  "name": "Unity Editor",
+  "description": "Префабы и инструменты открытого редактора",
+  "setting": "module_unity",
+  "scripts": [
+    [
+      "settings.js",
+      "agents.js"
+    ],
+    [
+      "chat.js",
+      "agents.js"
+    ]
+  ],
+  "service": "unity",
+  "settings": true,
+  "id": "unity",
+  "feature": "desktop.cjs"
+}

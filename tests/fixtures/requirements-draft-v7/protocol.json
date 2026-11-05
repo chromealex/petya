@@ -1,0 +1,30 @@
+{
+  "data": {
+    "train": {
+      "maxTokens": 233,
+      "sha256": "821e22822904165151b7ffdf566976c0269297b22dbd914056f4f03807b8edf8"
+    },
+    "test": {
+      "maxTokens": 215,
+      "sha256": "1f72f900c3e8df8f4bfb9367c2abefe7cb74a863c8370d5668299671d1966849"
+    }
+  },
+  "parent_sha256": "e18071047755b0a6406c454a064ddbc56a74940250e72813a43d7b1ab15da93e",
+  "epochs": 3,
+  "steps": 744,
+  "learning_rate": 0.00015,
+  "seed": 42,
+  "weights": "Same last full-attention block V/O/down LoRA; no added trainable layers",
+  "hypothesis": "Correction rehearsal, task balance, canonical JSON and description-first drafts reduce under-learning and early title drift; combined intervention, not isolated attribution.",
+  "selection": "Fixed 3 epochs; final cases must not select a checkpoint",
+  "gate": "Numeric and general scores at least both base and parent, strict complete-draft coverage greater than both. Passing only permits broader release evaluation, not deployment.",
+  "draftReview": "Non-blind; preserve all explicit facts/exclusions, no invented scope or conditions, only explicitly open questions; inspect title and body.",
+  "inference": {
+    "temperature": 0,
+    "thinking": false,
+    "maxTokens": {
+      "draft": 450,
+      "other": 120
+    }
+  }
+}

@@ -35,7 +35,7 @@
  const cards=()=>[...settings.querySelectorAll('article.settings-card, #computer-control')];
  const serviceIds=new Set(optionalModules.map(([id])=>id));
  const category=card=>{
-   if(serviceIds.has(card.dataset.service))return 'services';
+   if(card.dataset.extension||serviceIds.has(card.dataset.service))return 'services';
    const name=card.querySelector('h2')?.textContent||card.querySelector(':scope>summary')?.textContent||'';
    if(card.dataset.service==='images'||/Whisper|Ollama|Zoom|Манера|модел|Распознавание|Звук встречи|Запись системного/i.test(name))return 'voice';
    return 'app';
@@ -45,7 +45,7 @@
    const services=group==='services',query=find.value.trim().toLocaleLowerCase();
    let shown=false,added=false;
    for(const card of cards()){
-     const selected=serviceIds.has(card.dataset.service)&&moduleSettings['module_'+card.dataset.service]==='true';
+     const selected=!!card.dataset.extension||serviceIds.has(card.dataset.service)&&moduleSettings['module_'+card.dataset.service]==='true';
      if(selected)added=true;
      const connected=card.querySelector('.connection-status')?.classList.contains('connected');
      const matchesState=state==='all'||(state==='connected'?connected:!connected);
@@ -70,7 +70,7 @@
  const source=card.querySelector('.connection-status');if(source){const meta=el('p',null,'small ux-check-time');source.after(meta);const update=()=>{const status=connectionBadge(source.textContent,[...source.classList],card.dataset.service);const summary=card.querySelector('.settings-summary-status');if(summary){summary.textContent=serviceIds.has(card.dataset.service)&&['disconnected','setup'].includes(status.state)?'Требуется настройка':serviceIds.has(card.dataset.service)&&status.state==='connected'?'Подключён':status.label;summary.title=source.textContent;}if(source.classList.contains('connected')||source.classList.contains('error')){meta.textContent='Результат проверки получен '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}filterSettings();};new MutationObserver(update).observe(source,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class']});update();}
  }
  $('settings-form').addEventListener('invalid',event=>{const card=event.target.closest('article.settings-card');if(card)window.revealSettings(card);},true);
- settingsTabs.select('services');document.addEventListener('petya-modules-changed',filterSettings);
+ settingsTabs.select('services');document.addEventListener('petya-modules-changed',filterSettings);document.addEventListener('petya-extensions-changed',filterSettings);
  const savePanel=settings.querySelector('.settings-save-panel');if(savePanel){savePanel.classList.add('ux-save-strip');const note=el('span','Изменений нет','small');note.title='Ручные поля сохраняются этой кнопкой. Вход в сервис, переключатели модулей и проверка доступа выполняются сразу.';savePanel.append(note);const save=savePanel.querySelector('button');save.textContent='Сохранить настройки';$('settings-form').addEventListener('input',()=>{note.textContent='Есть несохранённые изменения';save.classList.add('primary');});document.addEventListener('petya-settings-displayed',()=>{note.textContent='Настройки сохранены';});}
  // Permissions: keep long recovery advice available, without filling the whole page.
  const permissionList=$('permission-list');if(permissionList)new MutationObserver(()=>{for(const p of permissionList.querySelectorAll('p.small'))if(p.textContent.length>240&&!p.closest('details'))disclosure(p,'Как восстановить доступ');}).observe(permissionList,{childList:true});

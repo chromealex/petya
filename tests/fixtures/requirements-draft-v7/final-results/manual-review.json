@@ -1,0 +1,104 @@
+{
+  "base": {
+    "permit-print": [
+      true,
+      "All printing fields and exclusions retained; only printing is explicitly requested."
+    ],
+    "failed-calibration": [
+      false,
+      "Technician omitted; unrelated questions introduced."
+    ],
+    "repair-report": [
+      false,
+      "Repair result and hidden mechanic address omitted."
+    ],
+    "tank-reading": [
+      false,
+      "Level requirement changed into display condition; settled boundary reopened."
+    ],
+    "model-export": [
+      false,
+      "STEP excluded although only unapproved; unrelated question added."
+    ],
+    "monitor-refresh": [
+      true,
+      "All agreed fields, interval and exclusion retained."
+    ],
+    "directory-revert": [
+      true,
+      "Original name and address explicit; only visual icon changes clearly preserves content."
+    ],
+    "two-open": [
+      true,
+      "All fields, hidden price and two questions retained."
+    ]
+  },
+  "parent": {
+    "permit-print": [
+      true,
+      "All requirements retained."
+    ],
+    "failed-calibration": [
+      false,
+      "Hidden customer name omitted."
+    ],
+    "repair-report": [
+      false,
+      "Report contents and hidden address omitted."
+    ],
+    "tank-reading": [
+      false,
+      "Level constraint changed into conditional visibility."
+    ],
+    "model-export": [
+      false,
+      "Invented exclusions for PDF and Excel."
+    ],
+    "monitor-refresh": [
+      true,
+      "Awkward grammar, but count, 79-second refresh and hidden operators preserved."
+    ],
+    "directory-revert": [
+      false,
+      "Cancelled rename reinstated."
+    ],
+    "two-open": [
+      true,
+      "Name/date, hidden price and both unresolved questions retained; no alternative name representation introduced."
+    ]
+  },
+  "deep": {
+    "permit-print": [
+      true,
+      "All requirements retained."
+    ],
+    "failed-calibration": [
+      true,
+      "Only-failure condition entails no success notification. No error number is grounded in the rejected substitution in the source dialogue, not an invented exclusion."
+    ],
+    "repair-report": [
+      true,
+      "Master, no owner, work-order code/result and hidden mechanic address retained despite awkward grammar."
+    ],
+    "tank-reading": [
+      true,
+      "Strict bound, dispatcher, independent number visibility, hidden owner and no pump controls retained."
+    ],
+    "model-export": [
+      false,
+      "Double negative about STEP creates unclear/contradictory status."
+    ],
+    "monitor-refresh": [
+      true,
+      "All requirements retained."
+    ],
+    "directory-revert": [
+      false,
+      "Conservative failure: generic keep directory unchanged does not clearly enumerate retained name/content; summary also vague."
+    ],
+    "two-open": [
+      false,
+      "Price prohibition weakened to permission; summary missing and mixed question types."
+    ]
+  }
+}

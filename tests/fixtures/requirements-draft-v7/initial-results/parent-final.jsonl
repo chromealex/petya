@@ -1,0 +1,32 @@
+{"id": "neg-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "neg-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-23,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "neg-inclusive", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-14,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "neg-ceiling", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-14,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "decimal-floor", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":6.25,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "decimal-ceiling", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":6.25,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "mixed-low", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":3,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": false}
+{"id": "mixed-high", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-5,\"upper\":3,\"lowerInclusive\":true,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "exact-new", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":117,\"upper\":117,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "cancel-new", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "strict-count", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":422,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "max-count", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":421,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "closed-new", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":44,\"upper\":81,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "open-new", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":44,\"upper\":81,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "proposal-new", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "approved-new", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":8.75,\"upper\":8.75,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "receipt-new", "task": "draft", "answer": "{\"summary\": \"Печать квитанции\", \"description\": \"Русский\", \"questions\": []}", "exactJSON": false}
+{"id": "failure-new", "task": "draft", "answer": "{\"summary\": \"Поля уведомления тестировщика\", \"description\": \"При провале теста отправлять уведомление тестировщику. Содержимое уведомления строго по ТЗ:\\n\\n1. Номер запуска теста.\\n2. Текст причины провала.\\n\\nТребования по полям:\\n- При успешном завершении теста уведомления не отправлять.\\n- Имя автора не показывать.\\n- В теле уведомления показывать номер запуска, а не номер ошибки.\", \"questions\": []}", "exactJSON": false}
+{"id": "roles-new", "task": "draft", "answer": "{\"summary\": \"Отправка отчёта упаковки бригадиру\", \"description\": \"Настроить отправку отчёта упаковки только бригадиру. Содержимое отчёта:\", \"questions\": []}", "exactJSON": false}
+{"id": "scope-new", "task": "draft", "answer": "{\"summary\": \"Экран показывать номер насоса\", \"description\": \"На экране диспетчера показывать номер насоса. Отображать номер независимо от показаний давления. Отображать номер только при давлении меньше 91 бара. Имя владельца не показывать. Функция охлаждения не добавлять.\", \"questions\": []}", "exactJSON": false}
+{"id": "format-new", "task": "draft", "answer": "{\"summary\": \"Экспорт маршрута\", \"description\": \"Экспортируемый маршрут должен включать номер редакции и расстояние. Формат экспорта пока не выбран; по ходу обсуждения рассматривался вариант GPX.\", \"questions\": [\"Какой формат экспорта маршрута утвердить?\"]}", "exactJSON": false}
+{"id": "period-new", "task": "draft", "answer": "{\"summary\": \"Уменьшение интервала обновления статистики\", \"description\": \"Интервал обновления показателя количества подключений изменён с 46 секунд на 41 секунду. Имена пользователей по-прежнему скрыты. Другие параметры не меняются.\", \"questions\": []}", "exactJSON": false}
+{"id": "rename-new", "task": "draft", "answer": "{\"summary\": \"Изменить цвет кнопок на экране\", \"description\": \"На экране «Доставка» изменить цвет кнопок на фиолетовый. Переименование экрана в «Рейсы» отменено, название экрана остаётся «Доставка». Содержимое и ссылки не меняются.\", \"questions\": []}", "exactJSON": false}
+{"id": "status-new", "task": "draft", "answer": "{\"summary\": \"Карточка оборудования\", \"description\": \"Карточка оборудования показывать состояние и дату осмотра. Цену скрывать. Отображать состояние в виде текста.\", \"questions\": [\"Какой цвет использовать для отображения состояния?\"]}", "exactJSON": false}
+{"id": "multiply", "task": "general", "answer": "611", "exactJSON": true}
+{"id": "sort-list", "task": "general", "answer": "{\"numbers\": [2, 5, 9]}", "exactJSON": false}
+{"id": "python-length", "task": "general", "answer": "3", "exactJSON": true}
+{"id": "literal", "task": "general", "answer": "Да", "exactJSON": false}
+{"id": "translation", "task": "general", "answer": "Файл готов.", "exactJSON": true}
+{"id": "read-json", "task": "general", "answer": "7", "exactJSON": true}
+{"id": "cancel-action", "task": "general", "answer": "нет", "exactJSON": true}
+{"id": "sum", "task": "general", "answer": "400", "exactJSON": true}

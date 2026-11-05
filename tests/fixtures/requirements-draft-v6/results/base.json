@@ -1,0 +1,152 @@
+{
+  "boundsCorrect": 11,
+  "boundsTotal": 16,
+  "validDrafts": 8,
+  "draftTotal": 8,
+  "records": [
+    {
+      "id": "frost-0",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": -6,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+      "passed": false
+    },
+    {
+      "id": "frost-1",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": -6,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+      "passed": true
+    },
+    {
+      "id": "cold-floor-0",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": -17,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+      "passed": true
+    },
+    {
+      "id": "cold-floor-1",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": -17,\n  \"upper\": null,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": null\n}",
+      "passed": false
+    },
+    {
+      "id": "fraction-0",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 4.5,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+      "passed": false
+    },
+    {
+      "id": "fraction-1",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 4.5,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+      "passed": true
+    },
+    {
+      "id": "cross-zero-0",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": -8,\n  \"upper\": 2,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "passed": false
+    },
+    {
+      "id": "cross-zero-1",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": -8,\n  \"upper\": 2,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": false\n}",
+      "passed": true
+    },
+    {
+      "id": "visitors-0",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 312,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}",
+      "passed": false
+    },
+    {
+      "id": "visitors-1",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 311,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}",
+      "passed": true
+    },
+    {
+      "id": "settlement-0",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 2.5,\n  \"upper\": 2.5,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "passed": true
+    },
+    {
+      "id": "settlement-1",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+      "passed": true
+    },
+    {
+      "id": "interval-new-0",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 42,\n  \"upper\": 79,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": false\n}",
+      "passed": true
+    },
+    {
+      "id": "interval-new-1",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 42,\n  \"upper\": 79,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "passed": true
+    },
+    {
+      "id": "new-cancel-0",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+      "passed": true
+    },
+    {
+      "id": "new-cancel-1",
+      "task": "bounds",
+      "answer": "{\n  \"status\": \"final\",\n  \"lower\": 111,\n  \"upper\": 111,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+      "passed": true
+    },
+    {
+      "id": "inspection-message",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Отправка уведомления механику при неудачной инспекции\",\n  \"description\": \"Реализовать логику отправки уведомления механику в случае неудачной инспекции. Уведомление должно содержать номер инспекции и описание дефекта. Фамилия владельца должна быть скрыта в уведомлении.\",\n  \"questions\": [\n    \"В каком виде (email, push-уведомление, сообщение в чат) должно быть отправлено уведомление механику?\",\n    \"Какой механизм используется для определения статуса инспекции как 'неудачной'?\",\n    \"Кто является целевой аудиторией (механик конкретного участка или все механики системы)?\",\n    \"Какой формат должен иметь описание дефекта (текстовое поле, код ошибки, фото)?\",\n    \"Требуется ли подтверждение механика о получении уведомления или о начале устранения дефекта?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "ticket-print",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Реализовать печать талона с номером места и временем сеанса (без имени зрителя)\",\n  \"description\": \"Необходимо реализовать функционал печати талона для зрителя. В выведенном на печать документе должны содержаться только следующие данные:\\n1. Номер места.\\n2. Время сеанса в формате ЧЧ:ММ.\\n\\nИмя зрителя в талоне не должно отображаться. Функционал поиска места не требуется.\",\n  \"questions\": [\n      \"Какой формат времени принят в системе (например, ЧЧ:ММ или ЧЧ:ММ:СС)?\",\n      \"Нужно ли указывать название сеанса/фильма в талоне?\",\n      \"Какой формат номера места (например, 'А-12' или '12')?\"\n    ]\n  }\n```",
+      "validJSON": true
+    },
+    {
+      "id": "shipment-report",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Изменить формат отчета отгрузки: исключить начальника, добавить номер машины и итог\",\n  \"description\": \"Необходимо внести изменения в логику формирования и отправки отчета отгрузки:\\n\\n1. **Получатели отчета:**\\n   - Отправлять отчет только логисту.\\n   - Исключить отправку начальнику.\\n\\n2. **Содержимое отчета:**\\n   - Включить номер машины.\\n   - Включить итог.\\n   - Исключить номер рейса.\\n\\n3. **Дополнительные требования:**\\n   - Адрес водителя в отчете не отображать.\",\n  \"questions\": []\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "screen-revert",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Изменение цвета кнопок на экране «Склад»\",\n  \"description\": \"Необходимо изменить цвет кнопок на экране «Склад» на белый. Содержимое экрана и его адрес остаются без изменений.\",\n  \"questions\": []\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "rotation-scope",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Отображение номера привода при частоте вращения < 630 об/мин\",\n  \"description\": \"Реализовать логику отображения информации о приводах. Оператору необходимо показывать номер привода независимо от текущей частоты вращения. Отображение номера привода должно происходить только при условии, что частота вращения строго меньше 630 оборотов в минуту (RPM < 630). Имя владельца привода в этом случае должно быть скрыто.\",\n  \"questions\": [\n    \"Какие данные скрывать?\",\n    \"Внести условия вентиляции?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "vector-export",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Реализовать экспорт схемы в формате DXF с включением номера ревизии и единиц\",\n  \"description\": \"Необходимо реализовать функционал экспорта схемы в формате DXF. В экспортируемый файл должны быть включены следующие обязательные поля:\\n1. Номер ревизии.\\n2. Единицы измерения (масштаб/единицы измерения измерения).\\n\\nПримечание: Формат DXF выбран как временное решение до утверждения финального формата.\",\n  \"questions\": [\n    \"Утвердить формат экспорта (DXF) как финальный или оставить как временный вариант?\"\n  ]\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "dashboard-period",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Обновление интервала обновления табло свободных кабинетов с 39 до 33 секунд\",\n  \"description\": \"Необходимо изменить логику обновления табло, отображающего количество свободных кабинетов. Текущий интервал обновления составляет 39 секунд, что требует коррекции. Новый интервал должен быть установлен ровно на 33 секунды. Имена пациентов в табло должны оставаться скрыты (требование уже согласовано ранее).\",\n  \"questions\": []\n}\n```",
+      "validJSON": true
+    },
+    {
+      "id": "parcel-card",
+      "task": "draft",
+      "answer": "```json\n{\n  \"summary\": \"Отображение веса посылки в карточке\",\n  \"description\": \"В карточку посылки необходимо добавить отображение веса. \\n\\nТребования:\\n1. Показывать вес в числовом формате (килограммы).\\n2. Дата приёма посылки должна оставаться отображаться (требование сохранено).\\n3. Стоимость посылки не показывать.\\n\\nОткрытые вопросы:\\n- Определить цвет отображения веса.\",\n  \"questions\": [\n    \"Определить цвет отображения веса.\"\n  ]\n}\n```",
+      "validJSON": true
+    }
+  ]
+}
