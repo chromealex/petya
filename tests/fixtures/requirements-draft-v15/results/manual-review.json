@@ -1,0 +1,248 @@
+{
+  "base": {
+    "name-0-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-10": [
+      false,
+      "Cancelled peach color applied."
+    ],
+    "name-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      false,
+      "Agreed cobalt color cancelled."
+    ],
+    "name-1-10": [
+      false,
+      "Cancelled cobalt color applied."
+    ],
+    "name-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-10": [
+      false,
+      "Partner permission ignored."
+    ],
+    "report-0-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-11": [
+      false,
+      "Partner permission ignored."
+    ],
+    "report-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-10": [
+      false,
+      "Approved replacement explicitly rejected; obsolete request number retained."
+    ],
+    "report-1-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-11": [
+      false,
+      "Summary retains obsolete number for buyer and conflicts with replacement in description."
+    ],
+    "failure-0-0": [
+      false,
+      "Approved operator name hidden."
+    ],
+    "failure-0-1": [
+      false,
+      "Explicit hidden-operator requirement omitted; unrelated open questions added."
+    ],
+    "scope": [
+      false,
+      "Monitor procurement exclusion omitted and settled date format reopened."
+    ],
+    "repeat": [
+      false,
+      "Settled privacy reopened and unrelated history/additional-counter questions added."
+    ]
+  },
+  "parent": {
+    "name-0-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-01": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-01": [
+      false,
+      "Buyer is included despite preserved delivery prohibition."
+    ],
+    "report-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "failure-0-0": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "failure-0-1": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "scope": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "repeat": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ]
+  },
+  "v8": {
+    "name-0-01": [
+      false,
+      "Cancelled rename applied."
+    ],
+    "name-0-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-00": [
+      true,
+      "Final after-agreement qualifier explicitly cancels rename/color; address/content retained. Awkward initial planned actions credited as superseded."
+    ],
+    "name-0-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      false,
+      "Description preserves old color despite approved cobalt color in summary."
+    ],
+    "name-1-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-00": [
+      false,
+      "Cancelled cobalt color applied."
+    ],
+    "name-1-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-01": [
+      false,
+      "Prohibited partner included and approved phone visibility rejected."
+    ],
+    "report-0-11": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-00": [
+      false,
+      "Replacement omitted and required number/result included under hiding instruction."
+    ],
+    "report-1-10": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-01": [
+      false,
+      "Obsolete number retained and approved email visibility rejected."
+    ],
+    "report-1-11": [
+      false,
+      "Approved email visibility rejected."
+    ],
+    "failure-0-0": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "failure-0-1": [
+      true,
+      "Not-required-to-show wording credited as excluding the operator name, consistent with previous reviews; identifier/cause/failure-only retained."
+    ],
+    "scope": [
+      false,
+      "Dispatcher delivery explicitly prohibited, visitor recipient introduced and procurement exclusion omitted."
+    ],
+    "repeat": [
+      true,
+      "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ]
+  }
+}
