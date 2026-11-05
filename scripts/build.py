@@ -1,6 +1,5 @@
 """Publish one current application/installer per platform; keep no archived builds."""
 import argparse
-import fcntl
 import os
 import pathlib
 import shutil
@@ -15,9 +14,15 @@ parser.add_argument('--win', action='store_true')
 args = parser.parse_args()
 platforms = ['mac', 'win'] if not (args.mac or args.win) else ([ 'mac' ] if args.mac else []) + ([ 'win' ] if args.win else [])
 with (root / '.build.lock').open('w') as lock:
+    # One build at a time; fcntl is POSIX-only, Windows (CI) locks with msvcrt.
     try:
-        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-    except BlockingIOError:
+        if sys.platform == 'win32':
+            import msvcrt
+            msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except (BlockingIOError, OSError):
         raise SystemExit('Another Petya build is running; wait for it to finish.')
     for platform in platforms:
         if platform == 'mac':
@@ -40,6 +45,11 @@ with (root / '.build.lock').open('w') as lock:
                 subprocess.run([node, '-e', "process.noAsar = true; require('@electron/asar').extractAll(process.argv[1],process.argv[2])",
                     str(output/'win-unpacked/resources/app.asar'), str(extracted)], cwd=root, env=node_env, check=True)
                 subprocess.run([sys.executable, str(root/'scripts/verify-package.py'), str(root/'src'), str(extracted/'src')], check=True)
+                # On Windows the unpacked app also has to start: same tray start check as the Mac build.
+                if sys.platform == 'win32':
+                    verify_env = dict(os.environ, PETYA_VERIFY_BUILD='1')
+                    verify_env.pop('ELECTRON_RUN_AS_NODE', None)
+                    subprocess.run([str(output/'win-unpacked/Petya.exe')], cwd=output/'win-unpacked', env=verify_env, check=True, timeout=120)
                 installer = output/'Petya-Setup.exe'
                 if installer.stat().st_size < 1000000 or installer.read_bytes()[:2] != b'MZ':
                     raise RuntimeError('Windows installer is incomplete')
