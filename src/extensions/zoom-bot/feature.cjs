@@ -1,6 +1,6 @@
 const fs=require('node:fs'),path=require('node:path');
 const {ZoomBot}=require('./controller.cjs');
-const DEFAULT_URL='https://auth.petya-app.ru/zoom-bot';
+const {createRemote,DEFAULT_URL}=require('./remote.cjs');
 function validate(next){
  if(!['off','ask','auto'].includes(next.zoomBotMode)||!['bot','local'].includes(next.zoomCaptureMode))throw Error('Проверьте режим подключения Zoom.');
  if(next.zoomBotUrl){const u=new URL(next.zoomBotUrl);if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash)throw Error('Сервис Zoom должен использовать HTTPS.');}
@@ -16,13 +16,7 @@ module.exports={name:'zoomBot',defaults:{zoomBotMode:'auto',zoomCaptureMode:'bot
    persist:state=>{if(!safeStorage.isEncryptionAvailable())throw Error('Хранилище ОС недоступно.');fs.writeFileSync(file+'.tmp',safeStorage.encryptString(JSON.stringify(state)),{mode:0o600});fs.renameSync(file+'.tmp',file);},
    emit:state=>{if(s.win&&!s.win.isDestroyed())s.win.webContents.send('zoom-bot-progress',state);},
    save:rows=>s.memory.put(rows),transcribe:bytes=>require('../../voice-setup.cjs').transcribe(s,bytes),
-   remote:async(method,route,data)=>{
-    const config=s.settings;validate(config);if(!(config.zoomBotCredential||config.zoomCredential))throw Error('Сервис участника Пети ещё не подключён. Настройте Zoom в подключениях. Микрофон компьютера не используется.');
-    if(route==='/v1/bots'&&method==='POST'){if(!config.zoomCredential)throw Error('Войдите в Zoom в настройках подключения Пети.');data={...data,oauthCredential:config.zoomCredential};}
-    const response=await fetch((config.zoomBotUrl||DEFAULT_URL).replace(/\/$/,'')+route,{method,headers:{Authorization:'Bearer '+(config.zoomBotCredential||config.zoomCredential),'Content-Type':'application/json'},...(data?{body:JSON.stringify(data)}:{}),redirect:'error',signal:AbortSignal.timeout(20000)});
-    if(!response.ok)throw Error(response.status===503?'Сервис Zoom ещё не готов: требуется приложение Zoom и Meeting SDK.':'Сервис Zoom вернул HTTP '+response.status);
-    const text=await response.text();if(text.length>10*1024*1024)throw Error('Слишком большой ответ сервиса Zoom.');return JSON.parse(text);
-   }
+   remote:createRemote({settings:()=>s.settings,bot:()=>bot})
   });
   let stopped=false;const tick=()=>{if(!stopped&&process.env.PETYA_VERIFY_BUILD!=='1')bot.tick().catch(()=>{});};
   const timer=setInterval(tick,5000);timer.unref();app.once('before-quit',()=>{stopped=true;clearInterval(timer);});

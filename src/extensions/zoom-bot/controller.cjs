@@ -17,7 +17,7 @@ class ZoomBot {
    if(found){this.hits++;this.misses=0;}else{this.hits=0;this.misses++;}
    if(this.misses>=3){const wasPresent=this.present;this.present=false;if(wasPresent)this.publish({});if(!this.state.jobId)this.publish({phase:'idle',id:null,url:null,meetingId:null});}
    if(found&&this.hits>=2&&!this.present){this.present=true;
-    if(this.state.jobId&&!['done','error'].includes(this.state.phase))return this.snapshot();
+    if(this.state.jobId&&this.state.phase!=='done')return this.snapshot();
     this.state={id:randomUUID(),phase:'link',at:this.now()};this.publish({});
     await this.discover();
     if(this.settings().zoomBotMode==='auto')await this.connect();
@@ -61,7 +61,15 @@ class ZoomBot {
   try{
    if(method==='dismiss'){if(this.state.jobId)throw Error('Петя уже подключается к встрече.');return this.publish({phase:'dismissed',message:phases.dismissed});}
    if(method==='join'&&this.state.phase!=='detected')throw Error('Встреча не ожидает подключения.');
-   if(method==='retry'){if(this.state.jobId){await this.poll();return this.snapshot();}await this.discover();}
+   if(method==='retry'){
+    if(this.state.jobId){
+     try{await this.poll();if(this.state.phase!=='error')return this.snapshot();}
+     catch(e){if(e.code!=='ZOOM_JOB_UNAVAILABLE'||this.state.completed)throw e;}
+     // Explicit retry starts a new attempt only after a terminal/missing job.
+     this.state={id:randomUUID(),phase:'link',at:this.now()};this.publish({});
+    }
+    await this.discover();
+   }
    return await this.connect();
   }catch(e){this.publish({phase:'error',permissionBlocked:e.code==='ACCESSIBILITY_REQUIRED',message:e.message});throw e;}finally{this.busy=false;}
  }
