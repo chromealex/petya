@@ -20,7 +20,9 @@ module.exports=ctx=>{
     const existing=require('./project-folders.cjs').projectFolders(p,ctx.projectMemory.get(p?.memoryId));const folders=data.folders|| (data.folder?[data.folder]:[]);for(const folder of folders)if(!existing.includes(folder)&&!pickedProjectFolders.has(folder))throw Error('Выберите папку кнопкой в контексте проекта.');data.folders=await Promise.all(folders.map(folder=>require('./local-project.cjs').rootFolder(folder)));data.folder=data.folders[0]||'';
     if(!p){ctx.dialogue.projectCreate(name);p=ctx.dialogue.state.projects.find(p=>p.id===ctx.dialogue.state.activeProjectId);}p.name=name;Object.assign(p,data);ctx.dialogue.persist();return ctx.dialogue.list();
   }));
-  ctx.handle('chatArchive',projectMutation((kind,id,archived)=>{if(!['project','chat'].includes(kind))throw Error('Неизвестный тип записи.');if(kind==='chat'&&ctx.chatJobs.busy(id)||kind==='project'&&ctx.dialogue.state.topics.some(t=>t.projectId===id&&ctx.chatJobs.busy(t.id)))throw Error('Дождитесь ответа перед архивированием.');return ctx.chatUndo.mutate(()=>ctx.dialogue.archive(kind,id,archived));}));
+  // Agent chats belong to the chat that started them: they go to the archive, come back and move with it.
+  const agentsOf=id=>ctx.dialogue.state.topics.filter(t=>t.agentOf===id&&t.id!==id);
+  ctx.handle('chatArchive',projectMutation((kind,id,archived)=>{if(!['project','chat'].includes(kind))throw Error('Неизвестный тип записи.');if(kind==='chat'&&[id,...agentsOf(id).map(t=>t.id)].some(t=>ctx.chatJobs.busy(t))||kind==='project'&&ctx.dialogue.state.topics.some(t=>t.projectId===id&&ctx.chatJobs.busy(t.id)))throw Error('Дождитесь ответа перед архивированием.');return ctx.chatUndo.mutate(()=>{if(kind==='chat'){const agents=agentsOf(id);for(const t of agents){t.archived=!!archived;if(archived&&ctx.dialogue.state.activeId===t.id)ctx.dialogue.state.activeId='';}}return ctx.dialogue.archive(kind,id,archived);});}));
 
   ctx.handle('chatProjectSelect',projectMutation(id=>ctx.dialogue.projectSelect(id)));
   ctx.handle('chatProjectRename',projectMutation((id,name)=>ctx.dialogue.projectRename(id,name)));
@@ -28,7 +30,7 @@ module.exports=ctx=>{
   ctx.handle('chatProjectContext',()=>require('./chat-project-context.cjs').snapshot({dialogue:ctx.dialogue,projectMemory:ctx.projectMemory,settings:ctx.settings,slackAccount:ctx.slackAccount(),attachments:ctx.attachments.list()}));
   ctx.handle('chatProjectPin',(id,pinned)=>{const p=ctx.dialogue.state.projects.find(p=>p.id===id);if(!p)throw Error('Проект не найден.');if(id!=='general')p.pinned=!!pinned;ctx.dialogue.persist();return ctx.dialogue.list();});
   ctx.handle('chatPin',(id,pinned)=>ctx.dialogue.pin(id,pinned));
-  ctx.handle('chatReorder',projectMutation((id,projectId,beforeId)=>{if(ctx.chatJobs.busy(id))throw Error('Дождитесь ответа перед переносом чата.');return ctx.chatUndo.mutate(()=>ctx.dialogue.reorder(id,projectId,beforeId));}));
+  ctx.handle('chatReorder',projectMutation((id,projectId,beforeId)=>{if(ctx.chatJobs.busy(id))throw Error('Дождитесь ответа перед переносом чата.');return ctx.chatUndo.mutate(()=>{const result=ctx.dialogue.reorder(id,projectId,beforeId);const parent=ctx.dialogue.state.topics.find(t=>t.id===id);if(parent){let moved=false;for(const t of agentsOf(id))if(t.projectId!==parent.projectId&&!ctx.chatJobs.busy(t.id)){t.projectId=parent.projectId;moved=true;}if(moved){ctx.dialogue.persist();return ctx.dialogue.list();}}return result;});}));
   ctx.handle('chatProjectBind',projectMutation((id,memoryId)=>{const group=ctx.dialogue.state.projects.find(p=>p.id===id);if(id==='general')throw Error('Для общего проекта нельзя подключить папку или рабочий проект.');if(!group||id!==ctx.dialogue.state.activeProjectId)throw Error('Проект изменился. Откройте контекст заново.');if(memoryId&&!ctx.projectMemory.get(memoryId))throw Error('Рабочий проект не найден.');group.memoryId=memoryId||'';ctx.dialogue.select('');return ctx.dialogue.list();}));
 
 
