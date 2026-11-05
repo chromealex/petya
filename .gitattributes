@@ -1,0 +1,4 @@
+# Preserve review artifacts and original scanner output byte-for-byte.
+/output/pdf/*.pdf -text
+/output/review/*.zip -text
+/zoom-bot/review/evidence/* -text -whitespace
