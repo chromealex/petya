@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('petyaEvents', {
   onExtensionInstall: callback => ipcRenderer.on('extension-install-progress', (_,item) => callback(item)),
   onUnityProgress: callback => ipcRenderer.on('unity-progress', (_,state) => callback(state)),
   onReportShareProgress: callback => ipcRenderer.on('report-share-progress', (_,state) => callback(state)),
+  onSlackScreenProgress: callback => ipcRenderer.on('slack-screen-progress', (_,state) => callback(state)),
   onChatChange: callback => ipcRenderer.on('chat-change-progress', (_,state) => callback(state)),
   onMotionProgress: callback => ipcRenderer.on('blender-motion-progress', (_,state) => callback(state)),
   onArtistProgress: callback => ipcRenderer.on('artist-progress', (_event, state) => callback(state)),

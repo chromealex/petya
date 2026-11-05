@@ -31,6 +31,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       }
     }
     if(!choice){const important=ctx.highlights?.turn(original);if(important)return important;}
+    if(!choice){const screen=await ctx.slackScreen?.turn(original);if(screen)return screen;}
     if(!choice){const discovered=await ctx.contextDiscovery?.turn(original);if(discovered)return discovered;}
     if (!choice) {
       const visual = await ctx.extensionReplies?.turn(original);
@@ -208,6 +209,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       const access=require('./service-access.cjs');
       const service=error.petyaService;
       if(!reason||!Object.hasOwn(access.services,service)||typeof command!=='string'||choice||owner!==ctx.dialogue.active()||project!==ctx.dialogue.state.activeProjectId||company!==ctx.companyId)throw error;
+      if(service==='slack'&&reason&&ctx.slackScreen&&require('./features/slack-screen.cjs').reading(command))return ctx.slackScreen.run(command);
       const name=access.services[service].name,text=name+' · '+reason.message;
       ctx.dialogue.rememberAction(command,text);
       const chat=ctx.dialogue.active(),message=chat.messages.at(-1);

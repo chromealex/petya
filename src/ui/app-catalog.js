@@ -1,5 +1,5 @@
 (()=>{
- const descriptions={unity:'Поиск и просмотр префабов открытого проекта',telegram:'Сообщения и обсуждения команды',slack:'Каналы, сообщения и треды',notion:'Страницы и базы знаний',asana:'Поручения и задачи',jira:'Задачи, версии и отчёты',confluence:'Документы и пространства',ai:'Передача задач агентам',googleplay:'Ошибки и ANR приложений',gmail:'Почта и календарь',web:'Поиск по открытым источникам'};
+ const descriptions={artist:'Генерация изображений на этом компьютере',unity:'Поиск и просмотр префабов открытого проекта',telegram:'Сообщения и обсуждения команды',slack:'Каналы, сообщения и треды',notion:'Страницы и базы знаний',asana:'Поручения и задачи',jira:'Задачи, версии и отчёты',confluence:'Документы и пространства',ai:'Передача задач агентам',googleplay:'Ошибки и ANR приложений',gmail:'Почта и календарь',web:'Поиск по открытым источникам'};
  const glyph={telegram:'➤',asana:'∴',ai:'✧',googleplay:'▷',gmail:'@',web:'◎'};
  window.openAppCatalog=function(term=''){
   const previous=document.activeElement,d=document.createElement('dialog');d.className='app-catalog';
@@ -9,14 +9,15 @@
   head.append(title,close);search.type='search';search.placeholder='Найти приложение';search.setAttribute('aria-label',search.placeholder);search.value=term;
   function draw(){
     rows.replaceChildren();const q=search.value.trim().toLocaleLowerCase();
-    for(const [id,name] of optionalModules){
+    for(const [id,name] of [...optionalModules,['artist','Художник']]){
       if(!(name+' '+descriptions[id]).toLocaleLowerCase().includes(q))continue;
-      const row=make('div'),icon=glyph[id]?make('span',glyph[id]):make('img'),copy=make('div'),enabled=moduleEnabled(id),action=make('button',enabled?'Настроить':'Включить');
+      const row=make('div'),icon=(glyph[id]||id==='artist')?make('span',glyph[id]||'✎'):make('img'),copy=make('div'),enabled=id==='artist'?!!window.petyaArtistAdded:moduleEnabled(id),action=make('button',enabled?'Настроить':'Включить');
       row.className='app-catalog-row';icon.className='app-catalog-icon';
       if(icon.tagName==='IMG'){icon.src=id==='unity'?'../extensions/unity/icon.svg':'catalog-icons/'+id+'.svg';icon.alt='';}
       else icon.setAttribute('aria-hidden','true');
       copy.append(make('strong',name),make('small',descriptions[id]));action.type='button';
       action.onclick=async()=>{action.disabled=true;try{
+        if(id==='artist'){let state=await window.petya.feature('artist','status');if(!state.enabled)state=await window.petya.feature('artist','configure',true,state.url||'');window.configureArtistCard?.(state);d.close();view('settings');window.revealSettings?.($('image-install-card'));return;}
         if(!enabled){const check=moduleChecks.get(id);check.checked=true;await check.onchange();if(!moduleEnabled(id))return;}
         d.close();view('settings');const card=$('settings').querySelector('[data-service="'+id+'"]');if(card)window.revealSettings(card);
       }finally{action.disabled=false;}};

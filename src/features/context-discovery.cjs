@@ -40,6 +40,7 @@ module.exports={name:'contextDiscovery',defaults:{},validate(){},resolve,evidenc
    try{await s.slackSync.start();found=collect();if(found.kind==='empty')found.text+=' Slack обновляется; из-за лимитов сервиса ещё не все каналы могли загрузиться.';}
    catch(e){found.text+=' Обновить Slack не удалось: '+e.message;}
   }
+  if(found.kind==='empty'&&s.slackScreen&&!s.modules.projectDisabled('slack'))return s.slackScreen.run(command);
   if(found.kind!=='found')return {handled:true,text:found.text,question:true};
   const topic=current||{id:randomUUID(),projectId:project?.id||'general',title:command.slice(0,80),kind:'chat',messages:[],at:Date.now()};
   if(!current){s.dialogue.state.topics.push(topic);s.dialogue.state.activeId=topic.id;delete s.dialogue.state.newChat;}

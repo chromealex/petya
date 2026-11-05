@@ -71,6 +71,9 @@
  const reportShareProgress = item => {if(item)put(item.id,item);};
  window.petyaEvents.onReportShareProgress(reportShareProgress);
  window.petya.reportShareProgress().then(items=>items.forEach(reportShareProgress)).catch(()=>{});
+ const slackScreenProgress = item => {if(item)put(item.id,item);};
+ window.petyaEvents.onSlackScreenProgress(slackScreenProgress);
+ window.petya.feature('slackScreen','status').then(slackScreenProgress).catch(()=>{});
  const changeProgress = item => {if(item)put(item.id,item);};
  window.petyaEvents.onChatChange(changeProgress);
  window.petya.feature('chatChanges','progress').then(items=>items.forEach(changeProgress)).catch(()=>{});

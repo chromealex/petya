@@ -2,6 +2,7 @@
 // IPC handlers through the shared services object. Add a feature here instead of editing main.cjs.
 module.exports=[
  require('./features/artist.cjs'),
+ require('./features/slack-screen.cjs'),
  require('./features/context-discovery.cjs'),
  require('./features/meeting-memory.cjs'),
  require('./features/unity.cjs'),
