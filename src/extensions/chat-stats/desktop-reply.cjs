@@ -9,7 +9,7 @@ module.exports = {
   scope(s,topic) { return topic?.messages || []; },
   answer(command,messages) {
     const rows = [['user','Вы'],['assistant','Петя']].map(([role,label])=>({
-      label,count:messages.filter(message=>message.role===role).length
+      label,count:messages.filter(message=>message.role===role && !message.pending).length
     }));
     return chartReply({kind:'bars',title:'Сообщения в этом чате до запроса',rows,emptyText:'В чате пока нет сообщений.'});
   }

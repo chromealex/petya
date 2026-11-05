@@ -66,8 +66,8 @@ function setup(s, dialog = () => require('electron').dialog) {
       files.set(id,{owner:scope(),full});
       if (files.size > 512) files.delete(files.keys().next().value);
       message.motionFile = {id,name:path.basename(full)};
-      s.attachments.remove(attachment.id);
     }
+    if (attachment) s.attachments.remove(attachment.id);
     s.dialogue.persist();
     return {handled:true,by:'Blender',text,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
   }

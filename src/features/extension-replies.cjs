@@ -93,6 +93,11 @@ function setup(s) {
   return { extensionReplies:{turn}, ipc:{ catalog, progress:()=>[...progress.values()], limit:() => s.settings[limitKey],
     setLimit(value) { validate({[limitKey]:value}); s.saveSettings({[limitKey]:value}); } } };
 }
+async function turnForAttachments(s,ids,command) {
+  const files = s.attachments.list();
+  if (!files.length || !Array.isArray(ids) || files.length !== ids.length || !files.every(f=>ids.includes(f.id))) return null;
+  return sessions.get(s.dialogue)?.turn(command);
+}
 function validate(settings) {
   if (!/^\d{1,6}$/.test(settings[limitKey])) throw Error('Введите целое число от 0 до 999999 МиБ.');
 }
@@ -110,7 +115,7 @@ function register(server,z,ctx) {
     const check = () => {
       ctx.check();
       const topic = ctx.dialogue.active();
-      if (!topic || topic.archived || topic.id !== chatId || ctx.access.projectId && ctx.access.projectId !== topic.projectId)
+      if (!topic || topic.archived || !ctx.dialogue.state.projects.some(p=>p.id===topic.projectId && !p.archived) || topic.id !== chatId || ctx.access.projectId && ctx.access.projectId !== topic.projectId)
         throw Error('Откройте чат в разрешённом проекте.');
       if (ctx.chatJobs?.busy(chatId)) throw Error('Дождитесь завершения запроса в чате.');
     };
@@ -125,5 +130,5 @@ function register(server,z,ctx) {
     } catch(error) { return {isError:true,content:[{type:'text',text:error.message}]}; }
   });
 }
-module.exports = {name:'extensionReplies', setup, register, needsApproval, validate,
+module.exports = {name:'extensionReplies', setup, register, turnForAttachments, needsApproval, validate,
   defaults:{[limitKey]:'100',...Object.fromEntries(providers.map(p=>[flag(p),'false']))}};

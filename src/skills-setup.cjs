@@ -51,6 +51,12 @@ module.exports=ctx=>{
       return {handled:true,text:answer,error,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
     }finally{dialogue.running.delete(topic.id);}
   };
-  ctx.handle('attachmentInspect',async(ids,command)=>!String(command||'').trim()?inspectAttachments(ids,''):(await executeSkill(ctx.text(command,4000),ids))||(require('./team-fill.cjs').isTeamFill(command)?ctx.teamFill.turn(ctx.text(command,4000)):inspectAttachments(ids,command)));
+  ctx.handle('attachmentInspect',async(ids,command)=>{
+    if (!String(command||'').trim()) return inspectAttachments(ids,'');
+    const request = ctx.text(command,4000);
+    const reply = await require('./features/extension-replies.cjs').turnForAttachments(ctx,ids,request);
+    if (reply) return reply;
+    return (await executeSkill(request,ids)) || (require('./team-fill.cjs').isTeamFill(command)?ctx.teamFill.turn(request):inspectAttachments(ids,command));
+  });
   return {instructionSkills,inspectAttachments,executeSkill,taskDuplicates,workSkills};
 };
