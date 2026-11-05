@@ -948,3 +948,13 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 #home .chat-feed .message-meta>details{margin:0;padding:0}
 #home .chat-feed .message-meta>details>summary{display:flex;align-items:center;min-height:24px;box-sizing:border-box;line-height:16px;margin:0;padding:0 4px}
 #home .chat-feed .message-meta>.message-steps>summary{padding-inline:0}
+
+/* Shared hover and keyboard feedback for every message action. */
+#home .chat-feed .message-meta>button,
+#home .chat-feed .message-meta>details>summary{border-radius:5px;cursor:pointer;transition:background-color .15s,color .15s,opacity .15s}
+#home .chat-feed .message-meta>button:not(:disabled):is(:hover,:focus-visible),
+#home .chat-feed .message-meta>details>summary:is(:hover,:focus-visible){background:#ffffff12;color:var(--ink);opacity:1}
+#home .chat-feed .message-meta>button:focus-visible,
+#home .chat-feed .message-meta>details>summary:focus-visible{outline:1px solid var(--green);outline-offset:2px}
+#home .chat-feed .message-meta>.message-steps>summary{width:fit-content;max-width:100%;padding-inline:4px}
+@media(prefers-reduced-motion:reduce){#home .chat-feed .message-meta>button,#home .chat-feed .message-meta>details>summary{transition:none}}
