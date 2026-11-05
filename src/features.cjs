@@ -3,6 +3,7 @@
 module.exports=[
  require('./features/artist.cjs'),
  require('./features/context-discovery.cjs'),
+ require('./features/meeting-memory.cjs'),
  require('./features/unity.cjs'),
  require('./features/layout.cjs'),
  require('./features/chat-return.cjs'),

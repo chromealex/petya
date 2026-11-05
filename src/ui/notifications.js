@@ -51,6 +51,9 @@
    const state=await window.petya.chatNavigation('');
    for(const topic of state.topics)if(topic.job?.state==='attention' && state.projects.some(p=>p.id===topic.projectId&&!p.archived))chatNotification(topic);
  }).catch(error=>console.warn('Chat notifications unavailable',error.message));
+ function meetingProgress(state){put('meeting:'+state.id,{title:'Встреча Zoom',text:state.message,busy:['recording','processing'].includes(state.phase),percent:state.percent,version:state.phase,kind:state.phase==='error'?'error':state.phase==='done'?'success':'info',actions:state.phase==='error'?[['Повторить обработку',()=>window.petya.feature('meetingMemory','retry',state.id)]]:[]});if(state.phase==='done')refreshContexts().catch(()=>{});}
+ window.petyaEvents.onMeetingMemory(meetingProgress);
+ window.petya.feature('meetingMemory','status').then(states=>states.forEach(meetingProgress)).catch(()=>{});
  window.petyaEvents.onBackground(state=>{if(state.error)put('background',{title:'Фоновое обновление',text:state.error,kind:'error',actions:[['Подключения',()=>{setOpen(false);view('settings');}]]});});
  document.addEventListener('petya-image-install',event=>{const state=event.detail;if(!state.busy&&!items.has('image-install'))return;put('image-install',{title:'Модель изображений',text:state.message||(state.ready?'Готова к работе':'Подготовка…'),busy:state.busy,version:state.phase,kind:state.phase==='error'?'error':'model',actions:state.busy?[['Отменить',()=>window.petya.imageInstallCancel()]]:[]});});
  function languageProgress(state){

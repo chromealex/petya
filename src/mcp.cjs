@@ -9,6 +9,7 @@ function createServer(deps) {
   });
   require('./mcp-chat-tools.cjs').register(server, z, deps);
   require('./features/context-discovery.cjs').register(server,z,deps);
+  require('./features/meeting-memory.cjs').register(server,z,deps);
   require('./features/extension-replies.cjs').register(server,z,deps);
   require('./features/blender-motion.cjs').register(server,z,deps);
   require('./features/layout.cjs').register(server,z,deps);

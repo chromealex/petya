@@ -467,6 +467,7 @@ function setupHandlers() {
   // features add their own services here (see src/features.cjs) instead of editing main.cjs.
   const services={
     get workspace(){return workspace;},
+    get dataRoot(){return dataRoot;}, get speech(){return speech;}, get qwenSpeech(){return qwenSpeech;}, get speechError(){return speechError;},
     get win(){return win;},get handle(){return handle;},get directRequest(){return directRequest;},get team(){return team;},get memory(){return memory;},get slackSync(){return slackSync;},
     get agents(){return agents;},
     get allowedMedia(){return allowedMedia;},
@@ -528,6 +529,7 @@ function setupHandlers() {
   const stopChatMcp = require('./mcp-setup.cjs')({
     invokeUnity:(...args)=>services.unity.invoke(...args),
     handle, dialogue, attachments, chatJobs, memory, addContext, companyId,
+    meetingRecording: (...args)=>services.meetingRecording(...args),
     generatePainting: (args, check) => services.artist.generate(args, check),
     check() { if (switchingCompany || quitting) throw Error('Компания закрывается.'); },
     async run(work) { activeOperations++; try { return await work(); } finally { activeOperations--; } },

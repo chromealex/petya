@@ -15,7 +15,7 @@ const slack=(id,channel,text,user='alex')=>({id,channel,text,user,at:now,source:
  assert.equal(resolve({rows:[rows[3]],topic:{excludedMaterials:['s']}}).kind,'empty');
  assert.equal(resolve({rows:[rows[3],slack('s2','C2','Помоги с ошибкой')]}).kind,'clarify');
  assert.deepEqual(resolve({rows:[rows[3],slack('s2','C2','Помоги с ошибкой')],project:{id:'p',name:'Bunker'},channels:[{id:'C1'}]}).rows.map(r=>r.id),['s']);
- assert.equal(resolve({project:{id:'p',name:'Bunker'}}).kind,'empty');
+ assert.deepEqual(resolve({project:{id:'p',name:'Bunker'}}).rows.map(r=>r.id),['a','b']);
  assert.equal(resolve({rows:[zoom('stale','old',now-8*86400000,'Ошибка')]}).kind,'empty');
  assert.equal(resolve({rows:[zoom('future','x',now+1000,'Ошибка')]}).kind,'empty');
  let saved=0,seen;

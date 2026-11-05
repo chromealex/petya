@@ -88,7 +88,7 @@ class AudioListener {
     if (this.active) return;
     this.active = true; const generation = ++this.generation;
     try {
-      const speech = await window.petya.ensureSpeech();this.engine=speech?.engine||'Whisper';
+      const speech = this.options.recordSegment ? {concurrency:1} : await window.petya.ensureSpeech();this.engine=speech?.engine||'Whisper';
       this.concurrency = Math.max(1, Math.min(4, Number(speech?.concurrency) || 2));
       if (!this.active || generation !== this.generation) return;
       if (!meeting && !await window.petya.permission()) throw new Error('Нет разрешения на микрофон. Разрешите его в настройках ОС.');
@@ -121,7 +121,7 @@ class AudioListener {
         if (!this.active || generation !== this.generation) return;
         this.lastFrameAt=Date.now();
         if(this.options.onLevel){let energy=0;for(const sample of event.data)energy+=sample*sample;this.options.onLevel(Math.sqrt(energy/Math.max(1,event.data.length)));}
-        if(window.petyaSpeaking){this.options.onState?.('Петя говорит — микрофон временно не распознаёт');this.gate.reset();this.chunks=[];this.samples=0;this.quiet=0;this.voiced=false;this.queue=[];this.previousText='';this.overlap=false;++this.captureEpoch;this.started=Date.now();return;}
+        if(window.petyaSpeaking&&!this.options.recordSegment){this.options.onState?.('Петя говорит — микрофон временно не распознаёт');this.gate.reset();this.chunks=[];this.samples=0;this.quiet=0;this.voiced=false;this.queue=[];this.previousText='';this.overlap=false;++this.captureEpoch;this.started=Date.now();return;}
         const chunk = event.data, duration = chunk.length / this.context.sampleRate;
         const {speaking,chunks}=this.gate.feed(chunk,this.voiced);
         if (speaking) { this.lastSpeechAt=Date.now(); this.options.onSpeech?.(this.lastSpeechAt);this.options.onState?.('Слышу речь'); }
@@ -149,7 +149,7 @@ class AudioListener {
         const item = this.queue.shift(), epoch = this.captureEpoch;
         this.options.onState?.('Распознаю речь');
         // Attach a rejection handler immediately, including to the second request.
-        const promise = new Promise(resolve => resolve(window.petya.transcribe(item.wav))).then(result => ({result}), error => ({error}));
+        const promise = new Promise(resolve => resolve(this.options.recordSegment ? this.options.recordSegment(item) : window.petya.transcribe(item.wav))).then(result => ({result}), error => ({error}));
         pending.push({ item, epoch, promise }); this.inFlight++;
       }
     };
@@ -194,6 +194,7 @@ class AudioListener {
     if (!this.active) return;
     const generation = this.generation;
     this.finishing = (async () => {
+      if(this.captureWatch){clearInterval(this.captureWatch);this.captureWatch=null;}
       if (this.node) this.node.port.onmessage = null;
       if (this.stream) this.stream.getTracks().forEach(t => { t.onended = null; t.stop(); });
       if (this.voiced && this.chunks?.length) this.queue.push({ wav: toWav(this.chunks, this.context.sampleRate), at: this.started, endedAt: Date.now(), overlap: this.overlap, direct: this.direct });

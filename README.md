@@ -146,6 +146,14 @@ API references: [Figma file nodes](https://developers.figma.com/docs/rest-api/fi
 
 ### Automatic work context
 
-Vague questions such as «посмотри что не так» resolve saved context before answering: the latest eligible Zoom session, otherwise team requests in synced Slack threads. Existing chat materials take precedence. Selected projects restrict Slack channels; ambiguous channels without a project require clarification. Selected-project Zoom context must identify that project. Sources, timestamps and bounded text snapshots stay in the chat for follow-up questions. Missing recordings or unsynced Slack messages cannot be inferred.
+Vague questions such as «посмотри что не так» resolve saved context before answering: the latest eligible Zoom session, otherwise team requests in synced Slack threads. Existing chat materials take precedence. Selected projects restrict Slack channels; ambiguous channels without a project require clarification. Zoom meetings are shared company context available across projects. Sources, timestamps and bounded text snapshots stay in the chat for follow-up questions. Missing recordings or unsynced Slack messages cannot be inferred.
 
 `resolve_work_context(chatId)` uses the same resolver and returns evidence for an MCP assistant to answer. It is read-only; project-scoped clients can only discover shared materials already referenced in their authorized project. Excluded materials and disabled project services remain excluded. Recording permissions, connection settings and sending messages remain in the application.
+
+### Automatic Zoom meeting memory
+
+Zoom meeting detection is enabled by default, including a one-time migration for existing profiles. Later opt-outs remain saved. OS permissions still require the app. Transcripts (including the local microphone) are stored in encrypted company memory, independently of the selected chat, for the configured 1–7 days. System audio capture includes other applications. Recording continues until the meeting ends; only then does recognition start. Encrypted audio segments survive recognition failures and restarts and are deleted after successful processing; stale pending audio is removed on startup or the next recording according to the context retention period. A dedicated meeting microphone never enters the voice-command timeout. The notification center shows recording, processing, completion and retryable errors.
+
+MCP `read_meeting_memory` reads complete transcript segments with optional `sessionId`, `offset`, and `limit` (up to 100); it requires company-wide access and cannot start capture or bypass OS permission. `resolve_work_context` can use shared Zoom sessions in any project; project-scoped MCP access retains its existing material restrictions.
+
+MCP `meeting_recording_status` exposes the same processing snapshot as the UI; `retry_meeting_processing(sessionId)` retries a failed saved recording and requires company-wide edit access. Audio capture and OS permission prompts remain app-only.

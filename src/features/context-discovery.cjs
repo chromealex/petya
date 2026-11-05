@@ -7,12 +7,13 @@ function resolve({rows,topic,project,channels=[],members=[],now=Date.now()}){
  const excluded=new Set(topic?.excludedMaterials||[]),scoped=project?.id&&project.id!=='general';
  const eligible=rows.filter(r=>!excluded.has(r.id)&&r.at<=now&&now-r.at<=7*DAY&&String(r.text||'').trim()).filter(r=>{
   if(r.projectId)return r.projectId===(project?.id||'general');
+  if(r.source==='Zoom'||r.source==='Микрофон'&&r.sessionId)return true;
   if(!scoped)return true;
   if(r.source==='Slack')return channels.some(c=>c.id===r.channel)||topic?.slackSource?.url===r.url;
   return r.source==='Zoom'&&project.name?.length>2&&String(r.title+' '+r.text).toLocaleLowerCase().includes(project.name.toLocaleLowerCase());
  });
  const meetings=eligible.filter(r=>r.source==='Zoom').sort((a,b)=>b.at-a.at);
- if(meetings.length){const latest=meetings[0];return {kind:'found',rows:meetings.filter(r=>latest.sessionId?r.sessionId===latest.sessionId:r.id===latest.id).sort((a,b)=>a.at-b.at),reason:'Последний сохранённый разговор Zoom'};}
+ if(meetings.length){const latest=meetings[0];return {kind:'found',rows:eligible.filter(r=>(r.source==='Zoom'||r.source==='Микрофон')&&(latest.sessionId?r.sessionId===latest.sessionId:r.id===latest.id)).sort((a,b)=>a.at-b.at),reason:'Последний сохранённый разговор Zoom'};}
  const slack=eligible.filter(r=>r.source==='Slack'&&(r.messages||[]).some(m=>!m.bot_id&&m.user&&(!members.length||members.includes(m.user))&&m.at<=now&&now-m.at<=7*DAY&&requestText.test(m.text||''))).sort((a,b)=>b.at-a.at);
  const source=topic?.slackSource?.url&&slack.filter(r=>r.url===topic.slackSource.url);
  const candidates=source?.length?source:slack;
