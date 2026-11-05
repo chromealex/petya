@@ -196,5 +196,71 @@
       true,
       "Final interval, count and hidden names retained."
     ]
+  },
+  "candidate": {
+    "name-0-01": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-0-10": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-0-00": [
+      false,
+      "Cancelled lilac color is applied; both-cancelled state is not retained."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-1-01": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-1-10": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-1-00": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "report-00": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "report-10": [
+      false,
+      "Explicit owner delivery permission is ignored; owner remains excluded."
+    ],
+    "report-01": [
+      false,
+      "Explicit owner delivery exclusion is omitted after phone visibility changes."
+    ],
+    "report-11": [
+      false,
+      "Owner delivery is omitted after both prohibitions are lifted."
+    ],
+    "scope": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "print": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "failure": [
+      false,
+      "Hidden operator requirement omitted; email channel introduced without agreement."
+    ],
+    "repeat": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ]
   }
 }
