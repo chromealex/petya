@@ -98,8 +98,8 @@ module.exports = async (win, workspace) => {
     const lessons=await window.petya.converse('покажи сохранённые решения');if(!lessons.text.includes('Smoke'))throw Error('Lesson was not persisted');
     await window.petya.converse('забудь решение 1');
     const watch=await window.petya.converse('следи за этим билдом');if(!watch.text.includes('точная ссылка'))throw Error('Watch must require an actual thread');
-    await window.petya.attachmentForget(reviewTopic.topicId);
-    await window.petya.attachmentForget(attachmentReply.topicId);if(await window.petya.attachmentTopic()) throw new Error('Attachment deletion failed');
+    // Attachment analysis now stays in the same conversation: forget each chat once.
+    for(const id of new Set([reviewTopic.topicId,attachmentReply.topicId]))await window.petya.attachmentForget(id);if(await window.petya.attachmentTopic()) throw new Error('Attachment deletion failed');
     await window.petya.saveSettings({model:previous.model});
 
     if (!document.getElementById('mail-skill-form') || !document.getElementById('gmail-start')) throw new Error('Missing Gmail teaching UI');
