@@ -47,7 +47,7 @@ function grounded(result,sources,stats={}) {
 }
 class TeamFill {
  // screen(): reads the visible Slack window; approve(): asks for computer control when it is needed.
- constructor({settings,save,sources,extract,roster,jiraRoster,scope,screen,approve,now=Date.now}) {Object.assign(this,{settings,save,sources,extract,roster,jiraRoster,scope,screen,approve,now});this.pending=null;this.busy=false;this.epoch=0;}
+ constructor({settings,save,sources,extract,roster,jiraRoster,enrich,scope,screen,approve,now=Date.now}) {Object.assign(this,{settings,save,sources,extract,roster,jiraRoster,enrich,scope,screen,approve,now});this.pending=null;this.busy=false;this.epoch=0;}
  reset(){this.pending=null;this.epoch++;}
  reply(text,extra={}){return {handled:true,text,...extra};}
  async turn(command,answer=false,screenSources=null,preset=null) {
@@ -70,6 +70,8 @@ class TeamFill {
    // Nobody with roles in the window: the people from the sidebar's direct messages are the team (names only).
    let fromSidebar=false;if(!candidates.length&&screenSources){const names=directMessages(screenSources.map(x=>x.text).join('\n'));if(names.length){candidates=names.map(name=>({member:team.validate([{name}])[0],evidence:'Slack: личные сообщения · '+name,source:'Slack · личные сообщения'}));fromSidebar=true;}}
    let fromJira=!!preset;if(!candidates.length&&!preset){const rows=await this.fromJira();if(rows?.length){candidates=rows;fromJira=true;}}
+   // Names without roles (sidebar, Jira, a plain list): add the Slack profile title and the Jira components and labels.
+   let enriched=0;if(candidates.length&&this.enrich&&candidates.some(c=>!c.member.role||!c.member.responsibilities)){try{const before=candidates.filter(c=>c.member.role||c.member.responsibilities).length;candidates=await this.enrich(candidates);enriched=candidates.filter(c=>c.member.role||c.member.responsibilities).length-before;}catch(e){console.error('Team enrich:',e.message);}}
    for(const {member,evidence,source} of candidates) {
     const ids=['slackId','jiraId','email'];
     let matches=members.map((m,i)=>({m,i})).filter(({m})=>ids.some(k=>member[k]&&m[k]&&normalized(member[k])===normalized(m[k])));
@@ -93,7 +95,8 @@ class TeamFill {
     const jira=this.jiraError?'Jira тоже не помогла: '+this.jiraError+'. ':'';
     const hint=screenSources?'Открой в Slack список участников канала или сообщение, где перечислена команда, и повтори «Заполни команду»; или назови коллег сам: «Заполни команду: Полина — тестирование».':'Назовите коллег и обязанности или прикрепите список команды.';
     return this.askDetails((read||why?read+why:'Не нашёл однозначных сведений о составе команды. ')+jira+hint);}
-   return this.reply(summary+(fromSidebar?' Взял коллег из личных сообщений Slack слева; роли и обязанности допиши в разделе «Команда».':'')+(fromJira?' Взял исполнителей задач из Jira: имена, аккаунты и проекты; обязанности допиши в разделе «Команда» или скажи «Заполни команду: Полина — тестирование».':'')+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled)});
+   const without=candidates.filter(c=>!c.member.role&&!c.member.responsibilities).map(c=>c.member.name);
+   return this.reply(summary+(fromSidebar?' Взял коллег из личных сообщений Slack слева.':'')+(fromJira?' Взял исполнителей задач из Jira.':'')+(enriched?' Роли и обязанности добавил для '+enriched+': должность — из профиля Slack, обязанности — по компонентам и меткам их задач в Jira.':'')+(without.length?' Без роли остались: '+without.slice(0,8).join(', ')+(without.length>8?' и ещё '+(without.length-8):'')+' — в Slack у них не указана должность, а в Jira нет компонентов и меток. Допиши в «Команде» или скажи «Заполни команду: '+without[0]+' — тестирование».':'')+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled)});
   }catch(e){
    // Slack rate limit: offer to read the Slack app window instead of waiting.
    if(!screenSources&&(e.status===429||/HTTP 429|ограничил запросы/u.test(e.message||''))){const rows=await this.fromJira().catch(()=>null);if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}

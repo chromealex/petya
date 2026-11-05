@@ -36,6 +36,7 @@ module.exports=ctx=>{
     roster:command=>slackTeam.collect(command),
     // Second source: people assigned to issues of the allowed Jira projects in the last 90 days.
     jiraRoster:()=>require('./team-jira-roster.cjs').roster(ctx.workspace,ctx.settings),
+    enrich:async rows=>{const e=require('./team-enrich.cjs');let profiles=[],work=new Map();try{profiles=await e.slackProfiles(ctx.settings,ctx.request);}catch(err){console.error('Slack profiles:',err.message);}try{work=await e.jiraWork(ctx.workspace,rows);}catch(err){console.error('Jira work:',err.message);}return e.enrich(rows,profiles,work);},
     // Fallback when the Slack API is rate-limited: bring Slack to the front and read its visible window.
     screen:readSlackScreen,
     approve:(command,action)=>ctx.computerApproval.request(command,action),
