@@ -1,0 +1,67 @@
+{
+  "v18-failure-0-1": {
+    "passed": true,
+    "reason": "Only synonymous heading differs.",
+    "answer_sha256": "3f45ac4f034e5ea8c1627cb7889d23765ea562491a124d593277c8210dc33227"
+  },
+  "v18-scope": {
+    "passed": false,
+    "reason": "Omits explicit scanner procurement exclusion.",
+    "answer_sha256": "dd3d67892521ab3632dc83bc59754c4ac306b5d762e3272b153c390aee0949af"
+  },
+  "v18-repeat": {
+    "passed": true,
+    "reason": "Equivalent interval phrasing.",
+    "answer_sha256": "787356b51728c55b9e986d1273254ffa3b021b8e76e4e619c936f5e1a64c0b8a"
+  },
+  "v18-partial-send": {
+    "passed": true,
+    "reason": "Preserves separate permissions and preparation-only buyer copy.",
+    "answer_sha256": "f33b901ddb3939790e3ceddf7002d8d07e6bf5aeb5b0d29cc7b7331da4ae536b"
+  },
+  "v18-revoke-after-grant": {
+    "passed": false,
+    "reason": "Adds an unrequested instruction to preserve the contract instead of explicitly excluding its number.",
+    "answer_sha256": "fdc5abe5f0d4616d46486729965ba652f45e9af4cd1038a57a9f4d39ecddbe4f"
+  },
+  "v18-field-not-source": {
+    "passed": false,
+    "reason": "Adds an unrequested analysis operation.",
+    "answer_sha256": "2adf1af845354ff8b7453fa0e9ea33c9a36037a9d0767151b7edd779bb44e230"
+  },
+  "v18-exact-case": {
+    "passed": true,
+    "reason": "Explicit casing/letter instruction accurately repeats source requirement.",
+    "answer_sha256": "9372c135c4bbb158134f75fccf963bd52797644d748138179fcebcc7aa491256"
+  },
+  "v18-topic-return": {
+    "passed": false,
+    "reason": "Drops the client-name exclusion.",
+    "answer_sha256": "a453d5ac82ac2e04fea7e82e9d341fdb786ccc27a2f68261a8710783e07d84ae"
+  },
+  "v18-proposed-not-approved": {
+    "passed": false,
+    "reason": "Invents button-click invocation, which was not specified.",
+    "answer_sha256": "158185a3b15bf01525ad2a21fd6c39f94ac4abeddcb2ba187dc234846ea402f5"
+  },
+  "v18-numeric-range-draft": {
+    "passed": true,
+    "reason": "Correct upper bound logically excludes zero; no need to repeat the consequence.",
+    "answer_sha256": "c35a9e9e8acad42e687808616c5c5c12ca397abb6a021340c2102b2c44060a02"
+  },
+  "v18-ambiguous-recipient": {
+    "passed": false,
+    "reason": "Omits the explicitly requested open recipient question.",
+    "answer_sha256": "add9b78edca724ae0dd1f207dfac29c5371c2d740903c4297ec86f8b5417bb16"
+  },
+  "v18-regrant-limited": {
+    "passed": false,
+    "reason": "Drops the prohibition on sending the full report.",
+    "answer_sha256": "d08dd377b9122edb6eca61bfad61e3c8e72b530a2fd01ba0f2d61ceee9e869c5"
+  },
+  "v18-no-invented-channel": {
+    "passed": false,
+    "reason": "Omits the explicitly requested open channel question.",
+    "answer_sha256": "3480b2b53b57870e03d9734e4e2f3f82f7ba31c6c51be53a931bd302fc54842e"
+  }
+}

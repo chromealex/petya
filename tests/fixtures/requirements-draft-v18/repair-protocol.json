@@ -1,0 +1,27 @@
+{
+  "parent": "adapter",
+  "parent_sha256": "da7c023c81e238080007e9754ea918976c209c7f60505fbea8e73feef1ee637b",
+  "training_sha256": "98890a766a511924a4172f5f1caab3d98d08d49b3fad21020a82b9d720bbaa2d",
+  "steps": 681,
+  "epochs": 1,
+  "layers": 13,
+  "seed": 42,
+  "learning_rate": 2.5e-06,
+  "failed_acquisition_ids": [
+    "v18-scope",
+    "v18-revoke-after-grant",
+    "v18-field-not-source",
+    "v18-topic-return",
+    "v18-proposed-not-approved",
+    "v18-ambiguous-recipient",
+    "v18-regrant-limited",
+    "v18-no-invented-channel"
+  ],
+  "initial_acquisition": {
+    "total": 469,
+    "exact": 456,
+    "semantic_passed": 461
+  },
+  "selection": "Acquisition-only repair, frozen before candidate fresh inference. Require all 469 targets correct after ordinary reload. Preserve original artifact and answers. No selection based on fresh answers.",
+  "recipe": "All 469 targets once, eight extra copies of each of eight failures, 36 balanced variants once, 64 bounds and 48 negative sorts."
+}

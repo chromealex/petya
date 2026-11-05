@@ -13,3 +13,7 @@ Structured baseline inference and all 801 training updates completed. Training t
 ## Supplementary prompt correction
 
 The first supplementary parent run used the bounds system instruction accidentally selected from the first acquisition row. Its numerical-schema replies are invalid test evidence, not model draft failures. Original inputs, hash and raw answers are preserved in `results/invalid-release-prompt`. Before any candidate fresh inference, only the system instruction was corrected to the existing draft instruction; histories and references are unchanged. The amendment is recorded in `release-dialogues-protocol.json`. Training inputs are unchanged. The corrected parent test must be rerun sequentially after the active GPU job. The verifier now checks system instructions against task type.
+
+## Acquisition-only repair
+
+The first adapter retains 461/469 familiar cases semantically, with 456 exact JSON matches and five reviewed equivalents. Eight cases still omit explicit prohibitions or requested questions, or invent contract preservation, analysis or button-click requirements. Initial weights and raw answers are preserved. No candidate fresh inference has occurred. `repair-protocol.json` freezes one additional 681-step epoch at 0.0000025 with complete retention rehearsal and focused corrections. The corrected supplementary parent test runs before this repair, sequentially on the GPU. The repair must pass all 469 familiar targets before fresh candidate inference.
