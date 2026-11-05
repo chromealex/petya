@@ -1,0 +1,623 @@
+{
+  "base": {
+    "boundsCorrect": 14,
+    "boundsTotal": 18,
+    "validDrafts": 8,
+    "draftTotal": 8,
+    "records": [
+      {
+        "id": "books-exact",
+        "topic": "books-exact",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Подготовка комплектов книг для школы: формирование пакетов по 16 книг и передача данных библиотекарю\",\n  \"description\": \"Необходимо подготовить комплектацию книг для выдачи школе согласно утвержденным требованиям:\\n\\n1. Формирование комплектов: в каждый комплект должно входить ровно 16 книг.\\n2. Передача данных библиотекарю: передать только код класса.\\n3. Исключение данных: фамилии детей в комплектации не печатать.\\n\\nДоставка книг в школу оформляется в отдельной задаче.\",\n  \"questions\": []\n}\n```",
+        "validJSON": true,
+        "coveragePassed": true,
+        "reviewFinding": "Preserves count, recipient, class code, privacy and separate delivery scope."
+      },
+      {
+        "id": "cable-less",
+        "topic": "cable-less",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Приёмка кабеля: проверка номера бухты и ограничения по длине образца\",\n  \"description\": \"Необходимо реализовать процесс приёмки кабеля с соблюдением следующих требований:\\n1. Контролёру при приёмке отображается только номер бухты.\\n2. Стоимость закупки для контролёра должна быть скрыта.\\n3. Длина образца при приёмке должна быть строго меньше 24 метров (значение 24.00 м и выше не допускается).\",\n  \"questions\": []\n}\n```",
+        "validJSON": true,
+        "coveragePassed": true,
+        "reviewFinding": "Preserves exclusive length bound, recipient, field and hidden cost."
+      },
+      {
+        "id": "pallet-max",
+        "topic": "pallet-max",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Ограничение количества коробок на палете (максимум 35) и скрытие адреса покупателя\",\n  \"description\": \"Реализовать следующие требования для формирования палеты:\\n1. Ограничить максимальное количество коробок на одной палете значением 35 (включительно).\\n2. При выводе информации для грузчика скрывать адрес покупателя.\\n3. Обязательно сообщать грузчику номер рейса.\\n\\nВажно: Минимальное количество коробок не задается, ограничение только верхнее.\",\n  \"questions\": []\n}\n```",
+        "validJSON": true,
+        "coveragePassed": true,
+        "reviewFinding": "Preserves inclusive upper bound and explicitly avoids a minimum."
+      },
+      {
+        "id": "bake-min",
+        "topic": "bake-min",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Корректировка минимального времени выдержки в задаче по выпечке до 48 минут\",\n  \"description\": \"Обновить логику задачи по выпечке: установить жесткое ограничение на время выдержки. Минимальное значение времени выдержки должно составлять 48 минут. Показывать мастеру номер печи. Имя поставщика должно быть скрыто.\",\n  \"questions\": []\n}\n```",
+        "validJSON": true,
+        "coveragePassed": true,
+        "reviewFinding": "Preserves current inclusive lower bound and both display rules."
+      },
+      {
+        "id": "pressure-more",
+        "topic": "pressure-more",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Реализовать логику проверки баллона: давление > 62 бар, вывод кода стенда, скрытие серийного номера клиента\",\n  \"description\": \"Необходимо реализовать функционал проверки баллона с соблюдением следующих требований:\\n\\n1. **Критерий проверки**: Давление баллона должно быть строго больше 62 бар (62 бар не проходит проверку).\\n2. **Вывод данных**: При успешной проверке инженеру должен быть показан код стенда.\\n3. **Конфиденциальность**: Серийный номер клиента не должен отображаться в результатах проверки.\\n\\nВажно: Не путать 'код стенда' с 'серийным номером клиента' — это разные поля.\",\n  \"questions\": [\n    \"Подтвердить, что условие проверки — это строго больше 62 бар (не >= 62).\"\n  ]\n}\n```",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Reopens the settled exclusive pressure bound; also conditions code display on success."
+      },
+      {
+        "id": "dry-open",
+        "topic": "dry-open",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Определение финального времени сушки на основе результатов эксперимента\",\n  \"description\": \"Для этапа сушки предварительно предложено время 57 минут. Однако окончательное решение по времени будет принято только после проведения эксперимента. \\n\\nВажные ограничения по доступу к данным:\\n1. Технологу показывается только код партии.\\n2. Цена материала не показывается.\\n\\nТребуется провести эксперимент, проанализировать результаты и утвердить итоговое время сушки, заменив текущее временное значение.\",\n  \"questions\": [\n    \"Какое окончательное время сушки утвердить после результатов эксперимента?\"\n  ]\n}\n```",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Calls 57 minutes the current temporary value despite an explicit refusal to adopt it."
+      },
+      {
+        "id": "vial-switch",
+        "topic": "vial-switch",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Обновление конфигурации кассеты: фиксация количества пробирок и скрытие данных пациента\",\n  \"description\": \"Необходимо внести изменения в логику работы с кассетой для пробирок согласно согласованным требованиям:\\n\\n1. Установить фиксированное количество пробирок в кассете ровно на 11 штук.\\n2. В интерфейсе для лабораторного персонала отображать только номер образца.\\n3. Полностью скрыть имя пациента от лабораторного персонала.\\n\\nПримечание: Вопросы, касающиеся хранения контейнеров (20 штук), вынесены в отдельную задачу и не включаются в текущий тикет.\",\n  \"questions\": []\n}\n```",
+        "validJSON": true,
+        "coveragePassed": true,
+        "reviewFinding": "Retains the cassette count and privacy; excludes the other count from the task."
+      },
+      {
+        "id": "paint-correction",
+        "topic": "paint-correction",
+        "task": "draft",
+        "answer": "```json\n{\n  \"summary\": \"Корректировка таймлайта перемешивания краски и правил отображения кода оттенка\",\n  \"description\": \"Необходимо внести изменения в процесс перемешивания краски и логику отображения данных:\\n\\n1. **Время перемешивания**: Установить точное значение времени перемешивания краски — **71 секунда** (ранее было согласовано не более 73 секунд).\\n2. **Отображение кода оттенка**: Изменить получателя кода оттенка. Код оттенка должен отображаться **только диспетчеру**, а не маляру.\\n3. **Скрытие имени клиента**: Оставить без изменений требование о скрытии имени клиента от маляра.\",\n  \"questions\": [\n     \"Подтвердить, что логика скрытия имени клиента от маляра остается в силе (не отменять запрет).\",\n     \"Уточнить, есть ли дополнительные требования к интерфейсу для диспетчера при отображении кода оттенка (например, формат вывода или дополнительные поля).\"\n  ]\n}\n```",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Reopens the settled privacy restriction and adds new interface questions."
+      },
+      {
+        "id": "regression-0",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 23,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-2",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 23,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-4",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 23,\n  \"upper\": 23,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-6",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": false
+      },
+      {
+        "id": "regression-8",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 23,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-10",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-12",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 41,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-14",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 41,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-16",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": false
+      },
+      {
+        "id": "regression-18",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 41,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": false
+      },
+      {
+        "id": "regression-20",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 41,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-22",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-24",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-26",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-28",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 29,\n  \"upper\": 29,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "passed": true
+      },
+      {
+        "id": "regression-30",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": false
+      },
+      {
+        "id": "regression-32",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 29,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      {
+        "id": "regression-34",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+        "passed": true
+      }
+    ],
+    "draftCoverage": 5
+  },
+  "v1": {
+    "boundsCorrect": 15,
+    "boundsTotal": 18,
+    "validDrafts": 5,
+    "draftTotal": 8,
+    "records": [
+      {
+        "id": "books-exact",
+        "topic": "books-exact",
+        "task": "draft",
+        "answer": "{\"summary\":\"Подготовка комплектов книг для школы: формирование пакетов по 16 книг и передача данных библиотекарю\",\"description\":\"Необходимо подготовить комплекты книг для выдачи школе согласно утвержденным требованиям:\\n\\n1. Формировать комплекты строго по 16 книг в каждом.\\n2. При передаче данных библиотекарю указывать только код класса.\\n3. Фамилии детей в комплектации не указывать.\",\"questions\":[\"Утвержден ли полный список кодов классов для формирования комплектов?\",\"Какой формат данных (файл, таблица, сообщение) предпочтителен для передачи библиотекарю?\",\"Требуется ли указать количество комплектов для каждого класса или только список кодов?\"]}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Preserves explicit content but adds three unrequested open topics; fails the strict question-scope criterion."
+      },
+      {
+        "id": "cable-less",
+        "topic": "cable-less",
+        "task": "draft",
+        "answer": "{\"summary\":\"Приёмка кабеля: проверка номера бухты и длины образца\",\"description\":\"Необходимо реализовать процесс приёмки кабеля с соблюдением следующих требований:\\n\\n1. **Ввод данных контролёром**: Пользователь (контролёр) должен вводить номер бухты кабеля.\\n2. **Скрытие стоимости**: Поле со стоимостью закупки должно быть скрыто от контролёра (не отображаться в интерфейсе).\\n3. **Проверка длины образца**: Система должна проверять длину образца кабеля. Длина образца должна быть строго меньше 24 метров (длина = 24 м считается недопустимой).\\n\\n**Критерии приёмки**:\\n- Контролёр видит только поле для ввода номера бухты.\\n- Поле со стоимостью отсутствует в интерфейсе контролёра.\\n- При попытке приёмки кабеля с длиной образца ровно 24 метра операция отклоняется с соответствующим сообщением об ошибке.\\n- Приёмка успешно проходит для длины образца менее 24 метров.\",\"questions\":[]}\"",
+        "validJSON": false,
+        "coveragePassed": false,
+        "reviewFinding": "Invalid JSON (extra trailing quote); also changes displaying the number into entering it."
+      },
+      {
+        "id": "pallet-max",
+        "topic": "pallet-max",
+        "task": "draft",
+        "answer": "{\"summary\":\"Ограничение количества коробок на палете до 35 (включительно) и скрытие адреса покупателя\",\"description\":\"При формировании палеты необходимо обеспечить соблюдение следующих правил:\\n1. Максимальное количество коробок на одной палете не должно превышать 35 штук (значение 35 включительно).\\n2. В интерфейсе для грузчика должен отображаться номер рейса.\\n3. Адрес покупателя из данных заказа не должен выводиться в информации для грузчика.\",\"questions\":[]}",
+        "validJSON": true,
+        "coveragePassed": true,
+        "reviewFinding": "Preserves the bound, recipient, required field and privacy."
+      },
+      {
+        "id": "bake-min",
+        "topic": "bake-min",
+        "task": "draft",
+        "answer": "{\"summary\":\"Настройка времени выдержки в задаче по выпечке\",\"description\":\"Обновить логику времени выдержки в задаче по выпечке:\\n1. Установить минимальное время выдержки на 48 минут (ранее было 45).\\n2. Отображать мастеру номер печи.\\n3. Скрывать имя поставщика.\",\"questions\":[]}",
+        "validJSON": true,
+        "coveragePassed": true,
+        "reviewFinding": "Preserves the updated minimum and display rules."
+      },
+      {
+        "id": "pressure-more",
+        "topic": "pressure-more",
+        "task": "draft",
+        "answer": "{\"summary\":\"Проверка баллона: давление > 62 бар, скрыть серийный номер клиента, вывести код стенда\",\"description\":\"Реализовать логику проверки давления баллона:\\n1. Давление должно быть строго больше 62 бар (не >= 62).\\n2. В интерфейсе отображать только код стенда.\\n3. Не показывать серийный номер клиента.\",\"questions\":[\"Подтвердить, что условие проверки — строго больше 62 бар (исключить равное 62).\",\"Подтвердить, что в выводе должны присутствовать только код стенда и статус проверки, без серийного номера клиента.\",\"Подтвердить, что код стенда и серийный номер клиента — это разные поля в системе.\",\"Подтвердить, какие именно данные должны отображаться в статусе проверки (например, 'OK', 'FAIL', 'WARNING').\"]}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Reopens settled bound and field decisions; adds new output-status scope."
+      },
+      {
+        "id": "dry-open",
+        "topic": "dry-open",
+        "task": "draft",
+        "answer": "{\"summary\":\"Настройка параметров сушки: таймер 57 минут, скрытие цены материала, показ кода партии технологу\",\"description\":\"Для этапа сушки необходимо реализовать следующие требования:\\n1. Установить таймер сушки на 57 минут (значение предложено, финальное решение зависит от результатов эксперимента).\\n2. В интерфейсе технолога отображать только код партии.\\n3. Скрывать информацию о цене материала от технолога.\",\"questions\":[\"Подтвердить, что временной интервал сушки (57 минут) является временным решением до результатов эксперимента, или требуется жестко зафиксировать это значение в коде сейчас?\"]}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Requires setting a 57-minute timer although the duration is explicitly unresolved."
+      },
+      {
+        "id": "vial-switch",
+        "topic": "vial-switch",
+        "task": "draft",
+        "answer": "{\"summary\":\"Настройка отображения данных для пробирок (кассета на 11 штук)\", \"description\":\"Реализовать логику отображения информации для пробирок в кассете. В кассете должно быть ровно 11 пробирок. При отображении для лаборанта необходимо показывать только номер образца, а имя пациента должно быть скрыто.\", \"questions\":[\"Подтвердить, что количество пробирок в кассете строго фиксировано и равно 11.\",\"Подтвердить, что для задачи по контейнерам (где обсуждалось 20 штук) создаётся отдельная задача.\",\"Уточнить, какие именно поля данных считаются 'номером образца' и 'именем пациента' в текущей модели данных.\",\"Подтвердить, что скрытие имени пациента касается только текущего пользователя (лаборанта) или всех пользователей системы.\",\"Уточнить, какие права доступа (permissions) должны быть у пользователя для просмотра номера образца, если он не является лаборантом.\",\"Подтвердить, нужно ли сохранять имя пациента в базе данных, но просто не показывать его в интерфейсе, или удалять его из данных полностью.\"]",
+        "validJSON": false,
+        "coveragePassed": false,
+        "reviewFinding": "Invalid JSON and multiple questions reopening agreed requirements."
+      },
+      {
+        "id": "paint-correction",
+        "topic": "paint-correction",
+        "task": "draft",
+        "answer": "{\"summary\":\"Настроить таймер перемешивания краски на 71 секунду и изменить логику отображения кода оттенка\",\"description\":\"Необходимо внести изменения в процесс работы с краской:\\n1. Установить точное время перемешивания краски: 71 секунда (ранее было согласовано не более 73 секунд).\\n2. Изменить доступ к информации о краске: код оттенка должен отображаться диспетчеру, а не маляру.\\n3. Сохранить текущее требование о скрытии имени клиента от маляра.\",\"questions\":[\"Подтвердить, что имя клиента должно оставаться оставаться{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"{\"",
+        "validJSON": false,
+        "coveragePassed": false,
+        "reviewFinding": "Invalid repetitive JSON; reopens privacy decision."
+      },
+      {
+        "id": "regression-0",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":23,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-2",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "passed": false
+      },
+      {
+        "id": "regression-4",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":23,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-6",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-8",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-10",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-12",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-14",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":false}",
+        "passed": true
+      },
+      {
+        "id": "regression-16",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":41,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-18",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": false
+      },
+      {
+        "id": "regression-20",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-22",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-24",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":29,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-26",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":0,\"upper\":29,\"lowerInclusive\":false,\"upperInclusive\":false}",
+        "passed": false
+      },
+      {
+        "id": "regression-28",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":29,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      },
+      {
+        "id": "regression-30",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-32",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      },
+      {
+        "id": "regression-34",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      }
+    ],
+    "draftCoverage": 2
+  },
+  "v4": {
+    "boundsCorrect": 12,
+    "boundsTotal": 18,
+    "validDrafts": 8,
+    "draftTotal": 8,
+    "records": [
+      {
+        "id": "books-exact",
+        "topic": "books-exact",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить комплект книг для школы\", \"description\": \"Передавать библиотекарю код класса. Не печатать фамилии детей. Количество книг в комплекте: ровно 16.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": true,
+        "reviewFinding": "Preserves count, recipient, required field and privacy with no new questions."
+      },
+      {
+        "id": "cable-less",
+        "topic": "cable-less",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить этикетки для приёмки кабеля\", \"description\": \"1. Контролёру показывается только номер бухты кабеля.\\n2. Стоимость закупки кабеля не показывается.\\n3. Длина образца кабеля строго меньше 24 метров (длина <= 23.99...м).\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Invents label preparation in the summary; labels were never requested."
+      },
+      {
+        "id": "pallet-max",
+        "topic": "pallet-max",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить палету\", \"description\": \"1. Количество коробок на палете: максимум 35 (включительно).\\n2. Для грузчика: обязательно указать номер рейса.\\n3. Не выводить адрес покупателя.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": true,
+        "reviewFinding": "Preserves inclusive upper bound, recipient, required field and privacy."
+      },
+      {
+        "id": "bake-min",
+        "topic": "bake-min",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить плитки\", \"description\": \"Переопределить значение времени выдержки\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Invents tiles and omits the 48-minute minimum, recipient and display rules."
+      },
+      {
+        "id": "pressure-more",
+        "topic": "pressure-more",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить код стенда для проверки баллона\", \"description\": \"Необходимо разработать код стенда для проверки баллона. Требования к логике проверки: значение давления должно быть строго больше 62 бар. При выводе данных серийный номер клиента не должен отображаться. Не путать код стенда с номером клиента.\", \"questions\": [\"Какое значение давления (62 бар) считается провалившим проверку?\"]}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Changes displaying a stand identifier into developing stand code and reopens the settled pressure question."
+      },
+      {
+        "id": "dry-open",
+        "topic": "dry-open",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить этикетки для партии после эксперимента\", \"description\": \"1. Технологу показывать код партии.\\n2. Не показывать цену материала.\\n3. Время сушки: значение пока не согласовано; только после эксперимента. Не согласовывать 57 минут пока.\", \"questions\": [\"Какое значение согласовать для времени сушки после эксперимента?\"]}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Preserves the unresolved duration and display rules but invents label preparation in the summary."
+      },
+      {
+        "id": "vial-switch",
+        "topic": "vial-switch",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить лотки для пробирок\", \"description\": \"Необходимо создать лотки для пробирок. Количество пробирок в одном лотке: ровно 11 штук. При отображении для лаборанта: показывать только номер образца, имя пациента не показывать.\", \"questions\": []}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Changes the cassette into trays and adds creating trays as a requirement."
+      },
+      {
+        "id": "paint-correction",
+        "topic": "paint-correction",
+        "task": "draft",
+        "answer": "{\"summary\": \"Подготовить лотки краски\", \"description\": \"Переопределить лотки\", \"questions\": [\"Какое значение времени перемешивания краски: ровно 71 секунда?\"]}",
+        "validJSON": true,
+        "coveragePassed": false,
+        "reviewFinding": "Invents paint trays, omits recipient/privacy, and reopens the exact duration."
+      },
+      {
+        "id": "regression-0",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 23, \"lowerInclusive\": null, \"upperInclusive\": true}",
+        "passed": true
+      },
+      {
+        "id": "regression-2",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 23, \"lowerInclusive\": null, \"upperInclusive\": false}",
+        "passed": true
+      },
+      {
+        "id": "regression-4",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-6",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"open\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-8",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": 23, \"upper\": null, \"lowerInclusive\": true, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-10",
+        "topic": "honey",
+        "task": "bounds",
+        "answer": "{\"status\": \"open\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-12",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-14",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 41, \"lowerInclusive\": null, \"upperInclusive\": false}",
+        "passed": true
+      },
+      {
+        "id": "regression-16",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": 41, \"upper\": 41, \"lowerInclusive\": true, \"upperInclusive\": true}",
+        "passed": true
+      },
+      {
+        "id": "regression-18",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": 41, \"upper\": null, \"lowerInclusive\": true, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-20",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": 41, \"upper\": null, \"lowerInclusive\": true, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-22",
+        "topic": "cloth",
+        "task": "bounds",
+        "answer": "{\"status\": \"open\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-24",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 29, \"lowerInclusive\": null, \"upperInclusive\": true}",
+        "passed": true
+      },
+      {
+        "id": "regression-26",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 29, \"lowerInclusive\": null, \"upperInclusive\": false}",
+        "passed": true
+      },
+      {
+        "id": "regression-28",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": false
+      },
+      {
+        "id": "regression-30",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": null, \"upper\": 29, \"lowerInclusive\": null, \"upperInclusive\": false}",
+        "passed": false
+      },
+      {
+        "id": "regression-32",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"final\", \"lower\": 29, \"upper\": null, \"lowerInclusive\": true, \"upperInclusive\": null}",
+        "passed": true
+      },
+      {
+        "id": "regression-34",
+        "topic": "queue",
+        "task": "bounds",
+        "answer": "{\"status\": \"open\", \"lower\": null, \"upper\": null, \"lowerInclusive\": null, \"upperInclusive\": null}",
+        "passed": true
+      }
+    ],
+    "draftCoverage": 2
+  }
+}
