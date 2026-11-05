@@ -21,9 +21,12 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     // A complex request for agents: subtasks run as parallel background chats of this project.
     // Explicit («раздай агентам») runs at once; a request over several areas gets an offer first
     // («Раздать агентам» / «Ответить одним сообщением», the choice can be remembered).
+    let teamChecked=false;
     if(!choice&&!ctx.dialogue.active()?.agentOf){
       const team=require('./agent-team.cjs'),explicit=team.agentRequest(original);
       if(explicit||team.complexRequest(original)||ctx.agentTeam.offers.has(ctx.dialogue.active()?.id)||/агент/iu.test(original)){
+        // One workflow Petya already has (filling the team directory from Jira and Slack) is not split into parts.
+        if(!/агент/iu.test(original)&&!ctx.agentTeam.offers.has(ctx.dialogue.active()?.id)){teamChecked=true;const filled=await ctx.teamIntent?.turn(original);if(filled)return via('заполнение команды',filled);}
         let topic=ctx.dialogue.active();if(!topic){topic={id:ctx.randomUUID(),projectId:ctx.dialogue.state.activeProjectId||'general',title:original.slice(0,80),kind:'chat',messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;delete ctx.dialogue.state.newChat;}
         const reply=explicit?await ctx.agentTeam.turn(original,topic):await ctx.agentTeam.offer(original,topic);
         if(reply?.parts){const start=Date.now(),home=topic.id,answers=[];
@@ -98,7 +101,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     if(!choice){const skillReply=await ctx.executeSkill(original);if(skillReply)return via('скилл',skillReply);}
     if(!choice&&!ctx.attachments.list().length){const info=require('./capabilities-reply.cjs').reply(original,ctx.dialogue.active(),ctx.settings,ctx.instructionSkills.list());if(info){ctx.dialogue.rememberAction(original,info.text);const topic=ctx.dialogue.active();topic.capabilityReply=info.text;topic.capabilityPage=info.capabilityPage;ctx.dialogue.persist();return via('шаблон: возможности',{...info,topicId:topic.id,topicTitle:topic.title,messages:topic.messages});}}
     // Requests about the team are understood by meaning before the Jira reports take «команда» as workload.
-    if(!choice){const team=await ctx.teamIntent?.turn(original);if(team)return via('заполнение команды',team);}
+    if(!choice&&!teamChecked){const team=await ctx.teamIntent?.turn(original);if(team)return via('заполнение команды',team);}
     if(!choice&&!ctx.attachments.list().length&&!ctx.dialogue.active()?.attachments?.length&&!require('./team-fill.cjs').isTeamFill(original)){
       const workRoute=require('./work-query-route.cjs');
       const report=async(command,workflow)=>{const offer=await ctx.serviceAccess.offer('Проверь Jira: '+command,null);if(offer)return offer;const skill=ctx.instructionSkills.list().find(s=>s.enabled&&s.workflow===workflow);if(!skill)return {handled:true,text:'Для этого отчёта включи скилл '+workflow+' в разделе «Скиллы».'};return ctx.workSkills.turn({skill,question:command,verified:true},command);};
@@ -213,7 +216,10 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       });
       if(routed)return {...routed,selectedTool:route.tool};
     }
-    const reply=await ctx.dialogue.turn(value,typeof choice==='string'?choice:undefined,undefined,preparedTopicRoute);
+    // A fitting skill from the library shapes this answer (a bug report, release notes, a retro…).
+    const skill=!choice&&!ctx.attachments.list().length?await ctx.skillChoice?.prepare(value):null;
+    let reply,used=false;try{reply=await ctx.dialogue.turn(value,typeof choice==='string'?choice:undefined,undefined,preparedTopicRoute);}finally{used=!!ctx.skillChoice?.done();}
+    if(skill&&used&&reply?.handled&&!reply.error){reply.by='скилл '+skill.name;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&last.text===reply.text){last.by=reply.by;ctx.dialogue.persist();}}
     if(applied.length&&reply.handled){const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user');if(m){m.originalText=original;ctx.dialogue.persist();}}
     return {...reply,resolvedCommand:value,appliedRules:applied};
   });

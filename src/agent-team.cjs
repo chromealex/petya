@@ -11,7 +11,7 @@ function agentRequest(command=''){
  if(EXPLICIT.test(text))return true;
  // An enumerated list of several requests is also a job for agents.
  const items=text.split('\n').filter(line=>/^\s*(?:[-•*]|\d+[.)])\s+\S/u.test(line));
- return items.length>=2;
+ return items.length>=2&&!dependentSteps(text);
 }
 // Items the user already enumerated are taken word for word: the planner only splits free text.
 function enumerated(command=''){
@@ -25,6 +25,7 @@ function enumerated(command=''){
 }
 // A request that touches several independent areas: Petya offers agents instead of starting them.
 const AREAS=[/(?:задач|таск|тикет|баг|jira|джир|спринт|релиз|эпик)/iu,/(?:slack|слак)/iu,/(?:(?:^|[\s(])гит|git|коммит|ветк|верси[яюи] проекта|pull request|пулл?-?реквест)/iu,/(?:почт|письм|gmail|outlook)/iu,/(?:telegram|телеграм|(?:^|\s)тг(?:\s|$))/iu,/(?:в интернете|погод|курс (?:доллар|евро|валют)|новост)/iu,/(?:команд[аеуы]|коллег|загрузк)/iu,/(?:notion|ноушн|ноушен|confluence|конфлю|asana|асан)/iu];
+const dependentSteps=text=>/(?:^|[\s,;])(?:потом|затем|после\s+этого|после\s+чего|а\s+дальше|в\s+конце)(?=[\s,]|$)|по\s+(?:этим|эти|ним|полученным|найденным|тем\s+же)(?:[\s,]|$)|оттуда|из\s+(?:них|этого|полученного)(?=[\s,]|$)|(?:их|этих\s+людей)\s+(?:должност|рол|почт|контакт|задач)/iu.test(text);
 function complexRequest(command=''){
  const text=String(command).trim();
  if(text.length<25||text.length>4000||EXTERNAL.test(text)||EXPLICIT.test(text))return false;
@@ -32,6 +33,9 @@ function complexRequest(command=''){
  // One command with details («Заполни команду: Полина — релизы», «Создай задачу: …») is not several requests.
  if(/^(?:петя[,!\s]+)?(?:пожалуйста[,\s]+)?(?:заполни|запомни|напомни|забудь|создай|заведи|отправь|напиши|ответь|переименуй|удали|закрой|назначь|переназначь|добавь|измени|обнови|сделай коммит|закоммить|запушь)/iu.test(text))return false;
  if(!/[,;:]|\s(?:и|а также|плюс|ещё|еще)\s/iu.test(text))return false;
+ // Steps that feed each other («возьми имена в Jira, потом по этим именам должности в Slack») are one job
+ // in order, not independent parts for parallel agents.
+ if(dependentSteps(text))return false;
  return AREAS.filter(r=>r.test(text)).length>=2;
 }
 const OFFER={run:'Раздать агентам',single:'Ответить одним сообщением',always:'Всегда раздавать',never:'Всегда одним сообщением'};
@@ -129,4 +133,4 @@ class AgentTeam{
   this.emit({topicId:topic.id,job:topic.chatJob,agentPlan:plan});
  }
 }
-module.exports={agentRequest,complexRequest,enumerated,AgentTeam,OFFER};
+module.exports={dependentSteps,agentRequest,complexRequest,enumerated,AgentTeam,OFFER};
