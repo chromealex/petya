@@ -26,6 +26,9 @@ for name,grades in reviews.items():
  for group,prefix in [('rename','name-'),('recipient_field','report-')]:
   part=[x for x in rows if x['id'].startswith(prefix)]
   stats[group]={'passed':sum(passed(x) for x in part),'total':len(part)}
+ for group,condition in [('sorting',lambda x:x['id'].startswith('sort-')),('other_general',lambda x:x['task']=='general' and not x['id'].startswith('sort-'))]:
+  part=[x for x in rows if condition(x)]
+  stats[group]={'passed':sum(x['schemaValid'] and x['exactJSON'] for x in part),'total':len(part)}
  stats['schema']={'passed':sum(x['schemaValid'] for x in rows),'total':len(rows)}
  summary[name]=stats
  outcomes[name]={x["id"]:bool(passed(x) if x["task"]=="draft" else x["schemaValid"] and x["exactJSON"]) for x in rows}
