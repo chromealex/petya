@@ -1,0 +1,14 @@
+{
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "data_sha256": "b2d106279395bdb7e4a857d6fe10f67ce085e7cf45e40abb4f93c8ef52aabfdb",
+  "adapter": "tests/fixtures/requirements-draft-v11/adapter",
+  "temperature": 0,
+  "thinking": false,
+  "max_tokens": {
+    "draft": 450,
+    "other": 120
+  },
+  "reference_in_prompt": false,
+  "adapter_sha256": "06c94a74c012863059f70c1b8e72fa3616b8b3204e1d24940eb423ac9ceee538",
+  "config_sha256": "fa4115c7d1da8f27f3ca93b177066f01bdb7bd37946110147ee00329eb3b36f7"
+}

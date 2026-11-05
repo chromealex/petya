@@ -1,0 +1,10 @@
+{
+  "adapter": "adapter",
+  "sha256": "06c94a74c012863059f70c1b8e72fa3616b8b3204e1d24940eb423ac9ceee538",
+  "acquisition_exact": 45,
+  "acquisition_total": 45,
+  "prior_retained": 38,
+  "new_corrections": 7,
+  "repair": false,
+  "selection_basis": "All acquisition targets exact after ordinary reload; candidate fresh answers not yet generated."
+}
