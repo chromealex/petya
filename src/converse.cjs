@@ -42,7 +42,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       ctx.dialogue.persist();return {handled:true,text:message.text,error:!!message.error,gitDiscovery:message.gitDiscovery,gitCommand:original,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
     }
     if(!choice&&!ctx.attachments.list().length){
-      const prefab=ctx.unity?.turn(original);
+      const prefab=await ctx.unity?.turn(original);
       if(prefab)return prefab;
     }
     const drawing=!choice?require('./local-images.cjs').imagePrompt(original):null;
@@ -196,7 +196,20 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     return {...reply,resolvedCommand:value,appliedRules:applied};
   });
   // When a correction changed the request, the recorded question keeps what was actually said.
-  return async(command,choice,background=false)=>{const result=await pipeline(command,choice,background);
+  return async(command,choice,background=false)=>{const owner=ctx.dialogue.active(),project=ctx.dialogue.state.activeProjectId,company=ctx.companyId;
+    let result;
+    try{result=await pipeline(command,choice,background);}
+    catch(error){
+      const reason=require('./connection-failure.cjs').classify(error);
+      const access=require('./service-access.cjs');
+      const service=error.petyaService;
+      if(!reason||!Object.hasOwn(access.services,service)||typeof command!=='string'||choice||owner!==ctx.dialogue.active()||project!==ctx.dialogue.state.activeProjectId||company!==ctx.companyId)throw error;
+      const name=access.services[service].name,text=name+' · '+reason.message;
+      ctx.dialogue.rememberAction(command,text);
+      const chat=ctx.dialogue.active(),message=chat.messages.at(-1);
+      message.by=name;message.serviceProblem={id:service==='outlook'?'gmail':service};
+      ctx.dialogue.persist();result={handled:true,error:true,text,topicId:chat.id,messages:chat.messages};
+    }
     const spoken=typeof command==='string'?command.trim():'';const topic=ctx.dialogue.active();
     if(!choice&&spoken&&result?.handled&&topic){const corrected=require('./self-correction.cjs').resolve(spoken);if(corrected.changed&&!corrected.cancelled){const m=[...topic.messages].reverse().find(m=>m.role==='user'&&m.text===corrected.text);if(m&&!m.originalText){m.originalText=spoken;ctx.dialogue.persist();}}}
     // A complete answer resolves an older «Нужно уточнение» status of this chat.

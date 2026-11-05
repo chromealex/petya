@@ -64,7 +64,12 @@ function setup(s) {
     }
     const files = s.attachments.list();
     const context = { files, topic, settings:s.settings };
-    const matches = providers.filter(p => (!files.length || p.acceptsFiles?.(files)) && p.matches(command, context));
+    const last=require('../extensions/previous-reply.cjs')(topic)?.extensionResult;
+    const refresh=!files.length && last?.project===project && /^(?:обнови(?: результат| отчёт| отчет| диаграмму)?|покажи ещё раз|покажи еще раз)[.!?]*$/iu.test(command.trim());
+    const requested=/^только\s+(.+?)\s*$/iu.exec(command.trim())?.[1];
+    const pick=!files.length && last?.project===project && requested && last.choices?.find(key=>key.toLowerCase()===requested.toLowerCase());
+    const continuing=refresh||!!pick,query=continuing?last.query:command;
+    const matches = providers.filter(p => (!files.length || p.acceptsFiles?.(files)) && (!continuing||p.type===last.provider) && p.matches(query, context));
     if (matches.length !== 1) return null;
     const p = matches[0];
     check();
@@ -78,12 +83,29 @@ function setup(s) {
     if (!await activate(p,check)) return {handled:true,text:'Установка отменена.'};
     check();
     if (p.turn) return p.turn(s, command, context);
-    const content = await p.answer(command, p.scope(s, topic));
+    let content,source,base,choices,problem;
+    const selected=pick||(refresh&&last.selected)||null;
+    try {
+      const scope=p.scope(s,topic);
+      base=p.source?.(scope,s) || p.name;
+      if(continuing && last.base && base!==last.base)return {handled:true,text:'Источник этого отчёта изменился. Укажите его в новом запросе.'};
+      if(selected)p.select(scope,selected);
+      source=selected?base.split(' · ')[0]+' · '+selected:base;
+      content=await p.answer(query,scope);
+      choices=continuing?last.choices:p.choices?.(scope);
+    } catch(error) {
+      check();
+      problem=p.service && require('../connection-failure.cjs').classify(error);
+      if(!problem)throw error;
+      content=[{type:'text',text:p.name+' · '+problem.message}];
+    }
     check();
-    const text = [notice, ...content.filter(block => block.type === 'text').map(block => block.text)].join('\n');
+    const text = [notice,...content.filter(block => block.type === 'text').map(block => block.text)].join('\n');
     dialogue.rememberAction(command, text);
     const owner = dialogue.active(), message = owner.messages.at(-1);
     message.by = p.name;
+    message.extensionResult={provider:p.type,query,source:source||p.name,base,choices,selected,project};
+    if(problem)message.serviceProblem={id:p.type,query:'Обнови результат'};
     message.extensionImages = content.filter(block => block.type === 'image');
     dialogue.persist();
     return { handled:true, text, by:p.name, topicId:owner.id, topicTitle:owner.title, messages:owner.messages };

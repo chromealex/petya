@@ -150,7 +150,8 @@ async function request(url, options = {}) {
   let target = await atlassianOAuth.rewrite(url, options, settings);
   for (const client of Object.values(serviceOAuth)) target = await client.rewrite(target.url, target.options, settings);
   if (service) modules.assertEnabled(settings, service);
-  return directRequest(target.url, target.options);
+  try{return await directRequest(target.url,target.options);}
+  catch(error){if(service)error.petyaService=service;throw error;}
 }
 async function directRequest(url, options = {}) {
   require('./answer-cancel.cjs').check();

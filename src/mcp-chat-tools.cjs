@@ -47,10 +47,10 @@ function register(server, z, ctx) {
   }
   if(ctx.invokeUnity && ctx.access?.mode==='edit'){
     for(const [action,spec] of Object.entries(require('./extensions/unity/prefabs.cjs').tools)){
-      server.registerTool('unity_'+action,{description:spec.description+' Требует подтверждения в открытом чате Пети.',inputSchema:{chatId:id,...spec.schema.shape}},async({chatId,...args})=>{
+      server.registerTool('unity_'+action,{description:spec.description+' Требует подтверждения в открытом чате Пети.',inputSchema:{chatId:id,instance:z.string().min(1).max(250).optional(),...spec.schema.shape}},async({chatId,instance,...args})=>{
         try{
           const verify=()=>{ctx.check();topicFor(chatId);};
-          verify();return await ctx.run(()=>ctx.invokeUnity(chatId,action,args,verify));
+          verify();return await ctx.run(()=>ctx.invokeUnity(chatId,action,args,verify,instance));
         }catch(e){return {isError:true,content:[{type:'text',text:e.message}]};}
       });
     }

@@ -7,6 +7,9 @@ module.exports = { service:true, description:'Мои задачи по типа�
     if (!named && (!connected || /asana|асана|linear|trello|трелло|github|битрикс|youtrack/iu.test(command))) return false;
     return require('./chat-reply.cjs').matches(command + (named ? '' : ' Jira'));
   },
+  choices(scope){return scope.projects.slice();},
+  select(scope,key){if(!scope.projects.includes(key))throw Error('Проект больше недоступен.');scope.projects=[key];},
+  source(scope,s){return [new URL(s.settings.jiraUrl).hostname,...scope.projects].join(' · ');},
   scope(s, topic) {
     const keys = allowed(s.settings);
     const binding = s.projectMemory?.get(topic?.projectMemoryId)?.jira;
