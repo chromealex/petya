@@ -1,0 +1,134 @@
+{
+  "base": {
+    "cancel-01": [
+      false,
+      "Cancelled rename reinstated; settled decisions reopened."
+    ],
+    "cancel-10": [
+      true,
+      "Rename retained, color/data/address unchanged."
+    ],
+    "cancel-00": [
+      false,
+      "Cancelled rename reinstated and settled color question reopened."
+    ],
+    "cancel-11": [
+      true,
+      "Both changes retained and data/address preserved."
+    ],
+    "ban-00": [
+      false,
+      "Unrequested fields, masking options and additional questions introduced."
+    ],
+    "ban-10": [
+      true,
+      "Both recipients, return number/result and hidden phone retained."
+    ],
+    "ban-01": [
+      true,
+      "Buyer excluded, return number/result and visible phone retained."
+    ],
+    "ban-11": [
+      true,
+      "Both recipients and visible phone with replacement number/result retained."
+    ],
+    "topic-return": [
+      false,
+      "Vacation exclusion omitted; unrequested name masking behavior added."
+    ],
+    "double-cancel": [
+      false,
+      "Cancelled blue color is stated as current retained color."
+    ],
+    "print-fields": [
+      true,
+      "All fields, exact date format and exclusions retained."
+    ],
+    "notify-only": [
+      false,
+      "Several unrelated implementation questions added."
+    ],
+    "open-questions": [
+      true,
+      "Both fields, hidden cost and the two open decisions retained."
+    ],
+    "closed-question": [
+      true,
+      "Fields and approved TSV retained without questions."
+    ],
+    "pronoun": [
+      true,
+      "Batch number/result and hidden address retained. Generic preservation of other fields introduces no new feature."
+    ],
+    "repeat-correction": [
+      true,
+      "Latest 127-second interval, count and hidden names retained."
+    ]
+  },
+  "parent": {
+    "cancel-01": [
+      true,
+      "Correct original name, new color and preserved data/address."
+    ],
+    "cancel-10": [
+      false,
+      "Description becomes an unrelated conceptual explanation; data/address preservation omitted."
+    ],
+    "cancel-00": [
+      false,
+      "Cancelled color change reinstated."
+    ],
+    "cancel-11": [
+      true,
+      "Both changes retained, data/address preserved."
+    ],
+    "ban-00": [
+      false,
+      "Old receipt number retained instead of return number."
+    ],
+    "ban-10": [
+      false,
+      "Malformed JSON even though much of the intended content is present."
+    ],
+    "ban-01": [
+      false,
+      "Phone remains hidden despite explicit cancellation; result omitted."
+    ],
+    "ban-11": [
+      false,
+      "Phone remains hidden despite explicit cancellation."
+    ],
+    "topic-return": [
+      false,
+      "Agreed HH:MM format omitted."
+    ],
+    "double-cancel": [
+      true,
+      "Latest rename and unchanged color/address retained."
+    ],
+    "print-fields": [
+      true,
+      "All fields and exclusions retained."
+    ],
+    "notify-only": [
+      true,
+      "Only failure, correct recipient/identifier/reason and hidden sender retained."
+    ],
+    "open-questions": [
+      true,
+      "All fields, hidden cost and both questions retained."
+    ],
+    "closed-question": [
+      true,
+      "Approved TSV and fields retained without questions."
+    ],
+    "pronoun": [
+      true,
+      "Fields and hidden address retained."
+    ],
+    "repeat-correction": [
+      true,
+      "Latest interval, count and hidden names retained."
+    ]
+  }
+}
