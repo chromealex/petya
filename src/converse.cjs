@@ -97,6 +97,8 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     const duplicateReply=await ctx.taskDuplicates.turn(original,choice);if(duplicateReply)return via('дубликаты задач',duplicateReply);
     if(!choice){const skillReply=await ctx.executeSkill(original);if(skillReply)return via('скилл',skillReply);}
     if(!choice&&!ctx.attachments.list().length){const info=require('./capabilities-reply.cjs').reply(original,ctx.dialogue.active(),ctx.settings,ctx.instructionSkills.list());if(info){ctx.dialogue.rememberAction(original,info.text);const topic=ctx.dialogue.active();topic.capabilityReply=info.text;topic.capabilityPage=info.capabilityPage;ctx.dialogue.persist();return via('шаблон: возможности',{...info,topicId:topic.id,topicTitle:topic.title,messages:topic.messages});}}
+    // Requests about the team are understood by meaning before the Jira reports take «команда» as workload.
+    if(!choice){const team=await ctx.teamIntent?.turn(original);if(team)return via('заполнение команды',team);}
     if(!choice&&!ctx.attachments.list().length&&!ctx.dialogue.active()?.attachments?.length&&!require('./team-fill.cjs').isTeamFill(original)){
       const workRoute=require('./work-query-route.cjs');
       const report=async(command,workflow)=>{const offer=await ctx.serviceAccess.offer('Проверь Jira: '+command,null);if(offer)return offer;const skill=ctx.instructionSkills.list().find(s=>s.enabled&&s.workflow===workflow);if(!skill)return {handled:true,text:'Для этого отчёта включи скилл '+workflow+' в разделе «Скиллы».'};return ctx.workSkills.turn({skill,question:command,verified:true},command);};

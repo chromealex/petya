@@ -56,8 +56,9 @@ class TeamFill {
  constructor({settings,save,sources,extract,roster,jiraRoster,enrich,scope,screen,approve,now=Date.now}) {Object.assign(this,{settings,save,sources,extract,roster,jiraRoster,enrich,scope,screen,approve,now});this.pending=null;this.busy=false;this.epoch=0;}
  reset(){this.pending=null;this.epoch++;}
  reply(text,extra={}){return {handled:true,text,...extra};}
- async turn(command,answer=false,screenSources=null,preset=null) {
-  if(!screenSources&&!preset&&!answer&&!isTeamFill(command)){this.pending=null;return null;}
+ // opts.force: the request was recognised as team filling by meaning (team-intent); opts.existing: only the saved team.
+ async turn(command,answer=false,screenSources=null,preset=null,opts={}) {
+  if(!screenSources&&!preset&&!answer&&!opts.force&&!isTeamFill(command)){this.pending=null;return null;}
   if(this.busy)return this.reply('Уже заполняю команду. Дождитесь результата.');
   this.busy=true;
   try {
@@ -66,8 +67,9 @@ class TeamFill {
    const scope=this.scope(),epoch=this.epoch,settings=this.settings();
    const baseline=settings.teamMembers||'[]',notes=settings.teamRoles||'';
    // Roles for the saved team: its own cards are the people; Slack profiles and Jira add the roles.
-   const saved=!preset&&!screenSources&&rolesRequest(command)?team.members(settings):[];
-   if(rolesRequest(command)&&!preset&&!screenSources&&!saved.length)return this.askDetails('В разделе «Команда» пока никого нет. Скажи «Заполни команду» — соберу коллег из Slack и Jira вместе с ролями.');
+   const onlySaved=opts.existing||rolesRequest(command);
+   const saved=!preset&&!screenSources&&onlySaved?team.members(settings):[];
+   if(onlySaved&&!preset&&!screenSources&&!saved.length)return this.askDetails('В разделе «Команда» пока никого нет. Скажи «Заполни команду» — соберу коллег из Slack и Jira вместе с ролями.');
    const roster=preset||(saved.length?saved.map(member=>({member:{...member},evidence:'Команда · '+member.name,source:'Команда'})):null)||(screenSources?null:this.roster?await this.roster(command):null);
    let budget=32000;const sources=(screenSources||(roster===null?this.sources(command):[{title:'Команда',text:command}])).map((s,i)=>({...s,id:String(i),text:String(s.text||'')})).filter(s=>s.text.trim()).map(s=>{const text=s.text.slice(0,Math.max(0,budget));budget-=text.length;return {...s,text};}).filter(s=>s.text);
    if(!sources.length&&!screenSources&&!preset){const rows=await this.fromJira();if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}
