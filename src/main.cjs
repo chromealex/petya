@@ -103,6 +103,9 @@ defaults.whisperModel = fs.existsSync(localModel) ? localModel : '';
 if (process.env.PETYA_SMOKE_TEST !== '1') { const stale = require('./speech.cjs').cleanupOrphans(path.join(app.getPath('userData'), 'whisper-pids.json'), [localBinary]); if (stale.length) console.log('Stopped stale whisper-server: ' + stale.length); }
 const secrets = ['telegramCredential','teamMembers','microsoftCredential','gmailCredential','googlePlayCredential','asanaCredential', 'slackCredential', 'notionCredential', 'atlassianCredential', 'jiraToken', 'slackToken', 'notionToken'];
 const entry = pathToFileURL(path.join(__dirname, 'ui/index.html')).href;
+// Chromium and Node encode file URLs differently («RUNNER~1» vs «RUNNER%7E1» in Windows short paths): compare the paths.
+const entryPath = path.join(__dirname, 'ui/index.html');
+const isEntry = url => { try { const a = path.normalize(require('node:url').fileURLToPath(url)), b = path.normalize(entryPath); return process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b; } catch { return false; } };
 const file = () => path.join(dataRoot, 'settings.json');
 function loadSettings() {
   settings = { ...defaults };
@@ -179,7 +182,7 @@ function handle(name, fn) { ipcMain.handle('petya:' + name, async (event, ...arg
   const contents = win.webContents;
   if (contents.isDestroyed()) return;
   const frame = event.senderFrame;
-  if (event.sender !== contents || !frame || frame !== contents.mainFrame || frame.url !== entry) throw new Error('Недопустимый источник запроса.');
+  if (event.sender !== contents || !frame || frame !== contents.mainFrame || !isEntry(frame.url)) throw new Error('Недопустимый источник запроса.');
   if(switchingCompany)throw Error('Переключаю компанию. Дождитесь открытия Пети.');
   const controller=cancellableAnswers.has(name)?new AbortController():null,answerTopic=dialogue?.state.activeId||'';if(controller){if(!foregroundAnswers.has(answerTopic))foregroundAnswers.set(answerTopic,new Set());foregroundAnswers.get(answerTopic).add(controller);}
   activeOperations++;try{return await require('./answer-cancel.cjs').run(controller?.signal,()=>requestProgress.run(name,label=>{if(!event.sender.isDestroyed())event.sender.send('request-progress',label);},()=>require('./answer-stream.cjs').run(chunk=>{if(!event.sender.isDestroyed())event.sender.send('answer-chunk',chunk);},()=>modules.withProject(projectOperations.has(name)?dialogue?.state.projects.find(p=>p.id===dialogue.state.activeProjectId):null,()=>projectOperations.has(name)&&dialogue?dialogue.within(dialogue.state.activeId,dialogue.state.activeProjectId,()=>fn(...args)):fn(...args)))));}finally{activeOperations--;if(controller){foregroundAnswers.get(answerTopic)?.delete(controller);if(!foregroundAnswers.get(answerTopic)?.size)foregroundAnswers.delete(answerTopic);}}
@@ -625,7 +628,7 @@ else {
     require('./external-links.cjs')(win.webContents,
       url => smoke ? Promise.resolve() : require('electron').shell.openExternal(url),
       error => require('electron').dialog.showErrorBox('Не удалось открыть ссылку', error.message));
-    installCapture({ session: session.defaultSession, win, entry, desktopCapturer, platform: process.platform });
+    installCapture({ session: session.defaultSession, win, entry, isEntry, desktopCapturer, platform: process.platform });
     if (process.platform === 'darwin' && app.dock) app.dock.hide();
     const icon = nativeImage.createFromPath(path.join(__dirname, process.platform === 'darwin' ? '../assets/trayTemplate.png' : '../assets/tray.png'));
     if (process.platform === 'darwin') icon.setTemplateImage(true);
