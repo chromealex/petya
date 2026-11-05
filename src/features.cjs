@@ -8,6 +8,7 @@ module.exports=[
  require('./features/address.cjs'),
  require('./features/chat-tasks.cjs'),
  require('./features/fresh-data.cjs'),
+ require('./features/list-followup.cjs'),
  require('./features/selftest.cjs'),
  require('./features/morning-brief.cjs'),
  require('./features/extension-replies.cjs')
