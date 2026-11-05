@@ -1,0 +1,15 @@
+{
+  "hashes": {
+    "stabilization-train.jsonl": "5e2bb2f607ae69c6dc26727e9864fe965910076eed40ffcb21399f21a717a912",
+    "confirmation.jsonl": "18957f1219ec3c34f23029433dd6d99b4011a91dbc62a8fa9a77dc84d372581f"
+  },
+  "parent": "adapter",
+  "epochs": 1,
+  "lr": 2e-05,
+  "layers": 5,
+  "steps": 520,
+  "selection": "Fixed one-pass stabilization before new confirmation inference.",
+  "reason": "Initial v8 acquired 7/7 but regressed on an older negative lower bound. Add balanced directional/interval/zero contrasts, original eight corrections and the ten newly observed failures.",
+  "gate": "All seven current and eight original corrections semantically correct; new numeric and general at least v7 and base; new complete drafts greater than v7 and base. Report comparison to initial v8 too. Release requires all targeted checks and broader validation.",
+  "limitations": "Synthetic related task families; manual non-blind semantic draft review; no production change."
+}

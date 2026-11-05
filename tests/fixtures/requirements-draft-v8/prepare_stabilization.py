@@ -4,7 +4,7 @@ from pathlib import Path
 R=Path(__file__).parent
 # Reuse deterministic constructors; prepare.py only regenerates identical frozen v8 data.
 v=runpy.run_path(str(R/'prepare.py'));bounds=v['bounds'];draft=v['draft'];canonical=v['canonical']
-read=lambda p:list(map(json.loads(p.read_text().splitlines())))
+read=lambda p:list(map(json.loads,p.read_text().splitlines()))
 base=read(R/'train.jsonl');old=[canonical(r) for r in read(R.parent/'requirements-draft-v7/control.jsonl')]
 queue=read(R/'next-corrections.jsonl');new=[canonical(dict(id='repair-'+r['id'],task=r['task'],messages=r['messages']+[dict(role='assistant',content=r['chosen'])])) for r in queue]
 contrasts=[]
