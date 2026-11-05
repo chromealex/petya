@@ -8,7 +8,7 @@ from mlx.utils import tree_flatten
 from mlx_lm import load
 from mlx_lm.tuner.utils import linear_to_lora_layers
 ROOT=Path(__file__).parent
-p=argparse.ArgumentParser();p.add_argument('base');p.add_argument('parent',type=Path);p.add_argument('output',type=Path);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('base');p.add_argument('parent',type=Path);p.add_argument('output',type=Path);p.add_argument('--pairs',type=Path,default=ROOT/'preferences.jsonl');a=p.parse_args()
 a.output.mkdir(exist_ok=False)
 model,tok=load(a.base);mx.random.seed(42);model.freeze()
 config=json.loads((a.parent/'adapter_config.json').read_text());linear_to_lora_layers(model,1,config['lora_parameters']);model.eval()
@@ -24,7 +24,7 @@ def logp(net,tokens,offset):
  loss=nn.losses.cross_entropy(net(tokens[:,:-1])[:,offset-1:,:].astype(mx.float32),tokens[:,offset:],reduction='none')
  return -mx.sum(loss)
 pairs=[];reference=[]
-for r in map(json.loads,(ROOT/'preferences.jsonl').read_text().splitlines()):
+for r in map(json.loads,a.pairs.read_text().splitlines()):
  c,co=encode(r['messages'],r['chosen']);d,do=encode(r['messages'],r['rejected'])
  rc=logp(model,c,co).item();rd=logp(model,d,do).item()
  pairs.append((c,co,d,do,rc-rd));reference.append(dict(id=r['id'],chosenLogp=rc,rejectedLogp=rd))
@@ -49,5 +49,5 @@ weights=dict(tree_flatten(model.trainable_parameters()));assert all(bool(mx.all(
 artifact=a.output/'adapters.safetensors';mx.save_safetensors(str(artifact),weights)
 (a.output/'adapter_config.json').write_text(json.dumps(config,indent=2)+'\n')
 (a.output/'reference.json').write_text(json.dumps(reference,indent=2)+'\n')
-record=dict(steps=len(history),epochs=3,beta=0.1,chosenSFTWeight=0.2,retentionSFTWeight=0.2,learning_rate=0.00002,seed=42,optimizer_reset=True,parent_sha256=hashlib.sha256((a.parent/'adapters.safetensors').read_bytes()).hexdigest(),preferences_sha256=hashlib.sha256((ROOT/'preferences.jsonl').read_bytes()).hexdigest(),retention_sha256=hashlib.sha256((ROOT/'preference-retention.jsonl').read_bytes()).hexdigest(),adapter_sha256=hashlib.sha256(artifact.read_bytes()).hexdigest(),loss=history)
+record=dict(steps=len(history),epochs=3,beta=0.1,chosenSFTWeight=0.2,retentionSFTWeight=0.2,learning_rate=0.00002,seed=42,optimizer_reset=True,parent_sha256=hashlib.sha256((a.parent/'adapters.safetensors').read_bytes()).hexdigest(),preferences_sha256=hashlib.sha256(a.pairs.read_bytes()).hexdigest(),retention_sha256=hashlib.sha256((ROOT/'preference-retention.jsonl').read_bytes()).hexdigest(),adapter_sha256=hashlib.sha256(artifact.read_bytes()).hexdigest(),loss=history)
 (a.output/'training.json').write_text(json.dumps(record,indent=2)+'\n')
