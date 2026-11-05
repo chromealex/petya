@@ -11,3 +11,15 @@ Before any evaluation, historical-prompt auditing found one reused arithmetic qu
 Evaluation reloads saved weights, excludes the reference completion, uses the same short task prompts and deterministic no-thinking diagnostic generation as v7, and records model/data/config hashes. This does not change live chat sampling or its repeat guard. `scoring.py` rejects duplicate keys, non-finite JSON, missing draft fields and non-string questions. The focused parser tests cover false positives that ordinary `json.loads` would permit. Semantic draft review is manual and non-blind: all constraints and unresolved questions must survive, but reference wording is not required. A logically equivalent exclusion counts. A complete new draft must also pass schema validation.
 
 The narrow improvement gate requires all seven corrections semantically correct after reload, no numeric/general regression relative to both base and v7, and higher complete-draft coverage than both on new cases. Release additionally requires every targeted check to pass and broader deployment validation; no adapter is automatically installed or named a production petya-v1 by these scripts. These are research fixtures, not a new application or MCP capability.
+
+## Initial continuation result and retention regression
+
+The fixed two-epoch continuation acquired all seven corrections semantically (six exact JSON matches, one equivalent question wording). On the 44 reserved cases, base/v7/v8 numeric scores were 18/24, 16/24 and 20/24; complete draft scores were 1/12, 5/12 and 6/12; general scores were 8/8 for all. Every output passed schema validation. Detailed non-blind semantic judgments are in `results/manual-review.json`.
+
+This met the narrow new-case improvement gate but a subsequent rehearsal check exposed a regression: one of the original eight corrections converted a negative lower bound into an upper bound. Only 7/8 old corrections remained exact. The candidate is therefore not a stable replacement. The now-inspected 44-case check becomes development evidence for later training. Ten new failed cases were preserved with corrections, including four numeric failures and six incomplete/incorrect drafts.
+
+## Stabilization protocol
+
+A further fixed pass starts from the initial v8 adapter with learning rate 0.00002. Its 520 rows comprise the original 364, eight copies of each original correction (64), six copies of each newly observed correction (60), and 32 balanced directional, interval-inclusion and zero/no-decision contrasts. This avoids reinforcing only upper-bound examples. `confirmation.jsonl` reserves 16 new numeric, eight seven-turn draft and eight general cases before stabilization inference. `stabilization-protocol.json` records hashes and gates. Compare against base, v7 and initial v8; do not select checkpoints using these answers.
+
+`acquisition.jsonl` separately checks the original eight, current seven and newly observed ten correction targets. These are training/rehearsal evidence only. Production release remains blocked until both retention and broader new-case behavior are adequate.

@@ -1,5 +1,5 @@
 {
-  "status": "narrow_improvement_confirmed_release_blocked",
+  "status": "fresh_set_improvement_but_retention_regression_stabilization_required",
   "models": {
     "base": {
       "bounds": {
@@ -67,5 +67,13 @@
     "Deterministic diagnostic sampling, not live dialogue validation"
   ],
   "improvement_gate_passed": true,
-  "release_gate_passed": false
+  "release_gate_passed": false,
+  "retention": {
+    "original_eight_exact": 7,
+    "original_eight_total": 8,
+    "regression": "negative-1: lower negative bound became upper bound",
+    "v7_development_numeric": 13,
+    "v7_development_numeric_total": 16,
+    "interpretation": "Development/rehearsal evidence, not fresh confirmation"
+  }
 }
