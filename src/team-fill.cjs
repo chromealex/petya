@@ -15,6 +15,19 @@ function directRows(sources) {
 }
 // Screen and chat text is full of doubled spaces and line breaks: quotes are compared with whitespace collapsed.
 const flat=v=>String(v||'').replace(/\s+/gu,' ').trim();
+// Slack sidebar: the people in «Личные сообщения / Direct messages» are the colleagues the user writes to.
+// Names are taken from the lines of that section; apps, bots and the user's own entry are skipped.
+const SECTION=/^(?:личные сообщения|direct messages|личная переписка|dms?)$/iu;
+const NEXT=/^(?:каналы|channels|приложения|apps|избранное|starred|добавить коллег|add coworkers|add teammates|пригласить|invite people|ветки|threads|упоминания|mentions|черновики|drafts|activity|активность|later|позже|huddles|канвасы|canvases|lists|списки|файлы|files)$/iu;
+const NOT_PERSON=/^(?:заметки|notes|сохранённое|сохраненное|saved|напоминания|reminders|slackbot|jira|jira cloud|github|gitlab|google drive|google calendar|zoom|asana|notion|confluence|figma|loom|polly|donut|workflow builder|ещё|more|show more|показать ещё)$|(?:\bbot\b|бот$|\(you\)|\(вы\)|\bapp\b)/iu;
+function directMessages(text=''){
+ const lines=String(text).split('\n').map(l=>l.replace(/\s+/gu,' ').trim()).filter(Boolean);const start=lines.findIndex(l=>SECTION.test(l));if(start<0)return [];
+ const names=[];for(const line of lines.slice(start+1,start+80)){if(NEXT.test(line))break;
+  // A group conversation lists several people: «Мария, Олег».
+  for(const part of line.replace(/^(?:личное сообщение|direct message)(?: с| with)?\s*/iu,'').replace(/·.*$/u,'').split(/,\s*/u)){const name=part.replace(/\s+\d+$/u,'').trim();
+   if(!/^[\p{Lu}][\p{L}'’.-]+(?:\s+[\p{L}][\p{L}'’.-]+){0,3}$/u.test(name)||NOT_PERSON.test(name)||names.includes(name))continue;names.push(name);}}
+ return names.slice(0,60);
+}
 function grounded(result,sources,stats={}) {
  if(!result||!Array.isArray(result.members)||result.members.length>100)throw Error('Не удалось разобрать сведения о команде.');
  const rows=[];stats.proposed=result.members.length;stats.unquoted=0;
@@ -54,6 +67,8 @@ class TeamFill {
    if(epoch!==this.epoch||scope!==this.scope()||baseline!==(this.settings().teamMembers||'[]')||notes!==(this.settings().teamRoles||''))return this.reply('Сведения или компания изменились во время заполнения. Повторите команду.');
    const stats={};let candidates=roster===null?grounded(extracted,sources,stats):roster;const members=team.members(settings),conflicts=[];let added=0,filled=0,ambiguous=0;
    // Nothing in Slack or memory: the people assigned in Jira are the team (names, Jira IDs, projects).
+   // Nobody with roles in the window: the people from the sidebar's direct messages are the team (names only).
+   let fromSidebar=false;if(!candidates.length&&screenSources){const names=directMessages(screenSources.map(x=>x.text).join('\n'));if(names.length){candidates=names.map(name=>({member:team.validate([{name}])[0],evidence:'Slack: личные сообщения · '+name,source:'Slack · личные сообщения'}));fromSidebar=true;}}
    let fromJira=!!preset;if(!candidates.length&&!preset){const rows=await this.fromJira();if(rows?.length){candidates=rows;fromJira=true;}}
    for(const {member,evidence,source} of candidates) {
     const ids=['slackId','jiraId','email'];
@@ -78,7 +93,7 @@ class TeamFill {
     const jira=this.jiraError?'Jira тоже не помогла: '+this.jiraError+'. ':'';
     const hint=screenSources?'Открой в Slack список участников канала или сообщение, где перечислена команда, и повтори «Заполни команду»; или назови коллег сам: «Заполни команду: Полина — тестирование».':'Назовите коллег и обязанности или прикрепите список команды.';
     return this.askDetails((read||why?read+why:'Не нашёл однозначных сведений о составе команды. ')+jira+hint);}
-   return this.reply(summary+(fromJira?' Взял исполнителей задач из Jira: имена, аккаунты и проекты; обязанности допиши в разделе «Команда» или скажи «Заполни команду: Полина — тестирование».':'')+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled)});
+   return this.reply(summary+(fromSidebar?' Взял коллег из личных сообщений Slack слева; роли и обязанности допиши в разделе «Команда».':'')+(fromJira?' Взял исполнителей задач из Jira: имена, аккаунты и проекты; обязанности допиши в разделе «Команда» или скажи «Заполни команду: Полина — тестирование».':'')+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled)});
   }catch(e){
    // Slack rate limit: offer to read the Slack app window instead of waiting.
    if(!screenSources&&(e.status===429||/HTTP 429|ограничил запросы/u.test(e.message||''))){const rows=await this.fromJira().catch(()=>null);if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}
@@ -133,4 +148,4 @@ class TeamFill {
   this.pending=null;return this.reply(p.summary+' Команда заполнена.',{teamUpdated:true});
  }
 }
-module.exports={TeamFill,isTeamFill,grounded,directRows};
+module.exports={TeamFill,isTeamFill,grounded,directRows,directMessages};

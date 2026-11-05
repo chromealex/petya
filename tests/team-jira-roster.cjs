@@ -39,3 +39,15 @@ const assert=require('node:assert/strict');const {roster}=require('../src/team-j
  r=await empty.fromScreen('Заполни команду');assert.match(r.text,/Прочитал Экран Slack · #general \(\d+ символов\)/);assert.match(r.text,/не смогла подтвердить никого точной цитатой/);assert.match(r.text,/список участников/);
  console.log('Team from the Slack window: request passed to the model, numeric source ids and loose whitespace accepted, an empty result says what was read and why passed');
 })().catch(e=>{console.error(e);process.exit(1);});
+// Slack sidebar: people from «Личные сообщения / Direct messages» become the team when the window has no roles.
+(async()=>{
+ const {directMessages}=require('../src/team-fill.cjs');
+ assert.deepEqual(directMessages('Azur Games\nChannels\njw-random\nDirect messages\nПолина Иванова\nIvan Petrov\nSlackbot\nJira\nАлександр Феер (you)\nМария, Олег\nApps\nGitHub'),['Полина Иванова','Ivan Petrov','Мария','Олег']);
+ assert.deepEqual(directMessages('Каналы\nобщий\nЛичные сообщения\nПолина\nЗаметки\nПриложения\nAsana'),['Полина']);
+ assert.deepEqual(directMessages('Каналы\nобщий'),[]);
+ const settings={teamMembers:'[]',teamRoles:''};let saved=null;
+ const fill=new TeamFill({settings:()=>settings,save:m=>{saved=m;settings.teamMembers=JSON.stringify(m);},sources:()=>[],roster:async()=>null,scope:()=>'s',extract:async()=>({members:[]}),
+  screen:async()=>({title:'Экран Slack · Jira (DM)',text:'Channels\njw-random\nDirect messages\nПолина Иванова\nИван Петров\nApps\nJira\nJira: BW-4350 updated'})});
+ const r=await fill.fromScreen('Заполни команду');assert.match(r.text,/Добавлено коллег: 2/);assert.match(r.text,/из личных сообщений Slack/);assert.deepEqual(saved.map(m=>m.name),['Полина Иванова','Иван Петров']);
+ console.log('Team from the Slack sidebar: direct-message people (group DMs split; apps, bots, notes and you skipped) when the window has no roles passed');
+})().catch(e=>{console.error(e);process.exit(1);});
