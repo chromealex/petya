@@ -1,0 +1,37 @@
+Step 16 loss 0.0046
+Step 32 loss 0.00453
+Step 48 loss 0.00484
+Step 64 loss 0.00066
+Step 80 loss 0.0022
+Step 96 loss 0.00873
+Step 112 loss 0.02542
+Step 128 loss 0.04003
+Step 144 loss 0.00286
+Step 160 loss 0.01661
+Step 176 loss 0.02169
+Step 192 loss 0.06367
+Step 208 loss 0.001
+Step 224 loss 0.00079
+Step 240 loss 0.00049
+Step 256 loss 0.00075
+Step 272 loss 0.00054
+Step 288 loss 0.0005
+Step 304 loss 0.00045
+Step 320 loss 0.04187
+Step 336 loss 0.00147
+Step 352 loss 0.00018
+Step 368 loss 0.03684
+Step 384 loss 0.00052
+Step 400 loss 0.00223
+Step 416 loss 0.00129
+Step 432 loss 0.0269
+Step 448 loss 0.00031
+Step 464 loss 0.00076
+Step 480 loss 0.00056
+Step 496 loss 0.00247
+Step 512 loss 0.00104
+Traceback (most recent call last):
+  File "/Users/aleksandrfeer/Projects/Peter/tests/fixtures/requirements-draft-v7/train.py", line 39, in <module>
+    tokens,offset=seq[i];loss,grads=gradient(model,tokens,offset);optimizer.update(model,grads);mx.eval(model.trainable_parameters(),optimizer.state,loss)
+                                                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: [METAL] Command buffer execution failed: Caused GPU Hang Error (00000003:kIOGPUCommandBufferCallbackErrorHang).
