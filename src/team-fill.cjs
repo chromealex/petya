@@ -31,11 +31,11 @@ function grounded(result,sources) {
 }
 class TeamFill {
  // screen(): reads the visible Slack window; approve(): asks for computer control when it is needed.
- constructor({settings,save,sources,extract,roster,scope,screen,approve,now=Date.now}) {Object.assign(this,{settings,save,sources,extract,roster,scope,screen,approve,now});this.pending=null;this.busy=false;this.epoch=0;}
+ constructor({settings,save,sources,extract,roster,jiraRoster,scope,screen,approve,now=Date.now}) {Object.assign(this,{settings,save,sources,extract,roster,jiraRoster,scope,screen,approve,now});this.pending=null;this.busy=false;this.epoch=0;}
  reset(){this.pending=null;this.epoch++;}
  reply(text,extra={}){return {handled:true,text,...extra};}
- async turn(command,answer=false,screenSources=null) {
-  if(!screenSources&&!answer&&!isTeamFill(command)){this.pending=null;return null;}
+ async turn(command,answer=false,screenSources=null,preset=null) {
+  if(!screenSources&&!preset&&!answer&&!isTeamFill(command)){this.pending=null;return null;}
   if(this.busy)return this.reply('Уже заполняю команду. Дождитесь результата.');
   this.busy=true;
   try {
@@ -43,12 +43,15 @@ class TeamFill {
    this.pending=null;
    const scope=this.scope(),epoch=this.epoch,settings=this.settings();
    const baseline=settings.teamMembers||'[]',notes=settings.teamRoles||'';
-   const roster=screenSources?null:this.roster?await this.roster(command):null;
+   const roster=preset||(screenSources?null:this.roster?await this.roster(command):null);
    let budget=32000;const sources=(screenSources||(roster===null?this.sources(command):[{title:'Команда',text:command}])).map((s,i)=>({...s,id:String(i),text:String(s.text||'')})).filter(s=>s.text.trim()).map(s=>{const text=s.text.slice(0,Math.max(0,budget));budget-=text.length;return {...s,text};}).filter(s=>s.text);
+   if(!sources.length&&!screenSources&&!preset){const rows=await this.fromJira();if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}
    if(!sources.length)return this.askDetails('В памяти пока нет сведений о коллегах. Назовите имена и обязанности, например: «Полина — тестирование, Иван — серверная часть».');
    const extracted=roster===null?(this.extract?await this.extract(sources):directRows(sources.filter(s=>s.direct))):null;
    if(epoch!==this.epoch||scope!==this.scope()||baseline!==(this.settings().teamMembers||'[]')||notes!==(this.settings().teamRoles||''))return this.reply('Сведения или компания изменились во время заполнения. Повторите команду.');
-   const candidates=roster===null?grounded(extracted,sources):roster,members=team.members(settings),conflicts=[];let added=0,filled=0,ambiguous=0;
+   let candidates=roster===null?grounded(extracted,sources):roster;const members=team.members(settings),conflicts=[];let added=0,filled=0,ambiguous=0;
+   // Nothing in Slack or memory: the people assigned in Jira are the team (names, Jira IDs, projects).
+   let fromJira=!!preset;if(!candidates.length&&!screenSources&&!preset){const rows=await this.fromJira();if(rows?.length){candidates=rows;fromJira=true;}}
    for(const {member,evidence,source} of candidates) {
     const ids=['slackId','jiraId','email'];
     let matches=members.map((m,i)=>({m,i})).filter(({m})=>ids.some(k=>member[k]&&m[k]&&normalized(member[k])===normalized(m[k])));
@@ -66,13 +69,15 @@ class TeamFill {
    const summary=`Добавлено коллег: ${added}. Заполнено полей: ${filled}.`+(ambiguous?' Неоднозначные карточки не изменены: '+ambiguous+'. Уточните полные имена и контакты.':'');
    if(conflicts.length){this.pending={kind:'conflict',conflicts,baseline:JSON.stringify(members),scope,at:this.now(),summary};return this.question();}
    if(!candidates.length)return this.askDetails('Не нашёл однозначных сведений о составе команды. Назовите коллег и обязанности или прикрепите список команды.');
-   return this.reply(summary+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled)});
+   return this.reply(summary+(fromJira?' Взял исполнителей задач из Jira: имена, аккаунты и проекты; обязанности допиши в разделе «Команда» или скажи «Заполни команду: Полина — тестирование».':'')+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled)});
   }catch(e){
    // Slack rate limit: offer to read the Slack app window instead of waiting.
+   if(!screenSources&&(e.status===429||/HTTP 429|ограничил запросы/u.test(e.message||''))){const rows=await this.fromJira().catch(()=>null);if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}
    if(!screenSources&&this.screen&&(e.status===429||/HTTP 429|ограничил запросы/u.test(e.message||''))){const wait=Math.ceil(e.retryAfter||30);this.pending={kind:'screen',command,scope:this.scope(),at:this.now(),wait};return this.reply('Slack временно ограничил запросы (повторить можно через '+wait+' с). Могу сам посмотреть в приложении Slack: переключусь на него и прочитаю то, что видно в окне, например открытый канал команды или список участников. Посмотреть? Скажи «да» или «нет».',{question:true,teamFillReply:true});}
    if(e.teamChannels||e.code==='SLACK_CHANNEL_LOOKUP_REQUIRED'){const lookup=e.channelInput||e.code==='SLACK_CHANNEL_LOOKUP_REQUIRED';const reply=this.askDetails(lookup?'Из какого канала Slack взять участников команды? Введите точное название с # или вставьте ссылку на канал.':e.message);if(lookup)reply.clarificationInput={label:'Канал Slack',placeholder:'#название или ссылка на канал',submit:'Продолжить'};this.pending.channelInput=lookup;this.pending.prefix='Заполни команду из Slack ';this.pending.channelOptions=e.channelOptions||[];return reply;}return this.reply('Не удалось заполнить команду: '+e.message,{error:true});}
   finally{this.busy=false;}
  }
+ async fromJira(){if(!this.jiraRoster)return null;try{return await this.jiraRoster();}catch(e){console.error('Team from Jira:',e.message);return null;}}
  // Fill the team from the visible Slack window; ask for computer control if it is off.
  async fromScreen(command){
   let view;
