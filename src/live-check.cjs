@@ -90,7 +90,7 @@ module.exports=async(win,out)=>{
    if(scenario.agents){const since=Date.parse(report.at);for(const t of (await js('window.petya.dialogueTopics()')).topics.filter(t=>/^Агент · /.test(t.title)&&t.at>=since))try{await js(`window.petya.chatArchive('chat',${JSON.stringify(t.id)},true)`);}catch{}}
    if(target!==project.id){const id=(await js('window.petya.dialogueTopics()')).activeId;if(id)try{await js(`window.petya.chatArchive('chat',${JSON.stringify(id)},true)`);}catch{}}
   }
- }finally{
+ }catch(e){note('FAILED '+(e?.stack||e));throw e;}finally{note('FINALLY');
   try{report.summary=require('./live-grade.cjs').summary(report);}catch(e){report.summaryError=e.message;}
   fs.writeFileSync(out,JSON.stringify(report,null,1));
   // Leave the user's chats as they were: remove the test project and the chats this run opened (and leftovers of
