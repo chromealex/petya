@@ -56,7 +56,7 @@ def add(row,criteria=None,group=None):
  if row['task']=='draft':rubric[row['id']]=dict(criteria=criteria,group=group)
 for i,(old,new,color) in enumerate([('Пропуска-07','Допуски-07','сиреневым'),('Счёты-04','Расчёты-04','песочным')]):
  for name,col in [(False,True),(True,False),(False,False),(True,True)]:
-  pairs=[('Отказываемся от переименования?',f'Нет, требуется «{new}».' if name else f'Да, оставляем «{old}».'),('Новый цвет сохраняется?',f'Да, нужен {color} значок.' if col else 'Нет, сохраняется старый цвет.')]
+  pairs=[('Отказываемся от переименования?',f'Нет, требуется «{new}».' if name else f'Да, оставляем «{old}».'),('Новый цвет сохраняется?',f'Да, значок будет {color}.' if col else 'Нет, сохраняется старый цвет.')]
   if i:pairs.reverse()
   turns=[f'Для раздела «{old}» планировали имя «{new}» и значок {color}. Адрес и содержимое не менять.']
   if not i:turns += ['Содержимое переписать?','Нет, оставить.']
