@@ -1,0 +1,11 @@
+# Diverse cancellations and constrained permissions
+
+Continue from v17 with 801 frozen presentations: all 469 familiar targets once (369 old targets, 84 previous fresh cases, sixteen previous release dialogues), six additional copies of each former release dialogue, four additional copies of four field/permission controls, 36 diverse variants three times, 64 numeric rehearsal cases and 48 negative sorts. All former release dialogues are now training/retention data and must never be reported as fresh evidence.
+
+The variants balance revoked/granted sending, selective rollback of two changes, independently authorized document versions, cancellation of cancellation, known/unknown channels, approved/rejected proposals, inclusive/exclusive bounds in prose, exact identifiers, and quoted versus actual permissions. Ordinary application prompts and sampling remain unchanged. This is offline research, not a new app/MCP capability.
+
+Reserve 84 fresh structured cases and sixteen newly authored release dialogues before any inference. Compare base, immediate v17 parent and historical v8 on the structured check, and parent/candidate on the new release dialogues. Keep all inference sequential on the GPU. Reuse the unchanged v7 trainer at one epoch, learning rate 0.000005, thirteen adapted blocks, seed 42. Candidate fresh inference follows a recorded decision that all 469 familiar targets survive ordinary reload. Acquisition-only repair must be frozen separately before execution if necessary.
+
+Manual semantic review checks complete requirements, explicit exclusions, recipient direction, unresolved questions, coherent headings and exact names; wording may differ. Preserve strict numeric scoring and paired regressions. Small related synthetic tests are not proof of broad reliability. No release unless all gates pass, including diverse release dialogues, generated multi-turn behavior with normal sampling, artifact provenance and real runtime loading/integration.
+
+Training and inference have not yet started. `protocol.json` and `release-dialogues-protocol.json` freeze input hashes. `verify.py` checks completed stages explicitly and never asserts release readiness from a partial evaluation.

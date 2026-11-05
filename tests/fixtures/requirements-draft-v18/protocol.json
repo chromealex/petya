@@ -1,0 +1,17 @@
+{
+  "hashes": {
+    "train.jsonl": "f945b8a5033fbda5d247ef2024609bbb7cc9f45bf578c12d63da20fff22d0a30",
+    "acquisition.jsonl": "543cfd71d1136e99bc5271e14b2d5bd3dcf9d359cdfab18f5d7d17cda467dbd5",
+    "diverse-variants.jsonl": "719f0b37c0be8bd01a8d97daa733d2f6e9fd9a5b33ee7aac07a916767375afe5",
+    "check.jsonl": "06c79e3743439df7981ddeba605f4c3adb57106845cded5c0a3f2848b70effcc"
+  },
+  "parent": "../requirements-draft-v17/adapter",
+  "steps": 801,
+  "layers": 13,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 5e-06,
+  "gate": "All 469 familiar targets correct; no lost parent successes on fresh cases; bounds, sorts and exact labels preserved. Supplementary independent varied dialogues and real runtime checks required before release.",
+  "selection": "Fixed run. No candidate fresh inference before recorded acquisition decision. Freeze any acquisition-only repair before execution.",
+  "limits": "Synthetic cases and non-blind review. Prior release dialogues are now training/retention data, never fresh evidence."
+}
