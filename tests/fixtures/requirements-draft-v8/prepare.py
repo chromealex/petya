@@ -80,12 +80,17 @@ checks += [
  draft('d-shift',['В письме клиенту показывать номер брони и дату заселения. Телефон администратора скрывать.','Добавить оплату?','Нет.','Теперь обсудим уборку?','Уборка отдельно, вернёмся к письму.','Дату заменить временем?','Нет, оставить дату в формате ГГГГ-ММ-ДД. Подготовь только задачу письма.'],'Письмо о брони','В письме клиенту показывать номер брони и дату заселения в формате ГГГГ-ММ-ДД. Телефон администратора скрывать. Оплату и уборку в задачу не включать.'),
 ]
 for id,q,a in [
- ('g1','Ответь только числом: 19 умножить на 13.','247'),('g2','Отсортируй 8, -2, 5 по возрастанию. Верни только JSON-массив.','[-2,5,8]'),('g3','Ответь только числом: len("Петя") в Python.','4'),('g4','Напиши ровно слово: Принято','Принято'),('g5','Вычисли 81 минус 34. Ответь только числом.','47'),('g6','Верни только значение count из JSON {"count":42,"label":"Далее"}.','42'),('g7','Задание отменили до запуска. Оно выполнено? Ответь только «да» или «нет».','нет'),('g8','Ответь только числом: 125 плюс 275.','400')]:
+ ('g1','Ответь только числом: 23 умножить на 17.','391'),('g2','Отсортируй 8, -2, 5 по возрастанию. Верни только JSON-массив.','[-2,5,8]'),('g3','Ответь только числом: len("Петя") в Python.','4'),('g4','Напиши ровно слово: Принято','Принято'),('g5','Вычисли 81 минус 34. Ответь только числом.','47'),('g6','Верни только значение count из JSON {"count":42,"label":"Далее"}.','42'),('g7','Задание отменили до запуска. Оно выполнено? Ответь только «да» или «нет».','нет'),('g8','Ответь только числом: 125 плюс 275.','400')]:
  checks.append(dict(id=id,task='general',messages=[dict(role='user',content=q),dict(role='assistant',content=a)]))
 assert len(checks)==44
 sig=lambda r:json.dumps(r['messages'][:-1],ensure_ascii=False,sort_keys=True)
 assert set(map(sig,train)).isdisjoint(map(sig,checks))
 assert len(set(map(sig,checks)))==len(checks)
+prior=[]
+for path in OLD.glob('*.jsonl'):
+ for row in read(path):
+  if 'messages' in row and row['messages'][-1]['role']=='assistant':prior.append(row)
+assert set(map(sig,checks)).isdisjoint(map(sig,prior))
 assert {r['id'] for r in checks}.isdisjoint(r['id'] for r in train)
 hashes={name:write(name,rows) for name,rows in [('train.jsonl',train),('corrections.jsonl',corrections),('variants.jsonl',variants),('check.jsonl',checks)]}
 (R/'protocol.json').write_text(json.dumps(dict(hashes=hashes,parent='../requirements-draft-v7/deep-adapter',epochs=2,lr=0.00003,layers=5,seed=42,training_rows=len(train),steps=len(train)*2,new_cases={'bounds':24,'draft':12,'general':8},selection='One fixed candidate; no checkpoint selection on reserved checks.',improvement_gate='All seven corrected examples semantically correct after reload; numeric and general no worse than both parent and base; complete draft score greater than both on new cases.',release_gate='All targeted numeric and draft checks pass, plus broader deployment validation; this research alone cannot authorize release.',draft_rubric='Valid JSON summary/description strings and questions list of strings; all agreed constraints retained, no invented requirements or reopened settled questions. Semantically equivalent wording and logically entailed exclusions accepted. Manual non-blind assessment; no exact wording criterion.',limitations='Synthetic related families, not real-user or broad intelligence evidence; greedy diagnostic inference only. Old deep-check is now development.'),indent=2)+'\n')
