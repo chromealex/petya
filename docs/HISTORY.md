@@ -18,6 +18,10 @@ OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
 **Windows.** Every push builds the installer on Windows in CI, checks its package against `src/` and starts the unpacked app for the tray check; a version tag publishes `Petya-Setup.exe` as a GitHub release. Fixed on the way: every IPC call was rejected when the app path contained a Windows short name (`RUNNER~1`), the bundled Ollama setup script was not found by makensis on Windows, the build lock used POSIX-only `fcntl`, and package verification read sources as cp1252.
 
+**Privacy.** Recording Zoom meetings is off by default again and is never switched on by an update; installations that a one-off migration had switched on are switched back off once.
+
+**Long dialogues.** A list follow-up after the conversation moved to another chat uses the project's latest list; weather answers «нет, в Казани» / «а завтра?» and no longer falls back to Google; «Что важно не забыть?» lists the «Важно» marks. A team-fill conflict answered by voice («замени») is saved again.
+
 **Live check.** `PETYA_LIVE_ONLY=<regex>` runs only matching scenarios; turns record the peak number of simultaneous local generations; new scenarios cover agents across projects, list follow-ups and long mixed dialogues.
 
 ## 0.9.0 — agents, «Важно», live self-check
