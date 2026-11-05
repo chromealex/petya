@@ -1,0 +1,12 @@
+{
+  "purpose": "Feasibility only: finite gradients and resource use when expanding the existing rank-8 adapter from thirteen to all thirty-two blocks. Not a quality or release test.",
+  "parent": "../requirements-draft-v18/question-adapter",
+  "data_sha256": "5af6be6164ebc2b9da5c6903ea8d3c582192d4dd75bb8a58f973189927ebd9cd",
+  "parent_sha256": "52192adaf485b9e5958d42d956a2125238f37cc5a005c23d1f26dfe6f44acea8",
+  "steps": 4,
+  "layers": 32,
+  "epochs": 1,
+  "learning_rate": 5e-06,
+  "seed": 42,
+  "selection": "Probe weights are disposable diagnostic artifacts and cannot be selected as a release candidate. Any full experiment starts from the original v18 parent and requires frozen training/holdout data."
+}
