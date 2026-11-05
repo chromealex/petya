@@ -11,9 +11,12 @@ function generate(root,provider){
   const x=provider==='figma'?box.x-(parent?.x||0):box.x,y=provider==='figma'?box.y-(parent?.y||0):box.y;
   const styles=[`position: absolute`,`left: ${depth?number(x):0}px`,`top: ${depth?number(y):0}px`,`width: ${number(box.width)}px`,`height: ${number(box.height)}px`];
   const text=node.characters??node.content;
-  const fill=node.fills?.find(f=>f.visible!==false&&['SOLID','color'].includes(f.type))?.color;
+  const textStyle=provider==='zeplin'?node.text_styles?.[0]?.style:null;
+  const fill=textStyle?.color||node.fills?.find(f=>f.visible!==false&&['SOLID','color'].includes(f.type))?.color;
   if(fill){const scale=provider==='figma'?255:1;styles.push(`${text==null?'background-color':'color'}: rgba(${['r','g','b'].map(k=>Math.max(0,Math.min(255,Math.round(number(fill[k])*scale)))).join(',')},${Math.max(0,Math.min(1,fill.a??1))})`);}
-  if(node.style?.fontSize)styles.push(`font-size: ${number(node.style.fontSize)}px`);
+  const fontSize=textStyle?.font_size??node.style?.fontSize;
+  if(fontSize)styles.push(`font-size: ${number(fontSize)}px`);
+  if(node.text_styles?.length>1)warnings.push('Смешанные стили текста: используется стиль первого фрагмента.');
   if(text!=null)styles.push('white-space: normal');
   const tag=text==null?'VisualElement':'Label';
   return `<ui:${tag} name="layer-${count}"${text==null?'':` text="${xml(text)}"`} style="${xml(styles.join('; '))}">${(node.children||node.layers||[]).map(n=>element(n,box,depth+1)).join('')}</ui:${tag}>`;
@@ -28,8 +31,10 @@ function code(uxml){
 if (!UnityEditor.AssetDatabase.IsValidFolder(folder)) UnityEditor.AssetDatabase.CreateFolder("Assets", "PetyaLayouts");
 var path = UnityEditor.AssetDatabase.GenerateUniqueAssetPath(folder + "/Layout.uxml");
 System.IO.File.WriteAllBytes(path, System.Convert.FromBase64String("${base64}"));
-UnityEditor.AssetDatabase.ImportAsset(path);
-UnityEditor.Selection.activeObject = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.VisualTreeAsset>(path);
+UnityEditor.AssetDatabase.ImportAsset(path, UnityEditor.ImportAssetOptions.ForceSynchronousImport);
+var asset = UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.UIElements.VisualTreeAsset>(path);
+if (asset == null) throw new System.InvalidOperationException("UXML import failed: " + path);
+UnityEditor.Selection.activeObject = asset;
 return path;`;
 }
 module.exports={generate,code};

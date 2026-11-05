@@ -15,7 +15,7 @@ module.exports=async ctx=>{
   assert.equal(options.redirect,'error');
   if(pause)await new Promise(resolve=>{release=resolve;});
   if(endpoint.includes('figma')){assert.equal(options.headers['X-Figma-Token'],'private');return new Response(JSON.stringify({nodes:{'1:2':{document:node}}}));}
-  assert.equal(options.headers.Authorization,'Bearer zeplin');return new Response(JSON.stringify({width:300,height:400,layers:[{type:'text',content:'Zeplin',rect:{x:10,y:20,width:30,height:40}}]}));
+  assert.equal(options.headers.Authorization,'Bearer zeplin');return new Response(JSON.stringify({width:300,height:400,layers:[{type:'text',content:'Zeplin',text_styles:[{style:{font_size:24,color:{r:255,g:0,b:0,a:1}}}],rect:{x:10,y:20,width:30,height:40}}]}));
  });
  for(const mode of ['read','edit']){
   const endpoint=await startMcp({...ctx,access:{mode,projectId:topic.projectId}},{port:0});const client=new Client({name:'layout-test',version:'1'});
@@ -30,7 +30,7 @@ module.exports=async ctx=>{
    assert.match(prepared.uxml,/left: 10px; top: 20px/);assert.match(prepared.uxml,/&lt;Hello &amp; &quot;you&quot;&gt;/);assert.ok(!JSON.stringify(prepared).includes('private'));
    assert.ok(!(await call('apply_unity_layout',{proposalId:prepared.id,instance:'EditorA'})).isError);assert.equal(calls.length,1);assert.equal(calls[0][4],'EditorA');assert.match(calls[0][2].arguments.code,/GenerateUniqueAssetPath/);
    assert.ok((await call('apply_unity_layout',{proposalId:prepared.id})).isError);
-   const zeplin=await call('prepare_unity_layout',{url:'https://app.zeplin.io/project/abc/screen/def'});assert.ok(!zeplin.isError);assert.match(JSON.parse(zeplin.content[0].text).uxml,/Zeplin/);
+   const zeplin=await call('prepare_unity_layout',{url:'https://app.zeplin.io/project/abc/screen/def'});assert.ok(!zeplin.isError);assert.match(JSON.parse(zeplin.content[0].text).uxml,/Zeplin/);assert.match(JSON.parse(zeplin.content[0].text).uxml,/font-size: 24px/);assert.match(JSON.parse(zeplin.content[0].text).uxml,/color: rgba\(255,0,0,1\)/);
    const stale=JSON.parse(zeplin.content[0].text);s.companyId='another';assert.ok((await call('apply_unity_layout',{proposalId:stale.id})).isError);s.companyId=ctx.companyId;
    pause=true;const pending=ipc.prepare({url});await new Promise(resolve=>setImmediate(resolve));await assert.rejects(ipc.prepare({url}),/Дождитесь/);settings.layoutFigmaToken='changed';release();await assert.rejects(pending,/изменились/);settings.layoutFigmaToken='private';pause=false;
    assert.equal(ipc.status().busy,false);assert.equal(ipc.status().kind,'error');assert.ok(events.some(([,e])=>e.busy));
