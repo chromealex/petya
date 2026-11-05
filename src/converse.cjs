@@ -14,6 +14,10 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     if(choice)ctx.draftAnswers.clear();else ctx.draftAnswers.commit(original,ctx.voicePreparationKey());
     const namePreference=!choice?require('./name-preference.cjs').preference(original,ctx.settings):null;
     if(namePreference){ctx.saveSettings(namePreference.patch);ctx.dialogue.rememberAction(original,namePreference.text);return {handled:true,text:namePreference.text,topicId:ctx.dialogue.active()?.id,messages:ctx.dialogue.active()?.messages};}
+    if (!choice) {
+      const motion = ctx.blenderMotion?.turn(original);
+      if (motion) return motion;
+    }
     // A complex request for agents: subtasks run as parallel background chats of this project.
     // Explicit («раздай агентам») runs at once; a request over several areas gets an offer first
     // («Раздать агентам» / «Ответить одним сообщением», the choice can be remembered).

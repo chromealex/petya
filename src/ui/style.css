@@ -855,3 +855,8 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .chat-model-frame{display:block;width:100%;height:clamp(220px,36vh,420px);border:0;border-radius:8px}
 .message-attachment.model-attachment{flex-wrap:wrap;max-width:100%}
 .model-attachment:has(iframe){width:min(600px,70vw)}
+
+.blender-motion-card { display:grid; gap:.65rem; margin-block:.75rem; }
+.blender-motion-card > button { justify-self:start; }
+.blender-motion-card label { display:grid; gap:.25rem; }
+.blender-motion-card label[hidden] { display:none; }

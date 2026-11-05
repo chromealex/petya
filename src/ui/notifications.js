@@ -51,6 +51,9 @@
  }
  window.petyaEvents.onVoiceLanguageProgress(languageProgress);
  window.petya.voiceLanguageStatus().then(states=>states.forEach(languageProgress)).catch(()=>{});
+ const motionProgress = item => { if (item) put(item.id,item); };
+ window.petyaEvents.onMotionProgress(motionProgress);
+ window.petya.feature('blenderMotion','status').then(motionProgress).catch(()=>{});
  document.addEventListener('petya-ui-notification',event=>{const {id,...data}=event.detail;put(id,data);});
  window.petyaEvents.onWindowShown(()=>checkUpdates(false));setTimeout(()=>checkUpdates(false),2000);draw();
 })();

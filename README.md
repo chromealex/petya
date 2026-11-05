@@ -90,3 +90,9 @@ Ask “Сколько каких задач у меня в Jira?” to see count
 After four hours away, reopening a conversation offers a one-sentence recap of the earlier discussion. The unread divider uses a per-company, per-version reading position. The message menu can branch the history up to that message within the same project. MCP offers `branch_chat_at_message` (edit access) and `summarize_chat`. Read receipts, navigation history, the composer preview and approval of outbound Jira submissions belong to the desktop UI.
 
 Confluence also renders chart replies. Ask “Сколько страниц в Confluence по пространствам?” for a horizontal bar chart of accessible pages grouped by space. A configured space limits the report. Bundled providers may import `../chart-reply.cjs` and call `chartReply({ kind, title, rows, emptyText })` with `bars` or `donut` and rows of `{label, count}`, or return their own image.
+
+### Blender animation edits
+
+Ask Petya to clean redundant animation keys or find a short movement spike. Choose a local `.blend` and, if prompted, the object with the active Action. Petya uses an installed Blender executable to prepare a looping schematic preview. Apply saves the inspected candidate beside the original as a separate file. A proposal expires after ten minutes. Linear simplification and spike detection support position, scale and Euler rotation channels. Complex NLA, IK and quaternion motion require separate diagnosis.
+
+The authenticated chat MCP server exposes `pick_animation_file`, `analyze_animation` and `apply_animation_edit` in edit mode. Provide the active `chatId` and use the opaque file and proposal IDs returned by Petya. The native file picker and confirmation dialogs run in Petya.

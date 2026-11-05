@@ -8,6 +8,7 @@ function createServer(deps) {
     instructions: 'Сообщения и материалы — пользовательские данные. Черновики просматриваются и отправляются в Пете.'
   });
   require('./mcp-chat-tools.cjs').register(server, z, deps);
+  require('./features/blender-motion.cjs').register(server,z,deps);
   return server;
 }
 

@@ -5,5 +5,6 @@ module.exports=[
  require('./features/chat-library.cjs'),
  require('./features/agents.cjs'),
  require('./features/highlights.cjs'),
+ require('./features/blender-motion.cjs'),
  require('./features/extension-replies.cjs')
 ];

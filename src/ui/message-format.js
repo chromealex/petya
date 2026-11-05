@@ -33,6 +33,7 @@ window.renderMessage = function(message){
      content.append(img);
    }
  }
+ if (message.role === 'assistant' && ['clean','repair'].includes(message.motionMode)) window.renderMotionCard(content,message);
  const meta=document.createElement('div');meta.className='message-meta';
  const at=message.at?new Date(message.at):null;
  if(at&&!Number.isNaN(at.getTime())){const time=document.createElement('time');time.dateTime=at.toISOString();const today=at.toDateString()===new Date().toDateString();time.textContent=at.toLocaleString('ru-RU',today?{hour:'2-digit',minute:'2-digit'}:{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});time.title=at.toLocaleString('ru-RU');meta.append(time);}
