@@ -61,8 +61,8 @@ window.renderMessage = function(message){
  const copy=document.createElement('button');copy.className='message-copy';copy.type='button';
  const paint=copied=>{copy.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(copied?'<path d="m5 12 4 4L19 6"/>':'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/>')+'</svg>';copy.title=copied?'Скопировано':'Копировать сообщение';copy.setAttribute('aria-label',copy.title);};paint(false);
  if(message.role!=='user'&&typeof message.by==='string'&&message.by){const source=document.createElement('span');source.className='message-source';source.textContent=message.by;source.title='Кто подготовил ответ';meta.append(source);}
- // Finished steps stay out of the way: a small toggle in the hover row next to the source.
- if(message.role!=='user'&&Array.isArray(message.steps)&&message.steps.length>1)meta.append(window.renderSteps(message.steps));
+ // Keep completed work above the answer, where its live progress appeared.
+ if(message.role!=='user'&&Array.isArray(message.steps)&&message.steps.length>0)node.insertBefore(window.renderSteps(message.steps),content);
  copy.onclick=async()=>{try{await navigator.clipboard.writeText(message.text||'');paint(true);setTimeout(()=>paint(false),1800);}catch{notice('Не удалось скопировать сообщение. Выделите текст и нажмите ⌘C / Ctrl+C.',true);}};meta.append(copy);node.append(meta);
  window.enhanceChatMessage?.(node,message);
  const menu=node.querySelector('.message-actions-menu');

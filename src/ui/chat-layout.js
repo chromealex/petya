@@ -97,6 +97,7 @@
  const sync=()=>{const last=chatHistory.at(-1),key=last?[last.at??'',chatHistory.length,String(last.text||'').slice(0,60)].join('|'):'',newAnswer=last?.role==='assistant'&&previousLast!==key;previousLast=key;welcome.hidden=dialogueMessages.childElementCount>0;if(historyPrepended){historyPrepended=false;return;}if(restoring)return;if(follow)window.chatScrollToLatest();else if(newAnswer)latest.hidden=false;};
  new MutationObserver(sync).observe(dialogueMessages,{childList:true});sync();
  document.addEventListener('petya-topic-changed',event=>{if(event.detail?.preserveScroll)return;follow=true;requestAnimationFrame(window.chatScrollToLatest);});
+ window.chatFollowStream=()=>{if(follow)window.chatScrollToLatest();};
  window.placeChatProgress=panel=>{
   const user=[...dialogueMessages.querySelectorAll(':scope>.message-user')].at(-1);
   if(!user){if(panel.parentElement!==dialogueMessages)dialogueMessages.append(panel);return;}

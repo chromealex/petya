@@ -50,14 +50,16 @@ window.petyaEvents.onAnswerChunk?.(chunk=>{
  }
  else if(chunk.start){answerPace?.stop();answerPace=null;answerShown=0;if(window.shouldSpeakChat?.(window.streamSpeechEnabled)??window.streamSpeechEnabled){++speechEpoch;releaseReplyAudio();spokenStreamId=chunk.id;streamedVoice.start();window.answerVoiceBegin?.();}answerPreview?.remove();answerPreview=null;answerStreamId=chunk.id;answerStreamHidden=false;return;}
  if(chunk.id!==answerStreamId)return;
- if(chunk.end){answerShown=answerPace?.shown||0;if(chunk.topicId)window.lastStreamShown={topicId:chunk.topicId,length:answerShown};answerPace?.stop();if(chunk.id===spokenStreamId)streamedVoice.generationEnded();answerPreview?.remove();answerPreview=null;answerStreamId='';return;}
+ if(chunk.end){answerShown=answerPreview?.dataset.streamLength?Number(answerPreview.dataset.streamLength):answerPace?.shown||0;if(chunk.topicId)window.lastStreamShown={topicId:chunk.topicId,length:answerShown};answerPace?.stop();if(chunk.id===spokenStreamId)streamedVoice.generationEnded();answerStreamId='';return;}
  if(answerStreamHidden||typeof chunk.text!=='string')return;
  if(chunk.id===spokenStreamId)streamedVoice.feed(chunk.text);
  if(!chunk.text){answerPreview?.remove();answerPreview=null;return;}
- if(!answerPreview){answerPreview=document.createElement('p');answerPreview.className='message assistant';answerPreview.setAttribute('aria-label','Петя отвечает');dialogueMessages.append(answerPreview);}
- if(!answerPace)answerPace=window.createAnswerPace(part=>{if(answerPreview)answerPreview.textContent=part;},{spoken:chunk.id===spokenStreamId});answerPace.update(chunk.text);
+ const rendered=window.renderMessage({role:'assistant',text:chunk.text});
+ if(!answerPreview){answerPreview=document.createElement('article');answerPreview.className='message-assistant answer-stream-preview';answerPreview.setAttribute('aria-label','Петя отвечает');}
+ answerPreview.replaceChildren(rendered.querySelector('.message-content'));answerPreview.dataset.streamLength=String(chunk.text.length);answerShown=chunk.text.length;
+ if(!answerPreview.isConnected)dialogueMessages.append(answerPreview);window.chatFollowStream?.();
 });
-document.addEventListener('petya-topic-changed',()=>{answerStreamHidden=true;answerPace?.stop();answerPace=null;answerPreview?.remove();answerPreview=null;});
+document.addEventListener('petya-topic-changed',event=>{if(event.detail?.preserveScroll)return;answerStreamHidden=true;answerPace?.stop();answerPace=null;answerPreview?.remove();answerPreview=null;});
 let speechEpoch=0, replyAudioSource=null, replyAudioURL=null, replyAudioWatch=null;
 function releaseReplyAudio(){
  if(replyAudioWatch){clearInterval(replyAudioWatch);replyAudioWatch=null;}
@@ -139,8 +141,11 @@ async function showDialogueReply(result,spoken=false){
  if(result.teamUpdated)document.dispatchEvent(new Event('petya-team-updated'));
  if(result.slackRequestReply)voiceReply=async answer=>{if(!String(answer||'').trim())return;showDialogueReply(await window.petya.slackRequestReply(answer),spoken);};
  if(result.teamFillReply)voiceReply=async answer=>{if(!String(answer||'').trim())return;showDialogueReply(await window.petya.teamFillReply(answer),spoken);};
+ answerPreview?.remove();answerPreview=null;
+ const completedSteps=result.steps?.length?result.steps:(commandProgress.busy?commandProgress.steps:[])?.map(s=>({label:s.label,ms:(s.done||Date.now())-s.at}));
+ if(result.messages?.at(-1)?.role==='assistant'&&!result.messages.at(-1).steps?.length&&completedSteps?.length)result.messages.at(-1).steps=completedSteps;
  if(result.error&&result.messages?.at(-1)?.role==='assistant')result.messages.at(-1).error=true;
- if(result.messages)showDialogueMessages(result.messages);else {const message={role:'assistant',text:result.text,at:Date.now(),error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],evidence:result.evidence||[]};chatHistory.push(message);dialogueMessages.append(renderDialogueMessage(message));}
+ if(result.messages)showDialogueMessages(result.messages);else {const message={role:'assistant',text:result.text,at:Date.now(),error:!!result.error,steps:completedSteps||[],sources:result.sources||[],usedMaterials:result.usedMaterials||[],evidence:result.evidence||[]};chatHistory.push(message);dialogueMessages.append(renderDialogueMessage(message));}
  const newest=[...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1);if(!result.error&&!result.computerApproval)window.revealAnswer?.(newest,result.text,{spoken,initial:result.answerStreamId===spokenStreamId||result.answerStreamId?answerShown:0});
  if(result.text)window.checkVoiceLanguages?.(result.text,newest);
  window.applyChatPlaceholder($('command'),chatHistory,result);

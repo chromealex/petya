@@ -91,6 +91,7 @@ ChatJobs.prototype.executeFull=async function(job){
   const last=target.messages.at(-1);if(result.error&&last?.role==='assistant'&&last.text===result.text)last.error=true;
   if(result.text&&!(last?.role==='assistant'&&last.text===result.text))target.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:Date.now(),...(result.by?{by:result.by}:{})});
   if(target.title==='Новый чат')target.title=command.slice(0,80);
+  const answer=target.messages.at(-1);if(answer?.role==='assistant'&&!answer.steps?.length){const now=Date.now();answer.steps=result.steps?.length?result.steps:(topic.chatJob?.steps||[]).map(s=>({label:s.label,ms:Math.max(0,(s.done||now)-s.at)}));}
   const waiting=needsUser(result);
   target.lastChatResult={...result,question:result.question||waiting,topicId:target.id,topicTitle:target.title,messages:undefined,topics:undefined};
   if(target!==topic){target.chatJob={...topic.chatJob};if(d.state.topics.includes(topic))this.update(topic,'done','Ответ в чате «'+target.title+'»');}
