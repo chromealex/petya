@@ -147,7 +147,7 @@ function setup(s) {
   return { extensionReplies:{turn}, ipc:{ catalog, progress:()=>[...progress.values()], limit:() => s.settings[limitKey],
     setLimit(value) { validate({[limitKey]:value}); s.saveSettings({[limitKey]:value}); } } };
 }
-function ownedByPetya(command,topic){try{return require('../dialogue.cjs').intent(command)!=='chat'||require('../team-fill.cjs').isTeamFill(command)||!!require('../work-query-route.cjs').classify(command,topic||{})||!!require('../slack-digest.cjs').question(command)||!!require('./fresh-data.cjs').weatherQuestion(command)||!!require('./fresh-data.cjs').rateQuestion(command);}catch{return false;}}
+function ownedByPetya(command,topic){try{return require('../explicit-calculation.cjs').explicitCalculation(command)!==null||require('../dialogue.cjs').intent(command)!=='chat'||require('../team-fill.cjs').isTeamFill(command)||!!require('../work-query-route.cjs').classify(command,topic||{})||!!require('../slack-digest.cjs').question(command)||!!require('./fresh-data.cjs').weatherQuestion(command)||!!require('./fresh-data.cjs').rateQuestion(command);}catch{return false;}}
 async function turnForAttachments(s,ids,command) {
   const files = s.attachments.list();
   if (!files.length || !Array.isArray(ids) || files.length !== ids.length || !files.every(f=>ids.includes(f.id))) return null;

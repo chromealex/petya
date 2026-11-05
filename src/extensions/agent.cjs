@@ -15,6 +15,16 @@ async function ask(s,messages,format) {
   return JSON.parse(message?.content || 'null');
 }
 
+// History only matters when the chat is already working with an extension: after ordinary answers (sums,
+// explanations) a short follow-up («А пример?») is not a request for Unity, and one wrong pick must not make
+// the next requests look like Unity work too.
+function history(s,providers){
+ const messages=(s.dialogue.active()?.messages||[]).filter(m=>!m.pending);
+ const names=providers.map(p=>p.name);
+ const last=messages.filter(m=>m.role==='assistant').at(-1);
+ if(!last||!names.includes(last.by))return [];
+ return messages.slice(-4).map(m=>({role:m.role,content:String(m.text).slice(0,800)}));
+}
 async function select(s,command,providers) {
   if (require('../dialogue-answer.cjs').greetingReply(command) || require('../dialogue-answer.cjs').prohibitionReply(command)) return null;
   if (!s.settings.model || s.settings.semanticTools==='false') return null;
@@ -22,7 +32,7 @@ async function select(s,command,providers) {
   if (!choices.length) return null;
   const response=await ask(s,[
     {role:'system',content:'Выбери расширение для выполнения текущей просьбы в реальном приложении. Обычный разговор, объяснение, цитата, запрет действия или неоднозначный сервис: id пустой. История служит только для явных ссылок. Верни id из каталога и confidence 0..1.'},
-    ...(s.dialogue.active()?.messages || []).filter(m=>!m.pending).slice(-4).map(m=>({role:m.role,content:String(m.text).slice(0,800)})),
+    ...history(s,providers),
     {role:'user',content:JSON.stringify({request:command,catalog:choices.map(p=>({id:p.type,description:p.agent}))})}
   ],{type:'object',properties:{id:{enum:['',...choices.map(p=>p.type)]},confidence:{type:'number'}},required:['id','confidence'],additionalProperties:false});
   return Number.isFinite(response?.confidence) && response.confidence>=.85 && response.confidence<=1 ?
@@ -122,4 +132,4 @@ async function run({s,command,catalog,readOnly,invoke,check:authorize,report,his
   }
   return {answer:'Достигнут предел проверки. Уточните, что проверить дальше.',steps};
 }
-module.exports={run,select};
+module.exports={run,select,history};

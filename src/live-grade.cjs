@@ -7,7 +7,7 @@ function grade(r,checks={}){
  else if(r?.error)fail.push('ошибка');
  if(!text.trim())fail.push('пустой ответ');
  if(/\{"(?:understood|answer|intent|skill)"|<selected_skill>|\bundefined\b|\[object Object\]|\bNaN\b/u.test(text))fail.push('служебный текст в ответе');
- if(!checks.en&&text.trim()&&!/\p{Script=Cyrillic}/u.test(text))fail.push('ответ не по-русски');
+ if(!checks.en&&/\p{L}/u.test(text)&&!/\p{Script=Cyrillic}/u.test(text))fail.push('ответ не по-русски');
  // Petya speaks «на ты»: a formal «вы» to the user is a mistake (quotes and «вы» in drafts for others are fine).
  if(/(?:^|[.!?]\s+)(?:Вы|Вам|Вас|Ваш\p{L}*)\s/u.test(text)&&!checks.formalOk)fail.push('обращение на «вы»');
  if(checks.by&&!re(checks.by).test(by))fail.push('обработчик «'+by+'», ожидался /'+checks.by+'/');
