@@ -1,0 +1,57 @@
+{
+  "method": "Manual non-blind review under the frozen strict protocol. No exact wording requirement. Drafts are judged including summary, conditions, explicit exclusions and question scope. A ZIP with no password is accepted as the requested unprotected archive without requiring the word encryption to be repeated.",
+  "models": {
+    "base": {
+      "archive-format": {
+        "passed": true,
+        "finding": "Preserves ZIP, no encryption/password and naming."
+      },
+      "cooling": {
+        "passed": false,
+        "finding": "Reopens the explicitly requested camera code and adds an unrequested format question."
+      },
+      "expiry-new": {
+        "passed": true,
+        "finding": "Keeps one-time use, proposed-only duration and decision after checking; asks about duration."
+      },
+      "printer": {
+        "passed": false,
+        "finding": "Changes printing the invoice number into a document lookup criterion and does not preserve the print privacy requirement."
+      },
+      "sound": {
+        "passed": true,
+        "finding": "Preserves inclusive volume limit, current value and recipient/exclusion."
+      },
+      "map": {
+        "passed": false,
+        "finding": "Invents an exact label format and introduces multiple new questions."
+      }
+    },
+    "selected": {
+      "archive-format": {
+        "passed": true,
+        "finding": "Preserves unprotected ZIP and invoice naming; no encryption requirement is introduced."
+      },
+      "cooling": {
+        "passed": true,
+        "finding": "Preserves inclusive minimum, no maximum, cancelled old value and operator field."
+      },
+      "expiry-new": {
+        "passed": false,
+        "finding": "Drops the requirement to decide after checking and asks to approve the proposed 15 hours without that condition."
+      },
+      "printer": {
+        "passed": false,
+        "finding": "Invents searching by invoice number instead of printing it."
+      },
+      "sound": {
+        "passed": false,
+        "finding": "Invents a volume-threshold trigger for sending the notification."
+      },
+      "map": {
+        "passed": false,
+        "finding": "Replaces all requirements with the generic word Fields."
+      }
+    }
+  }
+}

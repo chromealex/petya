@@ -1,0 +1,22 @@
+{
+  "selected": "epoch-4",
+  "summary": {
+    "base": {
+      "bounds": 14,
+      "boundsTotal": 18,
+      "drafts": 3,
+      "draftTotal": 6,
+      "validDrafts": 6
+    },
+    "selected": {
+      "bounds": 17,
+      "boundsTotal": 18,
+      "drafts": 2,
+      "draftTotal": 6,
+      "validDrafts": 6
+    }
+  },
+  "finalGatePassed": false,
+  "deployed": false,
+  "decision": "Reject general-draft deployment. Preserve evidence of improved numeric regression for further narrow-task validation."
+}
