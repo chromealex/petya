@@ -1,0 +1,18 @@
+{
+  "parent": "v5 epoch4",
+  "num_layers": 5,
+  "full_attention_blocks": 2,
+  "trainable_parameters": 2457600,
+  "keys": "Q/K/V/O and MLP gate/up/down where present",
+  "rank": 8,
+  "epochs": 3,
+  "steps": 840,
+  "learning_rate": 5e-05,
+  "seed": 42,
+  "dataSHA256": "dcdd06075e208b21beeea3baedcf11aad82b306384d38634afbc43e379f1e30c",
+  "training_backend": "Differentiable gated_delta_ops for the three recurrent blocks on the trainable path; other frozen layers retain inference kernels.",
+  "generation_backend": "Standard saved-adapter reload with inference kernels; evaluate actual generation, not training loss.",
+  "probe": "Longest training example: 233 tokens, finite gradients, 0.873 seconds, 9510575770 peak bytes; host memory 103079215104 bytes.",
+  "comparison": "Same dataset, parent, optimizer, epochs and learning rate as expanded two-block SFT; greater trainable depth and differentiable recurrent execution.",
+  "evaluation": "Fixed duration. Prior sets are development evidence; reserve fresh final cases before evaluation. No automatic deployment."
+}

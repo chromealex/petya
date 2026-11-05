@@ -1,5 +1,5 @@
 """Controlled correction rehearsal with balanced correction rehearsal."""
-import argparse,hashlib,json,math,random
+import argparse,hashlib,json,math,random,time
 from pathlib import Path
 import mlx.core as mx
 import mlx.nn as nn
@@ -15,6 +15,10 @@ if a.attention:params['keys']+=['self_attn.q_proj','self_attn.k_proj']
 if a.mlp:params['keys']+=['mlp.gate_proj','mlp.up_proj']
 params['keys']=list(dict.fromkeys(params['keys']))
 linear_to_lora_layers(model,a.layers,params);model.eval()
+if a.layers>2:
+ for layer in model.layers[-a.layers:]:
+  if hasattr(layer,'linear_attn'):layer.linear_attn.train()
+started=time.monotonic()
 parent=mx.load(str(a.parent/'adapters.safetensors'));model.load_weights(list(parent.items()),strict=False)
 weights=dict(tree_flatten(model.trainable_parameters()))
 assert all(k.endswith(('lora_a','lora_b')) for k in weights)
@@ -38,5 +42,5 @@ for epoch in range(a.epochs):
 weights=dict(tree_flatten(model.trainable_parameters()));assert all(bool(mx.all(mx.isfinite(v)).item()) for v in weights.values())
 artifact=a.output/'adapters.safetensors';mx.save_safetensors(str(artifact),weights)
 config['lora_parameters']=params;config['num_layers']=a.layers;(a.output/'adapter_config.json').write_text(json.dumps(config,indent=2)+'\n')
-record=dict(attention_added=a.attention,layers=a.layers,mlp_expanded=a.mlp,seed=42,epochs=a.epochs,steps=len(history),learning_rate=a.lr,optimizer_reset=True,trainable_parameters=sum(v.size for v in weights.values()),parent_sha256=hashlib.sha256((a.parent/'adapters.safetensors').read_bytes()).hexdigest(),training_sha256=hashlib.sha256(a.data.read_bytes()).hexdigest(),adapter_sha256=hashlib.sha256(artifact.read_bytes()).hexdigest(),loss=history)
+record=dict(attention_added=a.attention,layers=a.layers,mlp_expanded=a.mlp,seed=42,epochs=a.epochs,steps=len(history),learning_rate=a.lr,optimizer_reset=True,trainable_parameters=sum(v.size for v in weights.values()),parent_sha256=hashlib.sha256((a.parent/'adapters.safetensors').read_bytes()).hexdigest(),training_sha256=hashlib.sha256(a.data.read_bytes()).hexdigest(),adapter_sha256=hashlib.sha256(artifact.read_bytes()).hexdigest(),loss=history,elapsed_seconds=time.monotonic()-started,peak_memory_bytes=mx.get_peak_memory())
 (a.output/'training.json').write_text(json.dumps(record,indent=2)+'\n')
