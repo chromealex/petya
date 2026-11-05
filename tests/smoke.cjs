@@ -81,7 +81,7 @@ module.exports = async (win, workspace) => {
     if((await window.petya.teamList()).members.length)throw Error('Team removal failed');
     view('home');
 
-    if (document.querySelectorAll('[data-module]').length !== 10) throw new Error('Missing module selection');
+    if (document.querySelectorAll('[data-module]').length !== optionalModules.length) throw new Error('Missing module selection');
     const repairDisabled=await window.petya.converse('Почини падающую сборку');if(!repairDisabled.text.includes('Включите модуль Claude'))throw Error('Repair must require an enabled executor');
     const buildQuestionDisabled=await window.petya.converse('Петя, что с билдом');if(!buildQuestionDisabled.integrationOffers?.some(o=>o.service==='slack'))throw Error('Build question should offer Slack connection or browser');
     if (!document.getElementById('attachment-pick')) throw new Error('Missing attachments UI');
