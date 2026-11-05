@@ -1,0 +1,12 @@
+{
+  "train": {
+    "records": 48,
+    "maxTokens": 266,
+    "minTokens": 217
+  },
+  "holdout": {
+    "records": 12,
+    "maxTokens": 254,
+    "minTokens": 204
+  }
+}
