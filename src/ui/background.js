@@ -18,7 +18,8 @@ window.petyaStartMeetingRecording = async () => {
   finally { autoStarting = false; }
 };
 window.petyaStartAutomaticMeeting = async () => {
-  if ((await window.petya.settings()).zoomAutoRecord === 'true') await window.petyaStartMeetingRecording();
+  const config=await window.petya.settings();
+  if (config.zoomCaptureMode === 'local' && config.zoomAutoRecord === 'true') await window.petyaStartMeetingRecording();
 };
 window.petyaStopAutomaticMeeting = async () => {
   ++autoGeneration;

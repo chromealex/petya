@@ -46,6 +46,8 @@ subprocess.run(['xcrun', 'swiftc', '-module-cache-path', str(staging / 'swift-ca
 subprocess.run(['codesign', '--force', '--sign', identity, str(app_dir / 'assets/claude-send')], check=True)
 subprocess.run(['xcrun', 'swiftc', '-module-cache-path', str(staging / 'swift-cache'), str(root / 'native/slack-view.swift'), '-o', str(app_dir / 'assets/native/slack-view')], check=True)
 subprocess.run(['codesign', '--force', '--sign', identity, str(app_dir / 'assets/native/slack-view')], check=True)
+subprocess.run(['xcrun', 'swiftc', '-module-cache-path', str(staging / 'swift-cache'), str(root / 'native/watch-macos.swift'), '-o', str(app_dir / 'assets/native/watch-macos')], check=True)
+subprocess.run(['codesign', '--force', '--sign', identity, str(app_dir / 'assets/native/watch-macos')], check=True)
 # Capture UI and application code after native compilation to minimize concurrent-edit races.
 shutil.copytree(root / 'src', app_dir / 'src')
 # Copy the exact production dependency tree, including nested versions.

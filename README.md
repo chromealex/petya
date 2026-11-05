@@ -186,3 +186,11 @@ Zoom meeting detection is enabled by default, including a one-time migration for
 MCP `read_meeting_memory` reads complete transcript segments with optional `sessionId`, `offset`, and `limit` (up to 100); it requires company-wide access and cannot start capture or bypass OS permission. `resolve_work_context` can use shared Zoom sessions in any project; project-scoped MCP access retains its existing material restrictions.
 
 MCP `meeting_recording_status` exposes the same processing snapshot as the UI; `retry_meeting_processing(sessionId)` retries a failed saved recording and requires company-wide edit access. Audio capture and OS permission prompts remain app-only.
+
+### Separate Zoom participant
+
+The `zoom-bot` extension detects a live Zoom desktop meeting and reads its meeting information. Its settings select automatic joining, confirmation in Petya, or disabled joining. Bot mode never opens the computer microphone or system-audio capture. Chat voice input is suspended during a detected meeting; text chats remain usable. The optional local recorder remains a separate capture mode.
+
+A provisioned Linux Meeting SDK service and Zoom OAuth connection are required; a server alone is not enough. The service records encrypted audio until Zoom ends, then the desktop transcribes it and stores complete segments in shared company memory. It does not send transcription to the current chat. Confirmed memory writes are resumable; successful acknowledgment removes server audio. See [deployment and limitations](zoom-bot/README.md).
+
+MCP tools `zoom_bot_status`, `zoom_bot_join(id)`, `zoom_bot_dismiss(id)` and `zoom_bot_retry(id)` use the same controller as the interface. They require company-wide access; mutations require edit access. Join/retry through MCP require automatic mode. Manual joining confirmation, service configuration and OAuth login are app-only; MCP cannot bypass them.

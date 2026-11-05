@@ -92,12 +92,19 @@ function askVoiceChoices(message, options) {
     await matches[0].run();
   });
 }
+const voiceInputLocks=new Set();
+document.addEventListener('petya-voice-input-lock',event=>{
+ const {id,locked}=event.detail||{};if(typeof id!=='string')return;
+ if(locked)voiceInputLocks.add(id);else voiceInputLocks.delete(id);
+ if(voiceInputLocks.size)mic.stop();
+ updateAudio();
+});
 const voiceTurn = new VoiceTurn({
   pending: () => ({capturing:mic.active && mic.voiced && Date.now()-mic.lastSpeechAt<250,buffered:mic.active && mic.voiced,transcribing:mic.active && (mic.busy || mic.queue?.length)}),
   onTimeout: () => { mic.stop(); voiceReply=null; automaticVoiceCommand=false; updateAudio(); },
   status: (message, error) => { if(commandProgress.busy&&!error)return; notice(message, error); if(!commandProgress.busy)commandProgress.update(error?'error':voiceTurn.active?'listening':'idle', message); if (error) { window.petya.notify(message).catch(()=>{}); window.petya.requestAttention().catch(()=>{}); } },
   dispatch: async (command, at) => {
-    if(window.petyaAutoMeetingActive)return;
+    if(window.petyaAutoMeetingActive||voiceInputLocks.size)return;
     window.streamSpeechEnabled=true;
     if (CommandProgress.isRetry(command) && commandProgress.failed) { await repeatCommand(true); return; }
     if (voiceReply && !VoiceTurn.isNewQuestion(command)) { const reply = voiceReply; voiceReply = null; await reply(command); }
@@ -109,7 +116,7 @@ const micLevel=document.createElement('meter');micLevel.min=0;micLevel.max=1;mic
 const micState=document.createElement('span');micState.textContent='Микрофон выключен';micDiagnostics.append(micLevel,document.createTextNode(' '),micState,$('heard'));$('command-form').append(micDiagnostics);
 let micLevelAt=0;
 const mic = new AudioListener(async (speech, at, endedAt, direct) => {
-  if(window.petyaSpeaking||window.petyaAutoMeetingActive)return;
+  if(window.petyaSpeaking||window.petyaAutoMeetingActive||voiceInputLocks.size)return;
   const turn = voiceTurn.feed(speech, at, endedAt, direct);
   $('heard').textContent = turn.consumed && voiceTurn.parts.length ? voiceTurn.parts.join(' ') : speech;
   if(turn.consumed&&!turn.cancelled&&voiceTurn.parts.length)window.petya.prepareVoice(voiceTurn.parts.join(' ')).catch(()=>{});
@@ -120,6 +127,7 @@ const meetingCaptureFailed = error => { audioError(error); window.petyaStopAutom
 const meeting = new AudioListener(()=>{}, meetingCaptureFailed, {recordSegment:recordMeetingSegment('Zoom')});
 const meetingMic = new AudioListener(()=>{}, meetingCaptureFailed, {recordSegment:recordMeetingSegment('Микрофон')});
 async function startSelectedMicrophone(){
+ if(voiceInputLocks.size)throw Error('Во время встречи голосовой ввод в чаты приостановлен. Можно писать текстом.');
  if(window.petyaAutoMeetingActive||meeting.active)throw Error('Во время встречи микрофон записывает только встречу. В чаты можно писать текстом.');
  const choice=selectedMicrophone();
  try{await mic.start(false,choice.id);}
