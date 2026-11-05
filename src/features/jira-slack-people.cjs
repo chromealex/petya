@@ -1,6 +1,8 @@
 // Read Jira identities first, then join Slack profiles without writing the team directory.
 const norm=v=>String(v||'').trim().toLocaleLowerCase().replace(/ё/g,'е');
-const matches=text=>/(?:jira|джир|жир)/iu.test(text)&&/(?:slack|слак)/iu.test(text)&&/(?:имен|имена|люд|сотрудник|коллег)/iu.test(text)&&/(?:должност|рол[ьи])/iu.test(text);
+// Filling the team directory with them is the team fill's job (src/team-fill.cjs): this only lists.
+const fillsTeam=text=>/(?:заполн|запиш|запиши|сохран|добав|обнов|внес)\p{L}*\s+(?:\p{L}+\s+){0,2}(?:команд|справочник|в\s+команд)/iu.test(text);
+const matches=text=>!fillsTeam(text)&&/(?:jira|джир|жир)/iu.test(text)&&/(?:slack|слак)/iu.test(text)&&/(?:имен|имена|люд|сотрудник|коллег)/iu.test(text)&&/(?:должност|рол[ьи])/iu.test(text);
 async function turn(command,s){
  if(!matches(command))return null;
  const access=await s.serviceAccess.offer(command,s.dialogue.active());if(access)return access;

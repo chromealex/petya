@@ -4,7 +4,11 @@ function statusFilter(text){
  if(/(?:^|[\s(«"])(?:to ?do|тудушк\p{L}*|туду|к выполнению|не начат\p{L}*|бэклог\p{L}*|backlog|открытых к работе)(?=[\s,.!?)»"]|$)/iu.test(s))return {category:'To Do'};
  if(/(?:^|[\s(«"])(?:in progress|в работе|в процессе|в разработке|делаю сейчас|в прогрессе)(?=[\s,.!?)»"]|$)/iu.test(s))return {category:'In Progress'};
  const named=/(?:в статусе|со статусом|статус(?:ом)?)\s+[«"]?([\p{L}\p{N} _-]{2,40}?)[»"]?(?=[,.!?]|$)/iu.exec(s)||/(?:^|\s)(?:в|на|из)\s+[«"]?((?:owner review|code review|on hold|ready for qa|ready for test|in review|in qa|qa|review|ревью|блок\p{L}*))[»"]?(?=[\s,.!?]|$)/iu.exec(s)||/(?:^|[\s«"])((?:owner review|code review|on hold|ready for qa|ready for test|in review))(?=[\s,.!?»"]|$)/iu.exec(s);
- if(named){const name=named[1].trim();const map={'ревью':'Review','блок':'Blocked'};return {name:map[name.toLowerCase()]||map[name.toLowerCase().slice(0,4)]||name};}
+ if(named){const name=named[1].trim();const map={'ревью':'Review','blocked':'Blocked','блок':'Blocked'};return {name:map[name.toLowerCase()]||map[name.toLowerCase().slice(0,4)]||name};}
+ // Any other Latin word at the end («таски в new», «из Ready for Release»): a status if the project has one
+ // with that name; jira-insights checks it against Jira and drops it otherwise.
+ const other=/(?:^|\s)(?:в|из)\s+[«"]?([A-Za-z][A-Za-z ]{1,30}?)[»"]?\s*[.!?]*$/u.exec(s);
+ if(other&&!/^[A-Z][A-Z0-9_-]*$/.test(other[1].trim()))return {name:other[1].trim(),guess:true};
  return null;
 }
 function details(command,topic){

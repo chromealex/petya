@@ -58,3 +58,20 @@ const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}
 // early stop: once everyone wanted is found, no more pages
 (async()=>{let page=0;const r=await slackProfiles({slackToken:'x'},async()=>{const i=page++;return {ok:true,members:[{id:'U'+i,profile:{real_name:i===1?'Polina Samarina':'X'+i}}],response_metadata:{next_cursor:'c'+i}};},[{name:'Polina Samarina'}],{wait:async()=>{}});
  assert.equal(page,2);assert(r.complete);console.log('Team enrich: Slack walk stops once everyone is found passed');})().catch(e=>{console.error(e);process.exit(1);});
+// «Сходи в жиру, возьми все имена, потом в слаке по ним должности и заполни команду»: people from Jira, roles from Slack.
+(async()=>{const {jiraPeople}=require('../src/team-fill.cjs'),{complexRequest,agentRequest,dependentSteps}=require('../src/agent-team.cjs');
+ const command='Сходи в жиру, возьми оттуда все имена, потом пойди в слак и по этим именам возьми их должности, а потом заполни команду';
+ assert(jiraPeople(command));assert(!jiraPeople('Заполни команду'));assert(!jiraPeople('Добавь команде роли из Jira'));
+ assert(dependentSteps(command));assert(!complexRequest(command),'dependent steps are not split into parallel parts');
+ assert(!agentRequest('1. Найди все имена людей в Jira\n2. Потом по этим именам забери должности из Slack'));
+ assert(agentRequest('1. Какие баги открыты в BW\n2. Что нового в Slack'));assert(complexRequest('Покажи мои задачи и что нового в слаке'));
+ const settings={teamMembers:'[]'};let slackRoster=0;
+ const fill=new TeamFill({settings:()=>settings,save:m=>{settings.teamMembers=JSON.stringify(m);},sources:()=>[{title:'Команда',text:command,direct:true}],scope:()=>'s',
+  roster:async()=>{slackRoster++;return null;},extract:async()=>({members:[]}),
+  jiraRoster:async()=>[{member:{name:'Polina Samarina',jiraId:'a1'},evidence:'Jira · Polina Samarina',source:'Jira'},{member:{name:'Oleg Petrov',jiraId:'a2'},evidence:'Jira · Oleg Petrov',source:'Jira'}],
+  enrich:async r=>enrich(r,[{slackId:'U1',names:['polina samarina'],name:'Polina Samarina',title:'Project Manager, Jet Whales',email:''},{slackId:'U2',names:['oleg petrov'],name:'Oleg Petrov',title:'Backend',email:''}],new Map())});
+ const r=await fill.turn(command,false,null,null,{force:true});
+ const saved=JSON.parse(settings.teamMembers);assert.equal(saved.length,2,r.text);assert.equal(slackRoster,0,'the Slack roster is not where the people come from');
+ assert.equal(saved.find(m=>m.name==='Polina Samarina').role,'Project Manager, Jet Whales');assert.match(r.text,/из Jira/);
+ console.log('Team fill: names from Jira, roles from Slack profiles, not split into agent parts passed');
+})().catch(e=>{console.error(e);process.exit(1);});

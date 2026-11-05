@@ -51,6 +51,9 @@ function grounded(result,sources,stats={}) {
  }
  return rows;
 }
+// Jira named as where the people are; «жира» is how Jira is often said and recognised.
+const JIRA=/(?:jira|джир\p{L}*|(?:в|из|по|с)\s+жир[аеуыо]\p{L}*)/iu,PEOPLE=/(?:имен|имён|люд|человек|исполнител|участник|сотрудник|коллег|всех)/iu;
+const jiraPeople=command=>JIRA.test(command)&&PEOPLE.test(command);
 class TeamFill {
  // screen(): reads the visible Slack window; approve(): asks for computer control when it is needed.
  constructor({settings,save,sources,extract,roster,jiraRoster,enrich,scope,screen,approve,now=Date.now}) {Object.assign(this,{settings,save,sources,extract,roster,jiraRoster,enrich,scope,screen,approve,now});this.pending=null;this.busy=false;this.epoch=0;}
@@ -67,8 +70,11 @@ class TeamFill {
    const scope=this.scope(),epoch=this.epoch,settings=this.settings();
    const baseline=settings.teamMembers||'[]',notes=settings.teamRoles||'';
    // Roles for the saved team: its own cards are the people; Slack profiles and Jira add the roles.
-   const onlySaved=opts.existing||rolesRequest(command);
+   const fromJiraPeople=!preset&&!screenSources&&!opts.existing&&jiraPeople(command);
+   const onlySaved=opts.existing||!fromJiraPeople&&rolesRequest(command);
    const saved=!preset&&!screenSources&&onlySaved?team.members(settings):[];
+   // «Возьми имена из Jira, должности из Slack»: the people come from Jira assignees, Slack profiles add roles below.
+   if(fromJiraPeople){const rows=await this.fromJira();if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}
    if(onlySaved&&!preset&&!screenSources&&!saved.length)return this.askDetails('В разделе «Команда» пока никого нет. Скажи «Заполни команду» — соберу коллег из Slack и Jira вместе с ролями.');
    const roster=preset||(saved.length?saved.map(member=>({member:{...member},evidence:'Команда · '+member.name,source:'Команда'})):null)||(screenSources?null:this.roster?await this.roster(command):null);
    let budget=32000;const sources=(screenSources||(roster===null?this.sources(command):[{title:'Команда',text:command}])).map((s,i)=>({...s,id:String(i),text:String(s.text||'')})).filter(s=>s.text.trim()).map(s=>{const text=s.text.slice(0,Math.max(0,budget));budget-=text.length;return {...s,text};}).filter(s=>s.text);
@@ -166,4 +172,4 @@ class TeamFill {
   this.pending=null;return this.reply(p.summary+' Команда заполнена.',{teamUpdated:true});
  }
 }
-module.exports={TeamFill,isTeamFill,rolesRequest,grounded,directRows,directMessages};
+module.exports={jiraPeople,TeamFill,isTeamFill,rolesRequest,grounded,directRows,directMessages};

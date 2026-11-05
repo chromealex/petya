@@ -12,3 +12,11 @@ const assert=require('node:assert/strict');const {personalTasks}=require('../src
  const fs=require('node:fs'),main=fs.readFileSync(require.resolve('../src/converse.cjs'),'utf8');assert(main.indexOf("workRoute.classify(original,")>0&&main.indexOf("workRoute.classify(original,")<main.indexOf("if(!choice){const presence="));
  console.log('Personal tasks: direct Jira routing, current account, assignee/status validation, no stale version, refresh, project choice and no Slack fallback passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});
+// «Какие на мне таски в new?»: a status named in passing is used when Jira has it, ignored otherwise.
+(async()=>{const {details}=require('../src/personal-tasks.cjs');let jql='';const status=name=>({isLast:true,issues:[{key:'AA-2',fields:{summary:'Новая задача',status:{name,statusCategory:{key:'new'}},assignee:{accountId:'me'}}}]});
+ const w={settings:()=>({jiraUrl:'https://fixture.invalid',jiraProjects:'AA',jiraToken:'t'}),pages:async()=>[{key:'AA',name:'Альфа'}],api:async(route,o)=>{if(route.endsWith('/myself'))return {accountId:'me',displayName:'Я'};if(route.endsWith('/rest/api/3/status'))return [{name:'New'},{name:'To Do'},{name:'Owner Review'}];jql=JSON.parse(o.body).jql;return status('New');}};
+ const r=await new JiraInsights(w).read('Какие на мне таски в new?',{jiraProject:'AA'},'','tasks');assert.match(jql,/AND status = "New"/);assert.match(r.text,/в статусе «New»/);
+ await new JiraInsights(w).read('Мои задачи в Альфа',{jiraProject:'AA'},'','tasks');assert.match(jql,/statusCategory != Done/);assert.doesNotMatch(jql,/status = /);
+ assert.equal(details('Мои задачи в BW').name,undefined,'a project key is not a status');
+ console.log('Personal tasks: a status named in passing («в new») is checked against Jira statuses passed');
+})().catch(e=>{console.error(e);process.exit(1);});

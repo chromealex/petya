@@ -8,6 +8,12 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## Next — 100 built-in skills, team from Jira and Slack
+
+**Skills.** A built-in library of 100 instruction skills (`src/skill-library/`): tasks and Jira, releases, QA, development, games and mobile, analytics, communication, management, documents, product. For each request a lexical shortlist over skill names and descriptions (up to six candidates) goes to the local model, which picks one skill or none; small talk, facts, service data and actions get none. The chosen skill only shapes the answer of that one request (instructions added through the `skill` hook of `dialogue-request.cjs`, the answer is labelled «скилл name»); it grants no tools or access. «/name» runs any built-in skill explicitly; a user skill with the same name replaces it, a disabled one switches it off. `autoSkills=false` turns the automatic choice off. Every skill has a typical request in `tests/skill-requests.cjs` that must shortlist it.
+
+**Team from Jira and Slack.** «Возьми имена в Jira, потом по ним должности в Slack и заполни команду» fills the team from Jira assignees and their Slack profile titles. Steps that feed each other («потом», «по этим именам», «оттуда») are no longer split into parallel agent parts or answered one by one by unrelated handlers; a team-directory request is checked before the agents offer.
+
 ## 0.9.1 — agent chats in the sidebar, list follow-ups, Windows CI
 
 **Agents.** Agent chats sit under the chat that started them as a collapsible «Агенты · N» sub-list that folds itself when they are done and read; they go to the archive, come back and move to another project with their parent. An agent's chat always keeps its own answer, even when the pipeline also answered in another chat. «Ответить одним сообщением» answers every planned part and joins them into one reply; the combined answer has no greetings or forms of address.
