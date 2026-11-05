@@ -1,0 +1,37 @@
+{
+  "new-d-failure": {
+    "passed": true,
+    "reason": "Accurate shorter failure heading; description and questions identical.",
+    "answer_sha256": "280645f9755c5b767af027a10e65468ae508ce6578d4d2095e4dbd426503f363"
+  },
+  "v11-name-1-01": {
+    "passed": true,
+    "reason": "Adds the accurate noun section; all requirements identical.",
+    "answer_sha256": "78ccd0214f63dacc8896163d5fed327f5dfb74bba338177a6f75f2aab8de7a77"
+  },
+  "v11-name-1-00": {
+    "passed": true,
+    "reason": "Adds the accurate noun section; all requirements identical.",
+    "answer_sha256": "1124c0cfce46ffe6e9473334a62f5875300a0a37a7d5ea65c7f31e7a490a9d47"
+  },
+  "v16-failure-0-1": {
+    "passed": true,
+    "reason": "Accurate indexing-failure heading; description and questions identical.",
+    "answer_sha256": "e4fb136a2db36e8358fe33619eb1b24be892c50585832ad2a8f1a37112195840"
+  },
+  "v18-failure-0-1": {
+    "passed": true,
+    "reason": "Heading is vague but accurate about failure; description and questions identical.",
+    "answer_sha256": "6acc39b886e5131d81d05ecacd20fcb04fc1b54d3b7e41da8ce486f6134e4d5f"
+  },
+  "v18-repeat": {
+    "passed": true,
+    "reason": "Equivalent interval wording; all requirements survive.",
+    "answer_sha256": "787356b51728c55b9e986d1273254ffa3b021b8e76e4e619c936f5e1a64c0b8a"
+  },
+  "v18-regrant-limited": {
+    "passed": true,
+    "reason": "Accurate alternative heading; both version permissions and fields identical.",
+    "answer_sha256": "7e03f48040c09737dc4ebe233f645de1f7b315634d4c1d128a928980c38c781b"
+  }
+}

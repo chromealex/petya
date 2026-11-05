@@ -1,0 +1,9 @@
+{
+  "artifact": "question-adapter",
+  "adapter_sha256": "52192adaf485b9e5958d42d956a2125238f37cc5a005c23d1f26dfe6f44acea8",
+  "acquisition_passed": true,
+  "acquisition_total": 469,
+  "acquisition_exact": 462,
+  "acquisition_semantic": 469,
+  "decision": "Select after two predeclared acquisition-only repairs. All original and intermediate artifacts retained. No candidate fresh inference has occurred. Release not authorized by acquisition success."
+}
