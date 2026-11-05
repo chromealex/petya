@@ -34,6 +34,8 @@ function conversationalRead(value){
  const compound=/(?:\s|,)(?:и|а|потом|затем|после)\s|;/u.test(body);
  if(compound)return null;
  if(read.test(body)&&(mentionsGit&&/(?:верси|тег|релиз)/u.test(body)||/(?:^|\s)(?:верси[яюи]) (?:проекта|приложения|сборки|игры|билда)(?=\s|$)|(?:последн|текущ)\p{L}* (?:тег|верси|релиз)/u.test(body)))return {action:'version'};
+ // Branches and history in any wording: «какие ветки есть в гите», «в какой я ветке», «последние коммиты».
+ if(read.test(body)||/^в какой/u.test(body)){if(/(?:^|\s)ветк\p{L}*/u.test(body)&&(mentionsGit||/(?:какие|список|в какой|на какой)/u.test(body)))return {action:'branches'};if(/(?:^|\s)(?:коммит\p{L}*|истори\p{L}*\s+(?:коммитов|гита|git))/u.test(body)&&!/(?:сделай|создай)/u.test(body))return {action:'log'};}
  // Any other read-style question about git shows the repository status instead of going to the model.
  if(read.test(body)&&mentionsGit)return {action:'status'};
  return null;

@@ -4,11 +4,18 @@ const {randomUUID}=require('node:crypto');
 const LIMIT=4000,ITEM=1000;
 const SAY=/^(?:петя[,!\s]+)?(?:запомни|отметь|сохрани)\s+(?:это\s+)?как\s+важное(?:\s+для\s+(?:всего\s+)?(проекта))?\s*[:,—-]?\s*([\s\S]+)$/iu;
 const clean=v=>String(v||'').replace(/\s+/g,' ').trim().slice(0,ITEM);
-function collect(state,topic){
+const words=v=>String(v||'').toLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}.]{2,}/gu)||[];
+const key=w=>/\d/.test(w)?w.replace(/\.$/,''):w.slice(0,5);
+const significant=w=>w.length>=4||/\d/.test(w);
+const related=(text,mark)=>{const asked=new Set(words(text).filter(significant).map(key));return words(mark).some(w=>significant(w)&&asked.has(key(w)));};
+function collect(state,topic,command=''){
  if(!topic)return [];
  const parent=topic.agentOf?state.topics.find(t=>t.id===topic.agentOf):null;
  const project=state.projects?.find(p=>p.id===topic.projectId);
- const rows=[...(topic.highlights||[]),...(parent?.highlights||[]),...(project?.highlights||[])];
+ // The topic router may have moved the question to a new chat: marks from other chats of the project
+ // that the question is about still count («Когда релиз 1.19?» after the mark in another chat).
+ const nearby=command?state.topics.filter(t=>t!==topic&&t!==parent&&!t.archived&&t.projectId===topic.projectId).flatMap(t=>(t.highlights||[]).filter(h=>related(command,h.text))):[];
+ const rows=[...(topic.highlights||[]),...(parent?.highlights||[]),...(project?.highlights||[]),...nearby];
  const out=[];let size=0;for(const h of rows){const text=clean(h.text);if(!text||out.includes(text))continue;if(size+text.length>LIMIT)break;out.push(text);size+=text.length;}
  return out;
 }
@@ -20,10 +27,8 @@ module.exports={
  collect,
  setup(s){
   const state=()=>s.dialogue.state,save=()=>s.dialogue.persist();
-  require('../dialogue-request.cjs').important=topic=>collect(state(),topic);
+  require('../dialogue-request.cjs').important=(topic,command)=>collect(state(),topic,command);
   // A question about something the user marked stays in that chat instead of starting a new topic.
-  const words=v=>String(v||'').toLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}.]{2,}/gu)||[];
-  const key=w=>/\d/.test(w)?w.replace(/\.$/,''):w.slice(0,5);
   const keep=(text,topic)=>{const marks=collect(state(),topic);if(!marks.length)return false;const asked=new Set(words(text).filter(w=>w.length>=4||/\d/.test(w)).map(key));return marks.some(m=>words(m).some(w=>(w.length>=4||/\d/.test(w))&&asked.has(key(w))));};
   s.dialogue.keepTopic=keep;
   const add=(topicId,{text,messageIndex=null,scope='chat'}={})=>{

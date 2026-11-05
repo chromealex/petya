@@ -11,6 +11,8 @@ const assert=require('node:assert/strict');const feature=require('../src/feature
  r=await freshData.turn('Нужен ли зонт?');assert(r.question);
  r=await freshData.turn('Какой курс доллара?');assert.match(r.text,/доллар США — 81,23 ₽ \(−0,27/);
  assert.equal(await freshData.turn('Покажи мои задачи'),null);
+ {const keep=s.request;s.request=async url=>{if(url.includes('open-meteo'))throw Error('fetch failed');if(url.includes('wttr.in/'+encodeURIComponent('Казань')))return {nearest_area:[{areaName:[{value:'Казань'}],region:[{value:'Татарстан'}]}],current_condition:[{temp_C:'1',FeelsLikeC:'-3',windspeedKmph:'18',lang_ru:[{value:'Облачно'}]}],weather:[{mintempC:'-2',maxtempC:'3',hourly:[{chanceofrain:'10',lang_ru:[{value:'облачно'}]}]},{mintempC:'0',maxtempC:'4',hourly:[{chanceofrain:'70',lang_ru:[{value:'дождь'}]}]},{mintempC:'1',maxtempC:'5',hourly:[]}]};return {};};
+  r=await freshData.turn('Какая погода завтра в Казани?');assert.match(r.text,/^Казань, Татарстан — завтра: 0…\+4°, дождь, осадки 70%/);assert.match(r.sources[0].title,/wttr/);s.request=keep;}
  s.request=async()=>{throw Error('offline');};assert.equal(await freshData.turn('Какая погода в Москве?'),null);
  s.modules.enabled=()=>false;assert.equal(await freshData.turn('Какой курс евро?'),null);
  console.log('Fresh data: weather now/tomorrow from Open-Meteo, CBR rates, city in any case, fallback to web search passed');

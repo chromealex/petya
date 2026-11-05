@@ -10,6 +10,11 @@ function statusFilter(text){
 function details(command,topic){
  let text=String(command).trim().replace(/^петя[\s,:.!?—-]*/iu,'').replace(/^пожалуйста[,\s]+/iu,'');
  if(topic?.taskAssignee==='currentUser'){const follow=text.replace(/^а\s+/iu,'');const followFilter=statusFilter(follow);if(followFilter&&!/(?:создай|закрой|назначь|перенеси|удали|отправь|напиши)(?=\s|$)/iu.test(follow)&&follow.split(/\s+/).length<=8)return {status:'open',overdue:false,...followFilter};if(/^(?:обнови(?: ответ| данные)?|проверь ещё|посмотри ещё|только (?:просроченные|закрытые|открытые|незаверш[её]нные)|(?:теперь )?(?:в|по) (?:проект[еу]? )?[A-Z][A-Z0-9_-]*)[.!?]*$/iu.test(follow)){const overdue=/просроч/iu.test(follow)?true:/только (?:закрытые|открытые|незаверш)/iu.test(follow)?false:!!topic.personalTaskOverdue;return {status:/просроч|только (?:открытые|незаверш)/iu.test(follow)?'open':/только закрытые/iu.test(follow)?'done':topic.personalTaskStatus||'open',overdue};}}
+ const kind=v=>({overdue:/просроч/iu.test(v),status:/(?:^|\s)(?:закрыт|заверш[её]н)/iu.test(v)&&!/незаверш/iu.test(v)?'done':/(?:^|\s)все(?:\s|[.!?]|$)/iu.test(v)?'all':'open'});
+ // Inside «Мои задачи»: «а просроченные?», «только закрытые», «все».
+ if(topic?.taskAssignee==='currentUser'){const follow=text.replace(/^(?:(?:а|и|ну|теперь|только|покажи|покажи только)[,\s]+)+/iu,'');if(/^(?:просроченн\p{L}*|закрыт\p{L}*|открыт\p{L}*|заверш[её]нн\p{L}*|незаверш[её]нн\p{L}*|все)(?:\s+(?:задачи|таски))?(?:\s+(?:на мне|у меня|мои))?[.!?]*$/iu.test(follow)){const k=kind(follow);return {status:k.overdue?'open':k.status,overdue:k.overdue};}}
+ // «Покажи закрытые на мне» — a status and the user without the word «задачи».
+ {const bare=text.replace(/^(?:(?:а|и|ну|покажи|какие|все)[,\s]+)+/iu,'');if(/^(?:просроченн\p{L}*|закрыт\p{L}*|открыт\p{L}*|заверш[её]нн\p{L}*|незаверш[её]нн\p{L}*)\s+(?:на мне|у меня|за мной)[.!?]*$/iu.test(bare)){const k=kind(bare);return {status:k.overdue?'open':k.status,overdue:k.overdue};}}
  // A leading «а / и / ну / теперь» only continues the conversation («А какие задачи на мне?»).
  text=text.replace(/^(?:(?:а|и|ну|теперь|так)[,\s]+)+/iu,'');
  if(/^(?:не\s|[«"“]|если|объясни|переведи|придумай|что такое|что означает)/iu.test(text)||/(?:^|\s)(?:и|а|но|потом|затем)(?:\s|$)/iu.test(text)||/[;\n]/.test(text))return null;

@@ -32,6 +32,8 @@ function line(text){
  out=out.replace(/(^|[.!?:;]\s+|[—•-]\s+|\n\s*(?:\d+[.)]\s*)?)([\p{Lu}\p{Ll}][\p{L}]+)([^.!?\n]*)/gu,(m,pre,w,rest)=>{const v=imperative(w);if(!v)return m;
   // «Проверьте подключение и повторите» — the rest of the same sentence follows the first imperative.
   return pre+v+rest.replace(/(\s(?:и|или|затем|потом|а потом)\s+)([\p{L}]+)/gu,(x,join,next)=>{const n=imperative(next);return n&&!IRREGULAR[next.toLowerCase()]?join+n:x;});});
+  // Questions to the user without «вы»: «За что благодарите?» → «За что благодаришь?».
+ out=out.replace(/[^.!?\n]*\?/gu,q=>q.replace(/(^|[^\p{L}])([\p{L}]{4,}(?:[её]те|ите))(?=[^\p{L}]|$)/gu,(m,pre,w)=>{if(NOT_VERB.has(w.toLowerCase()))return m;const v=verb(w);return v?pre+v:m;}));
  return out;
 }
 function informal(text){

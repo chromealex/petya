@@ -23,11 +23,22 @@ module.exports={
  setup(s){
   const get=async url=>s.request(url,{headers:{Accept:'application/json'}});
   const reply=(command,text,sources)=>{s.dialogue.rememberAction(command,text);const t=s.dialogue.active();const last=t?.messages?.at(-1);if(last?.role==='assistant'){last.by='открытые данные';last.sources=sources;}s.dialogue.persist();return {handled:true,text,by:'открытые данные',sources,topicId:t?.id,topicTitle:t?.title,messages:t?.messages};};
-  const weather=async(command,q)=>{
-   if(!q.city)return {handled:true,question:true,text:'В каком городе посмотреть погоду?',by:'открытые данные'};
+  // Second provider when Open-Meteo is unreachable: wttr.in (same answer format).
+  const wttr=async(command,q)=>{
+   let data=null,name='';for(const v of cityVariants(q.city)){try{data=await get('https://wttr.in/'+encodeURIComponent(v)+'?format=j1&lang=ru');}catch{data=null;}if(data?.weather?.length){name=v;break;}}
+   if(!data?.weather?.length)throw Error('Сервисы погоды недоступны.');
+   const area=data.nearest_area?.[0],where=(area?.areaName?.[0]?.value||name)+(area?.region?.[0]?.value&&area.region[0].value!==area?.areaName?.[0]?.value?', '+area.region[0].value:'');
+   const desc=c=>c?.lang_ru?.[0]?.value||c?.weatherDesc?.[0]?.value||'';const rain=d=>Math.max(...(d.hourly||[]).map(h=>Number(h.chanceofrain)||0));
+   const dayText=(i,label)=>{const d=data.weather[i];const mid=d.hourly?.[4]||d.hourly?.[0];return label+': '+signed(Number(d.mintempC))+'…'+signed(Number(d.maxtempC))+'°, '+desc(mid)+', осадки '+rain(d)+'%';};
+   const c=data.current_condition?.[0];
+   const text=q.day===0&&c?where+' сейчас '+signed(Number(c.temp_C))+'° (ощущается как '+signed(Number(c.FeelsLikeC))+'°), '+desc(c).toLowerCase()+', ветер '+num(Number(c.windspeedKmph)/3.6)+' м/с.\n'+dayText(0,'Сегодня')+'\n'+dayText(1,'Завтра'):where+' — '+dayText(q.day,q.day===1?'завтра':'послезавтра')+'.';
+   return reply(command,text,[{title:'wttr.in · '+where,url:'https://wttr.in/'+encodeURIComponent(name)}]);
+  };
+  const weather=async(command,q)=>{if(!q.city)return {handled:true,question:true,text:'В каком городе посмотреть погоду?',by:'открытые данные'};try{return await openMeteo(command,q);}catch(e){if(e.notFound)throw e;console.error('Open-Meteo:',e.message,e.cause?.code||'');return wttr(command,q);}};
+  const openMeteo=async(command,q)=>{
    s.requestProgress.report('Смотрю погоду: '+q.city);
    let place=null;for(const name of cityVariants(q.city)){const found=await get('https://geocoding-api.open-meteo.com/v1/search?'+new URLSearchParams({name,count:'1',language:'ru',format:'json'}));if(found?.results?.length){place=found.results[0];break;}}
-   if(!place)return {handled:true,question:true,text:'Не нашёл город «'+q.city+'». Уточни название.',by:'открытые данные'};
+   if(!place){const e=Error('Не нашёл город «'+q.city+'». Уточни название.');e.notFound=true;throw e;}
    const f=await get('https://api.open-meteo.com/v1/forecast?'+new URLSearchParams({latitude:String(place.latitude),longitude:String(place.longitude),current:'temperature_2m,apparent_temperature,weather_code,wind_speed_10m',daily:'temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code',timezone:'auto',forecast_days:'3',wind_speed_unit:'ms'}));
    if(!f?.daily?.time?.length)throw Error('Сервис погоды не ответил.');
    const where=place.name+(place.admin1&&place.admin1!==place.name?', '+place.admin1:'');const d=q.day,daily=f.daily;
@@ -45,7 +56,7 @@ module.exports={
   const turn=async command=>{
    if(!s.modules.enabled(s.settings,'web'))return null;
    const w=weatherQuestion(command),r=!w&&rateQuestion(command);if(!w&&!r)return null;
-   try{return w?await weather(command,w):await rate(command,r);}catch(e){console.error('Fresh data:',e.message);return null;} // fall back to the web search
+   try{return w?await weather(command,w):await rate(command,r);}catch(e){if(e.notFound)return {handled:true,question:true,text:e.message,by:'открытые данные'};console.error('Fresh data:',e.message,e.cause?.code||'');return null;} // fall back to the web search
   };
   return {freshData:{turn}};
  }
