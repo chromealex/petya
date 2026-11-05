@@ -1,0 +1,25 @@
+{
+  "scores": {
+    "parent": {
+      "passed": 5,
+      "total": 16
+    },
+    "candidate": {
+      "passed": 8,
+      "total": 16
+    }
+  },
+  "gains": [
+    "quoted-permission",
+    "short-authorized",
+    "double-reversal",
+    "channel-open",
+    "source-untouched"
+  ],
+  "regressions": [
+    "inclusive-prose",
+    "lifetime-approved"
+  ],
+  "release_petya_v1": false,
+  "limitations": "Synthetic fixed histories; non-blind manual review. Cosmetic language defects are recorded separately from requirement errors."
+}

@@ -436,5 +436,151 @@
       true,
       "Preserves final requirements; equivalent wording accepted."
     ]
+  },
+  "candidate": {
+    "name-0-01": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "name-0-10": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "name-0-00": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "name-0-11": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "name-1-01": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "name-1-10": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "name-1-00": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "name-1-11": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "report-0-00": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "report-0-10": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "report-0-01": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "report-0-11": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "report-1-00": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "report-1-10": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "report-1-01": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "report-1-11": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-0-000": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-0-001": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-0-010": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-0-011": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-0-100": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-0-101": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-0-110": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-0-111": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-1-000": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-1-001": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-1-010": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-1-011": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-1-100": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-1-101": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-1-110": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "polarity-1-111": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "failure-0-0": [
+      false,
+      "Omits the required visible author email."
+    ],
+    "failure-0-1": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ],
+    "scope": [
+      false,
+      "Description fixes procurement exclusion, but heading still incorrectly identifies the task as a procurement message."
+    ],
+    "repeat": [
+      true,
+      "All requirements preserved; exact reference or equivalent wording/heading."
+    ]
   }
 }

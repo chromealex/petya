@@ -64,5 +64,71 @@
       false,
       "Describes renaming without limiting it to page output and omits explicit database no-change constraint."
     ]
+  },
+  "candidate": {
+    "revoked-all": [
+      false,
+      "Reauthorizes explicitly revoked delivery and loses draft-only status."
+    ],
+    "two-targets": [
+      false,
+      "Invents questionnaire fields and loses preparation of the author copy."
+    ],
+    "cancel-second": [
+      false,
+      "Keeps ref_id instead of audit_id and retains canceled reviewer_id."
+    ],
+    "restore-first": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "exact-identifier": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "proposal-status": [
+      false,
+      "Invents status/result fields."
+    ],
+    "context-exclusion": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "inclusive-prose": [
+      false,
+      "Turns the exclusive upper bound into inclusive."
+    ],
+    "sort-direction": [
+      false,
+      "Provides the correct concrete array but omits the requested general descending-order rule."
+    ],
+    "missing-destination": [
+      false,
+      "Omits explicit no-send pending recipient choice."
+    ],
+    "quoted-permission": [
+      true,
+      "Quote and prohibition preserved. Heading is awkward mixed-script wording for documentation but introduces no different task; cosmetic language defect recorded."
+    ],
+    "short-authorized": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "double-reversal": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "channel-open": [
+      true,
+      "Unresolved channel question is correct and no service is invented; awkward extra phrase does not change requirements."
+    ],
+    "lifetime-approved": [
+      false,
+      "Invents authentication/login use and limits nonreuse to successful login rather than unconditional single use."
+    ],
+    "source-untouched": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ]
   }
 }

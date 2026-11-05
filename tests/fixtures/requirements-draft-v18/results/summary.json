@@ -1,0 +1,18 @@
+{
+  "selected_artifact": "question-adapter",
+  "acquisition_total": 469,
+  "acquisition_semantic_passed": 469,
+  "acquisition_exact": 462,
+  "fresh_passed": 82,
+  "fresh_total": 84,
+  "parent_fresh_passed": 82,
+  "release_dialogues_passed": 8,
+  "release_dialogues_total": 16,
+  "parent_release_dialogues_passed": 5,
+  "release_regressions": [
+    "inclusive-prose",
+    "lifetime-approved"
+  ],
+  "release_petya_v1": false,
+  "next": "Compare the unadapted base on inspected diverse dialogues as development-only diagnosis before selecting the next training strategy. Fresh data must remain independent for the next candidate."
+}

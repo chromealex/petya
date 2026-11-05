@@ -1,0 +1,6 @@
+{
+  "dataset": "release-dialogues.jsonl",
+  "purpose": "Development-only comparison of unadapted base after candidate review, to diagnose accumulated specialization versus base capability.",
+  "selection_use": "May inform next experiment only; cannot change v18 scores, selection or release decision. Next candidate requires new reserved checks.",
+  "inference": "Unchanged v8 evaluator; same draft instruction and token settings; no adapter; references excluded."
+}
