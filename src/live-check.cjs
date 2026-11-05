@@ -41,6 +41,9 @@ module.exports=async(win,out)=>{
  const withTimeout=(promise,ms)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(Error('Нет ответа за '+ms/1000+' с')),ms))]);
  const report={at:new Date().toISOString(),version:require('../package.json').version,scenarios:[]};
  const before=await js('window.petya.dialogueTopics()');
+ // PETYA_LIVE_MODEL runs the whole check on another local model (for comparing models); restored afterwards.
+ const previousModel=(await js('window.petya.settings()')).model||'';report.model=process.env.PETYA_LIVE_MODEL||previousModel;
+ if(process.env.PETYA_LIVE_MODEL)await js(`window.petya.saveSettings(${JSON.stringify({model:process.env.PETYA_LIVE_MODEL})})`);
  const title='Автотест Пети '+new Date().toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
  const project=(await js(`window.petya.chatProjectCreate(${JSON.stringify(title)})`)).projects.find(p=>p.name===title);
  try{
@@ -68,6 +71,7 @@ module.exports=async(win,out)=>{
   // Leave the user's chats as they were: remove the test project and the chats this run opened (and leftovers of
   // older runs), then return to the previous chat.
   try{const turns=SCENARIOS.flatMap(x=>x.turns);report.cleanup=await js(`window.petya.feature('selftest','cleanup',${JSON.stringify({since:Date.parse(report.at)-1000,turns,legacy:true})})`);fs.writeFileSync(out,JSON.stringify(report,null,1));}catch(e){try{await js(`window.petya.chatArchive('project',${JSON.stringify(project.id)},true)`);}catch{}}
+  if(process.env.PETYA_LIVE_MODEL)try{await js(`window.petya.saveSettings(${JSON.stringify({model:previousModel})})`);}catch{}
   try{if(before.activeProjectId)await js(`window.petya.chatProjectSelect(${JSON.stringify(before.activeProjectId)})`);if(before.activeId)await js(`window.petya.dialogueSelect(${JSON.stringify(before.activeId)})`);}catch{}
  }
 };
