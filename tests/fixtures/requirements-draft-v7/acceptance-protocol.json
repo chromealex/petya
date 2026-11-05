@@ -1,0 +1,6 @@
+{
+  "dataSHA256": "8ee8eda254dcf233244433b668f6f5d2a83155b3d37cec25f313ff06bf1b01da",
+  "use": "New confirmation cases, authored before inspecting query/key experiment outputs. If the experiment fails development gates, reserve these unused. Related synthetic families, not broad independent benchmark.",
+  "gate": "Numeric and general scores at least base and v5, draft coverage strictly greater than both. No automatic deployment.",
+  "translation": "Exact output after whitespace trim; \u0451/\u0435 variation alone may additionally be reported as a semantic-only caveat, never silently rescored."
+}
