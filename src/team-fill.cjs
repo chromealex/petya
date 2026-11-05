@@ -13,15 +13,18 @@ function directRows(sources) {
  }
  return {members:rows.slice(0,100)};
 }
-function grounded(result,sources) {
+// Screen and chat text is full of doubled spaces and line breaks: quotes are compared with whitespace collapsed.
+const flat=v=>String(v||'').replace(/\s+/gu,' ').trim();
+function grounded(result,sources,stats={}) {
  if(!result||!Array.isArray(result.members)||result.members.length>100)throw Error('Не удалось разобрать сведения о команде.');
- const rows=[];
+ const rows=[];stats.proposed=result.members.length;stats.unquoted=0;
  for(const row of result.members) {
-  const source=sources.find(s=>s.id===row.source),quote=String(row.evidence||'');
-  if(!source||!quote||!source.text.includes(quote)||!row.name||!quote.includes(row.name))continue;
+  // Local models return the source id as a number as often as a string.
+  const source=sources.find(s=>s.id===String(row.source??''))||(sources.length===1?sources[0]:null),quote=flat(row.evidence),text=flat(source?.text);
+  if(!source||!quote||!text.includes(quote)||!row.name||!quote.includes(flat(row.name))){stats.unquoted++;continue;}
   const data={};
   for(const key of Object.keys(team.limits))if(typeof row[key]==='string'&&row[key].trim()) {
-   const value=row[key].trim();
+   const value=flat(row[key]);
    if(quote.includes(value))data[key]=value;
   }
   if(!data.name)continue;
@@ -47,11 +50,11 @@ class TeamFill {
    let budget=32000;const sources=(screenSources||(roster===null?this.sources(command):[{title:'Команда',text:command}])).map((s,i)=>({...s,id:String(i),text:String(s.text||'')})).filter(s=>s.text.trim()).map(s=>{const text=s.text.slice(0,Math.max(0,budget));budget-=text.length;return {...s,text};}).filter(s=>s.text);
    if(!sources.length&&!screenSources&&!preset){const rows=await this.fromJira();if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}
    if(!sources.length)return this.askDetails('В памяти пока нет сведений о коллегах. Назовите имена и обязанности, например: «Полина — тестирование, Иван — серверная часть».');
-   const extracted=roster===null?(this.extract?await this.extract(sources):directRows(sources.filter(s=>s.direct))):null;
+   const extracted=roster===null?(this.extract?await this.extract(sources,clean(command)):directRows(sources.filter(s=>s.direct))):null;
    if(epoch!==this.epoch||scope!==this.scope()||baseline!==(this.settings().teamMembers||'[]')||notes!==(this.settings().teamRoles||''))return this.reply('Сведения или компания изменились во время заполнения. Повторите команду.');
-   let candidates=roster===null?grounded(extracted,sources):roster;const members=team.members(settings),conflicts=[];let added=0,filled=0,ambiguous=0;
+   const stats={};let candidates=roster===null?grounded(extracted,sources,stats):roster;const members=team.members(settings),conflicts=[];let added=0,filled=0,ambiguous=0;
    // Nothing in Slack or memory: the people assigned in Jira are the team (names, Jira IDs, projects).
-   let fromJira=!!preset;if(!candidates.length&&!screenSources&&!preset){const rows=await this.fromJira();if(rows?.length){candidates=rows;fromJira=true;}}
+   let fromJira=!!preset;if(!candidates.length&&!preset){const rows=await this.fromJira();if(rows?.length){candidates=rows;fromJira=true;}}
    for(const {member,evidence,source} of candidates) {
     const ids=['slackId','jiraId','email'];
     let matches=members.map((m,i)=>({m,i})).filter(({m})=>ids.some(k=>member[k]&&m[k]&&normalized(member[k])===normalized(m[k])));
@@ -68,7 +71,12 @@ class TeamFill {
    if(added||filled)this.save(team.validate(members));
    const summary=`Добавлено коллег: ${added}. Заполнено полей: ${filled}.`+(ambiguous?' Неоднозначные карточки не изменены: '+ambiguous+'. Уточните полные имена и контакты.':'');
    if(conflicts.length){this.pending={kind:'conflict',conflicts,baseline:JSON.stringify(members),scope,at:this.now(),summary};return this.question();}
-   if(!candidates.length)return this.askDetails('Не нашёл однозначных сведений о составе команды. Назовите коллег и обязанности или прикрепите список команды.');
+   if(!candidates.length){
+    // Say what was read and why nothing was taken, instead of a bare «не нашёл».
+    const read=screenSources?'Прочитал '+(screenSources[0]?.title||'окно Slack')+' ('+flat(screenSources[0]?.text).length+' символов). ':'';
+    const why=stats.proposed?'Модель нашла '+stats.proposed+' '+(stats.proposed===1?'человека':'человек')+', но не смогла подтвердить '+(stats.unquoted===stats.proposed?'никого':stats.unquoted)+' точной цитатой из текста — такие карточки не сохраняю. ':screenSources?'Имён коллег с ролями или обязанностями в этом окне нет. ':'';
+    const hint=screenSources?'Открой в Slack список участников канала или сообщение, где перечислена команда, и повтори «Заполни команду»; или назови коллег сам: «Заполни команду: Полина — тестирование».':'Назовите коллег и обязанности или прикрепите список команды.';
+    return this.askDetails((read||why?read+why:'Не нашёл однозначных сведений о составе команды. ')+hint);}
    return this.reply(summary+(fromJira?' Взял исполнителей задач из Jira: имена, аккаунты и проекты; обязанности допиши в разделе «Команда» или скажи «Заполни команду: Полина — тестирование».':'')+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled)});
   }catch(e){
    // Slack rate limit: offer to read the Slack app window instead of waiting.

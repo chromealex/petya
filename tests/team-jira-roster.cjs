@@ -22,3 +22,20 @@ const assert=require('node:assert/strict');const {roster}=require('../src/team-j
  r=await limited.turn('Заполни команду');assert.match(r.text,/Добавлено коллег: 2/);
  console.log('Team from Jira: assignees of the last 90 days with accounts and projects (no bots or deactivated users), used when Slack and memory give nothing or Slack is rate-limited passed');
 })().catch(e=>{console.error(e);process.exit(1);});
+// Screen text: numeric source ids and doubled spaces/line breaks no longer drop every member; the request is the user's.
+(async()=>{
+ const {grounded}=require('../src/team-fill.cjs');
+ const src=[{id:'0',text:'Полина  Иванова   10:32\nтестирование релиза 1.19\nИван Петров  11:05'}];
+ const rows=grounded({members:[{name:'Полина Иванова',source:0,evidence:'Полина Иванова 10:32'},{name:'Иван Петров',source:'0',evidence:'Иван  Петров'},{name:'Выдуманный',source:0,evidence:'Выдуманный — сервер'}]},src,{});
+ assert.deepEqual(rows.map(r=>r.member.name),['Полина Иванова','Иван Петров']);
+ let request='';const settings={teamMembers:'[]',teamRoles:''};
+ const screen=new TeamFill({settings:()=>settings,save:m=>{settings.teamMembers=JSON.stringify(m);},sources:()=>[],roster:async()=>null,scope:()=>'s',
+  extract:async(sources,command)=>{request=command;return {members:[{name:'Полина Иванова',source:0,evidence:'Полина Иванова'}]};},
+  screen:async()=>({title:'Экран Slack · #jw-bw-dev',text:'Полина  Иванова 10:32 привет'})});
+ let r=await screen.fromScreen('Заполни команду');assert.equal(request,'Заполни команду','the model gets the user request, not the screen text');assert.match(r.text,/Добавлено коллег: 1/);
+ // nothing confirmed: the reply says what was read and why nothing was saved
+ settings.teamMembers='[]';const empty=new TeamFill({settings:()=>settings,save:()=>{},sources:()=>[],roster:async()=>null,scope:()=>'s',
+  extract:async()=>({members:[{name:'Кто-то',source:0,evidence:'нет такой строки'}]}),screen:async()=>({title:'Экран Slack · #general',text:'Обсуждение релиза без имён'})});
+ r=await empty.fromScreen('Заполни команду');assert.match(r.text,/Прочитал Экран Slack · #general \(\d+ символов\)/);assert.match(r.text,/не смогла подтвердить никого точной цитатой/);assert.match(r.text,/список участников/);
+ console.log('Team from the Slack window: request passed to the model, numeric source ids and loose whitespace accepted, an empty result says what was read and why passed');
+})().catch(e=>{console.error(e);process.exit(1);});
