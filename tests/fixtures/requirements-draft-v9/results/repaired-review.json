@@ -1,0 +1,66 @@
+{
+  "cancel-01": [
+    false,
+    "Data preservation omitted; icon simultaneously changed and preserved."
+  ],
+  "cancel-10": [
+    false,
+    "Cancelled color applied and agreed rename omitted."
+  ],
+  "cancel-00": [
+    false,
+    "Cancelled color applied."
+  ],
+  "cancel-11": [
+    false,
+    "Agreed rename omitted; conflicting icon preservation and data omission."
+  ],
+  "ban-00": [
+    true,
+    "Recipient exclusion, correct replacement/result and hidden phone retained."
+  ],
+  "ban-10": [
+    true,
+    "Both agreed recipients, replacement/result and hidden phone retained; showing fields to those recipients is consistent with delivery scope."
+  ],
+  "ban-01": [
+    true,
+    "Recipient exclusion and revoked phone hiding correctly separated."
+  ],
+  "ban-11": [
+    true,
+    "Both restrictions revoked; fields and both recipients retained."
+  ],
+  "topic-return": [
+    true,
+    "Dispatcher, shift/time HH:MM, hidden surname and excluded vacation scope retained."
+  ],
+  "double-cancel": [
+    true,
+    "Last rename decision and unchanged color/address retained."
+  ],
+  "print-fields": [
+    true,
+    "All fields/date format and exclusions retained."
+  ],
+  "notify-only": [
+    true,
+    "Only failure, secretary, letter number/reason and hidden sender retained."
+  ],
+  "open-questions": [
+    true,
+    "All fields/exclusion and both questions retained."
+  ],
+  "closed-question": [
+    true,
+    "Approved TSV and fields retained without questions."
+  ],
+  "pronoun": [
+    true,
+    "Fields and hidden address retained."
+  ],
+  "repeat-correction": [
+    true,
+    "Latest interval/count and hidden names retained."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "acquisition_exact": 30,
+  "acquisition_total": 30,
+  "numeric": 16,
+  "numeric_total": 16,
+  "draft": 12,
+  "draft_total": 16,
+  "general": 7,
+  "general_total": 8,
+  "rename_group": 0,
+  "rename_total": 4,
+  "ban_group": 4,
+  "ban_total": 4,
+  "status": "Narrow score improvement, but cancelled rename/color decisions fail and descending sorting remains wrong. Not reliable; no release."
+}
