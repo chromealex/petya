@@ -17,6 +17,7 @@ const SCENARIOS=[
  {name:'Команда',turns:['Кто сейчас свободен в команде?','Какие задачи у коллег в работе?']},
  {name:'Бытовое',turns:['Как сварить гречку?','Переведи на английский: доброе утро']},
  {name:'Агенты',turns:['Раздай агентам: 1) какие задачи на мне в работе, 2) что нового в Slack, 3) какая последняя версия проекта по гиту'],agents:true,userProject:true},
+ {name:'Агенты по проектам',turns:['Раздай агентам: 1) какие баги открыты в BW, 2) какой статус проекта MW2, 3) что нового в Slack за сегодня'],agents:true,userProject:true},
  {name:'Предложение агентов',turns:['Покажи мои задачи в работе и что нового в слаке','Ответить одним сообщением']},
  {name:'Важное',turns:['Запомни как важное: релиз 1.19 переносим на 20 ноября','Расскажи анекдот про тестировщиков','Когда релиз 1.19?']},
  {name:'Свежие данные',turns:['Какая сейчас погода в Москве?','Какой курс доллара?','Погода в Санкт-Петербурге завтра']},
@@ -47,7 +48,9 @@ module.exports=async(win,out)=>{
  const title='Автотест Пети '+new Date().toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'});
  const project=(await js(`window.petya.chatProjectCreate(${JSON.stringify(title)})`)).projects.find(p=>p.name===title);
  try{
-  for(const scenario of SCENARIOS){
+  // PETYA_LIVE_ONLY=<regex> runs only the scenarios whose name matches (e.g. «Агент»).
+  const only=process.env.PETYA_LIVE_ONLY?new RegExp(process.env.PETYA_LIVE_ONLY,'iu'):null;
+  for(const scenario of SCENARIOS.filter(x=>!only||only.test(x.name))){const models=require('./model-context.cjs');models.stats({reset:true});
    // Git needs the folders of the user's own project; its chat is archived right after.
    // Prefer the active project when it has folders, otherwise the first project that has some.
    const withFolders=(before.projects||[]).filter(p=>p.folder||p.folders?.length||p.memoryId);
@@ -58,7 +61,10 @@ module.exports=async(win,out)=>{
     try{r=await withTimeout(js(`window.petya.converse(${JSON.stringify(text)}).then(r=>({text:r.text||'',topicId:r.topicId||'',by:r.by||(r.messages||[]).filter(m=>m.role==='assistant').at(-1)?.by||'',handled:r.handled,question:!!r.question,error:!!r.error,steps:(r.steps||[]).map(s=>s.label),options:(r.options||r.clarificationOptions||r.skillChoices||r.integrationOffers||r.mediaChoices||[]).map(o=>o.label||o).slice(0,6)}))`),150000);}
     catch(e){r={text:'',error:true,failure:e.message};}
     // Agents answer later: wait for the combined answer in the parent chat.
-    if(scenario.agents&&!r.error){const id=(await js('window.petya.dialogueTopics()')).activeId;for(let i=0;i<120&&id;i++){await new Promise(res=>setTimeout(res,2000));const st=await js(`window.petya.chatJobState(${JSON.stringify(id)})`);const plan=st?.messages?.find(m=>m.agentPlan)?.agentPlan;if(st?.job?.state==='done'&&st.messages.at(-1)?.by==='агенты Пети: итог'){r.agents=(plan?.tasks||[]).map(t=>t.title+' — '+t.state);r.final=st.messages.at(-1).text;break;}}}
+    if(scenario.agents&&!r.error){const id=(await js('window.petya.dialogueTopics()')).activeId;for(let i=0;i<120&&id;i++){await new Promise(res=>setTimeout(res,2000));const st=await js(`window.petya.chatJobState(${JSON.stringify(id)})`);const plan=st?.messages?.find(m=>m.agentPlan)?.agentPlan;if(st?.job?.state==='done'&&st.messages.at(-1)?.by==='агенты Пети: итог'){r.agents=(plan?.tasks||[]).map(t=>t.title+' — '+t.state);r.final=st.messages.at(-1).text;break;}}
+     // Agent chats must sit under this chat in the sidebar (agentOf) and stay within the model cap.
+     if(id){const nav=await js('window.petya.chatNavigation("")');r.agentChats=nav.topics.filter(t=>t.agentOf===id).map(t=>t.title+' — '+(t.job?.state||''));}}
+    {const m=require('./model-context.cjs').stats({reset:true});r.models={peak:m.peak,maxWaiting:m.maxWaiting,limit:m.limit};}
     turns.push({input:text,ms:Date.now()-started,...r});
     fs.writeFileSync(out,JSON.stringify({...report,scenarios:[...report.scenarios,{name:scenario.name,turns}]},null,1));
    }
