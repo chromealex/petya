@@ -24,11 +24,17 @@ def detect_languages(text, preferred='ru'):
         greeting = re.split(r'[,!?:]', value.lower(), maxsplit=1)[0].strip()
         if greeting in greetings:
             add(greetings[greeting]); continue
-        if len(re.findall(r'[A-Za-zÀ-ž]+', value)) < 3:
+        words = re.findall(r'[A-Za-zÀ-ž]+', value)
+        if len(words) < 3:
             continue  # Project names alone must not trigger installation.
+        # Inside a Russian answer, short Latin runs are names and window titles («Azur Games - 1 new item - Slack»),
+        # not a phrase to pronounce in another language: only a real sentence counts, and only with high confidence.
+        short = 'ru' in found and (len(words) < 6 or sum(map(len, words)) < 30)
         try:
             result = detect_langs(value)[0]
-            if result.prob >= .90: add(result.lang)
+            # English is built in; any other language from a short run needs a real sentence and high confidence.
+            if result.lang == 'en' and result.prob >= .90: add('en')
+            elif not short and result.prob >= (.97 if len(words) < 8 else .90): add(result.lang)
         except Exception: pass
     if not found: add(preferred if preferred in ['ru','en',*CATALOG] and preferred!='ru' else 'en' if re.search('[A-Za-z]',text) else 'ru')
     return found

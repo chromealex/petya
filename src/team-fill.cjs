@@ -75,8 +75,9 @@ class TeamFill {
     // Say what was read and why nothing was taken, instead of a bare «не нашёл».
     const read=screenSources?'Прочитал '+(screenSources[0]?.title||'окно Slack')+' ('+flat(screenSources[0]?.text).length+' символов). ':'';
     const why=stats.proposed?'Модель нашла '+stats.proposed+' '+(stats.proposed===1?'человека':'человек')+', но не смогла подтвердить '+(stats.unquoted===stats.proposed?'никого':stats.unquoted)+' точной цитатой из текста — такие карточки не сохраняю. ':screenSources?'Имён коллег с ролями или обязанностями в этом окне нет. ':'';
+    const jira=this.jiraError?'Jira тоже не помогла: '+this.jiraError+'. ':'';
     const hint=screenSources?'Открой в Slack список участников канала или сообщение, где перечислена команда, и повтори «Заполни команду»; или назови коллег сам: «Заполни команду: Полина — тестирование».':'Назовите коллег и обязанности или прикрепите список команды.';
-    return this.askDetails((read||why?read+why:'Не нашёл однозначных сведений о составе команды. ')+hint);}
+    return this.askDetails((read||why?read+why:'Не нашёл однозначных сведений о составе команды. ')+jira+hint);}
    return this.reply(summary+(fromJira?' Взял исполнителей задач из Jira: имена, аккаунты и проекты; обязанности допиши в разделе «Команда» или скажи «Заполни команду: Полина — тестирование».':'')+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled)});
   }catch(e){
    // Slack rate limit: offer to read the Slack app window instead of waiting.
@@ -85,7 +86,7 @@ class TeamFill {
    if(e.teamChannels||e.code==='SLACK_CHANNEL_LOOKUP_REQUIRED'){const lookup=e.channelInput||e.code==='SLACK_CHANNEL_LOOKUP_REQUIRED';const reply=this.askDetails(lookup?'Из какого канала Slack взять участников команды? Введите точное название с # или вставьте ссылку на канал.':e.message);if(lookup)reply.clarificationInput={label:'Канал Slack',placeholder:'#название или ссылка на канал',submit:'Продолжить'};this.pending.channelInput=lookup;this.pending.prefix='Заполни команду из Slack ';this.pending.channelOptions=e.channelOptions||[];return reply;}return this.reply('Не удалось заполнить команду: '+e.message,{error:true});}
   finally{this.busy=false;}
  }
- async fromJira(){if(!this.jiraRoster)return null;try{return await this.jiraRoster();}catch(e){console.error('Team from Jira:',e.message);return null;}}
+ async fromJira(){this.jiraError='';if(!this.jiraRoster)return null;try{const rows=await this.jiraRoster();if(rows&&!rows.length)this.jiraError='в Jira нет исполнителей задач за 90 дней';if(rows===null)this.jiraError='Jira не подключена или не выбраны проекты';return rows;}catch(e){console.error('Team from Jira:',e.message);this.jiraError=e.message;return null;}}
  // Fill the team from the visible Slack window; ask for computer control if it is off.
  async fromScreen(command){
   let view;
