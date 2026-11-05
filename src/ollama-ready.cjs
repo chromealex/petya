@@ -12,8 +12,8 @@ async function readProgress(body, onValue) {
   if (!success) throw new Error('Загрузка модели прервалась. Нажмите «Запустить Ollama» для продолжения.');
 }
 class OllamaReady {
-  constructor({ settings, save, install, emit, fetcher = fetch, wait = ms => new Promise(r => setTimeout(r, ms)) }) {
-    Object.assign(this, { settings, save, install, emit, fetcher, wait });
+  constructor({ settings, save, install, emit, fetcher = fetch, wait = ms => new Promise(r => setTimeout(r, ms)), checkDisk = require('./disk-space.cjs').checkModelSpace }) {
+    Object.assign(this, { settings, save, install, emit, fetcher, wait, checkDisk });
     this.state = { phase: 'idle', busy: false, message: '' };
   }
   update(phase, message, extra = {}) { this.state = { phase, message, busy: !['idle', 'done', 'error', 'cancelled'].includes(phase), ...extra }; this.emit(this.state); return this.state; }
@@ -66,6 +66,9 @@ class OllamaReady {
     }
     model ||= DEFAULT_MODEL;
     if (this.forcePull || !tags.models.some(m => m.name === model || m.name === model + ':latest')) {
+      this.update('checking', `Проверяю место для модели ${model}…`);
+      await this.checkDisk(model, this.fetcher);
+      this.controller.signal.throwIfAborted();
       this.update('pulling', `Загружаю модель ${model}…`);
       const response = await request('/api/pull', { model, stream: true }, 2 * 3600000);
       if (!response.body) throw new Error('Ollama не начал загрузку модели.');
