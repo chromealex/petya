@@ -13,7 +13,7 @@ function question(command=''){
  return {days,mentions};
 }
 class SlackDigest{
- constructor({settings,enabled,ready,items,sync,status,summarize,screen,approve,fallback,background=()=>true,keepFresh=()=>{},now=Date.now}){Object.assign(this,{settings,enabled,ready,items,sync,status,summarize,screen,approve,fallback,background,keepFresh,now});this.pending=null;}
+ constructor({settings,enabled,ready,items,sync,status,summarize,format,screen,approve,fallback,background=()=>true,keepFresh=()=>{},now=Date.now}){Object.assign(this,{settings,enabled,ready,items,sync,status,summarize,format,screen,approve,fallback,background,keepFresh,now});this.pending=null;}
  reply(text,extra={}){return {handled:true,text,by:'Slack: сводка',...extra};}
  async turn(command){
   const p=this.pending;
@@ -42,7 +42,7 @@ class SlackDigest{
   const messages=rows.flatMap(i=>i.messages.map(m=>({channel:i.channel,thread:i.title,at:m.at,user:m.user,text:String(m.text||'').slice(0,600)}))).sort((a,b)=>b.at-a.at).slice(0,80);
   const answer=await this.summarize(command,messages,ask);
   const updated=status.updatedAt?' Данные Slack на '+new Date(status.updatedAt).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+'.':'';
-  return this.reply(String(answer||'').trim()+updated,{sources:rows.slice(0,5).map(i=>({title:'Slack · '+i.title,url:i.url}))});
+  return this.reply(String(answer||'').trim()+updated,{extensionData:this.format?{slackMessages:await this.format(rows)}:undefined,sources:rows.slice(0,5).map(i=>({title:'Slack · '+i.title,url:i.url}))});
  }
  async fromScreen(command,ask={days:1}){
   let view;

@@ -23,6 +23,7 @@ module.exports=ctx=>{
     items:()=>ctx.memory.prune(),sync:()=>ctx.slackSync.start(),status:()=>ctx.slackSync.status,screen:readSlackScreen,
     approve:(command,action)=>ctx.computerApproval.request(command,action),
     background:()=>ctx.settings.slackAutoSync==='true',keepFresh:()=>ctx.saveSettings({slackAutoSync:'true',slackInterval:'15'}),
+    format:rows=>require('./extensions/slack/message-result.cjs').capture(rows,ctx.settings,ctx.request),
     summarize:async(command,messages,ask)=>{
       if(!ctx.settings.model)throw Error('Настройте локальную модель Ollama.');
       ctx.requestProgress.report(ask.screen?'Пересказываю, что видно в Slack':'Пересказываю сообщения Slack');

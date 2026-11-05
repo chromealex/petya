@@ -240,6 +240,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     // A complete answer resolves an older «Нужно уточнение» status of this chat.
     const chat=result?.topicId?ctx.dialogue.state.topics.find(t=>t.id===result.topicId):topic;
     if(!background&&chat&&['attention','cancelled'].includes(chat.chatJob?.state)&&result?.handled&&!result.error&&!require('./chat-jobs.cjs').needsUser(result)&&!ctx.chatJobs.busy(chat.id)){delete chat.lastChatResult;ctx.chatJobs.update(chat,'done','Готово');}
+    if(result?.extensionData&&chat){const message=chat.messages?.at(-1);if(message?.role==='assistant'&&message.text===result.text){message.extensionData=result.extensionData;ctx.dialogue.persist();}}
     // Keep what Petya did with the answer, so the chat can show the steps later.
     const steps=require('./request-progress.cjs').steps();
     if(steps.length&&result&&typeof result==='object'){result.steps=steps;const last=chat?.messages?.at(-1);if(last?.role==='assistant'&&!last.steps&&result.handled){last.steps=steps;ctx.dialogue.persist();}}
