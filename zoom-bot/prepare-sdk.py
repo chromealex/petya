@@ -18,7 +18,8 @@ replace('src/Zoom.cpp', 'initParam.enableGenerateDump = true;', 'initParam.enabl
 replace('src/Zoom.cpp', 'Log::info("writing audio raw data to " + m_audioSource->dir() + "/" + m_audioSource->filename());', 'std::cout << "PETYA:recording" << std::endl;')
 replace('src/Zoom.h', 'recCtl->RequestLocalRecordingPrivilege();\n        }', 'recCtl->RequestLocalRecordingPrivilege();\n        } else { startRawRecording(); }')
 replace('src/events/MeetingServiceEvent.cpp', 'Log::success("meeting ended");', 'std::cout << "PETYA:ended" << std::endl; std::exit(0);')
-replace('src/events/MeetingServiceEvent.cpp', 'case MEETING_STATUS_FAILED:', 'case MEETING_STATUS_FAILED: std::exit(2);')
+replace('src/events/MeetingServiceEvent.cpp', 'case MEETING_STATUS_FAILED:', 'case MEETING_STATUS_FAILED: std::cout << "PETYA:failure:meeting:" << iResult << std::endl; std::exit(2);')
+replace('src/events/AuthServiceEvent.cpp', 'Log::error(message.str());', 'std::cout << "PETYA:failure:auth:" << static_cast<int>(result) << std::endl;')
 replace('src/events/MeetingServiceEvent.cpp', 'Log::info("waiting for the meeting to start");', 'std::cout << "PETYA:waiting" << std::endl;')
 replace('src/raw_record/ZoomSDKAudioRawDataDelegate.cpp', '#include "ZoomSDKAudioRawDataDelegate.h"', '#include "ZoomSDKAudioRawDataDelegate.h"\n#include <unistd.h>\n#include <cstdint>\n#include <cstdlib>\n#include <cerrno>')
 needle = 'void ZoomSDKAudioRawDataDelegate::writeToFile(const string &path, AudioRawData *data)\n{'

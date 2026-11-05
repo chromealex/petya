@@ -23,3 +23,7 @@ The Zoom development app supports only local/internal testing. The production co
 ## Approval boundary
 
 After an initial automatic approval-review block, the owner explicitly authorized sharing this security material and the architecture diagram with Zoom. The technical-design form received the architecture, technology and data-protection descriptions, including missing audits and operational limitations; the PNG was uploaded. The external-sharing request was submitted and its Request in Review status was observed. No secrets or meeting content were included.
+
+## Live diagnostic follow-up (2026-11-05)
+
+A retry reached OAuth/OBF token retrieval but the Meeting SDK rejected the join with `MEETING_FAIL_UNABLE_TO_JOIN_EXTERNAL_MEETING` (63), defined in the installed official SDK's `meeting_service_interface.h`. No audio was produced. A test meeting hosted by the developer account is still required. The service now preserves safe, stage-specific errors and numeric SDK failures instead of overwriting them with a generic worker-exit message. UI and existing MCP status/retry paths use the same result.

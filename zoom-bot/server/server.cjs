@@ -23,7 +23,7 @@ function createService({store,tenants,ready,run,resolveTenant=async()=>null,now=
     if(!ready())return send(503,{error:'Zoom SDK is not configured'});
     if(active.size>=maxActive)return send(409,{error:'Recorder busy'});
     const job={id:crypto.randomUUID(),requestId:data.requestId,tenant,phase:'joining',at:now(),segments:0};jobs.set(job.id,job);update(job,{});active.add(job.id);
-    Promise.resolve().then(()=>run(job,{...parsed,password:data.password||parsed.password,oauthCredential:data.oauthCredential},patch=>update(job,patch))).then(()=>{if(job.phase!=='recorded')update(job,{phase:'error',message:'Zoom завершился без подтверждения записи.'});},()=>update(job,{phase:'error',message:'Не удалось завершить запись Zoom. Проверьте разрешения и подключение приложения.'})).finally(()=>active.delete(job.id));
+    Promise.resolve().then(()=>run(job,{...parsed,password:data.password||parsed.password,oauthCredential:data.oauthCredential},patch=>update(job,patch))).then(()=>{if(job.phase!=='recorded')update(job,{phase:'error',message:'Zoom завершился без подтверждения записи.'});},()=>{if(job.phase!=='error')update(job,{phase:'error',message:'Не удалось завершить запись Zoom. Проверьте разрешения и подключение приложения.'});}).finally(()=>active.delete(job.id));
     return send(202,view(job));
    }
    const match=u.pathname.match(/^\/v1\/bots\/([a-f0-9-]{36})(?:\/(ack|audio\/(\d+)))?$/);const job=match&&jobs.get(match[1]);
