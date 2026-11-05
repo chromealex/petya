@@ -1,5 +1,5 @@
 const {randomUUID,createHash}=require('node:crypto');
-const {chooseChannels,listChannels}=require('./slack-channel-route.cjs');
+const {chooseChannels,listChannels,findChannel}=require('./slack-channel-route.cjs');
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const clean=s=>String(s||'').trim().replace(/^петя[\s,:.!?—-]*/iu,'').replace(/[.!?]+$/,'').trim();
 function parse(command){
@@ -18,7 +18,7 @@ class SlackRequest {
  account(){return hash(this.settings().slackCredential||this.settings().slackToken||'');}
  scope(){return JSON.stringify([this.account(),this.enabled(),this.context(),this.settings().teamMembers]);}
  async turn(command,answer=false){
-  let task=parse(command),selected;
+  let task=parse(command),selected,lookupTarget;
   if(!answer&&!task){this.pending=null;return null;}
   if(!answer&&/(?:не отправляй|не пиши|без отправки|только черновик)/iu.test(command))return this.reply('Поручение не отправлено.');
   if(this.busy)return this.reply('Предыдущее поручение ещё обрабатывается.');
@@ -26,7 +26,7 @@ class SlackRequest {
    const value=clean(command).toLowerCase();if(/^(?:отмена|стоп|не надо)$/.test(value))return this.reply('Поручение отменено.');
    const ord={первый:1,первая:1,первое:1,второй:2,вторая:2,второе:2,третий:3,третья:3,третье:3};
    selected=p.options[(ord[value]||Number(value))-1]||p.options.find(c=>c.id.toLowerCase()===value||c.name.toLowerCase()===value.replace(/^#/,''));
-   if(!selected){this.pending=p;return this.ask(p.task,p.options,'Назовите точный канал или номер варианта.');}task=p.task;
+   if(!selected)lookupTarget=clean(command);else if(p.lookup)lookupTarget=selected.id;task=p.task;
   }
   this.busy=true;
   try{
@@ -34,7 +34,8 @@ class SlackRequest {
    const scope=this.scope(),topic=this.context(),account=this.account(),token=this.settings().slackToken||'';
    const check=()=>{if(scope!==this.scope())throw Error('Проект, тема или подключение изменились. Повторите поручение.');};
    const request=async(...args)=>{check();const result=await this.request(...args);check();return result;};
-   const all=await listChannels(request,token);
+   let all;try{all=lookupTarget?[await findChannel(request,token,lookupTarget)]:await listChannels(request,token,{target:task.literal?task.target:''});}catch(error){if(error.code==='SLACK_CHANNEL_LOOKUP_REQUIRED')return this.ask(task,error.channels||[],'В какой канал отправить поручение? Введите точное название или ссылку.',true);if(lookupTarget&&!/изменились/u.test(error.message))return this.ask(task,[],error.message,true);throw error;}
+   if(lookupTarget)selected=all[0];
    let choice=chooseChannels(all,{...task,topic});
    if(selected){const live=all.find(c=>c.id===selected.id&&!c.is_archived);choice=live?{channels:[live]}:{options:all,reason:'Выбранный канал больше недоступен.'};}
    // A purpose alone cannot authorize the only channel in an unrelated workspace.
@@ -62,7 +63,7 @@ class SlackRequest {
    return this.receipt(row);
   }catch(e){return this.reply(e.message,{error:true});}finally{this.busy=false;}
  }
- ask(task,options,reason){options=options.filter(c=>!c.is_archived&&/^[CG][A-Z0-9]+$/.test(c.id)).slice(0,8);if(!options.length)return this.reply((reason||'Нет доступных каналов.')+' Уточните подключение Slack и повторите поручение.',{error:true});this.pending={task,options,scope:this.scope(),at:this.now()};return this.reply(reason||'Куда отправить поручение?',{question:true,slackRequestChoices:options.map(c=>({id:c.id,label:'#'+c.name}))});}
+ ask(task,options,reason,lookup=false){options=options.filter(c=>!c.is_archived&&/^[CG][A-Z0-9]+$/.test(c.id)).slice(0,8);this.pending={task,options,lookup,scope:this.scope(),at:this.now()};return this.reply(reason||'Куда отправить поручение?',{question:true,slackRequestReply:true,...lookup||!options.length?{clarificationInput:{label:'Канал Slack',placeholder:'#название или ссылка',submit:'Продолжить'}}:{},slackRequestChoices:options.map(c=>({id:c.id,label:'#'+c.name}))});}
  receipt(row,duplicate=false){const ok=row.status==='sent';return this.reply(ok?(duplicate?'Уже отправил':'Отправил поручение')+' в #'+row.name+'.'+(row.recipients?.length?' Отметил: '+row.recipients.map(r=>r.name).join(', ')+'.':''): 'Slack не подтвердил отправку в #'+row.name+'. Автоматически повторять поручение не буду, чтобы не создать дубль.',{error:!ok,sources:[{title:ok?'Поручение в Slack':'Проверить канал Slack',url:row.url||'https://app.slack.com/archives/'+row.channel}]});}
 }
 module.exports={SlackRequest,parse,thread};

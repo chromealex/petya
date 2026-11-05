@@ -58,3 +58,10 @@
 - Use the generic extension host and catalog. Do not add extension-specific settings controls, script tags or activation branches to the application shell.
 - Reuse shared credential adapters for service connections; do not duplicate credentials. Extensions without settings must explicitly declare that fact.
 - Validate extension discovery and installed/uninstalled behavior, including notifications while settings are closed.
+
+# Missing information in chat
+
+- Missing input, ambiguous targets and prerequisites are clarification states, not technical errors. Ask in chat, retain the original request and resume the exact unfinished step after the answer.
+- Use `input-required.cjs` with the scoped `clarifications` feature for new workflows, or an existing scoped continuation. Supply concrete choices when available, otherwise an inline input. Never ask the user to retype the original request.
+- Emit a clarification before side effects. Never retry an external write with an unknown outcome. Revalidate company, project, chat/version and connection before continuing; support cancellation and reject stale answers.
+- Test a multi-step clarification, invalid/missing input, cancellation, context changes and duplicate submission. Genuine connection, permission and execution failures must remain distinguishable from missing data.

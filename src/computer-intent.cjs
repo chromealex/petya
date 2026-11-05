@@ -36,7 +36,7 @@ class ComputerIntent{
  async turn(command){if(!candidate(command))return null;const generation=this.computer.generation;let route;try{route=parseRoute(await this.model(command),command);}catch{}if(!route)route=direct(command);
  if(!route)return null;
  if(generation!==this.computer.generation)throw Error('Управление изменилось. Повторите просьбу.');
- if(route.intent==='clarify')return {handled:true,text:route.question};
+ if(route.intent==='clarify')return {handled:true,question:true,text:route.question};
  if(route.intent==='contact_search')return this.search(route.query);
  if(route.intent==='app_focus'){
  const names={'телеграм':'Telegram','телеграмм':'Telegram','telegram':'Telegram','сафари':'Safari','safari':'Safari','хром':'Google Chrome','гугл хром':'Google Chrome','chrome':'Google Chrome','google chrome':'Google Chrome','файндер':'Finder','finder':'Finder','слак':'Slack','slack':'Slack','блокнот':process.platform==='win32'?'notepad':'TextEdit','заметки':'Notes','notes':'Notes','терминал':'Terminal','terminal':'Terminal'};

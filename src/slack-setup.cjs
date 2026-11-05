@@ -36,7 +36,7 @@ module.exports=ctx=>{
     // Fallback when the Slack API is rate-limited: bring Slack to the front and read its visible window.
     screen:readSlackScreen,
     approve:(command,action)=>ctx.computerApproval.request(command,action),
-    settings:()=>ctx.settings, scope:()=>JSON.stringify([ctx.companyId,ctx.settings.module_slack,ctx.settings.slackCredential,ctx.settings.slackToken,ctx.settings.slackChannels,ctx.dialogue.active()?.id,ctx.dialogue.active()?.jiraProject,ctx.dialogue.active()?.reviewScope,ctx.dialogue.active()?.slackSource?.url]),
+    settings:()=>ctx.settings, scope:()=>JSON.stringify([ctx.companyId,ctx.settings.module_slack,ctx.settings.slackCredential,ctx.settings.slackToken,ctx.settings.slackChannels,ctx.dialogue.active()?.id,ctx.dialogue.state.activeProjectId,ctx.dialogue.active()?.versionIndex,ctx.dialogue.active()?.jiraProject,ctx.dialogue.active()?.reviewScope,ctx.dialogue.active()?.slackSource?.url]),
     save:members=>ctx.saveSettings({teamMembers:JSON.stringify(members)}),
     sources:command=>{
       const files=ctx.attachments.list(),topic=ctx.dialogue.active();

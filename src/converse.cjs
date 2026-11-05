@@ -39,12 +39,12 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     }
     const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
     if(gitRoute){
-      if(gitRoute.action==='clarify')return {handled:true,text:gitRoute.question,question:true};
+      if(gitRoute.action==='clarify')return require('./input-required.cjs').ask({text:gitRoute.question,label:'Параметры Git'},answer=>pipeline((gitRoute.input?.prefix||'')+answer+(gitRoute.input?.suffix||''),undefined,background));
       if(gitRoute.action==='help')return {handled:true,text:'Git: «статус гита», «покажи diff», «история коммитов», «добавь в коммит путь/файл», «сделай коммит: описание», «создай ветку feature/name», «переключись на ветку main», «git fetch», «git pull», «git push». Git автоматически определяется по папкам текущего проекта. Панель открывается кнопкой Git в чате.'};
       ctx.dialogue.rememberAction(original,'Выполняю Git…');const topic=ctx.dialogue.active(),message=topic.messages.at(-1);
-      try{ctx.requestProgress.report('Выполняю Git: '+gitRoute.action);const result=gitRoute.action==='init'?await ctx.gitWorkspace.init(null,(await ctx.gitWorkspace.discover()).projectId):await ctx.gitWorkspace.execute(gitRoute);message.text=result.text;}catch(error){message.text=error.message;message.error=true;if(error.gitDiscovery)message.gitDiscovery=error.gitDiscovery;}
+      try{ctx.requestProgress.report('Выполняю Git: '+gitRoute.action);const result=gitRoute.action==='init'?await ctx.gitWorkspace.init(null,(await ctx.gitWorkspace.discover()).projectId):await ctx.gitWorkspace.execute(gitRoute);message.text=result.text;}catch(error){message.text=error.message;message.error=!error.gitDiscovery;if(error.gitDiscovery){message.gitDiscovery=error.gitDiscovery;message.question=true;}}
       if(!ctx.dialogue.state.topics.includes(topic))return {handled:true,text:message.text,error:!!message.error};
-      ctx.dialogue.persist();return {handled:true,text:message.text,error:!!message.error,gitDiscovery:message.gitDiscovery,gitCommand:original,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
+      ctx.dialogue.persist();return {handled:true,text:message.text,error:!!message.error,question:!!message.question,gitDiscovery:message.gitDiscovery,gitCommand:original,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
     }
     if(!choice&&!ctx.attachments.list().length){
       const prefab=await ctx.unity?.turn(original);
@@ -52,10 +52,10 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     }
     const drawing=!choice?require('./local-images.cjs').imagePrompt(original):null;
     if(drawing!==null){
-      if(!drawing)return {handled:true,text:'Что нарисовать? Например: «Нарисуй кота-космонавта на Луне».'};
+      if(!drawing)return require('./input-required.cjs').ask({text:'Что нарисовать?',label:'Описание картинки',placeholder:'Например: кот-космонавт на Луне'},answer=>pipeline('Нарисуй '+answer,undefined,background));
       if(ctx.attachments.list().length)return {handled:true,text:'Пока я создаю изображения по описанию. Уберите вложения и опишите новую картинку.'};
       const artist = ctx.settings.artistEnabled === 'true' && ctx.artist;
-      if(!artist && !ctx.localImages.status().ready)return {handled:true,text:'Чтобы рисовать, откройте «Подключения → Генерация изображений» и нажмите «Установить». Интернет нужен только для первой загрузки модели.',error:true};
+      if(!artist && !ctx.localImages.status().ready)return require('./input-required.cjs').ask({text:'Для этого рисунка нужен Художник. Добавить расширение и продолжить? Перед загрузкой модели покажу её размер и спрошу разрешение.',label:'Генерация изображений',options:['Добавить Художника','Отмена'],strictChoices:true},()=>{ctx.saveSettings({artistEnabled:'true'});return pipeline(original,undefined,background);});
       if(ctx.localImages.status().busy)return {handled:true,text:'Уже рисую изображение. Дождитесь результата или нажмите «Остановить генерацию».',error:true};
       ctx.dialogue.rememberAction(original,'Рисую изображение на этом компьютере…');
       const topic=ctx.dialogue.active(),message=topic.messages.at(-1);message.id=ctx.randomUUID();message.topicId=topic.id;ctx.localImages.turnBusy=true;const imageEpoch=ctx.localImages.epoch;
@@ -93,7 +93,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     if(!choice){const presence=require('./ui/conversation-input.js').ConversationInput.presenceReply(original);if(presence)return via('шаблон: присутствие',presence);}
     if(!choice){const catalog=require('./project-catalog.cjs').projectCatalogReply(original,{projects:ctx.projectMemory.state.projects,activeId:ctx.projectMemory.active()?.id,settings:ctx.settings});if(catalog)return via('каталог проектов',catalog);}
     if(!choice){const remembered=await ctx.projectMemory.turn(original);if(remembered)return via('память проектов',remembered);const sent=await ctx.slackRequest.turn(original);if(sent)return via('Slack',sent);}
-    if(!choice){try{const controlled=require('./computer-control.cjs').parseCommand(original)||require('./computer-intent.cjs').candidate(original)?(step('Работаю с приложениями на компьютере'),await ctx.computerLock(async()=>await ctx.computer.command(original)||await ctx.computerIntent.turn(original))):null;if(controlled){if(controlled.telegramContacts||require('./computer-intent.cjs').direct(original)?.intent==='contact_search')return via('управление компьютером',require('./extensions/telegram/contact-result.cjs').remember(ctx.dialogue,original,controlled,false,ctx.settings));return via('управление компьютером',controlled);}}catch(error){if(error.code==='COMPUTER_PERMISSION_REQUIRED'){const approval=ctx.computerApproval.request(original,error.action);return error.action?.type==='search'&&error.action.service==='telegram'?require('./extensions/telegram/contact-result.cjs').offer(approval,ctx.settings,false):approval;}throw error;}}
+    if(!choice){try{const controlled=require('./computer-control.cjs').parseCommand(original)||require('./computer-intent.cjs').candidate(original)?(step('Работаю с приложениями на компьютере'),await ctx.computerLock(async()=>await ctx.computer.command(original)||await ctx.computerIntent.turn(original))):null;if(controlled){if(controlled.question)return require('./input-required.cjs').ask({text:controlled.text,label:'Приложение и действие'},answer=>pipeline(original+'\nУточнение: '+answer,undefined,background));if(controlled.telegramContacts||require('./computer-intent.cjs').direct(original)?.intent==='contact_search')return via('управление компьютером',require('./extensions/telegram/contact-result.cjs').remember(ctx.dialogue,original,controlled,false,ctx.settings));return via('управление компьютером',controlled);}}catch(error){if(error.code==='COMPUTER_PERMISSION_REQUIRED'){const approval=ctx.computerApproval.request(original,error.action);return error.action?.type==='search'&&error.action.service==='telegram'?require('./extensions/telegram/contact-result.cjs').offer(approval,ctx.settings,false):approval;}throw error;}}
     if(!choice){const filled=await ctx.teamFill.turn(original);if(filled)return via('заполнение команды',filled);}
     if(!choice){const digest=await ctx.slackDigest.turn(original);if(digest){if(digest.text&&!digest.messages){ctx.dialogue.rememberAction(original,digest.text);const topic=ctx.dialogue.active(),last=topic?.messages?.at(-1);if(last?.role==='assistant'){last.by=digest.by;if(digest.sources?.length)last.sources=digest.sources;ctx.dialogue.persist();}return {...digest,topicId:topic?.id,topicTitle:topic?.title,messages:topic?.messages};}return digest;}}
     if(!choice&&!ctx.learning.preview(original).matched&&!ctx.attachments.list().length&&(!ctx.dialogue.active()?.attachments?.length||require('./service-access.cjs').detect(original,null).length)){const offer=await ctx.serviceAccess.offer(original.replace(/^петя[\s,:.!?-]*/iu,''),ctx.dialogue.active());if(offer)return offer;}
@@ -113,7 +113,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       const files=ctx.attachments.list();const target=references.referenceTarget({pending:files.length,topic:ctx.dialogue.active(),slack:ctx.modules.enabled(ctx.settings,'slack')});
       if(target==='attachments')return ctx.inspectAttachments(files.map(a=>a.id),original);
       if(target==='topic')return ctx.dialogue.turn(original,undefined,'chat');
-      if(target==='clarify')return {handled:true,text:'Что именно посмотреть? Прикрепите файл или скриншот, выберите тему разговора либо откройте нужный тред в подключённом Slack.'};
+      if(target==='clarify')return require('./input-required.cjs').ask({text:'Что именно посмотреть? Прикрепите файл или уточните источник.',label:'Источник и задача',files:true},answer=>pipeline(original+'\n'+answer,undefined,background));
       contextualSlack=true;
     }
 
@@ -131,7 +131,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       }catch(e){return {handled:true,text:e.message,error:true};}
     }
 
-    if(!choice&&/^(?:посмотри|разбери|объясни|изучи) (?:вот )?(?:это|вложени[яе]|файл|скриншот)/iu.test(original)){const pending=ctx.attachments.list();if(pending.length)return ctx.inspectAttachments(pending.map(a=>a.id),original);if(!ctx.dialogue.active()?.attachments?.length)return {handled:true,text:'Прикрепите файл кнопкой «Показать файл», перетащите его в окно или вставьте скриншот из буфера.'};}
+    if(!choice&&/^(?:посмотри|разбери|объясни|изучи) (?:вот )?(?:это|вложени[яе]|файл|скриншот)/iu.test(original)){const pending=ctx.attachments.list();if(pending.length)return ctx.inspectAttachments(pending.map(a=>a.id),original);if(!ctx.dialogue.active()?.attachments?.length)return require('./input-required.cjs').ask({text:'Какой файл разобрать? Прикрепите его здесь — исходный запрос сохранён.',label:'Файл или пояснение',files:true},answer=>pipeline(original+'\n'+answer,undefined,background));}
     if(!choice){if(ctx.pendingWeb&&/^продолжи(?:ть)? поиск[.!?]*$/iu.test(original))return ctx.runWeb(ctx.pendingWeb.original,ctx.pendingWeb.search,true);const search=ctx.searchCommand(original,ctx.dialogue.active());if(search){step('Ищу в интернете: «'+String(search.query||original).slice(0,80)+'»');return ctx.runWeb(original,search);}}
     if(!choice){const mail=await ctx.mailSkill.turn(original);if(mail){
       if(mail.mail||mail.mailTeaching){ctx.dialogue.prune();let topic=ctx.dialogue.state.topics.find(t=>t.mail);if(!topic){topic={id:ctx.randomUUID(),title:'Почта Gmail',kind:'chat',mail:true,messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);}ctx.dialogue.state.activeId=topic.id;}
@@ -203,7 +203,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
   // When a correction changed the request, the recorded question keeps what was actually said.
   return async(command,choice,background=false)=>{const owner=ctx.dialogue.active(),beforeMessage=owner?.messages?.at(-1),project=ctx.dialogue.state.activeProjectId,company=ctx.companyId;
     let result;
-    try{result=await pipeline(command,choice,background);}
+    try{result=await (ctx.clarifications?ctx.clarifications.run(command,()=>pipeline(command,choice,background)):pipeline(command,choice,background));}
     catch(error){
       const reason=require('./connection-failure.cjs').classify(error);
       const access=require('./service-access.cjs');

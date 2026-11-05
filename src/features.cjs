@@ -1,6 +1,7 @@
 // Feature modules: each declares its setting defaults and validation and registers its services and
 // IPC handlers through the shared services object. Add a feature here instead of editing main.cjs.
 module.exports=[
+ require('./features/clarifications.cjs'),
  require('./features/extension-ui.cjs'),
  ...require('./features/extension-ui.cjs').features,
  require('./features/slack-screen.cjs'),
