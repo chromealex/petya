@@ -1,0 +1,68 @@
+{
+  "parent": {
+    "revoked-all": [
+      false,
+      "Sends the letter despite revoked permission; heading contradicts description."
+    ],
+    "two-targets": [
+      false,
+      "Preserves recipient permissions but drops the explicit no-questionnaire constraint."
+    ],
+    "cancel-second": [
+      false,
+      "Reverses both field decisions: retains ref_id and applies the canceled second replacement."
+    ],
+    "restore-first": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "exact-identifier": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "proposal-status": [
+      false,
+      "Omits explicit ZIP exclusion and manual-start requirement."
+    ],
+    "context-exclusion": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "inclusive-prose": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "sort-direction": [
+      false,
+      "Correct direction and duplicate retention, but omits the explicitly requested full sorted result."
+    ],
+    "missing-destination": [
+      false,
+      "Does not preserve no-send pending recipient selection; description is only a question."
+    ],
+    "quoted-permission": [
+      false,
+      "Simultaneously preserves and excludes the same quote."
+    ],
+    "short-authorized": [
+      false,
+      "Includes remarks in the short version despite explicit exclusion."
+    ],
+    "double-reversal": [
+      false,
+      "Correct field changes, but invents a contacts section in the heading."
+    ],
+    "channel-open": [
+      false,
+      "Assumes Slack although the channel is unresolved."
+    ],
+    "lifetime-approved": [
+      true,
+      "All final requirements and applicable exact labels survive; wording is equivalent."
+    ],
+    "source-untouched": [
+      false,
+      "Describes renaming without limiting it to page output and omits explicit database no-change constraint."
+    ]
+  }
+}
