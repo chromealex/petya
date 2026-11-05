@@ -1,0 +1,9 @@
+{
+  "data_sha256": "f0dd3d31a25848712b9e7029bfd81a0f0f797284c750958102c8bde48b9947b6",
+  "count": 16,
+  "training_use": false,
+  "stage": "Frozen before candidate training and inference; supplementary release gate",
+  "review": "Manual semantic review of all agreed requirements, explicit exclusions, unresolved questions and exact names. Titles may paraphrase. Do not treat reference wording as required verbatim. No external messages are sent.",
+  "gate": "All 16 pass; no regression against parent. Then verify stochastic multi-turn behavior and deployed runtime separately.",
+  "limitations": "Synthetic fixed histories; not a substitute for generated live multi-turn conversations."
+}
