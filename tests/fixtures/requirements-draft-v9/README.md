@@ -25,3 +25,24 @@ The repaired candidate retained all 30 acquired targets exactly. On the first 40
 The now-inspected first check becomes development/training evidence. A further fixed one-epoch run at 0.00001 starts from the repaired adapter. Its 464 presentations comprise 120 old-acquisition replays, two copies of the 40-case development set, 128 balanced rename/color dialogs (four question polarities, both decision orders, four independent states, four sets of names), 64 recipient/field replays, 64 ascending/descending sorting variations and eight historical general examples. `decision-protocol.json` freezes parameters and hashes.
 
 `confirmation.jsonl` is a new 32-case set: eight rename/color dialogs in two orders, four recipient/field combinations, four other long-dialogue checks, eight numeric cases and eight general checks. `confirmation-rubric.json` records the required states. Compare base, original v8, repaired v9 and the final decision-trained adapter on identical cases; assess retention separately on the original 30 acquisition targets. No automatic release or runtime change follows.
+
+## Final confirmation and artifact decision
+
+The final decision-polarity experiment is rejected. It reproduces only 29/30 acquired targets: `new-d-shift` omits the client recipient, although it retains the other fields and exclusions. This is a lost requirement, not merely different wording. The preceding `repaired-adapter` retains all 30 targets exactly (the requested five plus the prior 25) and remains an experimental artifact only. `candidate-status.json` records this decision and the exact retained weight hash. Production selection is unchanged.
+
+On the separate 32-case confirmation:
+
+| Model | Numeric | Complete drafts | General | Complete rename/color cases | Complete recipient/field cases |
+| --- | --- | --- | --- | --- | --- |
+| Base | 3/8 | 8/16 | 8/8 | 6/8 | 2/4 |
+| Original v8 | 6/8 | 11/16 | 6/8 | 7/8 | 1/4 |
+| Retained repaired v9 | 7/8 | 10/16 | 8/8 | 6/8 | 1/4 |
+| Rejected decision v9 | 8/8 | 11/16 | 8/8 | 6/8 | 1/4 |
+
+These are complete-requirement scores: a report with correct recipient restrictions but the wrong identifier still fails. Explicit final replacement instructions are credited even when an earlier clause names the old field. Harmless wording/inflection differences are accepted where the referent and final state are unambiguous; contradictions, omitted exclusions and reopened decisions are not. Individual judgments are preserved in `confirmation-results/manual-review.json` for review.
+
+The initial improvement on the 40-case set did not establish reliable transfer: on the second set the retained candidate trails v8 in complete drafts, and the latest training loses a prior requirement. No claim that Petya now reliably preserves cancellations/prohibitions is supported. Neither v9 artifact is release-ready. The seven failures of the retained candidate on final confirmation are stored in `remaining-corrections.jsonl`; the rejected experiment's retention failure and raw responses remain available separately. These final cases were not trained on.
+
+All three training artifacts are retained with verified parent/data/weight hashes and finite loss histories: 525 steps (~294 s), 264 repair steps (~142 s), and 464 decision steps (~271 s). The same 2,457,600 adapter parameters were trained; peak allocation was about 9.6 GB. The shared strict-scoring tests pass, research scripts parse, and frozen dataset hashes match. No application/MCP feature, live prompt, sampling setting, build or deployed model was changed.
+
+Further progress requires improving generalization rather than treating memorization or one favorable aggregate as completion. Useful unresolved distinctions are latest versus earlier decisions under negative questions, independent field replacement versus disclosure, and maintaining the complete recipient set. This experiment demonstrates remaining limitations; it does not prove a unique causal explanation or a reliable next training recipe.

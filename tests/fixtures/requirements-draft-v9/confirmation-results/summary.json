@@ -1,0 +1,119 @@
+{
+  "status": "targeted_fixes_acquired_but_transfer_not_reliable",
+  "models": {
+    "base": {
+      "bounds": {
+        "passed": 3,
+        "total": 8
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 8,
+        "total": 16
+      },
+      "rename": {
+        "passed": 6,
+        "total": 8
+      },
+      "recipient_field": {
+        "passed": 2,
+        "total": 4
+      }
+    },
+    "v8": {
+      "bounds": {
+        "passed": 6,
+        "total": 8
+      },
+      "general": {
+        "passed": 6,
+        "total": 8
+      },
+      "draft": {
+        "passed": 11,
+        "total": 16
+      },
+      "rename": {
+        "passed": 7,
+        "total": 8
+      },
+      "recipient_field": {
+        "passed": 1,
+        "total": 4
+      }
+    },
+    "repaired": {
+      "bounds": {
+        "passed": 7,
+        "total": 8
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 10,
+        "total": 16
+      },
+      "rename": {
+        "passed": 6,
+        "total": 8
+      },
+      "recipient_field": {
+        "passed": 1,
+        "total": 4
+      }
+    },
+    "decisions": {
+      "bounds": {
+        "passed": 8,
+        "total": 8
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 11,
+        "total": 16
+      },
+      "rename": {
+        "passed": 6,
+        "total": 8
+      },
+      "recipient_field": {
+        "passed": 1,
+        "total": 4
+      }
+    }
+  },
+  "retained_research_candidate": "repaired-adapter",
+  "latest_experiment": "decision-adapter",
+  "latest_decision": "Rejected: prior client recipient omitted in one acquired correction; new draft score does not exceed original v8. No deployment or release.",
+  "acquisition": {
+    "repaired": {
+      "exact": 30,
+      "semantic": 30,
+      "total": 30,
+      "new_five": 5,
+      "prior_25": 25
+    },
+    "decisions": {
+      "exact": 29,
+      "semantic": 29,
+      "total": 30,
+      "failure": "new-d-shift omits client recipient; wording-only differences are not penalized, this is a lost requirement."
+    }
+  },
+  "limitations": [
+    "Related synthetic cases, not broad live-dialogue validation",
+    "Manual non-blind semantic grading",
+    "Small groups; no statistical-significance claim"
+  ],
+  "latest_improvement_gate_passed": false,
+  "reliable_cancellation_and_prohibition_gate_passed": false,
+  "release_gate_passed": false
+}

@@ -4,7 +4,7 @@ const json = value => new Response(JSON.stringify(value));
 (async () => {
  let config = { ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '' }, saves = 0, pulls = 0, installs = 0;
  const events = [];
- const options = { settings: () => config, save: s => { config = s; saves++; }, install: { start: async () => { installs++; return {phase:'done'}; }, cancel() {} }, emit: s => events.push(s), wait: async()=>{},
+ const options = { checkDisk: async()=>{}, settings: () => config, save: s => { config = s; saves++; }, install: { start: async () => { installs++; return {phase:'done'}; }, cancel() {} }, emit: s => events.push(s), wait: async()=>{},
  fetcher: async (url, opts) => {
  const route = new URL(url).pathname;
  if (route === '/api/tags') return json({ models: [] });
@@ -12,6 +12,8 @@ const json = value => new Response(JSON.stringify(value));
  if (route === '/api/chat') return json({ message: { content: 'Готов' } });
  throw new Error('Unexpected route');
  }};
+ const blocked = new OllamaReady({...options,checkDisk:async()=>{throw Error('Недостаточно места');}});
+ assert.equal((await blocked.start()).phase,'error');assert.equal(pulls,0);assert.equal(saves,0);
  const ready = new OllamaReady(options); const a=ready.start();assert.equal(a,ready.start());assert.equal((await a).ready,true);
  assert.equal(config.model,'qwen3:4b');assert.equal(saves,1);assert.equal(installs,0);assert.equal(pulls,1);assert.ok(events.some(s=>s.received===50));
  config = { ...config, model: '' };

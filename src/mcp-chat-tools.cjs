@@ -91,9 +91,9 @@ function register(server, z, ctx) {
     const term=a.query?.toLowerCase();
     const hits=messages.flatMap((m,index)=>!term||String(m.text).toLowerCase().includes(term)?[index]:[]);
     return {total:hits.length,items:hits.slice(a.offset,a.offset+a.limit).map(index=>{
-      const {role,text,at,attachments,usedMaterials,extensionImages}=messages[index];
+      const {role,text,at,attachments,usedMaterials,extensionImages,sources,actionReceiptId}=messages[index];
       const link=role==='assistant'&&ctx.companyId?require('./chat-location.cjs').link(ctx.companyId,t,version,index):undefined;
-      return {index,role,text,at,usedMaterials,...(a.includeImages && extensionImages?.length ? {extensionImages} : {}),files:attachments?.map(({id,name})=>({id,name})),link};
+      return {index,role,text,at,usedMaterials,sources,actionReceiptId,...(a.includeImages && extensionImages?.length ? {extensionImages} : {}),files:attachments?.map(({id,name})=>({id,name})),link};
     })};
   });
   tool('select_chat_version','Переключить версию в чате Пети.',{...chat,revision:id,version:index},(a,t)=>shared.chatVersionSelect(t.id,a.version),true);

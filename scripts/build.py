@@ -1,4 +1,5 @@
 """Publish one current application/installer per platform; keep no archived builds."""
+from build_space import check_build_space
 import argparse
 import os
 import pathlib
@@ -25,6 +26,7 @@ with (root / '.build.lock').open('w') as lock:
     except (BlockingIOError, OSError):
         raise SystemExit('Another Petya build is running; wait for it to finish.')
     for platform in platforms:
+        check_build_space(root, platform)
         if platform == 'mac':
             env = dict(os.environ, PETYA_MANAGED_BUILD='1')
             subprocess.run([sys.executable, str(root / 'scripts/local-mac.py')], cwd=root, env=env, check=True)

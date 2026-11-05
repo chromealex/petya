@@ -1,0 +1,138 @@
+{
+  "status": "narrow_gain_without_reliable_cancellation_transfer",
+  "acquisition": {
+    "prior_targets_exact": 30,
+    "new_corrections_exact": 7,
+    "extra_pair_control_exact": 1,
+    "total_exact": 38,
+    "total": 38
+  },
+  "scores": {
+    "base": {
+      "bounds": {
+        "passed": 3,
+        "total": 8
+      },
+      "general": {
+        "passed": 7,
+        "total": 8
+      },
+      "draft": {
+        "passed": 8,
+        "total": 16
+      },
+      "rename": {
+        "passed": 6,
+        "total": 8
+      },
+      "recipient_field": {
+        "passed": 2,
+        "total": 4
+      },
+      "schema": {
+        "passed": 32,
+        "total": 32
+      }
+    },
+    "parent": {
+      "bounds": {
+        "passed": 7,
+        "total": 8
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 8,
+        "total": 16
+      },
+      "rename": {
+        "passed": 3,
+        "total": 8
+      },
+      "recipient_field": {
+        "passed": 2,
+        "total": 4
+      },
+      "schema": {
+        "passed": 32,
+        "total": 32
+      }
+    },
+    "v8": {
+      "bounds": {
+        "passed": 8,
+        "total": 8
+      },
+      "general": {
+        "passed": 7,
+        "total": 8
+      },
+      "draft": {
+        "passed": 10,
+        "total": 16
+      },
+      "rename": {
+        "passed": 5,
+        "total": 8
+      },
+      "recipient_field": {
+        "passed": 2,
+        "total": 4
+      },
+      "schema": {
+        "passed": 32,
+        "total": 32
+      }
+    },
+    "candidate": {
+      "bounds": {
+        "passed": 8,
+        "total": 8
+      },
+      "general": {
+        "passed": 8,
+        "total": 8
+      },
+      "draft": {
+        "passed": 9,
+        "total": 16
+      },
+      "rename": {
+        "passed": 4,
+        "total": 8
+      },
+      "recipient_field": {
+        "passed": 2,
+        "total": 4
+      },
+      "schema": {
+        "passed": 32,
+        "total": 32
+      }
+    }
+  },
+  "predeclared_narrow_improvement_gate_passed": true,
+  "all_cancellation_and_prohibition_cases_passed": false,
+  "release_ready": false,
+  "production_changed": false,
+  "decision": "Keep as experimental artifact only. Requested corrections and retention pass, but complete drafts trail historical v8 and targeted subgroup reliability fails.",
+  "sensitivity": {
+    "strict_drafts": 9,
+    "total": 16,
+    "if_two_source_label_variants_were_credited": 11,
+    "cases": [
+      "name-0-10",
+      "name-0-11"
+    ],
+    "reason": "Quoted source UI label Пропуска becomes Пропуски. Explicit labels are treated as factual values; equivalent free prose is accepted. This grading choice does not change the failed reliability/release result."
+  },
+  "limitations": [
+    "Small related synthetic set",
+    "Non-blind manual semantic review",
+    "Depth and data changed together",
+    "No broad live-dialogue or deployment validation"
+  ],
+  "candidate_outperforms_historical_v8_drafts": false
+}

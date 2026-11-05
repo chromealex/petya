@@ -1,0 +1,6 @@
+{
+  "restored_core_versions_match": true,
+  "parent_control_answers_identical": 32,
+  "total": 32,
+  "scope": "Observed exact raw-answer equality on the complete fixed check; this does not prove all dependency behavior identical."
+}

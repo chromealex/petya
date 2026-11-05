@@ -1,0 +1,15 @@
+{
+  "python": "3.12.0",
+  "packages": {
+    "mlx": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "transformers": "5.22.1"
+  },
+  "source_sha256": {
+    "tests/fixtures/requirements-draft-v10/train.jsonl": "d1a0c80af974fcb8c3d4bc52985530acac7fd4c820788c595698071c95257a9b",
+    "tests/fixtures/requirements-draft-v10/check.jsonl": "64dcd02493fa703b4db897f92ea7a0ffbcc01d6a5a180bb2030e6581087e76da",
+    "tests/fixtures/requirements-draft-v7/train.py": "ebdd2086372060fa6fd9328a40c205a249a05e133811eef1446cddc0d1746716",
+    "tests/fixtures/requirements-draft-v8/evaluate.py": "6b8c01a05adc5fea462de4c090d0a4ac9d376007124ee6d396c3c39d3c72e287",
+    "tests/fixtures/requirements-draft-v8/scoring.py": "c11b8e892cdb7402b5d23edf5f787dd209a103109f78eb2607cf251e067dce7c"
+  }
+}

@@ -69,6 +69,7 @@
  const changeProgress = item => {if(item)put(item.id,item);};
  window.petyaEvents.onChatChange(changeProgress);
  window.petya.feature('chatChanges','progress').then(items=>items.forEach(changeProgress)).catch(()=>{});
+ window.petya.feature('actionResults','progress').then(items=>items.forEach(changeProgress)).catch(()=>{});
  const motionProgress = item => { if (item) put(item.id,item); };
  window.petyaEvents.onMotionProgress(motionProgress);
  window.petya.feature('blenderMotion','status').then(motionProgress).catch(()=>{});

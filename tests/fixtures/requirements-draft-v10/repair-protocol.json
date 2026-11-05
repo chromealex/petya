@@ -1,0 +1,13 @@
+{
+  "parent": "adapter",
+  "layers": 13,
+  "epochs": 1,
+  "learning_rate": 1e-05,
+  "steps": 196,
+  "training_sha256": "3eff5c51e8d6036ac7f46d9ddbf07c2b41727c8fff0eab30ec27a1fdb0ad9cc7",
+  "acquisition_sha256": "085365e29c19a6df1dfaa7dbe24039ef96044695b61dd2ba21363ee42f3e809d",
+  "trigger": "Initial wider adapter retained 30/30 old targets but only 6/7 new corrections: v10-f-ban-10 keeps the tenant excluded despite explicit removal of the delivery ban.",
+  "composition": "Four copies of all 37 acquisition targets plus twelve copies of each of four balanced old recipient/field states.",
+  "selection": "Repair chosen solely from acquisition evidence; no v10 candidate fresh-case outputs generated or inspected. The same reserved check remains untouched.",
+  "gate": "All 37 requested/prior targets plus the fourth paired-state control semantically correct before fresh-case assessment."
+}

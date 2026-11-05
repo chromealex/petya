@@ -1,0 +1,11 @@
+{
+  "stage": "experimental",
+  "adapter": "repaired-adapter",
+  "weight_sha256": "d9d4f8b1f87983a3575c015f05a8cbc0a8f43171166971423da1079e2db58602",
+  "acquisition_exact": 38,
+  "acquisition_total": 38,
+  "narrow_improvement_gate_passed": true,
+  "release_ready": false,
+  "production_changed": false,
+  "remaining_case_count": 7
+}

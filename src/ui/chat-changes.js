@@ -42,6 +42,8 @@
       if(r.state==='superseded')card.append(el('p','Заменено уточнённой правкой.'));
       if(r.state==='cancelled')card.append(el('p','Отменено. Изменения не применялись.'));
       if(r.receipt){card.append(el('p',r.receipt.text));if(r.receipt.url){const link=el('a','Открыть задачу');link.href=r.receipt.url;link.target='_blank';link.rel='noopener';card.append(link);}if(r.receipt.file)actions.append(button('Показать в папке',()=>call('reveal',state.scope,r.id)));if(r.receipt.canUndo&&!r.undone)actions.append(button('Предпросмотр отката',()=>mutate('undo',r.id)));if(r.undone)card.append(el('small','Изменение отменено.'));}
+      if(r.canVerify&&['uncertain','failed','done'].includes(r.state))actions.append(button('Проверить результат',()=>mutate('verify',r.id)));
+      if(r.state==='uncertain')card.append(el('p','Запись могла выполниться. Сначала проверьте результат; повторная запись отключена.'));
       if(r.error)card.append(el('p',r.error,'change-error'));message.append(card);
     }
   }

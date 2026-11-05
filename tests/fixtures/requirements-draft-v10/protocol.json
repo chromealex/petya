@@ -1,0 +1,20 @@
+{
+  "hashes": {
+    "train.jsonl": "d1a0c80af974fcb8c3d4bc52985530acac7fd4c820788c595698071c95257a9b",
+    "corrections.jsonl": "eeafb01ec160ddcb6af897b0dbd9313cc271c6c6c8104698833e0e18fc1eba8d",
+    "acquisition.jsonl": "804979b3fa5a2c6bc6c53e60bfb940f511fabf6d748f018c35684907aee70635",
+    "check.jsonl": "64dcd02493fa703b4db897f92ea7a0ffbcc01d6a5a180bb2030e6581087e76da"
+  },
+  "parent": "../requirements-draft-v9/repaired-adapter",
+  "layers": 13,
+  "epochs": 1,
+  "learning_rate": 1e-05,
+  "seed": 42,
+  "steps": 668,
+  "unique_training_prompts": 293,
+  "composition": "464 historical decision rows plus twelve copies of seven corrections plus four copies of 30 prior corrections.",
+  "selection": "One fixed candidate. No tuning on reserved check.",
+  "gate": "All 37 acquired targets semantically correct. New numeric/general no worse than base and parent; complete drafts greater than both. Report rename and recipient/field groups separately. Reliable cancellation/prohibition claims require all relevant members to pass.",
+  "limits": "Synthetic related families, manual non-blind semantic assessment, no automatic release or runtime changes.",
+  "causality": "Depth and data change together; no unique-cause claim."
+}

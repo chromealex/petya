@@ -58,4 +58,9 @@ function natural(record,intent){
  if(intent.kind==='restrict'&&record.plan?.after)return prepare(record,{text:require('../../chat-change-intent.cjs').restrictPoints(record.before.text,record.plan.after,intent.number)});
  throw Error('Укажите замену: «замени в файле «исходный текст» на «новый текст»».');
 }
-module.exports={load,prepare,apply,undo,natural};
+async function verify(record,s,check){
+ check();const current=await read(record.target.file);check();
+ if(current.hash!==hash(Buffer.from(record.plan.after)))throw Object.assign(Error('Файл отличается от предпросмотра. Запись не повторялась; сравните файл и подготовьте новую правку.'),{code:'RESULT_MISMATCH'});
+ return {text:'Проверено сейчас: содержимое файла совпадает с предпросмотром.',file:true,canUndo:false,verifiedAt:Date.now()};
+}
+module.exports={load,prepare,apply,undo,natural,verify};

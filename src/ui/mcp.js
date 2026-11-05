@@ -52,6 +52,7 @@
   }
   window.petyaEvents.onMcpChatChanged(async ({owner,name,revision,token,result})=>{
     try{
+      if(name==='verify_chat_action_result'&&owner===topicSelect.value){document.dispatchEvent(new Event('petya-dialogue-state'));return;}
       if(['answer_chat_clarification','cancel_chat_clarification'].includes(name)&&owner===topicSelect.value){voiceReply=null;dialogueChoices.replaceChildren();await showDialogueReply(result,false);return;}
       if(name==='bookmark_chat_answer')document.dispatchEvent(new Event('petya-bookmarks-updated'));
       if(token || name==='prepare_chat_version'){

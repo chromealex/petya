@@ -32,6 +32,8 @@ const {scope}=require('../src/features/chat-results.cjs');
   id=(await api.chatChanges.start(row,expected)).changeEditor;api.ipc.cancel(expected,id);await assert.rejects(api.ipc.prepare(expected,id,{text:'bad'}));
   active={id:'other',projectId:'general'};await assert.rejects(api.ipc.apply(expected,id),/изменился/);active=t;
   const pending=t.chatChanges[0];pending.state='applying';api=feature.setup(s);assert.equal(api.ipc.snapshot().items[0].state,'uncertain');await assert.rejects(api.ipc.apply(expected,pending.id));
+  await fs.writeFile(file,pending.plan.after);await api.ipc.verify(expected,pending.id);assert.equal(api.ipc.snapshot().items[0].state,'done');assert.equal(api.ipc.snapshot().items[0].receipt.canUndo,false);
+  await fs.writeFile(file,'external mismatch');await api.ipc.verify(expected,pending.id);assert.match(api.ipc.snapshot().items[0].error,/отличается/);assert.equal(await fs.readFile(file,'utf8'),'external mismatch');
   assert(events.some(e=>e.busy));assert(events.some(e=>e.kind==='success'));assert(events.some(e=>e.kind==='error'));
   await fs.writeFile(file,Buffer.from([0xff,0xfe,0]));await assert.rejects(api.chatChanges.start(row,expected),/UTF-8/);
   console.log('chat changes: preview, restart, apply, duplicate, undo, conflict, scope, notifications passed');
