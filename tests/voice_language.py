@@ -15,6 +15,9 @@ class LanguagePacks(unittest.TestCase):
     self.assertNotRegex(spoken_numbers('12',code),r'\d')
    self.assertEqual(detect_languages('Проверь Bunker Wars в Jira. Please check Slack.'),['ru','en'])
    self.assertEqual(detect_languages('Bunker Wars'),['en'])
+   # a Slack window title inside a Russian answer is not German
+   self.assertEqual(detect_languages('Прочитал Экран Slack · jw-random (Channel) - Azur Games - 1 new item - Slack (53 символов).'),['ru'])
+   self.assertEqual(detect_languages('Привет! Переведи: Guten Morgen, wie geht es dir heute, mein lieber Freund?'),['ru','de'])
    self.assertEqual(detect_languages('日本語', 'ja'),['ja'])
    self.assertEqual(detect_languages('你好世界'),['zh-cn'])
    self.assertEqual(detect_languages('Привет! こんにちは。 안녕하세요.'),['ru','ja','ko'])
