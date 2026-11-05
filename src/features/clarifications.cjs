@@ -59,6 +59,8 @@ module.exports={name:'clarifications',Clarifications,register,setup(s){
   const existing=s.dialogue.active()?.messages.at(-1);
   if(existing?.role!=='assistant'||existing.text!==result.text)s.dialogue.rememberAction(command,result.text);const topic=s.dialogue.active();
   const last=topic?.messages.at(-1);if(last){last.clarificationId=result.clarificationId;s.dialogue.persist();}
+  // Recording may have opened the chat for this question; team filling checks its answer against that chat.
+  if(result.by==='заполнение команды')s.teamFill?.rescope?.();
   Object.assign(result,{topicId:topic?.id,messages:topic?.messages});
  }});
  const runtime=require('./clarification-runtime.cjs')(s,clarifications);

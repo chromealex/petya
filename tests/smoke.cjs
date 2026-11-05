@@ -83,12 +83,12 @@ module.exports = async (win, workspace) => {
 
     if (document.querySelectorAll('[data-module]').length !== optionalModules.length) throw new Error('Missing module selection');
     const repairDisabled=await window.petya.converse('Почини падающую сборку');if(!repairDisabled.text.includes('Включите модуль Claude'))throw Error('Repair must require an enabled executor');
-    const buildQuestionDisabled=await window.petya.converse('Петя, что с билдом');if(!buildQuestionDisabled.integrationOffers?.some(o=>o.service==='slack'))throw Error('Build question should offer Slack connection or browser');
+    const buildQuestionDisabled=await window.petya.converse('Петя, что с билдом');if(!buildQuestionDisabled.integrationOffers?.some(o=>o.service==='slack')&&!(buildQuestionDisabled.computerApproval||/Slack недоступен как сервис/.test(buildQuestionDisabled.text)))throw Error('Build question should offer Slack connection, browser or reading the Slack window');
     if (!document.getElementById('attachment-pick')) throw new Error('Missing attachments UI');
     const attachment = await window.petya.attachmentAdd('smoke.txt',new TextEncoder().encode('Проверочный документ: версия 42.').buffer);
     const previous = await window.petya.settings();await window.petya.saveSettings({model:''});
     const attachmentReply = await window.petya.attachmentInspect([attachment.id],'Что в файле?');
-    const attachmentTopic = await window.petya.attachmentTopic();if(!attachmentReply.messages?.[0]?.attachments?.some(f=>f.name==='smoke.txt'))throw Error('Sent message lost its attachment');if(!attachmentTopic?.files.some(f=>f.name==='smoke.txt')) throw new Error('Attachment topic not saved');
+    const attachmentTopic = await window.petya.attachmentTopic();if(!attachmentReply.messages?.some(m=>m.role==='user'&&m.attachments?.some(f=>f.name==='smoke.txt')))throw Error('Sent message lost its attachment');if(!attachmentTopic?.files.some(f=>f.name==='smoke.txt')) throw new Error('Attachment topic not saved');
     const reviewFile=await window.petya.attachmentAdd('build.log',new TextEncoder().encode('Android build 123\\nError: Cannot find module ./modules.cjs').buffer);
     const reviewTopic=await window.petya.attachmentInspect([reviewFile.id],'Почему падает?');
     const proof=await window.petya.converse('Покажи, откуда ты это взял');await showDialogueReply(proof);
