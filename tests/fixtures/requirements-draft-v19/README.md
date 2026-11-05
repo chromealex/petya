@@ -27,3 +27,9 @@ On the sixteen diverse fixed-history dialogues, the parent passes only 7/16. Fai
 The full-depth candidate is still training. No candidate fresh evaluation or release decision follows from these baseline results.
 
 `verify_results.py` rechecks all 268 baseline answers against their reserved datasets, actual adapter/config hashes, declared inference settings and raw-answer review hashes. It recomputes exact/schema scores and checks semantic-review coverage and aggregate totals. Five corruption tests in `test_result_evidence.py` reject substituted weights, declared reference leakage, changed raw answers, falsified scores even after the file hash is refreshed, and missing semantic judgments. These checks validate evidence consistency, not the truth of a human semantic judgment or the bytes of the full base model; final release provenance must verify the base separately.
+
+## Completed full-depth training
+
+The full run completed all 913 updates in 2,380.3 seconds (39.7 minutes), peaking at 35,822,122,332 bytes (33.36 GiB). All losses and 256 saved tensors are finite. `adapter/` contains the original full-run artifact, SHA256 `05a004a70d6f86a9ae15f7e3c43bbf99f5b76816b88e340d6c203348f8bff563`. Parent, training data, configuration, parameter count and actual tensor coverage passed `verify_artifact.py`; details are in `adapter-verification.json`.
+
+The ordinary-reload acquisition evaluation is running. This original artifact has not yet passed the 569-case retention gate, has not been selected for independent candidate evaluation and is not a release. Preserve it even if a later acquisition-only repair becomes necessary.
