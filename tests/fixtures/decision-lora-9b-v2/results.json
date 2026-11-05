@@ -1,0 +1,888 @@
+{
+  "scores": {
+    "base": {
+      "bounds": 14,
+      "membership": 18,
+      "draftCoverage": 2
+    },
+    "v1": {
+      "bounds": 15,
+      "membership": 18,
+      "draftCoverage": 2
+    },
+    "v2": {
+      "bounds": 12,
+      "membership": 18,
+      "draftCoverage": 1
+    }
+  },
+  "records": [
+    {
+      "id": 0,
+      "topic": "honey",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 23,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 23,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":23,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":23,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 1,
+      "topic": "honey",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": true
+      },
+      "v1": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 2,
+      "topic": "honey",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 23,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 23,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "passed": false
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": false
+      }
+    },
+    {
+      "id": 3,
+      "topic": "honey",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": false
+      },
+      "v1": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      }
+    },
+    {
+      "id": 4,
+      "topic": "honey",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 23,\n  \"upper\": 23,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": 23,
+        "upper": 23,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":23,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": false
+      }
+    },
+    {
+      "id": 5,
+      "topic": "honey",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": true
+      },
+      "v1": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 6,
+      "topic": "honey",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": false
+      },
+      "expected": {
+        "status": "final",
+        "lower": 23,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": false
+      }
+    },
+    {
+      "id": 7,
+      "topic": "honey",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": false
+      },
+      "v1": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      }
+    },
+    {
+      "id": 8,
+      "topic": "honey",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 23,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": 23,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":23,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      }
+    },
+    {
+      "id": 9,
+      "topic": "honey",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": true
+      },
+      "v1": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 10,
+      "topic": "honey",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "v1": {
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      }
+    },
+    {
+      "id": 11,
+      "topic": "honey",
+      "task": "membership",
+      "base": {
+        "answer": "```json\n{\n  \"allowed\": null\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "allowed": null
+      },
+      "v1": {
+        "answer": "{\"allowed\": null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": null}",
+        "passed": true
+      }
+    },
+    {
+      "id": 12,
+      "topic": "cloth",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 41,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 41,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 13,
+      "topic": "cloth",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": true
+      },
+      "v1": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 14,
+      "topic": "cloth",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 41,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 41,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":false}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":41,\"lowerInclusive\":null,\"upperInclusive\":false}",
+        "passed": true
+      }
+    },
+    {
+      "id": 15,
+      "topic": "cloth",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": false
+      },
+      "v1": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      }
+    },
+    {
+      "id": 16,
+      "topic": "cloth",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": false
+      },
+      "expected": {
+        "status": "final",
+        "lower": 41,
+        "upper": 41,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":41,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":41,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 17,
+      "topic": "cloth",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": true
+      },
+      "v1": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 18,
+      "topic": "cloth",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 41,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": false
+      },
+      "expected": {
+        "status": "final",
+        "lower": 41,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": false
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": false
+      }
+    },
+    {
+      "id": 19,
+      "topic": "cloth",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": false
+      },
+      "v1": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      }
+    },
+    {
+      "id": 20,
+      "topic": "cloth",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 41,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": 41,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":41,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      }
+    },
+    {
+      "id": 21,
+      "topic": "cloth",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": true
+      },
+      "v1": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 22,
+      "topic": "cloth",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "v1": {
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      }
+    },
+    {
+      "id": 23,
+      "topic": "cloth",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": null}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": null
+      },
+      "v1": {
+        "answer": "{\"allowed\": null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": null}",
+        "passed": true
+      }
+    },
+    {
+      "id": 24,
+      "topic": "queue",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 29,
+        "lowerInclusive": null,
+        "upperInclusive": true
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":29,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":29,\"lowerInclusive\":null,\"upperInclusive\":true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 25,
+      "topic": "queue",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": true
+      },
+      "v1": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 26,
+      "topic": "queue",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": null,
+        "upper": 29,
+        "lowerInclusive": null,
+        "upperInclusive": false
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":0,\"upper\":29,\"lowerInclusive\":false,\"upperInclusive\":false}",
+        "passed": false
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":29,\"lowerInclusive\":null,\"upperInclusive\":false}",
+        "passed": true
+      }
+    },
+    {
+      "id": 27,
+      "topic": "queue",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": false
+      },
+      "v1": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      }
+    },
+    {
+      "id": 28,
+      "topic": "queue",
+      "task": "bounds",
+      "base": {
+        "answer": "{\n  \"status\": \"final\",\n  \"lower\": 29,\n  \"upper\": 29,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": 29,
+        "upper": 29,
+        "lowerInclusive": true,
+        "upperInclusive": true
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":29,\"lowerInclusive\":true,\"upperInclusive\":true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": false
+      }
+    },
+    {
+      "id": 29,
+      "topic": "queue",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": true
+      },
+      "v1": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 30,
+      "topic": "queue",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": 29,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": false\n}\n```",
+        "passed": false
+      },
+      "expected": {
+        "status": "final",
+        "lower": 29,
+        "upper": null,
+        "lowerInclusive": false,
+        "upperInclusive": null
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":29,\"lowerInclusive\":null,\"upperInclusive\":false}",
+        "passed": false
+      }
+    },
+    {
+      "id": 31,
+      "topic": "queue",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": false
+      },
+      "v1": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": false}",
+        "passed": true
+      }
+    },
+    {
+      "id": 32,
+      "topic": "queue",
+      "task": "bounds",
+      "base": {
+        "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 29,\n  \"upper\": null,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": null\n}\n```",
+        "passed": true
+      },
+      "expected": {
+        "status": "final",
+        "lower": 29,
+        "upper": null,
+        "lowerInclusive": true,
+        "upperInclusive": null
+      },
+      "v1": {
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"final\",\"lower\":29,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+        "passed": true
+      }
+    },
+    {
+      "id": 33,
+      "topic": "queue",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": true
+      },
+      "v1": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": true}",
+        "passed": true
+      }
+    },
+    {
+      "id": 34,
+      "topic": "queue",
+      "task": "bounds",
+      "base": {
+        "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}",
+        "passed": true
+      },
+      "expected": {
+        "status": "open",
+        "lower": null,
+        "upper": null,
+        "lowerInclusive": null,
+        "upperInclusive": null
+      },
+      "v1": {
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+        "passed": true
+      }
+    },
+    {
+      "id": 35,
+      "topic": "queue",
+      "task": "membership",
+      "base": {
+        "answer": "{\"allowed\": null}",
+        "passed": true
+      },
+      "expected": {
+        "allowed": null
+      },
+      "v1": {
+        "answer": "{\"allowed\": null}",
+        "passed": true
+      },
+      "v2": {
+        "answer": "{\"allowed\": null}",
+        "passed": true
+      }
+    },
+    {
+      "id": 36,
+      "topic": "bags-max",
+      "task": "draft",
+      "base": {
+        "answer": "```json\n{\n  \"summary\": \"Добавление даты сбора и номера пасеки на этикетку, ограничение количества банок в коробке до 23 шт.\",\n  \"description\": \"Необходимо реализовать следующие изменения в системе учета и маркировки продукции:\\n\\n1. **Изменение формата этикетки:**\\n   - На каждую этикетку баночки должно выводиться поле \\\"Дата сбора\\\".\\n   - На каждую этикетку баночки должно выводиться поле \\\"Номер пасеки\\\".\\n\\n2. **Логика формирования коробок:**\\n   - Реализовать ограничение на количество банок в одной коробке.\\n   - Максимальное количество банок в коробке: 23 шт. (включительно).\\n   - При попытке добавить 24-ю банку в текущую коробку, система должна автоматически создавать новую коробку или выдавать ошибку (в зависимости от бизнес-логики, уточнить в вопросах).\",\n  \"questions\": [\n    \"Какое действие должно происходить при попытке добавить 24-ю банку в коробку? (Автоматическое создание новой коробки или запрет на добавление/ошибка).\",\n    \"Нужно ли сохранять историю переноса банок из одной коробки в другую при достижении лимита в 23 шт., или достаточно просто отделить их в новой коробке без связи?\",\n    \"Требуется ли форматирование даты сбора (например, DD.MM.YYYY) или достаточно стандартного формата вывода базы данных?\",\n    \"Нужно ли указывать номер пасеки на коробке (упаковочной единице) или только на каждой отдельной баночке внутри коробки?\"\n  ]\n}\n```",
+        "coveragePassed": true
+      },
+      "v1": {
+        "answer": "{\"summary\":\"Добавить дату сбора и номер пасеки на этикетку, ограничить количество банок в коробке до 23 штук\", \"description\":\"Необходимо внести изменения в процесс упаковки и маркировки продукции:\\n\\n1. **Этикетка:** Добавить поля для указания:\\n   - Даты сбора меда.\\n   - Номера пасеки.\\n\\n2. **Коробка:** Установить жесткое ограничение на количество банок, которые можно разместить в одной коробке:\\n   - Максимальное количество: 23 банки (включительно).\\n\\nЭти требования должны быть реализованы в текущей версии продукта/процесса.\", \"questions\":[\"Какой формат даты сбора предпочтителен (ДД.ММ.ГГГГ, ГГГГ-ММ-ДД и т.д.)?\", \"Нужно ли указывать год сбора отдельно или достаточно полного формата даты?\", \"Требуется ли добавить поле для номера партии/серии помимо номера пасеки?\", \"Какие дополнительные данные должны присутствовать на этикетке согласно текущим согласованным требованиям (например, вес, сорт, состав)?\", \"Изменится ли размер коробки или форма упаковки при ограничении в 23 банки, или это уже учтено в текущих спецификациях?\", \"Нужно ли предусмотреть визуальное выделение (цвет, шрифт) для номера пасеки на этикетке?\", \"Есть ли требования к штрих-коду или QR-коду на этикетке, которые должны быть связаны с номером пасеки или датой сбора?\"],\"open_questions\":[\"Какой формат даты сбора предпочтителен (ДД.ММ.ГГГГ, ГГГГ-ММ-ДД и т.д.)?\", \"Нужно ли указывать год сбора отдельно или достаточно полного формата даты?\", \"Требуется ли добавить поле для номера партии/серии помимо номера пасеки?\", \"Какие дополнительные данные должны присутствовать на этикетке согласно текущим согласованным требованиям (например, вес, сорт, состав",
+        "coveragePassed": true
+      },
+      "v2": {
+        "answer": "{\"summary\":\"Добавить дату сбора и номер пасеки на этикетку, ограничить количество банок в коробке до 23 шт.\",\"description\":\"Необходимо внести изменения в процесс упаковки и оформления продукции:\\n\\n1. **Этикетка:** Добавить поля для указания:\\n   - Даты сбора меда.\\n   - Номера пасеки.\\n\\n2. **Упаковка (коробка):** Установить жесткое ограничение на количество банок в одной коробке — не более 23 штук (включительно).\",\"questions\":[\"Подтвердить формат отображения даты сбора (ДД.ММ.ГГГГ или иной)?\",\"Подтвердить формат отображения номера пасеки (цифры, код, с префиксом)?\",\"Есть ли дополнительные требования к шрифту или размеру этих полей на этикетке?\",\"Требуется ли генерация этикетки автоматически из системы или заполнение вручную?\"]}",
+        "coveragePassed": true
+      }
+    },
+    {
+      "id": 37,
+      "topic": "cloth-less",
+      "task": "draft",
+      "base": {
+        "answer": "```json\n{\n  \"summary\": \"Добавление полей 'Название ткани' и 'Цвет' в заявку с валидацией длины отрезов\",\n  \"description\": \"Необходимо модифицировать форму заявки для добавления обязательных полей 'Название ткани' и 'Цвет'. Также требуется реализовать валидацию для поля 'Длина отреза': система должна принимать только значения, строго меньшие 41 см (max < 41). При попытке сохранения заявки с отрезом 41 см и выше необходимо показывать пользователю ошибку.\",\n  \"questions\": [\n      \"Какой тип данных использовать для поля 'Цвет' (строка, enum, код цвета)?\",\n      \"Нужно ли добавлять валидацию на уникальность названия ткани?\",\n      \"Какой формат сообщения об ошибке при превышении длины отреза предпочтителен пользователю?\"\n  ]\n}\n```",
+        "coveragePassed": true
+      },
+      "v1": {
+        "answer": "{\"summary\":\"Добавить в заявку поля 'Название ткани' и 'Цвет', а также валидацию длины отрезов (максимум 41 см)\", \"description\":\"Необходимо обновить форму создания заявки для добавления следующих обязательных полей:\\n\\n1. **Название ткани**: Текстовое поле для указания названия используемого материала.\\n2. **Цвет**: Выпадающий список или поле для выбора цвета ткани.\\n\\nТакже требуется реализовать валидацию для поля 'Длина отреза':\\n- Принимать заказы только на отрезы длиной **меньше 41 см**.\\n- При попытке сохранить заявку с длиной 41 см и более система должна выдавать ошибку и блокировать сохранение.\", \"questions\":[\"Какой тип поля лучше использовать для выбора цвета (выпадающий список, чекбоксы, текстовое поле)?\",\"Нужно ли сохранять историю изменений цвета ткани при редактировании заявки?\",\"Какой формат хранения данных для названия ткани предпочтительнее (простой текст или ссылка на карточку материала)?\",\"Какое сообщение об ошибке нужно вывести пользователю при превышении длины 41 см?\",\"Требуется ли валидация на уровне клиента (frontend) или достаточно только серверной валидации?\"]}",
+        "coveragePassed": true
+      },
+      "v2": {
+        "answer": "{\"summary\":\"Добавить в заявку поля 'Название ткани' и 'Цвет', а также валидацию длины отрезов (максимум 41 см)\", \"description\":\"Необходимо доработать форму создания заявки с учетом следующих требований:\\n\\n1. Добавить обязательное поле для ввода **Названия ткани**.\\n2. Добавить обязательное поле для выбора/ввода **Цвета ткани**.\\n3. Реализовать валидацию для длины отрезов: система должна принимать только отрезы длиной **меньше 41 см** (т.е. длина <= 40.99 см или < 41 см, в зависимости от точности ввода). Отрезы длиной 41 см и более должны отклоняться с соответствующим сообщением об ошибке.\\n\\nВсе поля должны быть сохранены в объекте заявки при успешной валидации.\", \"questions\":[\"Уточнить, является ли поле 'Название ткани' обязательным или может быть пустым (null/empty)?\",\"Уточнить формат ввода 'Цвета ткани': это выпадающий список с фиксированными значениями или свободное текстовое поле?\",\"Точная логика граничного значения: отрез длиной ровно 41 см должен быть принят или отклонен (требование 'короче 41 см' означает < 41 или <= 41)?\",\"Нужно ли сохранять единицы измерения измерения измерения{\"summary\":\"Добавить в заявку поля 'Название ткани' и 'Цвет', а также валидацию длины отрезов (максимум 41 см)\", \"description\":\"Необходимо доработать форму создания заявки с учетом следующих требований:\\n\\n1. Добавить обязательное поле для ввода **Названия ткани**.\\n2. Добавить обязательное поле для выбора/ввода **Цвета ткани**.\\n3. Реализовать валидацию для длины отрезов: система должна принимать только отрезы длиной **меньше 41 см** (т.е. длина < 41 см). Отрезы длиной 41",
+        "coveragePassed": false,
+        "finding": "Invalid truncated JSON with repetition and reopening of strict boundary."
+      }
+    },
+    {
+      "id": 38,
+      "topic": "queue-open",
+      "task": "draft",
+      "base": {
+        "answer": "```json\n{\n  \"summary\": \"Отображение номера очереди и окна обслуживания для оператора\",\n  \"description\": \"Необходимо реализовать функционал, который сообщает оператору номер очереди и окно обслуживания. \\n\\nСогласно текущему согласованному требованию, оператору должно быть предложено время ожидания 29 минут. \\n\\nВажно: окончательная длительность ожидания (29 минут) еще предстоит согласовать с заказчиком/стейкхолдерами, поэтому в коде должна быть предусмотрена возможность изменения этого значения или использование переменной-константы, которую можно легко обновить после согласования.\",\n  \"questions\": [\n    \"Согласовать финальное значение длительности ожидания (пока предложено 29 минут).\",\n    \"Определить, как именно передавать данные о номере очереди и окне обслуживания в интерфейс оператора (API, веб-хук, база данных, push-уведомление).\",\n    \"Определить логику формирования номера очереди (последовательная нумерация, приоритетная и т.д.).\",\n    \"Определить логику формирования окна обслуживания (расписание, свободные слоты, динамическое распределение).\"\n  ]\n}\n```",
+        "coveragePassed": false,
+        "finding": "Introduces a provisional 29-minute requirement."
+      },
+      "v1": {
+        "answer": "{\"summary\":\"Уведомление оператора о номере очереди и окне обслуживания с временной оценкой ожидания\",\"description\":\"Необходимо реализовать функционал информирования оператора о текущем номере очереди и номере окна обслуживания. Также требуется отображение предварительной оценки времени ожидания (по умолчанию предложено 29 минут), однако итоговая длительность ожидания должна быть предметом отдельного согласования с заинтересованными сторонами.\",\"questions\":[\"Какова утвержденная длительность ожидания (в минутах), которую необходимо использовать в системе вместо временной оценки в 29 минут?\",\"Требуется ли отображать оператору не только номер окна, но и статус окна (например, 'свободно', 'занято', 'перерыв')?\",\"Нужно ли предоставлять оператору возможность вручную корректировать номер очереди или окна в случае возникновения форс-мажорных обстоятельств?\"]}",
+        "coveragePassed": false,
+        "finding": "Introduces a provisional 29-minute requirement."
+      },
+      "v2": {
+        "answer": "{\"summary\":\"Уведомление оператора о номере очереди и окне обслуживания (длительность待定)\", \"description\":\"Необходимо реализовать функционал, который сообщает оператору номер очереди и окно обслуживания клиенту. В текущей реализации предложено значение длительности ожидания 29 минут, однако это значение требует финального согласования с заинтересованными сторонами до внедрения в продакшн.\", \"questions\":[\"Какое окончательное значение длительности ожидания (в минутах) должно быть установлено после согласования?\",\"Есть ли дополнительные поля или метаданные, которые должны быть включены в уведомление оператора помимо номера очереди и окна обслуживания?\",\"Требуется ли интеграция с системой очередей для автоматического обновления статуса окна обслуживания в реальном времени?\"]}",
+        "coveragePassed": false,
+        "finding": "Recipient becomes ambiguous between operator and customer."
+      }
+    },
+    {
+      "id": 39,
+      "topic": "frames-exact",
+      "task": "draft",
+      "base": {
+        "answer": "```json\n{\n  \"summary\": \"Обновление упаковки: добавить артикул, скрыть имя заказчика и установить точное количество рамок\",\n  \"description\": \"Необходимо внести изменения в процесс упаковки товара согласно следующим требованиям:\\n1. На внешней упаковке (коробке) должен быть указан артикул товара.\\n2. Имя заказчика на упаковке должно быть скрыто (удалено или замаскировано).\\n3. Внутрь коробки должно помещаться ровно 33 рамки (без отклонений).\",\n  \"questions\": [\n      \"Подтвердить, что логика скрытия имени заказчика применяется ко всем типам клиентов (B2B и B2C) или только к определенным группам?\",\n      \"Уточнить формат отображения артикула на упаковке (шрифт, размер, расположение относительно других данных).\",\n      \"Подтвердить, что требование 'ровно 33 рамки' является жестким ограничением для всех заказов или зависит от типа заказа/размера коробки.\"\n  ]\n}\n```",
+        "coveragePassed": false,
+        "finding": "Requests reconfirmation of the exact count."
+      },
+      "v1": {
+        "answer": "{\"summary\":\"Упаковка: указать артикул, скрыть имя заказчика, включить ровно 33 рамки\",\"description\":\"Необходимо внести изменения в процесс упаковки товара согласно следующим требованиям:\\n\\n1. На внешней упаковке должен быть указан артикул товара.\\n2. Имя заказчика на упаковке должно быть скрыто (не отображаться).\\n3. Внутри коробки должно находиться ровно 33 рамки.\",\"questions\":[\"Подтвердить точный список артикулов, которые должны отображаться на упаковке.\",\"Уточнить формат отображения артикула (шрифт, размер, расположение).\",\"Подтвердить, что требование 'ровно 33 рамки' является финальным и не подлежит изменению в рамках текущего спринта.\",\"Уточнить, какие именно данные считаются 'именем заказчика' и где именно они должны быть скрыты (на всей поверхности или только в определенных полях).\",\"Подтвердить тип коробки/упаковки, в которую помещаются рамки (стандартный размер, материал).\"]}",
+        "coveragePassed": false,
+        "finding": "Requests reconfirmation of the exact count."
+      },
+      "v2": {
+        "answer": "{\"summary\":\"Упаковка: указать артикул, скрыть имя заказчика, включить ровно 33 рамки\",\"description\":\"Необходимо обновить состав упаковки согласно согласованным требованиям:\\n1. На внешней упаковке должен быть указан артикул товара.\\n2. Имя заказчика на упаковке должно быть скрыто (не отображаться).\\n3. Внутри коробки должно находиться ровно 33 рамки.\",\"questions\":[\"Подтвердить точный формат отображения артикула на упаковке (шрифт, размер, положение).\",\"Подтвердить, что скрытие имени заказчика касается только внешней упаковки, или требуется скрытие и внутри коробки.\",\"Подтвердить, что количество рамок (33 шт.) является финальным и не подлежит изменению в рамках текущего заказа.\",\"Уточнить, требуется ли дополнительная маркировка или этикетка внутри коробки помимо самих рамок.\",\"Подтвердить тип упаковки (коробка, пакет, паллета) для корректного указания требований по видимости имени заказчика.\"]",
+        "coveragePassed": false,
+        "finding": "Requests reconfirmation of the exact count."
+      }
+    }
+  ]
+}
