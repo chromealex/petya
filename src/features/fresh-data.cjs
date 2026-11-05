@@ -35,7 +35,8 @@ module.exports={
   const wttr=async(command,q)=>{
    let data=null,name='';for(const v of cityVariants(q.city)){try{data=await get('https://wttr.in/'+encodeURIComponent(v)+'?format=j1&lang=ru');}catch{data=null;}if(data?.weather?.length){name=v;break;}}
    if(!data?.weather?.length)throw Error('Сервисы погоды недоступны.');
-   const area=data.nearest_area?.[0],where=(area?.areaName?.[0]?.value||name)+(area?.region?.[0]?.value&&area.region[0].value!==area?.areaName?.[0]?.value?', '+area.region[0].value:'');
+   // wttr.in names a nearby district in English («New Holland, Leningrad»): show the city that was asked.
+   const where=name;
    const desc=c=>String(c?.lang_ru?.[0]?.value||c?.weatherDesc?.[0]?.value||'').toLowerCase();const rain=d=>Math.max(...(d.hourly||[]).map(h=>Number(h.chanceofrain)||0));
    const dayText=(i,label)=>{const d=data.weather[i];const mid=d.hourly?.[4]||d.hourly?.[0];return label+': '+signed(Number(d.mintempC))+'…'+signed(Number(d.maxtempC))+'°, '+desc(mid)+', осадки '+rain(d)+'%';};
    const c=data.current_condition?.[0];
