@@ -1,0 +1,32 @@
+{"id": "negative-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "negative-under", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-29,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "negative-inclusive-min", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-54,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "negative-inclusive-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-54,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": false}
+{"id": "fraction-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":9.625,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "fraction-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":9.625,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "mixed-left", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-13,\"upper\":5,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false}
+{"id": "mixed-right", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-13,\"upper\":5,\"lowerInclusive\":true,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "exact", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":157,\"upper\":157,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "revoked", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "count-min", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":719,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "count-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":719,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "range-closed", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":52,\"upper\":89,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "range-open", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":52,\"upper\":89,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "proposal", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "approved", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":4.75,\"upper\":4.75,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "permit-print", "task": "draft", "answer": "{\"summary\": \"Печать пропуск\", \"description\": \"Создать функцию печати пропуска с выводом следующих данных:\\n1. Код посетителя\\n2. Дата визита в формате ДД-ММ-ГГГГ\\n3. Номер зала\\n\\nТелефон посетителя не печатать. Поиск посетителя не требуется. Операция выполняется только по печати.\", \"questions\": []}", "exactJSON": false}
+{"id": "failed-calibration", "task": "draft", "answer": "{\"summary\": \"Технику показывать номер неудачной калибровки и её причину\", \"description\": \"При неудачной калибровке сообщать технику номер калибровки и текст причины. При удачной калибровке показывать не сообщать.\", \"questions\": []}", "exactJSON": false}
+{"id": "repair-report", "task": "draft", "answer": "{\"summary\": \"Отправка отчёта по ремонту\", \"description\": \"Настроить отправку отчёта по ремонту только мастеру. Собственник не должен получать этот отчёт. Содержимое отчёта:\", \"questions\": []}", "exactJSON": false}
+{"id": "tank-reading", "task": "draft", "answer": "{\"summary\": \"Экран диспетчера\", \"description\": \"Экран диспетчера должен показывать номер бака и его уровень. Уровень показывать только если он строго меньше 83%. Диспетчер всегда видит номер бака. Имя владельца не показывать. Управление насосом не добавлять.\", \"questions\": []}", "exactJSON": false}
+{"id": "model-export", "task": "draft", "answer": "{\"summary\": \"Экспорт модели\", \"description\": \"Экспорт модели должен содержать масштаб и название детали. Формат экспорта пока не утверждён; 2D PDF и Excel не подходят.\", \"questions\": [\"Какой формат экспорта выбрать?\"]}", "exactJSON": false}
+{"id": "monitor-refresh", "task": "draft", "answer": "{\"summary\": \"Отладка дисплея количества линий\", \"description\": \"Монитор показывать количество работающих линий. Обновлять показывать ровно 79 секунд. Имена операторов не показывать.\", \"questions\": []}", "exactJSON": false}
+{"id": "directory-revert", "task": "draft", "answer": "{\"summary\": \"Изменить цвет иконки и название\", \"description\": \"В разделе меню «Справочник» выполнить следующие действия:\\n1. Переименовать «Справочник» в «База».\\n2. Изменить цвет иконки на коричневый.\\n\\nПримечание: Адрес и содержимое не менять.\", \"questions\": []}", "exactJSON": false}
+{"id": "two-open", "task": "draft", "answer": "{\"summary\": \"Доработать интерфейс карточки станции\", \"description\": \"Карточка станции показывать название и дату осмотра. Цену не показывать. Цвет названия и порядок карточек ещё не выбраны.\", \"questions\": [\"Какой цвет использовать для названия станции?\", \"Какой порядок сортировки карточек?\"]}", "exactJSON": false}
+{"id": "multiply", "task": "general", "answer": "238", "exactJSON": true}
+{"id": "sort", "task": "general", "answer": "{\"numbers\": [4, 9, 12]}", "exactJSON": false}
+{"id": "length", "task": "general", "answer": "6", "exactJSON": true}
+{"id": "literal", "task": "general", "answer": "Сохранено", "exactJSON": true}
+{"id": "expression", "task": "general", "answer": "x > 0", "exactJSON": true}
+{"id": "extract", "task": "general", "answer": "27", "exactJSON": true}
+{"id": "cancellation", "task": "general", "answer": "нет", "exactJSON": true}
+{"id": "addition", "task": "general", "answer": "500", "exactJSON": true}

@@ -1,0 +1,25 @@
+{
+  "source_adapter": "deep-adapter",
+  "scale_factor": 0.5,
+  "source_scale": 2.0,
+  "evaluated_scale": 1.0,
+  "weights_unchanged": true,
+  "numeric": {
+    "passed": 11,
+    "total": 16
+  },
+  "general": {
+    "passed": 8,
+    "total": 8
+  },
+  "draft_manual": {
+    "passed": 5,
+    "total": 8,
+    "failed": [
+      "repair-report",
+      "tank-reading",
+      "directory-revert"
+    ]
+  },
+  "decision": "Rejected: numeric regression from full-scale deep adapter; same inspected set, not new confirmation."
+}

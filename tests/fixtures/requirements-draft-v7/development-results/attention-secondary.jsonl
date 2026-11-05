@@ -1,0 +1,32 @@
+{"id": "temp-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-31,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "temp-under", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-31,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "temp-min", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-19,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "temp-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-19,\"upper\":-19,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false}
+{"id": "weight-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":7.5,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "weight-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":7.5,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": false}
+{"id": "offset-a", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-4,\"upper\":9,\"lowerInclusive\":false,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "offset-b", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-4,\"upper\":9,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": false}
+{"id": "size-exact", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":126,\"upper\":126,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "size-open", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false}
+{"id": "count-over", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":517,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "count-max", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":517,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "range-closed", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":49,\"upper\":86,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "range-open", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":49,\"upper\":86,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": true}
+{"id": "proposed", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true}
+{"id": "confirmed", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":3.75,\"upper\":3.75,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true}
+{"id": "label-print", "task": "draft", "answer": "{\"description\":\"Печатать транспортную этикетку с код груза, датой передачи в формате ДД/ММ/ГГГГ и массой. Телефон отправителя скрывать. Адрес не добавлять.\",\"questions\":[],\"summary\":\"Печать транспортной этикетки\"}", "exactJSON": false}
+{"id": "failed-scan", "task": "draft", "answer": "{\"description\":\"Только после неудачного сканирования отправлять архивисту идентификатор сканирования и текст причины. Имя оператора скрывать. При успешном сканировании не отправлять.\",\"questions\":[],\"summary\":\"Правило отправки архивисту\"}", "exactJSON": false}
+{"id": "packing-fields", "task": "draft", "answer": "{\"description\":\"Отправлять отчёт приёмки снабженцу, управляющему его. Поля отчёта:\\n- Код склада\\n- Результат приёмки.Телефон приёмщика скрывать.\",\"questions\":[],\"summary\":\"Отчёт приёмки\"}", "exactJSON": false}
+{"id": "motor-reading", "task": "draft", "answer": "{\"description\":\"Сделать номер мотора видимым на панели показания строго при скорости строго меньше 745 оборотов в минуту. Название клиента скрывать. Функционал настройки освещения вне задачи.\",\"questions\":[],\"summary\":\"Показывать номер мотора при скорости строго меньше 745 оборотов\"}", "exactJSON": false}
+{"id": "diagram-format", "task": "draft", "answer": "{\"description\":\"Экспорт диаграммы должен содержать название оси и номер редакции. Формат экспорта пока не выбран; EPS не выбран.\",\"questions\":[\"Какой формат экспорта диаграммы выбрать?\"],\"summary\":\"Выбрать формат экспорта диаграммы\"}", "exactJSON": false}
+{"id": "queue-refresh", "task": "draft", "answer": "{\"description\":\"Обновить интервал обновления сводки с 53 секунд до 47 секунд. Имена посетителей оставить скрытыми. Сохранить количество и тип остальных полей.\",\"questions\":[],\"summary\":\"Обновление интервала обновления сводки\"}", "exactJSON": false}
+{"id": "navigation-revert", "task": "draft", "answer": "{\"description\":\"Иконку пункта «История» оставить оранжевой. Название «История» и адрес содержимого не менять.\",\"questions\":[],\"summary\":\"Цвет иконки истории\"}", "exactJSON": false}
+{"id": "asset-card", "task": "draft", "answer": "{\"description\":\"Карточка инструмента должна показывать название и дату проверки. Закупочную цену скрывать. Название показывать текстом. Дата обязательна. Цвет названия пока не выбран.\",\"questions\":[\"Какой цвет использовать для названия?\"],\"summary\":\"Карточка инструмента\"}", "exactJSON": false}
+{"id": "math", "task": "general", "answer": "444", "exactJSON": true}
+{"id": "ordered", "task": "general", "answer": "{\"1\":\"1\",\"6\":\"6\",\"8\":\"8\"}", "exactJSON": false}
+{"id": "python", "task": "general", "answer": "4", "exactJSON": true}
+{"id": "word", "task": "general", "answer": "Принято", "exactJSON": true}
+{"id": "translate", "task": "general", "answer": "Отчёт готов.", "exactJSON": true}
+{"id": "json", "task": "general", "answer": "19", "exactJSON": true}
+{"id": "cancel", "task": "general", "answer": "нет", "exactJSON": true}
+{"id": "addition", "task": "general", "answer": "400", "exactJSON": true}
