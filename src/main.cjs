@@ -432,7 +432,7 @@ function setupHandlers() {
   handle('imageInstall',()=>imageInstaller.start());
   handle('imageInstallCancel',()=>imageInstaller.cancel());
   app.on('will-quit',()=>imageInstaller.cancel());
-  handle('imageCancel',()=>localImages.stop());
+  handle('imageCancel',()=>{localImages.stop();services.artist.stop();});
   handle('imageSave',async(topicId,messageId)=>{
     const topic=dialogue.state.topics.find(t=>t.id===topicId);
     const generated=topic?.messages.find(m=>m.id===messageId)?.generatedImage;
@@ -442,7 +442,7 @@ function setupHandlers() {
     if(result.canceled||!result.filePath)return false;
     await fs.promises.writeFile(result.filePath,bytes);return true;
   });
-  app.on('will-quit',()=>localImages.stop());
+  app.on('will-quit',()=>{localImages.stop();services.artist?.stop();});
   // The whole request pipeline of one chat. Runs inside that chat's scope (dialogue.within), either
   // in the foreground (IPC 'converse') or as a background chat job, so several chats run at once.
   // The mouse and keyboard are shared: computer control requests from different chats take turns.
@@ -525,6 +525,7 @@ function setupHandlers() {
     run:(work,progress,projectId,topicId)=>modules.withProject(dialogue.state.projects.find(p=>p.id===projectId),()=>requestProgress.run('converse',progress,()=>require('./answer-stream.cjs').run(chunk=>{if(!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('answer-chunk',{...chunk,topicId});},work))),converse:command=>converseTurn(command,undefined,true),limit:10});
   const stopChatMcp = require('./mcp-setup.cjs')({
     handle, dialogue, attachments, chatJobs, memory, addContext, companyId,
+    generatePainting: (args, check) => services.artist.generate(args, check),
     check() { if (switchingCompany || quitting) throw Error('Компания закрывается.'); },
     async run(work) { activeOperations++; try { return await work(); } finally { activeOperations--; } },
     changed(event) { if (!win.isDestroyed()) win.webContents.send('mcp-chat-changed',event); }

@@ -3,6 +3,7 @@ const calls = ['checkDraftSubmission','chatReturnSummary','branchChatAt','chatRe
 contextBridge.exposeInMainWorld('petya', Object.fromEntries(calls.map(name => [name, async (...args) => { try { return await ipcRenderer.invoke('petya:' + name, ...args); } catch (error) { throw new Error(error.message.replace(/^Error invoking remote method '[^']+':\s*(?:Error: |TypeError: )?/, '')); } }])));
 contextBridge.exposeInMainWorld('petyaEvents', {
   onMotionProgress: callback => ipcRenderer.on('blender-motion-progress', (_,state) => callback(state)),
+  onArtistProgress: callback => ipcRenderer.on('artist-progress', (_event, state) => callback(state)),
   onMcpChatChanged: callback => ipcRenderer.on('mcp-chat-changed', (_event, change) => callback(change)),
   onMessageLink: callback=>ipcRenderer.on('message-link-ready',()=>callback()),
   onChatJob: callback => ipcRenderer.on('chat-job',(_event,state)=>callback(state)),

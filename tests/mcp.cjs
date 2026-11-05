@@ -85,12 +85,25 @@ const {Dialogue}=require('../src/dialogue.cjs');
   }finally{await client.close();await endpoint.close();}
   dialogue.state.projects.push({id:'private',name:'Другой проект'});
   dialogue.state.topics.push({...topic,id:'private-chat',projectId:'private'});
-  for(const mode of ['read','drafts']){
+  const paintings = [];
+  ctx.generatePainting = async (args, check) => {
+    check();
+    paintings.push(args);
+    return { image: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jC1kAAAAASUVORK5CYII=' };
+  };
+  for(const mode of ['read','drafts','edit']){
     const limited=await startMcp({...ctx,access:{mode,projectId:'general'}},{port:0});
     const peer=new Client({name:'limited',version:'1'});
     try{
       await peer.connect(new StreamableHTTPClientTransport(new URL(limited.url),{requestInit:{headers:{Authorization:'Bearer '+limited.token}}}));
       const tools=(await peer.listTools()).tools.map(t=>t.name);
+      assert.equal(tools.includes('generate_painting'),mode==='edit');
+      if (mode === 'edit') {
+        const result = await peer.callTool({name:'generate_painting',arguments:{prompt:'Маяк',format:'portrait'}});
+        assert.equal(result.content[0].type, 'image');
+        assert.deepEqual(paintings, [{prompt:'Маяк',quality:'standard',format:'portrait'}]);
+        continue;
+      }
       assert.equal(tools.includes('set_chat_draft'),mode==='drafts');
       assert.ok(!tools.includes('add_chat_note'));
       assert.ok((await peer.callTool({name:'get_chat_draft',arguments:{owner:'private-chat'}})).isError);
