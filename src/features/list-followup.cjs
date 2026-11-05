@@ -36,7 +36,9 @@ module.exports={
    const topic=s.dialogue.active();const list=lastList(topic?.messages);if(!list)return null; // no list in this chat: the usual pipeline answers
    const all=list.rows,total=shownOf(list.text),partial=total>all.length?' (в списке показаны '+all.length+' из '+total+')':'';
    if(group){const rows=pick(all,group);
-    const text=rows.length?'Из показанного списка '+group.name+' — '+rows.length+partial+':\n'+rows.map(r=>r.key+' — '+r.title+(r.status?' ('+r.status+')':'')).join('\n'):'В показанном списке'+partial+' задач со статусом «'+group.name+'» нет. Статусы в списке: '+[...new Set(all.map(r=>r.status).filter(Boolean))].join(', ')+'.';
+    let text=rows.length?'Из показанного списка '+group.name+' — '+rows.length+partial+':\n'+rows.map(r=>r.key+' — '+r.title+(r.status?' ('+r.status+')':'')).join('\n'):'В показанном списке'+partial+' задач со статусом «'+group.name+'» нет. Статусы в списке: '+[...new Set(all.map(r=>r.status).filter(Boolean))].join(', ')+'.';
+    // Part of a longer list: the rest may hold such tasks, so say how to ask for all of them.
+    if(partial)text+='\nВ остальных задачах такие могут быть — спроси, например, «задачи '+(all[0].key.split('-')[0])+' '+group.name+'», и я посмотрю по всему проекту.';
     return record(command,text,'фильтр списка');}
    const rows=open(all);let text;
    if(!rows.length)text='В показанном списке все задачи уже закрыты (Done, Released, Rejected). Попроси «покажи незавершённые задачи» — выберу из них.';

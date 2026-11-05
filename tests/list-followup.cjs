@@ -25,6 +25,7 @@ const f=require('../src/features/list-followup.cjs');
  assert.equal(f.filterQuestion('Какие из них критичные?'),null,'priority is not in the shown list');assert.equal(f.filterQuestion('Какие задачи на мне?'),null);
  // a truncated list says the answer covers the shown part
  topic.messages=[{role:'assistant',text:list}];const part=await listFollowup.turn('Какие из них на паузе?');assert.match(part.text,/показаны 6 из 431/);
+ topic.messages=[{role:'assistant',text:list}];const missing=await listFollowup.turn('А какие из них в работе?');assert.match(missing.text,/«задачи MW2 в работе»/);
  // no list in the chat: the usual pipeline answers
  topic.messages=[{role:'assistant',text:'Привет'}];assert.equal(await listFollowup.turn('Какие из этих задач сделать сначала?'),null);
  console.log('List follow-up: «какие из этих сначала» and status filters («на ревью», «в работе») answer from the latest shown list, closed items skipped, partial lists named, no list → pipeline passed');
