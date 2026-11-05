@@ -80,7 +80,40 @@ def verify_baselines(results):
     print('Verified 268 baseline answers, raw hashes, adapter/data provenance, recomputed scores and review coverage. This does not independently validate human judgments or prove release readiness.')
 
 
+def verify_acquisition(results, adapter, run_name='acquisition', require_retention=False):
+    rows, refs = verify_run(results / (run_name + '.jsonl'), R / 'acquisition.jsonl', adapter)
+    reviews = json.loads((results / (run_name + '-review.json')).read_text())
+    assert set(reviews) == {x['id'] for x in rows if not x['exactJSON']}, 'Review coverage mismatch'
+    failures = []
+    for row in rows:
+        passed = row['schemaValid'] and row['exactJSON']
+        if not row['exactJSON']:
+            review = reviews[row['id']]
+            assert type(review['passed']) is bool and isinstance(review['reason'], str) and review['reason'].strip()
+            assert review['answer_sha256'] == hashlib.sha256(row['answer'].encode()).hexdigest(), 'Reviewed answer changed'
+            passed = row['schemaValid'] and row['task'] == 'draft' and review['passed']
+        literal = assess(refs[row['id']], row['answer'])
+        passed = passed and (literal is None or literal['passed'])
+        if not passed:
+            failures.append(row['id'])
+    result = {'total': len(rows), 'exact': sum(x['exactJSON'] for x in rows),
+              'semantic_passed': len(rows) - len(failures), 'failed': failures,
+              'acquisition_passed': not failures}
+    print(json.dumps(result, indent=2))
+    if require_retention:
+        assert not failures, 'Retention gate failed; do not select for fresh evaluation'
+    return result
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--results', type=Path, default=R / 'results')
-    verify_baselines(parser.parse_args().results)
+    parser.add_argument('--stage', choices=['baseline', 'acquisition'], default='baseline')
+    parser.add_argument('--adapter', type=Path, default=R / 'adapter')
+    parser.add_argument('--run-name', default='acquisition')
+    parser.add_argument('--require-retention', action='store_true')
+    args = parser.parse_args()
+    if args.stage == 'baseline':
+        verify_baselines(args.results)
+    else:
+        verify_acquisition(args.results, args.adapter, args.run_name, args.require_retention)

@@ -6,7 +6,7 @@ import shutil
 import tempfile
 import unittest
 from pathlib import Path
-from verify_results import R, digest, verify_baselines
+from verify_results import R, digest, verify_baselines, verify_acquisition
 
 
 class EvidenceChecks(unittest.TestCase):
@@ -25,6 +25,14 @@ class EvidenceChecks(unittest.TestCase):
     def check_rejected(self):
         with self.assertRaises(AssertionError), contextlib.redirect_stdout(io.StringIO()):
             verify_baselines(self.results)
+
+    def test_failed_acquisition_cannot_be_selected(self):
+        with contextlib.redirect_stdout(io.StringIO()):
+            result = verify_acquisition(self.results, R / 'adapter')
+            self.assertEqual(result['semantic_passed'], 566)
+            self.assertEqual(len(result['failed']), 3)
+            with self.assertRaisesRegex(AssertionError, 'Retention gate failed'):
+                verify_acquisition(self.results, R / 'adapter', require_retention=True)
 
     def test_substituted_weights(self):
         self.change_json('parent-check.manifest.json', lambda m: m.update(adapter_sha256='0' * 64))
