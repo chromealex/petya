@@ -1,0 +1,248 @@
+{
+  "base": {
+    "name-0-01": [
+      true,
+      "Only icon changes on the original named element; address/content preserved, no rename instruction."
+    ],
+    "name-0-10": [
+      false,
+      "Cancelled lemon color applied."
+    ],
+    "name-0-00": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      false,
+      "Agreed burgundy color cancelled."
+    ],
+    "name-1-10": [
+      false,
+      "Cancelled burgundy color applied."
+    ],
+    "name-1-00": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      true,
+      "Access-setting wording is scoped to agreed delivery exclusion, not a broader viewing ban."
+    ],
+    "report-0-10": [
+      false,
+      "Supplier still excluded after permission; description contradicts cancellation of ban."
+    ],
+    "report-0-01": [
+      true,
+      "Correct replacement, shown address and delivery-only exclusion."
+    ],
+    "report-0-11": [
+      false,
+      "Supplier still excluded after permission."
+    ],
+    "report-1-00": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-1-10": [
+      false,
+      "Organizer still excluded after permission; summary and description conflict."
+    ],
+    "report-1-01": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-1-11": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "failure-0-0": [
+      false,
+      "Introduces template/channel questions despite complete agreed notification specification."
+    ],
+    "failure-0-1": [
+      false,
+      "Hidden executor requirement omitted; unrelated field/recipient/trigger questions introduced."
+    ],
+    "scope": [
+      false,
+      "Invents creation/change trigger and unrelated extra-field questions."
+    ],
+    "repeat": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ]
+  },
+  "parent": {
+    "name-0-01": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-0-10": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-0-00": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-1-10": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-1-00": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-0-10": [
+      false,
+      "Supplier remains forbidden after permission."
+    ],
+    "report-0-01": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-0-11": [
+      false,
+      "Supplier remains forbidden after permission."
+    ],
+    "report-1-00": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-1-10": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-1-01": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-1-11": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "failure-0-0": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "failure-0-1": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "scope": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "repeat": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ]
+  },
+  "v8": {
+    "name-0-01": [
+      false,
+      "Cancelled rename applied."
+    ],
+    "name-0-10": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-0-00": [
+      false,
+      "Both cancelled changes applied."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-1-10": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "name-1-00": [
+      false,
+      "Cancelled color applied."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      false,
+      "Obsolete request code retained alongside replacement."
+    ],
+    "report-0-10": [
+      false,
+      "Supplier permission ignored; obsolete request code retained."
+    ],
+    "report-0-01": [
+      false,
+      "Obsolete code retained; approved visible address hidden."
+    ],
+    "report-0-11": [
+      false,
+      "Supplier permission ignored, obsolete code retained and approved address hidden."
+    ],
+    "report-1-00": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "report-1-10": [
+      true,
+      "Correct complete report to both recipients and hidden phone; embedded question/answer recap is settled, not an open question."
+    ],
+    "report-1-01": [
+      false,
+      "Replacement number and organizer exclusion omitted; approved phone hidden."
+    ],
+    "report-1-11": [
+      false,
+      "Approved phone visibility rejected."
+    ],
+    "failure-0-0": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ],
+    "failure-0-1": [
+      false,
+      "Explicit hidden-executor requirement omitted."
+    ],
+    "scope": [
+      true,
+      "Recipient and message context retained across summary/description; exact date, privacy and procurement exclusion preserved."
+    ],
+    "repeat": [
+      true,
+      "All final decisions, fields, exclusions and required labels retained; no invented unresolved questions."
+    ]
+  }
+}

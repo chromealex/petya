@@ -7,6 +7,7 @@ r=Path(__file__).parent
 refs={x['id']:x for x in map(json.loads,(r/'check.jsonl').read_text().splitlines())}
 reviews=json.loads((a.results/'manual-review.json').read_text())
 summary={}
+outcomes={}
 for name,grades in reviews.items():
  rows=list(map(json.loads,(a.results/(name+'-check.jsonl')).read_text().splitlines()))
  assert len(rows)==len(refs) and {x['id'] for x in rows}==set(refs)
@@ -27,5 +28,10 @@ for name,grades in reviews.items():
   stats[group]={'passed':sum(passed(x) for x in part),'total':len(part)}
  stats['schema']={'passed':sum(x['schemaValid'] for x in rows),'total':len(rows)}
  summary[name]=stats
+ outcomes[name]={x["id"]:bool(passed(x) if x["task"]=="draft" else x["schemaValid"] and x["exactJSON"]) for x in rows}
 (a.results/'scores.json').write_text(json.dumps(summary,indent=2)+'\n')
 print(json.dumps(summary,indent=2))
+
+if 'parent' in outcomes:
+ paired={name:{'gains':[k for k,v in cases.items() if v and not outcomes['parent'][k]],'regressions':[k for k,v in cases.items() if not v and outcomes['parent'][k]]} for name,cases in outcomes.items() if name!='parent'}
+ (a.results/'paired-comparison.json').write_text(json.dumps(paired,indent=2)+'\n')

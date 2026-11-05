@@ -1,0 +1,50 @@
+{
+  "base": {
+    "gains": [
+      "value-0-exact",
+      "value-1-exact",
+      "value-2-exact",
+      "value-3-exact"
+    ],
+    "regressions": [
+      "name-0-10",
+      "name-1-01",
+      "name-1-10",
+      "report-1-10",
+      "failure-0-0",
+      "failure-0-1",
+      "scope",
+      "value-0-lower",
+      "value-2-lower",
+      "value-3-lower",
+      "interval-0",
+      "interval-1"
+    ]
+  },
+  "v8": {
+    "gains": [
+      "value-0-exact",
+      "value-1-exact",
+      "value-2-exact",
+      "value-3-exact"
+    ],
+    "regressions": [
+      "name-0-01",
+      "name-0-00",
+      "name-1-00",
+      "report-0-00",
+      "report-0-01",
+      "report-1-01",
+      "report-1-11",
+      "failure-0-1",
+      "value-0-open",
+      "value-1-open",
+      "value-2-open",
+      "value-3-open",
+      "interval-2",
+      "g0",
+      "g1",
+      "g2"
+    ]
+  }
+}
