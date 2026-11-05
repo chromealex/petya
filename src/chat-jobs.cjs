@@ -73,7 +73,9 @@ ChatJobs.prototype.executeFull=async function(job){
   if(job.scope!==this.scope(topic.projectId))throw Error('Настройки или компания изменились. Повторите запрос с новым контекстом.');
   if(!result||!result.handled)throw Error('Для этого запроса нужно действие. Откройте чат и повторите запрос.');
   // The pipeline may answer in another chat, e.g. an existing «Баги в Jira» topic or a new Slack log.
-  const target=result.topicId&&result.topicId!==topic.id?d.state.topics.find(t=>t.id===result.topicId)||topic:topic;
+  // An agent's chat keeps its own answer even when the pipeline also wrote it into another chat: it sits under
+  // the chat that started the agents, and the combined answer reads it from there.
+  const target=!topic.agentOf&&result.topicId&&result.topicId!==topic.id?d.state.topics.find(t=>t.id===result.topicId)||topic:topic;
   if(target!==topic){const at=topic.messages.indexOf(placeholder);if(at>=0)topic.messages.splice(at,1);if(job.created&&!topic.messages.length&&d.state.topics.includes(topic))d.state.topics.splice(d.state.topics.indexOf(topic),1);}
   else settle();
   if(!d.state.topics.includes(target))return;
