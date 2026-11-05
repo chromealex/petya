@@ -1,17 +1,14 @@
 const uri='mcpforunity://instances';
 async function inspect(client){
-  let cursor,hasCode=false;
-  do{
-    const page=await client.listTools({cursor});
-    hasCode ||= page.tools.some(tool=>tool.name==='execute_code');
-    cursor=page.nextCursor;
-  }while(cursor);
-  if(!hasCode)throw Error('В MCP for Unity включите инструмент execute_code в группе Scripting.');
+  let cursor;
+  const seen=new Set();
   if(!client.getServerCapabilities()?.resources)return null;
   let found=false;
   do{
     const page=await client.listResources({cursor});
     found=page.resources.some(resource=>resource.uri===uri);cursor=page.nextCursor;
+    if(cursor && seen.has(cursor))throw Error("Unity повторила страницу ресурсов.");
+    seen.add(cursor);
   }while(!found&&cursor);
   if(!found)return null;
   const response=await client.readResource({uri});

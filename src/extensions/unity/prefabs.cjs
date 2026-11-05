@@ -7,7 +7,35 @@ const tools = {
   preview_prefab: { description:'Показать собранный префаб с выбранной стороны (0–7).', schema:z.object({guid,view:z.number().int().min(0).max(7).default(0)}).strict() },
   open_prefab: { description:'Открыть выбранный префаб в Prefab Mode редактора Unity.', schema:z.object({guid}).strict() }
 };
-async function execute(client,tool,args){
+async function execute(client,tool,args,check=()=>{}){
+  if (tool==='find_prefabs') {
+    const available=await require('./native.cjs').pages(client,'listTools','tools',check);
+    if (available.some(t=>t.name==='manage_asset')) {
+      const matches=new Map();
+      let seen=0;
+      for(let page=1;;page++){
+        check();
+        const reply=await client.callTool({name:'manage_asset',arguments:{action:'search',path:'Assets',filter_type:'Prefab',
+          search_pattern:args.query,page_size:50,page_number:page,generate_preview:false}});
+        const text=reply.content?.find(b=>b.type==='text')?.text;
+        if(reply.isError)throw Error(text||'Ошибка поиска префабов.');
+        const body=reply.structuredContent??JSON.parse(text);
+        if(!body.success)throw Error(body.message||'Unity не выполнила поиск.');
+        const {assets,totalAssets,pageNumber}=z.object({assets:z.array(z.object({guid,path:z.string()})),
+          totalAssets:z.number().int().nonnegative(),pageNumber:z.number().int()}).parse(body.data);
+        if(pageNumber!==page || (!assets.length && seen<totalAssets))throw Error('Unity вернула неполную страницу префабов.');
+        seen+=assets.length;
+        for(const item of assets) {
+          if(item.path.startsWith('Assets/') && item.path.toLowerCase().endsWith('.prefab') &&
+              item.path.split('/').pop().slice(0,-7).toLowerCase().includes(args.query.toLowerCase())) matches.set(item.guid,item);
+        }
+        if(seen>=totalAssets || matches.size>50)break;
+      }
+      const data={matches:[...matches.values()].sort((a,b)=>a.path.localeCompare(b.path)).slice(0,50),more:matches.size>50};
+      return {structuredContent:data,content:[{type:'text',text:JSON.stringify(data)}]};
+    }
+    check();
+  }
   let code;
   if(tool==='find_prefabs'){
     const encoded=Buffer.from(args.query).toString('base64');

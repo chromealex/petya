@@ -62,6 +62,9 @@
  const installProgress = item => put(item.id,item);
  window.petyaEvents.onExtensionInstall(installProgress);
  window.petya.feature('extensionReplies','progress').then(items=>items.forEach(installProgress)).catch(()=>{});
+ const unityProgress = item => { if(item)put(item.id,item); };
+ window.petyaEvents.onUnityProgress(unityProgress);
+ window.petya.feature('unity','status').then(unityProgress).catch(()=>{});
  const motionProgress = item => { if (item) put(item.id,item); };
  window.petyaEvents.onMotionProgress(motionProgress);
  window.petya.feature('blenderMotion','status').then(motionProgress).catch(()=>{});

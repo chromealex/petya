@@ -1,7 +1,9 @@
 const {Client}=require('@modelcontextprotocol/sdk/client/index.js');
 const {StreamableHTTPClientTransport}=require('@modelcontextprotocol/sdk/client/streamableHttp.js');
 const {inspect,target}=require('./instances.cjs');
-const {tools,execute}=require('./prefabs.cjs');
+const prefabs=require('./prefabs.cjs');
+const native=require('./native.cjs');
+const tools={...prefabs.tools,...native.specs};
 function endpoint(address){
   const url=new URL(address);
   if(!['127.0.0.1','localhost','[::1]'].includes(url.hostname)||url.protocol!=='http:'||url.username||url.password||url.hash||url.search)
@@ -20,9 +22,21 @@ async function connect(settings,work){
 module.exports={
   name:'unity',defaults:{unityUrl:'http://127.0.0.1:8080/mcp',unityToken:''},
   validate(settings){endpoint(settings.unityUrl);},
-  setup(s){
+  tools,
+  setup(s,dialog=()=>require('electron').dialog){
     const available=project=>{if(s.settings.module_unity!=='true'||project?.disabledServices?.includes('unity'))throw Error('Включите Unity Editor в каталоге и настройках проекта.');};
     const findResults=new WeakMap();
+    let operation;
+    function progress(text,busy,error=false){
+      operation={id:'unity-mcp',title:'Unity Editor',text,busy,kind:error?'error':'info'};
+      if(s.win && !s.win.isDestroyed())s.win.webContents.send('unity-progress',operation);
+    }
+    async function invoke(...args){
+      if(operation?.busy)throw Error('Дождитесь завершения текущего запроса Unity.');
+      progress('Ожидаю подтверждения действия…',true);
+      try{const result=await perform(...args);progress(result.isError?'Unity сообщила об ошибке.':'Ответ Unity получен.',false,!!result.isError);return result;}
+      catch(error){progress(error.message,false,true);throw error;}
+    }
     function turn(command){
       const topic=s.dialogue.active(),selected=require('../previous-reply.cjs')(topic)?.unitySelection;
       const action=/^(?:поверни(?: (влево|вправо))?|покажи сзади|открой в unity)[.!?]*$/iu.exec(command.trim());
@@ -30,14 +44,15 @@ module.exports={
         const open=/открой/iu.test(action[0]),view=/сзади/iu.test(action[0])?4:(selected.view+(action[1]?.toLowerCase()==='влево'?7:1))%8;
         return followup(command,selected,open,view,topic);
       }
-      const match=/^(?:покажи|найди|открой|посмотри)\s+(?:мне\s+)?(?:Unity[- ]+)?префаб\s+(.+?)\s*$/iu.exec(command);
-      if(!match)return null;
-      const query=match[1].replace(/^[«"]|[»".?!]+$/gu,'').trim().slice(0,160);if(!query)return null;
+      const request=require('./intent.cjs').intent(command);
+      if(!request)return null;
+      const {query}=request;
       const d=s.dialogue,p=d.state.projects.find(p=>p.id===d.state.activeProjectId);
       const enabled=s.settings.module_unity==='true'&&!p?.disabledServices?.includes('unity');
-      const text=enabled?'Префаб «'+query+'» · Unity Editor':'Для поиска префаба «'+query+'» включите Unity Editor в каталоге приложений и в настройках проекта.';
+      const text=enabled?'Использую расширение «Unity Editor». '+(query?'Префаб «'+query+'».':request.catalog?'Доступные инструменты и ресурсы редактора.':'Запрос к редактору: '+request.name):'Включите Unity Editor в каталоге и настройках проекта.';
       d.rememberAction(command,text);const t=d.active(),m=t.messages.at(-1);
-      m.unityPrefab=query;m.by='Unity Editor';d.persist();
+      if(query)m.unityPrefab=query;else m.unityRequest=request;
+      m.by='Unity Editor';d.persist();
       return {handled:true,text,topicId:t.id,topicTitle:t.title,messages:t.messages,by:m.by};
     }
     async function followup(command,selected,open,view,topic){
@@ -56,44 +71,48 @@ module.exports={
       message.unitySelection={...selected,view:open||problem?selected.view:view};s.dialogue.persist();
       return {handled:true,text,topicId:topic.id,messages:topic.messages};
     }
-    async function invoke(id,tool,args,verify=()=>{},instance){
-      const company=s.companyId,url=s.settings.unityUrl,topic=s.dialogue.active(),version=topic?.versionIndex,owner=topic?.messages.at(-1),project=topic?.projectId;
+    async function perform(id,tool,args,verify=()=>{},instance){
+      const company=s.companyId,url=s.settings.unityUrl,token=s.settings.unityToken,topic=s.dialogue.active(),version=topic?.versionIndex,owner=topic?.messages.at(-1),project=topic?.projectId;
       function check(){
         require('../../answer-cancel.cjs').check();verify();
-        const t=s.dialogue.active();if(company!==s.companyId||url!==s.settings.unityUrl||t?.id!==id||!t||t.archived)throw Error('Чат или подключение изменились.');
+        const t=s.dialogue.active();if(company!==s.companyId||url!==s.settings.unityUrl||token!==s.settings.unityToken||t?.id!==id||!t||t.archived)throw Error('Чат или подключение изменились.');
         if(t!==topic||topic.projectId!==project||version!==topic.versionIndex||topic.messages.at(-1)!==owner)throw Error('Сообщения чата изменились.');
-        available(s.dialogue.state.projects.find(p=>p.id===t.projectId));
+        const currentProject=s.dialogue.state.projects.find(p=>p.id===t.projectId);
+        if(!currentProject || currentProject.archived)throw Error('Проект недоступен.');
+        available(currentProject);
       }
       check();if(!Object.hasOwn(tools,tool))throw Error('Неизвестное действие Unity.');
       const parsed=tools[tool].schema.parse(args);
-      const response=await require('electron').dialog.showMessageBox(s.win,{type:'question',message:tools[tool].description,detail:parsed.query||parsed.guid,buttons:['Продолжить','Отмена'],defaultId:0,cancelId:1});
+      const response=await dialog().showMessageBox(s.win,{type:'question',message:tools[tool].description,detail:[url,instance||'Редактор будет проверен перед вызовом',tool==='call_tool'?parsed.name:tool,JSON.stringify(parsed.arguments||parsed,null,2)].join('\n'),buttons:['Продолжить','Отмена'],defaultId:1,cancelId:1});
       if(response.response!==0)throw Error('Действие отменено.');
       check();
+      progress('Выполняю запрос MCP…',true);
       const result=await connect(s.settings,async client=>{
         const editors=await inspect(client);check();
         if(editors){
           if(!instance && editors.length>1){
-            if(tool==='find_prefabs')return {editors,content:[{type:'text',text:'Выберите проект Unity: '+editors.map(e=>e.id).join(', ')}]};
-            throw Error('Укажите редактор Unity для выбранного префаба.');
+            return {editors,structuredContent:{editors},content:[{type:'text',text:'Выберите проект Unity: '+editors.map(e=>e.id).join(', ')}]};
+
           }
           instance ||= editors[0].id;
           if(!editors.some(e=>e.id===instance))throw Error('Выбранный редактор Unity недоступен. Повторите поиск.');
           await target(client,instance);
         }else if(instance)throw Error('Сервер больше не подтверждает выбранный редактор Unity.');
-        check();const data=await execute(client,tool,parsed);return {...data,instance};
+        check();const data=Object.hasOwn(native.specs,tool)?await native.execute(client,tool,parsed,check):await prefabs.execute(client,tool,parsed,check);return {...data,instance};
       });
       check();
-      if(tool==='find_prefabs'&&result.structuredContent)findResults.set(topic,{instance,url,rows:result.structuredContent.matches});
+      if(tool==='find_prefabs'&&result.structuredContent?.matches)findResults.set(topic,{instance,url,rows:result.structuredContent.matches});
       const found=findResults.get(topic);
-      const item=found?.instance===instance&&found?.url===url&&found.rows.find(r=>r.guid===parsed.guid);
+      const item=found?.instance===instance&&found?.url===url&&found.rows?.find(r=>r.guid===parsed.guid);
       if(item&&owner?.unityPrefab && tool!=='find_prefabs'){
         owner.unitySelection={instance,url,project:topic.projectId,...item,view:parsed.view??owner.unitySelection?.view??0};s.dialogue.persist();
       }
       return result;
     }
-    return {unity:{turn,invoke},ipc:{invoke:(id,tool,args,instance)=>invoke(id,tool,args,()=>{},instance),async test(){
+    return {unity:{turn,invoke},ipc:{status:()=>operation,invoke:(id,tool,args,instance)=>invoke(id,tool,args,()=>{},instance),async test(){
       available();return connect(s.settings,async client=>{
-        await inspect(client);return 'Unity подключена';
+        const editors=await inspect(client);const catalog=await native.discover(client,()=>available());
+        return 'Unity подключена · инструментов: '+catalog.tools.length+(editors?' · редакторов: '+editors.length:'');
       });
     }}};
   }

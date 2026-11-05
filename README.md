@@ -123,3 +123,11 @@ Interactive controls and connection approvals stay in Petya. Blender's file sele
 confirmed copy are also available via its dedicated MCP tools.
 
 In desktop 0.8.3, Settings → Services → «Каталог приложений» lists the available company modules. Enable Unity Editor, start the local HTTP server in MCP for Unity, enable execute_code and use «Сохранить и проверить». In chat, «Покажи префаб Tank» opens the extension's search. Results are scoped to Assets in the connected editor; previews and Prefab Mode use the selected asset GUID. An external assistant with edit access can request unity_find_prefabs, unity_preview_prefab and unity_open_prefab for the open chat. Each editor action requires confirmation in Petya.
+
+Unity uses live MCP discovery. In an active chat, ask for the Unity console, errors, scene hierarchy, or editor tools.
+The extension can display the server's advertised input schemas, invoke a native tool, and read published
+resources and resource templates. The same operations are exposed as `unity_discover`,
+`unity_call_tool` (name and arguments) and `unity_read_resource` (URI). Each requires edit access to the
+active chat, an enabled Unity connection and local approval in Petya. Review the tool name and exact
+arguments before approving an edit. Available operations depend on the connected editor. Prefab search
+prefers native `manage_asset`; older servers and the directional preview/open workflows use `execute_code`.
