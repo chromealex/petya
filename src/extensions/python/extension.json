@@ -1,0 +1,20 @@
+{
+  "id": "python",
+  "name": "Python",
+  "description": "Изолированные расчёты, CSV и логи через локальный Docker",
+  "setting": "extension_python",
+  "settings": false,
+  "scripts": [
+    [
+      "notifications.js",
+      "notifications.js"
+    ],
+    [
+      "chat.js",
+      "technical-block.js"
+    ]
+  ],
+  "results": {
+    "pythonExecution": "renderPythonExecution"
+  }
+}

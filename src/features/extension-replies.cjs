@@ -55,6 +55,21 @@ function setup(s) {
     finally { installations.delete(p.type); }
   }
   async function turn(command, authorize = () => {}) {
+    // Execution extensions need a durable owner even when the composer is a new chat.
+    if(!s.dialogue.active()){
+      const files=s.attachments.list();
+      const matches=providers.filter(p=>p.requiresChat&&(!files.length||p.acceptsFiles?.(files))&&p.matches(command,{files,topic:null,settings:s.settings}));
+      if(matches.length===1){
+        cancel.check();authorize();
+        const project=s.dialogue.state.projects.find(p=>p.id===s.dialogue.state.activeProjectId&&!p.archived);
+        if(!project)throw Error('Выберите доступный проект.');
+        const inputs=files.length?s.attachments.take(files.map(f=>f.id)):[];
+        const topic={id:require('node:crypto').randomUUID(),projectId:project.id,title:command.slice(0,80),kind:'chat',messages:[],at:Date.now()};
+        s.dialogue.state.topics.push(topic);s.dialogue.state.activeId=topic.id;delete s.dialogue.state.newChat;
+        for(const file of inputs)s.attachments.store({...file,owner:topic.id});
+        s.dialogue.persist();
+      }
+    }
     const dialogue = s.dialogue, topic = dialogue.active(), company = s.companyId;
     const project = dialogue.state.activeProjectId, version = topic?.versionIndex;
     function check() {

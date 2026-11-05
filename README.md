@@ -216,3 +216,36 @@ MCP result verification: `list_chat_action_results({chatId})` lists safe Slack r
 Switching companies keeps the Electron process, tray and local speech runtime alive. The window reloads the selected company's UI and stored chats. Profile IPC handlers, timers, browser windows and MCP access are disposed before the next profile is loaded; browser cookies use the company's existing on-disk partition directories. Busy chat requests, recording, synchronization and model preparation still block switching. If profile initialization fails, Petya restores the previous profile.
 
 MCP tool `get_company_context` returns the connection's current company and switching status. Switching itself is UI-only: an assistant's grant never authorizes access to another company, and the old MCP endpoint is revoked on a switch. Enable MCP again in the target company if needed.
+
+### Python execution prototype
+
+Ask `Вычисли через Python: ...` or `Проанализируй через Python приложенный CSV`.
+The Python extension generates a standard-library script with the selected local model,
+runs it, and can correct one Python error. Explicit fenced Python runs unchanged.
+Code, stdout, stderr and exit status are retained in the chat. The initial version returns
+text only (including CSV/JSON text), not downloadable files or plots. No pip installation.
+Inputs are copied text supplied both as files in `/work` and in the `files` dictionary: at most five complete text
+attachments, 40000 characters each; truncated attachment previews are rejected.
+
+Prerequisite: locally running Docker Desktop with Linux containers and a locally pulled
+`python:3.12-slim` image (`docker pull python:3.12-slim`). Petya never pulls automatically.
+Missing prerequisites appear as a resumable chat question. Enable Python in the extension
+catalog for direct MCP use; an explicit chat request activates it through the existing host.
+Only local Unix/named-pipe Docker contexts are accepted. Each execution pins the image ID,
+uses no host mounts or inherited container credentials, disables networking, drops all
+capabilities, enables no-new-privileges and runs as UID 65534. Limits: 15 seconds execution,
+256 MiB memory including swap, one CPU, 32 processes, 16 MiB temporary storage and 64 KiB
+combined output. The root filesystem is read-only. Containers are removed after success,
+failure, cancellation or context change. Abrupt application termination can leave a container;
+it is labelled `com.petya.python=true` for manual inspection/removal. There is no native Python fallback.
+The Docker image/daemon are trusted prerequisites; this is process isolation, not a claim
+that arbitrary code is immune to container/kernel vulnerabilities.
+
+MCP: `python_status({chatId, version})` checks readiness; edit-only
+`run_python({chatId, version, code, files})` calls the same runtime as chat and saves the result;
+`stop_python({chatId, version})` cancels it. The active chat, version, project, company and
+access are rechecked during execution; read/drafts clients cannot run or stop code.
+Operation notifications work with settings closed and restore from a snapshot.
+Run `node tests/python.cjs`, `node tests/python-ui.cjs`, `node tests/python-live.cjs` (Docker required),
+`node tests/python-model-live.cjs` (local model and Docker required), and
+`node tests/mcp.cjs` to check behavior and the MCP client contract.

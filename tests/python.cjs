@@ -1,0 +1,38 @@
+const assert=require('node:assert/strict');
+const {PythonRuntime,validate}=require('../src/extensions/python/runtime.cjs');
+const feature=require('../src/features/python.cjs');
+const provider=require('../src/extensions/python/desktop-reply.cjs');
+async function main(){
+ for(const args of [{code:''},{code:'x'.repeat(24001)},{code:'ok',files:{x:12}},{code:'ok',files:{x:'x'.repeat(262144)}}])assert.throws(()=>validate(args));
+ assert.throws(()=>validate({code:'print(1)',files:{'../private':'data'}}));
+ for(const text of ['Вычисли через Python: 2 + 2','Проанализируй через Python CSV','Выполни Python:\n```python\nprint(1)\n```'])assert(provider.matches(text));
+ for(const text of ['Не запускай Python','Что такое Python?','Объясни фразу «запусти Python»','Посчитай задачи в Jira'])assert(!provider.matches(text));
+ const remote=new PythonRuntime({execute:async()=>({stdout:JSON.stringify([{Endpoints:{docker:{Host:'ssh://somewhere'}}}])})});assert.equal((await remote.status()).ready,false);await assert.rejects(remote.run({code:'print(1)'}),/локальный/);
+ let topic={id:'t',projectId:'p',versionIndex:0,messages:[]},notifications=[],calls=0,pending,started;
+ const s={companyId:'c',settings:{extension_python:'true',model:'test',ollamaUrl:'http://127.0.0.1:11434'},dialogue:{active:()=>topic,state:{projects:[{id:'p'}]},persist(){},rememberAction(command,text){topic.messages.push({role:'user',text:command},{role:'assistant',text});}},win:{webContents:{send:(event,item)=>notifications.push({event,...item})}},requestProgress:{report(){}},pythonRuntime:{status:async()=>({ready:true}),async run(args,{check,signal}){calls++;check();if(pending)await new Promise((resolve,reject)=>{started=resolve;signal.addEventListener('abort',()=>reject(Error('stopped')),{once:true});});check();return {ok:true,stdout:'4\n',stderr:'',exitCode:0};}}};
+ s.python=feature.setup(s).python;
+ assert.equal((await s.python.run({code:'print(2+2)'})).stdout,'4\n');assert.equal(notifications[0].id,notifications[1].id);assert.equal(s.python.progress().busy,false);
+ pending=true;const work=s.python.run({code:'print(1)'});await assert.rejects(s.python.run({code:'print(1)'}),/уже выполняет/);s.python.stop();await assert.rejects(work,/stopped/);pending=false;
+ assert.equal(s.python.progress().kind,'error');
+ pending=true;const stale=s.python.run({code:'print(1)'});topic.versionIndex++;started();await assert.rejects(stale,/изменились/);pending=false;
+ s.settings.extension_python='false';await assert.rejects(s.python.run({code:'print(1)'}),/Включите/);s.settings.extension_python='true';
+ let asked=0;s.request=async()=>{asked++;return {message:{content:JSON.stringify({code:'print(2+2)',question:''})}};};
+ const context={files:[],topic};
+ const reply=await provider.turn(s,'Вычисли через Python: 2 + 2',context,()=>{});assert.match(reply.text,/4/);assert.equal(asked,1);assert.equal(topic.messages.at(-1).pythonExecution.attempts.length,1);
+ await provider.turn(s,'Выполни Python:\n```python\nprint(2+2)\n```',context,()=>{});assert.equal(asked,1,'explicit code is not rewritten');
+ s.pythonRuntime.run=async()=>({ok:false,stdout:'',stderr:'NameError',exitCode:1});await provider.turn(s,'Вычисли через Python: 2 + 2',context,()=>{});assert.equal(asked,3,'one repair only');
+ s.request=async()=>({message:{content:JSON.stringify({code:'',question:'Какие числа сложить?'})}});let question;
+ try{await provider.turn(s,'Вычисли через Python сумму',context,()=>{});}catch(e){question=e;}assert.equal(question.name,'InputRequired');assert.equal(question.spec.text,'Какие числа сложить?');
+ s.pythonRuntime.status=async()=>({ready:false,message:'Запустите Docker'});await assert.rejects(provider.turn(s,'Вычисли через Python',context,()=>{}),e=>e.name==='InputRequired');
+ const {Dialogue}=require('../src/dialogue.cjs'),{Attachments}=require('../src/attachments.cjs');
+ const fresh=new Dialogue({save(){}});fresh.projectSelect('general');
+ const freshService={...s,dialogue:fresh,settings:{extension_python:'true'},saveSettings(next){Object.assign(this.settings,next);},pythonRuntime:{status:async()=>({ready:true}),run:async()=>({ok:true,stdout:'35\n',stderr:'',exitCode:0})}};
+ freshService.attachments=new Attachments({scope:()=>fresh.active()?.id||'draft:general'});
+ await freshService.attachments.add('cost.csv',Buffer.from('amount\n35'));
+ freshService.python=feature.setup(freshService).python;
+ const host=require('../src/features/extension-replies.cjs').setup(freshService).extensionReplies;
+ const first=await host.turn('Выполни Python:\n```python\nprint(35)\n```');
+ assert.equal(first.handled,true);assert.equal(fresh.active().attachments[0].name,'cost.csv');assert.equal(freshService.attachments.list().length,0);
+ console.log('Python unit: routing, validation, local-only Docker, scoped execution, duplicate start, stop, notifications, model code/repair and clarification passed');
+}
+if(require.main===module)main().catch(e=>{console.error(e);process.exitCode=1;});module.exports=main;

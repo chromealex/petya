@@ -12,6 +12,7 @@ function createServer(deps) {
     inputSchema:{}, annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false}
   },async()=>{try{deps.check();return {content:[{type:'text',text:JSON.stringify(deps.companyContext())}]};}catch(error){return {isError:true,content:[{type:'text',text:error.message}]};}});
   require('./mcp-chat-tools.cjs').register(server, z, deps);
+  require('./features/python.cjs').register(server,z,deps);
   require('./features/disk-space.cjs').register(server, z, deps);
   require('./features/clarifications.cjs').register(server,z,deps);
   require('./features/action-results.cjs').register(server,z,deps);
