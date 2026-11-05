@@ -8,7 +8,7 @@ let root=AXUIElementCreateApplication(app.processIdentifier)
 AXUIElementSetMessagingTimeout(root,0.05)
 // Slack is an Electron app: Chromium exposes the page (messages, member lists) to accessibility only after
 // AXManualAccessibility is set; without it only the window title is readable. The tree is built asynchronously.
-let enabled=AXUIElementSetAttributeValue(root,"AXManualAccessibility" as CFString,kCFBooleanTrue)==.success
+let enabled = AXUIElementSetAttributeValue(root,"AXManualAccessibility" as CFString,kCFBooleanTrue) == .success
 func attribute(_ element:AXUIElement,_ key:String)->CFTypeRef? { var value:CFTypeRef?;AXUIElementCopyAttributeValue(element,key as CFString,&value);return value }
 guard let window=attribute(root,kAXFocusedWindowAttribute) else { output([:]);exit(0) }
 let element=unsafeBitCast(window,to:AXUIElement.self)
