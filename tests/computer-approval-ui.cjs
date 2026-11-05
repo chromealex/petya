@@ -21,5 +21,9 @@ const key=load.resolve('./tests/smoke.cjs');require.cache[key]={id:key,filename:
  await js("document.querySelector('.computer-approval .primary').click()");await wait("dialogueMessages.textContent.includes('Источник: открытое окно Slack')");if(reads!==1)throw Error('Duplicate read');
  await wait("!window.chatStartPending && !commandProgress.busy");
  if(await js("!!document.querySelector('.chat-composer .computer-approval')"))throw Error('Completed permission choices remain');
+ await js("$('command').value='Что нового в Slack?';window.sendChatNow()");await wait("!!document.querySelector('.computer-approval .primary')");
+ await js("document.querySelector('.computer-approval .approval-buttons button:last-child').click()");await wait("!document.querySelector('.computer-approval') && dialogueMessages.textContent.includes('Доступ не предоставлен')");if(reads!==1)throw Error('Denied approval executed an action');
+ await js("showDialogueReply({handled:true,question:true,computerApproval:'expired-test',text:'Разрешить?'})");
+ await js("document.querySelector('.computer-approval .primary').click()");await wait("!document.querySelector('.computer-approval') && dialogueMessages.textContent.includes('Разрешение больше не действует')");if(reads!==1)throw Error('Expired approval executed an action');
  console.log('Computer approval UI: waiting state, repeated redraw, explicit consent and single execution passed');
 }};load('./src/main.cjs');
