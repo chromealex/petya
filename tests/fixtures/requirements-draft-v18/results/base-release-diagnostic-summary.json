@@ -1,0 +1,8 @@
+{
+  "passed": 3,
+  "total": 16,
+  "candidate_passed": 8,
+  "candidate_total": 16,
+  "development_only": true,
+  "conclusion": "An unadapted restart is not supported as a simple cure: base often preserves core content but reopens settled questions or invents implementation details. Accumulated adaptation improves full-task accuracy on this inspected set but still loses some core constraints. No single causal explanation is proven."
+}
