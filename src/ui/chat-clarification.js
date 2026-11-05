@@ -52,7 +52,7 @@
    const cancelLabel=result.clarificationInput?.cancelLabel||'Отмена';
    if(!modelChoices.some(v=>v.toLocaleLowerCase()===cancelLabel.toLocaleLowerCase()))button(cancelLabel,()=>reply(result.clarificationInput?.cancelLabel||'отмена'));
   }
-  if(buttons.childElementCount>3)box.classList.add('many-choices');
+  if(selectable)box.classList.add('choice-list');
   buttons.onkeydown=event=>{if(!['ArrowDown','ArrowUp'].includes(event.key))return;const options=[...buttons.querySelectorAll('button:not(:disabled)')],index=options.indexOf(document.activeElement);if(index<0)return;event.preventDefault();options[(index+(event.key==='ArrowDown'?1:-1)+options.length)%options.length]?.focus();};
  };
  const history=document.createElement('details'),summary=document.createElement('summary'),rows=document.createElement('div');history.className='clarification-history';summary.textContent='Продолжения';history.append(summary,rows);document.querySelector('.chat-heading')?.append(history);

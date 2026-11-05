@@ -2,37 +2,36 @@ let activeJiraRoute = null, routeRevision = 0;
 const routePanel = document.createElement('article'); routePanel.className = 'card'; routePanel.hidden = true;
 $('resolution').after(routePanel);
 async function selectJiraRoute(context, resume, project = '', issueType = '') {
-  const revision = ++routeRevision;
-  notice('Определяю проект Jira по обсуждению…');
+  const revision = ++routeRevision,owner=topicSelect.value;
+  routePanel.hidden=true;$('notice').hidden=true;
+  commandProgress.update('working','Определяю проект Jira по обсуждению…');
   const result = await window.petya.routeJira(commandSnapshot, context.id, project, issueType);
-  if (revision !== routeRevision) return null;
-  routePanel.replaceChildren();
-  if (result.ready) {
-    routePanel.hidden = true; voiceReply = null;
-    notice(`Проект ${result.project} · ${result.name}. ${result.reason}`);
-    return result;
-  }
-  routePanel.hidden = false; $('resolution').hidden = true;
-  const title = document.createElement('h2'); title.textContent = result.issueTypes ? 'Какой тип задачи нужен?' : 'К какому проекту относится обсуждение?';
-  const reason = document.createElement('p'); reason.textContent = result.reason;
-  routePanel.append(title, reason);
-  const options = result.issueTypes || result.projects;
-  for (const option of options) {
-    const button = document.createElement('button'); button.type = 'button';
-    button.textContent = result.issueTypes ? option.name : `${option.name} (${option.key})`;
-    button.onclick = run(async () => {
-      routePanel.querySelectorAll('button').forEach(b => b.disabled = true);
-      try {
-        const route = await selectJiraRoute(context, resume, result.issueTypes ? result.project : option.key, result.issueTypes ? option.id : '');
-        if (route) await resume(route);
-      } finally { routePanel.querySelectorAll('button').forEach(b => b.disabled = false); }
-    });
-    routePanel.append(button);
-  }
-  const cancel = document.createElement('button'); cancel.type = 'button'; cancel.textContent = 'Отмена';
-  cancel.onclick = () => { automaticVoiceCommand = false; voiceReply = null; voiceTurn.reset(); ++routeRevision; routePanel.hidden = true; }; routePanel.append(cancel);
-  if (automaticVoiceCommand) askVoiceChoices(result.reason, options.map(option => ({label:option.name, names:[option.name, option.key || option.id], run:async () => { const route = await selectJiraRoute(context, resume, result.issueTypes ? result.project : option.key, result.issueTypes ? option.id : ''); if (route) await resume(route); }})));
-  routePanel.scrollIntoView({block:'nearest'});
+  if (revision !== routeRevision||owner!==topicSelect.value) return null;
+  if (result.ready) {voiceReply=null;return result;}
+  $('resolution').hidden=true;
+  const options=result.issueTypes||result.projects||[];
+  const labels=options.map(option=>result.issueTypes?option.name:`${option.name} (${option.key})`);
+  const question=result.issueTypes?'Какой тип задачи нужен?':'К какому проекту относится обсуждение?';
+  const present=()=>{
+    dialogueChoices.replaceChildren();
+    voiceReply=async answer=>{
+      if(revision!==routeRevision||owner!==topicSelect.value)return;
+      if(/^(?:отмена|стоп|не надо)[.!]?$/iu.test(answer.trim())){
+        automaticVoiceCommand=false;voiceReply=null;voiceTurn.reset();++routeRevision;
+        await showDialogueReply({handled:true,text:'Выбор проекта Jira отменён.'});return;
+      }
+      const value=answer.trim().toLocaleLowerCase();
+      const index=labels.findIndex((label,i)=>[label,options[i].name,options[i].key,options[i].id,String(i+1)].some(v=>v&&String(v).toLocaleLowerCase()===value));
+      if(index<0){present();return;}
+      const option=options[index];
+      const route=await selectJiraRoute(context,resume,result.issueTypes?result.project:option.key,result.issueTypes?option.id:'');
+      if(route)await resume(route);
+    };
+    window.renderClarification({question:true,text:question,clarificationOptions:labels,clarificationInput:{choicesOnly:true}},null,automaticVoiceCommand);
+    commandProgress.update('waiting','Жду выбора проекта Jira');
+  };
+  present();
+  if(automaticVoiceCommand)speakReply(question+' '+labels.map((label,i)=>(i+1)+' — '+label).join('; ')).catch(e=>notice(e.message,true));
   return null;
 }
 let currentIntent = '', activeContext = null, workspaceBusy = false, batchId = '', frozenBatch = null, selectedPeople = [], batchTarget = {};
