@@ -5,7 +5,7 @@ function validate(next){
  if(!['off','ask','auto'].includes(next.zoomBotMode)||!['bot','local'].includes(next.zoomCaptureMode))throw Error('Проверьте режим подключения Zoom.');
  if(next.zoomBotUrl){const u=new URL(next.zoomBotUrl);if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash)throw Error('Сервис Zoom должен использовать HTTPS.');}
 }
-module.exports={name:'zoomBot',defaults:{zoomBotMode:'auto',zoomCaptureMode:'bot',zoomBotUrl:DEFAULT_URL,zoomBotCredential:'',zoomCredential:''},secrets:['zoomBotCredential','zoomCredential'],validate,
+module.exports={name:'zoomBot',defaults:{zoomBotMode:'auto',zoomCaptureMode:'local',zoomBotUrl:DEFAULT_URL,zoomBotCredential:'',zoomCredential:''},secrets:['zoomBotCredential','zoomCredential'],validate,
  setup(s){
   const {app,safeStorage,shell,systemPreferences}=require('electron'),file=path.join(s.dataRoot,'zoom-bot-state.enc');
   const oauth=new (require('../../service-oauth.cjs').ServiceOAuth)('zoom',s.request);
@@ -20,8 +20,8 @@ module.exports={name:'zoomBot',defaults:{zoomBotMode:'auto',zoomCaptureMode:'bot
   });
   let stopped=false;const tick=()=>{if(!stopped&&process.env.PETYA_VERIFY_BUILD!=='1')bot.tick().catch(()=>{});};
   const timer=setInterval(tick,5000);timer.unref();app.once('before-quit',()=>{stopped=true;clearInterval(timer);});
-  const status=()=>({...bot.snapshot(),mode:s.settings.zoomBotMode,capture:s.settings.zoomCaptureMode,configured:!!(s.settings.zoomBotCredential||s.settings.zoomCredential),url:s.settings.zoomBotUrl||DEFAULT_URL,connected:!!s.settings.zoomCredential});
-  const configure=input=>{if(bot.snapshot().busy)throw Error('Дождитесь окончания текущей записи или обработки Zoom.');const values={zoomBotMode:input.mode,zoomCaptureMode:input.capture};if(typeof input.url==='string')values.zoomBotUrl=input.url;if(input.credential)values.zoomBotCredential=input.credential;s.saveSettings(values,true);return status();};
+  const status=()=>({...bot.snapshot(),mode:s.settings.zoomBotMode,capture:s.settings.zoomCaptureMode,configured:!!(s.settings.zoomBotCredential||s.settings.zoomCredential),url:s.settings.zoomBotUrl||DEFAULT_URL,connected:!!s.settings.zoomCredential,microphone:s.settings.zoomCaptureMic!=='false'});
+  const configure=input=>{if(s.meetingRecording?.('captureStatus')?.busy)throw Error('Сначала завершите текущую запись встречи.');if(bot.snapshot().busy&&s.settings.zoomCaptureMode==='bot')throw Error('Дождитесь окончания текущей записи или обработки Zoom.');const values={zoomBotMode:input.mode,zoomCaptureMode:input.capture};if(typeof input.microphone==='boolean')values.zoomCaptureMic=String(input.microphone);if(typeof input.url==='string')values.zoomBotUrl=input.url;if(input.credential)values.zoomBotCredential=input.credential;s.saveSettings(values,true);return status();};
   const ipc={status,configure,requestAccess,async signIn(){const result=await oauth.start();await shell.openExternal(result.url);return result;},completeSignIn:()=>oauth.poll(),async claim(siteId){const result=await oauth.claim(siteId);s.saveSettings({zoomCredential:result.credential},true);return status();},join:id=>bot.action('join',id),dismiss:id=>bot.action('dismiss',id),retry:id=>bot.action('retry',id)};
   return {ipc,zoomBot:(method,...args)=>{if(!['status','join','dismiss','retry','requestAccess'].includes(method))throw Error('Настройки подключения меняются только в Пете.');return ipc[method](...args);}};
  },

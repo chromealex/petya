@@ -59,7 +59,7 @@ async function backgroundTick() {
     if (!smoke) await buildRepair?.tick();
     if (modules.enabled(settings, 'slack') && settings.slackAutoSync === 'true' && Date.now() - lastSlackRound >= Number(settings.slackInterval) * 60000) { lastSlackRound = Date.now(); slackSync.start().catch(e => { slackSync.status.message = e.message; }); }
     else if (modules.enabled(settings, 'slack') && slackSync.queue.length) slackSync.tick().catch(e => { slackSync.status.message = e.message; });
-    try { const state = await meetingMonitor.tick(settings.zoomCaptureMode === 'local' && settings.zoomAutoRecord === 'true'); if (state) monitorStatus = state; }
+    try { const state = await meetingMonitor.tick(settings.zoomLocalService !== '1' && settings.zoomCaptureMode === 'local' && settings.zoomAutoRecord === 'true'); if (state) monitorStatus = state; }
     catch (e) { monitorStatus = { message: e.message }; }
     win.webContents.send('background-status', { zoom: monitorStatus, slack: slackSync.status });
   } catch (e) { win.webContents.send('background-status', { error: e.message }); }

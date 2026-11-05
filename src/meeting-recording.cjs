@@ -26,7 +26,7 @@ class MeetingRecording {
   fs.writeFileSync(path.join(this.directory,filename),this.encrypt(Buffer.from(item.wav).toString('base64')),{mode:0o600});
   s.segments.push({filename,source,at:item.at,endedAt:item.endedAt,overlap:!!item.overlap});this.persist(s);
  }
- finish(id){const s=this.state(id);if(s.phase!=='recording')return this.public(s);s.phase='processing';s.message='Встреча завершена. Расшифровываю запись…';this.persist(s);void this.process(s);return this.public(s);}
+ finish(id){const s=this.state(id);if(s.phase!=='recording')return this.public(s);if(!s.segments.length){s.phase='error';s.message='В записи нет сохранённых звуковых фрагментов. Проверьте источники звука и начните запись заново.';this.persist(s);return this.public(s);}s.phase='processing';s.message='Встреча завершена. Расшифровываю запись…';this.persist(s);void this.process(s);return this.public(s);}
  retry(id){const s=this.state(id);if(s.phase!=='error')throw Error('Повтор доступен после ошибки обработки.');s.phase='processing';this.persist(s);void this.process(s);return this.public(s);}
  async process(s){
   if(this.running.has(s.id))return;this.running.add(s.id);

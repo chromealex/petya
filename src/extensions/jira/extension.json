@@ -8,8 +8,15 @@
     [
       "settings.js",
       "connections.js"
+    ],
+    [
+      "issue-cards.js",
+      "message-format.js"
     ]
   ],
   "id": "jira",
-  "markup": "settings.html"
+  "markup": "settings.html",
+  "results": {
+    "jiraItems": "renderJiraIssues"
+  }
 }

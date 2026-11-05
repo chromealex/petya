@@ -1,0 +1,9 @@
+{
+  "method": "Non-blind manual semantic review against complete histories; exact JSON is insufficient. Explicit exclusions and requested outputs must survive. No candidate fresh answers inspected.",
+  "answers": {
+    "parent-check.jsonl": "2dab598e8e553003439225ab8117548a3d4f02ba42379b3b78fcfdbc22c0e594",
+    "historical-check.jsonl": "31e62ac4d9b1ddd66f3542d7c74aae447548a93ff7a1c54ee0267fd29a62001f",
+    "base-check.jsonl": "a98271b7f2220fae653f51d4097ed6383975a1b24c25bd78df3487be542d4999",
+    "parent-release.jsonl": "8416f5646054a5d458ac7b29f7c6b5e3af32c3283feaf89f1b36a41cb191e6c7"
+  }
+}

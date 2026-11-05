@@ -1,0 +1,205 @@
+{
+  "artifact_sha256": "7260a5e7d500a3307b7d6d8f50f4da29255ec5ae346d35b2d210b80a8ec01f96",
+  "tensor_count": 256,
+  "trainable_parameters": 14548992,
+  "adapted_blocks": 32,
+  "full_attention_blocks": 8,
+  "mlp_blocks": 32,
+  "linear_attention_projections_adapted": false,
+  "coverage": {
+    "0": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "1": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "2": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "3": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj",
+      "self_attn.k_proj",
+      "self_attn.o_proj",
+      "self_attn.q_proj",
+      "self_attn.v_proj"
+    ],
+    "4": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "5": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "6": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "7": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj",
+      "self_attn.k_proj",
+      "self_attn.o_proj",
+      "self_attn.q_proj",
+      "self_attn.v_proj"
+    ],
+    "8": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "9": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "10": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "11": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj",
+      "self_attn.k_proj",
+      "self_attn.o_proj",
+      "self_attn.q_proj",
+      "self_attn.v_proj"
+    ],
+    "12": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "13": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "14": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "15": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj",
+      "self_attn.k_proj",
+      "self_attn.o_proj",
+      "self_attn.q_proj",
+      "self_attn.v_proj"
+    ],
+    "16": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "17": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "18": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "19": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj",
+      "self_attn.k_proj",
+      "self_attn.o_proj",
+      "self_attn.q_proj",
+      "self_attn.v_proj"
+    ],
+    "20": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "21": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "22": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "23": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj",
+      "self_attn.k_proj",
+      "self_attn.o_proj",
+      "self_attn.q_proj",
+      "self_attn.v_proj"
+    ],
+    "24": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "25": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "26": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "27": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj",
+      "self_attn.k_proj",
+      "self_attn.o_proj",
+      "self_attn.q_proj",
+      "self_attn.v_proj"
+    ],
+    "28": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "29": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "30": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj"
+    ],
+    "31": [
+      "mlp.down_proj",
+      "mlp.gate_proj",
+      "mlp.up_proj",
+      "self_attn.k_proj",
+      "self_attn.o_proj",
+      "self_attn.q_proj",
+      "self_attn.v_proj"
+    ]
+  },
+  "finite_tensors": true,
+  "scope": "Artifact integrity and architecture coverage only; not quality or release readiness."
+}

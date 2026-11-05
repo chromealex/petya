@@ -1026,3 +1026,20 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .chat-question.choice-list .approval-buttons>button{width:100%;text-align:left;flex-shrink:0;padding:8px 10px}
 
 .message-assistant>.message-steps{display:block;margin:0 0 12px;color:var(--muted);font-size:12px}.answer-stream-preview .message-content{min-height:1.5em}
+
+/* Work history is an inline disclosure between conversation text blocks. */
+#home .chat-feed .message-steps{width:100%;font-size:13px;font-weight:400;color:var(--muted);border:0;background:none;padding:0;margin:8px 0 16px}
+#home .chat-feed .message-steps>summary{display:flex;width:fit-content;max-width:100%;gap:8px;align-items:center;padding:4px 0;line-height:20px;border-radius:4px}
+#home .chat-feed .message-steps>summary::before{content:none}
+#home .chat-feed .message-steps>summary::after{content:'›';font-size:14px;transform:rotate(0deg);transition:transform .15s}
+#home .chat-feed .message-steps[open]>summary::after{transform:rotate(90deg)}
+#home .chat-feed .message-steps.live>summary::before{content:'•••';color:#d58a56;font-size:10px;letter-spacing:2px;transform:none;width:22px;flex:none}
+.message-steps .steps-label{min-width:0;overflow-wrap:anywhere}.message-steps .steps-duration{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+#home .chat-feed .message-steps>ol{display:block;max-width:none;margin:8px 0 0;padding:0;border:1px solid #ffffff12;border-radius:12px;overflow:hidden;background:#ffffff02}
+#home .chat-feed .message-steps.live>ol{margin-left:30px}
+#home .chat-feed .message-steps li{display:block;padding:8px 12px;line-height:20px;font-weight:400;color:var(--muted)}
+#home .chat-feed .message-steps li+li{border-top:1px solid #ffffff10}
+#home .chat-feed .message-steps li.current{color:var(--text,#e1e6df)}
+.message-steps li details{padding:0;border:0;background:none;margin:0}.message-steps li summary{cursor:pointer}.message-steps li pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;margin:8px 0 0}
+.chat-job-status:has(>.message-steps)>span,.chat-running-reply .command-progress:has(.message-steps)>p,.chat-running-reply .command-progress:has(.message-steps)>.small{display:none!important}
+#home .chat-feed .chat-running-reply .message-steps{flex-basis:100%;margin:8px 0 16px}

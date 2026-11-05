@@ -1,0 +1,68 @@
+{
+  "parent": {
+    "withdrawn-latest": [
+      false,
+      "Restores revoked delivery and keeps both old and replacement fields."
+    ],
+    "only-one-recipient": [
+      false,
+      "Invents settings and an exercise for the master, losing identical-copy requirement."
+    ],
+    "independent-field-cancels": [
+      false,
+      "Applies the canceled client_key replacement."
+    ],
+    "preserve-and-add": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "verbatim-name": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "no-invented-columns": [
+      false,
+      "Omits the manual export requirement."
+    ],
+    "return-from-other-topic": [
+      false,
+      "Omits the explicit exclusion of the other project font change."
+    ],
+    "boundary-language": [
+      false,
+      "Does not preserve the explicit no-rounding constraint; upper-bound wording is awkward."
+    ],
+    "sort-with-rule": [
+      false,
+      "Repeats the unsorted input instead of supplying the explicitly requested full sorted result."
+    ],
+    "destination-not-guessed": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "quoted-ban-not-action": [
+      false,
+      "Assigns permission to the editor to send rather than explicitly preserving delivery to the editor."
+    ],
+    "restricted-version": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "reversed-undo": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "service-unselected": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "single-use-scope": [
+      false,
+      "Omits the explicit exclusion of account login."
+    ],
+    "view-not-storage": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ]
+  }
+}

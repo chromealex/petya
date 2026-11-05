@@ -1,0 +1,1 @@
+{"type":"object","properties":{"understood":{"type":"boolean"},"answer":{"type":"string"},"clarificationOptions":{"type":"array","items":{"type":"string"},"maxItems":4}},"required":["understood","answer"],"additionalProperties":false}

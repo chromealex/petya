@@ -1,0 +1,23 @@
+{
+  "attention_added": true,
+  "layers": 32,
+  "mlp_expanded": true,
+  "seed": 42,
+  "epochs": 1,
+  "steps": 4,
+  "learning_rate": 5e-06,
+  "optimizer_reset": true,
+  "trainable_parameters": 14548992,
+  "parent_sha256": "52192adaf485b9e5958d42d956a2125238f37cc5a005c23d1f26dfe6f44acea8",
+  "training_sha256": "5af6be6164ebc2b9da5c6903ea8d3c582192d4dd75bb8a58f973189927ebd9cd",
+  "adapter_sha256": "7260a5e7d500a3307b7d6d8f50f4da29255ec5ae346d35b2d210b80a8ec01f96",
+  "loss": [
+    0.0013664026046171784,
+    0.00044941832311451435,
+    0.0006998191238380969,
+    0.0002052595664281398
+  ],
+  "elapsed_seconds": 15.819149375005509,
+  "peak_memory_bytes": 35763211724,
+  "interpretation": "All-block adaptation is technically feasible on this machine; no generalization or release claim. Probe weights are not selected or used as the next parent."
+}

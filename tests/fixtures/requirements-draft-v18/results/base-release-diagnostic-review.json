@@ -1,0 +1,66 @@
+{
+  "revoked-all": [
+    false,
+    "Correct substantive cancellation, but reopens explicitly settled draft-only and all-version decisions."
+  ],
+  "two-targets": [
+    false,
+    "Reopens identical-content decision, adds mechanism questions and omits no-questionnaire constraint."
+  ],
+  "cancel-second": [
+    true,
+    "All final requirements preserved; wording equivalent."
+  ],
+  "restore-first": [
+    false,
+    "Invents mandatory status for the new field."
+  ],
+  "exact-identifier": [
+    false,
+    "Leaks output-format instructions, omits file preservation and invents Jira context."
+  ],
+  "proposal-status": [
+    false,
+    "Adds unrequested questions about filters, storage, format and validation."
+  ],
+  "context-exclusion": [
+    false,
+    "Drops privacy and logo exclusion, invents current behavior and many questions."
+  ],
+  "inclusive-prose": [
+    true,
+    "All final requirements preserved; wording equivalent."
+  ],
+  "sort-direction": [
+    false,
+    "Correct sorting but asks to reconfirm settled order and duplicates."
+  ],
+  "missing-destination": [
+    false,
+    "Recipient question is correct, but explicit no-send prohibition is omitted."
+  ],
+  "quoted-permission": [
+    false,
+    "Reopens whether to retain the quote after explicit confirmation."
+  ],
+  "short-authorized": [
+    false,
+    "Makes full-report prohibition conditional on remarks and invents an authorization path."
+  ],
+  "double-reversal": [
+    true,
+    "All final requirements preserved; wording equivalent."
+  ],
+  "channel-open": [
+    false,
+    "Wrong question schema, invented Jira action and assumed Slack."
+  ],
+  "lifetime-approved": [
+    false,
+    "Adds unrelated authentication and implementation questions."
+  ],
+  "source-untouched": [
+    false,
+    "Correct page-only substitution but adds unrequested implementation/history questions."
+  ]
+}

@@ -5,7 +5,9 @@ function capture(result){
   if(!source)return;
   const site=new URL(source.url).origin;
   return result.data.issues.filter(item=>/^[A-Z][A-Z0-9_]*-\d+$/u.test(item.key)).map(item=>({
-    key:item.key,site,summary:String(item.fields?.summary||item.key).slice(0,300)
+    key:item.key,site,summary:String(item.fields?.summary||item.key).slice(0,300),
+    status:item.fields?.status?.name||'',category:item.fields?.status?.statusCategory?.key||'',
+    assignee:item.fields?.assignee?.displayName||'',priority:item.fields?.priority?.name||'',type:item.fields?.issuetype?.name||''
   }));
 }
 module.exports={
