@@ -1,0 +1,8 @@
+{
+  "selected": "repaired-adapter",
+  "weight_sha256": "23e29d12182a064f36008097ee03bddab4e89783bc1a452750169f5821b1c338",
+  "reason": "30/30 exact acquisition, including five current and all 25 prior corrections. Selected before viewing any v9 candidate new-case answers.",
+  "fresh_case_answers_inspected": false,
+  "initial_candidate_new_case_answers_inspected": false,
+  "no_further_training_before_confirmation": true
+}
