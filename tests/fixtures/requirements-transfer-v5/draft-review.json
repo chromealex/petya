@@ -1,0 +1,73 @@
+{
+  "method": "Manual, non-blind review under the precommitted strict rubric. Every explicit exclusion must be preserved. Negative exclusions are not inferred merely from a non-exhaustive list of positive fields or a named recipient. Each failed case records at least one decisive defect; findings are not exhaustive.",
+  "models": {
+    "base": {
+      "menu-revert": {
+        "passed": false,
+        "finding": "Reopens the settled gray-color requirement and adds new button exceptions."
+      },
+      "backup-recipients": {
+        "passed": false,
+        "finding": "Invents high priority and adds unrelated questions about history and delivery."
+      },
+      "drawing-unresolved": {
+        "passed": true,
+        "finding": "Keeps required fields, no approved SVG, and asks only about format."
+      },
+      "refresh-correction": {
+        "passed": true,
+        "finding": "Retains updated exact interval, active count and hidden names."
+      },
+      "explicit-trigger": {
+        "passed": false,
+        "finding": "Omits the check code and adds unrelated questions."
+      },
+      "print-columns": {
+        "passed": false,
+        "finding": "Adds new template/history/signature questions despite the print-only settled scope."
+      },
+      "sensor-topic": {
+        "passed": false,
+        "finding": "Omits owner serial privacy and invents conditional display plus new questions."
+      },
+      "single-open-field": {
+        "passed": false,
+        "finding": "Omits the explicit exclusion of the amount field; describing mandatory fields is not an exhaustive exclusion."
+      }
+    },
+    "adapter": {
+      "menu-revert": {
+        "passed": true,
+        "finding": "Preserves revoked rename, existing contents/link and gray buttons."
+      },
+      "backup-recipients": {
+        "passed": false,
+        "finding": "Retains report fields and privacy but omits the explicit prohibition on sending this report to the manager."
+      },
+      "drawing-unresolved": {
+        "passed": true,
+        "finding": "Keeps both export fields and leaves format open without adopting SVG."
+      },
+      "refresh-correction": {
+        "passed": true,
+        "finding": "Retains exact 18-second interval, count and hidden names."
+      },
+      "explicit-trigger": {
+        "passed": false,
+        "finding": "Substitutes error code for check code and drops error text."
+      },
+      "print-columns": {
+        "passed": false,
+        "finding": "Replaces all print requirements with Russian interface."
+      },
+      "sensor-topic": {
+        "passed": false,
+        "finding": "Invents temperature-conditioned display and omits the technician recipient."
+      },
+      "single-open-field": {
+        "passed": true,
+        "finding": "Retains status as text, date, no amount and the sole open color question."
+      }
+    }
+  }
+}

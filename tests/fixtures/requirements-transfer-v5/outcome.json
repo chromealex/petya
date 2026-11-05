@@ -1,0 +1,36 @@
+{
+  "summary": {
+    "base": {
+      "numericCorrect": 18,
+      "numericTotal": 24,
+      "pairsBothCorrect": 6,
+      "pairsTotal": 12,
+      "draftCoverage": 2,
+      "draftTotal": 8,
+      "validDrafts": 8
+    },
+    "adapter": {
+      "numericCorrect": 20,
+      "numericTotal": 24,
+      "pairsBothCorrect": 8,
+      "pairsTotal": 12,
+      "draftCoverage": 4,
+      "draftTotal": 8,
+      "validDrafts": 8
+    }
+  },
+  "pairedNumeric": {
+    "bothCorrect": 18,
+    "baseOnly": 0,
+    "adapterOnly": 2,
+    "bothWrong": 4
+  },
+  "improvedNumericCases": [
+    "revoked-0",
+    "decimal-1"
+  ],
+  "regressedNumericCases": [],
+  "trained": false,
+  "deployed": false,
+  "decision": "Preserve modest synthetic transfer evidence; do not deploy. Severe omissions and numeric errors remain."
+}
