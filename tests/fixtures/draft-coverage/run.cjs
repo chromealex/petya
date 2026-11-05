@@ -21,9 +21,9 @@ function text(value, max) {
 }
 const {composeDraft} = setup({handle() {}, core, settings, companies:new Map([['test',{name:'Тест'}]]),
   companyId:'test', team:{context:()=>''}, text, request:(_url,opt)=>chat(JSON.parse(opt.body))});
-async function structured(instruction, data) {
+async function structured(instruction, data, examples = []) {
   const response = await chat({model:settings.model, stream:false, format:'json', messages:[
-    {role:'system',content:instruction}, {role:'user',content:JSON.stringify(data)}
+    {role:'system',content:instruction}, ...examples, {role:'user',content:JSON.stringify(data)}
   ]});
   return JSON.parse(response.message.content);
 }
@@ -53,4 +53,5 @@ async function run(output) {
     }
   } finally { fs.closeSync(fd); }
 }
-run(process.argv[2]).catch(e=>{console.error(e);process.exitCode=1;});
+module.exports = {composeDraft, structured, extract, revise};
+if (require.main === module) run(process.argv[2]).catch(e=>{console.error(e);process.exitCode=1;});
