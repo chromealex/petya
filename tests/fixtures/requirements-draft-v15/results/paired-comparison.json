@@ -40,5 +40,16 @@
       "sort-5-0-0",
       "sort-5-1-1"
     ]
+  },
+  "candidate": {
+    "gains": [
+      "sort-0-1-0",
+      "sort-1-1-0",
+      "sort-2-1-0",
+      "sort-3-1-0",
+      "sort-4-0-0",
+      "sort-4-1-0"
+    ],
+    "regressions": []
   }
 }

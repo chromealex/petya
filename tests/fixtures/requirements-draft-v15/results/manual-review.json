@@ -244,5 +244,87 @@
       true,
       "Final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
     ]
+  },
+  "candidate": {
+    "name-0-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-01": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-0-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-00": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-10": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "report-1-01": [
+      false,
+      "Buyer delivery both required and prohibited without a correction qualifier."
+    ],
+    "report-1-11": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "failure-0-0": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "failure-0-1": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "scope": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ],
+    "repeat": [
+      true,
+      "All final decisions, fields, exact labels and exclusions retained; no invented unresolved questions."
+    ]
   }
 }
