@@ -27,6 +27,8 @@ class JiraInsights {
   const explicit=choose(command,{title:'',text:''},projects);
   const explicitMatches=require('./jira-routing.cjs').matches(command,projects);
   const unspecified=/^Примени скилл к данным текущей темы[.]/.test(command)||/^(?:в )?(?:текущем|этом) проекте[.!?]*$/iu.test(command.trim());
+  // A status the user named in passing («таски в new») counts only if Jira has a status with that name.
+  if(personalFilter?.guess){const statuses=await api('/rest/api/3/status',{},s).catch(()=>[]);const found=(Array.isArray(statuses)?statuses:[]).find(v=>String(v?.name||'').toLowerCase()===personalFilter.name.toLowerCase());if(found)personalFilter.name=found.name;else delete personalFilter.name;delete personalFilter.guess;}
   const namedKey=/(?:проект[еу]?|(?:теперь )?в)\s+([A-Z][A-Z0-9_-]*)\b/u.exec(command)?.[1];
   if(namedKey&&!projects.some(p=>p.key===namedKey))return {question:'Проект '+namedKey+' недоступен. Выбери доступный проект.',field:'jiraProject',options:projects.map(p=>({id:p.key,label:p.name+' ('+p.key+')'}))};
   let project=explicit.project;
