@@ -8,9 +8,10 @@ module.exports=ctx=>{
     reply:(text,extra={})=>({handled:true,text,...extra})
   });
   ctx.handle('slackRequestReply',value=>slackRequest.turn(ctx.text(value,4000),true));
-  const reportShare=new (require('./report-share.cjs').ReportShare)({state:ctx.reviewState,save:ctx.saveReview,settings:()=>ctx.settings,enabled:()=>ctx.modules.enabled(ctx.settings,'slack'),dialogue:ctx.dialogue,request:ctx.request,
+  const reportShare=new (require('./report-share.cjs').ReportShare)({state:ctx.reviewState,save:ctx.saveReview,settings:()=>ctx.settings,enabled:()=>ctx.modules.enabled(ctx.settings,'slack'),dialogue:ctx.dialogue,request:ctx.request,progress:item=>ctx.win?.webContents.send('report-share-progress',item),
    context:report=>{const projects=ctx.projectMemory.state.projects.filter(p=>p.jira?.key===report.project&&p.jira.site===report.site);const p=projects.length===1?projects[0]:null;return {project:report.project,site:report.site,projectChannels:p?Object.values(p.slack||{}).filter(c=>c.account===ctx.slackAccount()).map(c=>({id:c.id,name:c.name,role:c.role})):[]};}});
-  ctx.handle('reportShareOpen',id=>reportShare.open(ctx.text(id,100)));
+  ctx.handle('reportShareOpen',(id,lookup)=>lookup?reportShare.resolve(ctx.text(id,100),ctx.text(lookup.draftId,100),ctx.text(lookup.query,500)):reportShare.open(ctx.text(id,100)));
+  ctx.handle('reportShareProgress',()=>[...reportShare.progressItems.values()]);
   ctx.handle('reportShareSend',input=>reportShare.send(input));
   ctx.handle('reportShareCancel',id=>reportShare.cancel(ctx.text(id,100)));
 

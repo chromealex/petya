@@ -65,6 +65,9 @@
  const unityProgress = item => { if(item)put(item.id,item); };
  window.petyaEvents.onUnityProgress(unityProgress);
  window.petya.feature('unity','status').then(unityProgress).catch(()=>{});
+ const reportShareProgress = item => {if(item)put(item.id,item);};
+ window.petyaEvents.onReportShareProgress(reportShareProgress);
+ window.petya.reportShareProgress().then(items=>items.forEach(reportShareProgress)).catch(()=>{});
  const changeProgress = item => {if(item)put(item.id,item);};
  window.petyaEvents.onChatChange(changeProgress);
  window.petya.feature('chatChanges','progress').then(items=>items.forEach(changeProgress)).catch(()=>{});

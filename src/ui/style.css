@@ -897,3 +897,5 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 
 #home .chat-feed article.message-assistant:has(.chat-change-card){width:100%;max-width:100%;box-sizing:border-box}
 .chat-change-card{box-sizing:border-box;width:100%}.message-assistant .change-diff pre{white-space:pre-wrap;overflow-wrap:anywhere}
+
+#report-share{width:100%;max-width:800px;box-sizing:border-box;margin:12px 0}#report-share-dismiss{float:right;width:26px;height:26px;display:grid;place-items:center;padding:0}#report-share-filter{margin-bottom:0}#report-share-find{padding:5px 10px;margin-bottom:8px}#report-share-channel-hint:empty{display:none}

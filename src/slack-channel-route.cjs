@@ -32,15 +32,23 @@ function chooseChannels(channels,{target='',literal=false,topic={}}={}) {
  if(possible.length===1)return {channels:possible};
  return {options:possible.length?possible:candidates,reason:possible.length?'Подходят несколько каналов. Уточните проект или канал.':'Не найден канал для этого назначения.'};
 }
-async function listChannels(request,token=''){
+async function listChannels(request,token='',{target='',pages=50}={}){
  let cursor='';const seen=new Set(),rows=[];
- for(let page=0;page<50;page++){
+ for(let page=0;page<pages;page++){
   const data=await request('https://slack.com/api/conversations.list?'+new URLSearchParams({types:'public_channel,private_channel',exclude_archived:'true',limit:'200',...(cursor?{cursor}:{})}),{headers:{Authorization:'Bearer '+token}});
   if(!data?.ok||!Array.isArray(data.channels))throw Error('Не удалось прочитать каналы Slack: '+String(data?.error||'неполный ответ'));
-  rows.push(...data.channels);cursor=String(data.response_metadata?.next_cursor||'').trim();
+  rows.push(...data.channels);
+  if(target){const exact=data.channels.find(c=>!c.is_archived&&(c.id===target||c.name===target));if(exact)return [exact];}
+  cursor=String(data.response_metadata?.next_cursor||'').trim();
   if(!cursor)return [...new Map(rows.map(c=>[c.id,c])).values()];
   if(seen.has(cursor))throw Error('Slack повторил страницу каналов.');seen.add(cursor);
  }
- throw Error('Список каналов слишком большой. Уточните точное название канала.');
+ const error=Error('Не удалось загрузить весь список. Укажите точное название или вставьте ссылку на канал.');error.code='SLACK_CHANNEL_LOOKUP_REQUIRED';error.channels=[...new Map(rows.map(c=>[c.id,c])).values()];throw error;
 }
-module.exports={chooseChannels,listChannels,purposes};
+async function findChannel(request,token,target){
+ target=String(target||'').trim().replace(/^#/,'');const id=channelFromURL(target)||(/^[CG][A-Z0-9]+$/.test(target)?target:'');
+ if(id){const data=await request('https://slack.com/api/conversations.info?'+new URLSearchParams({channel:id}),{headers:{Authorization:'Bearer '+token}});if(!data?.ok||data.channel?.id!==id)throw Error('Канал недоступен: '+String(data?.error||'неполный ответ'));if(data.channel.is_archived||data.channel.is_im||data.channel.is_mpim||typeof data.channel.name!=='string')throw Error('Канал архивирован или недоступен.');return data.channel;}
+ if(!target||target.length>80||/[\s/]/u.test(target))throw Error('Введите точное название канала или ссылку из Slack.');
+ const rows=await listChannels(request,token,{target});const found=rows.filter(c=>!c.is_archived&&c.name===target);if(found.length!==1)throw Error('Канал не найден. Проверьте имя или вставьте ссылку из Slack.');return found[0];
+}
+module.exports={chooseChannels,listChannels,findChannel,purposes};
