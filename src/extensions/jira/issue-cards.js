@@ -8,7 +8,7 @@
   for(const node of parent.querySelectorAll(':scope>p,:scope>ul>li,:scope>ol>li'))if(keys.has(node.textContent.match(/^([A-Z][A-Z0-9_]*-\d+)\s+[—–-]/)?.[1]))node.remove();
   let more;
   items.forEach((item,index)=>{
-   const card=document.createElement('section');card.className='jira-issue-card';const header=document.createElement('header'),title=document.createElement('h4'),key=document.createElement('a');
+   const card=document.createElement('section');card.className='jira-issue-card';card.dataset.resultPresentation=JSON.stringify([item.site,item.key]);const header=document.createElement('header'),title=document.createElement('h4'),key=document.createElement('a');
    key.textContent=item.key;try{const site=new URL(item.site);if(site.protocol==='https:'||site.protocol==='http:'){key.href=site.origin+'/browse/'+encodeURIComponent(item.key);key.target='_blank';key.rel='noopener';}}catch{}
    header.append(key);if(item.status){const status=document.createElement('span');status.className='jira-issue-status';status.dataset.category=item.category||'';status.textContent=item.status;header.append(status);}
    title.textContent=item.summary;card.append(header,title);

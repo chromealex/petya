@@ -35,7 +35,7 @@ function setup(s){
     if(!topic||topic.archived)return {scope:null,items:[],selected:null};
     const rows=collect(topic,s);
     return {scope:scope(s,topic),selected:selected(topic)?.id||null,
-      items:rows.map(({id,objectId,index,title,subtitle,actions})=>({id,objectId,index,title,subtitle,actions:actions.map(({id,label})=>({id,label}))}))};
+      items:rows.map(({id,objectId,index,title,subtitle,actions,presentationKey})=>({id,objectId,index,title,subtitle,presentationKey,actions:actions.map(({id,label})=>({id,label}))}))};
   }
   function choose(expected,id){
     const topic=topicFor(expected);

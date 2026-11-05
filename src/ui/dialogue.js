@@ -17,7 +17,7 @@ function cancelStreamingAudio(){
  if(streamingURL){URL.revokeObjectURL(streamingURL);streamingURL=null;}
  const reject=streamingReject;streamingReject=null;reject?.(Error('Озвучивание остановлено.'));
 }
-function releaseStreamingMic(){window.answerVoiceEnd?.();window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));if(mic.active)voiceTurn.arm();}
+function releaseStreamingMic(){window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));if(mic.active)voiceTurn.arm();}
 const streamedVoice=new window.StreamingSpeech({
  cancel:()=>{cancelStreamingAudio();window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));},
  onIdle:()=>{const id=spokenStreamId,epoch=streamedVoice.epoch;setTimeout(()=>{if(epoch===streamedVoice.epoch&&id===spokenStreamId&&streamedVoice.stopped)releaseStreamingMic();},500);},
@@ -27,30 +27,30 @@ const streamedVoice=new window.StreamingSpeech({
   const encoded=await window.petya.synthesizeVoice(text);if(epoch!==streamedVoice.epoch)throw Error('Отменено');if(encoded?.languageRequired){window.offerVoiceLanguage?.(text,encoded.languageRequired);stopStreamedVoice();releaseStreamingMic();return;}if(!encoded)return;
   await new Promise((resolve,reject)=>{
    streamingURL=URL.createObjectURL(new Blob([Uint8Array.from(atob(encoded),c=>c.charCodeAt(0))],{type:'audio/wav'}));
-   const audio=new Audio(streamingURL);window.answerVoiceSegment?.(audio,text);streamingAudio=audio;streamingReject=reject;audio.preservesPitch=true;audio.defaultPlaybackRate=1.0;audio.playbackRate=window.chatSpeechRate?.()||1;
+   const audio=new Audio(streamingURL);streamingAudio=audio;streamingReject=reject;audio.preservesPitch=true;audio.defaultPlaybackRate=1.0;audio.playbackRate=window.chatSpeechRate?.()||1;
    const finish=error=>{if(streamingAudio!==audio)return;streamingReject=null;cancelStreamingAudio();if(error)reject(error);else resolve();};
-   audio.onended=()=>{window.answerVoiceSegmentEnd?.();finish();};audio.onerror=()=>finish(Error('Не удалось воспроизвести фрагмент.'));
+   audio.onended=()=>{finish();};audio.onerror=()=>finish(Error('Не удалось воспроизвести фрагмент.'));
    let lastPosition=0,lastProgress=Date.now();streamingWatch=setInterval(()=>{if(window.replyVoicePaused){lastProgress=Date.now();return;}if(audio.currentTime>lastPosition){lastPosition=audio.currentTime;lastProgress=Date.now();}if(audio.ended||Number.isFinite(audio.duration)&&audio.duration>0&&audio.currentTime>=audio.duration)finish();else if(Date.now()-lastProgress>5000)finish(Error('Воспроизведение остановилось.'));},250);
    Promise.resolve(audio.play()).catch(finish);
   });
  }
 });
-function stopStreamedVoice(){window.replyVoicePaused=false;window.answerVoiceEnd?.();streamedVoice.stop();window.petya.stopVoice().catch(()=>{});window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));}
+function stopStreamedVoice(){window.replyVoicePaused=false;streamedVoice.stop();window.petya.stopVoice().catch(()=>{});window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));}
 window.stopStreamedVoice=stopStreamedVoice;
 
 
 // Transient preview; only the final response enters history. Speech uses complete sentences.
-let answerPreview=null,answerStreamId='',answerStreamHidden=false,answerPace=null,answerShown=0;
+let answerPreview=null,answerStreamId='',answerStreamHidden=false,answerShown=0;
 window.petyaEvents.onAnswerChunk?.(chunk=>{
  // Background chats tag their stream with the chat: show only the open chat's stream, never speak it,
  // and pick it up mid-way when the user opens that chat while the answer is being written.
  if(chunk.topicId){
   if(chunk.topicId!==topicSelect.value)return;
-  if(chunk.start||((chunk.id!==answerStreamId||answerStreamHidden)&&!chunk.end&&typeof chunk.text==='string')){answerPace?.stop();answerPace=null;answerShown=0;answerPreview?.remove();answerPreview=null;answerStreamId=chunk.id;answerStreamHidden=false;if(chunk.start)return;}
+  if(chunk.start||((chunk.id!==answerStreamId||answerStreamHidden)&&!chunk.end&&typeof chunk.text==='string')){answerShown=0;answerPreview?.remove();answerPreview=null;answerStreamId=chunk.id;answerStreamHidden=false;if(chunk.start)return;}
  }
- else if(chunk.start){answerPace?.stop();answerPace=null;answerShown=0;if(window.shouldSpeakChat?.(window.streamSpeechEnabled)??window.streamSpeechEnabled){++speechEpoch;releaseReplyAudio();spokenStreamId=chunk.id;streamedVoice.start();window.answerVoiceBegin?.();}answerPreview?.remove();answerPreview=null;answerStreamId=chunk.id;answerStreamHidden=false;return;}
+ else if(chunk.start){answerShown=0;if(window.shouldSpeakChat?.(window.streamSpeechEnabled)??window.streamSpeechEnabled){++speechEpoch;releaseReplyAudio();spokenStreamId=chunk.id;streamedVoice.start();}answerPreview?.remove();answerPreview=null;answerStreamId=chunk.id;answerStreamHidden=false;return;}
  if(chunk.id!==answerStreamId)return;
- if(chunk.end){answerShown=answerPreview?.dataset.streamLength?Number(answerPreview.dataset.streamLength):answerPace?.shown||0;if(chunk.topicId)window.lastStreamShown={topicId:chunk.topicId,length:answerShown};answerPace?.stop();if(chunk.id===spokenStreamId)streamedVoice.generationEnded();answerStreamId='';return;}
+ if(chunk.end){answerShown=answerPreview?.dataset.streamLength?Number(answerPreview.dataset.streamLength):0;if(chunk.topicId)window.lastStreamShown={topicId:chunk.topicId,length:answerShown};if(chunk.id===spokenStreamId)streamedVoice.generationEnded();answerStreamId='';return;}
  if(answerStreamHidden||typeof chunk.text!=='string')return;
  if(chunk.id===spokenStreamId)streamedVoice.feed(chunk.text);
  if(!chunk.text){answerPreview?.remove();answerPreview=null;return;}
@@ -59,7 +59,7 @@ window.petyaEvents.onAnswerChunk?.(chunk=>{
  answerPreview.replaceChildren(rendered.querySelector('.message-content'));answerPreview.dataset.streamLength=String(chunk.text.length);answerShown=chunk.text.length;
  if(!answerPreview.isConnected)dialogueMessages.append(answerPreview);window.chatFollowStream?.();
 });
-document.addEventListener('petya-topic-changed',event=>{if(event.detail?.preserveScroll)return;answerStreamHidden=true;answerPace?.stop();answerPace=null;answerPreview?.remove();answerPreview=null;});
+document.addEventListener('petya-topic-changed',event=>{if(event.detail?.preserveScroll)return;answerStreamHidden=true;answerPreview?.remove();answerPreview=null;});
 let speechEpoch=0, replyAudioSource=null, replyAudioURL=null, replyAudioWatch=null;
 function releaseReplyAudio(){
  if(replyAudioWatch){clearInterval(replyAudioWatch);replyAudioWatch=null;}
@@ -69,10 +69,10 @@ function releaseReplyAudio(){
 async function speakReply(text,{continueConversation=false}={}){
  if(window.chatVoiceOff?.())return;
  window.stopStreamedVoice?.();
- const epoch=++speechEpoch;releaseReplyAudio();window.answerVoiceBegin?.();
+ const epoch=++speechEpoch;releaseReplyAudio();
  window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));voiceTurn.reset();
  let finished=false;
- const done=()=>{if(epoch!==speechEpoch||finished)return;finished=true;releaseReplyAudio();window.answerVoiceEnd?.();setTimeout(()=>{if(epoch!==speechEpoch)return;window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));if(mic.active&&(voiceReply||continueConversation))voiceTurn.arm();},500);};
+ const done=()=>{if(epoch!==speechEpoch||finished)return;finished=true;releaseReplyAudio();setTimeout(()=>{if(epoch!==speechEpoch)return;window.petyaSpeaking=false;document.dispatchEvent(new Event('petya-speaking'));if(mic.active&&(voiceReply||continueConversation))voiceTurn.arm();},500);};
  try {
   const encoded=await window.petya.synthesizeVoice(text);
   if(epoch!==speechEpoch)return;
@@ -80,7 +80,7 @@ async function speakReply(text,{continueConversation=false}={}){
   if(!encoded){done();return;}
   const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));
   replyAudioURL=URL.createObjectURL(new Blob([bytes],{type:'audio/wav'}));
-  const source=new Audio(replyAudioURL);window.answerVoiceSegment?.(source,text);replyAudioSource=source;
+  const source=new Audio(replyAudioURL);replyAudioSource=source;
   // Preserve the synthesized cadence without browser time compression.
   source.preservesPitch=true;source.defaultPlaybackRate=1.0;source.playbackRate=window.chatSpeechRate?.()||1;
   source.onended=done;
@@ -147,7 +147,7 @@ async function showDialogueReply(result,spoken=false){
  if(result.error&&result.messages?.at(-1)?.role==='assistant')result.messages.at(-1).error=true;
  if(result.reportShareId&&result.messages?.at(-1)?.role==='assistant'&&result.messages.at(-1).text===result.text)result.messages.at(-1).reportShareId=result.reportShareId;
  if(result.messages)showDialogueMessages(result.messages);else {const message={role:'assistant',text:result.text,at:Date.now(),error:!!result.error,steps:completedSteps||[],reportShareId:result.reportShareId,extensionData:result.extensionData,sources:result.sources||[],usedMaterials:result.usedMaterials||[],evidence:result.evidence||[]};chatHistory.push(message);dialogueMessages.append(renderDialogueMessage(message));}
- const newest=[...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1);if(!result.error&&!result.computerApproval)window.revealAnswer?.(newest,result.text,{spoken,initial:result.answerStreamId===spokenStreamId||result.answerStreamId?answerShown:0});
+ const newest=[...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1);
  if(result.text)window.checkVoiceLanguages?.(result.text,newest);
  window.applyChatPlaceholder($('command'),chatHistory,result);
  if(window.showResultChoices)await window.showResultChoices(result);

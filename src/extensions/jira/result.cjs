@@ -13,7 +13,7 @@ function capture(result){
 module.exports={
   id:'jira',capture,
   describe(message,topic,s){
-    const tasks=(message.jiraItems||[]).map(item=>({key:[item.site,item.key],item,
+    const tasks=(message.jiraItems||[]).map(item=>({key:[item.site,item.key],item,presentationKey:JSON.stringify([item.site,item.key]),
       title:'Jira · '+item.key,subtitle:item.summary,
       actions:[{id:'open',label:'Открыть в Jira'},{id:'details',label:'К ответу'},{id:'edit',label:'Изменить'}]}));
     return [...reports.describe(message,topic,s),...tasks];

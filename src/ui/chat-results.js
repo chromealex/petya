@@ -50,11 +50,13 @@
     choose.textContent=selected?selected.title:'Выбрать объект · '+choices().length;
     choose.title=selected?.subtitle||'Выбрать результат из этого чата';
     paintPicker();
-    document.querySelectorAll('.chat-result-card').forEach(card=>card.remove());
+    document.querySelectorAll('.chat-result-card,.chat-result-inline-actions').forEach(card=>card.remove());
     for(const item of state.items){
       const message=document.querySelector('.chat-messages [data-message-index="'+item.index+'"]')||
         dialogueMessages.querySelector('[data-message-index="'+item.index+'"]');
       if(!message)continue;
+      const presented=item.presentationKey&&[...message.querySelectorAll('[data-result-presentation]')].find(node=>node.dataset.resultPresentation===item.presentationKey);
+      if(presented){const actions=document.createElement('div');actions.className='chat-result-inline-actions';for(const action of item.actions.filter(a=>a.id!=='open'&&a.id!=='details'))actions.append(button(action.label,()=>act(item,action)));presented.append(actions);continue;}
       const card=document.createElement('section');card.className='chat-result-card';
       card.classList.toggle('selected',item.id===state.selected);
       const title=button(item.title,async()=>{await call('choose',state.scope,item.id);await refresh();});
