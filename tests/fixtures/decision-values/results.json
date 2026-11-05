@@ -1,0 +1,110 @@
+[
+  {
+    "id": "bins-отложено",
+    "mode": "base",
+    "answer": "{\n  \"proposed\": \"24\",\n  \"final\": null,\n  \"status\": \"отложено\"\n}",
+    "passed": true
+  },
+  {
+    "id": "bins-отложено",
+    "mode": "examples",
+    "answer": "{\"proposed\": \"24\", \"final\": null, \"status\": \"отложено\"}",
+    "passed": true
+  },
+  {
+    "id": "bins-утверждено",
+    "mode": "examples",
+    "answer": "{\"proposed\": \"24\", \"final\": \"24\", \"status\": \"утверждено\"}",
+    "passed": true
+  },
+  {
+    "id": "bins-утверждено",
+    "mode": "base",
+    "answer": "{\n  \"proposed\": \"24\",\n  \"final\": \"24\",\n  \"status\": \"утверждено\"\n}",
+    "passed": true
+  },
+  {
+    "id": "bins-заменено",
+    "mode": "base",
+    "answer": "{\n  \"proposed\": \"16\",\n  \"final\": null,\n  \"status\": \"отложено\"\n}",
+    "passed": false
+  },
+  {
+    "id": "bins-заменено",
+    "mode": "examples",
+    "answer": "{\"proposed\": \"24\", \"final\": \"16\", \"status\": \"заменено\"}",
+    "passed": true
+  },
+  {
+    "id": "alarm-отложено",
+    "mode": "examples",
+    "answer": "{\"proposed\": \"50\", \"final\": null, \"status\": \"отложено\"}",
+    "passed": true
+  },
+  {
+    "id": "alarm-отложено",
+    "mode": "base",
+    "answer": "{\n  \"proposed\": \"50\",\n  \"final\": null,\n  \"status\": \"отложено\"\n}",
+    "passed": true
+  },
+  {
+    "id": "alarm-утверждено",
+    "mode": "base",
+    "answer": "{\n  \"proposed\": \"50\",\n  \"final\": \"50\",\n  \"status\": \"утверждено\"\n}",
+    "passed": true
+  },
+  {
+    "id": "alarm-утверждено",
+    "mode": "examples",
+    "answer": "{\"proposed\": \"50\", \"final\": \"50\", \"status\": \"утверждено\"}",
+    "passed": true
+  },
+  {
+    "id": "alarm-заменено",
+    "mode": "examples",
+    "answer": "{\"proposed\": \"50\", \"final\": \"35\", \"status\": \"заменено\"}",
+    "passed": true
+  },
+  {
+    "id": "alarm-заменено",
+    "mode": "base",
+    "answer": "{\n  \"proposed\": \"50\",\n  \"final\": \"35\",\n  \"status\": \"утверждено\"\n}",
+    "passed": false
+  },
+  {
+    "id": "mark-отложено",
+    "mode": "base",
+    "answer": "{\n  \"proposed\": \"HX\",\n  \"final\": null,\n  \"status\": \"отложено\"\n}",
+    "passed": true
+  },
+  {
+    "id": "mark-отложено",
+    "mode": "examples",
+    "answer": "{\"proposed\": \"HX\", \"final\": null, \"status\": \"отложено\"}",
+    "passed": true
+  },
+  {
+    "id": "mark-утверждено",
+    "mode": "examples",
+    "answer": "{\"proposed\": \"HX\", \"final\": \"HX\", \"status\": \"утверждено\"}",
+    "passed": true
+  },
+  {
+    "id": "mark-утверждено",
+    "mode": "base",
+    "answer": "{\n  \"proposed\": \"HX\",\n  \"final\": \"HX\",\n  \"status\": \"утверждено\"\n}",
+    "passed": true
+  },
+  {
+    "id": "mark-заменено",
+    "mode": "base",
+    "answer": "{\n  \"proposed\": \"QZ\",\n  \"final\": null,\n  \"status\": \"отложено\"\n}",
+    "passed": false
+  },
+  {
+    "id": "mark-заменено",
+    "mode": "examples",
+    "answer": "{\"proposed\": \"HX\", \"final\": \"QZ\", \"status\": \"заменено\"}",
+    "passed": true
+  }
+]
