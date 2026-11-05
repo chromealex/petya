@@ -40,7 +40,10 @@ module.exports=ctx=>{
       dialogue.persist();
       for(const id of ids)ctx.attachments.remove(id);
       let answer,error=false;
-      try{answer=await ctx.analyzeMaterials({...topic,attachments:files},question);}
+      try{
+        if(!caption && files.every(f=>f.modelFormat))answer=files.map(f=>f.name+' — '+f.note).join('\n')+'\nОткройте «Показать 3D» под файлом.';
+        else answer=await ctx.analyzeMaterials({...topic,attachments:files},question);
+      }
       catch(e){answer=e.message;error=true;}
       if(!dialogue.state.topics.includes(topic))return {handled:true,text:'Чат удалён.'};
       topic.messages.push({role:'assistant',text:answer,error,...(error?{retryStep:'files'}:{}),usedMaterials:error?[]:require('./chat-attribution.cjs').fileRefs(files,answer),at:Date.now()});
