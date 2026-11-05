@@ -1,0 +1,58 @@
+[
+  {
+    "id": "floor-1",
+    "badAnswer": "{\"status\":\"final\",\"lower\":206,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+    "correctedAnswer": "{\"status\": \"final\", \"lower\": 205, \"upper\": null, \"lowerInclusive\": false, \"upperInclusive\": null}",
+    "source": "requirements-transfer-v5",
+    "note": "Only corrected completion is supervised."
+  },
+  {
+    "id": "zero-0",
+    "badAnswer": "{\"status\":\"final\",\"lower\":0,\"upper\":0,\"lowerInclusive\":true,\"upperInclusive\":true}",
+    "correctedAnswer": "{\"status\": \"final\", \"lower\": null, \"upper\": 0, \"lowerInclusive\": null, \"upperInclusive\": true}",
+    "source": "requirements-transfer-v5",
+    "note": "Only corrected completion is supervised."
+  },
+  {
+    "id": "negative-1",
+    "badAnswer": "{\"status\":\"final\",\"lower\":null,\"upper\":-12,\"lowerInclusive\":null,\"upperInclusive\":false}",
+    "correctedAnswer": "{\"status\": \"final\", \"lower\": -12, \"upper\": null, \"lowerInclusive\": false, \"upperInclusive\": null}",
+    "source": "requirements-transfer-v5",
+    "note": "Only corrected completion is supervised."
+  },
+  {
+    "id": "mixed-range-1",
+    "badAnswer": "{\"status\":\"final\",\"lower\":36,\"upper\":64,\"lowerInclusive\":true,\"upperInclusive\":true}",
+    "correctedAnswer": "{\"status\": \"final\", \"lower\": 36, \"upper\": 64, \"lowerInclusive\": false, \"upperInclusive\": true}",
+    "source": "requirements-transfer-v5",
+    "note": "Only corrected completion is supervised."
+  },
+  {
+    "id": "backup-recipients",
+    "badAnswer": "{\"summary\": \"Настроить отправку отчёта резервного копирования администратору\", \"description\": \"Настроить отправку отчёта резервного копирования администратору с показом времени завершения и результата. Путь к резервной копии скрывать. Отображать только отчёт резервного копирования.\", \"questions\": []}",
+    "correctedAnswer": "{\"summary\": \"Отчёт резервного копирования\", \"description\": \"Отправлять администратору время завершения и результат резервного копирования. Путь к файлу скрывать. Руководителю этот отчёт не отправлять.\", \"questions\": []}",
+    "source": "requirements-transfer-v5",
+    "note": "Only corrected completion is supervised."
+  },
+  {
+    "id": "explicit-trigger",
+    "badAnswer": "{\"summary\": \"Отправлять уведомление дежурному только при неудачной проверке\", \"description\": \"Требования к отправке уведомления дежурному:\\n\\n1. Уведомление отправлять ИСКЛЮЧИТЕЛЬНО после неудачной проверки. При успешной проверке отправлять не нужно.\\n2. В теле уведомления включать код ошибки.\\n3. В теле уведомления НЕ показывать имя пользователя.\\n4. Получателями уведомления остаются дежурные.\", \"questions\": []}",
+    "correctedAnswer": "{\"summary\": \"Уведомление о неудачной проверке\", \"description\": \"Только после неудачной проверки отправлять дежурному код проверки и текст ошибки. Имя пользователя не показывать. После успешной проверки уведомление не отправлять.\", \"questions\": []}",
+    "source": "requirements-transfer-v5",
+    "note": "Only corrected completion is supervised."
+  },
+  {
+    "id": "print-columns",
+    "badAnswer": "{\"summary\": \"Русский интерфейс\", \"description\": \"Русский интерфейс\", \"questions\": []}",
+    "correctedAnswer": "{\"summary\": \"Печать накладной\", \"description\": \"Печатать номер накладной, дату в формате ДД.ММ.ГГГГ и количество. Телефон покупателя не печатать. Поиск не добавлять.\", \"questions\": []}",
+    "source": "requirements-transfer-v5",
+    "note": "Only corrected completion is supervised."
+  },
+  {
+    "id": "sensor-topic",
+    "badAnswer": "{\"summary\": \"Показывать номер датчика при строгой температуре ниже 72 градусов\", \"description\": \"В интерфейсе показывать номер датчика только в том случае, если его температура строго меньше 72 градусов. Серийный номер владельца датчика скрывать. Другие функции датчика и вентилятора не добавлять.\", \"questions\": []}",
+    "correctedAnswer": "{\"summary\": \"Проверка показания датчика\", \"description\": \"Температура должна быть строго ниже 72 градусов; 72 не допускается. Технику показывать номер датчика. Серийный номер владельца скрывать. Вентилятор вне задачи.\", \"questions\": []}",
+    "source": "requirements-transfer-v5",
+    "note": "Only corrected completion is supervised."
+  }
+]

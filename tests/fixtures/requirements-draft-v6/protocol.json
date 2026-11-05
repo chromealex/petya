@@ -1,0 +1,30 @@
+{
+  "data": {
+    "train": {
+      "records": 128,
+      "maxTokens": 238,
+      "sha256": "654f27e93b1ea812b25be1cd38447ae3cf2423a4ef685546e60fd0b48be62471"
+    },
+    "test": {
+      "records": 24,
+      "maxTokens": 230,
+      "sha256": "197044ab4154d4035ff973453f16116227052fa02a42f47bcb4fef2798834b4d"
+    }
+  },
+  "parentAdapterSHA256": "e18071047755b0a6406c454a064ddbc56a74940250e72813a43d7b1ab15da93e",
+  "baseRevision": "8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "epochs": 2,
+  "steps": 256,
+  "learningRate": 5e-05,
+  "optimizer": "Fresh Adam; parent adapter weights retained exactly before first step",
+  "seed": 42,
+  "selection": "Fixed duration; no selection using final answers",
+  "evaluation": "Base, parent v5 and continued v6 on the same reserved set, greedy no-thinking, numeric cap120/draft450",
+  "draftRubric": "Valid JSON, all explicit facts and exclusions preserved; no invented scope/conditions; only explicitly open questions. Manual non-blind review with reasons.",
+  "gate": "Candidate numeric score must be at least both baselines and strict draft coverage must exceed both. This small gate only permits further evaluation, never automatic deployment.",
+  "packages": {
+    "mlx": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "transformers": "5.22.1"
+  }
+}
