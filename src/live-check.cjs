@@ -50,11 +50,15 @@ module.exports=async(win,out)=>{
  // The packaged app has no console: progress and an unexpected exit are logged next to the report.
  const note=line=>{try{fs.appendFileSync(out+'.log',new Date().toISOString()+' '+line+'\n');}catch{}};
  process.once('exit',code=>note('EXIT '+code));process.on('uncaughtException',e=>note('UNCAUGHT '+(e?.stack||e)));process.on('unhandledRejection',e=>note('REJECTION '+(e?.stack||e)));
+ {const {app}=require('electron');for(const k of ['quit','exit']){const f=app[k].bind(app);app[k]=(...a)=>{note('APP.'+k.toUpperCase()+' '+new Error().stack.split('\n').slice(2,6).join(' | '));return f(...a);};}
+  app.on('before-quit',()=>note('BEFORE-QUIT'));}
  win.webContents.on('render-process-gone',(_e,d)=>note('RENDERER GONE '+JSON.stringify(d)));
 
  const js=code=>win.webContents.executeJavaScript(code);
  const withTimeout=(promise,ms)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(Error('Нет ответа за '+ms/1000+' с')),ms))]);
  const report={at:new Date().toISOString(),version:require('../package.json').version,scenarios:[]};
+ // PETYA_LIVE_RESUME=1: an interrupted run (Petya was quit) continues with the scenarios it has not finished.
+ let done=new Set();if(process.env.PETYA_LIVE_RESUME==='1')try{const prev=JSON.parse(fs.readFileSync(out,'utf8'));if(!prev.summary){const names=new Set(CASES.map(c=>c.name));report.scenarios=prev.scenarios.filter(x=>names.has(x.name)&&x.turns.length===CASES.find(c=>c.name===x.name).turns.length);report.at=prev.at||report.at;done=new Set(report.scenarios.map(x=>x.name));note('RESUME after '+done.size+' scenarios');}}catch{}
  const before=await js('window.petya.dialogueTopics()');
  // PETYA_LIVE_MODEL runs the whole check on another local model (for comparing models); restored afterwards.
  const previousModel=(await js('window.petya.settings()')).model||'';report.model=process.env.PETYA_LIVE_MODEL||previousModel;
@@ -64,7 +68,7 @@ module.exports=async(win,out)=>{
  try{
   // PETYA_LIVE_ONLY=<regex> runs only the scenarios whose name matches (e.g. «Агент»).
   const only=process.env.PETYA_LIVE_ONLY?new RegExp(process.env.PETYA_LIVE_ONLY,'iu'):null;
-  for(const scenario of CASES.filter(x=>!only||only.test(x.name))){const models=require('./model-context.cjs');models.stats({reset:true});
+  for(const scenario of CASES.filter(x=>(!only||only.test(x.name))&&!done.has(x.name))){const models=require('./model-context.cjs');models.stats({reset:true});
    // Git needs the folders of the user's own project; its chat is archived right after.
    // Prefer the active project when it has folders, otherwise the first project that has some.
    const withFolders=(before.projects||[]).filter(p=>p.folder||p.folders?.length||p.memoryId);
