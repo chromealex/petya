@@ -47,6 +47,11 @@ const SCENARIOS=[
 // PETYA_LIVE_SET=500 runs the 500 graded cases of src/live-cases.cjs instead of the short scenario list.
 const CASES=process.env.PETYA_LIVE_SET==='500'?require('./live-cases.cjs'):SCENARIOS;
 module.exports=async(win,out)=>{
+ // The packaged app has no console: progress and an unexpected exit are logged next to the report.
+ const note=line=>{try{fs.appendFileSync(out+'.log',new Date().toISOString()+' '+line+'\n');}catch{}};
+ process.once('exit',code=>note('EXIT '+code));process.on('uncaughtException',e=>note('UNCAUGHT '+(e?.stack||e)));process.on('unhandledRejection',e=>note('REJECTION '+(e?.stack||e)));
+ win.webContents.on('render-process-gone',(_e,d)=>note('RENDERER GONE '+JSON.stringify(d)));
+
  const js=code=>win.webContents.executeJavaScript(code);
  const withTimeout=(promise,ms)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(Error('Нет ответа за '+ms/1000+' с')),ms))]);
  const report={at:new Date().toISOString(),version:require('../package.json').version,scenarios:[]};
@@ -66,7 +71,7 @@ module.exports=async(win,out)=>{
    const target=scenario.userProject?((withFolders.find(p=>p.id===before.activeProjectId)||withFolders[0])?.id||before.activeProjectId||project.id):project.id;
    await js(`window.petya.chatProjectSelect(${JSON.stringify(target)})`);await js(`window.petya.dialogueSelect('')`);
    const turns=[];
-   for(const turn of scenario.turns){const [text,checks]=Array.isArray(turn)?turn:[turn,{}];const started=Date.now();let r;
+   for(const turn of scenario.turns){const [text,checks]=Array.isArray(turn)?turn:[turn,{}];const started=Date.now();let r;try{fs.appendFileSync(out+'.log',new Date().toISOString()+' '+scenario.name+' › '+text+'\n');}catch{}
     try{r=await withTimeout(js(`window.petya.converse(${JSON.stringify(text)}).then(r=>({text:r.text||'',topicId:r.topicId||'',by:r.by||(r.messages||[]).filter(m=>m.role==='assistant').at(-1)?.by||'',handled:r.handled,question:!!r.question,error:!!r.error,steps:(r.steps||[]).map(s=>s.label),options:(r.options||r.clarificationOptions||r.skillChoices||r.integrationOffers||r.mediaChoices||[]).map(o=>o.label||o).slice(0,6)}))`),150000);}
     catch(e){r={text:'',error:true,failure:e.message};}
     // Agents answer later: wait for the combined answer in the parent chat.
@@ -82,7 +87,7 @@ module.exports=async(win,out)=>{
    if(target!==project.id){const id=(await js('window.petya.dialogueTopics()')).activeId;if(id)try{await js(`window.petya.chatArchive('chat',${JSON.stringify(id)},true)`);}catch{}}
   }
  }finally{
-  report.summary=require('./live-grade.cjs').summary(report);
+  try{report.summary=require('./live-grade.cjs').summary(report);}catch(e){report.summaryError=e.message;}
   fs.writeFileSync(out,JSON.stringify(report,null,1));
   // Leave the user's chats as they were: remove the test project and the chats this run opened (and leftovers of
   // older runs), then return to the previous chat.
