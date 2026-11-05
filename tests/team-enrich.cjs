@@ -31,3 +31,16 @@ const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}
  const r=await fill.fromScreen('Заполни команду');assert.match(r.text,/Заполнено полей: [1-9]/);assert.equal(JSON.parse(settings.teamMembers)[0].role,'QA Lead');
  console.log('Team enrich: existing cards without roles are filled on the next run passed');
 })().catch(e=>{console.error(e);process.exit(1);});
+// «Можешь команде добавить роли?» adds roles to the saved team instead of a Jira workload report
+(async()=>{
+ const {isTeamFill,rolesRequest}=require('../src/team-fill.cjs');const route=require('../src/work-query-route.cjs');
+ for(const q of ['Можешь команде добавить роли?','Проставь роли в команде','Заполни обязанности коллег'])assert(isTeamFill(q)&&rolesRequest(q),q);
+ for(const q of ['Какие задачи у команды?','Добавь роли в задачи Jira','Покажи роли в Jira'])assert(!rolesRequest(q),q);
+ const settings={teamMembers:JSON.stringify([{name:'Полина Иванова'},{name:'Мария'}]),teamRoles:''};let read=0;
+ const fill=new TeamFill({settings:()=>settings,save:m=>{settings.teamMembers=JSON.stringify(m);},sources:()=>{read++;return [];},roster:async()=>{read++;return null;},scope:()=>'s',
+  enrich:async r=>enrich(r,[{slackId:'U1',names:['полина иванова'],name:'Полина Иванова',title:'QA Lead',email:''}],new Map())});
+ const r=await fill.turn('Можешь команде добавить роли?');assert.equal(read,0,'the saved team is used, Slack is not read again');
+ assert.match(r.text,/Заполнено полей: [1-9]/);assert.match(r.text,/Без роли остались: Мария/);assert.equal(JSON.parse(settings.teamMembers)[0].role,'QA Lead');
+ const empty=new TeamFill({settings:()=>({teamMembers:'[]'}),save:()=>{},sources:()=>[],scope:()=>'s'});assert.match((await empty.turn('Добавь роли команде')).text,/пока никого нет/);
+ console.log('Team roles: «добавь команде роли» enriches the saved team (no Slack re-read), empty team asks to fill it first passed');
+})().catch(e=>{console.error(e);process.exit(1);});

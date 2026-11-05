@@ -2,7 +2,13 @@ const team = require('./team.cjs');
 const clean = value => String(value || '').trim().replace(/^петя[\s,:.!?—-]*/iu, '');
 const normalized = value => value.trim().toLocaleLowerCase().replace(/ё/g, 'е');
 const labels = {name:'имя',aliases:'варианты имени',role:'роль',projects:'проекты',responsibilities:'обязанности',email:'email',slackId:'Slack ID',jiraId:'Jira ID'};
+// «Можешь команде добавить роли?», «Проставь роли в команде», «Заполни обязанности коллег»: add roles to the saved team.
+function rolesRequest(text) {
+ const value=clean(text).replace(/[?!.]+$/u,'');
+ return /(?:добав|заполн|простав|укаж|укази|обнов|допиш|подтян|найд)\p{L}*/iu.test(value)&&/(?:рол|должност|обязанност)\p{L}*/iu.test(value)&&/(?:команд|коллег|сотрудник|участник)\p{L}*/iu.test(value)&&!/(?:jira|джир|задач|баг)/iu.test(value);
+}
 function isTeamFill(text) {
+ if(rolesRequest(text))return true;
  return /^(?:пожалуйста[,\s]+)?(?:заполни|дополни|обнови|собери|сформируй)\s+(?:(?:раздел|справочник|состав|карточки)\s+)?(?:нашу\s+|мою\s+)?(?:команду|команды|команда)(?=$|[\s,.!:—-])/iu.test(clean(text));
 }
 function directRows(sources) {
@@ -59,7 +65,10 @@ class TeamFill {
    this.pending=null;
    const scope=this.scope(),epoch=this.epoch,settings=this.settings();
    const baseline=settings.teamMembers||'[]',notes=settings.teamRoles||'';
-   const roster=preset||(screenSources?null:this.roster?await this.roster(command):null);
+   // Roles for the saved team: its own cards are the people; Slack profiles and Jira add the roles.
+   const saved=!preset&&!screenSources&&rolesRequest(command)?team.members(settings):[];
+   if(rolesRequest(command)&&!preset&&!screenSources&&!saved.length)return this.askDetails('В разделе «Команда» пока никого нет. Скажи «Заполни команду» — соберу коллег из Slack и Jira вместе с ролями.');
+   const roster=preset||(saved.length?saved.map(member=>({member:{...member},evidence:'Команда · '+member.name,source:'Команда'})):null)||(screenSources?null:this.roster?await this.roster(command):null);
    let budget=32000;const sources=(screenSources||(roster===null?this.sources(command):[{title:'Команда',text:command}])).map((s,i)=>({...s,id:String(i),text:String(s.text||'')})).filter(s=>s.text.trim()).map(s=>{const text=s.text.slice(0,Math.max(0,budget));budget-=text.length;return {...s,text};}).filter(s=>s.text);
    if(!sources.length&&!screenSources&&!preset){const rows=await this.fromJira();if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}
    if(!sources.length)return this.askDetails('В памяти пока нет сведений о коллегах. Назовите имена и обязанности, например: «Полина — тестирование, Иван — серверная часть».');
@@ -151,4 +160,4 @@ class TeamFill {
   this.pending=null;return this.reply(p.summary+' Команда заполнена.',{teamUpdated:true});
  }
 }
-module.exports={TeamFill,isTeamFill,grounded,directRows,directMessages};
+module.exports={TeamFill,isTeamFill,rolesRequest,grounded,directRows,directMessages};
