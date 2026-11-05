@@ -908,8 +908,15 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .chat-timeline{position:absolute;left:4px;top:calc(var(--chat-header-height,64px) + 12px);bottom:calc(var(--composer-inset,180px) + 12px);width:24px;z-index:8;display:flex;flex-direction:column;justify-content:flex-start;gap:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-block:12px}
 .chat-timeline[hidden]{display:none}
 .chat-timeline button{flex:0 0 10px;min-height:10px;width:24px;padding:0;border:0;border-radius:0;background:transparent;position:relative;box-shadow:none}
-.chat-timeline button::after{content:'';display:block;width:6px;height:1px;background:var(--muted,#8b9690);opacity:.45;transition:width .15s,opacity .15s}
+.chat-timeline button::after{content:'';display:block;width:6px;height:1px;background:var(--muted,#8b9690);opacity:.45;min-width:0;transition:width .15s,min-width .15s,opacity .15s}
 .chat-timeline button.user::after{width:12px}
+/* Expand nearby marks symmetrically without moving their hit targets. */
+.chat-timeline button:is(:hover,:focus-visible) + button::after,
+.chat-timeline button:has(+ button:is(:hover,:focus-visible))::after{min-width:18px;opacity:.85}
+.chat-timeline button:is(:hover,:focus-visible) + button + button::after,
+.chat-timeline button:has(+ button + button:is(:hover,:focus-visible))::after{min-width:14px;opacity:.7}
+.chat-timeline button:is(:hover,:focus-visible) + button + button + button::after,
+.chat-timeline button:has(+ button + button + button:is(:hover,:focus-visible))::after{min-width:10px;opacity:.55}
 .chat-timeline button.current::after,.chat-timeline button:hover::after,.chat-timeline button:focus-visible::after{width:22px;opacity:1;background:var(--text,#eef4e9)}
 .chat-timeline-preview{position:fixed;z-index:1000;width:280px;max-width:calc(100vw - 48px);padding:12px 14px;border:1px solid #3c4540;border-radius:12px;background:#252c27;box-shadow:0 8px 24px #0004;pointer-events:none;font-size:13px}
 .chat-timeline-preview strong{display:block;margin-bottom:5px}.chat-timeline-preview span{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:#aeb7b0;line-height:1.5}
