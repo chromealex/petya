@@ -31,3 +31,7 @@ A retry reached OAuth/OBF token retrieval but the Meeting SDK rejected the join 
 ## Review remediation follow-up (2026-11-05)
 
 Zoom returned the external beta request with "App Beta - Insufficient Evidence". No more detailed reviewer explanation was available. New first-party SSDLC/security/incident/vulnerability documents and original Semgrep/Wapiti reports are now prepared; see SUBMISSION-README.md and SCAN-RECORD.md. This supersedes the earlier statement that no SAST/DAST output was available, but no independent audit or pentest is claimed. The initial policies are pending owner adoption, the revised privacy notice is not yet public, and the expanded materials have not been re-submitted.
+
+## Owner approval and architecture change (2026-11-05)
+
+The owner adopted the new procedures and authorized publication and submission. The privacy notice was published and verified byte-for-byte. The approved policy PDF was uploaded to the SSDLC field. Zoom rejected JSON scan attachments as unsupported file types. Before re-submission, the owner requested switching the primary recording architecture to local device audio, like Granola. The external SDK review was therefore left as a draft, not re-submitted. The separate-participant package remains historical evidence and must not be presented as describing a local-only architecture.

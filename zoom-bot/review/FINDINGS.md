@@ -18,7 +18,7 @@ Wapiti flagged missing X-Frame-Options on the public root. CSP already used `fra
 
 - Server Node 18 was detected and replaced for both services with official Node 22.23.4 LTS after broker/provider/recorder tests passed on that runtime. Both services are active; see evidence/deployment.txt.
 - Failed/unacknowledged audio has no automatic expiry. Broad release requires an explicit retention decision and implementation or owner acceptance of manual operations; not implicitly accepted here.
-- The updated privacy notice is prepared but not yet published.
+- The owner-approved updated privacy notice is published at https://auth.petya-app.ru/privacy.
 - No independent penetration test, incident drill or continuously scheduled scan exists.
 - Full meeting capture/transcription acceptance and Windows live detection remain pending; prior external-meeting attempt returned Zoom SDK code 63.
-- Newly documented policies require owner adoption. They do not establish a historical audited program.
+- The owner adopted the newly documented policies on 2026-11-05. They do not establish a historical audited program.

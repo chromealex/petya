@@ -38,7 +38,7 @@ for i,name in enumerate(names):
 
 def footer(canvas,doc):
  canvas.setFont('Helvetica',8);canvas.setFillColor(colors.HexColor('#53645f'))
- canvas.drawString(42,24,'Petya | Zoom review preparation | 2026-11-05 | Owner approval pending')
+ canvas.drawString(42,24,'Petya | Zoom review preparation | 2026-11-05 | Owner approved')
  canvas.drawRightString(553,24,str(doc.page))
 SimpleDocTemplate(str(out),pagesize=(595,842),rightMargin=42,leftMargin=42,topMargin=42,bottomMargin=45,title='Petya Zoom security review package',author='Petya project').build(story,onFirstPage=footer,onLaterPages=footer)
 print(out)
