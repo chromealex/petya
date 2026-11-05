@@ -1,0 +1,105 @@
+{
+  "retention": {
+    "exact": 165,
+    "total": 165,
+    "prior_targets": 117,
+    "last_round_cases": 48,
+    "current_two_fixes": true
+  },
+  "fresh_candidate": {
+    "bounds": {
+      "passed": 20,
+      "total": 20
+    },
+    "general": {
+      "passed": 18,
+      "total": 20
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 20,
+      "total": 20
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 8,
+      "total": 8
+    },
+    "sorting": {
+      "passed": 14,
+      "total": 16
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 60,
+      "total": 60
+    }
+  },
+  "fresh_parent": {
+    "bounds": {
+      "passed": 20,
+      "total": 20
+    },
+    "general": {
+      "passed": 15,
+      "total": 20
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 20,
+      "total": 20
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 8,
+      "total": 8
+    },
+    "sorting": {
+      "passed": 11,
+      "total": 16
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 60,
+      "total": 60
+    }
+  },
+  "fresh_passed": 58,
+  "fresh_total": 60,
+  "paired_gains": [
+    "sort-0-1-0",
+    "sort-1-1-0",
+    "sort-3-1-0"
+  ],
+  "paired_regressions": [],
+  "no_case_regression_gate_passed": true,
+  "numeric_gate_passed": true,
+  "literal_gate_passed": true,
+  "targeted_dialogue_states_passed": true,
+  "strict_draft_improvement_gate_passed": false,
+  "strict_draft_gate_explanation": "Parent already scores 20/20; candidate preserves that ceiling, so this frozen set cannot demonstrate a strict draft gain.",
+  "all_fresh_cases_passed": false,
+  "broad_reliability_established": false,
+  "release_petya_v1": false,
+  "live_model_changed": false,
+  "decision": "Retain experimental adapter: known corrections acquired and fresh sorting improves without observed regression, but two all-negative sorting cases remain.",
+  "limitations": "Related synthetic small sample, manual non-blind draft review; all 165 retention targets were trained."
+}
