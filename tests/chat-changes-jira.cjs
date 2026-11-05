@@ -51,6 +51,7 @@ const {scope}=require('../src/features/chat-results.cjs');
  id=(await api.chatChanges.start(row,expected)).changeEditor;await api.ipc.prepare(expected,id,{field:'summary',value:'New title'});
  f.issues.get('TEST-1').fields.updated='external';await api.ipc.apply(expected,id);assert.equal(api.ipc.snapshot().items.at(-1).state,'failed');assert.equal(f.writes.length,2);
  id=(await api.chatChanges.start(row,expected)).changeEditor;await api.ipc.prepare(expected,id,{field:'summary',value:'New title'});f.fail('timeout');await api.ipc.apply(expected,id);assert.equal(api.ipc.snapshot().items.at(-1).state,'uncertain');await assert.rejects(api.ipc.apply(expected,id));
+ const count=f.writes.length;await api.ipc.verify(expected,id);assert.equal(api.ipc.snapshot().items.at(-1).state,'uncertain');assert.equal(f.writes.length,count);f.issues.get('TEST-1').fields.summary='New title';await api.ipc.verify(expected,id);assert.equal(api.ipc.snapshot().items.at(-1).state,'done');assert.equal(api.ipc.snapshot().items.at(-1).receipt.canUndo,false);assert.equal(f.writes.length,count);
  assert(f.w.history.filter(e=>e.kind==='edit-existing').every(e=>e.rows.every(r=>!r.canDelete)));
  s.dialogue.state.projects[0].disabledServices=['jira'];await assert.rejects(api.chatChanges.start(row,expected),/отключён/);
  console.log('Jira chat changes: explicit person, preview, restart, single write, undo, conflict, timeout and disabled project passed');

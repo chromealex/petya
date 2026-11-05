@@ -72,4 +72,11 @@ async function natural(record,intent,s,check){
  }
  throw Error('Уточните поле и новое значение задачи.');
 }
-module.exports={load,people,prepare,apply,undo,natural};
+async function verify(record,s,check){
+ const settings=connection(record.target,s,check),current=await snapshot(s.workspace,record.target.key,settings);connection(record.target,s,check);
+ const patch=record.plan?.staged?.rows?.find(r=>r.key===record.target.key)?.patch;
+ if(!patch)throw Error('Нет сохранённого плана для сравнения.');
+ if(changes(current,patch,{people:record.people||[]}).length)throw Error('Текущие поля Jira отличаются от предпросмотра. Запись не повторялась; откройте задачу и подготовьте новую правку.');
+ return {text:'Проверено сейчас: поля '+record.target.key+' совпадают с предпросмотром. Это подтверждает текущее состояние, а не автора изменения.',url:record.target.site+'/browse/'+record.target.key,canUndo:false,verifiedAt:Date.now()};
+}
+module.exports={load,people,prepare,apply,undo,natural,verify};

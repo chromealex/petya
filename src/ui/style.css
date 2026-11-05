@@ -930,3 +930,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .clarification-history { position: relative; font-size: 12px; color: var(--muted, #aab5af); }
 .clarification-history > div { position: absolute; top: 100%; right: 0; width: min(360px, 70vw); max-height: 45vh; overflow: auto; padding: 12px; border: 1px solid #3c4640; border-radius: 12px; background: #1b2220; z-index: 30; box-shadow: 0 8px 28px #0005; }
 .clarification-history p { margin: 0; padding: 8px 0; white-space: pre-line; overflow-wrap: anywhere; }
+.action-result-card { margin-top: 12px; padding: 12px 14px; border: 1px solid #3c4640; border-radius: 12px; display: grid; gap: 8px; }
+.action-result-card small { opacity: .7; }
+.action-result-card p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.action-result-card[data-state="unknown"] { border-color: #897348; }
