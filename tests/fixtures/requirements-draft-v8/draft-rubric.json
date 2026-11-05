@@ -1,0 +1,68 @@
+{
+  "global": "Valid schema; no invented requirements or reopened settled questions. Semantic equivalence and logically entailed constraints count. Non-blind manual review.",
+  "cases": {
+    "d-export": [
+      "timezone and flight code",
+      "XML unapproved, even temporarily",
+      "only format question"
+    ],
+    "d-rename": [
+      "original name Contracts retained",
+      "purple icon",
+      "address and content unchanged"
+    ],
+    "d-open": [
+      "name as text and capacity",
+      "address hidden",
+      "exactly size and order questions"
+    ],
+    "d-print": [
+      "queue number, appointment time HH:MM, room name",
+      "no passport data",
+      "no search"
+    ],
+    "d-failure": [
+      "auditor only on reconciliation failure",
+      "reconciliation ID and cause",
+      "employee surname hidden",
+      "no successful notifications"
+    ],
+    "d-report": [
+      "logistician recipient, not buyer",
+      "waybill code replaces order code, result retained",
+      "driver phone hidden"
+    ],
+    "d-bound": [
+      "humidity strictly below 67 percent as a constraint, not conditional display",
+      "operator sees camera number regardless of humidity",
+      "tenant hidden",
+      "no fan control"
+    ],
+    "d-refresh": [
+      "free-place count",
+      "exactly 97 seconds replaces 113",
+      "visitor names hidden"
+    ],
+    "d-approved": [
+      "name and SKU",
+      "YAML approved",
+      "no format question"
+    ],
+    "d-partial": [
+      "Supplies renamed Batches",
+      "icon color unchanged",
+      "address and data unchanged"
+    ],
+    "d-resolved": [
+      "name as black text and author",
+      "purchase price hidden",
+      "only ordering question"
+    ],
+    "d-shift": [
+      "email to customer",
+      "reservation number and check-in date YYYY-MM-DD",
+      "administrator phone hidden",
+      "no payment or cleaning scope"
+    ]
+  }
+}
