@@ -1,0 +1,16 @@
+{
+  "python": "3.12.0",
+  "packages": {
+    "mlx": "0.32.4",
+    "mlx-lm": "0.32.2",
+    "transformers": "5.22.1"
+  },
+  "source_sha256": {
+    "tests/fixtures/requirements-draft-v7/train.py": "ebdd2086372060fa6fd9328a40c205a249a05e133811eef1446cddc0d1746716",
+    "tests/fixtures/requirements-draft-v8/evaluate.py": "6b8c01a05adc5fea462de4c090d0a4ac9d376007124ee6d396c3c39d3c72e287",
+    "tests/fixtures/requirements-draft-v8/scoring.py": "c11b8e892cdb7402b5d23edf5f787dd209a103109f78eb2607cf251e067dce7c",
+    "tests/fixtures/requirements-draft-v8/train.jsonl": "1842a8c028b2633501db6e599252628058e9d7cea7546955b1cb6e98eaf0199e",
+    "tests/fixtures/requirements-draft-v8/check.jsonl": "b5515a0720e05c56bb2aa25bfa86772263e89ddf0a134fb3d174e6545f26bcad"
+  },
+  "command": "train.py BASE train.jsonl OUTPUT --parent ../requirements-draft-v7/deep-adapter --epochs 2 --lr 0.00003 --layers 5 --attention --mlp"
+}

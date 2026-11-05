@@ -1,0 +1,11 @@
+{
+  "semantic_pass": 7,
+  "total": 7,
+  "exact_json_pass": 6,
+  "schema_pass": 7,
+  "non_exact_case": {
+    "id": "two-open",
+    "reason": "Which title color to choose is equivalent to which color to choose for the title; all other constraints and both questions retained."
+  },
+  "interpretation": "Training acquisition after standard reload, not generalization."
+}
