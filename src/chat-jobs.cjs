@@ -23,7 +23,11 @@ class ChatJobs{
  }
  busy(id){return this.jobs.has(id);}
  any(){return this.jobs.size>0;}
- update(topic,state,label){const at=Date.now();topic.chatJob={...topic.chatJob,state,label,at,finishedAt:['done','attention','cancelled'].includes(state)?at:null,acknowledged:false};this.dialogue.persist();this.emit({topicId:topic.id,job:topic.chatJob});}
+ update(topic,state,label){const at=Date.now();
+ const steps=(topic.chatJob?.steps||[]).map(step=>({...step})),last=steps.at(-1);
+ if(['queued','running'].includes(state)&&label&&last?.label!==label){if(last&&!last.done)last.done=at;steps.push({label,at});if(steps.length>40)steps.shift();}
+ if(!['queued','running'].includes(state)&&last&&!last.done)last.done=at;
+ topic.chatJob={...topic.chatJob,state,label,at,steps,finishedAt:['done','attention','cancelled'].includes(state)?at:null,acknowledged:false};this.dialogue.persist();this.emit({topicId:topic.id,job:topic.chatJob});}
  finishForeground(id,state,result){
   const topic=this.dialogue.state.topics.find(t=>t.id===id);
   if(!topic?.chatJob||this.busy(id)||!['done','attention'].includes(state))return false;
