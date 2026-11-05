@@ -1,8 +1,8 @@
 const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}=require('../src/team-enrich.cjs');const {TeamFill}=require('../src/team-fill.cjs');
 (async()=>{
  // Slack profile titles and Jira components/labels fill empty role and responsibilities, never overwrite
- const profiles=await slackProfiles({slackToken:'x'},async url=>{assert.match(url,/users\.list/);return {ok:true,members:[
-  {id:'U1',profile:{real_name:'Полина Иванова',title:'QA Lead',email:'p@x.ru'}},{id:'U2',profile:{real_name:'Иван Петров',title:''}},{id:'B1',is_bot:true,profile:{real_name:'Jira'}}]};});
+ const profiles=(await slackProfiles({slackToken:'x'},async url=>{assert.match(url,/users\.list/);return {ok:true,members:[
+  {id:'U1',profile:{real_name:'Полина Иванова',title:'QA Lead',email:'p@x.ru'}},{id:'U2',profile:{real_name:'Иван Петров',title:''}}, {id:'B1',is_bot:true,profile:{real_name:'Jira'}}]};})).profiles;
  assert.deepEqual(profiles.map(p=>p.slackId),['U1','U2']);
  const w={settings:()=>({jiraUrl:'https://x',jiraProjects:'BW'}),api:async()=>({issues:[
   {fields:{assignee:{accountId:'a1',displayName:'Полина Иванова'},project:{key:'BW'},components:[{name:'Тесты'}],labels:['release']}},
@@ -21,6 +21,17 @@ const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}
  assert.equal(saved.find(m=>m.name==='Полина Иванова').role,'QA Lead');
  // an existing card without a role gets it on the next run
  const again=await fill.fromScreen('Заполни команду');assert.match(again.text,/Добавлено коллег: 0/);
+ // Large workspaces: the walk goes on until everyone wanted is found, waits once on a Slack limit, looks up by e-mail
+ {let page=0,waited=0;const pages=[[{id:'U9',profile:{real_name:'Кто-то'}}],[{id:'U10',profile:{real_name:'Polina Samarina',title:'Project Manager, Jet Whales'}}],[{id:'U11',profile:{real_name:'Лишний'}}]];
+  const req=async url=>{if(/lookupByEmail/.test(url))return {ok:true,user:{id:'U12',profile:{real_name:'Ivan S',title:'QA',email:'ivan@x.ru'}}};const i=page++;if(i===1&&!waited){waited++;page--;const e=Error('Slack 429');e.status=429;e.retryAfter=1;throw e;}return {ok:true,members:pages[i],response_metadata:{next_cursor:i<2?'c'+i:''}};};
+  const r=await slackProfiles({slackToken:'x'},req,[{name:'Polina Samarina'},{name:'Ivan Shapovalov',email:'ivan@x.ru'}],{wait:async()=>{}});
+  assert(r.limited);assert(r.complete);assert.equal(page,3,'Ivan is not in the list, so the walk goes to the end');
+  assert.equal(r.profiles.find(p=>p.slackId==='U10').title,'Project Manager, Jet Whales');assert(r.profiles.some(p=>p.slackId==='U12'),'found by e-mail');}
+ // the reply tells «profile not found» from «no job title»
+ {const settings={teamMembers:JSON.stringify([{name:'Мария'},{name:'Олег'}]),teamRoles:''};
+  const f=new TeamFill({settings:()=>settings,save:m=>{settings.teamMembers=JSON.stringify(m);},sources:()=>[],scope:()=>'s',
+   enrich:async rows=>{const out=enrich(rows,{profiles:[{slackId:'U1',names:['олег'],name:'Олег',title:'',email:''}],complete:false,limited:true},new Map());out.slack={complete:false,limited:true};return out;}});
+  const r=await f.turn('Добавь команде роли');assert.match(r.text,/Slack ограничил запросы, поэтому профили не найдены у: Мария/);assert.match(r.text,/не указана должность у: Олег/);assert.doesNotMatch(r.text,/у них не указана должность/);}
  console.log('Team enrich: role from the Slack profile title, responsibilities from Jira components and labels, existing values kept, reply names who is left without a role passed');
 })().catch(e=>{console.error(e);process.exit(1);});
 // cards saved earlier without roles (the previous run) get them now
@@ -44,3 +55,6 @@ const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}
  const empty=new TeamFill({settings:()=>({teamMembers:'[]'}),save:()=>{},sources:()=>[],scope:()=>'s'});assert.match((await empty.turn('Добавь роли команде')).text,/пока никого нет/);
  console.log('Team roles: «добавь команде роли» enriches the saved team (no Slack re-read), empty team asks to fill it first passed');
 })().catch(e=>{console.error(e);process.exit(1);});
+// early stop: once everyone wanted is found, no more pages
+(async()=>{let page=0;const r=await slackProfiles({slackToken:'x'},async()=>{const i=page++;return {ok:true,members:[{id:'U'+i,profile:{real_name:i===1?'Polina Samarina':'X'+i}}],response_metadata:{next_cursor:'c'+i}};},[{name:'Polina Samarina'}],{wait:async()=>{}});
+ assert.equal(page,2);assert(r.complete);console.log('Team enrich: Slack walk stops once everyone is found passed');})().catch(e=>{console.error(e);process.exit(1);});

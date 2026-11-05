@@ -36,7 +36,12 @@ module.exports=ctx=>{
     roster:command=>slackTeam.collect(command),
     // Second source: people assigned to issues of the allowed Jira projects in the last 90 days.
     jiraRoster:()=>require('./team-jira-roster.cjs').roster(ctx.workspace,ctx.settings),
-    enrich:async rows=>{const e=require('./team-enrich.cjs');let profiles=[],work=new Map();try{profiles=await e.slackProfiles(ctx.settings,ctx.request);}catch(err){console.error('Slack profiles:',err.message);}try{work=await e.jiraWork(ctx.workspace,rows);}catch(err){console.error('Jira work:',err.message);}return e.enrich(rows,profiles,work);},
+    enrich:async rows=>{const e=require('./team-enrich.cjs');let slack={profiles:[],complete:false,limited:false,error:''},work=new Map();
+      try{work=await e.jiraWork(ctx.workspace,rows);}catch(err){console.error('Jira work:',err.message);}
+      // E-mails from Jira let Slack find people directly by e-mail.
+      const wanted=rows.map(r=>({name:r.member.name,email:r.member.email||[...work.values()].find(w=>w.name===String(r.member.name||'').toLocaleLowerCase().replace(/ё/g,'е').replace(/\s+/g,' ').trim())?.email||''}));
+      try{slack=await e.slackProfiles(ctx.settings,ctx.request,wanted);}catch(err){console.error('Slack profiles:',err.message);slack.error=err.message;}
+      const out=e.enrich(rows,slack,work);out.slack=slack;return out;},
     // Fallback when the Slack API is rate-limited: bring Slack to the front and read its visible window.
     screen:readSlackScreen,
     approve:(command,action)=>ctx.computerApproval.request(command,action),
