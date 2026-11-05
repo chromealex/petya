@@ -70,6 +70,8 @@ Project rules are in [AGENTS.md](AGENTS.md): builds, integration icons, Slack co
 
 ### MCP access to chats
 
+`check_model_disk_space` is available in every authenticated access mode. With no arguments it returns available bytes; with `{"model":"qwen3.5:9b"}` it reads the registry manifest and returns `downloadBytes`, `required`, `reserve`, `available`, `missing`, and `status` (`sufficient`, `insufficient`, or `unknown`). It never starts a download or removes files. The conservative estimate includes the full model plus 512 MiB, without subtracting cached layers. It checks the local `OLLAMA_MODELS` directory or `~/.ollama/models`; it cannot discover a different storage volume configured inside another server process. Recheck immediately before downloading; unknown size is not approval to proceed.
+
 Open **Подключения → Доступ к чатам через MCP**, enable access, then copy the connection into your MCP client. The local Streamable HTTP endpoint uses a session bearer token. Stopping access, restarting Petya or switching companies ends that connection. Copy the new configuration after enabling it again.
 
 - Discover projects and chat IDs with `list_chat_projects` and `list_chats`.

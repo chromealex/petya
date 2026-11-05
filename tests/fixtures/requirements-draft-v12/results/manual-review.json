@@ -1,0 +1,266 @@
+{
+  "base": {
+    "name-0-01": [
+      true,
+      "Only color is changed on the original named element; address/content preserved, no rename instruction."
+    ],
+    "name-0-10": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-0-00": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-0-11": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-1-01": [
+      false,
+      "Agreed azure color and address preservation omitted; text instead cancels color."
+    ],
+    "name-1-10": [
+      false,
+      "Cancelled azure color applied."
+    ],
+    "name-1-00": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-1-11": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "report-0-00": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "report-0-10": [
+      false,
+      "Owner delivery remains forbidden after permission."
+    ],
+    "report-0-01": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "report-0-11": [
+      false,
+      "Owner delivery remains forbidden after permission."
+    ],
+    "failure-0-0": [
+      false,
+      "Adds unrelated questions about notification history/detail/channel."
+    ],
+    "failure-0-1": [
+      false,
+      "Adds unrelated ticket priority/category requirements as open questions."
+    ],
+    "scope": [
+      false,
+      "Recasts feature as sending one invitation and asks for actual meeting values."
+    ],
+    "repeat": [
+      false,
+      "Invents high priority/story points, display location and unrelated questions."
+    ]
+  },
+  "parent": {
+    "name-0-01": [
+      false,
+      "Cancelled rename applied."
+    ],
+    "name-0-10": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-0-00": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-0-11": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-1-01": [
+      false,
+      "Agreed azure color cancelled."
+    ],
+    "name-1-10": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-1-00": [
+      true,
+      "Awkward rename-to-identical-label wording has no name change; old color/address/content preserved."
+    ],
+    "name-1-11": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "report-0-00": [
+      false,
+      "Encoding email is not the agreed hiding; no guarantee email is excluded."
+    ],
+    "report-0-10": [
+      false,
+      "Customer remains excluded after permission."
+    ],
+    "report-0-01": [
+      true,
+      "Customer exclusion contains an obvious typo (Закодказчику), credited semantically as the sole named excluded recipient; no exact quoted identifier required here."
+    ],
+    "report-0-11": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "failure-0-0": [
+      false,
+      "Required archivist name omitted and unrequested email channel introduced."
+    ],
+    "failure-0-1": [
+      false,
+      "Explicit hidden-archivist requirement omitted."
+    ],
+    "scope": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "repeat": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ]
+  },
+  "v8": {
+    "name-0-01": [
+      true,
+      "Explicit cancellation qualifier and original final name credited despite awkward history-like wording."
+    ],
+    "name-0-10": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-0-00": [
+      true,
+      "Explicit final original name/color and summary preservation of address/content credited despite awkward negation."
+    ],
+    "name-0-11": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-1-01": [
+      false,
+      "Address preservation omitted."
+    ],
+    "name-1-10": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "name-1-00": [
+      false,
+      "Cancelled color applied in description and summary; contradictory cancellation in description."
+    ],
+    "name-1-11": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "report-0-00": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "report-0-10": [
+      false,
+      "Hides required request number/result in a list governed by hiding; replacement sentence does not restore result."
+    ],
+    "report-0-01": [
+      false,
+      "Email remains hidden after showing is approved."
+    ],
+    "report-0-11": [
+      false,
+      "Email remains hidden, customer permission unclear, obsolete number retained as hidden field."
+    ],
+    "failure-0-0": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ],
+    "failure-0-1": [
+      true,
+      "Not-required-to-show wording credited as excluding archivist name in the notification specification; identifier/cause/failure-only retained."
+    ],
+    "scope": [
+      true,
+      "Recipient is retained in summary; complete fields, exact date and exclusions in description."
+    ],
+    "repeat": [
+      true,
+      "Final states, fields, exclusions and literals retained; no invented open questions."
+    ]
+  },
+  "candidate": {
+    "name-0-01": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-0-10": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-0-00": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-0-11": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-1-01": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-1-10": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-1-00": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "name-1-11": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "report-0-00": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "report-0-10": [
+      false,
+      "Customer delivery remains forbidden after explicit permission."
+    ],
+    "report-0-01": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "report-0-11": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "failure-0-0": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "failure-0-1": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "scope": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ],
+    "repeat": [
+      true,
+      "All final requirements, exact labels where declared, exclusions and settled decisions retained."
+    ]
+  }
+}

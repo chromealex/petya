@@ -1,0 +1,92 @@
+{
+  "base": {
+    "bounds": {
+      "passed": 14,
+      "total": 20
+    },
+    "general": {
+      "passed": 8,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 11,
+      "total": 20
+    },
+    "rename": {
+      "passed": 5,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 5,
+      "total": 8
+    },
+    "schema": {
+      "passed": 48,
+      "total": 48
+    }
+  },
+  "parent": {
+    "bounds": {
+      "passed": 15,
+      "total": 20
+    },
+    "general": {
+      "passed": 8,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 18,
+      "total": 20
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 6,
+      "total": 8
+    },
+    "schema": {
+      "passed": 48,
+      "total": 48
+    }
+  },
+  "v8": {
+    "bounds": {
+      "passed": 14,
+      "total": 20
+    },
+    "general": {
+      "passed": 5,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 10,
+      "total": 20
+    },
+    "rename": {
+      "passed": 5,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 2,
+      "total": 8
+    },
+    "schema": {
+      "passed": 48,
+      "total": 48
+    }
+  }
+}

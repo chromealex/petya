@@ -1,0 +1,122 @@
+{
+  "base": {
+    "bounds": {
+      "passed": 14,
+      "total": 16
+    },
+    "general": {
+      "passed": 8,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 8,
+      "total": 16
+    },
+    "rename": {
+      "passed": 6,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 2,
+      "total": 4
+    },
+    "schema": {
+      "passed": 40,
+      "total": 40
+    }
+  },
+  "parent": {
+    "bounds": {
+      "passed": 14,
+      "total": 16
+    },
+    "general": {
+      "passed": 8,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 10,
+      "total": 16
+    },
+    "rename": {
+      "passed": 6,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 2,
+      "total": 4
+    },
+    "schema": {
+      "passed": 40,
+      "total": 40
+    }
+  },
+  "v8": {
+    "bounds": {
+      "passed": 13,
+      "total": 16
+    },
+    "general": {
+      "passed": 5,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 11,
+      "total": 16
+    },
+    "rename": {
+      "passed": 6,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 1,
+      "total": 4
+    },
+    "schema": {
+      "passed": 40,
+      "total": 40
+    }
+  },
+  "candidate": {
+    "bounds": {
+      "passed": 15,
+      "total": 16
+    },
+    "general": {
+      "passed": 8,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 15,
+      "total": 16
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 3,
+      "total": 4
+    },
+    "schema": {
+      "passed": 40,
+      "total": 40
+    }
+  }
+}

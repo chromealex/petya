@@ -1,0 +1,43 @@
+{
+  "acquisition": {
+    "exact": 45,
+    "total": 45,
+    "prior_retained": 38,
+    "new_fixed": 7
+  },
+  "new_drafts": {
+    "candidate": 11,
+    "parent": 6,
+    "base": 1,
+    "historical_v8": 7,
+    "total": 16
+  },
+  "literal_labels": {
+    "passed": 8,
+    "total": 8
+  },
+  "numeric": {
+    "passed": 6,
+    "total": 8
+  },
+  "general": {
+    "passed": 8,
+    "total": 8
+  },
+  "numeric_regressions": [
+    "n3"
+  ],
+  "remaining_draft_errors": [
+    "name-0-00",
+    "report-10",
+    "report-01",
+    "report-11",
+    "failure"
+  ],
+  "narrow_gate_passed": false,
+  "cancellation_prohibition_reliable": false,
+  "release_petya_v1": false,
+  "live_model_changed": false,
+  "decision": "Experimental artifact retained; promotion rejected because numeric regression and incomplete cancellation/prohibition transfer remain.",
+  "review": "Non-blind manual semantics plus strict schema, literal-label and numeric/general checks; small related synthetic sample."
+}

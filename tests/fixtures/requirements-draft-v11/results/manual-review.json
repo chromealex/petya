@@ -1,0 +1,266 @@
+{
+  "base": {
+    "name-0-01": [
+      false,
+      "Reopens explicitly settled address/content preservation; address omitted from description."
+    ],
+    "name-0-10": [
+      false,
+      "Applies cancelled lilac color and reopens settled preservation."
+    ],
+    "name-0-00": [
+      false,
+      "Reopens settled address/content/color decisions; rename cancellation not explicit."
+    ],
+    "name-0-11": [
+      false,
+      "Correct description but reopens settled rename/address/content decisions."
+    ],
+    "name-1-01": [
+      false,
+      "Address/content preservation only appears as reopened questions."
+    ],
+    "name-1-10": [
+      false,
+      "Applies cancelled sand color and reopens settled preservation."
+    ],
+    "name-1-00": [
+      false,
+      "Correct description but reopens settled address/content decisions."
+    ],
+    "name-1-11": [
+      false,
+      "Correct description but reopens all settled decisions."
+    ],
+    "report-00": [
+      false,
+      "Adds email/messenger delivery as an implementation requirement and reopens settled exclusion."
+    ],
+    "report-10": [
+      false,
+      "Contradictory owner exclusion and inclusion in the same description."
+    ],
+    "report-01": [
+      false,
+      "Technician phone remains hidden after hiding was cancelled."
+    ],
+    "report-11": [
+      false,
+      "Owner still excluded despite explicit permission."
+    ],
+    "scope": [
+      false,
+      "Correct core description but adds unrelated open questions about additional fields/template/channels."
+    ],
+    "print": [
+      false,
+      "Correct core description but invents an open warehouse-number format question."
+    ],
+    "failure": [
+      false,
+      "Hidden operator omitted; unrelated timeout and history questions introduced."
+    ],
+    "repeat": [
+      true,
+      "Final 151-second interval, count and hidden names retained."
+    ]
+  },
+  "parent": {
+    "name-0-01": [
+      false,
+      "Cancelled rename applied; original source label only appears in summary."
+    ],
+    "name-0-10": [
+      false,
+      "Rename rejected and cancelled color applied; source label changed to Пропуски-07."
+    ],
+    "name-0-00": [
+      true,
+      "Both cancelled changes and preserved address/content retained."
+    ],
+    "name-0-11": [
+      false,
+      "Correct decisions but source label changed from Пропуска-07 to Пропуски-07."
+    ],
+    "name-1-01": [
+      true,
+      "Original name, new color and preserved address/content retained."
+    ],
+    "name-1-10": [
+      true,
+      "Rename, original color and preserved address/content retained."
+    ],
+    "name-1-00": [
+      false,
+      "Sand color applied and preserved simultaneously; summary also applies cancelled color."
+    ],
+    "name-1-11": [
+      false,
+      "Color simultaneously retained and replaced without a correction qualifier."
+    ],
+    "report-00": [
+      false,
+      "Explicit owner delivery exclusion omitted; naming one recipient is not an explicit exclusion."
+    ],
+    "report-10": [
+      true,
+      "Also show to owner refers to the preceding code/result report as a whole; no restricted partial content specified."
+    ],
+    "report-01": [
+      false,
+      "Phone now shown but explicit owner delivery exclusion omitted."
+    ],
+    "report-11": [
+      false,
+      "Owner delivery omitted."
+    ],
+    "scope": [
+      false,
+      "Scanner procurement scope exclusion omitted; display-only wording is not that task boundary."
+    ],
+    "print": [
+      true,
+      "Fields, date format and both exclusions retained."
+    ],
+    "failure": [
+      false,
+      "Required sync number/cause explicitly excluded; hidden operator omitted."
+    ],
+    "repeat": [
+      true,
+      "Final interval, count and hidden names retained."
+    ]
+  },
+  "v8": {
+    "name-0-01": [
+      false,
+      "Agreed lilac color rejected and address preservation omitted."
+    ],
+    "name-0-10": [
+      false,
+      "Cancelled color applied; source label omitted from description and settled color reopened."
+    ],
+    "name-0-00": [
+      true,
+      "Awkward wording explicitly preserves source name, old color, address and content."
+    ],
+    "name-0-11": [
+      false,
+      "Source name and content preservation omitted; address mentioned without preserving it."
+    ],
+    "name-1-01": [
+      true,
+      "Original name, new color, address/content retained."
+    ],
+    "name-1-10": [
+      false,
+      "Cancelled color applied and source name omitted."
+    ],
+    "name-1-00": [
+      false,
+      "Cancelled sand color applied; address preservation omitted."
+    ],
+    "name-1-11": [
+      false,
+      "Source name omitted and rename not expressed; says name unchanged."
+    ],
+    "report-00": [
+      true,
+      "Complete report, excluded owner and hidden phone retained."
+    ],
+    "report-10": [
+      false,
+      "Stale request code and omitted owner delivery."
+    ],
+    "report-01": [
+      true,
+      "Awkward owner exclusion credited in context; service code/result and shown phone retained."
+    ],
+    "report-11": [
+      false,
+      "Stale request code and phone still hidden."
+    ],
+    "scope": [
+      false,
+      "Scanner procurement exclusion omitted."
+    ],
+    "print": [
+      true,
+      "Fields, date format and both exclusions retained."
+    ],
+    "failure": [
+      true,
+      "Failure-only administrator message, sync number/cause and hidden operator retained."
+    ],
+    "repeat": [
+      true,
+      "Final interval, count and hidden names retained."
+    ]
+  },
+  "candidate": {
+    "name-0-01": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-0-10": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-0-00": [
+      false,
+      "Cancelled lilac color is applied; both-cancelled state is not retained."
+    ],
+    "name-0-11": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-1-01": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-1-10": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-1-00": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "name-1-11": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "report-00": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "report-10": [
+      false,
+      "Explicit owner delivery permission is ignored; owner remains excluded."
+    ],
+    "report-01": [
+      false,
+      "Explicit owner delivery exclusion is omitted after phone visibility changes."
+    ],
+    "report-11": [
+      false,
+      "Owner delivery is omitted after both prohibitions are lifted."
+    ],
+    "scope": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "print": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ],
+    "failure": [
+      false,
+      "Hidden operator requirement omitted; email channel introduced without agreement."
+    ],
+    "repeat": [
+      true,
+      "All final decisions, fields, exact labels where declared, and exclusions retained; no reopened questions."
+    ]
+  }
+}

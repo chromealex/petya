@@ -11,7 +11,7 @@ class Clarifications {
   active:row.scope===this.scope(),requiresActiveChat:false,canResume:!row.recoveryRequired
  }));}
  offer(command,spec,resume,previous={}){
-  const id=randomUUID(),result={...previous,handled:true,question:true,text:spec.text,clarificationId:id,clarificationInput:{label:spec.label||'Уточнение',placeholder:spec.placeholder||'Напишите ответ…',submit:'Продолжить',files:!!spec.files},clarificationOptions:spec.options||[]};
+  const id=randomUUID(),result={...previous,handled:true,question:true,text:spec.text,clarificationId:id,clarificationInput:{label:spec.label||'Уточнение',placeholder:spec.placeholder||'Напишите ответ…',submit:'Продолжить',files:!!spec.files,choicesOnly:!!spec.strictChoices},clarificationOptions:spec.options||[]};
   for(const key of ['teamFillReply','slackRequestReply','slackRequestChoices'])delete result[key];
   this.record?.(command,result);
   const scope=this.scope();for(const [key,row] of this.pending)if(row.scope===scope||this.now()>row.expiresAt)this.pending.delete(key);

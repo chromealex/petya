@@ -1,0 +1,19 @@
+{
+  "hashes": {
+    "train.jsonl": "09becb7c3c79a7cab63e25c502e0e47c4440bb99a7a47cf8f5f8e4e5ecead745",
+    "acquisition.jsonl": "9a3f4b82b52047b5ecee11902ca3a79ccccb2c9343e488f2e8ad6684a7fd8d80",
+    "corrections.jsonl": "d658d7011654eebf8571caee22cf70f68e2065c6ae774a2b943ecb02e3a74d9f",
+    "numeric-rehearsal.jsonl": "efb7edeca3b97b0945e568439a4adb79d653716d7bf51a086e8d3ae9b8485bba",
+    "variants.jsonl": "2004b1e6dc4b561c34173f9379c6089bb9b40a8c0066081a6003b8a971b083ed",
+    "check.jsonl": "96604831611e594d72539259a697bcb5205c7de7a36fbe5a8f7e3f9ad385125e"
+  },
+  "parent": "../requirements-draft-v11/adapter",
+  "steps": 596,
+  "layers": 13,
+  "seed": 42,
+  "epochs": 1,
+  "learning_rate": 1e-05,
+  "gate": "All 52 old/new acquisition targets correct; all prior successful v11 check answers retained. Fresh drafts exceed parent, numeric/general do not regress, literals 8/8. Every targeted decision must pass to claim reliability. No automatic release.",
+  "selection": "One fixed run; acquisition-only repair allowed before candidate fresh inference.",
+  "limits": "Synthetic small related sample; manual non-blind draft review."
+}

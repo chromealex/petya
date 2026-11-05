@@ -1,0 +1,11 @@
+{
+  "adapter": "repaired-adapter",
+  "sha256": "f02b6b97ce45054df6b5343062df8079fcffc3f6a2f1c3be5f003f1e918563c1",
+  "acquisition_exact": 77,
+  "acquisition_total": 77,
+  "prior_acquisition_retained": 45,
+  "new_corrections": 7,
+  "additional_historical_cases": 25,
+  "historical_v11_all_exact": 32,
+  "basis": "Selected on acquisition and historical retention; no candidate fresh answers generated or inspected."
+}

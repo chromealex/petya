@@ -1,0 +1,18 @@
+{
+  "hashes": {
+    "train.jsonl": "c48079cfea234dd360b19cab5b7edc60fbb4d295b7d994870978c889b4206a72",
+    "acquisition.jsonl": "ff8eb68386059cdbaf6e6428c0d464ed82817d81d9ad3f8e09292f7c7ffb8fe0",
+    "corrections.jsonl": "47c2bc1fb22f6729326a3caad99d1ae1ad708ae1376b2d798e18cfaf75f211c6",
+    "variants.jsonl": "61e46604c486a39fb9593fb2369216644e10a24dcd15e939f70dac4cb21b6619",
+    "check.jsonl": "1e66aaf5efd739100a8c2383f449961bfe98bed41bbd1e98cda7ada00e61d4d8"
+  },
+  "parent": "../requirements-draft-v12/repaired-adapter",
+  "steps": 410,
+  "layers": 13,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 5e-06,
+  "gate": "All 117 familiar targets correct after reload. Fresh complete drafts improve versus parent, literals 8/8, no individual previously correct fresh case regresses. Every targeted state must pass to claim reliability; no automatic release.",
+  "selection": "One fixed candidate; acquisition-only repair permitted before fresh candidate inference.",
+  "limits": "Synthetic related small cases, manual non-blind semantic review."
+}

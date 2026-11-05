@@ -1,0 +1,40 @@
+{"id": "name-0-01", "task": "draft", "answer": "{\"description\":\"Название «Пропуска-09» сохранить. Значок сделать лиловым. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Пропуска-09»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-0-10", "task": "draft", "answer": "{\"description\":\"Переименовать «Пропуска-09» в «Допуски-09». Цвет значка не менять. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Пропуска-09»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-0-00", "task": "draft", "answer": "{\"description\":\"Название «Пропуска-09» сохранить. Цвет значка не менять. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Пропуска-09»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-0-11", "task": "draft", "answer": "{\"description\":\"Переименовать «Пропуска-09» в «Допуски-09». Значок сделать лиловым. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Пропуска-09»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-1-01", "task": "draft", "answer": "{\"description\":\"Название «Счёты-08» сохранить. Значок сделать лазурным. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Счёты-08»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-1-10", "task": "draft", "answer": "{\"description\":\"Переименовать «Счёты-08» в «Расчёты-08». Цвет значка не менять. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Счёты-08»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-1-00", "task": "draft", "answer": "{\"description\":\"Название «Счёты-08» сохранить. Цвет значка не менять. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Счёты-08»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-1-11", "task": "draft", "answer": "{\"description\":\"Переименовать «Счёты-08» в «Расчёты-08». Значок сделать лазурным. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Счёты-08»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-0-00", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «номер проверки» и «результат» отправлять начальнику смены. Заказчику не отправлять. Скрывать почту контролёра.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-0-10", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «номер проверки» и «результат» отправлять начальнику смены. Заказчику не отправлять. Скрывать почту контролёра.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": false, "schemaValid": true}
+{"id": "report-0-01", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «номер проверки» и «результат» отправлять начальнику смены. Заказчику не отправлять. Показывать почту контролёра.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-0-11", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «номер проверки» и «результат» отправлять начальнику смены и заказчику. Показывать почту контролёра.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "failure-0-0", "task": "draft", "answer": "{\"description\":\"Только при сбое архивации сообщать администратору номер архивации и причину. Показывать имя архивариуса. При успехе не сообщать.\",\"questions\":[],\"summary\":\"Уведомление о сбое\"}", "exactJSON": true, "schemaValid": true}
+{"id": "failure-0-1", "task": "draft", "answer": "{\"description\":\"Только при сбое архивации сообщать администратору номер архивации и причину. Скрывать имя архивариуса. При успехе не сообщать.\",\"questions\":[],\"summary\":\"Уведомление о сбое\"}", "exactJSON": true, "schemaValid": true}
+{"id": "scope", "task": "draft", "answer": "{\"description\":\"Отправлять координатору номер встречи и дату в формате ДД-ГГГГ-ММ. Имя участника скрывать. Покупку проектора не включать.\",\"questions\":[],\"summary\":\"Сообщение координатору\"}", "exactJSON": false, "schemaValid": true}
+{"id": "repeat", "task": "draft", "answer": "{\"description\":\"Показывать число принятых посылок. Обновлять каждые 169 секунд. Имена отправителей скрывать.\",\"questions\":[],\"summary\":\"Обновление таймера\"}", "exactJSON": false, "schemaValid": true}
+{"id": "n-0-0", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-74,\"upper\":-56,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "n-0-1", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-74,\"upper\":-56,\"lowerInclusive\":false,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n-0-2", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-74,\"upper\":-56,\"lowerInclusive\":true,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "n-0-3", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-74,\"upper\":-56,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n-1-0", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":83,\"upper\":98,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "n-1-1", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":83,\"upper\":98,\"lowerInclusive\":false,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n-1-2", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":83,\"upper\":98,\"lowerInclusive\":true,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "n-1-3", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":83,\"upper\":98,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "lower-0", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-93,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "upper-0", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-93,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "exact-0", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": true}
+{"id": "open-0", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "lower-1", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":4.5,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "upper-1", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":4.5,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "exact-1", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":4.5,\"upper\":4.5,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "open-1", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "g0", "task": "general", "answer": "[-31,13,42]", "exactJSON": true, "schemaValid": true}
+{"id": "g1", "task": "general", "answer": "[42,13,-31]", "exactJSON": true, "schemaValid": true}
+{"id": "g2", "task": "general", "answer": "[19,19,0,-6]", "exactJSON": true, "schemaValid": true}
+{"id": "g3", "task": "general", "answer": "[-6,0,19,19]", "exactJSON": true, "schemaValid": true}
+{"id": "g4", "task": "general", "answer": "368", "exactJSON": true, "schemaValid": true}
+{"id": "g5", "task": "general", "answer": "87", "exactJSON": true, "schemaValid": true}
+{"id": "g6", "task": "general", "answer": "7", "exactJSON": true, "schemaValid": true}
+{"id": "g7", "task": "general", "answer": "700", "exactJSON": true, "schemaValid": true}

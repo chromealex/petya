@@ -1,0 +1,96 @@
+{
+  "acquisition": {
+    "prior_retained": 45,
+    "current_corrections_fixed": 7,
+    "additional_historical_retained": 25,
+    "total_exact": 77
+  },
+  "historical_check": {
+    "exact": 32,
+    "total": 32,
+    "previously_successful_retained": 25,
+    "old_numeric_exact": 8,
+    "old_numeric_total": 8
+  },
+  "fresh_candidate": {
+    "bounds": {
+      "passed": 15,
+      "total": 16
+    },
+    "general": {
+      "passed": 8,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 15,
+      "total": 16
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 3,
+      "total": 4
+    },
+    "schema": {
+      "passed": 40,
+      "total": 40
+    }
+  },
+  "fresh_parent": {
+    "bounds": {
+      "passed": 14,
+      "total": 16
+    },
+    "general": {
+      "passed": 8,
+      "total": 8
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 10,
+      "total": 16
+    },
+    "rename": {
+      "passed": 6,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 2,
+      "total": 4
+    },
+    "schema": {
+      "passed": 40,
+      "total": 40
+    }
+  },
+  "fresh_passed": 38,
+  "fresh_total": 40,
+  "paired_gains": [
+    "name-0-01",
+    "name-1-01",
+    "report-0-00",
+    "failure-0-0",
+    "failure-0-1",
+    "n-1-2",
+    "upper-0"
+  ],
+  "paired_regressions": [
+    "exact-0"
+  ],
+  "aggregate_improvement_gate_passed": true,
+  "no_case_regression_gate_passed": false,
+  "reliable_cancellation_prohibition": false,
+  "release_petya_v1": false,
+  "live_model_changed": false,
+  "decision": "Preserve experimental adapter; no release because one fresh numerical regression and one recipient-permission failure remain.",
+  "limitations": "Small synthetic related cases; non-blind semantic review. All 77 retention targets are now trained, so retention is distinct from transfer."
+}
