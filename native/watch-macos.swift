@@ -88,10 +88,22 @@ func meetingObservation(_ pid: pid_t) -> (Bool, String) {
     if metadata.isEmpty {
         // Zoom hides the toolbar while presenting. The Invite dialog exposes only
         // this meeting's ID and passcode; opening it does not send invitations.
+        let invitePattern = "(?i)^(?:Invite people to join meeting|Пригласить.*конференци[юи])\\s+[0-9 ]{9,14}$"
+        func inviteTitle(_ element: AXUIElement) -> String? {
+            let labels = [kAXTitleAttribute, kAXDescriptionAttribute, kAXValueAttribute].compactMap { attribute(element, $0) as? String }
+            return labels.flatMap { $0.components(separatedBy: "\n") }.first { $0.range(of: invitePattern, options: .regularExpression) != nil }
+        }
         func inviteWindows() -> [AXUIElement] {
-            return (attribute(root, kAXWindowsAttribute) as? [AXUIElement] ?? []).filter {
-                let title = attribute($0, kAXTitleAttribute) as? String ?? ""
-                return title.range(of: "^(?:Invite people to join meeting|Пригласить.*конференци[юи]) [0-9]{9,11}$", options: .regularExpression) != nil
+            var candidates = attribute(root, kAXWindowsAttribute) as? [AXUIElement] ?? []
+            // Some Zoom releases expose the dialog only as the focused window.
+            if let focused = attribute(root, kAXFocusedWindowAttribute), CFGetTypeID(focused) == AXUIElementGetTypeID() {
+                let item = unsafeBitCast(focused, to: AXUIElement.self)
+                if !candidates.contains(where: { CFEqual($0, item) }) { candidates.append(item) }
+            }
+            return candidates.filter { candidate in
+                if inviteTitle(candidate) != nil { return true }
+                let subrole = attribute(candidate, kAXSubroleAttribute) as? String ?? ""
+                return ["AXDialog", "AXSystemDialog"].contains(subrole) && scan(candidate).contains { inviteTitle($0.0) != nil }
             }
         }
         var invitations = inviteWindows()
@@ -106,21 +118,33 @@ func meetingObservation(_ pid: pid_t) -> (Bool, String) {
                 }
                 if actions.count == 1 {
                     AXUIElementPerformAction(actions[0].0, kAXPressAction as CFString)
-                    Thread.sleep(forTimeInterval: 0.15)
-                    invitations = inviteWindows()
+                    // AX window creation can lag behind the menu action.
+                    for _ in 0..<12 {
+                        Thread.sleep(forTimeInterval: 0.1)
+                        invitations = inviteWindows()
+                        if !invitations.isEmpty { break }
+                    }
                 } else { AXUIElementPerformAction(menus[0].0, "AXCancel" as CFString) }
             }
         }
         if invitations.count == 1 {
             let dialog = invitations[0]
-            let title = attribute(dialog, kAXTitleAttribute) as? String ?? ""
-            if let range = title.range(of: "[0-9]{9,11}$", options: .regularExpression) { metadata.append("Meeting ID: " + title[range]) }
+            let title = inviteTitle(dialog) ?? scan(dialog).compactMap { inviteTitle($0.0) }.first ?? ""
+            if let range = title.range(of: "[0-9 ]{9,14}$", options: .regularExpression) { metadata.append("Meeting ID: " + title[range].replacingOccurrences(of: " ", with: "")) }
             for (_, _, text) in scan(dialog) {
                 if text.lowercased().hasPrefix("meeting passcode:") { metadata.append(String(text.dropFirst("Meeting ".count))) }
                 if text.lowercased().hasPrefix("код доступа:") { metadata.append(text) }
             }
-            if !wasOpen, let close = attribute(dialog, kAXCloseButtonAttribute), CFGetTypeID(close) == AXUIElementGetTypeID() {
-                AXUIElementPerformAction(unsafeBitCast(close, to: AXUIElement.self), kAXPressAction as CFString)
+            if !wasOpen {
+                var closeButton: AXUIElement?
+                if let close = attribute(dialog, kAXCloseButtonAttribute), CFGetTypeID(close) == AXUIElementGetTypeID() {
+                    closeButton = unsafeBitCast(close, to: AXUIElement.self)
+                } else {
+                    closeButton = scan(dialog).first { element, _, _ in
+                        (attribute(element, kAXSubroleAttribute) as? String) == "AXCloseButton"
+                    }?.0
+                }
+                if let close = closeButton { AXUIElementPerformAction(close, kAXPressAction as CFString) }
             }
         }
     }
