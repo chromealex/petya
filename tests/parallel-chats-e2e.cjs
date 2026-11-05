@@ -22,7 +22,8 @@ module.exports=async win=>{
   let states;for(let i=0;i<160;i++){states=await js(`Promise.all(${JSON.stringify(ids)}.map(id=>window.petya.chatJobState(id)))`);if(states.every(s=>['done','attention'].includes(s?.job?.state)))break;await new Promise(r=>setTimeout(r,250));}
   states.forEach((s,i)=>{const m=s.messages;if(s.job.state!=='done'||m.length!==2||m[0].text!==asks[i]||m[1].role!=='assistant')throw Error('Chat «'+asks[i]+'»: '+s.job.state+' '+JSON.stringify(m.map(x=>x.text)));if(/^Ответ на:/.test(m[1].text)&&!m[1].text.includes(asks[i]))throw Error('Cross-talk in «'+asks[i]+'»: '+m[1].text);});
   if((await js(`window.petya.dialogueTopics()`)).activeId!==selected)throw Error('Background answers moved the selected chat.');
-  if(peak<8)throw Error('Model calls did not overlap (peak '+peak+').');
+  // Chats run in parallel, but local generations are capped (model-context LIMIT) to keep Ollama's memory bounded.
+  const cap=require('../src/model-context.cjs').LIMIT;if(peak<2||peak>cap)throw Error('Model calls: peak '+peak+', expected 2…'+cap+'.');
   console.log('Parallel chats E2E: 12 chats, peak '+peak+' concurrent model calls, navigation during answers passed');
  }finally{server.close();await js(`window.petya.saveSettings(${JSON.stringify({model:previous.model||'',ollamaUrl:previous.ollamaUrl||''})})`).catch(()=>{});}
 };

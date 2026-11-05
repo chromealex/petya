@@ -14,4 +14,18 @@ function normalize(url,body){
  data.options={...(data.options||{}),num_ctx:SIZE};
  return JSON.stringify(data);
 }
-module.exports={SIZE,normalize};
+// Ollama keeps a KV cache per parallel slot: many simultaneous generations multiply its memory.
+const LIMIT=3;let running=0;const waiting=[];
+function isModelRequest(url,body){try{const u=new URL(url);return ['127.0.0.1','localhost','[::1]','::1'].includes(u.hostname)&&/\/api\/(?:chat|generate)$/.test(u.pathname)&&typeof body==='string';}catch{return false;}}
+function release(){running--;const next=waiting.shift();if(next)next();}
+function slot(signal,work){
+ const start=()=>{running++;return Promise.resolve().then(work).finally(release);};
+ if(running<LIMIT)return start();
+ return new Promise((resolve,reject)=>{
+  const go=()=>{signal?.removeEventListener?.('abort',abort);start().then(resolve,reject);};
+  const abort=()=>{const i=waiting.indexOf(go);if(i>=0)waiting.splice(i,1);reject(signal.reason||Object.assign(Error('Запрос отменён.'),{name:'AbortError'}));};
+  if(signal?.aborted)return abort();signal?.addEventListener?.('abort',abort,{once:true});waiting.push(go);
+ });
+}
+const stats=()=>({running,waiting:waiting.length,limit:LIMIT});
+module.exports={SIZE,normalize,isModelRequest,slot,stats,LIMIT};

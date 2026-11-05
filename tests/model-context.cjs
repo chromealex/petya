@@ -7,3 +7,8 @@ assert.equal(n('http://127.0.0.1:11434/api/chat',{model:'q',options:{num_ctx:409
 assert.equal(n('https://slack.com/api/chat.postMessage',{model:'q'}).options,undefined);
 assert.equal(normalize('http://127.0.0.1:11434/api/tags','x'),'x');
 console.log('Model context: one num_ctx for every local model request, low-memory retry kept, other services untouched passed');
+(async()=>{const m=require('../src/model-context.cjs');let peak=0,now=0;const work=()=>new Promise(r=>{now++;peak=Math.max(peak,now);setTimeout(()=>{now--;r('ok');},20);});
+ const results=await Promise.all(Array.from({length:8},()=>m.slot(null,work)));assert.equal(peak,m.LIMIT);assert(results.every(v=>v==='ok'));
+ const c=new AbortController();const blockers=Array.from({length:3},()=>m.slot(null,()=>new Promise(r=>setTimeout(r,50))));const waiting=m.slot(c.signal,work);c.abort();await assert.rejects(waiting);await Promise.all(blockers);assert.equal(m.stats().running,0);
+ assert(m.isModelRequest('http://127.0.0.1:11434/api/chat','{}'));assert(!m.isModelRequest('http://127.0.0.1:11434/api/tags',undefined));
+ console.log('Model slots: at most '+m.LIMIT+' local generations at once, queued requests can be cancelled passed');})().catch(e=>{console.error(e);process.exit(1);});
