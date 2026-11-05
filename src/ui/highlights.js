@@ -6,7 +6,7 @@
  const link=document.createElement('link');link.rel='stylesheet';link.href='highlights.css';document.head.append(link);
  let state={chat:[],project:[],projectName:''},loading=0;
  const panel=el('details',null,'important-panel');panel.hidden=true;
- function place(){if(typeof dialogueMessages==='undefined'||!dialogueMessages.parentElement)return;if(panel.nextElementSibling!==dialogueMessages)dialogueMessages.before(panel);}
+ function place(){const header=document.querySelector('.chat-sticky-header');if(header&&panel.parentElement!==header)header.append(panel);}
  function renderPanel(){
   window.petyaHighlightState={topicId:typeof topicSelect==='undefined'?'':topicSelect.value,items:[...state.chat,...state.project]};
   document.dispatchEvent(new CustomEvent('petya-highlights-changed',{detail:window.petyaHighlightState}));
@@ -27,20 +27,24 @@
  function mark(){
   if(typeof dialogueMessages==='undefined')return;
   for(const old of dialogueMessages.querySelectorAll('mark.user-important'))old.replaceWith(...old.childNodes);
+  const ranges=[];
   for(const article of dialogueMessages.querySelectorAll('article'))article.classList.remove('whole-message-important');
   for(const h of [...state.chat,...state.project]){
    if(h.wholeMessage&&h.topicId===topicSelect.value){const article=dialogueMessages.querySelector('[data-message-index="'+h.messageIndex+'"]');if(article?.dataset.messageText===h.text){article.classList.add('whole-message-important');continue;}}
-   const needle=h.text.slice(0,200);if(needle.length<2)continue;
-   for(const content of dialogueMessages.querySelectorAll('.message-content')){
-    const walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT);let node,found=false;
-    while((node=walker.nextNode())){const at=node.nodeValue.indexOf(needle);if(at<0)continue;const range=document.createRange();range.setStart(node,at);range.setEnd(node,at+needle.length);const m=el('mark',null,'user-important');m.title='Отмечено как важное';range.surroundContents(m);found=true;break;}
-    if(found)break;
+   const needle=h.text.replace(/\s+/g,' ').trim();if(needle.length<2)continue;
+   const articles=[...dialogueMessages.querySelectorAll('article')].filter(a=>h.topicId===topicSelect.value&&Number(a.dataset.messageIndex)===h.messageIndex);
+   for(const article of articles){const content=article.querySelector('.message-content');if(!content)continue;
+    const walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT),positions=[];let text='',part;
+    while((part=walker.nextNode()))for(let i=0;i<part.nodeValue.length;i++){const char=/\s/.test(part.nodeValue[i])?' ':part.nodeValue[i];if(char===' '&&text.endsWith(' '))continue;text+=char;positions.push({node:part,offset:i});}
+    const at=text.indexOf(needle);if(at<0)continue;const start=positions[at],end=positions[at+needle.length-1],range=document.createRange();range.setStart(start.node,start.offset);range.setEnd(end.node,end.offset+1);ranges.push(range);
    }
   }
+  if(window.CSS?.highlights){CSS.highlights.delete('petya-important');if(ranges.length)CSS.highlights.set('petya-important',new Highlight(...ranges));}
+
   for(const star of dialogueMessages.querySelectorAll('.important-star')){const text=star.closest('article')?.dataset.messageText||'';star.classList.toggle('on',[...state.chat,...state.project].some(h=>h.text===text||h.text===text.replace(/\s+/g,' ').trim().slice(0,1000)));}
  }
  async function refresh(){const epoch=++loading,id=typeof topicSelect!=='undefined'?topicSelect.value:'';if(!id){state={chat:[],project:[],projectName:''};renderPanel();return;}try{const next=await api('list',id);if(epoch!==loading)return;state=next;}catch{state={chat:[],project:[],projectName:''};}renderPanel();mark();}
- async function change(work){try{state=await work();renderPanel();mark();}catch(e){notice(e.message,true);}}
+ async function change(work){const owner=topicSelect.value;++loading;try{const next=await work();if(topicSelect.value!==owner)return;state=next;renderPanel();panel.open=true;mark();}catch(e){notice(e.message,true);}}
  // Whole message: a star in the hover row.
  function install(){const original=window.renderMessage;if(typeof original!=='function'||original.highlights)return;
   const wrapped=function(message){const node=original(message);const meta=node.querySelector('.message-meta');if(meta&&message?.text){const star=el('button','☆','message-copy important-star');star.type='button';star.title='Отметить сообщение как важное';star.setAttribute('aria-label',star.title);star.onclick=()=>{const index=Number(node.dataset.messageIndex);change(()=>api('add',topicSelect.value,{text:message.text,wholeMessage:true,messageIndex:Number.isInteger(index)?index:null}));};meta.append(star);const menu=node.querySelector('.answer-menu-items');if(menu){const item=el('button','Отметить всё сообщение как важное','important-menu-action');item.type='button';const icon=el('span','☆','message-menu-icon');icon.setAttribute('aria-hidden','true');item.prepend(icon);item.onclick=()=>{node.querySelector('.message-actions-menu').open=false;star.click();};menu.append(item);}}return node;};
@@ -48,7 +52,7 @@
  // Part of a message: select it and press «Важно».
  const float=el('button','★ Важно','important-float');float.type='button';float.hidden=true;document.body.append(float);
  let pick=null;
- document.addEventListener('mouseup',()=>setTimeout(()=>{const sel=window.getSelection();const text=sel?.toString().trim()||'';const anchor=sel?.anchorNode?.parentElement?.closest?.('.message-content');
+ document.addEventListener('mouseup',()=>setTimeout(()=>{const sel=window.getSelection();const text=sel?.toString().trim()||'';const anchor=(sel?.anchorNode?.nodeType===1?sel.anchorNode:sel?.anchorNode?.parentElement)?.closest?.('.message-content');
   if(!text||text.length<2||!anchor||!sel.focusNode||!anchor.contains(sel.focusNode)){float.hidden=true;pick=null;return;}
   const rect=sel.getRangeAt(0).getBoundingClientRect(),article=anchor.closest('article');pick={text,index:Number(article?.dataset.messageIndex)};
   float.style.left=Math.max(8,Math.min(window.innerWidth-110,rect.left+rect.width/2-45))+'px';float.style.top=Math.max(8,rect.top-36)+'px';float.hidden=false;

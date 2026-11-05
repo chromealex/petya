@@ -1,9 +1,10 @@
 (() => {
  const el=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};
  const card=el('article');card.className='card';card.id='git-card';
- const heading=el('h2','Git'),help=el('p','Git автоматически найден в папках выбранного проекта чата. Отметьте файлы, подготовьте коммит и отправьте выбранную ветку. Для pull/push используются подключения Git на этом компьютере.');
+ const heading=el('h2','Git'),help=el('p','Выберите файлы для коммита. Сетевые операции используют подключения Git этого компьютера.');
  const status=el('p');status.className='connection-status';status.setAttribute('role','status');
  const files=el('div'),output=el('pre');output.style.cssText='white-space:pre-wrap;max-height:420px;overflow:auto';
+ files.className='git-file-list';
  const repositories=el('select');repositories.setAttribute('aria-label','Репозиторий проекта');const discovery=el('div');
  const actions=el('div');actions.className='actions';let state=null,busy=false;
  const branch=el('input');branch.placeholder='feature/new-feature';branch.setAttribute('aria-label','Имя ветки');
@@ -23,7 +24,7 @@
  const commitRow=el('div');commitRow.append(message);button('Создать коммит','commit',()=>({message:message.value}),commitRow);
  const branches=el('div');branches.className='actions';branches.append(branchSelect);button('Переключить ветку','switchBranch',()=>({branch:branchSelect.value}),branches);branches.append(branch);button('Создать ветку','createBranch',()=>({branch:branch.value}),branches);
  const network=el('div');network.className='actions';network.append(remote);for(const action of ['fetch','pull','push'])button(action[0].toUpperCase()+action.slice(1),action,()=>({remote:remote.value}),network);
- card.append(heading,help,status,repositories,discovery,actions,files,stage,commitRow,branches,network,output);const dialog=el('dialog');dialog.className='git-project-dialog';dialog.style.cssText='width:min(960px,90vw);max-height:85vh;overflow:auto';const close=el('button','Закрыть');close.type='button';close.onclick=()=>dialog.close();dialog.append(close,card);document.body.append(dialog);const open=el('button','Git');open.type='button';open.onclick=()=>window.openProjectGit();open.className='quiet';open.id='project-git-open';document.querySelector('.chat-heading').append(open);window.openProjectGit=async()=>{if(!dialog.open)dialog.showModal();await perform('status');};repositories.onchange=run(async()=>{if(!repositories.value)return;await window.petya.gitSelect(repositories.value,repositories.dataset.projectId);await perform('status');});
+ const advanced=el('details'),advancedTitle=el('summary','Ветки и синхронизация');advanced.className='git-advanced';advanced.append(advancedTitle,branches,network);card.append(heading,help,status,repositories,discovery,actions,files,stage,commitRow,advanced,output);const dialog=el('dialog');dialog.className='git-project-dialog';const close=el('button','×');close.type='button';close.className='git-dialog-close';close.setAttribute('aria-label','Закрыть Git');close.onclick=()=>dialog.close();const head=el('div');head.className='git-dialog-head';head.append(heading,close);dialog.append(head,card);document.body.append(dialog);const open=el('button','Git');open.type='button';open.onclick=()=>window.openProjectGit();open.className='quiet';open.id='project-git-open';document.querySelector('.chat-heading').append(open);window.openProjectGit=async()=>{if(!dialog.open)dialog.showModal();await perform('status');};repositories.onchange=run(async()=>{if(!repositories.value)return;await window.petya.gitSelect(repositories.value,repositories.dataset.projectId);await perform('status');});
  status.textContent='Git определяется по папкам текущего проекта.';
  document.addEventListener('petya-dialogue-state',()=>{state=null;files.replaceChildren();status.className='connection-status';status.textContent='Git определяется по папкам текущего проекта.';if(dialog.open&&!busy)perform('status');});
 })();

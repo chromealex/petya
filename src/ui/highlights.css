@@ -18,3 +18,7 @@ article.important-flash{animation:important-flash 1.4s ease-out}
 .selection-task .important-float{position:static;box-shadow:none;border:0;background:transparent;color:var(--ink);font:inherit;padding:6px 9px;min-height:30px;border-radius:6px}
 .selection-task .important-float:hover{background:#ffffff12;color:var(--ink)}
 .whole-message-important>.message-content{box-shadow:inset 2px 0 #e8bc65;padding-left:12px}
+::highlight(petya-important){background:#6b622f;color:inherit}
+.chat-sticky-header>.important-panel{margin:4px 0 8px;padding:8px 10px;border:1px solid #e8bc6540;border-radius:8px;background:var(--panel);max-height:26vh;overflow:auto}
+.important-panel>summary{color:#e8bc65;font-size:12px}
+.important-item{padding:4px 0}.important-text{font-size:12px}
