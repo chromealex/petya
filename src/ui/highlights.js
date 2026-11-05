@@ -27,7 +27,9 @@
  function mark(){
   if(typeof dialogueMessages==='undefined')return;
   for(const old of dialogueMessages.querySelectorAll('mark.user-important'))old.replaceWith(...old.childNodes);
+  for(const article of dialogueMessages.querySelectorAll('article'))article.classList.remove('whole-message-important');
   for(const h of [...state.chat,...state.project]){
+   if(h.wholeMessage&&h.topicId===topicSelect.value){const article=dialogueMessages.querySelector('[data-message-index="'+h.messageIndex+'"]');if(article?.dataset.messageText===h.text){article.classList.add('whole-message-important');continue;}}
    const needle=h.text.slice(0,200);if(needle.length<2)continue;
    for(const content of dialogueMessages.querySelectorAll('.message-content')){
     const walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT);let node,found=false;
@@ -35,13 +37,13 @@
     if(found)break;
    }
   }
-  for(const star of dialogueMessages.querySelectorAll('.important-star')){const text=star.closest('article')?.dataset.messageText||'';star.classList.toggle('on',[...state.chat,...state.project].some(h=>h.text===text.replace(/\s+/g,' ').trim().slice(0,1000)));}
+  for(const star of dialogueMessages.querySelectorAll('.important-star')){const text=star.closest('article')?.dataset.messageText||'';star.classList.toggle('on',[...state.chat,...state.project].some(h=>h.text===text||h.text===text.replace(/\s+/g,' ').trim().slice(0,1000)));}
  }
  async function refresh(){const epoch=++loading,id=typeof topicSelect!=='undefined'?topicSelect.value:'';if(!id){state={chat:[],project:[],projectName:''};renderPanel();return;}try{const next=await api('list',id);if(epoch!==loading)return;state=next;}catch{state={chat:[],project:[],projectName:''};}renderPanel();mark();}
  async function change(work){try{state=await work();renderPanel();mark();}catch(e){notice(e.message,true);}}
  // Whole message: a star in the hover row.
  function install(){const original=window.renderMessage;if(typeof original!=='function'||original.highlights)return;
-  const wrapped=function(message){const node=original(message);const meta=node.querySelector('.message-meta');if(meta&&message?.text){const star=el('button','☆','message-copy important-star');star.type='button';star.title='Отметить сообщение как важное';star.setAttribute('aria-label',star.title);star.onclick=()=>{const index=Number(node.dataset.messageIndex);change(()=>api('add',topicSelect.value,{text:message.text,messageIndex:Number.isInteger(index)?index:null}));};meta.append(star);}return node;};
+  const wrapped=function(message){const node=original(message);const meta=node.querySelector('.message-meta');if(meta&&message?.text){const star=el('button','☆','message-copy important-star');star.type='button';star.title='Отметить сообщение как важное';star.setAttribute('aria-label',star.title);star.onclick=()=>{const index=Number(node.dataset.messageIndex);change(()=>api('add',topicSelect.value,{text:message.text,wholeMessage:true,messageIndex:Number.isInteger(index)?index:null}));};meta.append(star);const menu=node.querySelector('.answer-menu-items');if(menu){const item=el('button','Отметить всё сообщение как важное','important-menu-action');item.type='button';const icon=el('span','☆','message-menu-icon');icon.setAttribute('aria-hidden','true');item.prepend(icon);item.onclick=()=>{node.querySelector('.message-actions-menu').open=false;star.click();};menu.append(item);}}return node;};
   wrapped.highlights=true;Object.assign(wrapped,Object.fromEntries(Object.entries(original)));window.renderMessage=wrapped;}
  // Part of a message: select it and press «Важно».
  const float=el('button','★ Важно','important-float');float.type='button';float.hidden=true;document.body.append(float);
@@ -51,7 +53,7 @@
   const rect=sel.getRangeAt(0).getBoundingClientRect(),article=anchor.closest('article');pick={text,index:Number(article?.dataset.messageIndex)};
   float.style.left=Math.max(8,Math.min(window.innerWidth-110,rect.left+rect.width/2-45))+'px';float.style.top=Math.max(8,rect.top-36)+'px';float.hidden=false;
   // Sit next to the «Создать задачу» selection button when it is shown.
-  const other=document.querySelector('.selection-task:not([hidden])');if(other){const o=other.getBoundingClientRect();float.style.left=Math.min(window.innerWidth-110,o.right+6)+'px';float.style.top=o.top+'px';}},0));
+  const other=document.querySelector('.selection-task:not([hidden])');if(other){other.append(float);other.style.left=Math.max(8,Math.min(innerWidth-other.offsetWidth-8,rect.left))+'px';}else if(float.parentElement!==document.body)document.body.append(float);},0));
  float.addEventListener('mousedown',e=>e.preventDefault());
  float.onclick=()=>{const p=pick;float.hidden=true;pick=null;if(!p)return;window.getSelection()?.removeAllRanges();change(()=>api('add',topicSelect.value,{text:p.text,messageIndex:Number.isInteger(p.index)?p.index:null}));};
  document.addEventListener('scroll',()=>{float.hidden=true;},true);

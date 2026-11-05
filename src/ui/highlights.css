@@ -15,3 +15,6 @@ mark.user-important{background:color-mix(in srgb,var(--green) 22%,transparent);c
 article.important-flash{animation:important-flash 1.4s ease-out}
 @keyframes important-flash{0%{background:color-mix(in srgb,var(--green) 18%,transparent)}100%{background:transparent}}
 @media (prefers-reduced-motion:reduce){article.important-flash{animation:none}}
+.selection-task .important-float{position:static;box-shadow:none;border:0;background:transparent;color:var(--ink);font:inherit;padding:6px 9px;min-height:30px;border-radius:6px}
+.selection-task .important-float:hover{background:#ffffff12;color:var(--ink)}
+.whole-message-important>.message-content{box-shadow:inset 2px 0 #e8bc65;padding-left:12px}

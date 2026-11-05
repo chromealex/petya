@@ -12,7 +12,7 @@
   if(state?.topicId===topicSelect.value)for(const h of state.items){
    if(h.topicId!==topicSelect.value)continue;
    const i=h.messageIndex,text=chatHistory[i]?.text?.replace(/\s+/g,' ').trim()||'';
-   if(Number.isInteger(i)&&text.includes(h.text))important.add(i);
+   if(Number.isInteger(i)&&text.includes(h.text.replace(/\s+/g,' ').trim()))important.add(i);
   }
   for(const b of marks){const active=important.has(Number(b.dataset.index));b.classList.toggle('important',active);b.setAttribute('aria-label',(active?'Важное. ':'')+b.dataset.label);}
  }
