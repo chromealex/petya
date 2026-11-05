@@ -9,5 +9,6 @@ module.exports=[
  require('./features/chat-tasks.cjs'),
  require('./features/fresh-data.cjs'),
  require('./features/selftest.cjs'),
+ require('./features/morning-brief.cjs'),
  require('./features/extension-replies.cjs')
 ];

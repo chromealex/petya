@@ -471,7 +471,7 @@ function setupHandlers() {
   // features add their own services here (see src/features.cjs) instead of editing main.cjs.
   const services={
     get workspace(){return workspace;},
-    get win(){return win;},get snapshots(){return snapshots;},get handle(){return handle;},get directRequest(){return directRequest;},get team(){return team;},get memory(){return memory;},get slackSync(){return slackSync;},
+    get win(){return win;},get smoke(){return smoke;},get snapshots(){return snapshots;},get handle(){return handle;},get directRequest(){return directRequest;},get team(){return team;},get memory(){return memory;},get slackSync(){return slackSync;},
     get agents(){return agents;},
     get allowedMedia(){return allowedMedia;},
     get analyzeMaterials(){return analyzeMaterials;},

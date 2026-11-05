@@ -31,6 +31,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     if(!choice){const important=ctx.highlights?.turn(original);if(important)return important;}
     if(!choice){const address=ctx.address?.turn(original);if(address)return address;}
     if(!choice){const task=ctx.chatTasks?.turn(original);if(task)return task;}
+    if(!choice){const brief=ctx.morningBrief?.turn(original);if(brief)return brief;}
     if(!choice){const fresh=await ctx.freshData?.turn(original);if(fresh)return fresh;}
     if (!choice && !ctx.attachments.list().length) {
       const visual = await ctx.extensionReplies?.turn(original);
