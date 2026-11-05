@@ -1,0 +1,130 @@
+{
+  "name-0-01": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: True",
+      "Address/data/content retained"
+    ],
+    "group": "name-order-0"
+  },
+  "name-0-10": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: False",
+      "Address/data/content retained"
+    ],
+    "group": "name-order-0"
+  },
+  "name-0-00": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: False",
+      "Address/data/content retained"
+    ],
+    "group": "name-order-0"
+  },
+  "name-0-11": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: True",
+      "Address/data/content retained"
+    ],
+    "group": "name-order-0"
+  },
+  "name-1-01": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: True",
+      "Address/data/content retained"
+    ],
+    "group": "name-order-1"
+  },
+  "name-1-10": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: False",
+      "Address/data/content retained"
+    ],
+    "group": "name-order-1"
+  },
+  "name-1-00": {
+    "criteria": [
+      "Rename active: False",
+      "Color change active: False",
+      "Address/data/content retained"
+    ],
+    "group": "name-order-1"
+  },
+  "name-1-11": {
+    "criteria": [
+      "Rename active: True",
+      "Color change active: True",
+      "Address/data/content retained"
+    ],
+    "group": "name-order-1"
+  },
+  "report-00": {
+    "criteria": [
+      "Chief engineer recipient, protocol number replaces request number, conclusion retained",
+      "Worker receives: False",
+      "Lab address visible: False"
+    ],
+    "group": "recipient-field"
+  },
+  "report-10": {
+    "criteria": [
+      "Chief engineer recipient, protocol number replaces request number, conclusion retained",
+      "Worker receives: True",
+      "Lab address visible: False"
+    ],
+    "group": "recipient-field"
+  },
+  "report-01": {
+    "criteria": [
+      "Chief engineer recipient, protocol number replaces request number, conclusion retained",
+      "Worker receives: False",
+      "Lab address visible: True"
+    ],
+    "group": "recipient-field"
+  },
+  "report-11": {
+    "criteria": [
+      "Chief engineer recipient, protocol number replaces request number, conclusion retained",
+      "Worker receives: True",
+      "Lab address visible: True"
+    ],
+    "group": "recipient-field"
+  },
+  "topic": {
+    "criteria": [
+      "Archivist, file code, transfer date YYYY.MM.DD",
+      "Hidden applicant name",
+      "No shelving procurement"
+    ],
+    "group": null
+  },
+  "print": {
+    "criteria": [
+      "All three fields and exact date format",
+      "No controller name",
+      "No search"
+    ],
+    "group": null
+  },
+  "notify": {
+    "criteria": [
+      "Moderator only on failed import",
+      "Import code not error number, cause",
+      "Hidden operator"
+    ],
+    "group": null
+  },
+  "repeated": {
+    "criteria": [
+      "Open-window count",
+      "142 seconds not stale 158",
+      "Hidden cashier surnames"
+    ],
+    "group": null
+  }
+}
