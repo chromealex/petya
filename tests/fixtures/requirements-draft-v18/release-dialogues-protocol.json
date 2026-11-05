@@ -1,8 +1,12 @@
 {
-  "data_sha256": "06cde4f872f688c11142b45adb1e21f655eeaabb3d72787efee8a6f8b451c5be",
+  "data_sha256": "c89e7c7c900a84036db9d2880b8f446e10b68b8c7f35616227a99aafdd7d9c79",
   "count": 16,
   "training_use": false,
   "review": "Manual non-blind semantic review of complete final requirements, explicit exclusions, unresolved questions, headings and exact labels. Equivalent wording accepted. No external action occurs.",
   "gate": "All 16 correct, no lost parent successes. Then require runtime and generated multi-turn evidence.",
-  "limits": "New fixed histories in known failure categories; synthetic checks do not establish general reliability."
+  "limits": "New fixed histories in known failure categories; synthetic checks do not establish general reliability.",
+  "amendment": {
+    "invalid_previous_sha256": "06cde4f872f688c11142b45adb1e21f655eeaabb3d72787efee8a6f8b451c5be",
+    "reason": "Construction selected the first acquisition row system, which was bounds rather than draft. The invalid baseline answered the requested bounds schema. Correct only the system to the existing draft system; all sixteen histories and references unchanged. Original data and baseline retained under results/invalid-release-prompt. No candidate fresh inference occurred. Training data unchanged. Reevaluate parent with the corrected prompt before candidate."
+  }
 }

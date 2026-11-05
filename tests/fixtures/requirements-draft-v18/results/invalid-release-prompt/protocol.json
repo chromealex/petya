@@ -1,0 +1,8 @@
+{
+  "data_sha256": "06cde4f872f688c11142b45adb1e21f655eeaabb3d72787efee8a6f8b451c5be",
+  "count": 16,
+  "training_use": false,
+  "review": "Manual non-blind semantic review of complete final requirements, explicit exclusions, unresolved questions, headings and exact labels. Equivalent wording accepted. No external action occurs.",
+  "gate": "All 16 correct, no lost parent successes. Then require runtime and generated multi-turn evidence.",
+  "limits": "New fixed histories in known failure categories; synthetic checks do not establish general reliability."
+}

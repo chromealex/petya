@@ -1,0 +1,16 @@
+{"id": "revoked-all", "task": "draft", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "two-targets", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "cancel-second", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "restore-first", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "exact-identifier", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":4,\"upper\":4,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false, "schemaValid": false}
+{"id": "proposal-status", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "context-exclusion", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":0,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "inclusive-prose", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":-24,\"upper\":-8,\"lowerInclusive\":true,\"upperInclusive\":false}", "exactJSON": false, "schemaValid": false}
+{"id": "sort-direction", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":-18,\"upper\":-5,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false, "schemaValid": false}
+{"id": "missing-destination", "task": "draft", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "quoted-permission", "task": "draft", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "short-authorized", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "double-reversal", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "channel-open", "task": "draft", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}
+{"id": "lifetime-approved", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":95,\"upper\":95,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false, "schemaValid": false}
+{"id": "source-untouched", "task": "draft", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": false}

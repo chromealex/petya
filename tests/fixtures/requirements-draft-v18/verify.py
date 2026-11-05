@@ -66,7 +66,11 @@ acq = read(R / 'acquisition.jsonl')
 fresh = read(R / 'check.jsonl')
 release = read(R / 'release-dialogues.jsonl')
 assert (len(train), len(acq), len(fresh), len(release)) == (801, 469, 84, 16)
-for rows in [acq, fresh, release, read(R / 'replacement-variants.jsonl')]:
+systems = {task: next(x['messages'][0] for x in acq if x['task'] == task) for task in ['draft', 'bounds']}
+for row in train + fresh + release:
+    if row['task'] in systems:
+        assert row['messages'][0] == systems[row['task']], row['id']
+for rows in [acq, fresh, release, read(R / 'diverse-variants.jsonl')]:
     validate_dataset(rows)
 by_prompt = {}
 for row in train:
