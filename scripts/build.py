@@ -39,7 +39,7 @@ with (root / '.build.lock').open('w') as lock:
                 node_env['ELECTRON_RUN_AS_NODE'] = '1'
             with tempfile.TemporaryDirectory(prefix='petya-win-build-') as temp:
                 output = pathlib.Path(temp)
-                subprocess.run([node, '-e', "process.noAsar = true; delete process.versions.electron; require(process.argv[1])", str(root / 'node_modules/electron-builder/cli.js'), '--win', '--x64',
+                subprocess.run([node, '-e', "process.noAsar = true; delete process.versions.electron; require(process.argv[1])", str(root / 'node_modules/electron-builder/cli.js'), '--win', '--x64', '--publish', 'never',
                     '-c.directories.output=' + str(output), '-c.nsis.artifactName=Petya-Setup.exe'], cwd=root, env=node_env, check=True)
                 extracted = output / 'verified-app'
                 subprocess.run([node, '-e', "process.noAsar = true; require('@electron/asar').extractAll(process.argv[1],process.argv[2])",
