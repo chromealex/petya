@@ -21,7 +21,7 @@ window.renderUnityPrefab=function(node,query){
     async function render(n){
       status.textContent='Получаю превью из Unity…';
       if(!cache.has(n)){const r=await call('preview_prefab',{guid:item.guid,view:n});const frame=r.content.find(b=>b.type==='image'&&b.mimeType==='image/png');if(!frame)throw Error('Нет изображения от Unity.');cache.set(n,'data:image/png;base64,'+frame.data);}
-      angle=n;img.src=cache.get(n);img.hidden=false;status.textContent=[instance,item.path].filter(Boolean).join(' · ');
+      document.dispatchEvent(new Event('petya-results-changed'));angle=n;img.src=cache.get(n);img.hidden=false;status.textContent=[instance,item.path].filter(Boolean).join(' · ');
     }
     controls.className='actions';controls.append(button('Повернуть влево',()=>render((angle+7)%8)),button('Повернуть вправо',()=>render((angle+1)%8)),button('Открыть в Unity',async()=>{await call('open_prefab',{guid:item.guid});status.textContent='Открыт в Unity · '+item.path;}));
     preview.append(img,controls);controls.inert=true;try{await render(0);}finally{controls.inert=false;}

@@ -38,9 +38,10 @@ module.exports={
       catch(error){progress(error.message,false,true);throw error;}
     }
     function turn(command){
-      const topic=s.dialogue.active(),selected=require('../previous-reply.cjs')(topic)?.unitySelection;
+      const topic=s.dialogue.active(),selected=s.chatResults?s.chatResults.current(topic,'unitySelection'):require('../previous-reply.cjs')(topic)?.unitySelection;
       const action=/^(?:поверни(?: (влево|вправо))?|покажи сзади|открой в unity)[.!?]*$/iu.exec(command.trim());
-      if(action&&selected&&selected.url===s.settings.unityUrl&&selected.project===topic.projectId){
+      if(action&&selected){
+        if(selected.url!==s.settings.unityUrl||selected.project!==topic.projectId)throw Error('Подключение Unity изменилось. Найдите префаб заново.');
         const open=/открой/iu.test(action[0]),view=/сзади/iu.test(action[0])?4:(selected.view+(action[1]?.toLowerCase()==='влево'?7:1))%8;
         return followup(command,selected,open,view,topic);
       }
@@ -68,7 +69,7 @@ module.exports={
       s.dialogue.rememberAction(command,text);const message=topic.messages.at(-1);
       message.by='Unity Editor';message.extensionImages=result?.content.filter(b=>b.type==='image')||[];
       if(problem)message.serviceProblem={id:'unity',query:command};
-      message.unitySelection={...selected,view:open||problem?selected.view:view};s.dialogue.persist();
+      message.unitySelection={...selected,view:open||problem?selected.view:view};s.dialogue.persist();s.chatResults?.adopt(topic,message);
       return {handled:true,text,topicId:topic.id,messages:topic.messages};
     }
     async function perform(id,tool,args,verify=()=>{},instance){
@@ -101,11 +102,11 @@ module.exports={
         check();const data=Object.hasOwn(native.specs,tool)?await native.execute(client,tool,parsed,check):await prefabs.execute(client,tool,parsed,check);return {...data,instance};
       });
       check();
-      if(tool==='find_prefabs'&&result.structuredContent?.matches)findResults.set(topic,{instance,url,rows:result.structuredContent.matches});
+      if(tool==='find_prefabs'&&Array.isArray(result.structuredContent?.matches))findResults.set(topic,{instance,url,rows:result.structuredContent.matches});
       const found=findResults.get(topic);
       const item=found?.instance===instance&&found?.url===url&&found.rows?.find(r=>r.guid===parsed.guid);
       if(item&&owner?.unityPrefab && tool!=='find_prefabs'){
-        owner.unitySelection={instance,url,project:topic.projectId,...item,view:parsed.view??owner.unitySelection?.view??0};s.dialogue.persist();
+        owner.unitySelection={instance,url,project:topic.projectId,...item,view:parsed.view??owner.unitySelection?.view??0};s.dialogue.persist();s.chatResults?.adopt(topic,owner);
       }
       return result;
     }

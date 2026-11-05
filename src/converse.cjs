@@ -10,7 +10,10 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     if(correction.cancelled){ctx.dialogue.rememberAction(spoken,correction.reply);const topic=ctx.dialogue.active(),last=topic?.messages?.at(-1);if(last?.role==='assistant')last.by='поправка во фразе';ctx.dialogue.persist();return {handled:true,text:correction.reply,by:'поправка во фразе',topicId:topic?.id,topicTitle:topic?.title,messages:topic?.messages};}
     const step=label=>require('./request-progress.cjs').report(label);
     if(correction.changed)step('Учёл поправку во фразе: «'+correction.text.slice(0,80)+'»');
-    const original=correction.text;let value=original,applied=[];
+    let routed;
+    if(!choice&&!ctx.attachments.list().length)routed=await ctx.chatResults?.turn(correction.text);
+    if(routed&&!routed.resultCommand)return routed;
+    const original=routed?.resultCommand||correction.text;let value=original,applied=[];
     if(choice)ctx.draftAnswers.clear();else ctx.draftAnswers.commit(original,ctx.voicePreparationKey());
     const namePreference=!choice?require('./name-preference.cjs').preference(original,ctx.settings):null;
     if(namePreference){ctx.saveSettings(namePreference.patch);ctx.dialogue.rememberAction(original,namePreference.text);return {handled:true,text:namePreference.text,topicId:ctx.dialogue.active()?.id,messages:ctx.dialogue.active()?.messages};}
@@ -196,7 +199,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     return {...reply,resolvedCommand:value,appliedRules:applied};
   });
   // When a correction changed the request, the recorded question keeps what was actually said.
-  return async(command,choice,background=false)=>{const owner=ctx.dialogue.active(),project=ctx.dialogue.state.activeProjectId,company=ctx.companyId;
+  return async(command,choice,background=false)=>{const owner=ctx.dialogue.active(),beforeMessage=owner?.messages?.at(-1),project=ctx.dialogue.state.activeProjectId,company=ctx.companyId;
     let result;
     try{result=await pipeline(command,choice,background);}
     catch(error){
@@ -218,5 +221,6 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     // Keep what Petya did with the answer, so the chat can show the steps later.
     const steps=require('./request-progress.cjs').steps();
     if(steps.length&&result&&typeof result==='object'){result.steps=steps;const last=chat?.messages?.at(-1);if(last?.role==='assistant'&&!last.steps&&result.handled){last.steps=steps;ctx.dialogue.persist();}}
+    if(chat?.messages?.at(-1)!==beforeMessage)ctx.chatResults?.adopt(chat,chat?.messages?.at(-1));
     return result;};
 };

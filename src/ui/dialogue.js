@@ -108,7 +108,7 @@ function updateHistoryButton(){olderMessages.remove();if(chatHistoryStart>0)dial
 function showDialogueMessages(messages){
  const sameHistory=chatHistory.length&&messages.length>=chatHistory.length&&messages[0]?.text===chatHistory[0]?.text&&messages[0]?.at===chatHistory[0]?.at;
  chatHistoryStart=sameHistory?chatHistoryStart:Math.max(0,messages.length-CHAT_PAGE_SIZE);
- chatHistory=messages.slice();window.applyChatPlaceholder($('command'),chatHistory);dialogueMessages.replaceChildren(...chatHistory.slice(chatHistoryStart).map(renderDialogueMessage));updateHistoryButton();
+ chatHistory=messages.slice();window.applyChatPlaceholder($('command'),chatHistory);dialogueMessages.replaceChildren(...chatHistory.slice(chatHistoryStart).map(renderDialogueMessage));updateHistoryButton();document.dispatchEvent(new Event('petya-results-changed'));
 }
 async function loadOlderChatMessages(){
  if(chatHistoryLoading||!chatHistoryStart)return;
@@ -143,6 +143,7 @@ async function showDialogueReply(result,spoken=false){
  const newest=[...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1);if(!result.error&&!result.computerApproval)window.revealAnswer?.(newest,result.text,{spoken,initial:result.answerStreamId===spokenStreamId||result.answerStreamId?answerShown:0});
  if(result.text)window.checkVoiceLanguages?.(result.text,newest);
  window.applyChatPlaceholder($('command'),chatHistory,result);
+ if(window.showResultChoices)await window.showResultChoices(result);
  dialogueTitle.textContent=result.topicTitle||'Диалог с Петей';dialogueChoices.replaceChildren();window.offerReportShare?.(result.reportShareId,dialogueChoices);if(result.computerApproval)window.showComputerApproval(result.computerApproval,newest,spoken);
  if(result.gitDiscovery){const found=result.gitDiscovery;for(const root of found.repositories){const b=document.createElement('button');b.type='button';b.textContent='Работать с '+root;b.onclick=run(async()=>{await window.petya.gitSelect(root,found.projectId);await processCommand(result.gitCommand||'статус гита');});dialogueChoices.append(b);}if(!found.repositories.length&&!found.partial&&!found.warnings.length)for(const folder of found.missing){const b=document.createElement('button');b.type='button';b.textContent='Создать Git в '+folder;b.onclick=run(async()=>{b.disabled=true;try{const created=await window.petya.gitInit(folder,found.projectId);await showDialogueReply({handled:true,text:created.text},spoken);}finally{b.disabled=false;}});dialogueChoices.append(b);}}
 

@@ -28,7 +28,7 @@ async function run(){
     callTool:async request=>({structuredContent:{success:true,data:{instance:request.arguments.instance}}})};
   assert.deepEqual(await unity.inspect(client),instances);await unity.target(client,'A@2');
   instances.length=0;await assert.rejects(unity.inspect(client),/Connect/);
-  client.listTools=async()=>({tools:[]});await assert.rejects(unity.inspect(client),/execute_code/);
+  client.listTools=async()=>({tools:[]});instances.push({id:'A@1',name:'A'});assert.deepEqual(await unity.inspect(client),instances);
   console.log('Scoped report selection, recovery, source changes and Unity instance diagnostics passed');
 }
 run().catch(e=>{console.error(e);process.exitCode=1;});

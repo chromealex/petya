@@ -16,7 +16,7 @@ function setup(s, dialog = () => require('electron').dialog) {
     if (!topic || topic.archived) throw Error('Откройте чат с запросом на правку анимации.');
     return JSON.stringify([s.companyId, topic.projectId, topic.id, topic.versionIndex || 0]);
   }
-  async function pick() {
+  async function pick(motionId) {
     const owner = scope();
     const result = await dialog().showOpenDialog(s.win, { title:'Выберите исходник анимации Blender', properties:['openFile'],
       filters:[{name:'Сцена Blender',extensions:['blend']}] });
@@ -26,11 +26,21 @@ function setup(s, dialog = () => require('electron').dialog) {
     const id = randomUUID();
     files.set(id,{owner, full});
     if (files.size > 512) files.delete(files.keys().next().value);
-    return {id, name:path.basename(full)};
+    const selected={id,name:path.basename(full)};
+    const topic=s.dialogue.active(),message=topic.messages.find(m=>m.motionId===motionId);
+    if(message){message.motionFile={...selected,full,project:topic.projectId};s.dialogue.persist();s.chatResults?.adopt(topic,message);}
+    return selected;
   }
   async function resolve(id) {
-    const file = files.get(id);
+    let file = files.get(id);
+    if(!file){
+      const topic=s.dialogue.active(),saved=topic?.messages.find(m=>m.motionFile?.id===id)?.motionFile;
+      if(saved?.project===topic.projectId && typeof saved.full==='string' && path.extname(saved.full).toLowerCase()==='.blend'){
+        file={owner:scope(),full:saved.full};files.set(id,file);
+      }
+    }
     if (!file || file.owner !== scope() || await fs.realpath(file.full) !== file.full) throw Error('Выберите исходник заново в текущем чате.');
+    if(!(await fs.stat(file.full)).isFile())throw Error('Исходный файл недоступен. Выберите его заново.');
     return {full:file.full,relative:path.basename(file.full)};
   }
   const edits = animationEdits(resolve, () => true, async (detail,message) => {
@@ -65,16 +75,21 @@ function setup(s, dialog = () => require('electron').dialog) {
       const id = randomUUID();
       files.set(id,{owner:scope(),full});
       if (files.size > 512) files.delete(files.keys().next().value);
-      message.motionFile = {id,name:path.basename(full)};
+      message.motionFile = {id,name:path.basename(full),full,project:topic.projectId};
     }
     if (attachment) s.attachments.remove(attachment.id);
-    s.dialogue.persist();
+    s.dialogue.persist();s.chatResults?.adopt(topic,message);
     return {handled:true,by:'Blender',text,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
+  }
+  async function reveal(id,check=()=>{}){
+    const owner=scope(),file=await resolve(id);check();
+    if(owner!==scope())throw Error('Чат изменился.');
+    require('electron').shell.showItemInFolder(file.full);
   }
   const ipc = {pick, analyze:(...args)=>run('Проверяю ключи движения…',()=>edits.analyze(...args)),
     apply:id=>run('Сохраняю исправленную копию…',()=>edits.apply(id)), status:()=>operation};
   sessions.set(s.dialogue, {ipc, requests});
-  return {ipc,blenderMotion:{turn}};
+  return {ipc,blenderMotion:{turn,reveal}};
 }
 
 function register(server,z,ctx) {

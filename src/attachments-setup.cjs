@@ -32,11 +32,11 @@ module.exports=ctx=>{
     if (owner !== attachments.scope() || attachments.list().length >= 5) throw Error('Выберите до пяти файлов в текущем чате.');
     const full = ctx.fs.realpathSync(file);
     if (!ctx.fs.statSync(full).isFile() || !/\.blend$/i.test(full)) throw Error('Выберите локальный файл .blend.');
-    const item = {id:require('node:crypto').randomUUID(),name:ctx.path.basename(full),owner,at:Date.now(),note:'Сцена Blender'};
+    const item = {id:require('node:crypto').randomUUID(),name:ctx.path.basename(full),owner,at:Date.now(),localSourcePath:full,note:'Сцена Blender'};
     scenes.set(item,full);
     attachments.store(item);
     continue;
   }
-  if(ctx.fs.statSync(file).size>require('./attachments.cjs').maxSize(file))throw Error('Документ/изображение больше 10 МБ.');if(require('./attachments.cjs').isVideo(file))await attachments.addVideoFile(file,owner);else await attachments.add(ctx.path.basename(file),ctx.fs.readFileSync(file),owner);}catch(e){errors.push(ctx.path.basename(file)+': '+e.message);}}return errors;});
+  if(ctx.fs.statSync(file).size>require('./attachments.cjs').maxSize(file))throw Error('Документ/изображение больше 10 МБ.');if(require('./attachments.cjs').isVideo(file))await attachments.addVideoFile(file,owner);else await attachments.add(ctx.path.basename(file),ctx.fs.readFileSync(file),owner,item=>{if(owner!==attachments.scope())throw Error('Чат изменился. Прикрепите файл заново.');item.localSourcePath=ctx.fs.realpathSync(file);});}catch(e){errors.push(ctx.path.basename(file)+': '+e.message);}}return errors;});
   return {attachments,allowedMedia,importMedia};
 };

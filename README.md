@@ -131,3 +131,5 @@ resources and resource templates. The same operations are exposed as `unity_disc
 active chat, an enabled Unity connection and local approval in Petya. Review the tool name and exact
 arguments before approving an edit. Available operations depend on the connected editor. Prefab search
 prefers native `manage_asset`; older servers and the directional preview/open workflows use `execute_code`.
+
+Extensions may provide `result.cjs` with an `id`, `describe(message, topic, services)` and, for direct actions, `perform(action, result, services, check)`. Descriptors supply a stable object key, title, subtitle and action IDs/labels. Command actions use the normal chat pipeline. Direct actions recheck ownership and availability after asynchronous work and before side effects. The shared result cards and composer selector retain the selection (or explicit reset) within the company, project, chat and version. Multiple objects require an explicit choice. Imported files expose folder navigation only when their original local path was recorded by the native picker.

@@ -64,7 +64,7 @@ function setup(s) {
     }
     const files = s.attachments.list();
     const context = { files, topic, settings:s.settings };
-    const last=require('../extensions/previous-reply.cjs')(topic)?.extensionResult;
+    const last=s.chatResults?s.chatResults.current(topic,'extensionResult'):require('../extensions/previous-reply.cjs')(topic)?.extensionResult;
     const refresh=!files.length && last?.project===project && /^(?:обнови(?: результат| отчёт| отчет| диаграмму)?|покажи ещё раз|покажи еще раз)[.!?]*$/iu.test(command.trim());
     const requested=/^только\s+(.+?)\s*$/iu.exec(command.trim())?.[1];
     const pick=!files.length && last?.project===project && requested && last.choices?.find(key=>key.toLowerCase()===requested.toLowerCase());
@@ -107,7 +107,7 @@ function setup(s) {
     message.extensionResult={provider:p.type,query,source:source||p.name,base,choices,selected,project};
     if(problem)message.serviceProblem={id:p.type,query:'Обнови результат'};
     message.extensionImages = content.filter(block => block.type === 'image');
-    dialogue.persist();
+    dialogue.persist();s.chatResults?.adopt(owner,message);
     return { handled:true, text, by:p.name, topicId:owner.id, topicTitle:owner.title, messages:owner.messages };
   }
   const catalog = () => list(s.settings);

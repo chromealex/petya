@@ -32,9 +32,9 @@ window.renderMotionCard = function(parent, message) {
   const output = document.createElement('div');
   let file = message.motionFile;
   const choose = button('Выбрать .blend', async () => {
-    const selected = await call('pick');
+    const selected = await call('pick',message.motionId);
     if (!selected) return;
-    file = selected; choose.textContent = selected.name;
+    document.dispatchEvent(new Event('petya-results-changed'));file = selected; choose.textContent = selected.name;
     clip.replaceChildren(); clip.parentElement.hidden = true;
     status.textContent = ''; output.replaceChildren();
   });

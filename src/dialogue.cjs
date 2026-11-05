@@ -179,7 +179,7 @@ class Dialogue {
    if(result.title)active.title=result.title;
    if(result.data)active.lastData=result.data;
    if(result.error && kind==='chat' && active.attachments?.length)result.retryStep='files';
-   active.messages.push({role:'assistant',text:result.text,error:!!result.error,...(result.error&&(['bugs','tasks','anr'].includes(kind)||result.retryStep)?{retryStep:result.retryStep||kind}:{}),sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
+   active.messages.push({role:'assistant',text:result.text,error:!!result.error,...(result.error&&(['bugs','tasks','anr'].includes(kind)||result.retryStep)?{retryStep:result.retryStep||kind}:{}),sources:result.sources||[],jiraItems:require('./extensions/jira/result.cjs').capture(result),usedMaterials:result.usedMaterials||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
    return {handled:true,...result,topicId:active.id,topicTitle:active.title,messages:active.messages,topics:this.list()};
   }finally{this.running.delete(runningKey);}
  }
