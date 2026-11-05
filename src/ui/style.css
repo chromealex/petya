@@ -998,3 +998,9 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .clarification-input.choices-only{align-items:center;gap:6px;padding:0 0 10px}
 .clarification-input.choices-only>button{font-size:12px;line-height:18px;min-height:30px;padding:6px 10px;border-radius:8px;background:transparent}
 .clarification-input.choices-only>button:first-child{background:#d2f79b18;border-color:#d2f79b55;color:var(--green)}
+
+.computer-approval.clarification-input{width:100%;flex:1 1 100%;gap:12px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.computer-approval .approval-question{flex:1 1 260px;margin:0;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+.computer-approval .approval-buttons{display:flex;flex:none;gap:6px;margin-left:auto}
+.computer-approval .approval-buttons>button{font-size:12px;line-height:18px;min-height:30px;padding:6px 10px;border-radius:8px;background:transparent;white-space:nowrap}
+.computer-approval .approval-buttons>.primary{background:#d2f79b18;border-color:#d2f79b55;color:var(--green)}

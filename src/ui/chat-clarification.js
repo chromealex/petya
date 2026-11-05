@@ -6,7 +6,7 @@
   const modelChoices=Array.isArray(result.clarificationOptions)?result.clarificationOptions:[];
   const selectable=modelChoices.length>=2||keys.some(key=>result[key]?.length>0);
   dialogueChoices.classList.toggle('clarification-list',selectable);dialogueChoices.removeAttribute('aria-label');dialogueChoices.removeAttribute('role');dialogueChoices.onkeydown=null;
-  if(result.computerApproval){window.showComputerApproval(result.computerApproval,dialogueChoices,spoken);document.querySelector('.chat-composer')?.prepend(dialogueChoices);return;}
+  if(result.computerApproval){window.showComputerApproval(result.computerApproval,dialogueChoices,spoken,result.text);document.querySelector('.chat-composer')?.prepend(dialogueChoices);return;}
   if(result.clarificationId)voiceReply=async answer=>showDialogueReply(await window.petya.feature('clarifications','answer',result.clarificationId,answer),spoken);
   if(result.question&&!selectable&&!result.computerApproval&&!result.gitDiscovery){voiceReply ||= async answer=>showDialogueReply(await window.petya.converse(answer),spoken);result.clarificationInput ||= {label:'Ваш ответ',placeholder:'Уточните здесь…',submit:'Продолжить'};}
   if(result.clarificationInput&&typeof voiceReply==='function'){
