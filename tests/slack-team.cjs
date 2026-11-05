@@ -26,5 +26,20 @@ const {TeamFill}=require('../src/team-fill.cjs');
  fail='users.list';result=await fill.turn('Заполни команду');assert(result.error);assert.equal(saved,beforeChoice+1);fail='';
  settings.slackChannels='';result=await fill.turn('Заполни команду');assert(result.teamFillReply);result=await fill.turn('разработка',true);assert(!result.error);assert(!result.question);
  let changed=false;const stale=new SlackTeam({settings:()=>settings,enabled:()=>true,request:async(...args)=>{const data=await request(...args);if(!changed){settings.slackToken='changed';changed=true;}return data;}});await assert.rejects(()=>stale.collect('Заполни команду из Slack #разработка'),/изменилось/);
+ // A partial channel directory must request an address, then resume without listing it all again.
+ let directoryCalls=0,writes=0;const scoped={slackToken:'token',slackChannels:'*',teamMembers:'[]'};
+ const large=new SlackTeam({settings:()=>scoped,enabled:()=>true,request:async url=>{
+  const u=new URL(url),method=u.pathname.split('/').at(-1);
+  if(method==='conversations.list'){directoryCalls++;return {ok:true,channels:[{id:'CEXACT',name:'exact'}],response_metadata:{next_cursor:'page-'+directoryCalls}};}
+  if(method==='conversations.info'){assert.equal(u.searchParams.get('channel'),'CEXACT');return {ok:true,channel:{id:'CEXACT',name:'exact'}};}
+  if(method==='conversations.members')return {ok:true,members:['UONE']};
+  if(method==='users.list')return {ok:true,members:[people[0]]};
+  throw Error(method);
+ }});
+ let scope='company/project/chat';const resume=new TeamFill({settings:()=>scoped,save:members=>{scoped.teamMembers=JSON.stringify(members);writes++;},sources:()=>[],roster:c=>large.collect(c),scope:()=>scope});
+ result=await resume.turn('Заполни команду');assert(result.question&&result.clarificationInput&&result.teamFillReply);assert(!result.error);assert.equal(writes,0);assert.equal(directoryCalls,50);
+ result=await resume.turn('https://example.slack.com/archives/CEXACT',true);assert(result.teamUpdated);assert.equal(writes,1);assert.equal(directoryCalls,50);
+ scoped.teamMembers='[]';result=await resume.turn('Заполни команду');const beforeExact=directoryCalls;result=await resume.turn('exact',true);assert(result.teamUpdated);assert.equal(directoryCalls,beforeExact+1);
+ result=await resume.turn('Заполни команду');scope='another-project';result=await resume.turn('https://example.slack.com/archives/CEXACT',true);assert.match(result.text,/устарело/);assert.equal(writes,2);
  console.log('Slack team: selected channels, pagination, profiles, bots, dedupe, voice channel choice, missing scopes and stale connection passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});

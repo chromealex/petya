@@ -921,3 +921,8 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .chat-timeline.fade-top.fade-bottom{mask-image:linear-gradient(to bottom,transparent,#000 18px,#000 calc(100% - 18px),transparent)}
 .chat-timeline button.important::after{background:#e8bc65;width:16px;opacity:1;height:2px}
 .chat-timeline button.important.current::after,.chat-timeline button.important:hover::after{width:22px;background:#ffd78b}
+
+.clarification-input{display:flex;align-items:end;flex-wrap:wrap;gap:10px;padding:10px 0}
+.clarification-input label{flex:1 1 240px;margin:0}.clarification-input input{margin-top:6px}
+.clarification-input button{margin:0}.clarification-input [role=status]{flex-basis:100%;margin:0;font-size:12px}
+.clarification-input [role=status]:empty{display:none}

@@ -5,6 +5,12 @@
   const modelChoices=Array.isArray(result.clarificationOptions)?result.clarificationOptions:[];
   const selectable=modelChoices.length>=2||keys.some(key=>result[key]?.length>0);
   dialogueChoices.classList.toggle('clarification-list',selectable);dialogueChoices.removeAttribute('aria-label');dialogueChoices.removeAttribute('role');dialogueChoices.onkeydown=null;
+  if(result.clarificationInput&&typeof voiceReply==='function'){
+   const reply=voiceReply,owner=topicSelect.value,form=document.createElement('form'),label=document.createElement('label'),input=document.createElement('input'),submit=document.createElement('button'),status=document.createElement('p');
+   form.className='clarification-input';label.textContent=result.clarificationInput.label;input.placeholder=result.clarificationInput.placeholder;input.required=true;input.maxLength=300;input.autocomplete='off';submit.type='submit';submit.textContent=result.clarificationInput.submit||'Продолжить';status.setAttribute('role','status');label.append(input);form.append(label,submit,status);dialogueChoices.append(form);document.querySelector('.chat-composer')?.prepend(dialogueChoices);
+   form.onsubmit=async event=>{event.preventDefault();if(submit.disabled||owner!==topicSelect.value||voiceReply!==reply)return;submit.disabled=true;input.disabled=true;status.textContent='Продолжаю заполнение…';try{window.appendChatRequest?.(input.value);await reply(input.value);}catch(e){status.textContent=e.message;}finally{submit.disabled=false;input.disabled=false;}};
+   requestAnimationFrame(()=>{if(form.isConnected)input.focus({preventScroll:true});});return;
+  }
   if(!selectable){document.querySelector('.chat-feed')?.append(dialogueChoices);return;}
   if(modelChoices.length>=2){voiceReply=async answer=>showDialogueReply(await window.petya.converse(answer),spoken);for(const label of modelChoices){const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('aria-pressed','false');button.onclick=()=>{
    const input=$('command'),previous=dialogueChoices.dataset.selected||'';
