@@ -1,0 +1,440 @@
+{
+  "base": {
+    "failure-0-0": [
+      false,
+      "Adds unrelated channel, detail and logging questions."
+    ],
+    "failure-0-1": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-0-00": [
+      false,
+      "Omits preservation of the address."
+    ],
+    "name-0-01": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-0-10": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-0-11": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-1-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-1-01": [
+      false,
+      "Cancels the approved coral color."
+    ],
+    "name-1-10": [
+      false,
+      "Applies the canceled coral color."
+    ],
+    "name-1-11": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-000": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-001": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-010": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-011": [
+      false,
+      "Reopens the settled identifier and asks delivery format."
+    ],
+    "polarity-0-100": [
+      false,
+      "Adds an unrequested revision-code format question."
+    ],
+    "polarity-0-101": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-110": [
+      false,
+      "Reopens settled privacy and asks the code source."
+    ],
+    "polarity-0-111": [
+      false,
+      "Adds personal/work email, logging and formatting questions."
+    ],
+    "polarity-1-000": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-001": [
+      false,
+      "Hides the phone despite approval and reopens decisions."
+    ],
+    "polarity-1-010": [
+      false,
+      "Reopens final recipients and fields."
+    ],
+    "polarity-1-011": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-100": [
+      false,
+      "Reopens the visible identifier and asks formatting."
+    ],
+    "polarity-1-101": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-110": [
+      false,
+      "Reopens recipients/privacy and asks the identifier source."
+    ],
+    "polarity-1-111": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "repeat": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-01": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-10": [
+      false,
+      "Retains buyer prohibition after permission."
+    ],
+    "report-0-11": [
+      false,
+      "Retains buyer prohibition after permission."
+    ],
+    "report-1-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-1-01": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-1-10": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-1-11": [
+      false,
+      "Bans the contractor despite permission."
+    ],
+    "scope": [
+      false,
+      "Omits keyboard exclusion, assumes current behavior and asks an unrequested parsing question."
+    ]
+  },
+  "parent": {
+    "failure-0-0": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "failure-0-1": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-0-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-0-01": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-0-10": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-0-11": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-1-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-1-01": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-1-10": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-1-11": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-000": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-001": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-010": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-011": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-100": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-101": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-110": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-111": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-000": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-001": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-010": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-011": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-100": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-101": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-110": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-111": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "repeat": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-01": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-10": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-11": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-1-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-1-01": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-1-10": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-1-11": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "scope": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ]
+  },
+  "historical": {
+    "failure-0-0": [
+      false,
+      "Omits required visible reviewer name."
+    ],
+    "failure-0-1": [
+      false,
+      "Omits explicit reviewer-name hiding."
+    ],
+    "name-0-00": [
+      false,
+      "Applies canceled color."
+    ],
+    "name-0-01": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-0-10": [
+      false,
+      "Applies canceled color; heading contradicts description."
+    ],
+    "name-0-11": [
+      false,
+      "Omits address preservation and does not identify the original label in the replacement."
+    ],
+    "name-1-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-1-01": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-1-10": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "name-1-11": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-000": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-001": [
+      false,
+      "Hides approved email; malformed prohibition."
+    ],
+    "polarity-0-010": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-011": [
+      false,
+      "Invents an additional hidden revision-code field."
+    ],
+    "polarity-0-100": [
+      false,
+      "Changes the business subject to revisions rather than limiting the edit to the code field."
+    ],
+    "polarity-0-101": [
+      false,
+      "Hides approved email and changes the business subject."
+    ],
+    "polarity-0-110": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-0-111": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "polarity-1-000": [
+      false,
+      "Heading reverses hiding; description does not preserve the general expert-phone privacy constraint."
+    ],
+    "polarity-1-001": [
+      false,
+      "Hides approved phone."
+    ],
+    "polarity-1-010": [
+      false,
+      "Contradictory repetitive recipient instructions."
+    ],
+    "polarity-1-011": [
+      false,
+      "Contradictory recipients and hides approved phone."
+    ],
+    "polarity-1-100": [
+      false,
+      "Equates field values instead of replacing the displayed field."
+    ],
+    "polarity-1-101": [
+      false,
+      "Equates fields, allows forbidden tenant and hides approved phone."
+    ],
+    "polarity-1-110": [
+      false,
+      "Bans authorized tenant and omits manager."
+    ],
+    "polarity-1-111": [
+      false,
+      "Contradictory recipients and hides approved phone."
+    ],
+    "repeat": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-01": [
+      false,
+      "Hides approved phone and omits buyer prohibition."
+    ],
+    "report-0-10": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-0-11": [
+      false,
+      "Hides approved phone."
+    ],
+    "report-1-00": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ],
+    "report-1-01": [
+      false,
+      "Hides approved address."
+    ],
+    "report-1-10": [
+      false,
+      "Bans authorized contractor."
+    ],
+    "report-1-11": [
+      false,
+      "Hides approved address."
+    ],
+    "scope": [
+      true,
+      "All final requirements retained; equivalent wording accepted."
+    ]
+  }
+}

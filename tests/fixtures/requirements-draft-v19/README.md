@@ -17,3 +17,11 @@ Reserve 84 structured cases and sixteen independently worded diverse dialogues b
 Complete preservation of old requirements and independent checks without regressions remain necessary. These synthetic tests, especially greedy fixed histories, do not establish broad reliability or runtime readiness. Runtime integration, normal-sampling generated multi-turn behavior and final artifact verification remain outstanding before petya-v1 release. This intervention changes data and adaptation depth together and cannot establish an isolated causal explanation.
 
 `verify_artifact.py` checks actual safetensors coverage, finite values and provenance. The expansion adapts MLP projections in all 32 blocks and query/key/value/output projections in the eight full-attention blocks. It does not adapt the recurrent linear-attention projections. The probe contains 256 finite tensors and 14,548,992 trainable parameters. This distinction prevents describing the experiment as full-weight fine-tuning or adaptation of every attention projection.
+
+## Baselines before candidate evaluation
+
+The immediate v18 parent passes 84/84 structured cases: 36 requirement drafts, 20 numeric-bound cases, 24 sorts and four general checks. The unadapted base passes 55/84 and historical v8 passes 44/84 under the same criteria. These are independent inputs for this round, not a comparison to the counts from differently worded previous rounds.
+
+On the sixteen diverse fixed-history dialogues, the parent passes only 7/16. Failures include revoked sending, an independently canceled field replacement, invented exercise content, missing manual export, omitted exclusions, missing no-rounding, absent requested sorted output, and ambiguous reversal of editor recipient/sender roles. The editor case is conservatively failed because permission to the editor to send does not unambiguously preserve permission to send to the editor. All raw answers, manifests, explicit non-blind judgments and answer hashes are saved under `results/`. Equivalent prose is accepted; exact JSON equality is not the semantic pass criterion.
+
+The full-depth candidate is still training. No candidate fresh evaluation or release decision follows from these baseline results.

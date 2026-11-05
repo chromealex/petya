@@ -1,0 +1,17 @@
+{
+  "parent": {
+    "passed": 7,
+    "total": 16,
+    "failures": [
+      "withdrawn-latest",
+      "only-one-recipient",
+      "independent-field-cancels",
+      "no-invented-columns",
+      "return-from-other-topic",
+      "boundary-language",
+      "sort-with-rule",
+      "quoted-ban-not-action",
+      "single-use-scope"
+    ]
+  }
+}
