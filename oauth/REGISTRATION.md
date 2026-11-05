@@ -69,3 +69,9 @@ The end-to-end Asana test is complete: login from the installed Petya.app via Sa
 - API and Marketplace terms were accepted with explicit user approval. App credentials are installed in the server's protected environment files, not this repository.
 - SDK Linux x86_64 7.1.5.4432 compiled on the existing server using the pinned official sample and Petya adapter. OAuth broker and recorder systemd services are active. Recorder route: `https://auth.petya-app.ru/zoom-bot/`.
 - End-user OAuth authorization, macOS Accessibility permission, host recording permission, and a live end-to-end meeting test remain required. Development availability is not Marketplace publication or production approval.
+
+### External Zoom beta review (2026-11-05)
+
+Production OAuth callback, contact details and technical design are prepared. With explicit owner approval, the architecture PNG and security disclosures were sent to Zoom, including the absence of formal SSDLC, SAST/DAST and independent penetration-test reports. The external beta sharing request is **Request in Review**; external availability is still LIMITED. The live services continue using development credentials. Approval, production credential activation and live recording acceptance remain outstanding. See `zoom-bot/review/SECURITY-REVIEW.md` for the disclosed limitations.
+
+Desktop recording jobs now retain their original encrypted connection across reauthorization. Explicit retry can recover an unavailable/failed job without automatically replacing active work. Controller, HTTP reauthorization and MCP-client tests passed. The current `Petya.app` was rebuilt with `scripts/build.py --mac`; package, tray-launch and Developer ID signature checks passed.

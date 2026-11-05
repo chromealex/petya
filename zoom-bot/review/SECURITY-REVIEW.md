@@ -18,8 +18,8 @@ The owner confirmed that no formal SSDLC documentation, SAST/DAST reports or ind
 
 ## External distribution
 
-The Zoom development app supports only local/internal testing. The production configuration is prepared, but external sharing is LIMITED and Request to Share is disabled. External beta approval and/or publication review is required. The live server still uses development credentials; production credentials must not be activated until the applicable access and review requirements are resolved.
+The Zoom development app supports only local/internal testing. The production configuration is prepared. On 2026-11-05 the technical-design form and architecture diagram were submitted, and the external beta sharing request reached the verified Marketplace status **Request in Review**. External sharing remains LIMITED pending Zoom approval. This is not approval for arbitrary external accounts or full Marketplace publication. The live server still uses development credentials; production credentials must not be activated until the applicable access and review requirements are resolved.
 
 ## Approval boundary
 
-Automatic approval review blocked sending the detailed data-protection paragraph to Zoom because it discloses internal security and operational information. Owner approval is needed before uploading this material and its architecture diagram. No final external-sharing request has been submitted.
+After an initial automatic approval-review block, the owner explicitly authorized sharing this security material and the architecture diagram with Zoom. The technical-design form received the architecture, technology and data-protection descriptions, including missing audits and operational limitations; the PNG was uploaded. The external-sharing request was submitted and its Request in Review status was observed. No secrets or meeting content were included.
