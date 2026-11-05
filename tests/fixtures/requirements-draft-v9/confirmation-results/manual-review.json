@@ -1,0 +1,266 @@
+{
+  "base": {
+    "f-rename-0-01": [
+      false,
+      "Settled address/content decisions reopened."
+    ],
+    "f-rename-0-10": [
+      true,
+      "Desired new name, unchanged color/address/content. Singular source-name inflection credited as unambiguous referent, not exact wording."
+    ],
+    "f-rename-0-00": [
+      true,
+      "All final states correct; restoration phrasing credited as describing cancelled proposal rather than requiring reference wording."
+    ],
+    "f-rename-0-11": [
+      false,
+      "Settled address/content questions reopened."
+    ],
+    "f-rename-1-01": [
+      true,
+      "Original name/new color/address/content correct."
+    ],
+    "f-rename-1-10": [
+      true,
+      "New name/original color/address/content correct."
+    ],
+    "f-rename-1-00": [
+      true,
+      "Both changes cancelled and address/content preserved."
+    ],
+    "f-rename-1-11": [
+      true,
+      "Both changes retained and address/content preserved."
+    ],
+    "f-ban-00": [
+      true,
+      "Correct recipient exclusion, replacement number/result and hidden email."
+    ],
+    "f-ban-10": [
+      false,
+      "Malformed truncated JSON plus invented recipient deduplication rules."
+    ],
+    "f-ban-01": [
+      false,
+      "Email simultaneously hidden and unhidden."
+    ],
+    "f-ban-11": [
+      true,
+      "Both recipients, replacement/result and visible email retained."
+    ],
+    "f-topic": [
+      false,
+      "Explicit purchasing scope exclusion omitted."
+    ],
+    "f-print": [
+      false,
+      "Several unrelated implementation questions added."
+    ],
+    "f-notify": [
+      false,
+      "Hidden operator omitted and unrelated questions added."
+    ],
+    "f-pronoun": [
+      false,
+      "Resolved task creation appears as an unrequested question."
+    ]
+  },
+  "v8": {
+    "f-rename-0-01": [
+      true,
+      "All final states retained despite generic update wording."
+    ],
+    "f-rename-0-10": [
+      true,
+      "Correct rename and preserved color/address/content."
+    ],
+    "f-rename-0-00": [
+      true,
+      "Both original states retained."
+    ],
+    "f-rename-0-11": [
+      true,
+      "Both new states retained."
+    ],
+    "f-rename-1-01": [
+      true,
+      "Original name/new color/address/content correct."
+    ],
+    "f-rename-1-10": [
+      false,
+      "Cancelled beige color retained."
+    ],
+    "f-rename-1-00": [
+      true,
+      "Summary explicitly preserves icon, description preserves name/address/content. Generic update wording not treated as a contradictory instruction."
+    ],
+    "f-rename-1-11": [
+      true,
+      "Both new states and preserved address/content."
+    ],
+    "f-ban-00": [
+      false,
+      "Description says not to send to both manager and tenant, excluding required manager."
+    ],
+    "f-ban-10": [
+      true,
+      "Correct recipients, replacement/result and hidden email."
+    ],
+    "f-ban-01": [
+      false,
+      "Old number and hidden email contradict changes."
+    ],
+    "f-ban-11": [
+      false,
+      "Email still hidden after prohibition lifted."
+    ],
+    "f-topic": [
+      true,
+      "Mechanic in summary, date format and exclusions retained."
+    ],
+    "f-print": [
+      true,
+      "All fields/exclusions retained."
+    ],
+    "f-notify": [
+      false,
+      "Hidden operator omitted and extra field exclusions introduced."
+    ],
+    "f-pronoun": [
+      true,
+      "Number/area and hidden address retained."
+    ]
+  },
+  "repaired": {
+    "f-rename-0-01": [
+      true,
+      "All final states retained."
+    ],
+    "f-rename-0-10": [
+      false,
+      "Required rename omitted and cancelled color applied."
+    ],
+    "f-rename-0-00": [
+      true,
+      "All original states retained."
+    ],
+    "f-rename-0-11": [
+      true,
+      "Both new states and preserved address/content."
+    ],
+    "f-rename-1-01": [
+      true,
+      "Specific name/color/address/content retained; generic no additional changes phrasing not treated as overriding explicit color."
+    ],
+    "f-rename-1-10": [
+      false,
+      "Agreed rename denied; content preservation omitted."
+    ],
+    "f-rename-1-00": [
+      true,
+      "All original states retained."
+    ],
+    "f-rename-1-11": [
+      true,
+      "Both new states and preserved address/content."
+    ],
+    "f-ban-00": [
+      false,
+      "Old inventory number retained."
+    ],
+    "f-ban-10": [
+      false,
+      "Old inventory number retained."
+    ],
+    "f-ban-01": [
+      false,
+      "Old number and hidden email contradict changes."
+    ],
+    "f-ban-11": [
+      true,
+      "Explicit final replacement instruction resolves the earlier old-number reference; recipients/result/visible email retained."
+    ],
+    "f-topic": [
+      false,
+      "Agreed date format omitted."
+    ],
+    "f-print": [
+      true,
+      "All fields/exclusions retained."
+    ],
+    "f-notify": [
+      true,
+      "Only failure, recipient, identifier/reason and hidden operator retained."
+    ],
+    "f-pronoun": [
+      true,
+      "Number/area and hidden address retained."
+    ]
+  },
+  "decisions": {
+    "f-rename-0-01": [
+      true,
+      "Original name/new color/address/content retained."
+    ],
+    "f-rename-0-10": [
+      false,
+      "Agreed rename rejected."
+    ],
+    "f-rename-0-00": [
+      true,
+      "All original states retained."
+    ],
+    "f-rename-0-11": [
+      false,
+      "Agreed rename rejected."
+    ],
+    "f-rename-1-01": [
+      true,
+      "Original name/new color/address/content retained."
+    ],
+    "f-rename-1-10": [
+      true,
+      "New name/original color/address/content retained."
+    ],
+    "f-rename-1-00": [
+      true,
+      "All original states retained."
+    ],
+    "f-rename-1-11": [
+      true,
+      "Both new states and preserved address/content."
+    ],
+    "f-ban-00": [
+      true,
+      "Explicit replacement instruction resolves old-number reference; correct exclusion/result/hidden email."
+    ],
+    "f-ban-10": [
+      false,
+      "Old number retained instead of agreed replacement."
+    ],
+    "f-ban-01": [
+      false,
+      "Old number retained and lifted email prohibition ignored."
+    ],
+    "f-ban-11": [
+      false,
+      "Old number retained instead of agreed replacement."
+    ],
+    "f-topic": [
+      true,
+      "Mechanic/equipment/date format and both exclusions retained."
+    ],
+    "f-print": [
+      true,
+      "All fields/exclusions retained."
+    ],
+    "f-notify": [
+      true,
+      "Only failure, recipient, identifier/reason, hidden operator retained."
+    ],
+    "f-pronoun": [
+      true,
+      "Number/area and hidden address retained."
+    ]
+  }
+}

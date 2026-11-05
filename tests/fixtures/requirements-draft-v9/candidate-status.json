@@ -1,0 +1,10 @@
+{
+  "retained": "repaired-adapter",
+  "retained_weight_sha256": "23e29d12182a064f36008097ee03bddab4e89783bc1a452750169f5821b1c338",
+  "retention": "30/30 exact including requested 5 and prior 25",
+  "latest_experiment": "decision-adapter",
+  "latest_experiment_rejected": true,
+  "release_ready": false,
+  "production_changed": false,
+  "reason": "Retained candidate fails new dialogs; latest experiment also loses a prior recipient requirement."
+}
