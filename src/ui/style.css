@@ -847,3 +847,11 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .technical-block summary { cursor: pointer; font-size: .875rem; }
 .technical-block button { margin: .35rem 0; }
 .chat-search-result mark, .clarification-option[aria-pressed="true"] { background: #374731; color: #d5f5a8; }
+
+.selection-task:not([hidden]) { display:flex; gap:4px; padding:3px; border:1px solid var(--line); border-radius:9px; background:var(--panel); }
+.selection-task button { font-size:12px; padding:4px 8px; }
+.source-line-link { color:var(--green); background:transparent; font-size:12px; margin:3px 6px 3px 0; padding:3px 7px; }
+
+.chat-model-frame{display:block;width:100%;height:clamp(220px,36vh,420px);border:0;border-radius:8px}
+.message-attachment.model-attachment{flex-wrap:wrap;max-width:100%}
+.model-attachment:has(iframe){width:min(600px,70vw)}

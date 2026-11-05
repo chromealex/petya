@@ -82,7 +82,7 @@ function register(ctx) {
   ctx.handle('chatQuote',(id,ref)=>{
     const topic=get(id,true),message=topic.messages[ref?.index];
     if(!message||message.at!==ref.at||message.text!==ref.text) throw Error('Сообщение изменилось. Выберите его ещё раз.');
-    topic.nextQuote={role:message.role,text:message.text.slice(0,4000),at:message.at};
+    topic.nextQuote={role:message.role,text:(typeof ref.excerpt==='string' && ref.excerpt.trim()?ref.excerpt:message.text).slice(0,4000),at:message.at};
     ctx.dialogue.persist();
   });
   ctx.handle('chatContextToggle',(id,type,key,enabled)=>{

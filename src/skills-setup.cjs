@@ -20,7 +20,37 @@ module.exports=ctx=>{
   ctx.handle('skillsParse',markdown=>skillModule.parseMarkdown(markdown));
   ctx.handle('skillsExport',id=>{const skill=instructionSkills.list().find(s=>s.id===id);if(!skill)throw Error('Скилл не найден.');return skillModule.markdown(skill);});
   const executeSkill=async(command,ids)=>{const selected=instructionSkills.resolve(command);if(!selected)return null;const files=ids?ctx.attachments.take(ids):undefined;const result=await workSkills.turn(selected,command,files)||await skillModule.runSkill({selected,command,dialogue:ctx.dialogue,settings:{...ctx.settings},request:ctx.request,company:ctx.companies.get(ctx.companyId).name,files,...require('./chat-attribution.cjs').contextExcerpt(ctx.memory.prune().slice(-10))});if(ids)for(const id of ids)ctx.attachments.remove(id);return result;};
-  const inspectAttachments=async(ids,question)=>{const caption=String(question||'').trim();question=caption?ctx.text(caption,4000):require('./attachment-assistant.cjs').briefFileQuestion;const files=ctx.attachments.take(ids);const topic={id:ctx.randomUUID(),title:'Файлы: '+files.map(a=>a.name).join(', ').slice(0,70),kind:'chat',projectId:ctx.dialogue.state.activeProjectId,attachments:files,messages:[{role:'user',text:caption?question:'',at:Date.now(),attachments:files.map(f=>ctx.attachments.info(f))}],at:Date.now()};ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;ctx.dialogue.persist();for(const id of ids)ctx.attachments.remove(id);let answer,error=false;try{answer=await ctx.analyzeMaterials(topic,question);}catch(e){answer=e.message;error=true;}if(!ctx.dialogue.state.topics.includes(topic))return {handled:true,text:'Тема удалена; результат не сохранён.'};topic.messages.push({role:'assistant',text:answer,error,...(error?{retryStep:'files'}:{}),usedMaterials:error?[]:require('./chat-attribution.cjs').fileRefs(files),at:Date.now()});ctx.dialogue.persist();return {handled:true,text:answer,error,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};};
+  const inspectAttachments=async(ids,question)=>{
+    const caption=String(question||'').trim();
+    question=caption?ctx.text(caption,4000):require('./attachment-assistant.cjs').briefFileQuestion;
+    const files=ctx.attachments.take(ids), dialogue=ctx.dialogue, at=Date.now();
+    let topic=dialogue.active();
+    if(!topic){
+      topic={id:ctx.randomUUID(),title:'Файлы: '+files.map(f=>f.name).join(', ').slice(0,70),kind:'chat',projectId:dialogue.state.activeProjectId,messages:[]};
+      dialogue.state.topics.push(topic);
+      dialogue.state.activeId=topic.id;
+    }
+    if(dialogue.running.has(topic.id))throw Error('Дождитесь ответа в этом чате.');
+    dialogue.running.add(topic.id);
+    try{
+      topic.at=at;
+      topic.attachments=[...(topic.attachments||[]),...files];
+      topic.messages.push({role:'user',text:caption,at,attachments:files.map(f=>ctx.attachments.info(f)),...(topic.nextQuote?{replyTo:topic.nextQuote}:{})});
+      delete topic.nextQuote;
+      dialogue.persist();
+      for(const id of ids)ctx.attachments.remove(id);
+      let answer,error=false;
+      try{
+        if(!caption && files.every(f=>f.modelFormat))answer=files.map(f=>f.name+' — '+f.note).join('\n')+'\nОткройте «Показать 3D» под файлом.';
+        else answer=await ctx.analyzeMaterials({...topic,attachments:files},question);
+      }
+      catch(e){answer=e.message;error=true;}
+      if(!dialogue.state.topics.includes(topic))return {handled:true,text:'Чат удалён.'};
+      topic.messages.push({role:'assistant',text:answer,error,...(error?{retryStep:'files'}:{}),usedMaterials:error?[]:require('./chat-attribution.cjs').fileRefs(files,answer),at:Date.now()});
+      dialogue.persist();
+      return {handled:true,text:answer,error,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
+    }finally{dialogue.running.delete(topic.id);}
+  };
   ctx.handle('attachmentInspect',async(ids,command)=>!String(command||'').trim()?inspectAttachments(ids,''):(await executeSkill(ctx.text(command,4000),ids))||(require('./team-fill.cjs').isTeamFill(command)?ctx.teamFill.turn(ctx.text(command,4000)):inspectAttachments(ids,command)));
   return {instructionSkills,inspectAttachments,executeSkill,taskDuplicates,workSkills};
 };

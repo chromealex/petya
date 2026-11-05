@@ -61,7 +61,12 @@ function setup(s){
     try{
       const step=last.retryStep;
       const result=await withProject(project,()=>s.dialogue.within(id,t.projectId,async()=>{
-        if(step==='files')return {text:await s.analyzeMaterials(t,question.text||require('../attachment-assistant.cjs').briefFileQuestion),usedMaterials:require('../chat-attribution.cjs').fileRefs(t.attachments||[])};
+        if(step==='files'){
+          const ids=question.attachments?.map(f=>f.id),files=(t.attachments||[]).filter(f=>!ids||ids.includes(f.id));
+          if(!files.length)throw Error('Вложения больше недоступны в контексте чата.');
+          const text=await s.analyzeMaterials({...t,attachments:files},question.text||require('../attachment-assistant.cjs').briefFileQuestion);
+          return {text,usedMaterials:require('../chat-attribution.cjs').fileRefs(files,text)};
+        }
         if(!['bugs','tasks','anr'].includes(step))throw Error('Шаг недоступен.');
         return s.dialogue.readers[step](question.text,t,t.contextHint||s.dialogue.context());
       }));
