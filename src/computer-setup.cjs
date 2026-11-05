@@ -20,6 +20,10 @@ module.exports=ctx=>{
   ctx.handle('computerApprove',async(id,allow)=>{
     const topic=ctx.dialogue.active();
     const result=await computerApproval.decide(id,allow);
+    if(result.needsSystemPermission){
+      result.text='Разрешите Пете универсальный доступ в настройках macOS. После возвращения запрос продолжится автоматически.';
+      if(topic?.lastChatResult?.computerApproval===id){if(topic.messages.at(-1)?.text!==result.text)topic.messages.push({role:'assistant',text:result.text,at:Date.now()});ctx.dialogue.persist();return {...result,messages:topic.messages};}
+    }
     if(!result.needsSystemPermission&&topic?.lastChatResult?.computerApproval===id){
       const last=topic.messages.at(-1);
       if(result.text&&(last?.role!=='assistant'||last.text!==result.text))topic.messages.push({role:'assistant',text:result.text,at:Date.now(),error:!!result.error});

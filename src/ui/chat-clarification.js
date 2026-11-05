@@ -1,51 +1,63 @@
 (()=>{
+ let revision=0;
+ window.createChatQuestion=(text,host=dialogueChoices)=>{
+  const box=document.createElement('div'),prompt=document.createElement('p'),buttons=document.createElement('div');
+  box.className='chat-question clarification-input';box.setAttribute('role','group');box.setAttribute('aria-label','Уточнение запроса');
+  prompt.className='approval-question';prompt.textContent=text||'Уточните запрос';buttons.className='approval-buttons';box.append(prompt,buttons);host.append(box);
+  document.querySelector('.chat-composer')?.prepend(host);
+  return {box,prompt,buttons};
+ };
  window.renderClarification=(result,message,spoken)=>{
-  if(result.recoveryRequired){voiceReply=null;dialogueChoices.replaceChildren();const note=document.createElement('p');note.textContent='Вопрос и запрос сохранены. После перезапуска этот шаг нельзя безопасно продолжить автоматически.';const button=document.createElement('button');button.textContent='Вернуть запрос в черновик';button.onclick=()=>{if($('command').value.trim())return notice('Сначала сохраните или отправьте текущий черновик.');$('command').value=result.originalRequest;$('command').dispatchEvent(new Event('input'));$('command').focus();};dialogueChoices.append(note,button);document.querySelector('.chat-composer')?.prepend(dialogueChoices);return;}
-  const keys=['options','topicChoices','skillChoices','mediaChoices','repairChoices','slackRequestChoices','buildQuestionChoices','reviewChoices','trackingChoices'];
+  revision++;
   delete dialogueChoices.dataset.selected;
+  dialogueChoices.classList.remove('clarification-list');dialogueChoices.removeAttribute('aria-label');dialogueChoices.removeAttribute('role');dialogueChoices.onkeydown=null;
+  if(result.computerApproval){window.showComputerApproval(result.computerApproval,dialogueChoices,spoken,result.text);return;}
+  const keys=['options','topicChoices','skillChoices','mediaChoices','repairChoices','slackRequestChoices','buildQuestionChoices','reviewChoices','trackingChoices','interpretChoices','integrationOffers'];
   const modelChoices=Array.isArray(result.clarificationOptions)?result.clarificationOptions:[];
-  const selectable=modelChoices.length>=2||keys.some(key=>result[key]?.length>0);
-  dialogueChoices.classList.toggle('clarification-list',selectable);dialogueChoices.removeAttribute('aria-label');dialogueChoices.removeAttribute('role');dialogueChoices.onkeydown=null;
-  if(result.computerApproval){window.showComputerApproval(result.computerApproval,dialogueChoices,spoken,result.text);document.querySelector('.chat-composer')?.prepend(dialogueChoices);return;}
-  if(result.clarificationId)voiceReply=async answer=>showDialogueReply(await window.petya.feature('clarifications','answer',result.clarificationId,answer),spoken);
-  if(result.question&&!selectable&&!result.computerApproval&&!result.gitDiscovery){voiceReply ||= async answer=>showDialogueReply(await window.petya.converse(answer),spoken);result.clarificationInput ||= {label:'Ваш ответ',placeholder:'Уточните здесь…',submit:'Продолжить'};}
-  if(result.clarificationInput&&typeof voiceReply==='function'&&!modelChoices.length){
-   const reply=voiceReply,owner=result.topicId||topicSelect.value,box=document.createElement('div'),prompt=document.createElement('p'),buttons=document.createElement('div'),submit=document.createElement('button'),cancel=document.createElement('button');
-   box.className='computer-approval clarification-input text-clarification';prompt.className='approval-question';prompt.textContent=result.text||result.clarificationInput.label||'Уточните запрос';buttons.className='approval-buttons';submit.type=cancel.type='button';submit.className='primary';submit.textContent=result.clarificationInput.submit||'Продолжить';cancel.textContent='Отмена';buttons.append(submit,cancel);box.append(prompt,buttons);dialogueChoices.append(box);document.querySelector('.chat-composer')?.prepend(dialogueChoices);
-   let busy=false;const answer=async text=>{if(busy||owner!==topicSelect.value||!text.trim())return;busy=true;box.remove();delete dialogueChoices.dataset.selected;try{await reply(text);}catch(error){await showDialogueReply({handled:true,error:true,text:error.message});}};
-   if(result.clarificationInput.files){const pick=document.createElement('button');pick.type='button';pick.textContent='Прикрепить файл';pick.onclick=async()=>{try{await window.petya.attachmentPick();await refreshAttachments();if((await window.petya.attachmentList()).length)await answer('Файл прикреплён');}catch(error){notice(error.message,true);}};buttons.prepend(pick);}
-   voiceReply=answer;dialogueChoices.dataset.selected='clarification';
-   submit.onclick=()=>{const input=$('command');if(!input.value.trim()){input.focus();return;}submitChatCommand(input.value.trim());};
-   cancel.onclick=()=>{voiceReply=null;answer('отмена');};
-   const input=$('command');input.placeholder=result.clarificationInput.placeholder||'Напишите ответ…';delete input.dataset.suggestion;requestAnimationFrame(()=>{if(box.isConnected)input.focus({preventScroll:true});});return;
+  const selectable=modelChoices.length>0||keys.some(key=>result[key]?.length>0)||!!result.gitDiscovery||!!result.serviceBrowser;
+  if(!result.question&&!selectable&&!result.clarificationInput&&!result.recoveryRequired){document.querySelector('.chat-feed')?.append(dialogueChoices);return;}
+  const existing=[...dialogueChoices.children],owner=result.topicId||topicSelect.value;
+  const {box,buttons}=window.createChatQuestion(result.recoveryRequired?'Вопрос сохранён. После перезапуска нужно проверить запрос перед продолжением.':result.text);
+  let busy=false;
+  const perform=async action=>{
+   if(busy||owner!==topicSelect.value||!box.isConnected)return;
+   busy=true;revision++;box.remove();delete dialogueChoices.dataset.selected;voiceReply=null;window.chatStartPending=true;
+   try{await action();}catch(error){if(owner===topicSelect.value)await showDialogueReply({handled:true,error:true,text:error.message});}
+   finally{window.chatStartPending=false;}
+  };
+  const button=(label,action,primary=false)=>{const b=document.createElement('button');b.type='button';b.textContent=label;if(primary)b.className='primary';b.onclick=()=>perform(action);buttons.append(b);return b;};
+  if(result.recoveryRequired){
+   voiceReply=null;button('Вернуть запрос в черновик',()=>{const input=$('command');if(input.value.trim())throw Error('Сначала сохраните или отправьте текущий черновик.');input.value=result.originalRequest;input.dispatchEvent(new Event('input'));input.focus();},true);return;
   }
-  if(result.clarificationInput&&typeof voiceReply==='function'){
-   const reply=voiceReply,owner=topicSelect.value,form=document.createElement('form'),label=document.createElement('label'),input=document.createElement('input'),submit=document.createElement('button'),status=document.createElement('p');
-   form.className='clarification-input';label.textContent=result.clarificationInput.label;input.placeholder=result.clarificationInput.placeholder;input.required=true;input.maxLength=4000;input.autocomplete='off';submit.type='submit';submit.textContent=result.clarificationInput.submit||'Продолжить';status.setAttribute('role','status');label.append(input);form.append(label,submit,status);dialogueChoices.append(form);document.querySelector('.chat-composer')?.prepend(dialogueChoices);
-   form.onsubmit=async event=>{event.preventDefault();if(submit.disabled||owner!==topicSelect.value||voiceReply!==reply)return;submit.disabled=true;input.disabled=true;status.textContent='Продолжаю запрос…';try{window.appendChatRequest?.(input.value);await reply(input.value);}catch(e){status.textContent=e.message;}finally{submit.disabled=false;input.disabled=false;}};
-   const choicesOnly=result.clarificationInput.choicesOnly&&modelChoices.length>0;
-   if(choicesOnly){label.hidden=true;submit.hidden=true;form.classList.add('choices-only');}
-   for(const option of result.clarificationId?modelChoices.filter(value=>!/^отмена[.!]?$/iu.test(value.trim())):[]){const button=document.createElement('button');button.type='button';button.textContent=option;button.onclick=()=>{input.value=option;form.requestSubmit();};form.insertBefore(button,label);}
-   if(result.clarificationInput.files){const pick=document.createElement('button');pick.type='button';pick.textContent='Прикрепить файл';pick.onclick=async()=>{try{await window.petya.attachmentPick();await refreshAttachments();if(!(await window.petya.attachmentList()).length)return;input.value='Файл прикреплён';form.requestSubmit();}catch(e){status.textContent=e.message;}};form.append(pick);}
-   const cancel=document.createElement('button');cancel.type='button';cancel.textContent=result.clarificationInput.cancelLabel||'Отмена';cancel.onclick=()=>{input.value=result.clarificationInput.cancelLabel||'отмена';form.requestSubmit();};if(!choicesOnly||!modelChoices.includes(cancel.textContent))form.append(cancel);
-   requestAnimationFrame(()=>{if(form.isConnected)(choicesOnly?form.querySelector('button:not([hidden])'):input)?.focus({preventScroll:true});});return;
+  // Keep extension/service callbacks intact; only their presentation and lifecycle are shared.
+  for(const node of existing){if(node.tagName==='BUTTON'){const action=node.onclick;node.onclick=event=>perform(()=>action?.call(node,event));buttons.append(node);}else box.append(node);}
+  let reply=voiceReply;
+  if(result.clarificationId)reply=async answer=>{const next=await window.petya.feature('clarifications','answer',result.clarificationId,answer);if(owner===topicSelect.value)await showDialogueReply(next,spoken);};
+  else if(!reply&&(modelChoices.length||result.question))reply=async answer=>{const next=await window.petya.converse(answer);if(owner===topicSelect.value)await showDialogueReply(next,spoken);};
+  const answer=text=>perform(async()=>{window.appendChatRequest?.(text);await reply(text);});
+  const choicesOnly=!!result.clarificationInput?.choicesOnly&&modelChoices.length>0;
+  if(reply){
+   for(const option of modelChoices)button(option,async()=>{window.appendChatRequest?.(option);await reply(option);},buttons.childElementCount===0);
+   voiceReply=text=>perform(()=>reply(text));dialogueChoices.dataset.selected='clarification';
+   if(!choicesOnly){
+    box.classList.add('text-clarification');
+    button(result.clarificationInput?.submit||'Продолжить',()=>{},!buttons.childElementCount).onclick=()=>{
+     const input=$('command'),text=input.value.trim();if(!text){input.focus();return;}
+     if(busy||owner!==topicSelect.value)return;input.value='';input.dispatchEvent(new Event('input'));answer(text);
+    };
+    const input=$('command');input.placeholder=result.clarificationInput?.placeholder||'Напишите ответ…';delete input.dataset.suggestion;
+    requestAnimationFrame(()=>{if(box.isConnected)input.focus({preventScroll:true});});
+   }
+   if(result.clarificationInput?.files)button('Прикрепить файл',async()=>{await window.petya.attachmentPick();await refreshAttachments();if((await window.petya.attachmentList()).length)await reply('Файл прикреплён');else if(owner===topicSelect.value){dialogueChoices.replaceChildren();voiceReply=reply;window.renderClarification(result,null,spoken);}});
+   const cancelLabel=result.clarificationInput?.cancelLabel||'Отмена';
+   if(!modelChoices.some(v=>v.toLocaleLowerCase()===cancelLabel.toLocaleLowerCase()))button(cancelLabel,()=>reply(result.clarificationInput?.cancelLabel||'отмена'));
   }
-  if(!selectable){document.querySelector('.chat-feed')?.append(dialogueChoices);return;}
-  if(modelChoices.length>=2){voiceReply=async answer=>showDialogueReply(await window.petya.converse(answer),spoken);for(const label of modelChoices){const button=document.createElement('button');button.type='button';button.textContent=label;button.setAttribute('aria-pressed','false');button.onclick=()=>{
-   const input=$('command'),previous=dialogueChoices.dataset.selected||'';
-   const detail=previous && input.value.startsWith(previous)?input.value.slice(previous.length).replace(/^\s*—\s*/,'').trim():input.value.trim();
-   dialogueChoices.dataset.selected=label;
-   for(const option of dialogueChoices.querySelectorAll('[aria-pressed]'))option.setAttribute('aria-pressed',String(option===button));
-   input.value=label+(detail?' — '+detail:'');input.dispatchEvent(new Event('input',{bubbles:true}));input.focus();input.setSelectionRange(input.value.length,input.value.length);
-  };dialogueChoices.append(button);}}
-  dialogueChoices.setAttribute('role','group');dialogueChoices.setAttribute('aria-label','Уточните вариант');const composer=document.querySelector('.chat-composer');composer?.prepend(dialogueChoices);const prompt=document.createElement('p');prompt.className='clarification-prompt';prompt.textContent=result.text||'Уточните вариант';dialogueChoices.prepend(prompt);
-  let busy=false;for(const button of dialogueChoices.querySelectorAll(':scope>button')){button.classList.add('clarification-option');const choose=button.onclick;button.onclick=async event=>{if(busy)return;busy=true;const siblings=[...dialogueChoices.querySelectorAll('button')];siblings.forEach(b=>b.disabled=true);try{await choose?.call(button,event);}catch(e){notice(e.message,true);}finally{busy=false;siblings.forEach(b=>b.disabled=false);}};}
-  const custom=document.createElement('button');custom.type='button';custom.className='clarification-custom';custom.textContent='Свой вариант';custom.onclick=()=>{const input=$('command'),selected=dialogueChoices.dataset.selected;if(selected && input.value.startsWith(selected))input.value=input.value.slice(selected.length).replace(/^\s*—\s*/,'');delete dialogueChoices.dataset.selected;for(const option of dialogueChoices.querySelectorAll('[aria-pressed]'))option.setAttribute('aria-pressed','false');input.dispatchEvent(new Event('input'));input.placeholder='Напишите свой вариант…';delete input.dataset.suggestion;input.focus();};dialogueChoices.append(custom);
-  dialogueChoices.onkeydown=event=>{if(!['ArrowDown','ArrowUp'].includes(event.key))return;const buttons=[...dialogueChoices.querySelectorAll('button:not(:disabled)')],index=buttons.indexOf(document.activeElement);if(index<0)return;event.preventDefault();buttons[(index+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus();};
+  if(buttons.childElementCount>3)box.classList.add('many-choices');
+  buttons.onkeydown=event=>{if(!['ArrowDown','ArrowUp'].includes(event.key))return;const options=[...buttons.querySelectorAll('button:not(:disabled)')],index=options.indexOf(document.activeElement);if(index<0)return;event.preventDefault();options[(index+(event.key==='ArrowDown'?1:-1)+options.length)%options.length]?.focus();};
  };
  const history=document.createElement('details'),summary=document.createElement('summary'),rows=document.createElement('div');history.className='clarification-history';summary.textContent='Продолжения';history.append(summary,rows);document.querySelector('.chat-heading')?.append(history);
  async function refreshHistory(){if(!history.isConnected)document.querySelector('.chat-heading')?.append(history);const owner=topicSelect.value;const items=owner?await window.petya.feature('clarifications','history',owner):[];if(owner!==topicSelect.value)return;history.hidden=!items.length;summary.textContent='Продолжения · '+items.length;rows.replaceChildren();const labels={running:'В работе',waiting:'Ждёт уточнения',completed:'Готово',cancelled:'Остановлено',error:'Ошибка',interrupted:'Прервано перезапуском'};for(const item of items.slice().reverse()){const row=document.createElement('p');row.textContent=new Date(item.startedAt).toLocaleString('ru-RU')+' · '+item.actor+' · '+(labels[item.state]||item.state)+'\n'+item.summary;rows.append(row);}}
  document.addEventListener('petya-chat-opened',()=>refreshHistory().catch(()=>{}));window.petyaEvents.onChatJob(()=>refreshHistory().catch(()=>{}));
- document.addEventListener('petya-chat-opened',async()=>{const owner=topicSelect.value;try{const pending=await window.petya.feature('clarifications','latest');if(pending&&owner===topicSelect.value){dialogueChoices.replaceChildren();window.renderClarification(pending,null,false);}}catch(error){console.warn('Clarification unavailable',error.message);}});
- document.addEventListener('petya-topic-changed',event=>{if(event.detail?.preserveScroll)return;dialogueChoices.replaceChildren();dialogueChoices.classList.remove('clarification-list');document.querySelector('.chat-feed')?.append(dialogueChoices);});
+ document.addEventListener('petya-chat-opened',async()=>{const owner=topicSelect.value,expected=revision;try{const pending=await window.petya.feature('clarifications','latest');if(pending&&owner===topicSelect.value&&expected===revision){dialogueChoices.replaceChildren();window.renderClarification(pending,null,false);}}catch(error){console.warn('Clarification unavailable',error.message);}});
+ document.addEventListener('petya-topic-changed',event=>{if(event.detail?.preserveScroll)return;revision++;delete dialogueChoices.dataset.selected;dialogueChoices.replaceChildren();dialogueChoices.classList.remove('clarification-list');document.querySelector('.chat-feed')?.append(dialogueChoices);});
 })();

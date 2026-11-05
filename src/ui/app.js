@@ -25,7 +25,7 @@ function run(fn) { return async event => {
  let label,output,failed=false;const onNotice=e=>{if(e.detail.error)failed=true;};
  if(feedback){if(b.dataset.pending)return;label=b.textContent;b.dataset.pending='true';b.disabled=true;b.setAttribute('aria-busy','true');b.textContent=/^Проверить/.test(label)?'Проверяю…':'Обновляю…';output=b.nextElementSibling;if(!output?.classList.contains('action-feedback')){output=document.createElement('span');output.className='action-feedback';output.setAttribute('role','status');b.after(output);}output.textContent=b.textContent;output.classList.remove('error');document.addEventListener('petya-notice',onNotice);}
  try {await fn(event);if(output&&!failed)output.textContent='Обновлено · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
- catch(error){failed=true;if(output)output.textContent=error.message;notice(error.message,true);}
+ catch(error){if(b?.closest('.chat-question'))throw error;failed=true;if(output)output.textContent=error.message;notice(error.message,true);}
  finally{if(feedback){document.removeEventListener('petya-notice',onNotice);if(failed){output.classList.add('error');if(/Обновляю|Проверяю/.test(output.textContent))output.textContent='Не удалось обновить. См. сообщение об ошибке.';}b.textContent=label;b.disabled=false;b.removeAttribute('aria-busy');delete b.dataset.pending;}}
 }; }
 function view(name) { window.scrollTo(0,0);document.body.dataset.view=name;document.dispatchEvent(new CustomEvent('petya-view',{detail:name}));updateChromeStatus();document.querySelectorAll('.view').forEach(e => e.hidden = e.id !== name); document.querySelectorAll('.nav').forEach(e => e.classList.toggle('active', e.dataset.view === name)); }
@@ -75,9 +75,10 @@ async function repeatCommand(spoken = false) {
 }
 retryCommand.onclick = run(() => repeatCommand(false));
 let automaticVoiceCommand = false, voiceReply = null, automaticBatchQuestions = [];
-function askVoiceQuestion(message, reply) {
+function askVoiceQuestion(message, reply, choices=[]) {
   if (!automaticVoiceCommand) return;
-  voiceReply = reply; notice(message); commandProgress.update('waiting', 'Жду уточнения');
+  voiceReply = async answer=>{if(/^(?:отмена|стоп|не надо)[.!]?$/iu.test(answer.trim())){automaticVoiceCommand=false;voiceReply=null;await showDialogueReply({handled:true,text:'Запрос отменён.'});return;}await reply(answer);};
+  dialogueChoices.replaceChildren();window.renderClarification?.({question:true,text:message,clarificationOptions:choices,clarificationInput:{choicesOnly:choices.length>0}},null,true);commandProgress.update('waiting', 'Жду уточнения');
   speakReply(message).catch(e => notice(e.message, true));
   window.petya.requestAttention().catch(e => notice(e.message, true));
   window.petya.notify(message).catch(e => notice(e.message, true));
@@ -90,7 +91,7 @@ function askVoiceChoices(message, options) {
     const matches = Number.isInteger(number) ? options[number] ? [options[number]] : [] : options.filter(o => (o.names || [o.label]).some(n => n && value === String(n).toLocaleLowerCase().trim()));
     if (matches.length !== 1) { askVoiceChoices(message + ' Назовите вариант или его номер.', options); return; }
     await matches[0].run();
-  });
+  },options.map(o=>o.label));
 }
 const voiceInputLocks=new Set();
 document.addEventListener('petya-voice-input-lock',event=>{
@@ -235,7 +236,7 @@ async function executeCommand(command, at = Date.now(), automatic = false) {
   await window.petya.notify(result.kind === 'missing' ? 'Для задачи не хватает контекста.' : 'Уточните, какое обсуждение использовать для задачи.');
   } finally { planning = false; }
 }
-async function submitChatCommand(command) {$('notice').hidden=true;if(window.chatSwitchPending||window.chatNavigationPending){notice('Переключаю чат. Повторите отправку через секунду.');return;} if(window.pendingChatFiles?.length){await processCommand(command);return;}if(!voiceReply&&await window.tryBackgroundChat?.(command))return;window.streamSpeechEnabled=false; if(voiceReply&&(dialogueChoices.dataset.selected||!VoiceTurn.isNewQuestion(command))){const reply=voiceReply;voiceReply=null;window.appendChatRequest?.(command);if($('command').value===command)$('command').value='';await reply(command);}else await processCommand(command); }
+async function submitChatCommand(command) {$('notice').hidden=true;if(window.chatSwitchPending||window.chatNavigationPending){notice('Переключаю чат. Повторите отправку через секунду.');return;} if(window.pendingChatFiles?.length&&!voiceReply){await processCommand(command);return;}if(!voiceReply&&await window.tryBackgroundChat?.(command))return;window.streamSpeechEnabled=false; if(voiceReply&&(dialogueChoices.dataset.selected||!VoiceTurn.isNewQuestion(command))){const reply=voiceReply;voiceReply=null;window.appendChatRequest?.(command);if($('command').value===command)$('command').value='';await reply(command);}else await processCommand(command); }
 $('command-form').onsubmit=run(()=>window.sendChatNow?window.sendChatNow():submitChatCommand($('command').value));
 $('context-form').onsubmit = run(async () => { await window.petya.addContext({ title: $('context-title').value, text: $('context-text').value, source: $('context-source').value }); $('context-form').reset(); await refreshContexts(); notice('Материал сохранён. Перейдите в «Ассистент» и задайте вопрос по нему.'); });
 $('import').onchange = run(async event => { const file = event.target.files[0]; if (!file) return; if (file.size > 100000) throw new Error('Файл слишком большой. Выберите фрагмент до 100 КБ.'); const content = await file.text(); $('context-text').value = content.slice(0, 50000); $('context-title').value = file.name.replace(/\.(txt|vtt)$/i, ''); notice(content.length > 50000 ? 'Загружены первые 50 000 символов. Проверьте текст и нажмите «Сохранить материал».' : 'Текст загружен в форму. Проверьте его и нажмите «Сохранить материал».'); });

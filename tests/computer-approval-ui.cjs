@@ -2,8 +2,9 @@ const fs=require('node:fs'),path=require('node:path'),load=require('node:module'
 process.env.PETYA_SMOKE_TEST='1';
 const {Dialogue}=load('./src/dialogue.cjs'),active=Dialogue.prototype.active;let dialogue;
 Dialogue.prototype.active=function(...args){dialogue=this;return active.apply(this,args);};
-const {ComputerControl}=load('./src/computer-control.cjs');let reads=0;
-ComputerControl.prototype.status=function(){return {mode:this.session?'desktop':'off',accessGranted:true,supported:true};};
+const {ComputerControl}=load('./src/computer-control.cjs');let reads=0,access=true;
+require('electron').systemPreferences.isTrustedAccessibilityClient=()=>access;
+ComputerControl.prototype.status=function(){return {mode:this.session?'desktop':'off',accessGranted:access,supported:true};};
 ComputerControl.prototype.start=async function(){this.session={mode:'desktop'};return this.status();};
 ComputerControl.prototype.execute=async function(action){if(!this.session)throw Object.assign(Error('Permission'),{code:'COMPUTER_PERMISSION_REQUIRED',action});if(action.type!=='focus'||action.name!=='Slack')throw Error('Unexpected action');return {};};
 load('./src/slack-log.cjs').readDesktop=async()=>{reads++;return {title:'Slack · team',text:'Сборка готова.'};};
@@ -30,5 +31,9 @@ const key=load.resolve('./tests/smoke.cjs');require.cache[key]={id:key,filename:
  await js("$('command').value='Полина — тестирование';document.querySelector('.text-clarification .primary').click()");await wait("window.clarificationAnswers.length===1 && !document.querySelector('.text-clarification')");
  if(!await js("window.clarificationAnswers[0]==='Полина — тестирование' && !$('command').value"))throw Error('Composer answer not consumed');
  await js(`voiceReply=async text=>{window.clarificationAnswers.push(text);await showDialogueReply({handled:true,text:'Запрос отменён'});};dialogueChoices.replaceChildren();renderClarification({question:true,text:'Уточните команду',clarificationInput:{}},null,false);document.querySelector('.text-clarification .approval-buttons button:last-child').click()`);await wait("window.clarificationAnswers[1]==='отмена' && !document.querySelector('.text-clarification')");
+ access=false;
+ await js("$('command').value='Что нового в Slack?';window.sendChatNow()");await wait("!!document.querySelector('.computer-approval .primary')");
+ await js("document.querySelector('.computer-approval .primary').click()");await wait("!document.querySelector('.computer-approval') && dialogueMessages.textContent.includes('универсальный доступ')");if(reads!==1)throw Error('Read without OS permission');
+ access=true;await js("window.dispatchEvent(new Event('focus'))");await wait("!window.chatStartPending && !commandProgress.busy");if(reads!==2)throw Error('OS permission did not resume exactly once');
  console.log('Computer approval UI: waiting state, repeated redraw, explicit consent and single execution passed');
 }};load('./src/main.cjs');
