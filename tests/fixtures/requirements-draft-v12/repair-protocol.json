@@ -1,0 +1,15 @@
+{
+  "parent": "adapter",
+  "hashes": {
+    "repair-train.jsonl": "6886486cca4acf24c815471f27a218d998fc68e5d23b0a6601b38186bd4d20d0",
+    "repair-acquisition.jsonl": "63bd3087a3f16e51a36cf8e9e9a5d9989ec7414f87256ce18ba244537082219a"
+  },
+  "steps": 307,
+  "epochs": 1,
+  "learning_rate": 5e-06,
+  "layers": 13,
+  "seed": 42,
+  "reason": "All 52 acquisition targets exact, but one of 25 prior successful v11 checks regressed: retained old label instead of approved rename.",
+  "selection": "Repair frozen before any candidate fresh inference; all 77 acquisition/retention targets must be semantically correct. Preserve initial artifact and results.",
+  "fresh_data_sha256": "96604831611e594d72539259a697bcb5205c7de7a36fbe5a8f7e3f9ad385125e"
+}
