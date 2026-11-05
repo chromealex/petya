@@ -1,0 +1,10 @@
+{
+  "scenarios_sha256": "2fb2068dade737fdc56fe1f616eadd116c23106b11f74cc1be5b4b8357170f68",
+  "scenarios": 6,
+  "turns": 31,
+  "status": "reserved-unrun",
+  "history": "Generated assistant answers only; no reference replies inserted.",
+  "sampling": "Use unchanged dialogueRequest options and localAnswer repeat protection.",
+  "grading": "Manual semantic review of complete transcripts and per-turn provenance; no regex score asserted as model quality.",
+  "gate": "No external action; inference only on loopback. An exact model digest is required. Runtime format enforcement must be documented separately; these checks alone do not prove service integration."
+}
