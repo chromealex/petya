@@ -10,7 +10,7 @@ module.exports={name:'zoomBot',defaults:{zoomBotMode:'auto',zoomCaptureMode:'bot
   const {app,safeStorage,shell,systemPreferences}=require('electron'),file=path.join(s.dataRoot,'zoom-bot-state.enc');
   const oauth=new (require('../../service-oauth.cjs').ServiceOAuth)('zoom',s.request);
   const accessReady=()=>process.platform!=='darwin'||systemPreferences.isTrustedAccessibilityClient(false);
-  const requestAccess=async()=>{if(process.platform==='darwin'){systemPreferences.isTrustedAccessibilityClient(true);await shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility');}return status();};
+  const requestAccess=async()=>{if(bot.state.phase==='error'&&!bot.state.jobId)bot.publish({permissionBlocked:true});if(process.platform==='darwin'){systemPreferences.isTrustedAccessibilityClient(true);await shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility');}return status();};
   const bot=new ZoomBot({accessReady,settings:()=>s.settings,inspect:link=>require('../../meeting-monitor.cjs').desktopState({meetingLink:link}),
    load:()=>fs.existsSync(file)?JSON.parse(safeStorage.decryptString(fs.readFileSync(file))):null,
    persist:state=>{if(!safeStorage.isEncryptionAvailable())throw Error('Хранилище ОС недоступно.');fs.writeFileSync(file+'.tmp',safeStorage.encryptString(JSON.stringify(state)),{mode:0o600});fs.renameSync(file+'.tmp',file);},

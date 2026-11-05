@@ -38,7 +38,7 @@ Atlassian: Resource-level 3LO; site selection from accessible-resources. The cal
 
 ## Local services
 
-Zoom receives system audio through OS permissions. Ollama and Whisper run locally; they do not require OAuth or keys.
+Zoom supports a separate Meeting SDK participant through the user-managed Petya application described below; local system-audio capture remains optional. Ollama and Whisper run locally; they do not require OAuth or keys.
 
 ## Tests
 
@@ -60,3 +60,12 @@ The end-to-end Asana test is complete: login from the installed Petya.app via Sa
 ## App icons
 
 04.11.2026: the icon `assets/app-icon.png` was set in the consoles of Slack (A0CEDB1HFD3), Notion (40dd872b-594c-81b7-8b7a-0037d20d3c37), Atlassian for Jira/Confluence (20c1cb45-4b70-42ab-8bb4-aac4e0259dd3) and Asana (1220193688170618). Saving and display were checked in the services' interfaces; Atlassian was additionally checked after a page reload.
+
+## Zoom Meeting SDK participant (2026-11-05)
+
+- Development app: [Petya](https://marketplace.zoom.us/develop/applications/_hd32AsWRJi5vBoZmhd_vA/information?mode=dev), user-managed, Ready for local test.
+- Petya icon saved for light and dark modes. Meeting SDK and meeting-bot use case enabled.
+- Scopes: `user:read:user`, `user:read:token`. Strict callback: `https://auth.petya-app.ru/oauth/zoom/callback`.
+- API and Marketplace terms were accepted with explicit user approval. App credentials are installed in the server's protected environment files, not this repository.
+- SDK Linux x86_64 7.1.5.4432 compiled on the existing server using the pinned official sample and Petya adapter. OAuth broker and recorder systemd services are active. Recorder route: `https://auth.petya-app.ru/zoom-bot/`.
+- End-user OAuth authorization, macOS Accessibility permission, host recording permission, and a live end-to-end meeting test remain required. Development availability is not Marketplace publication or production approval.

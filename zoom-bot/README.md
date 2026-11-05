@@ -1,10 +1,10 @@
 # Separate Zoom participant service
 
-Status: implementation and protocol tests exist; a real SDK build and live meeting acceptance test are still required before enabling this service for users. Do not treat a successful API test as a successful Zoom recording.
+Status: implementation and protocol tests pass; Linux SDK 7.1.5.4432 is compiled and the service is installed on the existing server. End-user OAuth authorization and a live meeting acceptance test are still required. Do not treat a successful API test as a successful Zoom recording.
 
 ## Requirements
 
-- Linux x86_64, Node.js 22+, PulseAudio with a null sink, and the official Zoom Meeting SDK for Linux.
+- Linux x86_64, Node.js 18.19+ (22+ recommended), PulseAudio with a null sink, and the official Zoom Meeting SDK for Linux.
 - A user-managed Zoom General App with Meeting SDK enabled, `user:read:user` and `user:read:token` scopes, and exact OAuth callback `https://auth.petya-app.ru/oauth/zoom/callback`.
 - Host permission to record, waiting-room admission when required, and Zoom's current external-meeting authorization requirements. On-behalf authorization may require the authorizing user to remain in the meeting. This cannot promise recording after that user leaves. See [Zoom OBF requirements](https://developers.zoom.us/docs/meeting-sdk/obf-faq/).
 - The existing Petya OAuth broker on localhost:8787. Keep Zoom secrets in its protected environment file, never in source control.
