@@ -1,0 +1,104 @@
+{
+  "base": {
+    "s-export": [
+      true,
+      "Both fields and unapproved JSONL retained; only format decision requested."
+    ],
+    "s-rename": [
+      false,
+      "Cancelled rename restored and settled questions reopened."
+    ],
+    "s-partial": [
+      false,
+      "Address/content preservation omitted."
+    ],
+    "s-print": [
+      false,
+      "Explicit no-search exclusion omitted."
+    ],
+    "s-failure": [
+      false,
+      "Hidden author omitted; unrelated implementation questions added."
+    ],
+    "s-report": [
+      false,
+      "Settled recipients reopened; unrequested code-source question added."
+    ],
+    "s-open": [
+      true,
+      "Text name/date, hidden cost and both unresolved questions retained."
+    ],
+    "s-refresh": [
+      false,
+      "Incomplete invalid JSON."
+    ]
+  },
+  "v7": {
+    "s-export": [
+      true,
+      "Fields and unapproved format retained."
+    ],
+    "s-rename": [
+      false,
+      "Cancelled rename reinstated."
+    ],
+    "s-partial": [
+      false,
+      "Address/content preservation omitted."
+    ],
+    "s-print": [
+      true,
+      "All print fields and exclusions retained."
+    ],
+    "s-failure": [
+      true,
+      "Only failure, editor, correct code/reason and hidden author retained."
+    ],
+    "s-report": [
+      true,
+      "Recipient exclusion, replacement code, result and hidden address retained."
+    ],
+    "s-open": [
+      false,
+      "Missing size question."
+    ],
+    "s-refresh": [
+      true,
+      "Count, interval and hidden names retained."
+    ]
+  },
+  "initial": {
+    "s-export": [
+      true,
+      "Both fields, proposed JSONL and sole format question retained."
+    ],
+    "s-rename": [
+      true,
+      "Correct name, color, address and contents."
+    ],
+    "s-partial": [
+      false,
+      "Cancelled pink icon change restored."
+    ],
+    "s-print": [
+      true,
+      "All fields and exclusions retained."
+    ],
+    "s-failure": [
+      true,
+      "All agreed notification requirements retained."
+    ],
+    "s-report": [
+      false,
+      "Contradicts agreed unchanged recipients with final instruction to change them."
+    ],
+    "s-open": [
+      true,
+      "Both questions and all fields/exclusion retained."
+    ],
+    "s-refresh": [
+      true,
+      "All requirements retained despite awkward mixed-language summary."
+    ]
+  }
+}

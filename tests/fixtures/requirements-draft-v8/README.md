@@ -23,3 +23,22 @@ This met the narrow new-case improvement gate but a subsequent rehearsal check e
 A further fixed pass starts from the initial v8 adapter with learning rate 0.00002. Its 520 rows comprise the original 364, eight copies of each original correction (64), six copies of each newly observed correction (60), and 32 balanced directional, interval-inclusion and zero/no-decision contrasts. This avoids reinforcing only upper-bound examples. `confirmation.jsonl` reserves 16 new numeric, eight seven-turn draft and eight general cases before stabilization inference. `stabilization-protocol.json` records hashes and gates. Compare against base, v7 and initial v8; do not select checkpoints using these answers.
 
 `acquisition.jsonl` separately checks the original eight, current seven and newly observed ten correction targets. These are training/rehearsal evidence only. Production release remains blocked until both retention and broader new-case behavior are adequate.
+
+## Final stabilization result: no release
+
+After standard reload, the stabilized adapter exactly reproduces all 25 acquired correction targets: the original eight, the requested seven, and the ten failures from the initial v8 check. This repairs the detected retention regression. Acquisition alone is insufficient.
+
+| Model | New numeric | Complete new drafts | General smoke |
+| --- | --- | --- | --- |
+| Base | 9/16 | 2/8 | 7/8 |
+| v7 parent | 14/16 | 5/8 | 7/8 |
+| Initial v8 | 13/16 | 6/8 | 7/8 |
+| Stabilized v8 | 15/16 | 5/8 | 7/8 |
+
+The predeclared improvement gate **fails**: stabilized draft coverage does not exceed v7, and it is lower than initial v8 on this separate confirmation. Numeric performance improves, but the evidence shows a task tradeoff rather than a stable overall improvement. Both v8 artifacts remain experimental and neither is promoted or released as petya-v1. A previous gain on the initial 44-case set must not be presented as a successful final confirmation.
+
+All confirmation answers, manifests, per-case semantic reviews and totals are in `confirmation-results`. The five remaining cases are preserved in `remaining-corrections.jsonl`: one inclusion error, three draft failures (cancelled rename, unclear retention of content, inverted address exclusion with omitted recipient exclusion), and one sorting failure also present in the baselines. The content-retention judgment is explicitly conservative; clear equivalent wording is accepted. All stabilized confirmation outputs pass JSON structure checks, so valid schema does not imply valid requirements.
+
+The first pass took about 382 seconds for 728 steps; stabilization took about 298 seconds for 520 steps. Both trained 2,457,600 parameters, with peak MLX allocation below 9.6 GB. Parent/data/weight hashes are verified. Five focused scorer tests pass. Only research files changed; no build, application prompt, live sampling, runtime model selection or MCP capability changed.
+
+Next training should broaden contrastive multi-turn data for independent decisions (keep one change while cancelling another, excluded recipients versus hidden fields, required fields versus suggested substitutions), retaining balanced numeric examples. Repeating the same corrections alone has now demonstrated memorization with incomplete transfer. A new held-out set and broader live-dialogue validation remain necessary before release; the precise source of every transfer failure is not established by these experiments.

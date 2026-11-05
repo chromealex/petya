@@ -1,0 +1,94 @@
+{
+  "status": "release_blocked_mixed_transfer_results",
+  "models": {
+    "base": {
+      "bounds": {
+        "passed": 9,
+        "total": 16
+      },
+      "general": {
+        "passed": 7,
+        "total": 8
+      },
+      "draft": {
+        "passed": 2,
+        "total": 8
+      },
+      "schema": {
+        "passed": 31,
+        "total": 32
+      }
+    },
+    "v7": {
+      "bounds": {
+        "passed": 14,
+        "total": 16
+      },
+      "general": {
+        "passed": 7,
+        "total": 8
+      },
+      "draft": {
+        "passed": 5,
+        "total": 8
+      },
+      "schema": {
+        "passed": 32,
+        "total": 32
+      }
+    },
+    "initial": {
+      "bounds": {
+        "passed": 13,
+        "total": 16
+      },
+      "general": {
+        "passed": 7,
+        "total": 8
+      },
+      "draft": {
+        "passed": 6,
+        "total": 8
+      },
+      "schema": {
+        "passed": 32,
+        "total": 32
+      }
+    },
+    "stabilized": {
+      "bounds": {
+        "passed": 15,
+        "total": 16
+      },
+      "general": {
+        "passed": 7,
+        "total": 8
+      },
+      "draft": {
+        "passed": 5,
+        "total": 8
+      },
+      "schema": {
+        "passed": 32,
+        "total": 32
+      }
+    }
+  },
+  "acquisition": {
+    "original_eight": 8,
+    "current_seven": 7,
+    "new_ten": 10,
+    "exact_json_pass": 25,
+    "schema_pass": 25,
+    "total": 25,
+    "interpretation": "All are training/rehearsal examples; not independent improvement evidence."
+  },
+  "limitations": [
+    "Small synthetic related-family set",
+    "Non-blind manual semantic grading; equivalent wording accepted",
+    "Greedy diagnostic inference, not live dialogue deployment evaluation"
+  ],
+  "improvement_gate_passed": false,
+  "release_gate_passed": false,
+  "decision": "Do not promote either v8 adapter. Stabilized numeric performance improves over v7 but draft completeness does not; compared with initial v8, numeric gain trades off against draft coverage."
+}
