@@ -1,0 +1,19 @@
+{
+  "acquisition": {
+    "passed": 369,
+    "exact": 369,
+    "total": 369
+  },
+  "original_replacement_failures_fixed": 4,
+  "fresh_passed": 82,
+  "fresh_total": 84,
+  "parent_fresh_passed": 83,
+  "fresh_regressions": [
+    "polarity-0-101"
+  ],
+  "supplementary_release_passed": 5,
+  "supplementary_release_total": 16,
+  "parent_supplementary_release_passed": 7,
+  "release_petya_v1": false,
+  "next": "Broaden correction training beyond repeated report templates, preserve all current retention targets, freeze independent structurally varied holdouts, then verify real runtime and generated multi-turn behavior."
+}

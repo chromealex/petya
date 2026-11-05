@@ -1,0 +1,22 @@
+{
+  "scores": {
+    "parent": {
+      "passed": 7,
+      "total": 16
+    },
+    "candidate": {
+      "passed": 5,
+      "total": 16
+    }
+  },
+  "gains": [
+    "field-not-source"
+  ],
+  "regressions": [
+    "partial-send",
+    "topic-return",
+    "proposed-not-approved"
+  ],
+  "release_petya_v1": false,
+  "limitations": "Manual non-blind review of synthetic fixed histories; not generated live dialogue or runtime verification."
+}

@@ -436,5 +436,151 @@
       true,
       "All agreed fields, recipient/privacy decisions and applicable preservation constraints survive; wording may differ."
     ]
+  },
+  "candidate": {
+    "name-0-01": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "name-0-10": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "name-0-00": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "name-0-11": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "name-1-01": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "name-1-10": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "name-1-00": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "name-1-11": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "report-0-00": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "report-0-10": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "report-0-01": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "report-0-11": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "report-1-00": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "report-1-10": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "report-1-01": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "report-1-11": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-0-000": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-0-001": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-0-010": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-0-011": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-0-100": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-0-101": [
+      false,
+      "Adds contractor delivery although the prohibition remains. This is a lost parent success."
+    ],
+    "polarity-0-110": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-0-111": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-1-000": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-1-001": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-1-010": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-1-011": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-1-100": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-1-101": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-1-110": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "polarity-1-111": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "failure-0-0": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "failure-0-1": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ],
+    "scope": [
+      false,
+      "Omits the explicit exclusion of scanner procurement."
+    ],
+    "repeat": [
+      true,
+      "Preserves agreed requirements; exact reference or equivalent wording."
+    ]
   }
 }

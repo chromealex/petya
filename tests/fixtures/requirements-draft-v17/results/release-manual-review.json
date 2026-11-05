@@ -1,0 +1,134 @@
+{
+  "parent": {
+    "code-lifetime": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "partial-send": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "revoke-after-grant": [
+      false,
+      "Only forbids documents with the old field, not all revoked sending; replacement is deferred until sending."
+    ],
+    "field-not-source": [
+      false,
+      "Fails to choose the confirmed report field and loses the source-table prohibition."
+    ],
+    "two-replacements": [
+      false,
+      "Keeps the canceled first replacement instead of restoring the original code."
+    ],
+    "exact-case": [
+      false,
+      "Required literals survive, but the heading describes splitting/dressing rather than renaming the button."
+    ],
+    "topic-return": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "proposed-not-approved": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "numeric-range-draft": [
+      false,
+      "Changes the inclusive upper bound to exclusive and invents sending."
+    ],
+    "sort-correction": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "ambiguous-recipient": [
+      false,
+      "Does not preserve prepare-only/no-send condition; parent also selects the rejected last buyer."
+    ],
+    "quoted-cancel": [
+      false,
+      "Changes permission to send to the manager into permission from the manager."
+    ],
+    "regrant-limited": [
+      false,
+      "Includes result in buyer delivery despite authorization only for the short version without result."
+    ],
+    "cancel-cancellation": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "separate-names": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "no-invented-channel": [
+      false,
+      "Assumes Telegram in the question although no channel was selected."
+    ]
+  },
+  "candidate": {
+    "code-lifetime": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "partial-send": [
+      false,
+      "Invents document fields not present in the dialogue."
+    ],
+    "revoke-after-grant": [
+      false,
+      "Only forbids documents with the old field, not all revoked sending; replacement is deferred until sending."
+    ],
+    "field-not-source": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "two-replacements": [
+      false,
+      "Keeps the canceled first replacement instead of restoring the original code."
+    ],
+    "exact-case": [
+      false,
+      "Required literals survive, but the heading describes splitting/dressing rather than renaming the button."
+    ],
+    "topic-return": [
+      false,
+      "Drops the explicit exclusion of client name."
+    ],
+    "proposed-not-approved": [
+      false,
+      "Drops the explicit exclusion of unapproved XLSX."
+    ],
+    "numeric-range-draft": [
+      false,
+      "Changes the inclusive upper bound to exclusive and invents sending."
+    ],
+    "sort-correction": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "ambiguous-recipient": [
+      false,
+      "Does not preserve prepare-only/no-send condition; parent also selects the rejected last buyer."
+    ],
+    "quoted-cancel": [
+      false,
+      "Changes permission to send to the manager into permission from the manager."
+    ],
+    "regrant-limited": [
+      false,
+      "Includes result in buyer delivery despite authorization only for the short version without result."
+    ],
+    "cancel-cancellation": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "separate-names": [
+      true,
+      "Preserves all final requirements. Sorting example need not be repeated when ascending order and duplicate retention are explicit."
+    ],
+    "no-invented-channel": [
+      false,
+      "Assumes Telegram in the question although no channel was selected."
+    ]
+  }
+}

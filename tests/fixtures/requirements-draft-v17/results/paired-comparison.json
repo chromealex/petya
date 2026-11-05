@@ -71,5 +71,11 @@
       "sort-5-0-0",
       "sort-5-1-1"
     ]
+  },
+  "candidate": {
+    "gains": [],
+    "regressions": [
+      "polarity-0-101"
+    ]
   }
 }

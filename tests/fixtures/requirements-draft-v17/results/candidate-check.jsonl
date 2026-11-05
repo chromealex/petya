@@ -1,0 +1,84 @@
+{"id": "name-0-01", "task": "draft", "answer": "{\"description\":\"Название «Счёт-031» сохранить. Значок сделать лиловым. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Счёт-031»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-0-10", "task": "draft", "answer": "{\"description\":\"Переименовать «Счёт-031» в «Расчёт-031». Цвет значка не менять. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Счёт-031»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-0-00", "task": "draft", "answer": "{\"description\":\"Название «Счёт-031» сохранить. Цвет значка не менять. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Счёт-031»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-0-11", "task": "draft", "answer": "{\"description\":\"Переименовать «Счёт-031» в «Расчёт-031». Значок сделать лиловым. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Счёт-031»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-1-01", "task": "draft", "answer": "{\"description\":\"Название «Заявки-047» сохранить. Значок сделать янтарным. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Заявки-047»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-1-10", "task": "draft", "answer": "{\"description\":\"Переименовать «Заявки-047» в «Обращения-047». Цвет значка не менять. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Заявки-047»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-1-00", "task": "draft", "answer": "{\"description\":\"Название «Заявки-047» сохранить. Цвет значка не менять. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Заявки-047»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "name-1-11", "task": "draft", "answer": "{\"description\":\"Переименовать «Заявки-047» в «Обращения-047». Значок сделать янтарным. Адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Раздел «Заявки-047»\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-0-00", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «код приёмки» и «результат» отправлять диспетчеру. Покупателю не отправлять. Скрывать почту оценщика.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-0-10", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «код приёмки» и «результат» отправлять диспетчеру и покупателю. Скрывать почту оценщика.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-0-01", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «код приёмки» и «результат» отправлять диспетчеру. Покупателю не отправлять. Показывать почту оценщика.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-0-11", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «код приёмки» и «результат» отправлять диспетчеру и покупателю. Показывать почту оценщика.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-1-00", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «номер решения» и «результат» отправлять секретарю. Заказчику не отправлять. Скрывать телефон аналитика.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-1-10", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «номер решения» и «результат» отправлять секретарю и заказчику. Скрывать телефон аналитика.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-1-01", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «номер решения» и «результат» отправлять секретарю. Заказчику не отправлять. Показывать телефон аналитика.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "report-1-11", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «номер решения» и «результат» отправлять секретарю и заказчику. Показывать телефон аналитика.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-0-000", "task": "draft", "answer": "{\"description\":\"Сводку с полями «код декларации» и «результат» отправлять контролёру. Подрядчику не отправлять. Скрывать адрес консультанта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-0-001", "task": "draft", "answer": "{\"description\":\"Сводку с полями «код декларации» и «результат» отправлять контролёру. Подрядчику не отправлять. Показывать адрес консультанта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-0-010", "task": "draft", "answer": "{\"description\":\"Сводку с полями «код декларации» и «результат» отправлять контролёру и подрядчику. Скрывать адрес консультанта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-0-011", "task": "draft", "answer": "{\"description\":\"Сводку с полями «код декларации» и «результат» отправлять контролёру и подрядчику. Показывать адрес консультанта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-0-100", "task": "draft", "answer": "{\"description\":\"Сводку с полями «код обследования» и «результат» отправлять контролёру. Подрядчику не отправлять. Скрывать адрес консультанта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-0-101", "task": "draft", "answer": "{\"description\":\"Сводку с полями «код обследования» и «результат» отправлять контролёру и подрядчику. Показывать адрес консультанта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": false, "schemaValid": true}
+{"id": "polarity-0-110", "task": "draft", "answer": "{\"description\":\"Сводку с полями «код обследования» и «результат» отправлять контролёру и подрядчику. Скрывать адрес консультанта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-0-111", "task": "draft", "answer": "{\"description\":\"Сводку с полями «код обследования» и «результат» отправлять контролёру и подрядчику. Показывать адрес консультанта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-1-000", "task": "draft", "answer": "{\"description\":\"Сводку с полями «номер поставки» и «результат» отправлять заведующему. Заявителю не отправлять. Скрывать имя эксперта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-1-001", "task": "draft", "answer": "{\"description\":\"Сводку с полями «номер поставки» и «результат» отправлять заведующему. Показывать имя эксперта. Запрет на отправку заявителю сохранить.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": false, "schemaValid": true}
+{"id": "polarity-1-010", "task": "draft", "answer": "{\"description\":\"Сводку с полями «номер поставки» и «результат» отправлять заведующему и заявителю. Скрывать имя эксперта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-1-011", "task": "draft", "answer": "{\"description\":\"Сводку с полями «номер поставки» и «результат» отправлять заведующему и заявителю. Показывать имя эксперта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-1-100", "task": "draft", "answer": "{\"description\":\"Сводку с полями «номер согласования» и «результат» отправлять заведующему. Заявителю не отправлять. Скрывать имя эксперта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-1-101", "task": "draft", "answer": "{\"description\":\"Сводку с полями «номер согласования» и «результат» отправлять заведующему. Показывать имя эксперта. Запрет на отправку заявителю сохранить.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": false, "schemaValid": true}
+{"id": "polarity-1-110", "task": "draft", "answer": "{\"description\":\"Сводку с полями «номер согласования» и «результат» отправлять заведующему и заявителю. Скрывать имя эксперта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "polarity-1-111", "task": "draft", "answer": "{\"description\":\"Сводку с полями «номер согласования» и «результат» отправлять заведующему и заявителю. Показывать имя эксперта.\",\"questions\":[],\"summary\":\"Отправка сводки\"}", "exactJSON": true, "schemaValid": true}
+{"id": "failure-0-0", "task": "draft", "answer": "{\"description\":\"Только при сбое архивирования сообщать оператору номер архива и причину. Показывать имя составителя. При успехе не сообщать.\",\"questions\":[],\"summary\":\"Уведомление о сбое\"}", "exactJSON": true, "schemaValid": true}
+{"id": "failure-0-1", "task": "draft", "answer": "{\"description\":\"Только при сбое архивирования сообщать оператору номер архива и причину. Скрывать имя составителя. При успехе не сообщать.\",\"questions\":[],\"summary\":\"Уведомление о сбое\"}", "exactJSON": true, "schemaValid": true}
+{"id": "scope", "task": "draft", "answer": "{\"description\":\"Сообщение с полями «номер акта» и «дата» отправлять куратору. Формат даты: ГГГГ/ДД/ММ. Имя автора скрывать.\",\"questions\":[],\"summary\":\"Отправка акта\"}", "exactJSON": false, "schemaValid": true}
+{"id": "repeat", "task": "draft", "answer": "{\"description\":\"Показывать число проверенных записей. Имена редакторов скрывать. Интервал обновления: 241 секунда.\",\"questions\":[],\"summary\":\"Счётчик записей\"}", "exactJSON": false, "schemaValid": true}
+{"id": "value-0-exact", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-149,\"upper\":-149,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "value-0-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-149,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "value-0-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-149,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "value-0-open", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "value-1-exact", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-83,\"upper\":-83,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "value-1-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-83,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "value-1-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-83,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "value-1-open", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "value-2-exact", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-0.6875,\"upper\":-0.6875,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "value-2-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-0.6875,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "value-2-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-0.6875,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "value-2-open", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "value-3-exact", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-21.875,\"upper\":-21.875,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "value-3-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-21.875,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "value-3-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-21.875,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "value-3-open", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "interval-0", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-107,\"upper\":-69,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "interval-1", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-107,\"upper\":-69,\"lowerInclusive\":false,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "interval-2", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-107,\"upper\":-69,\"lowerInclusive\":true,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "interval-3", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-107,\"upper\":-69,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "sort-0-0-0", "task": "general", "answer": "[-67,-34,-17]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-0-0-1", "task": "general", "answer": "[-67,-34,-17]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-0-1-0", "task": "general", "answer": "[-17,-34,-67]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-0-1-1", "task": "general", "answer": "[-17,-34,-67]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-1-0-0", "task": "general", "answer": "[-86,-58,-29]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-1-0-1", "task": "general", "answer": "[-86,-58,-29]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-1-1-0", "task": "general", "answer": "[-29,-58,-86]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-1-1-1", "task": "general", "answer": "[-29,-58,-86]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-2-0-0", "task": "general", "answer": "[-42,-42,-21,-6]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-2-0-1", "task": "general", "answer": "[-42,-42,-21,-6]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-2-1-0", "task": "general", "answer": "[-6,-21,-42,-42]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-2-1-1", "task": "general", "answer": "[-6,-21,-42,-42]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-3-0-0", "task": "general", "answer": "[-7.625,-3.625,-0.625]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-3-0-1", "task": "general", "answer": "[-7.625,-3.625,-0.625]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-3-1-0", "task": "general", "answer": "[-0.625,-3.625,-7.625]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-3-1-1", "task": "general", "answer": "[-0.625,-3.625,-7.625]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-4-0-0", "task": "general", "answer": "[-138,-79,-31]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-4-0-1", "task": "general", "answer": "[-138,-79,-31]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-4-1-0", "task": "general", "answer": "[-31,-79,-138]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-4-1-1", "task": "general", "answer": "[-31,-79,-138]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-5-0-0", "task": "general", "answer": "[-5.25,1.25,9.25]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-5-0-1", "task": "general", "answer": "[-5.25,1.25,9.25]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-5-1-0", "task": "general", "answer": "[9.25,1.25,-5.25]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-5-1-1", "task": "general", "answer": "[9.25,1.25,-5.25]", "exactJSON": true, "schemaValid": true}
+{"id": "g0", "task": "general", "answer": "464", "exactJSON": true, "schemaValid": true}
+{"id": "g1", "task": "general", "answer": "167", "exactJSON": true, "schemaValid": true}
+{"id": "g2", "task": "general", "answer": "5", "exactJSON": true, "schemaValid": true}
+{"id": "g3", "task": "general", "answer": "1000", "exactJSON": true, "schemaValid": true}

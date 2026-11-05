@@ -124,5 +124,47 @@
       "passed": 84,
       "total": 84
     }
+  },
+  "candidate": {
+    "bounds": {
+      "passed": 20,
+      "total": 20
+    },
+    "general": {
+      "passed": 28,
+      "total": 28
+    },
+    "literal_labels": {
+      "passed": 8,
+      "total": 8
+    },
+    "draft": {
+      "passed": 34,
+      "total": 36
+    },
+    "rename": {
+      "passed": 8,
+      "total": 8
+    },
+    "recipient_field": {
+      "passed": 8,
+      "total": 8
+    },
+    "polarity": {
+      "passed": 15,
+      "total": 16
+    },
+    "sorting": {
+      "passed": 24,
+      "total": 24
+    },
+    "other_general": {
+      "passed": 4,
+      "total": 4
+    },
+    "schema": {
+      "passed": 84,
+      "total": 84
+    }
   }
 }
