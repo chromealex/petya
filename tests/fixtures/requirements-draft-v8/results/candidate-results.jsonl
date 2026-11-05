@@ -1,0 +1,44 @@
+{"id": "n01", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-38,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "n02", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-72,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n03", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-38,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": false, "schemaValid": true}
+{"id": "n04", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-72,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "n05", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":6.125,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n06", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":6.125,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "n07", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-22,\"upper\":-3,\"lowerInclusive\":false,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n08", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-22,\"upper\":-3,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false, "schemaValid": true}
+{"id": "n09", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "n10", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":243,\"upper\":243,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n11", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "n12", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":91,\"upper\":91,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n13", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "n14", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":8.375,\"upper\":8.375,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n15", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":863,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "n16", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":863,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "n17", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-11.5,\"upper\":2.75,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n18", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-11.5,\"upper\":2.75,\"lowerInclusive\":false,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "n19", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "n20", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": false, "schemaValid": true}
+{"id": "n21", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-0.75,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "n22", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-0.75,\"lowerInclusive\":null,\"upperInclusive\":false}", "exactJSON": true, "schemaValid": true}
+{"id": "n23", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":36,\"upper\":44,\"lowerInclusive\":true,\"upperInclusive\":true}", "exactJSON": false, "schemaValid": true}
+{"id": "n24", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "d-export", "task": "draft", "answer": "{\"description\":\"Часовой пояс и код рейса уже есть в расписании. Формат открыт XML. Временной формат не обсуждался.\",\"questions\":[\"Какой формат выгрузки расписания выбрать?\"],\"summary\":\"Утверждение формата выгрузки расписания\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-rename", "task": "draft", "answer": "{\"description\":\"Сделать значок раздела «Договоры» фиолетовым. Название «Договоры», адрес и содержимое сохранить.\",\"questions\":[],\"summary\":\"Значок раздела «Договоры»\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-open", "task": "draft", "answer": "{\"description\":\"Показывать название склада текстом и его вместимость. Адрес скрывать. Открытые вопросы: 1. Размер названия. 2. Порядок карточек.\",\"questions\":[\"Какой размер названия выбрать?\",\"Какой порядок карточек показывать?\"],\"summary\":\"Карточки склада\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-print", "task": "draft", "answer": "{\"description\":\"Печатать номер очереди и время записи в формате ЧЧ:ММ. Название кабинета не печатать. Поиск записи не нужен.\",\"questions\":[],\"summary\":\"Печать талона\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-failure", "task": "draft", "answer": "{\"description\":\"Только при сбое сверки отправлять уведомление аудитору. В уведомлении сообщать номер ошибки и причину сбоя. Фамилию сотрудника не показывать. Идентификатор сверки оставить номером ошибки.\",\"questions\":[],\"summary\":\"Уведомление аудитора только при сбое сверки\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-report", "task": "draft", "answer": "{\"description\":\"Отчёт логисту по отгрузке. Содержит код накладной и результат. Телефон водителя скрывать. Получателей оставить.\",\"questions\":[],\"summary\":\"Отчёт отгрузки\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-bound", "task": "draft", "answer": "{\"description\":\"Влажность должна быть строго меньше 67 процентов. Оператор видит номер камеры при любой влажности. Имя арендатора не показывать. Управление вентилятором вне этой задачи.\",\"questions\":[],\"summary\":\"Контроль влажности и видимости номера камеры\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-refresh", "task": "draft", "answer": "{\"description\":\"Обновлять количество свободных мест на панели каждые 97 секунд. Имена посетителей скрывать. Количество мест показывать.\",\"questions\":[],\"summary\":\"Обновление показателя свободных мест\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-approved", "task": "draft", "answer": "{\"description\":\"В экспорт каталога включать название и артикул. Формат экспорта — YAML.\",\"questions\":[],\"summary\":\"Экспорт каталога\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-partial", "task": "draft", "answer": "{\"description\":\"Сделать оранжевым значок раздела «Партии». Название «Поставки» переименовать в «Партии». Адрес и данные оставить прежними.\",\"questions\":[],\"summary\":\"Значок раздела «Партии»\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-resolved", "task": "draft", "answer": "{\"description\":\"Показывать название и автора. Скрывать закупочную цену. Цвет заголовка чёрный. Автор остаётся.\",\"questions\":[\"Какой порядок карточек выбрать?\"],\"summary\":\"Карточка книги\"}", "exactJSON": false, "schemaValid": true}
+{"id": "d-shift", "task": "draft", "answer": "{\"description\":\"В письме клиенту показывать номер брони и дату заселения в формате ГГГГ-ММ-DD. Телефон администратора скрывать. Оплата не добавлять.\",\"questions\":[],\"summary\":\"Показ номер брони и даты заселения\"}", "exactJSON": false, "schemaValid": true}
+{"id": "g1", "task": "general", "answer": "391", "exactJSON": true, "schemaValid": true}
+{"id": "g2", "task": "general", "answer": "[-2,5,8]", "exactJSON": true, "schemaValid": true}
+{"id": "g3", "task": "general", "answer": "4", "exactJSON": true, "schemaValid": true}
+{"id": "g4", "task": "general", "answer": "Принято", "exactJSON": true, "schemaValid": true}
+{"id": "g5", "task": "general", "answer": "47", "exactJSON": true, "schemaValid": true}
+{"id": "g6", "task": "general", "answer": "42", "exactJSON": true, "schemaValid": true}
+{"id": "g7", "task": "general", "answer": "нет", "exactJSON": true, "schemaValid": true}
+{"id": "g8", "task": "general", "answer": "400", "exactJSON": true, "schemaValid": true}
