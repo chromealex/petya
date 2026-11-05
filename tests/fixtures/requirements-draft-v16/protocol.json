@@ -1,0 +1,18 @@
+{
+  "hashes": {
+    "train.jsonl": "1cb61270f2fdbbf2eb71b81eb5d3d427a3b00bd669b4a882bdbb1148feff95e5",
+    "acquisition.jsonl": "600657ba8dfebf3ad4499d4302b89b594ea94560f0687f4df8affe73546c9f13",
+    "balanced-corrections.jsonl": "a120098b250e5536597bd9332a25ec30952f4bf5f1300e12f7ddc4beaa53db64",
+    "consistent-variants.jsonl": "b0ae84d44ed0a5d2d8e77ac5e18b325296017ed859a7d622a9c44bec371e9046",
+    "check.jsonl": "db142ed2205155ce7cf86e436374b5cc91cf555bdc76344a61a1dabc899b419b"
+  },
+  "parent": "../requirements-draft-v15/adapter",
+  "steps": 541,
+  "layers": 13,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 5e-06,
+  "gate": "All 293 familiar cases correct. Fresh permission handling improves versus parent without losing any prior successful fresh case. Numeric 20/20, labels 8/8, preserve sorting. Contradictory requirements fail even if a correct prohibition is appended. All states must pass to claim complete coverage; no automatic release.",
+  "selection": "Fixed run; acquisition-only repair permitted before candidate fresh inference.",
+  "limits": "Small related synthetic sample; manual non-blind draft review. New polarity cases frozen before all inference."
+}
