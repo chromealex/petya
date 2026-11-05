@@ -1,0 +1,80 @@
+{
+  "boundsCorrect": 5,
+  "boundsTotal": 6,
+  "validDrafts": 6,
+  "draftTotal": 6,
+  "records": [
+    {
+      "id": "watermark",
+      "task": "draft",
+      "answer": "{\"summary\": \"Добавление водяного знака\", \"description\": \"В правой нижней части изображения необходимо добавить водяной знак с текстом «Образец». Остальные параметры не заданы.\", \"questions\": [\"Какая прозрачность водяного знака?\"]}",
+      "validJSON": true
+    },
+    {
+      "id": "cache",
+      "task": "draft",
+      "answer": "{\"summary\": \"Хранение кеша\", \"description\": \"Хранение кеша длится ровно 7 часов. Ключ кеша — идентификатор документа. Имя пользователя не добавлять в ключ.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "audio",
+      "task": "draft",
+      "answer": "{\"summary\": \"Загрузка аудио строго в формате WAV\", \"description\": \"В модуль загрузки аудио внедрить следующие ограничения и правила:\\n1. Формат файла строго WAV. Другие форматы не принимать.\\n2. Длительность аудио строго меньше 92 секунд. Файл ровно 92 секунды не принимать.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "stock",
+      "task": "draft",
+      "answer": "{\"summary\": \"Исправление показателя остатков\", \"description\": \"Исправить интерфейс показателя остатков. Отображать его закупщику, а не кладовщику. В таблице показывать только Артикул и Количество. Скрыть столбец с Закупочной ценой. Поставщика не добавлять.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "page",
+      "task": "draft",
+      "answer": "{\"summary\": \"Панели навигации\", \"description\": \"На странице показывать не больше 34 записей. Отображать кнопки «Назад» и «Вперёд» для перелистывания.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "delivery-badge",
+      "task": "draft",
+      "answer": "{\"summary\": \"Русский текст и цвет для значка доставки\", \"description\": \"Русский текст «В пути». Цвет — жёлтый. Значок ошибки и его цвет не входят в эту задачу.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "validation-bound-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": false
+    },
+    {
+      "id": "validation-bound-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":9,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "validation-bound-2",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":9,\"upper\":9,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "validation-bound-3",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":13,\"lowerInclusive\":null,\"upperInclusive\":false}",
+      "passed": true
+    },
+    {
+      "id": "validation-bound-4",
+      "task": "bounds",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "validation-bound-5",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":55,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+      "passed": true
+    }
+  ]
+}

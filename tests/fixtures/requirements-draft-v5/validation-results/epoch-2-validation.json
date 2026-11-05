@@ -1,0 +1,80 @@
+{
+  "boundsCorrect": 4,
+  "boundsTotal": 6,
+  "validDrafts": 6,
+  "draftTotal": 6,
+  "records": [
+    {
+      "id": "watermark",
+      "task": "draft",
+      "answer": "{\"summary\": \"Добавить водяной знак «Образец»\", \"description\": \"Добавить водяной знак с текстом «Образец» в правом нижнем углу изображения. Прозрачность не согласована.\", \"questions\": [\"Какая прозрачность водяного знака?\"]}",
+      "validJSON": true
+    },
+    {
+      "id": "cache",
+      "task": "draft",
+      "answer": "{\"summary\": \"Кэширование по идентификатору документа\", \"description\": \"Настроить кэш с TTL ровно 7 часов. Ключ кэша должен строиться на основе идентификатора документа. Имя пользователя не добавлять в ключ.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "audio",
+      "task": "draft",
+      "answer": "{\"summary\": \"Загрузка аудиофайлов\", \"description\": \"Пользователь не может загрузить аудиофайл. Требуется, чтобы интерфейс и бэкенд строго ограничивали загрузку только аудиофайлами в формате WAV. Длительность загружаемого файла не может быть равна или больше 92 секунд; допустимы только файлы с длительностью строго меньше 92 секунд. Имя автора не должно отображаться.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "stock",
+      "task": "draft",
+      "answer": "{\"summary\": \"Исправление экрана остатков\", \"description\": \"Исправить экран «Остатки»: изменить роль пользователя с кладовщика на закупщика. Отображать только «Артикул» и «Количество». Скрыть поле «Закупочная цена». Поля «Поставщик» не добавлять.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "page",
+      "task": "draft",
+      "answer": "{\"summary\": \"Доработка пагинации сетки записей\", \"description\": \"Доработать интерфейс сетки записей с учётом согласованных требований по количеству и навигации.\\n\\nТребования:\\n1. Отображать не больше 34 записей на одной странице. Значение 34 — допустимое.\\n2. Минимальное количество записей на странице не задано. Отображать всё, что есть, если меньше 34.\\n3. Навигация по страницам осуществляется только с помощью кнопок «Назад» и «Вперёд». Кнопки «Первая» и «Последняя» не добавлять.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "delivery-badge",
+      "task": "draft",
+      "answer": "{\"summary\": \"Изменение цвета и текста значка статуса доставки\", \"description\": \"Необходимо обновить визуальное представление значка статуса «Доставка». Текущий цвет — жёлтый. Требуется изменить цвет на зелёный и текст на «В пути». Значки ошибок не входят в эту задачу.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "validation-bound-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "validation-bound-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":9,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "validation-bound-2",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":9,\"upper\":9,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "validation-bound-3",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": false
+    },
+    {
+      "id": "validation-bound-4",
+      "task": "bounds",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "validation-bound-5",
+      "task": "bounds",
+      "answer": "{\"status\":\"open\",\"lower\":55,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": false
+    }
+  ]
+}
