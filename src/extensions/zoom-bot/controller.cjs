@@ -3,14 +3,15 @@ const {fromObservation}=require('./meeting-link.cjs');
 const {hasMeeting}=require('../../meeting-monitor.cjs');
 const phases={idle:'Ожидаю начала встречи Zoom',detected:'Встреча обнаружена. Подключить Петю?',link:'Получаю ссылку текущей встречи Zoom…',joining:'Петя подключается к Zoom…',waiting:'Петя ожидает допуска в Zoom',recording:'Петя записывает встречу отдельно от компьютера',processing:'Встреча завершена. Обрабатываю запись…',done:'Расшифровка сохранена в общей памяти компании',dismissed:'Петя не будет входить в эту встречу'};
 class ZoomBot {
- constructor({settings,inspect,remote,save,transcribe,load=()=>null,persist=()=>{},emit=()=>{},now=Date.now}){Object.assign(this,{settings,inspect,remote,save,transcribe,persist,emit,now});this.state=load()||{phase:'idle'};this.busy=false;this.hits=0;this.misses=0;this.present=false;}
- snapshot(){const s=this.state;return {meetingPresent:this.present,id:s.id||'observer',phase:s.phase,message:s.message||phases[s.phase],meetingId:s.meetingId||'',hasLink:!!s.url,canJoin:s.phase==='detected',canRetry:s.phase==='error',busy:['link','joining','waiting','recording','processing'].includes(s.phase)};}
+ constructor({settings,inspect,remote,save,transcribe,accessReady=()=>true,load=()=>null,persist=()=>{},emit=()=>{},now=Date.now}){Object.assign(this,{settings,inspect,remote,save,transcribe,accessReady,persist,emit,now});this.state=load()||{phase:'idle'};this.busy=false;this.hits=0;this.misses=0;this.present=false;}
+ snapshot(){const s=this.state;return {needsPermission:!this.accessReady(),meetingPresent:this.present,id:s.id||'observer',phase:s.phase,message:s.message||phases[s.phase],meetingId:s.meetingId||'',hasLink:!!s.url,canJoin:s.phase==='detected',canRetry:s.phase==='error',busy:['link','joining','waiting','recording','processing'].includes(s.phase)};}
  publish(patch){Object.assign(this.state,patch);this.persist(this.state);this.emit(this.snapshot());return this.snapshot();}
  async tick(){
   if(this.busy)return;this.busy=true;
   try{
    if(this.state.jobId&&!['done','error','dismissed'].includes(this.state.phase)){await this.poll();}
    if(this.settings().zoomBotMode==='off'||this.settings().zoomCaptureMode==='local')return this.snapshot();
+   if(this.state.permissionBlocked&&this.accessReady()){await this.discover();}
    if(this.state.phase==='detected'&&this.settings().zoomBotMode==='auto')await this.connect();
    const observation=await this.inspect(false),found=hasMeeting(observation);
    if(found){this.hits++;this.misses=0;}else{this.hits=0;this.misses++;}
@@ -22,9 +23,9 @@ class ZoomBot {
     if(this.settings().zoomBotMode==='auto')await this.connect();
    }
    return this.snapshot();
-  }catch(e){return this.publish({phase:'error',message:e.message});}finally{this.busy=false;}
+  }catch(e){return this.publish({phase:'error',permissionBlocked:e.code==='ACCESSIBILITY_REQUIRED',message:e.message});}finally{this.busy=false;}
  }
- async discover(){const observation=await this.inspect(true);if(!hasMeeting(observation))throw Error('Встреча Zoom уже завершилась.');const link=fromObservation(observation);if(!link)throw Error('Не удалось прочитать ссылку текущей встречи. Разрешите Пете Универсальный доступ и откройте сведения о встрече Zoom.');this.publish({...link,phase:'detected',message:phases.detected});}
+ async discover(){if(!this.accessReady())throw Object.assign(Error('Разрешите Пете Универсальный доступ. Нажмите «Разрешить доступ» — откроется нужный раздел настроек, затем Петя продолжит автоматически.'),{code:'ACCESSIBILITY_REQUIRED'});const observation=await this.inspect(true);if(!hasMeeting(observation))throw Error('Встреча Zoom уже завершилась.');const link=fromObservation(observation);if(!link)throw Error('Не удалось прочитать ссылку текущей встречи. Петя попробовал открыть сведения о встрече. Нажмите «Повторить»; если окно Zoom закрыто, вернитесь во встречу.');this.publish({...link,permissionBlocked:false,phase:'detected',message:phases.detected});}
  async connect(){
   if(this.settings().zoomBotMode==='off')throw Error('Включите участника Пети в настройках Zoom.');
   if(this.state.jobId)return this.snapshot();
@@ -62,7 +63,7 @@ class ZoomBot {
    if(method==='join'&&this.state.phase!=='detected')throw Error('Встреча не ожидает подключения.');
    if(method==='retry'){if(this.state.jobId){await this.poll();return this.snapshot();}await this.discover();}
    return await this.connect();
-  }catch(e){this.publish({phase:'error',message:e.message});throw e;}finally{this.busy=false;}
+  }catch(e){this.publish({phase:'error',permissionBlocked:e.code==='ACCESSIBILITY_REQUIRED',message:e.message});throw e;}finally{this.busy=false;}
  }
 }
 module.exports={ZoomBot,phases};

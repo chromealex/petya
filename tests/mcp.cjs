@@ -39,6 +39,7 @@ const {Dialogue}=require('../src/dialogue.cjs');
     assert.equal((await call('retry_meeting_processing',{sessionId:'failed'})).phase,'processing');
     assert.equal((await call('zoom_bot_status')).mode,'auto');
     ctx.access={mode:'edit'};
+    assert.ok(await call('zoom_bot_request_access'));
     for(const method of ['join','dismiss','retry'])assert.ok(await call('zoom_bot_'+method,{id:'detected'}));
     zoomMode='ask';await call('zoom_bot_join',{id:'detected'},true);zoomMode='auto';delete ctx.access;
     notes.length=0;

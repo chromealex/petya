@@ -19,5 +19,6 @@ const assert=require('node:assert/strict'),vm=require('node:vm'),fs=require('nod
  context.voiceInputLocks.add('zoom-bot');await assert.rejects(context.startSelectedMicrophone(),/Во время встречи/);
  await callbackContext.callback('Речь встречи не должна попасть в чат',3,4,true);
  assert.equal(commandStarts,0);
+ window.petya.settings=async()=>({zoomCaptureMode:'bot'});await assert.rejects(window.petyaStartMeetingRecording(),/отдельный участник/);assert.equal(meetingStarts,1);
  console.log('Meeting isolation: dedicated capture, command mic stopped, restart blocked, late voice text ignored, duplicate start and no mic auto-resume passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});

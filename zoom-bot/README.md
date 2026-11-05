@@ -18,10 +18,12 @@ Clone the [official sample](https://github.com/zoom/meetingsdk-headless-linux-sa
 Run `node zoom-bot/server/server.cjs` under a dedicated service account. It binds only to 127.0.0.1:8790. Expose it behind HTTPS, with request body and response buffering limits; keep the OAuth broker's existing routes intact. Required environment:
 
 - `ZOOM_STORAGE_KEY`: independent 32-byte random key encoded as 64 hex characters.
-- `ZOOM_TENANTS`: JSON mapping SHA-256 hashes of random bearer credentials to company identifiers. Credentials must contain 40–200 base64url characters. Never store bearer credentials in public config.
+- `ZOOM_TENANTS` (optional): JSON mapping SHA-256 hashes of random bearer credentials to company identifiers. Credentials must contain 40–200 base64url characters. Never store bearer credentials in public config.
 - `ZOOM_CLIENT_ID`, `ZOOM_CLIENT_SECRET`: the General App's credentials, also configured on the OAuth broker.
 - `ZOOM_SDK_BINARY`: absolute executable path to the patched SDK sample.
 - `ZOOM_DATA_DIR`: protected persistent directory (default `/var/lib/petya-zoom`).
+
+By default the desktop uses its encrypted Zoom OAuth connection as its recorder credential. The service validates it with the local broker and isolates jobs by connection hash; no API key needs to be copied by the user. Optional explicit tenant credentials remain supported.
 
 The SDK receives a private config under `/dev/shm` and deletes it after exit. The service encrypts audio and metadata with AES-256-GCM, supports one active recorder by default, and isolates requests by company. ASR runs on the desktop only after the meeting ends. Successful acknowledgment deletes server audio. Unacknowledged or interrupted recordings require operator retention management; do not remove the encryption key while recovery is needed.
 

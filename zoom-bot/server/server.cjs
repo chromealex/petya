@@ -1,7 +1,7 @@
 const http=require('node:http'),crypto=require('node:crypto'),fs=require('node:fs'),path=require('node:path'),{spawn}=require('node:child_process');
 const {Store}=require('./store.cjs');
 const uuid=/^[a-f0-9-]{36}$/;
-function createService({store,tenants,ready,run,now=Date.now,maxActive=1}){
+function createService({store,tenants,ready,run,resolveTenant=async()=>null,now=Date.now,maxActive=1}){
  const jobs=new Map(store.ids().map(id=>[id,store.read(id)])),active=new Set();
  for(const job of jobs.values())if(['joining','waiting','recording'].includes(job.phase)){job.phase='error';job.message='Сервер записи перезапустился. Запись прервалась.';store.write(job.id,job);}
  const update=(job,patch)=>{Object.assign(job,patch);store.write(job.id,job);};
@@ -9,7 +9,9 @@ function createService({store,tenants,ready,run,now=Date.now,maxActive=1}){
  const server=http.createServer(async(req,res)=>{
   const send=(code,data)=>{res.writeHead(code,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
   try{
-   const token=req.headers.authorization?.match(/^Bearer ([A-Za-z0-9_-]{40,200})$/)?.[1],tenant=token&&tenants[crypto.createHash('sha256').update(token).digest('hex')];
+   const token=req.headers.authorization?.match(/^Bearer ([A-Za-z0-9_-]{40,200})$/)?.[1];
+   if(!token||req.headers.origin)return send(403,{error:'Forbidden'});
+   const tenant=tenants[crypto.createHash('sha256').update(token).digest('hex')]||await resolveTenant(token);
    if(!tenant||req.headers.origin)return send(403,{error:'Forbidden'});
    const u=new URL(req.url,'http://localhost');
    if(req.method==='GET'&&u.pathname==='/health')return send(200,{ready:ready(),active:active.size});
@@ -47,6 +49,7 @@ if(require.main===module){
   child.stdout.on('data',chunk=>{pending+=chunk;if(pending.length>65536){child.kill();return reject(Error('Worker output too large'));}let at;while((at=pending.indexOf('\n'))>=0){const line=pending.slice(0,at);pending=pending.slice(at+1);try{const data=JSON.parse(line);if(['joining','waiting','recording','recorded','error'].includes(data.phase))publish(data);}catch{}}});
   child.on('error',reject);child.on('exit',code=>code===0?resolve():reject(Error('Worker failed')));
  });
- const {server}=createService({store,tenants:JSON.parse(process.env.ZOOM_TENANTS||'{}'),ready,run});server.listen(Number(process.env.PORT||8790),'127.0.0.1');
+ const resolveTenant=require('./tenant.cjs').brokerTenant();
+ const {server}=createService({store,resolveTenant,tenants:JSON.parse(process.env.ZOOM_TENANTS||'{}'),ready,run});server.listen(Number(process.env.PORT||8790),'127.0.0.1');
 }
 module.exports={createService};

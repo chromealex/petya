@@ -1,0 +1,31 @@
+[Unit]
+Description=Petya separate Zoom participant
+After=network-online.target petya-auth.service
+Wants=network-online.target
+
+[Service]
+User=petya-zoom
+Group=petya-zoom
+WorkingDirectory=/var/lib/petya-zoom
+EnvironmentFile=/etc/petya-zoom.env
+Environment=XDG_RUNTIME_DIR=/run/petya-zoom
+Environment=PULSE_RUNTIME_PATH=/run/petya-zoom/pulse
+RuntimeDirectory=petya-zoom
+StateDirectory=petya-zoom
+ExecStartPre=/usr/bin/pulseaudio --start --exit-idle-time=-1 --log-target=stderr --load=module-null-sink
+ExecStart=/usr/bin/node /opt/petya-zoom/zoom-bot/server/server.cjs
+ExecStopPost=-/usr/bin/pulseaudio --kill
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillMode=control-group
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/petya-zoom /run/petya-zoom /dev/shm
+UMask=0077
+MemoryMax=600M
+
+[Install]
+WantedBy=multi-user.target

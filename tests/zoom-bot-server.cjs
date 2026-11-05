@@ -19,6 +19,7 @@ const {Store}=require('../zoom-bot/server/store.cjs'),{createService}=require('.
   assert(!fs.readFileSync(store.file(created.id+'-0')).includes(Buffer.from('aGVsbG8=')));
   await call('/v1/bots/'+created.id+'/ack','POST',{});assert.equal(fs.existsSync(store.file(created.id+'-0')),false);
   ready=false;assert.equal((await call('/v1/bots','POST',{...data,requestId:crypto.randomUUID()})).status,503);
+  let lookups=0,clock=0,allowed=true;const tenant=require('../zoom-bot/server/tenant.cjs').brokerTenant({now:()=>clock,fetcher:async()=>{lookups++;return {ok:allowed,json:async()=>({site:{provider:'zoom',id:'user'}})};}});const first=await tenant(token);assert.equal(await tenant(token),first);assert.equal(lookups,1);assert.notEqual(await tenant(other),first);clock=61000;allowed=false;assert.equal(await tenant(token),null);
   let saved=[];const frames=new Frames((i,data)=>saved.push(data)),pcm=Buffer.alloc(32000);pcm.writeInt16LE(1234,0);const frame=Buffer.alloc(8+pcm.length);frame.writeUInt32LE(16000,0);frame.writeUInt32LE(pcm.length,4);pcm.copy(frame,8);
   frames.push(frame.subarray(0,5));frames.push(frame.subarray(5));frames.end();const wav=Buffer.from(saved[0].wav,'base64');assert.equal(wav.toString('ascii',0,4),'RIFF');assert.equal(wav.readInt16LE(44),1234);
   console.log('Zoom service: auth/tenant isolation, idempotency, capacity, not-ready, completed-only audio, encrypted storage, acknowledgment cleanup and split PCM frames passed');

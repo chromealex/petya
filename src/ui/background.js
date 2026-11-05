@@ -1,11 +1,12 @@
 let autoStarting = false, autoGeneration = 0;
 window.petyaStartMeetingRecording = async () => {
   if (autoStarting || meeting.active) return;
+  const config = await window.petya.settings();
+  if(config.zoomCaptureMode !== 'local')throw Error('Выбран отдельный участник Zoom. Подключите Петю через уведомление о встрече или настройки Zoom.');
   autoStarting = true; const generation = ++autoGeneration;
   window.petyaAutoMeetingActive = true; meetingId = '';
   mic.stop(); updateAudio();
   try {
-    const config = await window.petya.settings();
     meetingId = await window.petya.feature('meetingMemory','begin');
     // Meeting audio never enters VoiceTurn or its command timeout.
     if (generation !== autoGeneration) { await window.petyaStopAutomaticMeeting(true); return; }

@@ -46,7 +46,10 @@ func meetingObservation(_ pid: pid_t) -> (Bool, String) {
         return nodes
     }
     let meetingWindows = windows.filter { window in
-        scan(window).contains { _, role, text in
+        let identifier = attribute(window, "AXIdentifier") as? String ?? ""
+        let title = attribute(window, kAXTitleAttribute) as? String ?? ""
+        if identifier == "zm.meeting.window.main" || ["Zoom Meeting", "Конференция Zoom"].contains(title) { return true }
+        return scan(window).contains { _, role, text in
             role == kAXButtonRole as String && text.lowercased().components(separatedBy: "\n").contains { label in
                 ["leave meeting", "end meeting", "leave", "end", "выйти из конференции", "завершить конференцию"].contains(label.trimmingCharacters(in: .whitespacesAndNewlines))
             }
@@ -80,6 +83,45 @@ func meetingObservation(_ pid: pid_t) -> (Bool, String) {
         if text.range(of: "(?i)^(?:meeting id|passcode|invite link|join link|идентификатор конференции|код доступа|пароль конференции|ссылка приглашения)[:：]?", options: .regularExpression) != nil {
             metadata.append(text)
             if index + 1 < texts.count { metadata.append(texts[index + 1]) }
+        }
+    }
+    if metadata.isEmpty {
+        // Zoom hides the toolbar while presenting. The Invite dialog exposes only
+        // this meeting's ID and passcode; opening it does not send invitations.
+        func inviteWindows() -> [AXUIElement] {
+            return (attribute(root, kAXWindowsAttribute) as? [AXUIElement] ?? []).filter {
+                let title = attribute($0, kAXTitleAttribute) as? String ?? ""
+                return title.range(of: "^(?:Invite people to join meeting|Пригласить.*конференци[юи]) [0-9]{9,11}$", options: .regularExpression) != nil
+            }
+        }
+        var invitations = inviteWindows()
+        let wasOpen = !invitations.isEmpty
+        if invitations.isEmpty, let barValue = attribute(root, kAXMenuBarAttribute), CFGetTypeID(barValue) == AXUIElementGetTypeID() {
+            let bar = unsafeBitCast(barValue, to: AXUIElement.self)
+            let menus = scan(bar).filter { _, role, text in role == "AXMenuBarItem" && ["Meeting", "Конференция"].contains(text.components(separatedBy: "\n")[0]) }
+            if menus.count == 1 {
+                AXUIElementPerformAction(menus[0].0, kAXPressAction as CFString)
+                let actions = scan(bar).filter { element, role, text in
+                    role == "AXMenuItem" && ((attribute(element, "AXIdentifier") as? String) == "onInvite:" || ["Invite...", "Пригласить..."].contains(text.components(separatedBy: "\n")[0]))
+                }
+                if actions.count == 1 {
+                    AXUIElementPerformAction(actions[0].0, kAXPressAction as CFString)
+                    Thread.sleep(forTimeInterval: 0.15)
+                    invitations = inviteWindows()
+                } else { AXUIElementPerformAction(menus[0].0, "AXCancel" as CFString) }
+            }
+        }
+        if invitations.count == 1 {
+            let dialog = invitations[0]
+            let title = attribute(dialog, kAXTitleAttribute) as? String ?? ""
+            if let range = title.range(of: "[0-9]{9,11}$", options: .regularExpression) { metadata.append("Meeting ID: " + title[range]) }
+            for (_, _, text) in scan(dialog) {
+                if text.lowercased().hasPrefix("meeting passcode:") { metadata.append(String(text.dropFirst("Meeting ".count))) }
+                if text.lowercased().hasPrefix("код доступа:") { metadata.append(text) }
+            }
+            if !wasOpen, let close = attribute(dialog, kAXCloseButtonAttribute), CFGetTypeID(close) == AXUIElementGetTypeID() {
+                AXUIElementPerformAction(unsafeBitCast(close, to: AXUIElement.self), kAXPressAction as CFString)
+            }
         }
     }
     return (true, metadata.joined(separator: "\n"))
