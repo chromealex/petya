@@ -1004,3 +1004,8 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .computer-approval .approval-buttons{display:flex;flex:none;gap:6px;margin-left:auto}
 .computer-approval .approval-buttons>button{font-size:12px;line-height:18px;min-height:30px;padding:6px 10px;border-radius:8px;background:transparent;white-space:nowrap}
 .computer-approval .approval-buttons>.primary{background:#d2f79b18;border-color:#d2f79b55;color:var(--green)}
+
+#home .chat-composer.card:has(.computer-approval){padding-top:0}
+#home .chat-composer>.actions:has(>.computer-approval){margin:0 -12px;width:calc(100% + 24px)}
+#home .chat-composer .computer-approval{border:0;border-bottom:1px solid #e8c75b30;border-radius:19px 19px 0 0;padding:12px 18px}
+@media(max-width:700px){#home .chat-composer>.actions:has(>.computer-approval){margin-inline:-10px;width:calc(100% + 20px)}}
