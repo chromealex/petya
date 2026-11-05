@@ -1,0 +1,32 @@
+{"id": "sort-0-0-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 51, -23, 14 по возрастанию."}, {"role": "assistant", "content": "[-23,14,51]"}]}
+{"id": "sort-0-0-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 51, -23, 14 от меньшего к большему. Только JSON-массив."}, {"role": "assistant", "content": "[-23,14,51]"}]}
+{"id": "sort-0-1-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 51, -23, 14 по убыванию."}, {"role": "assistant", "content": "[51,14,-23]"}]}
+{"id": "sort-0-1-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 51, -23, 14 от большего к меньшему. Только JSON-массив."}, {"role": "assistant", "content": "[51,14,-23]"}]}
+{"id": "sort-1-0-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 32, -12, 32, 0 по возрастанию."}, {"role": "assistant", "content": "[-12,0,32,32]"}]}
+{"id": "sort-1-0-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 32, -12, 32, 0 от меньшего к большему. Только JSON-массив."}, {"role": "assistant", "content": "[-12,0,32,32]"}]}
+{"id": "sort-1-1-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 32, -12, 32, 0 по убыванию."}, {"role": "assistant", "content": "[32,32,0,-12]"}]}
+{"id": "sort-1-1-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 32, -12, 32, 0 от большего к меньшему. Только JSON-массив."}, {"role": "assistant", "content": "[32,32,0,-12]"}]}
+{"id": "sort-2-0-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив -44, -6, -19 по возрастанию."}, {"role": "assistant", "content": "[-44,-19,-6]"}]}
+{"id": "sort-2-0-1", "task": "general", "messages": [{"role": "user", "content": "Расположи -44, -6, -19 от меньшего к большему. Только JSON-массив."}, {"role": "assistant", "content": "[-44,-19,-6]"}]}
+{"id": "sort-2-1-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив -44, -6, -19 по убыванию."}, {"role": "assistant", "content": "[-6,-19,-44]"}]}
+{"id": "sort-2-1-1", "task": "general", "messages": [{"role": "user", "content": "Расположи -44, -6, -19 от большего к меньшему. Только JSON-массив."}, {"role": "assistant", "content": "[-6,-19,-44]"}]}
+{"id": "sort-3-0-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 9, 0, -9, 9 по возрастанию."}, {"role": "assistant", "content": "[-9,0,9,9]"}]}
+{"id": "sort-3-0-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 9, 0, -9, 9 от меньшего к большему. Только JSON-массив."}, {"role": "assistant", "content": "[-9,0,9,9]"}]}
+{"id": "sort-3-1-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 9, 0, -9, 9 по убыванию."}, {"role": "assistant", "content": "[9,9,0,-9]"}]}
+{"id": "sort-3-1-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 9, 0, -9, 9 от большего к меньшему. Только JSON-массив."}, {"role": "assistant", "content": "[9,9,0,-9]"}]}
+{"id": "sort-4-0-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 3.5, -1.5, 0.5 по возрастанию."}, {"role": "assistant", "content": "[-1.5,0.5,3.5]"}]}
+{"id": "sort-4-0-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 3.5, -1.5, 0.5 от меньшего к большему. Только JSON-массив."}, {"role": "assistant", "content": "[-1.5,0.5,3.5]"}]}
+{"id": "sort-4-1-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 3.5, -1.5, 0.5 по убыванию."}, {"role": "assistant", "content": "[3.5,0.5,-1.5]"}]}
+{"id": "sort-4-1-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 3.5, -1.5, 0.5 от большего к меньшему. Только JSON-массив."}, {"role": "assistant", "content": "[3.5,0.5,-1.5]"}]}
+{"id": "sort-5-0-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 61, 28, -37 по возрастанию."}, {"role": "assistant", "content": "[-37,28,61]"}]}
+{"id": "sort-5-0-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 61, 28, -37 от меньшего к большему. Только JSON-массив."}, {"role": "assistant", "content": "[-37,28,61]"}]}
+{"id": "sort-5-1-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 61, 28, -37 по убыванию."}, {"role": "assistant", "content": "[61,28,-37]"}]}
+{"id": "sort-5-1-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 61, 28, -37 от большего к меньшему. Только JSON-массив."}, {"role": "assistant", "content": "[61,28,-37]"}]}
+{"id": "sort-6-0-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 0, -2, 0, 5 по возрастанию."}, {"role": "assistant", "content": "[-2,0,0,5]"}]}
+{"id": "sort-6-0-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 0, -2, 0, 5 от меньшего к большему. Только JSON-массив."}, {"role": "assistant", "content": "[-2,0,0,5]"}]}
+{"id": "sort-6-1-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив 0, -2, 0, 5 по убыванию."}, {"role": "assistant", "content": "[5,0,0,-2]"}]}
+{"id": "sort-6-1-1", "task": "general", "messages": [{"role": "user", "content": "Расположи 0, -2, 0, 5 от большего к меньшему. Только JSON-массив."}, {"role": "assistant", "content": "[5,0,0,-2]"}]}
+{"id": "sort-7-0-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив -17, -81, -43 по возрастанию."}, {"role": "assistant", "content": "[-81,-43,-17]"}]}
+{"id": "sort-7-0-1", "task": "general", "messages": [{"role": "user", "content": "Расположи -17, -81, -43 от меньшего к большему. Только JSON-массив."}, {"role": "assistant", "content": "[-81,-43,-17]"}]}
+{"id": "sort-7-1-0", "task": "general", "messages": [{"role": "user", "content": "Верни JSON-массив -17, -81, -43 по убыванию."}, {"role": "assistant", "content": "[-17,-43,-81]"}]}
+{"id": "sort-7-1-1", "task": "general", "messages": [{"role": "user", "content": "Расположи -17, -81, -43 от большего к меньшему. Только JSON-массив."}, {"role": "assistant", "content": "[-17,-43,-81]"}]}
