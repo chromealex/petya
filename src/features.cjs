@@ -19,6 +19,7 @@ module.exports=[
  require('./features/chat-tasks.cjs'),
  require('./features/fresh-data.cjs'),
  require('./features/list-followup.cjs'),
+ require('./features/team-intent.cjs'),
  require('./features/selftest.cjs'),
  require('./features/morning-brief.cjs'),
  require('./features/optional-models.cjs'),
