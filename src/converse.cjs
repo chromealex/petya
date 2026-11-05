@@ -31,6 +31,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       }
     }
     if(!choice){const important=ctx.highlights?.turn(original);if(important)return important;}
+    if(!choice){const discovered=await ctx.contextDiscovery?.turn(original);if(discovered)return discovered;}
     if (!choice) {
       const visual = await ctx.extensionReplies?.turn(original);
       if (visual) return visual;

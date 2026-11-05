@@ -26,6 +26,13 @@ const {Dialogue}=require('../src/dialogue.cjs');
       assert.ok(!r.isError,r.content[0].text);
       return JSON.parse(r.content[0].text);
     }
+    notes.push({id:'meeting-context-test',source:'Zoom',title:'Встреча',text:'После обновления не работает вход',at:Date.now(),sessionId:'test-call'});
+    assert.equal((await call('resolve_work_context',{chatId:'one'})).rows[0].id,'meeting-context-test');
+    await call('resolve_work_context',{chatId:'hidden'},true);
+    topic.excludedMaterials=['meeting-context-test'];
+    assert.equal((await call('resolve_work_context',{chatId:'one'})).kind,'empty');
+    delete topic.excludedMaterials;
+    notes.length=0;
     const stamp=async owner=>(await call('get_chat_draft',{owner})).revision;
     assert.equal((await call('list_chat_projects')).items[0].draftOwner,'draft:general');
     assert.equal((await call('list_chats')).total,1);
@@ -104,6 +111,12 @@ const {Dialogue}=require('../src/dialogue.cjs');
     try{
       await peer.connect(new StreamableHTTPClientTransport(new URL(limited.url),{requestInit:{headers:{Authorization:'Bearer '+limited.token}}}));
       const tools=(await peer.listTools()).tools.map(t=>t.name);
+      notes.push({id:'private-meeting-test',source:'Zoom',title:'Private',text:'private-project-secret',at:Date.now()});
+      const contextResult=await peer.callTool({name:'resolve_work_context',arguments:{chatId:'one'}});
+      assert.ok(!contextResult.isError);
+      assert.ok(!JSON.stringify(contextResult).includes('private-project-secret'));
+      assert.ok((await peer.callTool({name:'resolve_work_context',arguments:{chatId:'private-chat'}})).isError);
+      notes.pop();
       const catalog = await peer.callTool({name:'list_chat_extensions',arguments:{}});
       assert.ok(JSON.parse(catalog.content[0].text).some(row=>row.id==='chat-stats'));
       assert.equal(tools.includes('use_chat_extension'),mode==='edit');
