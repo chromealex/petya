@@ -65,8 +65,9 @@ module.exports=async(win,out)=>{
   }
  }finally{
   fs.writeFileSync(out,JSON.stringify(report,null,1));
-  // Leave the user's chats as they were: archive the test project and return to the previous chat.
-  try{await js(`window.petya.chatArchive('project',${JSON.stringify(project.id)},true)`);}catch{}
+  // Leave the user's chats as they were: remove the test project and the chats this run opened (and leftovers of
+  // older runs), then return to the previous chat.
+  try{const turns=SCENARIOS.flatMap(x=>x.turns);report.cleanup=await js(`window.petya.feature('selftest','cleanup',${JSON.stringify({since:Date.parse(report.at)-1000,turns,legacy:true})})`);fs.writeFileSync(out,JSON.stringify(report,null,1));}catch(e){try{await js(`window.petya.chatArchive('project',${JSON.stringify(project.id)},true)`);}catch{}}
   try{if(before.activeProjectId)await js(`window.petya.chatProjectSelect(${JSON.stringify(before.activeProjectId)})`);if(before.activeId)await js(`window.petya.dialogueSelect(${JSON.stringify(before.activeId)})`);}catch{}
  }
 };
