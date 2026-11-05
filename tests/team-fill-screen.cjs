@@ -9,8 +9,9 @@ const assert=require('node:assert/strict');const {TeamFill}=require('../src/team
   screen:async()=>{screenCalls++;if(screenError)throw screenError;return {title:'Экран Slack · #team',text:'Участники канала\nПолина — тестирование\nИван'};},
   approve:(command,action)=>{approved=action;return {handled:true,computerApproval:'id',text:'Нужен доступ'};}});
  let r=await fill.turn('Заполни команду');assert.equal(r.question,true);assert.match(r.text,/Могу сам посмотреть в приложении Slack/);assert.match(r.text,/30 с/);
- r=await fill.turn('нет',true);assert.match(r.text,/через 30 с/);assert.equal(screenCalls,0,'no screen reading without consent');
- await fill.turn('Заполни команду');r=await fill.turn('да',true);assert.equal(screenCalls,1);assert.match(r.text,/Добавлено коллег: 1/);assert.equal(saved[0].name,'Полина');
+ assert.deepEqual(r.clarificationOptions,['Посмотреть в Slack','Не сейчас']);assert(r.clarificationInput.choicesOnly);
+ r=await fill.turn('Не сейчас',true);assert.match(r.text,/через 30 с/);assert.equal(screenCalls,0,'no screen reading without consent');
+ await fill.turn('Заполни команду');r=await fill.turn('Посмотреть в Slack',true);assert.equal(screenCalls,1);assert.match(r.text,/Добавлено коллег: 1/);assert.equal(saved[0].name,'Полина');
  // Computer control off: the standard approval is requested, then the same fill runs.
  screenError=Object.assign(Error('Нужно разрешение'),{code:'COMPUTER_PERMISSION_REQUIRED'});await fill.turn('Заполни команду');r=await fill.turn('давай',true);assert.equal(r.computerApproval,'id');assert.deepEqual(approved,{type:'teamFillScreen'});
  screenError=null;settings.teamMembers='[]';r=await fill.fromScreen('Заполни команду');assert.match(r.text,/Добавлено коллег: 1/);

@@ -995,3 +995,6 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .git-advanced{margin:0;padding:0;border:0;background:transparent}.git-advanced>summary{padding:6px 0;font-size:12px;color:var(--muted)}.git-advanced .actions{padding-top:8px}
 #git-card>pre:empty{display:none}
 .git-file-list{scrollbar-width:thin;scrollbar-color:#647069 transparent}.git-file-list::-webkit-scrollbar{width:6px}.git-file-list::-webkit-scrollbar-track{background:transparent}.git-file-list::-webkit-scrollbar-thumb{background:#647069;border-radius:8px}
+.clarification-input.choices-only{align-items:center;gap:6px;padding:0 0 10px}
+.clarification-input.choices-only>button{font-size:12px;line-height:18px;min-height:30px;padding:6px 10px;border-radius:8px;background:transparent}
+.clarification-input.choices-only>button:first-child{background:#d2f79b18;border-color:#d2f79b55;color:var(--green)}

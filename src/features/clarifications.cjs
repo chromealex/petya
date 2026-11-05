@@ -11,7 +11,7 @@ class Clarifications {
   active:row.scope===this.scope(),requiresActiveChat:false,canResume:!row.recoveryRequired
  }));}
  offer(command,spec,resume,previous={}){
-  const id=randomUUID(),result={...previous,handled:true,question:true,text:spec.text,clarificationId:id,clarificationInput:{label:spec.label||'Уточнение',placeholder:spec.placeholder||'Напишите ответ…',submit:'Продолжить',files:!!spec.files,choicesOnly:!!spec.strictChoices},clarificationOptions:spec.options||[]};
+  const id=randomUUID(),result={...previous,handled:true,question:true,text:spec.text,clarificationId:id,clarificationInput:{label:spec.label||'Уточнение',placeholder:spec.placeholder||'Напишите ответ…',submit:'Продолжить',files:!!spec.files,choicesOnly:!!(spec.strictChoices||spec.choicesOnly),cancelLabel:spec.cancelLabel},clarificationOptions:spec.options||[]};
   for(const key of ['teamFillReply','slackRequestReply','slackRequestChoices'])delete result[key];
   this.record?.(command,result);
   const scope=this.scope();for(const [key,row] of this.pending)if(row.scope===scope||this.now()>row.expiresAt)this.pending.delete(key);
@@ -22,7 +22,7 @@ class Clarifications {
   this.save?.();
   try{
    const result=await work(),resume=this.resolve?.(result);
-   return resume?this.offer(command,{text:result.text,...result.clarificationInput,ttlMs:600000,options:(result.slackRequestChoices||[]).map(o=>o.label)},resume,result):result;
+   return resume?this.offer(command,{text:result.text,...result.clarificationInput,ttlMs:600000,options:result.clarificationOptions||(result.slackRequestChoices||[]).map(o=>o.label)},resume,result):result;
   }catch(error){
    if(!(error instanceof InputRequired))throw error;
    return this.offer(command,error.spec,error.resume);
