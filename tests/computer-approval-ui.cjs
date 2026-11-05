@@ -1,0 +1,22 @@
+const fs=require('node:fs'),path=require('node:path'),load=require('node:module').createRequire(path.resolve(__dirname,'../package.json'));
+process.env.PETYA_SMOKE_TEST='1';
+const {Dialogue}=load('./src/dialogue.cjs'),active=Dialogue.prototype.active;let dialogue;
+Dialogue.prototype.active=function(...args){dialogue=this;return active.apply(this,args);};
+const {ComputerControl}=load('./src/computer-control.cjs');let reads=0;
+ComputerControl.prototype.status=function(){return {mode:this.session?'desktop':'off',accessGranted:true,supported:true};};
+ComputerControl.prototype.start=async function(){this.session={mode:'desktop'};return this.status();};
+ComputerControl.prototype.execute=async function(action){if(!this.session)throw Object.assign(Error('Permission'),{code:'COMPUTER_PERMISSION_REQUIRED',action});if(action.type!=='focus'||action.name!=='Slack')throw Error('Unexpected action');return {};};
+load('./src/slack-log.cjs').readDesktop=async()=>{reads++;return {title:'Slack · team',text:'Сборка готова.'};};
+Object.defineProperty(load('./src/slack-digest.cjs').SlackDigest.prototype,'summarize',{get(){return async()=> 'Сборка готова.';},set(){},configurable:true});
+const key=load.resolve('./tests/smoke.cjs');require.cache[key]={id:key,filename:key,loaded:true,exports:async win=>{
+ const js=s=>win.webContents.executeJavaScript(s),sleep=n=>new Promise(r=>setTimeout(r,n));
+ const wait=async s=>{for(let i=0;i<120;i++){if(await js(s))return;await sleep(100);}throw Error('Timeout '+s);};
+ await js('window.chatNavigationReady');const topic={id:'slack-test',title:'Slack из окна',kind:'chat',projectId:'general',at:Date.now(),messages:[]};dialogue.state.topics.push(topic);dialogue.state.activeId=topic.id;dialogue.persist();
+ win.setContentSize(1100,820);win.show();await js("(async()=>{await selectDialogueTopic('slack-test');view('home');$('command').value='Что нового в Slack?';window.sendChatNow();})()");
+ await wait("!!document.querySelector('.computer-approval .primary')");if(reads)throw Error('Read before permission');
+ await js("(async()=>{const state=await window.petya.chatJobState(topicSelect.value);if(!state.result.question)throw Error('Approval not waiting');await showDialogueReply({...state.result,messages:state.messages});await showDialogueReply({...state.result,messages:state.messages});})()");
+ if(await js("document.querySelectorAll('.computer-approval .primary').length")!==1)throw Error('Approval lost or duplicated after redraw');
+ await js("document.querySelector('.computer-approval .primary').click()");await wait("dialogueMessages.textContent.includes('Источник: открытое окно Slack')");if(reads!==1)throw Error('Duplicate read');
+ await wait("!window.chatStartPending && !commandProgress.busy");
+ console.log('Computer approval UI: waiting state, repeated redraw, explicit consent and single execution passed');
+}};load('./src/main.cjs');
