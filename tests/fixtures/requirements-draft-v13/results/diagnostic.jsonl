@@ -1,0 +1,2 @@
+{"id": "g1", "task": "general", "answer": "[-29,17,46]", "exactJSON": false, "schemaValid": true}
+{"id": "report-0-10", "task": "draft", "answer": "{\"description\":\"Отчёт с полями «код приёмки» и «результат» отправлять заведующему. Поставщику не отправлять. Скрывать адрес проверяющего.\",\"questions\":[],\"summary\":\"Отправка отчёта\"}", "exactJSON": false, "schemaValid": true}
