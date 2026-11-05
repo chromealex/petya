@@ -3,7 +3,13 @@ const reset=document.querySelector('button'), animation=document.querySelector('
 async function show(data){
   const bytes=Uint8Array.from(atob(data.bytes),c=>c.charCodeAt(0));
   const manager=new T.LoadingManager();
+  let externalTexture=false;
   manager.setURLModifier(url=>{
+    if(data.format==='fbx' && !/^(?:data:|blob:)/.test(url)){
+      externalTexture=true;
+      // Substitute a local white pixel so missing sidecars do not hide geometry.
+      return 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
+    }
     if(!/^(?:data:|blob:)/.test(url))throw Error('Экспортируйте модель со встроенными ресурсами.');
     return url;
   });
@@ -11,6 +17,8 @@ async function show(data){
   if(data.format==='glb'||data.format==='gltf'){
     const gltf=await new T.GLTFLoader(manager).parseAsync(bytes.buffer,'');
     object=gltf.scene;clips=gltf.animations;
+  }else if(data.format==='fbx'){
+    object=new T.FBXLoader(manager).parse(bytes.buffer,'');clips=object.animations;
   }else if(data.format==='obj'){
     object=new T.OBJLoader(manager).parse(new TextDecoder().decode(bytes));
   }else{
@@ -35,6 +43,7 @@ async function show(data){
   const controls=new T.OrbitControls(camera,renderer.domElement);
   controls.target.copy(center);controls.minDistance=scale*.01;controls.maxDistance=scale*50;
   const draw=()=>renderer.render(scene,camera);
+  manager.onLoad=draw;
   const home=()=>{controls.target.copy(center);camera.position.copy(center).add(new T.Vector3(1,.7,1).normalize().multiplyScalar(scale*1.8/Math.min(1,camera.aspect)));controls.update();draw();};
   function resize(){const w=Math.max(1,viewport.clientWidth),h=Math.max(1,viewport.clientHeight);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();draw();}
   resize();home();controls.addEventListener('change',draw);new ResizeObserver(resize).observe(viewport);
@@ -48,7 +57,7 @@ async function show(data){
       renderer.setAnimationLoop(now=>{mixer.update(Math.max(0,Math.min(.1,(now-last)/1000)));last=now;draw();});
     }else draw();};
   }
-  statusLine.textContent='Тяните для вращения · колесо для масштаба';
+  statusLine.textContent='Тяните для вращения · колесо для масштаба'+(externalTexture?' · внешние текстуры пропущены':'');
 }
 function receive(event){
   if(event.source!==parent||!event.data?.bytes)return;

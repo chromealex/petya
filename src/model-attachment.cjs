@@ -1,5 +1,5 @@
 // Keep the original bytes for the local viewer and send only metadata to the assistant.
-const formats = ['glb','gltf','obj','stl','ply'];
+const formats = ['glb','gltf','obj','stl','ply','fbx'];
 function readModel(bytes,format) {
   let note = 'Геометрия '+format.toUpperCase()+'.';
   if (format==='glb' || format==='gltf') {
@@ -15,6 +15,15 @@ function readModel(bytes,format) {
     if((scene.extensionsRequired||[]).some(k=>['KHR_draco_mesh_compression','EXT_meshopt_compression','KHR_texture_basisu'].includes(k)))throw Error('Экспортируйте GLB без сжатия Draco, Meshopt и KTX2.');
     if((scene.accessors||[]).some(a=>!Number.isSafeInteger(a.count)||a.count<0||a.count>3000000))throw Error('Слишком сложная геометрия для просмотра в чате.');
     note='Мешей: '+(scene.meshes?.length||0)+' · материалов: '+(scene.materials?.length||0)+' · анимаций: '+(scene.animations?.length||0)+'.';
+  } else if(format==='fbx') {
+    const magic=Buffer.from('Kaydara FBX Binary  \0\x1a\0','ascii');
+    const binary=bytes.subarray(0,magic.length).equals(magic);
+    const version=binary
+      ? (bytes.length>=27?bytes.readUInt32LE(23):0)
+      : Number(/^\s*FBXVersion:\s*(\d+)\s*$/m.exec(bytes.toString('utf8'))?.[1]);
+    if(!version)throw Error('Не удалось прочитать заголовок FBX.');
+    if(version<(binary?6400:7000))throw Error('Сохраните файл в версии FBX 7.0 или новее.');
+    note=(binary?'Бинарный':'Текстовый')+' FBX · версия '+version+'.';
   } else if(format==='obj') {
     const source=bytes.toString('utf8');
     const vertices=source.match(/^\s*v\s+/gm)?.length||0;

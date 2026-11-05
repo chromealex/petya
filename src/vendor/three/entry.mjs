@@ -4,3 +4,4 @@ export {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 export {OBJLoader} from 'three/addons/loaders/OBJLoader.js';
 export {STLLoader} from 'three/addons/loaders/STLLoader.js';
 export {PLYLoader} from 'three/addons/loaders/PLYLoader.js';
+export {FBXLoader} from 'three/addons/loaders/FBXLoader.js';
