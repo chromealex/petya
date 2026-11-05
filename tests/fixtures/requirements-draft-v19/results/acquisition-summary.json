@@ -1,0 +1,12 @@
+{
+  "total": 569,
+  "exact": 560,
+  "semantic_passed": 566,
+  "failed": [
+    "original-print-columns",
+    "new-d-export",
+    "v19-scope"
+  ],
+  "acquisition_passed": false,
+  "candidate_fresh_evaluation_started": false
+}

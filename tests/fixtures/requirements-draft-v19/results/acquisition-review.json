@@ -1,0 +1,47 @@
+{
+  "original-print-columns": {
+    "passed": false,
+    "reason": "Omits the explicit exclusion of search; only printing was approved.",
+    "answer_sha256": "968637fe73948218ea4e47b690b419b7d1c45a513c40da6ae1be54917e62640f"
+  },
+  "seven-model-export": {
+    "passed": true,
+    "reason": "Equivalent wording preserves scale, part name and the unresolved export-format question.",
+    "answer_sha256": "9a7f8c9fab89b4efefa54ac54567eb1d3a02fafe0056ebc25e1d341e0825a975"
+  },
+  "new-d-export": {
+    "passed": false,
+    "reason": "Invents an unresolved time-format requirement, confusing temporary format approval with time formatting.",
+    "answer_sha256": "e2a4d99467bd0082d87e7692c39f8875d403b5bb237f85cf57f5660ec02bf6c9"
+  },
+  "v12-failure": {
+    "passed": true,
+    "reason": "Equivalent heading; all failure-only notification, identifier and privacy requirements retained.",
+    "answer_sha256": "fb2dbc52bf447e7b31c3a209080adae8e4d2973bbe0a805d1e2eed8c5f439d20"
+  },
+  "v17-name-0-10": {
+    "passed": true,
+    "reason": "Equivalent accurate heading; description preserves exact names and all color, address and content requirements.",
+    "answer_sha256": "bf70d758ed53c9c95145aed588063c3f22bdf10b5ed32c204f66bb06acf36c10"
+  },
+  "v17-name-0-11": {
+    "passed": true,
+    "reason": "Equivalent accurate heading; description preserves exact names and all color, address and content requirements.",
+    "answer_sha256": "d4ab8a9d0b8abbdbb85d2e8079641e4cb43a1286ec7c79655ffed89eae8a6c76"
+  },
+  "v19-scope": {
+    "passed": false,
+    "reason": "Heading says procurement although procurement is explicitly excluded; description alone is correct.",
+    "answer_sha256": "dd20abfae28252579ccc79d7d78da343a81ff240be4c7fb0d8e797f770d29d67"
+  },
+  "v19-repeat": {
+    "passed": true,
+    "reason": "Equivalent accurate heading and grammatical interval wording; requirements unchanged.",
+    "answer_sha256": "40f0ea4468b34928fe4dd91083cc7ce98a2c7ae96769f315bc4fdd534c2794a1"
+  },
+  "v19-exact-identifier": {
+    "passed": true,
+    "reason": "Exact identifier, case, yo, zeros and file name retained; equivalent wording.",
+    "answer_sha256": "2b2943c268e19a7a46f612b4e40c704a24840fde36fb80252cf43e077d6ae245"
+  }
+}

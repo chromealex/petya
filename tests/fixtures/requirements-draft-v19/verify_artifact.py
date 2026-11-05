@@ -4,15 +4,15 @@ from pathlib import Path
 import numpy as np
 from safetensors import safe_open
 R=Path(__file__).resolve().parent
-p=argparse.ArgumentParser();p.add_argument('artifact',type=Path);p.add_argument('--probe',action='store_true');p.add_argument('--output',type=Path);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('artifact',type=Path);mode=p.add_mutually_exclusive_group();mode.add_argument('--probe',action='store_true');mode.add_argument('--repair',action='store_true');p.add_argument('--output',type=Path);a=p.parse_args()
 digest=lambda path:hashlib.sha256(path.read_bytes()).hexdigest()
-protocol=json.loads((R/('capacity-probe-protocol.json' if a.probe else 'protocol.json')).read_text())
+protocol=json.loads((R/('capacity-probe-protocol.json' if a.probe else 'repair-protocol.json' if a.repair else 'protocol.json')).read_text())
 metadata=json.loads((a.artifact/'training.json').read_text())
 config=json.loads((a.artifact/'adapter_config.json').read_text())
 parent=(R/protocol['parent']).resolve()
 assert metadata['parent_sha256']==digest(parent/'adapters.safetensors')
-data=R/('capacity-probe.jsonl' if a.probe else 'train.jsonl')
-expected=protocol['data_sha256'] if a.probe else protocol['hashes']['train.jsonl']
+data=R/('capacity-probe.jsonl' if a.probe else 'repair-train.jsonl' if a.repair else 'train.jsonl')
+expected=protocol['data_sha256'] if a.probe else protocol['training_sha256'] if a.repair else protocol['hashes']['train.jsonl']
 assert metadata['training_sha256']==digest(data)==expected
 assert metadata['adapter_sha256']==digest(a.artifact/'adapters.safetensors')
 for field in ['steps','layers','epochs','seed','learning_rate']:assert metadata[field]==protocol[field],field

@@ -33,3 +33,9 @@ The full-depth candidate is still training. No candidate fresh evaluation or rel
 The full run completed all 913 updates in 2,380.3 seconds (39.7 minutes), peaking at 35,822,122,332 bytes (33.36 GiB). All losses and 256 saved tensors are finite. `adapter/` contains the original full-run artifact, SHA256 `05a004a70d6f86a9ae15f7e3c43bbf99f5b76816b88e340d6c203348f8bff563`. Parent, training data, configuration, parameter count and actual tensor coverage passed `verify_artifact.py`; details are in `adapter-verification.json`.
 
 The ordinary-reload acquisition evaluation is running. This original artifact has not yet passed the 569-case retention gate, has not been selected for independent candidate evaluation and is not a release. Preserve it even if a later acquisition-only repair becomes necessary.
+
+## Acquisition result and frozen repair
+
+The original full-depth adapter retained 566/569 familiar cases after ordinary reload (560 exact JSON matches, six reviewed equivalents). Three failures remain: the print task omits the explicit search exclusion; the timetable export invents an unresolved time-format requirement; and the protocol notification has a procurement heading although procurement is excluded. Raw answers, manifests, hash-bound judgments and corrections are preserved. No candidate fresh inference has occurred.
+
+`prepare_repair.py` freezes a short 196-step acquisition-only pass from the original 32-block adapter at learning rate 0.0000025, seed 42. It repeats each of the three failed references twelve times and includes 32 existing semantic variants, sixteen prior diverse dialogues, 64 numeric and 48 sort rehearsal cases. Every repair prompt/target already occurs in the original training set; both fresh sets remain disjoint. The full 569-case retention gate must pass again before selection. Use `verify_artifact.py --repair` for the resulting artifact. This repair has not yet been trained or validated.

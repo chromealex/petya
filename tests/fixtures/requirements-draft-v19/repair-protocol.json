@@ -1,0 +1,26 @@
+{
+  "parent": "adapter",
+  "parent_sha256": "05a004a70d6f86a9ae15f7e3c43bbf99f5b76816b88e340d6c203348f8bff563",
+  "training_sha256": "d59201539764b603a375d17fdeb6d35604ff5330edb0ef182fa9321fd71a825f",
+  "steps": 196,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 2.5e-06,
+  "failed_ids": [
+    "original-print-columns",
+    "new-d-export",
+    "v19-scope"
+  ],
+  "recipe": "Three observed acquisition failures twelve times, 32 existing semantic variants, 16 prior diverse dialogues, 64 numeric and 48 negative-sort rehearsal cases.",
+  "gate": "All 569 acquisition cases must pass after ordinary reload before selection and fresh evaluation.",
+  "candidate_fresh_evaluation_started": false,
+  "source_hashes": {
+    "acquisition-corrections.jsonl": "9c9264b0938de08c7d99abc9e396e3397617d8bf8057614953d3db68eff27c2d",
+    "results/acquisition.jsonl": "340728ead56420b4cc319a773f3b4935d225a39dd8e3f7b3af9e6aee650b8919",
+    "results/acquisition-review.json": "4363e8fc3a251b00ae4e3a455af62109137251339edae5e4db104e09587f9613",
+    "semantic-variants.jsonl": "7cdf74fc8ec12da6975197bfa32ec8d2f34eb043a16c3a51967816ce9eac4038",
+    "check.jsonl": "0f96a2a63d852da7bfa84766249fd716f182bde9f10a8fdd35e3575482d31dcf",
+    "release-dialogues.jsonl": "1672d0907e7b185ad79d19ee87d76bd8044b5a9b79c92e58f08cd504ee058bf7"
+  }
+}
