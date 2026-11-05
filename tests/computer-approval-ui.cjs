@@ -16,7 +16,10 @@ const key=load.resolve('./tests/smoke.cjs');require.cache[key]={id:key,filename:
  await wait("!!document.querySelector('.computer-approval .primary')");if(reads)throw Error('Read before permission');
  await js("(async()=>{const state=await window.petya.chatJobState(topicSelect.value);if(!state.result.question)throw Error('Approval not waiting');await showDialogueReply({...state.result,messages:state.messages});await showDialogueReply({...state.result,messages:state.messages});})()");
  if(await js("document.querySelectorAll('.computer-approval .primary').length")!==1)throw Error('Approval lost or duplicated after redraw');
+ if(!await js("!!document.querySelector('.chat-composer .computer-approval.choices-only') && !dialogueMessages.querySelector('.computer-approval')"))throw Error('Permission choices must be in composer');
+ await sleep(350);fs.writeFileSync('/private/tmp/petya-approval-composer.png',(await win.webContents.capturePage()).toPNG());
  await js("document.querySelector('.computer-approval .primary').click()");await wait("dialogueMessages.textContent.includes('Источник: открытое окно Slack')");if(reads!==1)throw Error('Duplicate read');
  await wait("!window.chatStartPending && !commandProgress.busy");
+ if(await js("!!document.querySelector('.chat-composer .computer-approval')"))throw Error('Completed permission choices remain');
  console.log('Computer approval UI: waiting state, repeated redraw, explicit consent and single execution passed');
 }};load('./src/main.cjs');

@@ -2,7 +2,7 @@
  let cancelCurrent=null,current=null;
  window.showComputerApproval=(id,message,spoken)=>{
   if(current?.id===id){message.append(current.box);return;}
-  cancelCurrent?.();const box=document.createElement('div');box.className='computer-approval actions';const status=document.createElement('p');status.className='small';status.setAttribute('role','status');const allow=document.createElement('button'),deny=document.createElement('button');allow.type=deny.type='button';allow.textContent='Разрешить';allow.className='primary';deny.textContent='Запретить';box.append(allow,deny,status);message.append(box);current={id,box};
+  cancelCurrent?.();const box=document.createElement('div');box.className='computer-approval clarification-input choices-only';box.setAttribute('role','group');box.setAttribute('aria-label','Доступ к управлению компьютером');const status=document.createElement('p');status.className='small';status.setAttribute('role','status');const allow=document.createElement('button'),deny=document.createElement('button');allow.type=deny.type='button';allow.textContent='Разрешить';allow.className='primary';deny.textContent='Запретить';box.append(allow,deny,status);message.append(box);current={id,box};
   let busy=false,waiting=false,closed=false;
   const cleanup=()=>{closed=true;window.removeEventListener('focus',resume);if(cancelCurrent===cancel){cancelCurrent=null;current=null;}};
   const cancel=()=>{if(closed)return;cleanup();window.petya.computerApprove(id,false).catch(()=>{});allow.remove();deny.remove();status.textContent='Запрос отменён.';};cancelCurrent=cancel;deny.onclick=cancel;
