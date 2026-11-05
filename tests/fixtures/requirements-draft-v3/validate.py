@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from transformers import AutoTokenizer
 
-root = Path(__file__).parent
+root = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(__file__).parent
 tok = AutoTokenizer.from_pretrained(sys.argv[1], local_files_only=True)
 stats = {}
 for split in ['train', 'holdout']:

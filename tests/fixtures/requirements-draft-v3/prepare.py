@@ -1,4 +1,5 @@
 """Build synthetic multi-turn supervision without reusing evaluation topics."""
+import argparse
 import json
 from pathlib import Path
 
@@ -29,7 +30,7 @@ KINDS = {
     'open': ('предложено {n}, решение отложено до испытаний', None),
 }
 
-def rows(topics, held_out=False):
+def rows(topics, held_out=False, grounded=False):
     result = []
     for topic, subject, target, n, recipient, field, hidden in topics:
         for kind, (decision, approved) in KINDS.items():
@@ -53,6 +54,9 @@ def rows(topics, held_out=False):
                     ('assistant', 'Есть другие условия для задачи?'),
                     ('user', 'Других условий нет. Составь черновик по этому обсуждению.'),
                 ]
+            if grounded:
+                role, text = turns[0]
+                turns[0] = (role, text + f' Числовое условие: {target}.')
             questions = [f'Какое значение согласовать для условия «{target}» после испытаний?'] if kind == 'open' else []
             boundary = (f'{target}: {approved.format(n=n)}.' if approved else
                         f'{target}: норма пока не согласована; {n} — только предложение до испытаний.')
@@ -67,7 +71,12 @@ def rows(topics, held_out=False):
     return result
 
 if __name__ == '__main__':
-    train, holdout = rows(TRAIN), rows(HOLDOUT, True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--grounded', action='store_true')
+    args = parser.parse_args()
+    destination = ROOT / 'grounded' if args.grounded else ROOT
+    destination.mkdir(exist_ok=True)
+    train, holdout = rows(TRAIN, grounded=args.grounded), rows(HOLDOUT, True, args.grounded)
     assert {r['topic'] for r in train}.isdisjoint(r['topic'] for r in holdout)
     assert {r['rubric']['value'] for r in train}.isdisjoint(r['rubric']['value'] for r in holdout)
     for name, records in [('train', train), ('holdout', holdout)]:
@@ -77,5 +86,10 @@ if __name__ == '__main__':
             assert set(answer) == {'summary', 'description', 'questions'}
             assert bool(answer['questions']) == (row['kind'] == 'open')
             assert row['rubric']['recipient'] in answer['description']
-        (ROOT / f'{name}.jsonl').write_text(''.join(json.dumps(r, ensure_ascii=False)+'\n' for r in records))
+        if args.grounded:
+            for row in records:
+                answer = json.loads(row['messages'][-1]['content'])
+                numeric_target = answer['description'].split('. ')[-1].split(':')[0]
+                assert numeric_target in row['messages'][1]['content']
+        (destination / f'{name}.jsonl').write_text(''.join(json.dumps(r, ensure_ascii=False)+'\n' for r in records))
     print(f'Validated {len(train)} training and {len(holdout)} held-out records.')
