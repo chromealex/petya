@@ -1,0 +1,13 @@
+{
+ "method": "DPO reference-relative sequence log-probability loss plus chosen-answer SFT and numeric/general SFT rehearsal",
+ "source": "https://arxiv.org/html/2305.18290v3",
+ "data": "Synthetic removal of final clauses from previously reviewed training drafts; not human preferences. Old development general probes now become retention training.",
+ "parent": "Query/key attention experiment",
+ "epochs": 3,
+ "learning_rate": 0.00002,
+ "beta": 0.1,
+ "chosen_sft_weight": 0.2,
+ "retention_sft_weight": 0.2,
+ "selection": "Fixed configuration. First evaluate on already-viewed development data; require improved draft coverage and no numeric regression versus attention parent before opening reserved acceptance data. General development scores are now training evidence, not independent.",
+ "release": false
+}
