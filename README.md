@@ -121,3 +121,5 @@ An authenticated MCP client can call `list_chat_extensions`. With edit access, `
 routes a request through the same adapter in the active authorized chat and returns its text and images.
 Interactive controls and connection approvals stay in Petya. Blender's file selection, preview and
 confirmed copy are also available via its dedicated MCP tools.
+
+In desktop 0.8.3, Settings → Services → «Каталог приложений» lists the available company modules. Enable Unity Editor, start the local HTTP server in MCP for Unity, enable execute_code and use «Сохранить и проверить». In chat, «Покажи префаб Tank» opens the extension's search. Results are scoped to Assets in the connected editor; previews and Prefab Mode use the selected asset GUID. An external assistant with edit access can request unity_find_prefabs, unity_preview_prefab and unity_open_prefab for the open chat. Each editor action requires confirmation in Petya.

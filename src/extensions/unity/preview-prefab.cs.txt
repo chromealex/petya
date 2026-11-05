@@ -1,0 +1,57 @@
+var preview = new PreviewRenderUtility();
+var baked = new List<Mesh>();
+Texture2D image = null;
+var previous = RenderTexture.active;
+try {
+    var bounds = new Bounds();
+    bool any = false;
+    foreach (var renderer in root.GetComponentsInChildren<Renderer>(false)) {
+        if (!renderer.enabled) continue;
+        var matrix = renderer.localToWorldMatrix;
+        Mesh mesh = null;
+        if (renderer is SkinnedMeshRenderer skin && skin.sharedMesh) {
+            mesh = new Mesh();
+            baked.Add(mesh);
+            skin.BakeMesh(mesh);
+        } else if (renderer is MeshRenderer) {
+            var filter = renderer.GetComponent<MeshFilter>();
+            if (filter) mesh = filter.sharedMesh;
+        }
+        if (!mesh) continue;
+        var materials = renderer.sharedMaterials;
+        for (var i=0; i<Math.Min(mesh.subMeshCount, materials.Length); i++) {
+            if (!materials[i]) continue;
+            preview.DrawMesh(mesh, matrix, materials[i], i);
+            if (!any) bounds = renderer.bounds; else bounds.Encapsulate(renderer.bounds);
+            any = true;
+        }
+    }
+    if (!any) throw new InvalidOperationException("В префабе нет видимых мешей с материалами.");
+    var radius = Mathf.Max(bounds.extents.magnitude, 0.01f);
+    var camera = preview.camera;
+    camera.orthographic = true;
+    camera.orthographicSize = radius * 1.08f;
+    camera.nearClipPlane = radius * 0.01f;
+    camera.farClipPlane = radius * 8f;
+    camera.transform.rotation = Quaternion.Euler(18f,yaw,0f);
+    camera.transform.position = bounds.center - camera.transform.forward * radius * 3f;
+    camera.clearFlags = CameraClearFlags.Color;
+    camera.backgroundColor = new Color(.10f,.12f,.11f);
+    preview.lights[0].intensity = 1.4f;
+    preview.lights[0].transform.rotation = Quaternion.Euler(40f,35f,0);
+    preview.lights[1].intensity = .8f;
+    preview.lights[1].transform.rotation = Quaternion.Euler(55f,215f,0);
+    preview.BeginPreview(new Rect(0,0,512,512),GUIStyle.none);
+    preview.Render(true);
+    var target = (RenderTexture)preview.EndPreview();
+    RenderTexture.active = target;
+    image = new Texture2D(target.width,target.height,TextureFormat.RGB24,false);
+    image.ReadPixels(new Rect(0,0,target.width,target.height),0,0);
+    image.Apply();
+    return Convert.ToBase64String(image.EncodeToPNG());
+} finally {
+    RenderTexture.active = previous;
+    if (image) UnityEngine.Object.DestroyImmediate(image);
+    foreach (var mesh in baked) UnityEngine.Object.DestroyImmediate(mesh);
+    preview.Cleanup();
+}

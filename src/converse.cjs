@@ -41,6 +41,10 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       if(!ctx.dialogue.state.topics.includes(topic))return {handled:true,text:message.text,error:!!message.error};
       ctx.dialogue.persist();return {handled:true,text:message.text,error:!!message.error,gitDiscovery:message.gitDiscovery,gitCommand:original,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
     }
+    if(!choice&&!ctx.attachments.list().length){
+      const prefab=ctx.unity?.turn(original);
+      if(prefab)return prefab;
+    }
     const drawing=!choice?require('./local-images.cjs').imagePrompt(original):null;
     if(drawing!==null){
       if(!drawing)return {handled:true,text:'Что нарисовать? Например: «Нарисуй кота-космонавта на Луне».'};
