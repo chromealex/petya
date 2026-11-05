@@ -1,0 +1,18 @@
+{
+  "name": "Telegram",
+  "description": "Личный аккаунт и обсуждения",
+  "setting": "module_telegram",
+  "service": "telegram",
+  "settings": true,
+  "scripts": [
+    [
+      "settings.js",
+      "web-search.js"
+    ],
+    [
+      "contact-card.js",
+      "chat-clarification.js"
+    ]
+  ],
+  "id": "telegram"
+}

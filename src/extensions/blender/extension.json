@@ -1,0 +1,14 @@
+{
+  "name": "Blender",
+  "description": "Проверка и очистка анимаций",
+  "setting": "extension_blender",
+  "scripts": [
+    [
+      "chat.js",
+      "technical-block.js"
+    ]
+  ],
+  "settings": false,
+  "id": "blender",
+  "feature": "feature.cjs"
+}

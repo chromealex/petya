@@ -21,7 +21,7 @@ require.cache[require.resolve('./smoke.cjs')] = { exports: async win => {
     throw Error('Timed out waiting for Artist UI');
   };
   try {
-    await ui("view('settings'); window.revealSettings($('image-install-card'));");
+    await ui("window.extensionHost.open('artist')");
     await wait(() => ui("!$('artist-enable').disabled && $('artist-enable').getBoundingClientRect().width > 0"));
     await ui("$('artist-url').value='http://127.0.0.1:" + server.address().port + "'; $('artist-connect').click();");
     await wait(() => ui("!$('artist-form').hidden"));

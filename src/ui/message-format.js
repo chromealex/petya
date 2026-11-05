@@ -53,7 +53,7 @@ window.renderMessage = function(message){
      content.append(img);
    }
  }
- if(message.layoutProposal)window.renderLayoutProposal?.(content,message.layoutProposal);
+ window.extensionHost?.render(content,message);
  if (message.role === 'assistant' && ['clean','repair'].includes(message.motionMode)) window.renderMotionCard(content,message);
  const meta=document.createElement('div');meta.className='message-meta';
  const at=message.at?new Date(message.at):null;
