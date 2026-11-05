@@ -14,6 +14,7 @@ with a.output.open('x') as f:
   try:expected=json.loads(m[-1]['content'])
   except ValueError:expected=m[-1]['content'];parsed=answer.strip()
   exact=type(parsed)==type(expected) and parsed==expected
+  if 'accepted' in row:exact=answer.strip() in row['accepted']
   if row['task']=='bounds':exact=exact and all(type(parsed[k]) is type(v) for k,v in expected.items())
   r=dict(id=row['id'],task=row['task'],answer=answer,exactJSON=exact)
   f.write(json.dumps(r,ensure_ascii=False)+'\n');f.flush();print(row['id'],exact,flush=True)

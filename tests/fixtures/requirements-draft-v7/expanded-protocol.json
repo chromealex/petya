@@ -1,0 +1,13 @@
+{
+  "parent": "v5 epoch4",
+  "layers": 2,
+  "keys": "Q/K/V/O in last full attention block; gate/up/down MLP in last two blocks",
+  "rank": 8,
+  "epochs": 3,
+  "steps": 840,
+  "learning_rate": 5e-05,
+  "preference_training": false,
+  "dataset": "Balanced 248 plus 32 general rehearsal presentations; old v7 smoke tests are training data.",
+  "reason": "Preference trials degenerated. Test greater trainable MLP capacity and ordinary SFT with general retention. Multiple factors differ, so no single-factor causal attribution.",
+  "caution": "Last-but-one recurrent attention remains frozen; no trainable path precedes it, so frozen inference kernels remain valid."
+}
