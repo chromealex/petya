@@ -135,10 +135,10 @@ async function showDialogueReply(result,spoken=false){
  voiceReply=null;
  document.dispatchEvent(new CustomEvent('petya-topic-changed',{detail:{preserveScroll:!result.topicId||result.topicId===topicSelect.value}}));
  if(result.projectChanged){voiceReply=null;voiceTurn.reset();await refreshTopics();await selectDialogueTopic(topicSelect.value,{internal:true});}
- if(result.projectMemoryReply)voiceReply=async answer=>showDialogueReply(await window.petya.projectMemoryReply(answer),spoken);
+ if(result.projectMemoryReply)voiceReply=async answer=>{if(!String(answer||'').trim())return;showDialogueReply(await window.petya.projectMemoryReply(answer),spoken);};
  if(result.teamUpdated)document.dispatchEvent(new Event('petya-team-updated'));
- if(result.slackRequestReply)voiceReply=async answer=>showDialogueReply(await window.petya.slackRequestReply(answer),spoken);
- if(result.teamFillReply)voiceReply=async answer=>showDialogueReply(await window.petya.teamFillReply(answer),spoken);
+ if(result.slackRequestReply)voiceReply=async answer=>{if(!String(answer||'').trim())return;showDialogueReply(await window.petya.slackRequestReply(answer),spoken);};
+ if(result.teamFillReply)voiceReply=async answer=>{if(!String(answer||'').trim())return;showDialogueReply(await window.petya.teamFillReply(answer),spoken);};
  if(result.error&&result.messages?.at(-1)?.role==='assistant')result.messages.at(-1).error=true;
  if(result.messages)showDialogueMessages(result.messages);else {const message={role:'assistant',text:result.text,at:Date.now(),error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],evidence:result.evidence||[]};chatHistory.push(message);dialogueMessages.append(renderDialogueMessage(message));}
  const newest=[...dialogueMessages.querySelectorAll('.message-assistant')].filter(n=>n.querySelector('.message-content')).at(-1);if(!result.error&&!result.computerApproval)window.revealAnswer?.(newest,result.text,{spoken,initial:result.answerStreamId===spokenStreamId||result.answerStreamId?answerShown:0});
