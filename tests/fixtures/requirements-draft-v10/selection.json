@@ -1,0 +1,13 @@
+{
+  "selected": "repaired-adapter",
+  "weight_sha256": "d9d4f8b1f87983a3575c015f05a8cbc0a8f43171166971423da1079e2db58602",
+  "acquisition": {
+    "prior_30": 30,
+    "current_seven": 7,
+    "extra_pair_control": 1,
+    "total": 38,
+    "exact": 38
+  },
+  "reason": "Selected solely on acquisition before any candidate fresh-check inference.",
+  "candidate_fresh_answers_generated": false
+}
