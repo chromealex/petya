@@ -1,12 +1,24 @@
 # Petya — feature history by version
 
-Detailed notes for versions 0.2–0.9.0. Project overview: [README](../README.md).
+Detailed notes for versions 0.2–0.9.1. Project overview: [README](../README.md).
 
 
 
 Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications, the «Петя» ("Petya") wake word, meeting and Slack context, clarification of ambiguity, and creating an issue in Jira Cloud.
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
+
+## 0.9.1 — agent chats in the sidebar, list follow-ups, Windows CI
+
+**Agents.** Agent chats sit under the chat that started them as a collapsible «Агенты · N» sub-list that folds itself when they are done and read; they go to the archive, come back and move to another project with their parent. An agent's chat always keeps its own answer, even when the pipeline also answered in another chat. «Ответить одним сообщением» answers every planned part and joins them into one reply; the combined answer has no greetings or forms of address.
+
+**List follow-ups.** Questions about the list just shown are answered from it: «Какие из этих задач сделать сначала?» orders 3–5 open items with a reason each; «А какие из них на ревью / в работе / на паузе / не начаты?» filter by status groups («Owner Review» and «QA Review» count as review). Closed items are skipped, a partly shown list is named as such, and the latest list in the chat is used even after an empty answer. Jira task lists show open tasks first.
+
+**Bugs.** When the current version has no open bugs, the answer also names the project's open bugs without a version and lists the five most recently updated.
+
+**Windows.** Every push builds the installer on Windows in CI, checks its package against `src/` and starts the unpacked app for the tray check; a version tag publishes `Petya-Setup.exe` as a GitHub release. Fixed on the way: every IPC call was rejected when the app path contained a Windows short name (`RUNNER~1`), the bundled Ollama setup script was not found by makensis on Windows, the build lock used POSIX-only `fcntl`, and package verification read sources as cp1252.
+
+**Live check.** `PETYA_LIVE_ONLY=<regex>` runs only matching scenarios; turns record the peak number of simultaneous local generations; new scenarios cover agents across projects, list follow-ups and long mixed dialogues.
 
 ## 0.9.0 — agents, «Важно», live self-check
 
