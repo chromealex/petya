@@ -13,7 +13,19 @@ const f=require('../src/features/list-followup.cjs');
  const {listFollowup}=f.setup(s);
  const r=await listFollowup.turn('Какие из этих задач сделать сначала?');
  assert.ok(r.handled);assert.deepEqual(sent.tasks.map(t=>t.key),['MW2-149','MW2-156','MW2-160']);assert.match(r.text,/MW2-149/);assert.match(r.text,/не учитывал: 3/);assert.equal(r.by,'выбор из списка');
+ // filters over the shown list match status groups, not one exact name; the last real list is used
+ const mine='Незавершённые назначенные задачи: 4.\nBW-3021 — ANR (Owner Review)\nBW-4243 — Кастом (In Progress)\nBW-4350 — Обрывы боёв (QA Review)\nBW-4382 — Тутор (In Progress)';
+ topic.messages=[{role:'assistant',text:mine},{role:'user',text:'?'},{role:'assistant',text:'Задач со статусом «Review»: 0.'}];
+ const review=await listFollowup.turn('Какие из них на ревью?');assert.equal(review.by,'фильтр списка');assert.match(review.text,/на ревью — 2/);assert.match(review.text,/BW-3021[\s\S]*BW-4350/);assert.doesNotMatch(review.text,/BW-4243/);
+ // «из них» is the latest list: after the review filter there is nothing in progress
+ assert.match((await listFollowup.turn('А какие из них в работе?')).text,/«в работе» нет\. Статусы в списке: Owner Review, QA Review/);
+ topic.messages=[{role:'assistant',text:mine}];const work=await listFollowup.turn('А какие из них в работе?');assert.match(work.text,/в работе — 2/);assert.match(work.text,/BW-4243[\s\S]*BW-4382/);
+ // a filter result is itself a list: the next follow-up narrows it
+ const none=await listFollowup.turn('Какие из них на паузе?');assert.match(none.text,/нет\. Статусы в списке: In Progress/);
+ assert.equal(f.filterQuestion('Какие из них критичные?'),null,'priority is not in the shown list');assert.equal(f.filterQuestion('Какие задачи на мне?'),null);
+ // a truncated list says the answer covers the shown part
+ topic.messages=[{role:'assistant',text:list}];const part=await listFollowup.turn('Какие из них на паузе?');assert.match(part.text,/показаны 6 из 431/);
  // no list in the chat: the usual pipeline answers
  topic.messages=[{role:'assistant',text:'Привет'}];assert.equal(await listFollowup.turn('Какие из этих задач сделать сначала?'),null);
- console.log('List follow-up: «какие из этих сначала» picks from the open items of the shown list, closed ones skipped, no list → pipeline passed');
+ console.log('List follow-up: «какие из этих сначала» and status filters («на ревью», «в работе») answer from the latest shown list, closed items skipped, partial lists named, no list → pipeline passed');
 })().catch(e=>{console.error(e);process.exit(1);});
