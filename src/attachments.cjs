@@ -9,7 +9,8 @@ class Attachments{
  store(item){this.pending.set(item.id,item);try{this.savePending?.([...this.pending.values()]);}catch(error){this.pending.delete(item.id);throw error;}return this.info(item);}
  prune(){if(this.savePending)return;for(const [id,a] of this.pending)if(a.at<this.now()-30*60000)this.pending.delete(id);}
  async add(name,raw,owner=this.scope(),beforeStore=null){if(this.adding)throw Error('Дождитесь обработки предыдущего вложения.');this.adding=true;try{this.prune();if([...this.pending.values()].filter(a=>a.owner===owner).length>=5)throw Error('Можно прикрепить до пяти файлов. Удалите лишние.');const bytes=Buffer.from(raw);if(!bytes.length||bytes.length>maxSize(name))throw Error('Файл пуст или превышает лимит документа/изображения (10 МБ). Видео не ограничено по размеру.');name=path.basename(String(name||'вложение')).slice(0,180);const ext=path.extname(name).toLowerCase();let result;
- if(isVideo(name)){if(!this.video)throw Error('Обработка видео недоступна.');result=await this.video(bytes,name);}
+ if(ext==='.blend')result={note:'Сцена Blender. Для правки выберите исходник в карточке.'};
+ else if(isVideo(name)){if(!this.video)throw Error('Обработка видео недоступна.');result=await this.video(bytes,name);}
  else if(['.png','.jpg','.jpeg','.webp'].includes(ext)){const value=await this.image(bytes);result=typeof value==='string'?{image:value,note:'Изображение до 1600 px.'}:value;}
  else if(require('./model-attachment.cjs').formats.includes(ext.slice(1)))result=require('./model-attachment.cjs').readModel(bytes,ext.slice(1));
  else if(ext==='.pdf'){if(bytes.subarray(0,5).toString()!=='%PDF-')throw Error('Это не PDF.');result=await this.pdf(bytes);}

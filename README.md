@@ -103,3 +103,21 @@ The authenticated chat MCP server exposes `pick_animation_file`, `analyze_animat
 Enable **Художник** under **Подключения → Картинки**. Describe a scene in the card, select the canvas and quality, or ask Petya to draw in chat. The first local drawing asks before downloading the pinned stable-diffusion.cpp engine and Stable Diffusion 1.5 model (about 2.2 GB, 2.5 GB of free space required). Downloads are SHA-256 verified. Subsequent drawings run offline on the CPU. The optional WebUI address accepts loopback HTTP only. Disabling Artist returns chat drawing to the existing SD-Turbo integration.
 
 The authenticated MCP tool `generate_painting` requires edit access, an enabled Artist and confirmation in Petya. It accepts `prompt`, optional `quality` (draft, standard, high) and `format` (square, portrait, landscape), and returns a PNG image block. Allow up to an hour for the first download. Enablement and connection settings are managed inside Petya.
+
+### Contextual chat extensions
+
+Petya discovers trusted bundled adapters in `src/extensions/<id>/desktop-reply.cjs`. Each exports a unique
+`type`, a display `name`, a catalog `description`, and `matches(command, {files, topic, settings})`.
+Set `service: true` to run the service access check. Supply `scope(services, topic)` and
+`answer(command, scope)` returning MCP text/image blocks, or `turn(services, command, context)`
+for an interactive workflow. File-aware adapters opt in with `acceptsFiles(files)`. An ambiguous
+match falls through. Petya activates the selected bundled adapter per company on first use.
+The download confirmation threshold is in Connections > Chat extensions (100 MiB by default).
+Optional catalog installers export `downloadBytes(services)` and `install(services, check, report)`.
+The host checks the estimate (unknown sizes require approval), coalesces installs and publishes progress.
+The size policy is configured in the app; MCP clients cannot raise it. Other download owners must check actual remaining bytes with `needsApproval` before downloading.
+
+An authenticated MCP client can call `list_chat_extensions`. With edit access, `use_chat_extension`
+routes a request through the same adapter in the active authorized chat and returns its text and images.
+Interactive controls and connection approvals stay in Petya. Blender's file selection, preview and
+confirmed copy are also available via its dedicated MCP tools.

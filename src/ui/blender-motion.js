@@ -30,7 +30,7 @@ window.renderMotionCard = function(parent, message) {
   const status = document.createElement('p');
   status.setAttribute('role','status');
   const output = document.createElement('div');
-  let file;
+  let file = message.motionFile;
   const choose = button('Выбрать .blend', async () => {
     const selected = await call('pick');
     if (!selected) return;
@@ -38,6 +38,7 @@ window.renderMotionCard = function(parent, message) {
     clip.replaceChildren(); clip.parentElement.hidden = true;
     status.textContent = ''; output.replaceChildren();
   });
+  if (file) choose.textContent = file.name;
   card.append(choose);
   const clip = field('Объект и клип',document.createElement('select'));
   clip.parentElement.hidden = true;

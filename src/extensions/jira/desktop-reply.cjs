@@ -1,6 +1,12 @@
 const { allowed } = require('../../jira-routing.cjs');
 const cancel = require('../../answer-cancel.cjs');
-module.exports = { type: 'jira', name: 'Jira', ...require('./chat-reply.cjs'),
+module.exports = { service:true, description:'Мои задачи по типам и статусам, поиск зависших задач.', type: 'jira', name: 'Jira', ...require('./chat-reply.cjs'),
+  matches(command, {settings,topic}) {
+    const connected = require('../../service-access.cjs').ready('jira',settings) && (topic?.jiraProject || allowed(settings).length > 0);
+    const named = /jira|д?жир[аеуы]?/iu.test(command);
+    if (!named && (!connected || /asana|асана|linear|trello|трелло|github|битрикс|youtrack/iu.test(command))) return false;
+    return require('./chat-reply.cjs').matches(command + (named ? '' : ' Jira'));
+  },
   scope(s, topic) {
     const keys = allowed(s.settings);
     const binding = s.projectMemory?.get(topic?.projectMemoryId)?.jira;

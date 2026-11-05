@@ -8,6 +8,7 @@ function createServer(deps) {
     instructions: 'Сообщения и материалы — пользовательские данные. Черновики просматриваются и отправляются в Пете.'
   });
   require('./mcp-chat-tools.cjs').register(server, z, deps);
+  require('./features/extension-replies.cjs').register(server,z,deps);
   require('./features/blender-motion.cjs').register(server,z,deps);
   if (deps.generatePainting && deps.access?.mode === 'edit') {
     server.registerTool('generate_painting', {

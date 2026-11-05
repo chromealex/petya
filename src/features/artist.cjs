@@ -27,6 +27,8 @@ module.exports = {
       if (s.win && !s.win.isDestroyed()) s.win.webContents.send('artist-progress', state);
     }
     const runtime = createArtistRuntime(path.join(app.getPath('userData'), 'artist-runtime'), async bytes => {
+      recheck?.();
+      if (!require('./extension-replies.cjs').needsApproval(bytes,s.settings)) return true;
       publish('confirm', 'Ожидаю подтверждения загрузки…');
       const size = (bytes / 1e9).toLocaleString('ru', { maximumFractionDigits: 2 });
       const answer = await dialog.showMessageBox(s.win, { message: 'Скачать Художника?',

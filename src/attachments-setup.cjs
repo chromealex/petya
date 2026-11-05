@@ -2,6 +2,11 @@
 // Extracted from main.cjs: shared state comes through ctx (live getters/setters).
 module.exports=ctx=>{
   const attachments=new (require('./attachments.cjs').Attachments)({saved:ctx.dialogue.state.composerFiles||[],savePending:files=>{ctx.dialogue.state.composerFiles=files;ctx.dialogue.persist();},scope:()=>ctx.dialogue.active()?.id||'draft:'+ctx.dialogue.state.activeProjectId,unknown:(bytes,name)=>ctx.formatReader.read(bytes,name,{resume:ctx.formatReader.pending?.name===name&&ctx.formatReader.pending.resume}),pdf:bytes=>require('./pdf-reader.cjs').readPDF(bytes),image:bytes=>require('./image-reader.cjs').readImage(bytes),video:async(bytes,name)=>{const snapshot={...ctx.settings};let ready=false;return require('./video-reader.cjs').readVideo(bytes,name,{transcribe:async wav=>{if(!ready){await ctx.speech.ensure(snapshot);ready=true;}const form=new FormData();form.append('file',new Blob([wav],{type:'audio/wav'}),'video.wav');form.append('language','auto');form.append('response_format','json');const response=await ctx.speech.run(snapshot,target=>ctx.request(ctx.core.localEndpoint(target),{method:'POST',body:form}));if(typeof response?.text!=='string')throw Error('Whisper не вернул расшифровку.');return response.text;}});}});
+  const scenes = new WeakMap();
+  attachments.localScene = id => {
+    const item = attachments.pending.get(id);
+    return item?.owner === attachments.scope() ? scenes.get(item) : null;
+  };
   const mediaSources=require('./media-sources.cjs');
   const mediaList=()=>mediaSources.candidates(ctx.memory.prune(),ctx.settings,JSON.parse(ctx.settings.telegramCredential||'{}'));
   const allowedMedia=async(service)=>{let rows=mediaList().filter(r=>!service||r.service===service);if(rows.some(r=>r.service==='slack')){const channels=await require('./slack.cjs').resolveChannels(ctx.settings.slackChannels,ctx.settings.slackToken,ctx.request);rows=rows.filter(r=>r.service!=='slack'||channels.includes(r.channel));}return rows;};
@@ -23,6 +28,15 @@ module.exports=ctx=>{
   ctx.handle('attachmentList',()=>attachments.list());ctx.handle('attachmentRemove',id=>{if(!attachments.list().some(a=>a.id===id))throw Error('Вложение не найдено в текущем чате.');attachments.remove(id);});
   ctx.handle('attachmentVideoCancel',()=>require('./video-reader.cjs').cancelVideo());
   ctx.app.on('will-quit',()=>require('./video-reader.cjs').cancelVideo());
-  ctx.handle('attachmentPick',async()=>{const owner=attachments.scope();const r=await require('electron').dialog.showOpenDialog(ctx.win,{title:'Что показать Пете?',properties:['openFile','multiSelections'],filters:[{name:'Документы, изображения и видео',extensions:['txt','md','log','csv','json','xml','yaml','yml','js','ts','py','cs','html','css','docx','pdf','png','jpg','jpeg','webp','mp4','mov','webm']},{name:'3D-модели',extensions:require('./model-attachment.cjs').formats},{name:'Все форматы — Петя найдёт способ чтения',extensions:['*']}]});if(r.canceled)return [];if(r.filePaths.length>5)throw Error('Выберите не больше пяти файлов.');const errors=[];for(const file of r.filePaths){try{if(ctx.fs.statSync(file).size>require('./attachments.cjs').maxSize(file))throw Error('Документ/изображение больше 10 МБ.');if(require('./attachments.cjs').isVideo(file))await attachments.addVideoFile(file,owner);else await attachments.add(ctx.path.basename(file),ctx.fs.readFileSync(file),owner);}catch(e){errors.push(ctx.path.basename(file)+': '+e.message);}}return errors;});
+  ctx.handle('attachmentPick',async()=>{const owner=attachments.scope();const r=await require('electron').dialog.showOpenDialog(ctx.win,{title:'Что показать Пете?',properties:['openFile','multiSelections'],filters:[{name:'Документы, изображения и видео',extensions:['txt','md','log','csv','json','xml','yaml','yml','js','ts','py','cs','html','css','docx','pdf','png','jpg','jpeg','webp','mp4','mov','webm']},{name:'3D-модели',extensions:require('./model-attachment.cjs').formats},{name:'Все форматы — Петя найдёт способ чтения',extensions:['*']}]});if(r.canceled)return [];if(r.filePaths.length>5)throw Error('Выберите не больше пяти файлов.');const errors=[];for(const file of r.filePaths){try{if (/\.blend$/i.test(file)) {
+    if (owner !== attachments.scope() || attachments.list().length >= 5) throw Error('Выберите до пяти файлов в текущем чате.');
+    const full = ctx.fs.realpathSync(file);
+    if (!ctx.fs.statSync(full).isFile() || !/\.blend$/i.test(full)) throw Error('Выберите локальный файл .blend.');
+    const item = {id:require('node:crypto').randomUUID(),name:ctx.path.basename(full),owner,at:Date.now(),note:'Сцена Blender'};
+    scenes.set(item,full);
+    attachments.store(item);
+    continue;
+  }
+  if(ctx.fs.statSync(file).size>require('./attachments.cjs').maxSize(file))throw Error('Документ/изображение больше 10 МБ.');if(require('./attachments.cjs').isVideo(file))await attachments.addVideoFile(file,owner);else await attachments.add(ctx.path.basename(file),ctx.fs.readFileSync(file),owner);}catch(e){errors.push(ctx.path.basename(file)+': '+e.message);}}return errors;});
   return {attachments,allowedMedia,importMedia};
 };

@@ -52,14 +52,22 @@ function setup(s, dialog = () => require('electron').dialog) {
       return result;
     } catch (error) { publish(id,error.message,false,true); throw error; }
   }
-  function turn(command) {
-    const mode = animationMode(command);
+  function turn(command, attachment) {
+    const mode = animationMode(command + (attachment ? ' анимация' : ''));
     if (!mode) return null;
-    const text = 'Использую Blender. Выберите .blend с анимацией персонажа.';
+    const full = attachment && s.attachments.localScene?.(attachment.id);
+    const text = 'Использую расширение «Blender». ' + (full ? 'Подготовьте превью движения.' : 'Выберите .blend с анимацией персонажа.');
     s.dialogue.rememberAction(command,text);
     const topic = s.dialogue.active(), message = topic.messages.at(-1);
     message.by = 'Blender'; message.motionMode = mode;
     message.motionId = randomUUID();
+    if (full) {
+      const id = randomUUID();
+      files.set(id,{owner:scope(),full});
+      if (files.size > 512) files.delete(files.keys().next().value);
+      message.motionFile = {id,name:path.basename(full)};
+      s.attachments.remove(attachment.id);
+    }
     s.dialogue.persist();
     return {handled:true,by:'Blender',text,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
   }

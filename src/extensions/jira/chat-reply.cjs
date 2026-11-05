@@ -11,14 +11,17 @@ function matches(command) {
 }
 async function answer(command, { projects, searchPage }) {
   if (!projects.length) throw Error('Выберите доступный проект в подключении Jira.');
-  const byStatus = /статус/iu.test(command);
+  const stalled = /завис|застрял|без движения/iu.test(command);
+  const staleKeys = [];
+  const cutoff = Date.now() - 7 * 86400000;
+  const byStatus = stalled || /статус/iu.test(command);
   const field = byStatus ? 'status' : 'issuetype';
   const quote = s => '"' + s.replace(/["\\]/g, '\\$&') + '"';
   const jql = 'assignee = currentUser() AND project IN (' + projects.map(quote).join(', ') + ') ORDER BY key';
   const groups = new Map(), ids = new Set(), tokens = new Set();
   let token;
   do {
-    const params = new URLSearchParams({ jql, fields: field, maxResults: '100' });
+    const params = new URLSearchParams({ jql, fields: stalled ? 'status,updated' : field, maxResults: '100' });
     if (token) params.set('nextPageToken', token);
     const page = await searchPage('/rest/api/3/search/jql?' + params);
     if (!Array.isArray(page?.issues)) throw Error('Jira вернула неполную страницу задач.');
@@ -27,6 +30,8 @@ async function answer(command, { projects, searchPage }) {
       if (!id) throw Error('Jira вернула задачу без идентификатора.');
       if (ids.has(id)) continue;
       ids.add(id);
+      if (stalled && issue.fields?.status?.statusCategory?.key === 'indeterminate' &&
+          Date.parse(issue.fields.updated) <= cutoff) staleKeys.push(issue.key);
       const label = issue.fields?.[field]?.name || 'Без значения';
       groups.set(label, (groups.get(label) || 0) + 1);
     }
@@ -36,7 +41,9 @@ async function answer(command, { projects, searchPage }) {
   } while (token);
   const rows = Array.from(groups, ([label, count]) => ({ label, count })).sort((a,b) => b.count - a.count || a.label.localeCompare(b.label, 'ru'));
   const title = 'Мои задачи Jira по ' + (byStatus ? 'статусам' : 'типам') + ' · ' + projects.join(', ');
-  return chartReply({ kind: 'donut', title, rows, emptyText: 'Назначенных вам задач нет.' });
+  const content = chartReply({ kind: 'donut', title, rows, emptyText: 'Назначенных вам задач нет.' });
+  if (stalled) content.push({type:'text',text:'В работе без обновлений 7 дней и дольше: ' + (staleKeys.join(', ') || 'нет') + '.'});
+  return content;
 }
 function context({ settings, workspace, check }) {
   return { projects: settings.jiraProject ? [settings.jiraProject] : [], searchPage: async path => {

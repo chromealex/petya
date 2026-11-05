@@ -1,6 +1,6 @@
 const cancel = require('../../answer-cancel.cjs');
 module.exports = {
-  type: 'confluence', name: 'Confluence', ...require('./chat-reply.cjs'),
+  service:true, description:'Диаграмма количества страниц по пространствам.', type: 'confluence', name: 'Confluence', ...require('./chat-reply.cjs'),
   scope(s) {
     const workspace = s.workspace;
     const settings = workspace.settings();
