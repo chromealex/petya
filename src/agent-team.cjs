@@ -25,9 +25,10 @@ function enumerated(command=''){
 }
 // A request that touches several independent areas: Petya offers agents instead of starting them.
 const AREAS=[/(?:задач|таск|тикет|баг|jira|джир|спринт|релиз|эпик)/iu,/(?:slack|слак)/iu,/(?:(?:^|[\s(])гит|git|коммит|ветк|верси[яюи] проекта|pull request|пулл?-?реквест)/iu,/(?:почт|письм|gmail|outlook)/iu,/(?:telegram|телеграм|(?:^|\s)тг(?:\s|$))/iu,/(?:в интернете|погод|курс (?:доллар|евро|валют)|новост)/iu,/(?:команд[аеуы]|коллег|загрузк)/iu,/(?:notion|ноушн|ноушен|confluence|конфлю|asana|асан)/iu];
+function dependentRequest(command=''){return /(?:потом|затем|после этого|по этим|по их|для этих|на основе|используя результат)/iu.test(command);}
 function complexRequest(command=''){
  const text=String(command).trim();
- if(text.length<25||text.length>4000||EXTERNAL.test(text)||EXPLICIT.test(text))return false;
+ if(text.length<25||text.length>4000||EXTERNAL.test(text)||EXPLICIT.test(text)||dependentRequest(text))return false;
  if(/^(?:не\s|что такое|что значит|объясни|почему|как работает|расскажи про|переведи)/iu.test(text))return false;
  // One command with details («Заполни команду: Полина — релизы», «Создай задачу: …») is not several requests.
  if(/^(?:петя[,!\s]+)?(?:пожалуйста[,\s]+)?(?:заполни|запомни|напомни|забудь|создай|заведи|отправь|напиши|ответь|переименуй|удали|закрой|назначь|переназначь|добавь|измени|обнови|сделай коммит|закоммить|запушь)/iu.test(text))return false;
@@ -61,7 +62,7 @@ class AgentTeam{
     // «Одним сообщением»: the parts are answered one after another in this chat and joined into one reply,
     // so one handler (e.g. the Slack digest) does not answer for the whole request.
     this.skip.add(pending.command);const parts=this.tasksFrom(pending.planned).map(t=>({title:t.title,request:t.request}));
-    return parts.length>1?{continueWith:pending.command,parts,note}:{continueWith:pending.command,note};}
+    return parts.length>1&&!dependentRequest(pending.command)?{continueWith:pending.command,parts,note}:{continueWith:pending.command,note};}
   }
   if(mode==='never'||!complexRequest(text))return null;
   let planned;try{planned=await this.plan(text);}catch{return null;} // no model: answer as usual
@@ -73,7 +74,7 @@ class AgentTeam{
   topic.messages.push(asked,reply);this.offers.set(topic.id,{command:text,planned,at:this.now(),messages:[asked,reply]});this.dialogue.persist();
   return {handled:true,question:true,text:question,by:'агенты Пети',clarificationOptions:Object.values(OFFER),topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
  }
- drop(topic,pending){for(const m of pending.messages||[]){const i=topic.messages.indexOf(m);if(i>=0)topic.messages.splice(i,1);}}
+ drop(topic,pending){const asked=pending.messages?.find(m=>m.role==='user');topic.messages=topic.messages.filter(m=>m===asked||!pending.messages?.includes(m)&&!(m.role==='user'&&m.pending));if(asked)asked.pending=true;}
  tasksFrom(planned){return (Array.isArray(planned?.tasks)?planned.tasks:[]).filter(t=>t&&typeof t.request==='string'&&t.request.trim()).slice(0,this.max).map(t=>({id:randomUUID(),title:String(t.title||t.request).trim().slice(0,80),request:String(t.request).trim().slice(0,1500),action:!!t.action,state:'queued',label:STATES.queued}));}
  // Returns a handled reply (the plan) or null when the request is not for agents.
  async turn(command,topic){
@@ -86,7 +87,7 @@ class AgentTeam{
   const tasks=this.tasksFrom(planned);
   if(tasks.length<2)return null; // one task: the normal pipeline answers it
   const plan={id:randomUUID(),command,state:'running',startedAt:this.now(),tasks};
-  topic.messages.push({role:'user',text:command,at:this.now()});
+  if(topic.messages.at(-1)?.pending&&topic.messages.at(-1).text===command)delete topic.messages.at(-1).pending;else topic.messages.push({role:'user',text:command,at:this.now()});
   const message={role:'assistant',text:'Раздал задачу агентам: '+tasks.length+'. Каждый работает в своём чате; соберу общий ответ, когда закончат.',at:this.now(),by:'агенты Пети',agentPlan:plan};
   topic.messages.push(message);topic.at=this.now();
   for(const task of tasks){
@@ -129,4 +130,4 @@ class AgentTeam{
   this.emit({topicId:topic.id,job:topic.chatJob,agentPlan:plan});
  }
 }
-module.exports={agentRequest,complexRequest,enumerated,AgentTeam,OFFER};
+module.exports={agentRequest,complexRequest,dependentRequest,enumerated,AgentTeam,OFFER};

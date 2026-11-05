@@ -18,6 +18,8 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     const namePreference=!choice?require('./name-preference.cjs').preference(original,ctx.settings):null;
     if(namePreference){ctx.saveSettings(namePreference.patch);ctx.dialogue.rememberAction(original,namePreference.text);return {handled:true,text:namePreference.text,topicId:ctx.dialogue.active()?.id,messages:ctx.dialogue.active()?.messages};}
 
+    const people=await ctx.jiraSlackPeople?.turn(original);if(people)return people;
+
     // A complex request for agents: subtasks run as parallel background chats of this project.
     // Explicit («раздай агентам») runs at once; a request over several areas gets an offer first
     // («Раздать агентам» / «Ответить одним сообщением», the choice can be remembered).
@@ -26,13 +28,13 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
       if(explicit||team.complexRequest(original)||ctx.agentTeam.offers.has(ctx.dialogue.active()?.id)||/агент/iu.test(original)){
         let topic=ctx.dialogue.active();if(!topic){topic={id:ctx.randomUUID(),projectId:ctx.dialogue.state.activeProjectId||'general',title:original.slice(0,80),kind:'chat',messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;delete ctx.dialogue.state.newChat;}
         const reply=explicit?await ctx.agentTeam.turn(original,topic):await ctx.agentTeam.offer(original,topic);
-        if(reply?.parts){const start=Date.now(),home=topic.id,answers=[];
+        if(reply?.parts){const retained=new Set(topic.messages),home=topic.id,answers=[];
           for(const part of reply.parts){ctx.dialogue.state.activeId=home;let r;try{r=await pipeline(part.request,choice,background);}catch(e){r={text:e.message,error:true};}answers.push({...part,text:String(r?.text||'Нет ответа.').trim(),sources:r?.sources||[]});}
           ctx.dialogue.state.activeId=home;const t=ctx.dialogue.state.topics.find(x=>x.id===home)||topic;
           // The per-part turns are replaced by the request and one joined answer.
-          t.messages=t.messages.filter(m=>(m.at||0)<start);
+          t.messages=t.messages.filter(m=>retained.has(m));
           const text=answers.map((a,i)=>'**'+(i+1)+'. '+a.title+'**\n'+a.text).join('\n\n')+(reply.note||'');
-          ctx.dialogue.rememberAction(original,text);const last=t.messages.at(-1);const sources=answers.flatMap(a=>a.sources).slice(0,8);if(last?.role==='assistant'){last.by='одним сообщением';last.sources=sources;}ctx.dialogue.persist();
+          ctx.dialogue.rememberAction(reply.continueWith,text);const last=t.messages.at(-1);const sources=answers.flatMap(a=>a.sources).slice(0,8);if(last?.role==='assistant'){last.by='одним сообщением';last.sources=sources;}ctx.dialogue.persist();
           return {handled:true,text,by:'одним сообщением',sources,topicId:t.id,topicTitle:t.title,messages:t.messages};}
         if(reply?.continueWith){const next=await pipeline(reply.continueWith,choice,background);if(reply.note&&next?.text){next.text+=reply.note;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&last.text===next.text.slice(0,-reply.note.length)){last.text=next.text;ctx.dialogue.persist();}}return next;}
         if(reply)return reply;
