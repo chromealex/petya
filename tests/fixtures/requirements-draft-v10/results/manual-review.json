@@ -196,5 +196,71 @@
       true,
       "Count, final interval and hidden surnames retained."
     ]
+  },
+  "candidate": {
+    "name-0-01": [
+      true,
+      "Original label, new color and preserved address/data/content."
+    ],
+    "name-0-10": [
+      false,
+      "Intended rename/color states are correct, but quoted source label \u041f\u0440\u043e\u043f\u0443\u0441\u043a\u0430 is changed to \u041f\u0440\u043e\u043f\u0443\u0441\u043a\u0438. Explicit UI labels are factual values, not freely paraphrased prose."
+    ],
+    "name-0-00": [
+      true,
+      "Original name/color and data/address retained."
+    ],
+    "name-0-11": [
+      false,
+      "Intended states correct, but quoted source label \u041f\u0440\u043e\u043f\u0443\u0441\u043a\u0430 becomes \u041f\u0440\u043e\u043f\u0443\u0441\u043a\u0438."
+    ],
+    "name-1-01": [
+      false,
+      "Agreed copper color explicitly rejected."
+    ],
+    "name-1-10": [
+      true,
+      "Correct rename with original color and preserved address/data."
+    ],
+    "name-1-00": [
+      false,
+      "Explicit address/data preservation omitted."
+    ],
+    "name-1-11": [
+      true,
+      "Correct rename/color and preserved address/data."
+    ],
+    "report-00": [
+      true,
+      "Correct recipient exclusion, replacement number/conclusion and hidden address."
+    ],
+    "report-10": [
+      true,
+      "Correct recipients, replacement number/conclusion and hidden address."
+    ],
+    "report-01": [
+      false,
+      "Lab address remains hidden after that restriction is lifted."
+    ],
+    "report-11": [
+      false,
+      "Executor instruction specifies the protocol number but omits delivery of the conclusion and visible address; full report content for that recipient is not explicitly retained."
+    ],
+    "topic": [
+      false,
+      "Explicit shelving-procurement scope exclusion omitted; display-only wording is not that task boundary."
+    ],
+    "print": [
+      true,
+      "All fields, exact date format and exclusions retained."
+    ],
+    "notify": [
+      true,
+      "Only failure, moderator, import code/cause and hidden operator retained."
+    ],
+    "repeated": [
+      true,
+      "Count, final 142-second interval and hidden surnames retained."
+    ]
   }
 }

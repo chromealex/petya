@@ -21,3 +21,24 @@ The initial training completed all 668 steps, but its temporary Python environme
 The initial 13-block adapter exactly retained all 30 previous targets but acquired only six of seven new ones. It continued excluding the tenant in `v10-f-ban-10` after the user explicitly allowed delivery. No new-case candidate answers were generated or inspected before repair selection.
 
 A precommitted 196-step repair at 0.00001 replays all 37 acquisition targets four times and all four historical recipient/field states twelve times. The fourth state adds one consistency control, bringing the repair acquisition check to 38 cases (37 requested/prior targets plus one control). The original fresh check and its criteria remain unchanged. Both initial and repaired artifacts must be retained and reported; success on the repaired training targets alone does not establish transfer.
+
+## Final result
+
+The repaired 13-block adapter exactly reproduces all 38 acquisition cases after ordinary reload: the prior 30, the requested seven, and the extra paired-state control. This establishes acquisition and retention on those examples, not broad generalization.
+
+| Model | New numeric | Complete new drafts | General smoke | Rename/color | Recipient/field |
+| --- | --- | --- | --- | --- | --- |
+| Base | 3/8 | 8/16 | 7/8 | 6/8 | 2/4 |
+| Retained v9 parent | 7/8 | 8/16 | 8/8 | 3/8 | 2/4 |
+| Historical v8 | 8/8 | 10/16 | 7/8 | 5/8 | 2/4 |
+| Wider repaired v10 | 8/8 | 9/16 | 8/8 | 4/8 | 2/4 |
+
+The predeclared narrow gate passes relative to the base and immediate parent, but the candidate does not outperform historical v8 on complete drafts. Reliable handling of cancellations and prohibitions is **not** established, and petya-v1 is not released. The adapter remains experimental; application model selection is unchanged.
+
+Two candidate answers make the intended decisions but substitute the explicitly quoted source UI label «Пропуски» for «Пропуска». Complete-requirement scoring treats labels as factual values and counts these as failures, not freely paraphrased prose. If these two were credited as inflection, draft coverage would be 11/16 instead of 9/16; cancellation/prohibition reliability and release gates would still fail. Raw answers and all judgments are retained so this sensitivity is reviewable.
+
+Other failures concern a cancelled color, missing address/data preservation, a field remaining hidden after its prohibition is lifted, incomplete report content for an added recipient, and omitted exclusion of an unrelated procurement task. The seven remaining references and actual failures are in `remaining-corrections.jsonl`; none were used to train this candidate. `results/summary.json` distinguishes acquisition, narrow score gains, historical comparison, subgroup reliability and release status.
+
+The initial run completed 668 updates in about 759 seconds; acquisition repair completed 196 updates in about 223 seconds. Both trained 6,094,848 adapter parameters, with peak allocation about 16.9 GB. All weight/parent/data hashes and finite loss histories were verified. Strict-scoring tests pass, scripts parse, dataset hashes match, and all 32 candidate outputs pass schema validation. Correct JSON is still insufficient for correct requirements.
+
+This experiment supports retaining the seven fixes without forgetting the prior thirty and shows a modest numerical/task gain over the immediate parent on this sample. It does not prove that more depth solves the underlying transfer problem. No app build, live prompt, sampling policy, MCP capability or deployed model changed.
