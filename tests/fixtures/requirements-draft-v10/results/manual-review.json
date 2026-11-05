@@ -1,0 +1,200 @@
+{
+  "base": {
+    "name-0-01": [
+      true,
+      "Original name/new color and all other data preserved."
+    ],
+    "name-0-10": [
+      true,
+      "Rename retained, color/address/data preserved."
+    ],
+    "name-0-00": [
+      true,
+      "Both changes cancelled and other data preserved."
+    ],
+    "name-0-11": [
+      true,
+      "Both changes retained and other data preserved."
+    ],
+    "name-1-01": [
+      false,
+      "Agreed copper color cancelled incorrectly."
+    ],
+    "name-1-10": [
+      true,
+      "Rename and original icon preserved with address/data."
+    ],
+    "name-1-00": [
+      false,
+      "Explicit original icon-color preservation omitted."
+    ],
+    "name-1-11": [
+      true,
+      "Both changes retained and other data preserved."
+    ],
+    "report-00": [
+      false,
+      "Adds a broader access ban, beyond the agreed exclusion from delivery."
+    ],
+    "report-10": [
+      true,
+      "Correct recipients, replacement number/conclusion and hidden address."
+    ],
+    "report-01": [
+      false,
+      "Address still hidden after hiding is cancelled."
+    ],
+    "report-11": [
+      true,
+      "Both recipients, replacement/conclusion and visible address retained."
+    ],
+    "topic": [
+      false,
+      "Settled date format reopened and unrelated implementation questions added."
+    ],
+    "print": [
+      false,
+      "Settled format reopened and unrelated questions added."
+    ],
+    "notify": [
+      false,
+      "Hidden operator omitted and unrequested identifier question added."
+    ],
+    "repeated": [
+      false,
+      "Adds unrequested initials/status display instead of simply hiding surnames."
+    ]
+  },
+  "parent": {
+    "name-0-01": [
+      true,
+      "Correct original name/new color and preserved data/address."
+    ],
+    "name-0-10": [
+      false,
+      "Description both preserves and replaces name without a correction qualifier."
+    ],
+    "name-0-00": [
+      true,
+      "Both original states and data/address retained."
+    ],
+    "name-0-11": [
+      false,
+      "Description preserves old name despite required rename and contradictory summary."
+    ],
+    "name-1-01": [
+      false,
+      "Data/content preservation omitted."
+    ],
+    "name-1-10": [
+      false,
+      "Cancelled copper color applied."
+    ],
+    "name-1-00": [
+      false,
+      "Cancelled copper color in description contradicts summary; address/data omitted."
+    ],
+    "name-1-11": [
+      true,
+      "Both new states and preserved data/address."
+    ],
+    "report-00": [
+      true,
+      "Correct exclusion, replacement/conclusion and hidden address."
+    ],
+    "report-10": [
+      true,
+      "Correct recipients, replacement/conclusion and hidden address."
+    ],
+    "report-01": [
+      false,
+      "Address still hidden after hiding is cancelled."
+    ],
+    "report-11": [
+      false,
+      "Adds rejected old request number and unrequested date fields."
+    ],
+    "topic": [
+      false,
+      "Separate procurement scope exclusion is not preserved; display-only wording concerns fields, not that explicit task boundary."
+    ],
+    "print": [
+      true,
+      "Fields, date format and exclusions retained."
+    ],
+    "notify": [
+      true,
+      "Only failure, moderator, import code/cause and hidden operator retained."
+    ],
+    "repeated": [
+      true,
+      "Count, final 142-second interval and hidden surnames retained."
+    ]
+  },
+  "v8": {
+    "name-0-01": [
+      true,
+      "Correct original name/new color and preserved data/address."
+    ],
+    "name-0-10": [
+      false,
+      "Data/content preservation omitted."
+    ],
+    "name-0-00": [
+      true,
+      "Both original states and preserved data/address."
+    ],
+    "name-0-11": [
+      true,
+      "Both new states and preserved data/address."
+    ],
+    "name-1-01": [
+      false,
+      "Agreed copper color omitted."
+    ],
+    "name-1-10": [
+      false,
+      "Cancelled copper color applied."
+    ],
+    "name-1-00": [
+      true,
+      "Summary explicitly retains original name/color; awkward do-not-add phrasing credited as cancelling proposed changes."
+    ],
+    "name-1-11": [
+      true,
+      "Both new states and preserved data/address."
+    ],
+    "report-00": [
+      true,
+      "Correct exclusion, replacement/conclusion and hidden address."
+    ],
+    "report-10": [
+      true,
+      "Correct recipients, replacement/conclusion and hidden address."
+    ],
+    "report-01": [
+      false,
+      "Address still hidden after hiding is cancelled."
+    ],
+    "report-11": [
+      false,
+      "Address still hidden after hiding is cancelled."
+    ],
+    "topic": [
+      false,
+      "Separate procurement scope exclusion omitted."
+    ],
+    "print": [
+      true,
+      "Fields, date format and exclusions retained."
+    ],
+    "notify": [
+      true,
+      "Only failure, moderator, import code/cause and hidden operator retained."
+    ],
+    "repeated": [
+      true,
+      "Count, final interval and hidden surnames retained."
+    ]
+  }
+}
