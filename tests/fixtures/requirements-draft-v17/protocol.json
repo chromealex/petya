@@ -1,0 +1,18 @@
+{
+  "hashes": {
+    "train.jsonl": "51988b99771d790b4eca8c00549a0fbdee46b30d5e921fea45242cb656e22761",
+    "acquisition.jsonl": "bfe15662f8c74b6e07dccf93fb65d1e86776126922c5b7931ca8950d6b39f772",
+    "balanced-corrections.jsonl": "143038c680a90d51e5203d05d58c7825c75fda89ade144b9e7475d556a188208",
+    "replacement-variants.jsonl": "f0d21c6883685ac4aee2652ca9c36602cae2431fdb7bb902d26fe34a9e8997de",
+    "check.jsonl": "e6cb31abcc465adc7b8c5899ffde0b3cc2c8a6ef2bf13e7196c50c56bee3055e"
+  },
+  "parent": "../requirements-draft-v16/adapter",
+  "steps": 609,
+  "layers": 13,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 5e-06,
+  "gate": "All 369 familiar targets correct, all fresh field decisions correct, no lost parent successes, bounds 20/20, sorting 24/24, literal labels 8/8. Research gate only; release additionally requires independent diverse dialogue and runtime integration verification.",
+  "selection": "Fixed run. Acquisition-only repair permitted before candidate fresh inference; freeze any repair first.",
+  "limits": "Synthetic related cases; non-blind manual semantic review; offline greedy diagnostics do not establish live reliability."
+}
