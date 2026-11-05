@@ -82,7 +82,7 @@ function setup(s) {
     s.requestProgress.report(notice);
     if (!await activate(p,check)) return {handled:true,text:'Установка отменена.'};
     check();
-    if (p.turn) return p.turn(s, command, context);
+    if (p.turn) return p.turn(s, command, context, check);
     let content,source,base,choices,problem;
     const selected=pick||(refresh&&last.selected)||null;
     try {

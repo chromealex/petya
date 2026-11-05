@@ -1,0 +1,1 @@
+module.exports={type:'layout',name:'Вёрстка Unity',description:'Базовая вёрстка UI Toolkit по макетам. Зависимости: Unity Editor и Figma или Zeplin. Токены настраиваются в «Вёрстка Unity».',matches:command=>/в[её]рст|сверста/iu.test(command),turn:(s,command,context,check)=>s.layout.turn(command,check)};

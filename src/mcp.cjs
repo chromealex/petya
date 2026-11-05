@@ -10,6 +10,7 @@ function createServer(deps) {
   require('./mcp-chat-tools.cjs').register(server, z, deps);
   require('./features/extension-replies.cjs').register(server,z,deps);
   require('./features/blender-motion.cjs').register(server,z,deps);
+  require('./features/layout.cjs').register(server,z,deps);
   if (deps.generatePainting && deps.access?.mode === 'edit') {
     server.registerTool('generate_painting', {
       description: 'Нарисовать картину после подтверждения в Пете. Требуется включённый Художник. Для первой загрузки увеличьте тайм-аут до часа.',

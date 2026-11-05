@@ -101,7 +101,7 @@ defaults.whisperBinary = fs.existsSync(localBinary) ? localBinary : '';
 defaults.whisperModel = fs.existsSync(localModel) ? localModel : '';
 // Stop whisper-server processes left by a Petya that was killed or crashed (each holds ~700 MB).
 if (process.env.PETYA_SMOKE_TEST !== '1') { const stale = require('./speech.cjs').cleanupOrphans(path.join(app.getPath('userData'), 'whisper-pids.json'), [localBinary]); if (stale.length) console.log('Stopped stale whisper-server: ' + stale.length); }
-const secrets = ['unityToken','telegramCredential','teamMembers','microsoftCredential','gmailCredential','googlePlayCredential','asanaCredential', 'slackCredential', 'notionCredential', 'atlassianCredential', 'jiraToken', 'slackToken', 'notionToken'];
+const secrets = [...features.flatMap(feature=>feature.secrets||[]),'unityToken','telegramCredential','teamMembers','microsoftCredential','gmailCredential','googlePlayCredential','asanaCredential', 'slackCredential', 'notionCredential', 'atlassianCredential', 'jiraToken', 'slackToken', 'notionToken'];
 const entry = pathToFileURL(path.join(__dirname, 'ui/index.html')).href;
 const file = () => path.join(dataRoot, 'settings.json');
 function loadSettings() {
@@ -120,7 +120,7 @@ function useBundledSpeech(target) {
     if ((!target[key] || !fs.existsSync(target[key])) && defaults[key]) target[key] = defaults[key];
   }
 }
-function publicSettings() { return { ...settings, unityToken:'', companyId, companyName:companies.get(companyId).name, telegramCredential:'',hasTelegram:!!settings.telegramCredential, microsoftCredential:'', gmailCredential:'', hasGmail:!!settings.gmailCredential, googlePlayCredential:'', hasGooglePlay:!!settings.googlePlayCredential, asanaCredential: '', hasAsanaOAuth: !!settings.asanaCredential, slackCredential: '', notionCredential: '', hasSlackOAuth: !!settings.slackCredential, hasNotionOAuth: !!settings.notionCredential, atlassianCredential: '', hasAtlassianOAuth: !!settings.atlassianCredential, jiraToken: '', slackToken: '', notionToken: '', hasNotionToken: !!settings.notionToken || !!settings.notionCredential, hasJiraToken: !!settings.jiraToken || !!settings.atlassianCredential, hasSlackToken: !!settings.slackToken || !!settings.slackCredential }; }
+function publicSettings() { return { ...settings, ...Object.fromEntries(features.flatMap(feature=>feature.secrets||[]).map(key=>[key,''])), unityToken:'', companyId, companyName:companies.get(companyId).name, telegramCredential:'',hasTelegram:!!settings.telegramCredential, microsoftCredential:'', gmailCredential:'', hasGmail:!!settings.gmailCredential, googlePlayCredential:'', hasGooglePlay:!!settings.googlePlayCredential, asanaCredential: '', hasAsanaOAuth: !!settings.asanaCredential, slackCredential: '', notionCredential: '', hasSlackOAuth: !!settings.slackCredential, hasNotionOAuth: !!settings.notionCredential, atlassianCredential: '', hasAtlassianOAuth: !!settings.atlassianCredential, jiraToken: '', slackToken: '', notionToken: '', hasNotionToken: !!settings.notionToken || !!settings.notionCredential, hasJiraToken: !!settings.jiraToken || !!settings.atlassianCredential, hasSlackToken: !!settings.slackToken || !!settings.slackCredential }; }
 let trayMeeting = false, trayListening = false, trayReady = false;
 function refreshTrayMenu() {
  if(!tray || tray.isDestroyed())return;
