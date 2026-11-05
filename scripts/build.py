@@ -49,7 +49,17 @@ with (root / '.build.lock').open('w') as lock:
                 if sys.platform == 'win32':
                     verify_env = dict(os.environ, PETYA_VERIFY_BUILD='1')
                     verify_env.pop('ELECTRON_RUN_AS_NODE', None)
-                    subprocess.run([str(output/'win-unpacked/Petya.exe')], cwd=output/'win-unpacked', env=verify_env, check=True, timeout=120)
+                    verify_env['ELECTRON_ENABLE_LOGGING'] = '1'
+                    run = subprocess.Popen([str(output/'win-unpacked/Petya.exe')], cwd=output/'win-unpacked', env=verify_env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                    try:
+                        log, _ = run.communicate(timeout=120)
+                    except subprocess.TimeoutExpired:
+                        run.kill(); log, _ = run.communicate()
+                        print(log.decode('utf-8', 'replace')[-6000:], flush=True)
+                        raise RuntimeError('Windows app did not finish the start check in 120 s')
+                    print(log.decode('utf-8', 'replace')[-3000:], flush=True)
+                    if run.returncode != 0:
+                        raise RuntimeError('Windows app start check failed: exit ' + str(run.returncode))
                 installer = output/'Petya-Setup.exe'
                 if installer.stat().st_size < 1000000 or installer.read_bytes()[:2] != b'MZ':
                     raise RuntimeError('Windows installer is incomplete')
