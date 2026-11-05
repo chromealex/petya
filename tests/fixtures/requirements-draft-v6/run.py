@@ -18,7 +18,7 @@ spec=importlib.util.spec_from_file_location('pilot',ROOT.parent/'decision-lora-9
 pilot=importlib.util.module_from_spec(spec);spec.loader.exec_module(pilot)
 p=argparse.ArgumentParser()
 p.add_argument('action',choices=['train','evaluate']);p.add_argument('base');p.add_argument('output',type=Path)
-p.add_argument('--adapter');p.add_argument('--split',choices=['test'],default='test')
+p.add_argument('--adapter');p.add_argument('--split',choices=['test','corrected'],default='test')
 a=p.parse_args()
 model,tok=load(a.base,adapter_path=a.adapter if a.action=='evaluate' else None)
 assert model.model_type=='qwen3_5' and len(model.layers)==32

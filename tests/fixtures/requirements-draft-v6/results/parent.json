@@ -1,0 +1,152 @@
+{
+  "boundsCorrect": 14,
+  "boundsTotal": 16,
+  "validDrafts": 8,
+  "draftTotal": 8,
+  "records": [
+    {
+      "id": "frost-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\": -6,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "frost-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-6,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "cold-floor-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\": -17,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "cold-floor-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":-17,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+      "passed": false
+    },
+    {
+      "id": "fraction-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":4.5,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "fraction-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":4.5,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "cross-zero-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":-8,\"upper\":2,\"lowerInclusive\":false,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "cross-zero-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":-8,\"upper\":2,\"lowerInclusive\":true,\"upperInclusive\":false}",
+      "passed": true
+    },
+    {
+      "id": "visitors-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":312,\"upper\":null,\"lowerInclusive\":true,\"upperInclusive\":null}",
+      "passed": false
+    },
+    {
+      "id": "visitors-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":311,\"lowerInclusive\":null,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "settlement-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":2.5,\"upper\":2.5,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "settlement-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "interval-new-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":42,\"upper\":79,\"lowerInclusive\":false,\"upperInclusive\":false}",
+      "passed": true
+    },
+    {
+      "id": "interval-new-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":42,\"upper\":79,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "new-cancel-0",
+      "task": "bounds",
+      "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}",
+      "passed": true
+    },
+    {
+      "id": "new-cancel-1",
+      "task": "bounds",
+      "answer": "{\"status\":\"final\",\"lower\":111,\"upper\":111,\"lowerInclusive\":true,\"upperInclusive\":true}",
+      "passed": true
+    },
+    {
+      "id": "inspection-message",
+      "task": "draft",
+      "answer": "{\"summary\": \"Отправка данных механику при неудачной инспекции\", \"description\": \"При завершении инспекции с результатом «Неудачно», система должна отправлять механику следующие данные:\\n\\n1. Номер инспекции.\\n2. Описание дефекта.\\n\\nВажно не отправлять фамилию владельца.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "ticket-print",
+      "task": "draft",
+      "answer": "{\"summary\": \"Печать талона\", \"description\": \"Создать функцию печати талона с номером места и временем сеанса. Имя зрителя не печатать. Поиск места не добавлять. Формат времени ЧЧ:ММ. Номер места сохранять.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "shipment-report",
+      "task": "draft",
+      "answer": "{\"summary\": \"Отправка отчёта отгрузки\", \"description\": \"Настроить отправку отчёта отгрузки только логисту. Содержимое отчёта:\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "screen-revert",
+      "task": "draft",
+      "answer": "{\"summary\": \"Экран «Склад»: сохранение содержимого и адресов\", \"description\": \"Экран «Склад» не переименовывать. Содержимое экрана и адрес его сохранения не менять. Цвет кнопок оставить белым.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "rotation-scope",
+      "task": "draft",
+      "answer": "{\"summary\": \"Поля дисплея привода\", \"description\": \"При показе информации о приводах на дисплее оператора внедрить следующие изменения:\\n\\n1. Отображать номер привода. Отображение номера не зависит от частоты вращения.\\n2. Отображать частоту вращения строго меньше 630 об/мин. Отображать только при выполнении этого условия.\\n3. Скрывать имя владельца привода.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "vector-export",
+      "task": "draft",
+      "answer": "{\"summary\": \"Экспорт схемы с номером ревизии\", \"description\": \"При экспорте схемы в PDF и Excel включать номер ревизии. Формат ещё не выбран, но по предложению команды DXF. Остальные поля и границы не меняются.\", \"questions\": [\"Какой формат экспорта выбрать?\"]}",
+      "validJSON": true
+    },
+    {
+      "id": "dashboard-period",
+      "task": "draft",
+      "answer": "{\"summary\": \"Таблица показывать количество свободных кабинетов\", \"description\": \"Таблица обновлять каждые 33 секунды. Имена пациентов не показывать.\", \"questions\": []}",
+      "validJSON": true
+    },
+    {
+      "id": "parcel-card",
+      "task": "draft",
+      "answer": "{\"summary\": \"Поля карточки посылки\", \"description\": \"Карточка посылки должна показывать вес и дату приёма. Стоимость показывать не нужно. Вес показывать числом в килограммах. Дата приёма — обязательное поле. Цвет веса ещё не выбран.\", \"questions\": [\"Какой цвет использовать для отображения веса?\"]}",
+      "validJSON": true
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "usage": "Post-training familiar-example diagnostic only; never a holdout or selection set.",
+  "drafts": {
+    "backup-recipients": {
+      "passed": false,
+      "finding": "Still omits explicit no-manager-recipient exclusion."
+    },
+    "explicit-trigger": {
+      "passed": false,
+      "finding": "Check code is repaired but error text is still missing; sentence ends unfinished."
+    },
+    "print-columns": {
+      "passed": false,
+      "finding": "Print scope and fields restored, but agreed date format and no-search exclusion are missing; invents header/body placement."
+    },
+    "sensor-topic": {
+      "passed": false,
+      "finding": "Still makes display conditional; drops technician recipient and owner serial privacy."
+    }
+  },
+  "boundsCorrect": 0,
+  "boundsTotal": 4,
+  "draftCoverage": 0,
+  "draftTotal": 4
+}

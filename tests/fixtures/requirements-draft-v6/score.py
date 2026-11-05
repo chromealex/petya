@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 ROOT=Path(__file__).parent
-p=argparse.ArgumentParser();p.add_argument('split',choices=['test']);p.add_argument('input',type=Path);p.add_argument('output',type=Path);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('split',choices=['test','corrected']);p.add_argument('input',type=Path);p.add_argument('output',type=Path);a=p.parse_args()
 rows=[json.loads(s) for s in (ROOT/f'{a.split}.jsonl').read_text().splitlines()]
 reference={r['id']:r for r in rows}
 answers=[json.loads(s) for s in a.input.read_text().splitlines()]
