@@ -22,6 +22,7 @@
     const result=await call('action',expected,item.id,action.id);
     if(state.scope!==expected)return;
     picker.hidden=true;restricted=null;
+    if(result.messages)showDialogueMessages(result.messages);
     if(result.changeEditor)await window.showChangeEditor?.();
     if(result.command)await processCommand(result.command);
     else if(result.attachment)await window.openChatAttachment(result.attachment,topicSelect.value);

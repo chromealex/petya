@@ -26,6 +26,10 @@ async function prepare(record,input,s,check){
   }else if(input.field==='description'){
     if(typeof input.value!=='string'||input.value.length>50000)throw Error('Описание должно быть не длиннее 50 000 символов.');
     patch.description=input.value?adf(input.value):null;
+  }else if(input.field==='append'){
+    if(typeof input.value!=='string'||!input.value.trim()||input.value.length>50000)throw Error('Укажите текст дополнения, до 50 000 символов.');
+    patch.description=structuredClone(record.before.description||{type:'doc',version:1,content:[]});
+    patch.description.content.push(...adf((input.heading?input.heading+'\n':'')+input.value).content);
   }else if(input.field==='assignee'){
     if(typeof input.accountId!=='string'||!record.people?.some(p=>p.id===input.accountId))throw Error('Выберите исполнителя из результатов Jira.');
     patch.assigneeId=input.accountId;
@@ -48,7 +52,7 @@ async function apply(record,s,check,starting){
   const result=await w.actions.apply(plan.staged.id,false,()=>connection(record.target,s,check),starting);
   const operation=result.operations.find(row=>row.id===plan.staged.id),row=operation?.rows[0];
   if(row?.state!=='done')throw Error(row?.error||'Jira не подтвердила изменение. Проверьте историю.');
-  const details=plan.rows.map(change=>change.label+' → '+change.after).join('; ');
+  const details=plan.rows.map(change=>change.field==='description'?'Описание обновлено':change.label+' → '+String(change.after).slice(0,160)).join('; ');
   return {text:record.target.key+' · '+details,url:record.target.site+'/browse/'+record.target.key,canUndo:operation.kind==='edit',historyId:entry.id,operationId:operation.id};
 }
 async function undo(record,s,check){
@@ -57,4 +61,15 @@ async function undo(record,s,check){
   connection(record.target,s,check);
   return {target:record.target,before:record.before,title:record.title,plan:{rows:p.rows.flatMap(row=>row.changes),entry:structuredClone(w.history.find(e=>e.id===record.receipt.historyId)),staged:structuredClone(w.actions.previews.get(p.id))}};
 }
-module.exports={load,people,prepare,apply,undo};
+async function natural(record,intent,s,check){
+ if(intent.kind==='summary')return prepare(record,{field:'summary',value:intent.value},s,check);
+ if(intent.kind==='append')return prepare(record,{field:'append',value:intent.value,heading:intent.heading},s,check);
+ if(intent.kind==='assignee')return prepare(record,{field:'assignee',accountId:intent.accountId},s,check);
+ if(intent.kind==='restrict'&&record.intent?.kind==='append'){
+  const lines=record.intent.value.split(/\r?\n/),starts=lines.flatMap((line,i)=>/^\s*(?:\d+[.)]|[-*•])\s+/.test(line)?[i]:[]);
+  if(!Number.isInteger(intent.number)||intent.number<1||intent.number>starts.length)throw Error('Укажите текст пункта, который нужно добавить.');
+  return prepare(record,{field:'append',value:lines.slice(starts[intent.number-1],starts[intent.number]??lines.length).join('\n'),heading:record.intent.heading},s,check);
+ }
+ throw Error('Уточните поле и новое значение задачи.');
+}
+module.exports={load,people,prepare,apply,undo,natural};

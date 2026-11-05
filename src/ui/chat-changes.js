@@ -15,14 +15,15 @@
     if(r.editor.kind==='file'){
       const text=el('textarea');text.value=r.editor.text;text.setAttribute('aria-label','Новый текст файла');controls.append(text);input=()=>({text:text.value});
     }else{
-      const field=el('select');field.setAttribute('aria-label','Поле задачи');for(const [value,label]of [['summary','Название'],['description','Описание'],['assignee','Исполнитель']]){const o=el('option',label);o.value=value;field.append(o);}
-      const body=el('div');controls.append(field,body);
+      const field=el('select');field.setAttribute('aria-label','Поле задачи');for(const [value,label]of [['summary','Название'],['description','Описание'],['append','Дополнить описание'],['assignee','Исполнитель']]){const o=el('option',label);o.value=value;field.append(o);}
+      field.value=r.editor.field||'summary';const body=el('div');controls.append(field,body);
       function render(){body.replaceChildren();let chosen='';
         if(field.value==='assignee'){
-          const query=el('input');query.placeholder='Имя в Jira';query.setAttribute('aria-label','Имя исполнителя');const results=el('div','','change-people');
-          body.append(query,button('Найти',async()=>{const expected=state.scope,rows=await call('people',expected,r.id,query.value);if(state.scope!==expected)return;chosen='';results.replaceChildren();if(!rows.length)results.append(el('p','Никого не найдено. Уточните имя.'));for(const person of rows){const option=button(person.name,async()=>{chosen=person.id;for(const child of results.children)child.setAttribute('aria-pressed',String(child===option));});results.append(option);}}),results);
-          input=()=>({field:'assignee',accountId:chosen});
-        }else{const text=el('textarea');text.value=r.editor[field.value]||'';text.setAttribute('aria-label',field.selectedOptions[0].textContent);body.append(text);input=()=>({field:field.value,value:text.value});}
+          const query=el('input');query.placeholder='Имя в Jira';query.value=r.editor.query||'';query.setAttribute('aria-label','Имя исполнителя');const results=el('div','','change-people');
+          const offer=rows=>{chosen='';results.replaceChildren();if(!rows.length)results.append(el('p','Никого не найдено. Уточните имя.'));for(const person of rows){const option=button(person.name,async()=>{chosen=person.id;for(const child of results.children)child.setAttribute('aria-pressed',String(child===option));});results.append(option);}};
+          body.append(query,button('Найти',async()=>{const expected=state.scope,rows=await call('people',expected,r.id,query.value);if(state.scope!==expected)return;offer(rows);}),results);
+          if(r.people?.length)offer(r.people);input=()=>({field:'assignee',accountId:chosen});
+        }else{const text=el('textarea');text.value=field.value==='append'?r.editor.value||'':r.editor[field.value]||'';text.setAttribute('aria-label',field.selectedOptions[0].textContent);body.append(text);input=()=>({field:field.value,value:text.value,...field.value==='append'?{heading:r.editor.heading||''}:{}});}
       }
       field.onchange=render;render();
     }
@@ -38,6 +39,7 @@
       const actions=el('div','','actions');card.append(actions);
       if(r.state==='preview')actions.append(button('Применить',()=>mutate('apply',r.id)),button('Отмена',()=>mutate('cancel',r.id)));
       if(r.state==='applying'){const status=el('p','Сохраняю изменения…');status.setAttribute('role','status');card.append(status);}
+      if(r.state==='superseded')card.append(el('p','Заменено уточнённой правкой.'));
       if(r.state==='cancelled')card.append(el('p','Отменено. Изменения не применялись.'));
       if(r.receipt){card.append(el('p',r.receipt.text));if(r.receipt.url){const link=el('a','Открыть задачу');link.href=r.receipt.url;link.target='_blank';link.rel='noopener';card.append(link);}if(r.receipt.file)actions.append(button('Показать в папке',()=>call('reveal',state.scope,r.id)));if(r.receipt.canUndo&&!r.undone)actions.append(button('Предпросмотр отката',()=>mutate('undo',r.id)));if(r.undone)card.append(el('small','Изменение отменено.'));}
       if(r.error)card.append(el('p',r.error,'change-error'));message.append(card);

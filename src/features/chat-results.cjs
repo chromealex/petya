@@ -76,6 +76,7 @@ function setup(s){
     return execute(row,action,topic);
   }
   async function turn(command){
+    const change=await s.chatChanges?.turn(command);if(change)return change;
     const normalized=command.trim().replace(/[.!?]+$/u,'').toLowerCase();
     const actionId=new Map([['измени','edit'],['изменить','edit'],['открой','open'],['обнови','refresh'],['обнови результат','refresh'],['обнови отчёт','refresh'],['обнови отчет','refresh'],
       ['покажи подробнее','details'],['подробнее','details'],['поверни','rotate'],
@@ -95,6 +96,6 @@ function setup(s){
     if(action.command)return {resultCommand:action.command};
     return execute(row,action,topic);
   }
-  return {chatResults:{current,adopt,turn},ipc:{snapshot,choose,action}};
+  return {chatResults:{current,adopt,turn,selected},ipc:{snapshot,choose,action}};
 }
 module.exports={name:'chatResults',setup,collect,scope};

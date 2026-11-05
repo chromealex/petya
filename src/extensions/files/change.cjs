@@ -22,7 +22,7 @@ function prepare(record,input){
   if(before.includes('\r\n')&&!before.replaceAll('\r\n','').includes('\n'))after=after.replace(/\r?\n/g,'\r\n');
   if(after.includes('\0')||Buffer.from(after).toString('utf8')!==after)throw Error('Текст содержит недопустимые символы.');
   if(before===after)throw Error('Текст не изменился.');
-  return {after,rows:[{label:'Содержимое файла',before,after}]};
+  return {after,rows:require('../../chat-change-intent.cjs').changedLines(before,after)};
 }
 async function write(record,after,expected,check,starting){
   const file=record.target.file,original=await read(file);
@@ -50,4 +50,12 @@ async function undo(record,s,check){
   if(current.hash!==hash(Buffer.from(record.plan.after)))throw Error('После правки файл изменился. Откат остановлен.');
   return {target:record.target,before:current,plan:{after:record.before.text,rows:[{label:'Содержимое файла',before:current.text,after:record.before.text}]},title:record.title};
 }
-module.exports={load,prepare,apply,undo};
+function natural(record,intent){
+ if(intent.kind==='replace'){
+  if(!record.before.text.includes(intent.from))throw Error('Такого текста в файле нет. Уточните исходную строку.');
+  return prepare(record,{text:record.before.text.split(intent.from).join(intent.to)});
+ }
+ if(intent.kind==='restrict'&&record.plan?.after)return prepare(record,{text:require('../../chat-change-intent.cjs').restrictPoints(record.before.text,record.plan.after,intent.number)});
+ throw Error('Укажите замену: «замени в файле «исходный текст» на «новый текст»».');
+}
+module.exports={load,prepare,apply,undo,natural};

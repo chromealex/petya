@@ -12,7 +12,7 @@ module.exports=ctx=>{const pipeline=(async(command,choice,background=false)=>{
     if(correction.changed)step('Учёл поправку во фразе: «'+correction.text.slice(0,80)+'»');
     let routed;
     if(!choice&&!ctx.attachments.list().length)routed=await ctx.chatResults?.turn(correction.text);
-    if(routed&&!routed.resultCommand){if(routed.changeEditor){ctx.dialogue.rememberAction(correction.text,routed.text);const t=ctx.dialogue.active();return {...routed,topicId:t.id,messages:t.messages};}return routed;}
+    if(routed&&!routed.resultCommand){if(routed.changeEditor&&!routed.messages){ctx.dialogue.rememberAction(correction.text,routed.text);const t=ctx.dialogue.active();return {...routed,topicId:t.id,messages:t.messages};}return routed;}
     const original=routed?.resultCommand||correction.text;let value=original,applied=[];
     if(choice)ctx.draftAnswers.clear();else ctx.draftAnswers.commit(original,ctx.voicePreparationKey());
     const namePreference=!choice?require('./name-preference.cjs').preference(original,ctx.settings):null;
