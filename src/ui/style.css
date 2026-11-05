@@ -1015,3 +1015,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .chat-question.many-choices .approval-buttons{width:100%;max-height:28vh;overflow:auto;justify-content:flex-start;scrollbar-width:thin}
 
 .chat-question .approval-buttons>button{max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:left}
+
+.chat-thinking-label{display:inline-flex;align-items:center;gap:8px}.chat-thinking-label::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);animation:step-pulse 1.2s ease-in-out infinite}@media(prefers-reduced-motion:reduce){.chat-thinking-label::before{animation:none}}
+
+.chat-running-reply.thinking-fallback .command-progress{display:none!important}

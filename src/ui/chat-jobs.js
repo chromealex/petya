@@ -12,7 +12,7 @@
  }
  window.chatJobInfo=id=>jobs.get(id);
  window.chatJobBusy=id=>['queued','running'].includes(jobs.get(id)?.state);
- function paint(){const job=jobs.get(topicSelect.value);panel.hidden=!job||['done','cancelled'].includes(job.state)||job.state==='attention'&&!!chatHistory.at(-1)?.error;if(panel.hidden)panel.remove();bar.hidden=job?.state==='attention';elapsed.hidden=!['queued','running'].includes(job?.state);text.textContent=job?.label||'';if(!panel.hidden)window.placeChatProgress(panel);retry.hidden=job?.state!=='attention';retry.onclick=()=>{if(job?.command&&!$('command').value){$('command').value=job.command;$('command').focus();}};panel.dataset.state=job?.state||'';paintSteps(job);}
+ function paint(){const job=jobs.get(topicSelect.value);panel.hidden=!job||['done','cancelled'].includes(job.state)||job.state==='attention'&&!!chatHistory.at(-1)?.error;if(panel.hidden)panel.remove();bar.hidden=job?.state==='attention';elapsed.hidden=!['queued','running'].includes(job?.state);text.textContent=String(job?.label||'').trim()||(['queued','running'].includes(job?.state)?'Думаю…':'Нужно внимание');if(!panel.hidden)window.placeChatProgress(panel);retry.hidden=job?.state!=='attention';retry.onclick=()=>{if(job?.command&&!$('command').value){$('command').value=job.command;$('command').focus();}};panel.dataset.state=job?.state||'';paintSteps(job);}
  window.tryBackgroundChat=async command=>{
   if(starting||voiceReply||currentDraft||workspaceBusy||planning||commandProgress.busy)return false;
   starting=true;window.chatStartPending=true;

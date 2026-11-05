@@ -1,0 +1,22 @@
+process.env.PETYA_SMOKE_TEST='1';
+const assert=require('node:assert/strict');
+require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
+ const js=code=>win.webContents.executeJavaScript(code),wait=async code=>{for(let i=0;i<100;i++){if(await js(code))return;await new Promise(r=>setTimeout(r,30));}throw Error('Timeout '+code);};
+ await js('window.chatNavigationReady');
+ await js("view('home');showDialogueMessages([{role:'user',text:'Новый вопрос',at:Date.now()}]);commandProgress.reset();window.chatStartPending=true");
+ await wait("!!document.querySelector('.chat-running-reply:not([hidden]) .chat-thinking-label:not([hidden])')");
+ assert(await js("dialogueMessages.querySelector('.message-user').nextElementSibling.classList.contains('chat-running-reply')"));
+ await js("window.chatStartPending=false;commandProgress.update('working','')");await wait("progressText.textContent==='Думаю…' && !!document.querySelector('.chat-running-reply:not([hidden])')");
+ await js("commandProgress.update('running','Читаю Slack')");await wait("progressText.textContent==='Читаю Slack' && document.querySelector('.chat-thinking-label').hidden");
+ await js("commandProgress.update('done','Готово')");await wait("!document.querySelector('.chat-running-reply:not([hidden])')");
+ await js("window.chatStartPending=true;dialogueChoices.replaceChildren();window.createChatQuestion('Уточните канал');commandProgress.update('waiting','Жду ответа')");await wait("!document.querySelector('.chat-running-reply:not([hidden])')");
+ await js("dialogueChoices.replaceChildren()");await wait("!!document.querySelector('.chat-thinking-label:not([hidden])')");
+ await js("window.chatStartPending=false;commandProgress.update('idle','')");
+ const id=await js('topicSelect.value');win.webContents.send('chat-job',{topicId:id,job:{state:'running',label:'  ',startedAt:Date.now(),steps:[]}});
+ await wait("document.querySelector('.chat-job-status')?.textContent.includes('Думаю…')");
+ assert(await js("document.querySelector('.chat-job-status').getClientRects().length>0"));
+ win.webContents.send('chat-job',{topicId:id,job:{state:'running',label:'Читаю Jira',startedAt:Date.now(),steps:[]}});await wait("document.querySelector('.chat-job-status')?.textContent.includes('Читаю Jira')");
+ win.webContents.send('chat-job',{topicId:id,job:{state:'cancelled'}});await wait("!document.querySelector('.chat-job-status:not([hidden])')");
+ console.log('Chat thinking: pending gap, blank labels, concrete stages, completion and waiting question passed');
+}};
+require('../src/main.cjs');
