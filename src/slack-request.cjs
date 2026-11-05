@@ -69,9 +69,9 @@ class SlackRequest {
   }catch(e){if(e instanceof require('./input-required.cjs').InputRequired)throw e;return this.reply(e.message,{error:true});}finally{this.busy=false;}
  }
  ask(task,options,reason,lookup=false){options=options.filter(c=>!c.is_archived&&/^[CG][A-Z0-9]+$/.test(c.id)).slice(0,8);this.pending={task,options,lookup,scope:this.scope(),at:this.now()};return this.reply(reason||'Куда отправить поручение?',{question:true,slackRequestReply:true,...lookup||!options.length?{clarificationInput:{label:'Канал Slack',placeholder:'#название или ссылка',submit:'Продолжить'}}:{},slackRequestChoices:options.map(c=>({id:c.id,label:'#'+c.name}))});}
- async verify(id){
+ async verify(id,authorize=()=>{}){
   const row=this.state.slackRequests.find(r=>r.id===id),scope=this.scope();
-  const check=()=>{require('./answer-cancel.cjs').check();if(!row||row.account!==this.account()||row.topicId!==this.context().id||row.projectId!==this.context().projectId||(row.version||0)!==(this.context().versionIndex||0)||scope!==this.scope()||!this.enabled())throw Error('Чат или подключение Slack изменились. Проверка недоступна.');};
+  const check=()=>{authorize();require('./answer-cancel.cjs').check();if(!row||row.account!==this.account()||row.topicId!==this.context().id||row.projectId!==this.context().projectId||(row.version||0)!==(this.context().versionIndex||0)||scope!==this.scope()||!this.enabled())throw Error('Чат или подключение Slack изменились. Проверка недоступна.');};
   check();const url=new URL('https://slack.com/api/'+(row.thread_ts?'conversations.replies':'conversations.history'));
   url.searchParams.set('channel',row.channel);url.searchParams.set('limit','15');url.searchParams.set('oldest',row.ts||String(Math.max(0,row.at/1000-60)));url.searchParams.set('inclusive','true');if(row.thread_ts)url.searchParams.set('ts',row.thread_ts);
   const result=await this.request(url.href,{headers:{Authorization:'Bearer '+(this.settings().slackToken||'')}});check();

@@ -11,7 +11,7 @@ function setup(s){
     return t;
   }
   function inProject(t,fn){return require('../modules.cjs').withProject(s.dialogue.state.projects.find(p=>p.id===(t.projectId||'general')),fn);}
-  function view(r){return {id:r.id,title:r.title,state:r.state,editor:r.editor,people:r.people||[],rows:r.plan?.rows,receipt:r.receipt,error:r.error,undoOf:r.undoOf,undone:r.undone,index:r.index,canVerify:!!adapters[r.adapter]?.verify};}
+  function view(r){return {id:r.id,title:r.title,state:r.state,editor:r.editor,people:r.people||[],rows:r.plan?.rows,receipt:r.receipt,error:r.error,undoOf:r.undoOf,undone:r.undone,index:r.index,canVerify:!!adapters[r.adapter]?.verify,verificationStatus:r.verificationStatus};}
   function notification(r){return {id:'change:'+r.id,title:r.title,text:r.error||r.receipt?.text||'Применяю подтверждённую правку…',busy:r.state==='applying',kind:r.state==='done'?'success':r.error?'error':'info',version:r.state};}
   function save(r){s.dialogue.persist();s.win?.webContents.send('chat-change-progress',notification(r));}
   function find(expected,id){const t=topicFor(expected),r=t.chatChanges?.find(r=>r.id===id&&r.scope===expected);if(!r)throw Error('Правка больше недоступна.');return r;}
@@ -126,14 +126,15 @@ function setup(s){
     const newId=randomUUID(),index=t.messages.length;t.messages.push({role:'assistant',text:'Предпросмотр отката',at:Date.now(),changeId:newId});
     t.chatChanges.push({...data,index,id:newId,adapter:r.adapter,scope:expected,state:'preview',undoOf:id,at:Date.now()});s.dialogue.persist();return snapshot();
   });}
-  async function verify(expected,id){return locked(expected,id,async(r,check)=>{
+  async function verify(expected,id,authorize=()=>{}){authorize();return locked(expected,id,async(r,topicCheck)=>{
+    const check=()=>{authorize();return topicCheck();};check();
     if(!['uncertain','failed','done'].includes(r.state)||!adapters[r.adapter].verify)throw Error('Проверка результата недоступна.');
     const progress={id:'verify:'+r.id,title:'Проверка · '+r.title,text:'Читаю текущее состояние…',busy:true,version:'running'};announce(progress);
-    try{const receipt=await adapters[r.adapter].verify(r,s,check);check();r.receipt=receipt;r.state='done';r.error='';}catch(error){r.previousReceipt=r.receipt;r.receipt=undefined;r.state='uncertain';r.error=error.message;}announce({...progress,busy:false,text:r.error||r.receipt.text,kind:r.error?'error':'success',version:String(Date.now())});save(r);return snapshot();
+    try{const receipt=await adapters[r.adapter].verify(r,s,check);check();r.receipt=receipt;r.state='done';r.error='';r.verificationStatus='confirmed';}catch(error){authorize();r.verificationStatus=error.code==='RESULT_MISMATCH'?'inconclusive':'error';r.previousReceipt=r.receipt;r.receipt=undefined;r.state='uncertain';r.error=error.message;}announce({...progress,busy:false,text:r.error||r.receipt.text,kind:r.error?'error':'success',version:String(Date.now())});save(r);return snapshot();
   });}
   async function reveal(expected,id){return locked(expected,id,async(r,check)=>{if(r.adapter!=='files'||r.state!=='done')throw Error('Файл недоступен.');return require('../extensions/files/result.cjs').perform('reveal',{file:{localSourcePath:r.target.file}},s,check);});}
   function cancel(expected,id){const r=find(expected,id);idle(r);if(!['editing','preview'].includes(r.state))throw Error('Эту операцию уже нельзя отменить.');r.state='cancelled';s.dialogue.persist();return snapshot();}
   function progress(){return [...preparations.values(),...s.dialogue.state.topics.flatMap(t=>(t.chatChanges||[]).filter(r=>['applying','done','failed','uncertain'].includes(r.state)).map(r=>{recover(r);return notification(r);})).slice(-30)].slice(-30);}
-  return {chatChanges:{start,turn},ipc:{snapshot,people,prepare,apply,undo,reveal,verify,cancel,progress}};
+  return {chatChanges:{start,turn,snapshot,verify},ipc:{snapshot,people,prepare,apply,undo,reveal,verify,cancel,progress}};
 }
 module.exports={name:'chatChanges',setup};

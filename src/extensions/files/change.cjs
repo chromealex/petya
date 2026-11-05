@@ -60,7 +60,7 @@ function natural(record,intent){
 }
 async function verify(record,s,check){
  check();const current=await read(record.target.file);check();
- if(current.hash!==hash(Buffer.from(record.plan.after)))throw Error('Файл отличается от предпросмотра. Запись не повторялась; сравните файл и подготовьте новую правку.');
+ if(current.hash!==hash(Buffer.from(record.plan.after)))throw Object.assign(Error('Файл отличается от предпросмотра. Запись не повторялась; сравните файл и подготовьте новую правку.'),{code:'RESULT_MISMATCH'});
  return {text:'Проверено сейчас: содержимое файла совпадает с предпросмотром.',file:true,canUndo:false,verifiedAt:Date.now()};
 }
 module.exports={load,prepare,apply,undo,natural,verify};
