@@ -8,7 +8,7 @@ class Clarifications {
  list(){return [...this.pending.entries()].filter(([,row])=>this.now()<=row.expiresAt&&row.scope===this.scope(row.owner)).map(([id,row])=>({
   id,...row.owner,request:row.command,question:row.spec.text,input:row.result.clarificationInput,
   options:(row.spec.options||[]).map((label,index)=>({id:String(index+1),label})),createdAt:row.at,expiresAt:row.expiresAt,
-  active:row.scope===this.scope(),requiresActiveChat:row.scope!==this.scope()
+  active:row.scope===this.scope(),requiresActiveChat:false
  }));}
  offer(command,spec,resume,previous={}){
   const id=randomUUID(),result={...previous,handled:true,question:true,text:spec.text,clarificationId:id,clarificationInput:{label:spec.label||'Уточнение',placeholder:spec.placeholder||'Напишите ответ…',submit:'Продолжить',files:!!spec.files},clarificationOptions:spec.options||[]};
@@ -78,11 +78,12 @@ function register(server,z,ctx){
    catch(error){return {isError:true,content:[{type:'text',text:error.message}]};}
   });
  };
- tool('list_chat_clarifications','Ожидающие вопросы Пети: исходный запрос, варианты, поля и срок действия. Только разрешённые чаты. requiresActiveChat означает, что для ответа чат нужно открыть в Пете.',{chatId:id.optional(),...page},args=>{const rows=visible().filter(r=>!args.chatId||r.chatId===args.chatId);return {total:rows.length,items:rows.slice(args.offset,args.offset+args.limit)};});
+ tool('list_chat_clarifications','Ожидающие вопросы Пети: исходный запрос, варианты, поля и срок действия. Только разрешённые чаты. Ответы продолжаются в исходном чате без переключения интерфейса.',{chatId:id.optional(),...page},args=>{const rows=visible().filter(r=>!args.chatId||r.chatId===args.chatId);return {total:rows.length,items:rows.slice(args.offset,args.offset+args.limit)};});
  tool('get_chat_clarification','Прочитать одно незавершённое уточнение перед ответом.',{chatId:id,clarificationId:id},find);
  async function respond(args,cancel=false){
-  const row=find(args),topic=ctx.dialogue.active();
-  const check=()=>{ctx.check();if(ctx.access?.mode!=='edit')throw Error('Нужен доступ на редактирование.');if(!topic||topic.id!==row.chatId||ctx.dialogue.active()!==topic||ctx.dialogue.state.activeProjectId!==row.projectId)throw Error('Откройте этот чат в разрешённом проекте Пети.');if(ctx.chatJobs?.busy(topic.id))throw Error('В чате уже выполняется запрос.');};
+  const row=find(args),topic=ctx.dialogue.state.topics.find(t=>t.id===row.chatId);
+  return ctx.dialogue.within(row.chatId,row.projectId,async()=>{
+  const check=()=>{ctx.check();if(ctx.access?.mode!=='edit')throw Error('Нужен доступ на редактирование.');if(!topic||!ctx.dialogue.state.topics.includes(topic)||topic.archived||topic.projectId!==row.projectId||(topic.versionIndex||0)!==row.version||!ctx.dialogue.state.projects.some(p=>p.id===row.projectId&&!p.archived))throw Error('Контекст уточнения изменился.');if(ctx.chatJobs?.busy(topic.id)||ctx.dialogue.busyChat(topic.id))throw Error('В чате уже выполняется запрос.');};
   check();
   const option=args.optionId?row.options.find(o=>o.id===args.optionId):null;
   if(!cancel&&((args.answer!==undefined)===(args.optionId!==undefined)||args.optionId&&!option))throw Error('Передайте либо answer, либо optionId из текущего уточнения.');
@@ -97,10 +98,12 @@ function register(server,z,ctx){
   if(ctx.dialogue.active()===topic&&!topic.archived){
    const last=topic.messages.at(-1);
    if(result.text&&(last?.role!=='assistant'||last.text!==result.text)){topic.messages.push({role:'assistant',text:result.text,at:Date.now(),error:!!result.error});ctx.dialogue.persist();}
+   ctx.chatJobs?.finishForeground?.(topic.id,result.error||result.question?'attention':'done',result);
    ctx.changed?.({owner:topic.id,name:cancel?'cancel_chat_clarification':'answer_chat_clarification',result:{...result,topicId:topic.id,messages:topic.messages}});
   }
   return {status:result.error?'error':result.question?'waiting':cancel?'cancelled':'completed',text:result.text,error:!!result.error,clarification:result.clarificationId?visible().find(r=>r.id===result.clarificationId):null};
+  });
  }
- tool('answer_chat_clarification','Ответить на вопрос и продолжить сохранённый запрос. Может выполнить исходное действие во внешнем сервисе. Нужны права edit и активный чат. Передайте answer или optionId. Повторная отправка использованного ID не выполняет действие снова.',{chatId:id,clarificationId:id,answer:z.string().trim().min(1).max(4000).optional(),optionId:id.optional()},args=>respond(args),true);
+ tool('answer_chat_clarification','Ответить на вопрос и продолжить сохранённый запрос. Может выполнить исходное действие во внешнем сервисе. Нужны права edit. Открывать чат в Пете не требуется. Передайте answer или optionId. Повторная отправка использованного ID не выполняет действие снова.',{chatId:id,clarificationId:id,answer:z.string().trim().min(1).max(4000).optional(),optionId:id.optional()},args=>respond(args),true);
  tool('cancel_chat_clarification','Отменить ожидающее уточнение без выполнения сохранённого запроса.',{chatId:id,clarificationId:id},args=>respond(args,true),true);
 }

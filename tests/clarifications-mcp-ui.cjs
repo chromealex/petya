@@ -13,7 +13,11 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  try{
   await client.connect(new StreamableHTTPClientTransport(new URL(endpoint.url),{requestInit:{headers:{Authorization:'Bearer '+endpoint.token}}}));
   const listed=await client.callTool({name:'list_chat_clarifications',arguments:{}});assert(!listed.isError);const row=JSON.parse(listed.content[0].text).items[0];assert.equal(row.request,'создай ветку');
+  await js("selectDialogueTopic('')");
   const response=await client.callTool({name:'answer_chat_clarification',arguments:{chatId:row.chatId,clarificationId:row.id,answer:'feature/mcp-question'}});assert(!response.isError,JSON.stringify(response));
+  assert.equal(await js("topicSelect.value"),'');
+  assert(!(await js("dialogueMessages.textContent.includes('Создана ветка feature/mcp-question')")));
+  await js("selectDialogueTopic("+JSON.stringify(row.chatId)+")");
   await wait("!document.querySelector('.clarification-input') && dialogueMessages.textContent.includes('Создана ветка feature/mcp-question')");
   assert.equal(runs,1);assert(await js("dialogueMessages.textContent.includes('feature/mcp-question')"));
   console.log('MCP UI: external answer resumes saved Git request, updates visible chat and dismisses question');
