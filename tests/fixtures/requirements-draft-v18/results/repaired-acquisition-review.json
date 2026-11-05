@@ -1,0 +1,27 @@
+{
+  "v18-repeat": {
+    "passed": true,
+    "reason": "Equivalent interval wording.",
+    "answer_sha256": "787356b51728c55b9e986d1273254ffa3b021b8e76e4e619c936f5e1a64c0b8a"
+  },
+  "v18-partial-send": {
+    "passed": true,
+    "reason": "Only punctuation changes; separate sending permissions survive.",
+    "answer_sha256": "0cb4c35141f25a7b6c727a8f33ad0193b61b3694f4f6efe371d90855d94a7cc6"
+  },
+  "v18-numeric-range-draft": {
+    "passed": true,
+    "reason": "Correct range excludes zero logically.",
+    "answer_sha256": "c35a9e9e8acad42e687808616c5c5c12ca397abb6a021340c2102b2c44060a02"
+  },
+  "v18-ambiguous-recipient": {
+    "passed": false,
+    "reason": "Explicitly requested recipient question is absent.",
+    "answer_sha256": "4ece958f102868d7e3b56336badab8b9eb7efc81853795900e1e3dd3febe2169"
+  },
+  "v18-regrant-limited": {
+    "passed": true,
+    "reason": "Equivalent accurate heading; both versions and permissions preserved.",
+    "answer_sha256": "7e03f48040c09737dc4ebe233f645de1f7b315634d4c1d128a928980c38c781b"
+  }
+}

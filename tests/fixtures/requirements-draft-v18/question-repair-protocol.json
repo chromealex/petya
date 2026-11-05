@@ -1,0 +1,20 @@
+{
+  "parent": "repaired-adapter",
+  "parent_sha256": "9d86553b863002d0ce6af6522e582bef2cb08169b27f6cd4c8f5785f2ce8a23f",
+  "training_sha256": "a3113d187f874f431cd2868ec31db0d0c8f6aacb889449ad2199002611df3b40",
+  "steps": 180,
+  "epochs": 1,
+  "layers": 13,
+  "seed": 42,
+  "learning_rate": 2.5e-06,
+  "failed_acquisition_ids": [
+    "v18-ambiguous-recipient"
+  ],
+  "previous_acquisition": {
+    "exact": 464,
+    "semantic_passed": 468,
+    "total": 469
+  },
+  "recipe": "16 extra presentations of the remaining missing-question case, all sixteen prior release targets once, 36 balanced diverse variants once, 64 bounds, 48 sorts. Full 469-case retention evaluation remains mandatory.",
+  "selection": "Frozen acquisition-only question repair before any candidate fresh inference. Preserve both earlier artifacts and answers. No release from memorized success alone."
+}
