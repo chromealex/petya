@@ -35,16 +35,17 @@ function inspectZoomWindows(explicit = false) {
 let telegramSource,serviceAccess,serviceBrowser;
 let slackLogs, buildWatch, reviewAssistant, buildQuestion, buildRepair;
 let memory, slackSync, meetingMonitor, backgroundTimer, backgroundBusy = false, lastSlackRound = 0, monitorStatus = {}, maintenance = () => {};
-function saveMemory(items) {
+function saveMemory(items, root = dataRoot) {
   if (!safeStorage.isEncryptionAvailable()) throw new Error('Хранилище ОС недоступно: контекст не сохранён.');
-  const file = path.join(dataRoot, 'context-memory.json');
+  const file = path.join(root, 'context-memory.json');
   fs.writeFileSync(file + '.tmp', JSON.stringify({ encrypted: safeStorage.encryptString(JSON.stringify(items)).toString('base64') }), { mode: 0o600 }); fs.renameSync(file + '.tmp', file);
 }
 function loadMemory() {
   const file = path.join(dataRoot, 'context-memory.json');
   const items = fs.existsSync(file) ? JSON.parse(safeStorage.decryptString(Buffer.from(JSON.parse(fs.readFileSync(file, 'utf8')).encrypted, 'base64'))) : [];
   if (!Array.isArray(items)) throw new Error('Не удалось прочитать сохранённый контекст.');
-  memory = new ContextStore({ items, days: () => settings.contextDays, save: saveMemory });
+  const root = dataRoot, profileSettings = settings, profileId = companyId;
+  memory = new ContextStore({ items, days: () => companyId === profileId ? settings.contextDays : profileSettings.contextDays, save: items => saveMemory(items, root) });
 }
 async function backgroundTick() {
   if (switchingCompany || backgroundBusy || !win || win.isDestroyed()) return;
@@ -146,13 +147,14 @@ function addContext(data) {
   if (typeof data.sessionId === 'string' && /^[a-z0-9-]{36}$/i.test(data.sessionId)) item.sessionId = data.sessionId;
   memory.put([item]); return item;
 }
-async function request(url, options = {}) {
+async function request(url, options = {}, profileSettings = settings, check = () => {}) {
   const service = modules.serviceForURL(url);
   requestProgress.request(url,service);
-  if (service) modules.assertEnabled(settings, service);
-  let target = await atlassianOAuth.rewrite(url, options, settings);
-  for (const client of Object.values(serviceOAuth)) target = await client.rewrite(target.url, target.options, settings);
-  if (service) modules.assertEnabled(settings, service);
+  if (service) modules.assertEnabled(profileSettings, service);
+  let target = await atlassianOAuth.rewrite(url, options, profileSettings);
+  for (const client of Object.values(serviceOAuth)) { check();target = await client.rewrite(target.url, target.options, profileSettings); }
+  check();
+  if (service) modules.assertEnabled(profileSettings, service);
   try{return await directRequest(target.url,target.options);}
   catch(error){if(service)error.petyaService=service;throw error;}
 }
@@ -188,7 +190,8 @@ function handle(name, fn) { ipcMain.handle('petya:' + name, async (event, ...arg
   const controller=cancellableAnswers.has(name)?new AbortController():null,answerTopic=dialogue?.state.activeId||'';if(controller){if(!foregroundAnswers.has(answerTopic))foregroundAnswers.set(answerTopic,new Set());foregroundAnswers.get(answerTopic).add(controller);}
   activeOperations++;try{return await require('./answer-cancel.cjs').run(controller?.signal,()=>requestProgress.run(name,label=>{if(!event.sender.isDestroyed())event.sender.send('request-progress',label);},()=>require('./answer-stream.cjs').run(chunk=>{if(!event.sender.isDestroyed())event.sender.send('answer-chunk',chunk);},()=>modules.withProject(projectOperations.has(name)?dialogue?.state.projects.find(p=>p.id===dialogue.state.activeProjectId):null,()=>projectOperations.has(name)&&dialogue?dialogue.within(dialogue.state.activeId,dialogue.state.activeProjectId,()=>fn(...args)):fn(...args)))));}finally{activeOperations--;if(controller){foregroundAnswers.get(answerTopic)?.delete(controller);if(!foregroundAnswers.get(answerTopic)?.size)foregroundAnswers.delete(answerTopic);}}
 }); }
-function saveSettings(input, internal = false) {
+function saveSettings(input, internal = false, profile = profileState()) {
+    const {workspace,memory,maintenance,telegramSource,buildRepair,buildQuestion,buildWatch,slackLogs,slackSync,stopWebSearch}=profile;
     if(typeof input.microsoftCredential==='string'&&input.microsoftCredential.length>200000)throw Error('Too many Microsoft accounts.');
     if(typeof input.gmailCredential==='string'&&input.gmailCredential.length>200000)throw Error('Слишком большой объём данных аккаунтов Gmail.');
     const next = { ...settings };
@@ -231,7 +234,21 @@ function receiveMessageLink(raw){
   if(win && !win.isDestroyed()){show();win.webContents.send('message-link-ready');}
 }
 app.on('open-url',(event,url)=>{event.preventDefault();receiveMessageLink(url);});
+let companyScope;
+const applicationRequest=request, applicationDirectRequest=directRequest, applicationSaveSettings=saveSettings, applicationHandle=handle, applicationAddContext=addContext, applicationNotify=notify;
+function profileState(){return {settings,memory,dataRoot,companyId,workspace,dialogue,telegramSource,serviceAccess,serviceBrowser,slackLogs,buildWatch,reviewAssistant,buildQuestion,buildRepair,slackSync,maintenance,stopWebSearch,pending,snapshots};}
+function publishProfile(state){({workspace,dialogue,telegramSource,serviceAccess,serviceBrowser,slackLogs,buildWatch,reviewAssistant,buildQuestion,buildRepair,slackSync,maintenance,stopWebSearch}=state);}
 function setupHandlers() {
+  const {memory,dataRoot,companyId,pending,snapshots}=profileState();
+  let {settings}=profileState();
+  let workspace,dialogue,telegramSource,serviceAccess,serviceBrowser,slackLogs,buildWatch,reviewAssistant,buildQuestion,buildRepair,slackSync,maintenance=()=>{},stopWebSearch=()=>{};
+  const scope=companyScope=new (require('./company-lifecycle.cjs').CompanyLifecycle)({app,powerMonitor,ipcMain});
+  const addContext=(...args)=>{scope.check();return applicationAddContext(...args);};
+  const notify=(...args)=>{if(!scope.closed)applicationNotify(...args);};
+  const request=async(url,options)=>{scope.check();const result=await applicationRequest(url,scope.options(options),settings,()=>scope.check());scope.check();return result;};
+  const directRequest=async(url,options)=>{scope.check();const result=await applicationDirectRequest(url,scope.options(options));scope.check();return result;};
+  const saveSettings=(...args)=>{scope.check();const result=applicationSaveSettings(args[0],args[1],{workspace,memory,maintenance,telegramSource,buildRepair,buildQuestion,buildWatch,slackLogs,slackSync,stopWebSearch});settings=profileState().settings;return result;};
+  const handle=(name,fn)=>{scope.names.add(name);applicationHandle(name,(...args)=>{scope.check();return fn(...args);});};
   handle('takeMessageLink',()=>{const raw=pendingMessageLink;pendingMessageLink='';return raw;});
   handle('messageLink',(id,index,text,at)=>{
     const topic=dialogue.state.topics.find(t=>t.id===id),message=topic?.messages[index];
@@ -349,7 +366,7 @@ function setupHandlers() {
   let formatReader;
   const {attachments,allowedMedia,importMedia}=require('./attachments-setup.cjs')({get app(){return app;},get core(){return core;},get dialogue(){return dialogue;},get formatReader(){return formatReader;},get fs(){return fs;},get handle(){return handle;},get memory(){return memory;},get modules(){return modules;},get path(){return path;},get request(){return request;},get serviceOAuth(){return serviceOAuth;},get settings(){return settings;},get speech(){return speech;},get telegramSource(){return telegramSource;},get win(){return win;}});
   const {instructionSkills,inspectAttachments,executeSkill,taskDuplicates,workSkills}=require('./skills-setup.cjs')({get analyzeMaterials(){return analyzeMaterials;},get attachments(){return attachments;},get companies(){return companies;},get companyId(){return companyId;},get dataRoot(){return dataRoot;},get dialogue(){return dialogue;},get fs(){return fs;},get handle(){return handle;},get jiraInsights(){return jiraInsights;},get memory(){return memory;},get path(){return path;},get randomUUID(){return randomUUID;},get request(){return request;},get reviewState(){return reviewState;},get safeStorage(){return safeStorage;},get saveReview(){return saveReview;},get settings(){return settings;},get snapshots(){return snapshots;},get teamFill(){return teamFill;},get text(){return text;},get workspace(){return workspace;}});
-  serviceBrowser=new (require('./service-browser.cjs').ServiceBrowser)({settings:()=>settings,onReturn:show,onAction:service=>{show();win.webContents.send('browser-action',{service});}});
+  serviceBrowser=new (require('./service-browser.cjs').ServiceBrowser)({dataRoot,settings:()=>settings,onReturn:show,onAction:service=>{show();win.webContents.send('browser-action',{service});}});
   serviceAccess=new (require('./service-access.cjs').ServiceAccess)({settings:()=>settings,save:saveSettings,open:service=>smoke?Promise.resolve():serviceBrowser.open(service)});
   handle('integrationChoice',(id,choice)=>serviceAccess.choose(id,choice));
   handle('integrationReset',service=>serviceAccess.reset(service));
@@ -374,7 +391,7 @@ function setupHandlers() {
     fs.writeFileSync(learningFile+'.tmp',JSON.stringify({encrypted:safeStorage.encryptString(JSON.stringify(state)).toString('base64')}),{mode:0o600});fs.renameSync(learningFile+'.tmp',learningFile);
   }});
   const {WebSearch,searchCommand}=require('./web-search.cjs');
-  const searchBrowser=new (require('./search-browser.cjs').SearchBrowser)({enabled:()=>modules.enabled(settings,'web'),onReturn:show,onAction:()=>{show();win.webContents.send('browser-action',{service:'web'});}});
+  const searchBrowser=new (require('./search-browser.cjs').SearchBrowser)({dataRoot,enabled:()=>modules.enabled(settings,'web'),onReturn:show,onAction:()=>{show();win.webContents.send('browser-action',{service:'web'});}});
   stopWebSearch=()=>searchBrowser.stop();
   app.on('will-quit',stopWebSearch);
   const webSearch=new WebSearch({enabled:()=>modules.enabled(settings,'web'),searchAPI:(query,resume)=>searchBrowser.search(query,resume),read:url=>searchBrowser.read(url),model:async(query,pages)=>{
@@ -538,6 +555,7 @@ function setupHandlers() {
   const stopChatMcp = require('./mcp-setup.cjs')({
     invokeUnity:(...args)=>services.unity.invoke(...args),
     handle, dialogue, attachments, chatJobs, memory, addContext, companyId,
+    companyContext:()=>({id:companyId,name:companies.get(companyId).name,switching:switchingCompany,switchInAppOnly:true}),
     meetingRecording: (...args)=>services.meetingRecording(...args),
     zoomBot: (...args)=>services.zoomBot(...args),
     generatePainting: (args, check) => services.artist.generate(args, check),
@@ -545,7 +563,7 @@ function setupHandlers() {
     async run(work) { activeOperations++; try { return await work(); } finally { activeOperations--; } },
     changed(event) { if (!win.isDestroyed()) win.webContents.send('mcp-chat-changed',event); }
   });
-  app.once('before-quit', () => { void stopChatMcp(); });
+  app.once('before-quit', () => stopChatMcp());
   const chatTools=require('./chat-tools.cjs'),chatUndo=new chatTools.ChatUndo(dialogue,id=>chatJobs.busy(id)||dialogue.running.has(id)||dialogue.state.topics.some(t=>t.projectId===id&&(chatJobs.busy(t.id)||dialogue.running.has(t.id))));
   handle('chatQuickSearch',query=>chatTools.search(dialogue.state,query));
   handle('chatEditMessage',(id,index,value)=>chatTools.editBranch(dialogue,id,index,value,id=>chatJobs.busy(id)));
@@ -574,16 +592,20 @@ function setupHandlers() {
   handle('companies',()=>({...companies.list(),activeId:companyId}));
   handle('companyCreate',name=>companies.create(name,settings));
   handle('companyRename',(id,name)=>{companies.rename(id,name);win.setTitle('Петя · '+companies.get(companyId).name);refreshTrayMenu();return {...companies.list(),activeId:companyId};});
-  handle('companySwitch',(id,raw)=>{
+  handle('companySwitch',async(id,raw)=>{
     if(raw && chatLocation.parse(raw)?.company!==id)throw Error('Некорректная ссылка на компанию.');
-    companies.get(id);if(id===companyId)return {unchanged:true};if(chatJobs.any())throw Error('Дождитесь завершения запросов в чатах перед сменой компании.');
-    if(ollamaReady.state.busy||visionReady.state.busy)throw Error('Подготавливается локальная модель. Дождитесь завершения загрузки в настройках.');if(backgroundBusy)throw Error('Обновляются материалы компании. Дождитесь завершения синхронизации.');if(activeOperations>1)throw Error('Петя завершает текущую операцию. Статус виден в верхней панели; переключите компанию после завершения.');
-    companies.select(id);
-    if(smoke){companies.select(companyId);return {testOnly:true};}
-    switchingCompany=true;serviceAccess?.clear();serviceBrowser?.stop();formatReader?.clear();require('./format-sandbox.cjs').stopFormats();telegramSource?.stop();clearInterval(backgroundTimer);buildRepair?.reset();buildQuestion?.reset();buildWatch?.reset();slackLogs?.reset();slackSync?.reset();stopWebSearch();
+    companies.get(id);if(id===companyId)return {unchanged:true};
+    if(chatJobs.any()||dialogue.running.size)throw Error('Дождитесь завершения запросов в чатах перед сменой компании.');
+    if(ollamaReady.state.busy||visionReady.state.busy||imageInstaller.state?.busy)throw Error('Дождитесь завершения загрузки модели.');
+    if(backgroundBusy||slackSync?.running||telegramSource?.busy||services.zoomBot?.('status')?.busy)throw Error('Обновляются материалы компании. Дождитесь завершения синхронизации.');
+    if(activeOperations>1)throw Error('Петя завершает текущую операцию. Переключите компанию после завершения.');
+    if(trayListening||trayMeeting)throw Error('Остановите запись перед переключением компании.');
+    if(smoke && process.env.PETYA_COMPANY_SWITCH_TEST!=='1')return {testOnly:true};
+    switchingCompany=true;
     win.webContents.send('pause-all');
-    app.relaunch({args:[...process.argv.slice(1).filter(a=>a!=='--petya-company-open'&&!chatLocation.parse(a)),'--petya-company-open',...(raw?[raw]:[])]});
-    setTimeout(()=>app.quit(),200);return {restarting:true};
+    // Let the IPC response reach the old renderer before loading the new profile.
+    setTimeout(()=>switchCompanyRuntime(id,raw).catch(error=>{console.error(error);}),50);
+    return {switching:true};
   });
   require('./telegram-setup.cjs')({get app(){return app;},get clientDefaults(){return clientDefaults;},get handle(){return handle;},get memory(){return memory;},get modules(){return modules;},get saveSettings(){return saveSettings;},get settings(){return settings;},get shell(){return shell;},get telegramSource(){return telegramSource;},set telegramSource(v){telegramSource=v;}});
   handle('teamJiraSearch',query=>require('./team-jira.cjs').search(workspace,query));
@@ -621,7 +643,32 @@ function setupHandlers() {
   // window.petya.feature(name, method, ...args) — so features need no preload or main.cjs edits either.
   const featureIpc = new Map();
   for (const feature of features) { const { ipc, ...provided } = feature.setup(services) || {}; if (ipc) featureIpc.set(feature.name, ipc); for (const [key, value] of Object.entries(provided)) Object.defineProperty(services, key, { value, enumerable: true, configurable: true }); }
+  publishProfile({workspace,dialogue,telegramSource,serviceAccess,serviceBrowser,slackLogs,buildWatch,reviewAssistant,buildQuestion,buildRepair,slackSync,maintenance,stopWebSearch});
+  scope.capture();
   handle('feature', (name, method, ...args) => { const ipc = featureIpc.get(name); if (typeof name !== 'string' || typeof method !== 'string' || !ipc || !Object.hasOwn(ipc, method) || typeof ipc[method] !== 'function') throw Error('Неизвестная функция.'); return ipc[method](...args); });
+}
+async function switchCompanyRuntime(id,raw) {
+ const previous=companyId;
+ try {
+  clearInterval(backgroundTimer);meetingMonitor?.pause();
+  serviceAccess?.clear();serviceBrowser?.stop();stopWebSearch();
+  buildRepair?.reset();buildQuestion?.reset();buildWatch?.reset();slackLogs?.reset();slackSync?.reset();
+  await companyScope.close();
+  companyId=id;dataRoot=companies.directory(id);pending=new Map();snapshots=new Map();
+  loadSettings();loadMemory();setupHandlers();companies.select(id);
+  pendingMessageLink=raw||'';monitorStatus={};lastSlackRound=0;trayListening=false;trayMeeting=false;
+  win.setTitle('Петя · '+companies.get(id).name);refreshTrayMenu();
+ } catch(error) {
+  console.error('Company switch:',error);
+  await companyScope?.close().catch(()=>{});
+  companyId=previous;dataRoot=companies.directory(previous);loadSettings();loadMemory();setupHandlers();companies.select(previous);
+  pendingMessageLink='';
+  require('electron').dialog.showErrorBox('Не удалось переключить компанию',error.message);
+ } finally {
+  switchingCompany=false;
+  await win.loadFile(path.join(__dirname,'ui/index.html'));
+  if(!smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){backgroundTimer=setInterval(backgroundTick,5000);backgroundTick();}
+ }
 }
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
@@ -687,7 +734,7 @@ else {
     }
     if (!app.isPackaged && process.env.PETYA_SMOKE_TEST === '1') {
       win.webContents.once('did-finish-load', async () => {
-        try { await require('../tests/smoke.cjs')(win, workspace); console.log('UI smoke test passed'); app.exit(0); }
+        try { if(process.env.PETYA_COMPANY_SWITCH_TEST==='1')await require('../tests/company-switch.cjs')(win,app);else await require('../tests/smoke.cjs')(win, workspace); console.log('UI smoke test passed'); app.exit(0); }
         catch (error) { console.error(error); app.exit(1); }
       });
     }

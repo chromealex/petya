@@ -14,7 +14,7 @@
    if(settingsDirty||$('team-status').textContent==='Изменения не сохранены.')throw Error('Сохраните изменения команды или подключений перед переключением.');
    if(mic.active)throw Error('Выключите микрофон перед переключением компании.');if(meeting.active||window.petyaAutoMeetingActive)throw Error('Остановите запись системного звука перед переключением компании.');if(currentDraft||workspaceBusy)throw Error('Завершите или закройте черновик в Ассистенте.');if(planning||draftBusy||agentBusy)throw Error('Дождитесь завершения текущего запроса; статус показан в верхней панели.');
    const result=await window.petya.companySwitch(target);
-   if(result.restarting){notice('Переключаю компанию… Петя сейчас откроется снова.');document.querySelectorAll('button,input,textarea,select').forEach(e=>e.disabled=true);}
+   if(result.switching){notice('Переключаю компанию…');document.querySelectorAll('button,input,textarea,select').forEach(e=>e.disabled=true);}
    else setBusy(false);
   }catch(error){setBusy(false);throw error;}
  }

@@ -12,7 +12,7 @@ const {Dialogue}=require('../src/dialogue.cjs');
   dialogue.state.topics.push(topic,{...topic,id:'hidden',archived:true});
   const notes=[];
   let zoomMode='auto';
-  const ctx={zoomBot:(method)=>method==='status'?{mode:zoomMode,id:'detected',phase:'detected'}:{phase:method==='dismiss'?'dismissed':'joining'},meetingRecording:(method,id)=>method==='status'?[]:{id,phase:'processing'},companyId:'default',dialogue,attachments:new Attachments({}),chatJobs:{busy:()=>busy},memory:{prune:()=>notes},addContext:note=>{const item={...note,id:'note'};notes.push(item);return item;},check(){},changed(){},run:fn=>fn()};
+  const ctx={companyContext:()=>({id:'default',name:'Компания 1',switching:false,switchInAppOnly:true}),zoomBot:(method)=>method==='status'?{mode:zoomMode,id:'detected',phase:'detected'}:{phase:method==='dismiss'?'dismissed':'joining'},meetingRecording:(method,id)=>method==='status'?[]:{id,phase:'processing'},companyId:'default',dialogue,attachments:new Attachments({}),chatJobs:{busy:()=>busy},memory:{prune:()=>notes},addContext:note=>{const item={...note,id:'note'};notes.push(item);return item;},check(){},changed(){},run:fn=>fn()};
   const endpoint=await startMcp(ctx,{port:0});
   const client=new Client({name:'petya-test',version:'1'});
   try{
@@ -27,6 +27,8 @@ const {Dialogue}=require('../src/dialogue.cjs');
       assert.ok(!r.isError,r.content[0].text);
       return JSON.parse(r.content[0].text);
     }
+    assert.equal((await call('check_model_disk_space')).status,'space_only');
+    assert.deepEqual(await call('get_company_context'),{id:'default',name:'Компания 1',switching:false,switchInAppOnly:true});
     notes.push({id:'meeting-context-test',source:'Zoom',title:'Встреча',text:'После обновления не работает вход',at:Date.now(),sessionId:'test-call'});
     assert.equal((await call('resolve_work_context',{chatId:'one'})).rows[0].id,'meeting-context-test');
     await call('resolve_work_context',{chatId:'hidden'},true);

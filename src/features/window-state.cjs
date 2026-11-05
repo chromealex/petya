@@ -8,7 +8,7 @@ function fit(bounds,displays){
  return {width,height,x:Math.max(screen.x,Math.min(bounds.x,screen.x+screen.width-width)),y:Math.max(screen.y,Math.min(bounds.y,screen.y+screen.height-height))};
 }
 module.exports={name:'window-state',fit,setup({win}){
- if(!win||installed.has(win))return;installed.add(win);
+ if(!win)return;if(installed.has(win)){win.emit('petya-profile-ready');return;}installed.add(win);
  const {app,screen}=require('electron'),file=path.join(app.getPath('userData'),'window-state.json');let timer,saved;
  try{saved=JSON.parse(fs.readFileSync(file,'utf8'));const bounds=fit(saved.bounds,screen.getAllDisplays());if(bounds)win.setBounds(bounds);}catch{}
  const save=()=>{clearTimeout(timer);if(win.isDestroyed()||win.isMinimized())return;try{const value={bounds:win.getNormalBounds(),maximized:win.isMaximized(),fullscreen:win.isFullScreen()};fs.writeFileSync(file+'.tmp',JSON.stringify(value));fs.renameSync(file+'.tmp',file);}catch(error){console.error('Window state:',error.message);}};
@@ -16,6 +16,7 @@ module.exports={name:'window-state',fit,setup({win}){
  for(const event of ['move','resize','maximize','unmaximize','enter-full-screen','leave-full-screen'])win.on(event,schedule);
  for(const event of ['close','hide'])win.on(event,save);
  app.on('before-quit',save);
+ win.on('petya-profile-ready',()=>{if(!app.listeners('before-quit').includes(save))app.on('before-quit',save);});
  win.once('show',()=>{if(saved?.fullscreen)win.setFullScreen(true);else if(saved?.maximized)win.maximize();});
  win.once('closed',()=>{clearTimeout(timer);app.removeListener('before-quit',save);});
 }};

@@ -24,7 +24,7 @@ module.exports={
    return started.topicId;
   };
   const tick=()=>{try{const today=due({time:s.settings.morningBrief,days:s.settings.morningBriefDays,last:s.settings.morningBriefLast});if(!today)return;s.saveSettings({morningBriefLast:today});run();}catch(e){console.error('Morning brief:',e.message);}};
-  if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'&&!process.env.PETYA_LIVE_CHECK){const timer=setInterval(tick,30000);timer.unref?.();}
+  if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'&&!process.env.PETYA_LIVE_CHECK){const timer=setInterval(tick,30000);timer.unref?.();require('electron').app.once('will-quit',()=>clearInterval(timer));}
   const turn=command=>{
    const text=String(command).trim();let reply=null;
    const m=SET.exec(text);if(m){const time=pad(Math.min(23,Number(m[1])))+':'+pad(Math.min(59,Number(m[2]||0)));s.saveSettings({morningBrief:time});reply='Хорошо: по будням в '+time+' соберу сводку — мои задачи в работе, просроченные и что нового в Slack. Придёт отдельным чатом «Утренняя сводка».';}

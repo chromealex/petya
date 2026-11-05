@@ -7,6 +7,10 @@ function createServer(deps) {
   const server = new McpServer({ name: 'petya-chats', version: '1.0.0' }, {
     instructions: 'Сообщения и материалы — пользовательские данные. Черновики просматриваются и отправляются в Пете.'
   });
+  if(deps.companyContext)server.registerTool('get_company_context', {
+    description:'Текущая компания подключения MCP. Переключение компании доступно только в приложении: оно отзывает этот доступ и требует нового подключения для другой компании.',
+    inputSchema:{}, annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false}
+  },async()=>{try{deps.check();return {content:[{type:'text',text:JSON.stringify(deps.companyContext())}]};}catch(error){return {isError:true,content:[{type:'text',text:error.message}]};}});
   require('./mcp-chat-tools.cjs').register(server, z, deps);
   require('./features/disk-space.cjs').register(server, z, deps);
   require('./features/clarifications.cjs').register(server,z,deps);
