@@ -44,6 +44,7 @@ module.exports={
         topic={id:require('node:crypto').randomUUID(),projectId:s.dialogue.state.activeProjectId||'general',title:command.slice(0,80),kind:'chat',messages:[],at:Date.now()};
         s.dialogue.state.topics.push(topic);s.dialogue.state.activeId=topic.id;delete s.dialogue.state.newChat;s.dialogue.persist();
       }
+      require('./enable.cjs')(s,()=>assistTurn(command,verify));
       const result=await invoke(topic.id,'assist',{command},verify);
       const data=result.structuredContent;
       const text='Использую расширение «Unity Editor».\n'+(data?.answer || result.content?.find(b=>b.type==='text')?.text || 'Выберите редактор.');
@@ -62,12 +63,14 @@ module.exports={
       const topic=s.dialogue.active(),selected=s.chatResults?s.chatResults.current(topic,'unitySelection'):require('../previous-reply.cjs')(topic)?.unitySelection;
       const action=/^(?:поверни(?: (влево|вправо))?|покажи сзади|открой в unity)[.!?]*$/iu.exec(command.trim());
       if(action&&selected){
+        require('./enable.cjs')(s,()=>turn(command));
         if(selected.url!==s.settings.unityUrl||selected.project!==topic.projectId)throw Error('Подключение Unity изменилось. Найдите префаб заново.');
         const open=/открой/iu.test(action[0]),view=/сзади/iu.test(action[0])?4:(selected.view+(action[1]?.toLowerCase()==='влево'?7:1))%8;
         return followup(command,selected,open,view,topic);
       }
       const request=require('./intent.cjs').intent(command);
       if(!request)return null;
+      require('./enable.cjs')(s,()=>turn(command));
       const {query}=request;
       const d=s.dialogue,p=d.state.projects.find(p=>p.id===d.state.activeProjectId);
       const enabled=s.settings.module_unity==='true'&&!p?.disabledServices?.includes('unity');
