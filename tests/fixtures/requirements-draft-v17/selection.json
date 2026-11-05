@@ -1,0 +1,8 @@
+{
+  "adapter_sha256": "c44f2c38edb02d006c3c6bd78ae5a75194430ff1959405009b9d2a9538f6bbb0",
+  "acquisition_passed": true,
+  "acquisition_exact": 369,
+  "acquisition_total": 369,
+  "original_replacement_failures_fixed": 4,
+  "decision": "Select fixed trained adapter for fresh evaluation; no acquisition repair or training retry. This is not a release decision."
+}
