@@ -1,10 +1,12 @@
 name: Release
-# A version tag (v0.9.1) builds the Windows installer on Windows, runs the same package and
-# tray start checks as the Tests workflow and attaches Petya-Setup.exe to the GitHub release.
+# A version tag (v0.9.1) — or a manual run on main, which creates the tag from package.json — builds
+# the Windows installer on Windows, runs the same package and tray start checks as the Tests workflow
+# and attaches Petya-Setup.exe to the GitHub release.
 # The macOS build is signed with the local Developer ID and stays a local build.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -21,9 +23,13 @@ jobs:
         with:
           python-version: '3.12'
       - run: npm ci --no-audit --no-fund
-      - name: The tag matches package.json
+      - name: The version from package.json
+        id: version
         shell: bash
-        run: test "v$(node -p "require('./package.json').version")" = "$GITHUB_REF_NAME"
+        run: |
+          tag="v$(node -p "require('./package.json').version")"
+          if [ "$GITHUB_REF_TYPE" = tag ]; then test "$tag" = "$GITHUB_REF_NAME"; fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
       - name: Build and verify the Windows installer
         run: python scripts/build.py --win
         env:
@@ -34,5 +40,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          notes=$(awk -v v="## ${GITHUB_REF_NAME#v}" 'index($0,v)==1{f=1;print;next} f&&/^## /{exit} f' docs/HISTORY.md)
-          gh release create "$GITHUB_REF_NAME" Petya-Setup.exe --title "Петя ${GITHUB_REF_NAME#v}" --notes "${notes:-Petya ${GITHUB_REF_NAME#v}}"
+          tag="${{ steps.version.outputs.tag }}"
+          notes=$(awk -v v="## ${tag#v}" 'index($0,v)==1{f=1;print;next} f&&/^## /{exit} f' docs/HISTORY.md)
+          if gh release view "$tag" >/dev/null 2>&1; then gh release upload "$tag" Petya-Setup.exe --clobber
+          else gh release create "$tag" Petya-Setup.exe --target "$GITHUB_SHA" --title "Петя ${tag#v}" --notes "${notes:-Petya ${tag#v}}"; fi
