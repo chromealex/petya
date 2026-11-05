@@ -50,8 +50,9 @@
     }catch(error){notice(error.message,true);}};
     bar.append(undo);timeout=setTimeout(()=>bar.hidden=true,10000);
   }
-  window.petyaEvents.onMcpChatChanged(async ({owner,name,revision,token})=>{
+  window.petyaEvents.onMcpChatChanged(async ({owner,name,revision,token,result})=>{
     try{
+      if(['answer_chat_clarification','cancel_chat_clarification'].includes(name)&&owner===topicSelect.value){voiceReply=null;dialogueChoices.replaceChildren();await showDialogueReply(result,false);return;}
       if(name==='bookmark_chat_answer')document.dispatchEvent(new Event('petya-bookmarks-updated'));
       if(token || name==='prepare_chat_version'){
         const drafts=await window.petya.chatDrafts();
