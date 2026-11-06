@@ -14,3 +14,13 @@ const assert=require('node:assert/strict');const {Dialogue,freshChat}=require('.
  assert.ok(d.prepareRoute('Ещё одно'),'once the chat has an answer, routing works as before');
  console.log('Fresh chat: the request stays in the chat opened for it passed');
 })().catch(e=>{console.error(e);process.exit(1);});
+// With automatic chats off (the default in the app): no routing, and tasks or bugs are answered in the open chat.
+(async()=>{let routed=0;
+ const state={projects:[{id:'general',name:'Общее'}],activeProjectId:'general',activeId:'c',topics:[{id:'c',projectId:'general',title:'Разговор',kind:'chat',messages:[{role:'user',text:'Привет',at:Date.now()},{role:'assistant',text:'Привет!',at:Date.now()}],at:Date.now()}]};
+ const d=new Dialogue({state,autoTopics:()=>false,answer:async()=>({text:'ok'}),routeTopic:async()=>{routed++;return {newTopic:true,title:'Осень'};},readers:{bugs:async()=>({text:'BW-1 — Краш (Open)'})}});
+ await d.turn('Расскажи про осень в Петербурге');assert.equal(routed,0);assert.equal(state.topics.length,1);
+ assert.equal(d.prepareRoute('А зимой?'),null);
+ const r=await d.turn('Какие баги открыты?');assert.equal(r.topicId,'c','bugs are answered in the open chat');assert.equal(state.topics.length,1);assert.equal(state.topics[0].kind,'bugs');
+ const n=await d.turn('Новая тема: отпуск');assert.equal(state.topics.length,2,'«новая тема» still makes a chat');
+ console.log('Chats: made only on request; tasks and bugs answered in the open chat passed');
+})().catch(e=>{console.error(e);process.exit(1);});

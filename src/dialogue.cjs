@@ -91,7 +91,7 @@ class Dialogue {
  // True while a request of chat `id` is running (busy() without id: any chat).
  busyChat(id){return id===undefined?this.running.size>0:this.running.has(id||'new:'+this.state.activeProjectId);}
  get busy(){return this.busyChat(this.active()?.id||'');}
- constructor({state={topics:[],activeId:''},save=()=>{},answer,readers,routeTopic,context=()=>'',days=()=>30,now=Date.now}){Object.assign(this,{state,save,answer,readers,routeTopic,context,days,now});this.running=new Set();this.ensureProjects(true);this.prune();}
+ constructor({state={topics:[],activeId:''},save=()=>{},answer,readers,routeTopic,autoTopics,context=()=>'',days=()=>30,now=Date.now}){Object.assign(this,{state,save,answer,readers,routeTopic,autoTopics:autoTopics||(()=>true),context,days,now});this.running=new Set();this.ensureProjects(true);this.prune();}
  prune(){const oldCount=(this.state.topics||[]).length;const cutoff=this.now()-Number(this.days())*86400000;const expiredRoute=this.state.lastRouting?.at<cutoff;if(expiredRoute)delete this.state.lastRouting;this.state.topics=(this.state.topics||[]).filter(t=>t.at>=cutoff);if(!this.active())this.state.activeId='';if(oldCount!==this.state.topics.length||expiredRoute)this.persist();}
  active(){return this.state.topics.find(t=>t.id===this.state.activeId);}
  ensureProjects(migrate=false){
@@ -127,7 +127,7 @@ class Dialogue {
  // Speculative classification only: no history writes, readers or user actions.
  prepareRoute(text){
   const active=this.active();
-  if(this.state.newChat||freshChat(active)||discussionOnly(text)||!this.routeTopic||active?.pending||actionRequest(text)||intent(text,active)!=='chat'||/^(?:верн[её]мся|вернись|продолжим|вернуться|новая тема|другая тема|теперь поговорим)/iu.test(text))return null;
+  if(!this.autoTopics?.()||this.state.newChat||freshChat(active)||discussionOnly(text)||!this.routeTopic||active?.pending||actionRequest(text)||intent(text,active)!=='chat'||/^(?:верн[её]мся|вернись|продолжим|вернуться|новая тема|другая тема|теперь поговорим)/iu.test(text))return null;
   const stateKey=JSON.stringify(this.state),topics=structuredClone(this.scoped()),activeId=active?.id;
   const result=Promise.resolve().then(()=>this.routeTopic(text,topics,activeId)).catch(()=>({unclear:true}));
   return {owner:this,text,stateKey,result};
@@ -156,10 +156,13 @@ class Dialogue {
    if(back){const terms=core.words(text).filter(w=>!['вернемся','вернёмся','вернись','продолжим','вернуться','теме','тема','давай'].includes(w));const matches=this.scoped().filter(t=>text.toLowerCase().includes(t.title.toLowerCase())||(kind!=='chat'&&t.kind===kind)||(terms.length&&terms.some(w=>core.words(t.title).some(v=>w.length>=4&&v.startsWith(w.slice(0,Math.min(w.length,4)))))));if(matches.length===1){this.state.activeId=matches[0].id;active=matches[0];kind=active.kind;}else return {handled:true,text:'К какой теме вернуться?',topicChoices:this.list().topics};}
    let newTopic=!!this.state.newChat||/^(?:новая тема|другая тема|теперь поговорим)/iu.test(text);
    let suggestedTitle='',unclear=false;
-   // A chat the user has just opened for this request is where it belongs: no routing to another or a new chat.
-   if(kind==='chat'&&!discussionOnly(text)&&!forcedKind&&!back&&!newTopic&&!aboutShown&&!freshChat(active)&&this.routeTopic){
+   // Chats are made by the user (the «+» button, «новый чат», «новая тема»): Petya answers in the open chat and
+   // never moves the conversation to another or a new chat on its own guess about the subject (settings.autoTopics='true' brings that back).
+   if(this.autoTopics?.()&&kind==='chat'&&!discussionOnly(text)&&!forcedKind&&!back&&!newTopic&&!aboutShown&&!freshChat(active)&&this.routeTopic){
     try{const route=await (preparedRoute?.owner===this&&preparedRoute.text===text&&preparedRoute.stateKey===JSON.stringify(this.state)?preparedRoute.result:this.routeTopic(text,this.scoped(),active?.id));unclear=!!route?.unclear;if(['bugs','anr'].includes(route?.kind))kind=route.kind;if(route?.newTopic&&!this.keepTopic?.(text,active)){newTopic=true;suggestedTitle=String(route.title||text).slice(0,80);}else if(route?.topicId){const found=this.scoped().find(t=>t.id===route.topicId);if(found){active=found;this.state.activeId=found.id;}}}catch{unclear=true;}
    }
+   // Tasks, bugs or ANR asked in an open chat are answered there; the chat takes that kind for the follow-ups.
+   if(!newTopic&&active&&kind!=='chat'&&active.kind!==kind&&!this.autoTopics?.())active.kind=kind;
    if(newTopic||!active||(kind!=='chat'&&active.kind!==kind)){
     const hint=!newTopic&&active?(active.title+' '+active.messages.slice(-2).map(m=>m.text).join(' ')):'';const previousProject=!newTopic?active?.jiraProject:undefined;const previousVersion=!newTopic?active?.versionId:undefined;
     const same=!newTopic&&this.scoped().filter(t=>t.kind===kind);

@@ -335,6 +335,7 @@ function setupHandlers() {
     };
   dialogue=new (require('./dialogue.cjs').Dialogue)({state:dialogueState,days:()=>settings.contextDays,
     save:state=>{if(!safeStorage.isEncryptionAvailable())throw new Error('Хранилище ОС недоступно.');fs.writeFileSync(dialogueFile+'.tmp',JSON.stringify({encrypted:safeStorage.encryptString(JSON.stringify(state)).toString('base64')}),{mode:0o600});fs.renameSync(dialogueFile+'.tmp',dialogueFile);},
+    autoTopics:()=>settings.autoTopics==='true',
     context:()=>memory.prune().slice(-10).map(c=>c.title+' '+c.text).join('\n').slice(-16000),
     routeTopic:async(command,topics,activeId)=>{
       requestProgress.report('Определяю тему запроса');

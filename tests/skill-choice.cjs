@@ -80,5 +80,10 @@ assert.throws(()=>user.resolve('/no-such-skill'),/не найден/);
  // A failing model never breaks the answer.
  s.settings.model='qwen';s.request=async()=>{throw Error('offline');};
  const log=console.error;console.error=()=>{};assert.equal(await skillChoice.prepare('Напиши release notes для версии 1.19'),null);console.error=log;
+ // A short follow-up to an answer made with a skill keeps it.
+ s.settings.model='qwen';s.request=async()=>({message:{content:JSON.stringify({skill:'',confidence:.9})}});
+ s.dialogue.active=()=>({messages:[{role:'user',text:'Напиши четверостишие в стиле Пушкина'},{role:'assistant',text:'…',by:'скилл verse'}]});
+ assert.equal((await skillChoice.prepare('Что-то не очень в рифму'))?.name,'verse');skillChoice.done();
+ s.dialogue.active=()=>({messages:[{role:'assistant',text:'…',by:'модель qwen'}]});assert.equal(await skillChoice.prepare('Что-то не очень в рифму'),null);
  console.log('skill choice: ok ('+first+'/'+library.BUILTIN.length+' ranked first)');
 })().catch(e=>{console.error(e);process.exit(1);});

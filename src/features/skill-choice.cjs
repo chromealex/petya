@@ -38,6 +38,8 @@ module.exports={
   const prepare=async command=>{
    chosen=null;let skill=null;
    try{skill=await choose(command);}catch(e){console.error('Skill choice:',e.message);}
+   // A short follow-up to an answer made with a skill («Давай», «Что-то не в рифму», «Короче») keeps that skill.
+   if(!skill&&s.settings.autoSkills!=='false'&&String(command).trim().length<=80){const last=[...(s.dialogue?.active?.()?.messages||[])].reverse().find(m=>m.role==='assistant');const name=/^скилл (\S+)$/u.exec(last?.by||'')?.[1];if(name)skill=skills().find(x=>x.name===name)||null;}
    if(skill){chosen={command:String(command).trim(),skill,at:Date.now()};s.requestProgress?.report('Беру скилл '+skill.name);}
    return skill;
   };
