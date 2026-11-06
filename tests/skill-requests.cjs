@@ -100,6 +100,7 @@ module.exports.TYPICAL={
  'press-release':'Напиши пресс-релиз о запуске игры',
  'social-post':'Напиши пост в Telegram про обновление',
  'product-brief':'Напиши продуктовый бриф новой фичи',
+ 'verse':'Напиши четверостишие в стиле Пушкина',
 };
 // Requests where no skill fits: small talk, facts, Petya's own tools.
 module.exports.NONE=['Привет','Как дела?','Спасибо!','Сколько будет 17 умножить на 23?','Какая погода в Москве?','Какой курс доллара?',

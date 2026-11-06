@@ -1,5 +1,6 @@
 const {randomUUID}=require('node:crypto');
 const core=require('./core.cjs');
+const freshChat=topic=>!!topic&&!(topic.messages||[]).some(m=>!m.pending);
 function aboutShownList(text,topic){
  if(actionRequest(text))return false;
  if(!/(?:^|[\s,])(?:эти|этих|этим|этими|них|этого\s+списка|этот\s+список|из\s+списка)(?=[\s,?.!]|$)/iu.test(String(text)))return false;
@@ -126,7 +127,7 @@ class Dialogue {
  // Speculative classification only: no history writes, readers or user actions.
  prepareRoute(text){
   const active=this.active();
-  if(this.state.newChat||discussionOnly(text)||!this.routeTopic||active?.pending||actionRequest(text)||intent(text,active)!=='chat'||/^(?:верн[её]мся|вернись|продолжим|вернуться|новая тема|другая тема|теперь поговорим)/iu.test(text))return null;
+  if(this.state.newChat||freshChat(active)||discussionOnly(text)||!this.routeTopic||active?.pending||actionRequest(text)||intent(text,active)!=='chat'||/^(?:верн[её]мся|вернись|продолжим|вернуться|новая тема|другая тема|теперь поговорим)/iu.test(text))return null;
   const stateKey=JSON.stringify(this.state),topics=structuredClone(this.scoped()),activeId=active?.id;
   const result=Promise.resolve().then(()=>this.routeTopic(text,topics,activeId)).catch(()=>({unclear:true}));
   return {owner:this,text,stateKey,result};
@@ -155,7 +156,8 @@ class Dialogue {
    if(back){const terms=core.words(text).filter(w=>!['вернемся','вернёмся','вернись','продолжим','вернуться','теме','тема','давай'].includes(w));const matches=this.scoped().filter(t=>text.toLowerCase().includes(t.title.toLowerCase())||(kind!=='chat'&&t.kind===kind)||(terms.length&&terms.some(w=>core.words(t.title).some(v=>w.length>=4&&v.startsWith(w.slice(0,Math.min(w.length,4)))))));if(matches.length===1){this.state.activeId=matches[0].id;active=matches[0];kind=active.kind;}else return {handled:true,text:'К какой теме вернуться?',topicChoices:this.list().topics};}
    let newTopic=!!this.state.newChat||/^(?:новая тема|другая тема|теперь поговорим)/iu.test(text);
    let suggestedTitle='',unclear=false;
-   if(kind==='chat'&&!discussionOnly(text)&&!forcedKind&&!back&&!newTopic&&!aboutShown&&this.routeTopic){
+   // A chat the user has just opened for this request is where it belongs: no routing to another or a new chat.
+   if(kind==='chat'&&!discussionOnly(text)&&!forcedKind&&!back&&!newTopic&&!aboutShown&&!freshChat(active)&&this.routeTopic){
     try{const route=await (preparedRoute?.owner===this&&preparedRoute.text===text&&preparedRoute.stateKey===JSON.stringify(this.state)?preparedRoute.result:this.routeTopic(text,this.scoped(),active?.id));unclear=!!route?.unclear;if(['bugs','anr'].includes(route?.kind))kind=route.kind;if(route?.newTopic&&!this.keepTopic?.(text,active)){newTopic=true;suggestedTitle=String(route.title||text).slice(0,80);}else if(route?.topicId){const found=this.scoped().find(t=>t.id===route.topicId);if(found){active=found;this.state.activeId=found.id;}}}catch{unclear=true;}
    }
    if(newTopic||!active||(kind!=='chat'&&active.kind!==kind)){
@@ -193,4 +195,4 @@ class Dialogue {
   }finally{this.running.delete(runningKey);}
  }
 }
-module.exports={aboutShownList,jiraHeard,chatScope,RAW,Dialogue,taskListRequest,intent,actionRequest,selectChoice,discussionOnly};
+module.exports={freshChat,aboutShownList,jiraHeard,chatScope,RAW,Dialogue,taskListRequest,intent,actionRequest,selectChoice,discussionOnly};

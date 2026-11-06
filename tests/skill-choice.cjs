@@ -8,8 +8,8 @@ const dialogueRequest=require('../src/dialogue-request.cjs');
 const {TYPICAL,NONE}=require('./skill-requests.cjs');
 
 // The library: exactly 100 valid skills with unique names, each with a typical request in the test set.
-assert.equal(library.BUILTIN.length,100);
-assert.equal(new Set(library.BUILTIN.map(s=>s.name)).size,100);
+assert.ok(library.BUILTIN.length>=100);
+assert.equal(new Set(library.BUILTIN.map(s=>s.name)).size,library.BUILTIN.length);
 for(const s of library.BUILTIN){validate(s);assert.ok(s.description.length>=40,s.name+' needs a description that says when to use it');}
 assert.deepEqual(Object.keys(TYPICAL).sort(),library.BUILTIN.map(s=>s.name).sort());
 
@@ -21,7 +21,7 @@ for(const [name,command] of Object.entries(TYPICAL)){
  assert.ok(at>=0,name+' is not shortlisted for «'+command+'»: '+short.map(r=>r.skill.name).join(', '));
  if(at===0)first++;
 }
-assert.ok(first>=85,'the right skill should usually rank first, got '+first);
+assert.ok(first>=library.BUILTIN.length*0.85,'the right skill should usually rank first, got '+first);
 // Small talk does not even reach the model.
 for(const command of ['Привет','Как дела?','Спасибо!','Ты кто?','Как меня зовут?','Какая погода в Москве?','Расскажи анекдот'])
  assert.equal(library.shortlist(command).filter(r=>r.score>=feature.MIN_SCORE).length,0,command);
@@ -31,7 +31,7 @@ const own=library.library([{name:'bug-report',description:'Мой формат �
 assert.ok(!own.some(s=>s.name==='bug-report'));
 assert.ok(own.some(s=>s.name==='my-digest'));
 assert.ok(!own.some(s=>s.name==='project-status'));
-assert.equal(own.length,100);
+assert.equal(own.length,library.BUILTIN.length);
 
 // Explicit «/name» runs a built-in skill too.
 const user=new InstructionSkills({state:[]});
@@ -80,5 +80,5 @@ assert.throws(()=>user.resolve('/no-such-skill'),/не найден/);
  // A failing model never breaks the answer.
  s.settings.model='qwen';s.request=async()=>{throw Error('offline');};
  const log=console.error;console.error=()=>{};assert.equal(await skillChoice.prepare('Напиши release notes для версии 1.19'),null);console.error=log;
- console.log('skill choice: ok ('+first+'/100 ranked first)');
+ console.log('skill choice: ok ('+first+'/'+library.BUILTIN.length+' ranked first)');
 })().catch(e=>{console.error(e);process.exit(1);});

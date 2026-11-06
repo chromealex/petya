@@ -1,10 +1,12 @@
 // Small, text-only Markdown renderer: model output never becomes executable HTML.
 // «Ход работы»: an expandable list of what Petya did (done) and is doing now (current).
+// Durations as people read them: «45 с», «4 мин 5 с», «1 ч 12 мин».
+window.formatDuration=function(ms){const t=Math.max(0,Math.round((Number(ms)||0)/1000));if(t<60)return t+' с';if(t<3600){const m=Math.floor(t/60),r=t%60;return m+' мин'+(r?' '+r+' с':'');}const h=Math.floor(t/3600),m=Math.floor(t%3600/60);return h+' ч'+(m?' '+m+' мин':'');};
 window.renderSteps = function(steps,{live=false,open=false}={}){
  const rows=(Array.isArray(steps)?steps:[]).filter(s=>s&&typeof s.label==='string'&&s.label).slice(0,40);
  const box=document.createElement('details');box.className='message-steps'+(live?' live':'');box.open=open;
  const summary=document.createElement('summary'),label=document.createElement('span'),time=document.createElement('span');
- const seconds=ms=>Math.max(0,Math.round(ms/1000))+' с';
+ const seconds=ms=>window.formatDuration(ms);
  const total=rows.reduce((sum,s)=>sum+(Number(s.ms)||0),0);
  label.className='steps-label';label.textContent=live?(rows.at(-1)?.label||'Думаю…'):'Ход работы · '+rows.length+' '+(rows.length%10===1&&rows.length%100!==11?'шаг':rows.length%10>=2&&rows.length%10<=4&&(rows.length%100<10||rows.length%100>=20)?'шага':'шагов');
  time.className='steps-duration';time.textContent=seconds(total);if(live)time.dataset.started=String(Date.now()-total);summary.append(label,time);
@@ -19,7 +21,7 @@ window.renderSteps = function(steps,{live=false,open=false}={}){
  });
  box.append(summary,list);return box;
 };
-window.setInterval?.(()=>{for(const node of document.querySelectorAll('.message-steps.live .steps-duration[data-started]'))node.textContent=Math.max(0,Math.round((Date.now()-Number(node.dataset.started))/1000))+' с';},1000);
+window.setInterval?.(()=>{for(const node of document.querySelectorAll('.message-steps.live .steps-duration[data-started]'))node.textContent=window.formatDuration(Date.now()-Number(node.dataset.started));},1000);
 window.renderMessage = function(message){
  const node=document.createElement('article');node.className=message.role==='user'?'message-user':'message-assistant';node.dataset.messageText=message.text||'';
  const role=document.createElement('span');role.className='sr-only';role.textContent=message.role==='user'?'Вы: ':'Петя: ';node.append(role);

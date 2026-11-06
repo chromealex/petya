@@ -1,4 +1,4 @@
-// The built-in skill library: 100 instruction skills Petya can pick for a request on its own or run as /name.
+// The built-in skill library: 100+ instruction skills Petya can pick for a request on its own or run as /name.
 // A skill shapes how the answer is analysed and formatted; it never grants tools, access or new facts.
 // Choosing is two steps: a cheap lexical shortlist over names and descriptions, then the local model picks
 // one skill from that shortlist or none (src/features/skill-choice.cjs).

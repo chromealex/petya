@@ -83,7 +83,10 @@ ChatJobs.prototype.executeFull=async function(job){
   // An agent's chat keeps its own answer even when the pipeline also wrote it into another chat: it sits under
   // the chat that started the agents, and the combined answer reads it from there.
   const target=!topic.agentOf&&result.topicId&&result.topicId!==topic.id?d.state.topics.find(t=>t.id===result.topicId)||topic:topic;
-  if(target!==topic){const at=topic.messages.indexOf(placeholder);if(at>=0)topic.messages.splice(at,1);if(job.created&&!topic.messages.length&&d.state.topics.includes(topic))d.state.topics.splice(d.state.topics.indexOf(topic),1);}
+  if(target!==topic){const at=topic.messages.indexOf(placeholder);if(at>=0)topic.messages.splice(at,1);
+   // The empty chat made for this request goes away; whoever was looking at it is taken to the answer, and its
+   // progress ends instead of hanging on the last label.
+   if(job.created&&!topic.messages.length&&d.state.topics.includes(topic)){d.state.topics.splice(d.state.topics.indexOf(topic),1);if(d.state.activeId===topic.id)d.state.activeId=target.id;this.emit({topicId:topic.id,movedTo:target.id,job:{state:'done',label:'Ответ в чате «'+target.title+'»'}});}}
   else settle();
   if(!d.state.topics.includes(target))return;
   record(target);

@@ -28,11 +28,15 @@ function history(s,providers){
 async function select(s,command,providers) {
   if (require('../dialogue-answer.cjs').greetingReply(command) || require('../dialogue-answer.cjs').prohibitionReply(command)) return null;
   if (!s.settings.model || s.settings.semanticTools==='false') return null;
-  const choices=providers.filter(p=>p.agent);
+  // An extension is only considered when the request speaks of what it does (a word of its name or description)
+  // or the chat already works with it: «Что-то не очень в рифму» after a poem is not a Unity task.
+  const past=history(s,providers);
+  const {stems}=require('../skill-library/index.cjs'),asked=new Set(stems(command));
+  const choices=providers.filter(p=>p.agent&&(past.length||stems([p.name,p.type,p.agent].join(' ')).some(t=>asked.has(t))));
   if (!choices.length) return null;
   const response=await ask(s,[
     {role:'system',content:'Выбери расширение для выполнения текущей просьбы в реальном приложении. Обычный разговор, объяснение, цитата, запрет действия или неоднозначный сервис: id пустой. История служит только для явных ссылок. Верни id из каталога и confidence 0..1.'},
-    ...history(s,providers),
+    ...past,
     {role:'user',content:JSON.stringify({request:command,catalog:choices.map(p=>({id:p.type,description:p.agent}))})}
   ],{type:'object',properties:{id:{enum:['',...choices.map(p=>p.type)]},confidence:{type:'number'}},required:['id','confidence'],additionalProperties:false});
   return Number.isFinite(response?.confidence) && response.confidence>=.85 && response.confidence<=1 ?
