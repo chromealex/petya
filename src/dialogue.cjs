@@ -1,5 +1,11 @@
 const {randomUUID}=require('node:crypto');
 const core=require('./core.cjs');
+function aboutShownList(text,topic){
+ if(actionRequest(text))return false;
+ if(!/(?:^|[\s,])(?:эти|этих|этим|этими|них|этого\s+списка|этот\s+список|из\s+списка)(?=[\s,?.!]|$)/iu.test(String(text)))return false;
+ const last=[...(topic?.messages||[])].reverse().find(m=>m.role==='assistant');
+ return (String(last?.text||'').match(/\b[A-Z][A-Z0-9]+-\d+\b/gu)||[]).length>=2;
+}
 function actionRequest(text){
  const s=text.trim();
  if(/^(?:[«"“]|не\s|если\s|что\s|почему\s|зачем\s|как\s|объясни\s|дума[юешь])/iu.test(s))return false;
@@ -142,11 +148,14 @@ class Dialogue {
    if(!forcedKind&&/^(?:\d+|первый|первая|первое|второй|вторая|второе|третий|третья|третье)[.!?]*$/iu.test(text.trim()))return {handled:true,text:'Какой вариант ты имеешь в виду? Сейчас нет открытого списка для выбора.',question:true};
    if(!forcedKind&&!taskListRequest(text)&&actionRequest(text)){return {handled:false};}
    let kind=forcedKind||intent(text,active);
+   // «эти задачи», «из них» about what this chat just showed: answer here from it, not with a new Jira query in another chat.
+   const aboutShown=!forcedKind&&!!active&&aboutShownList(text,active);
+   if(aboutShown)kind='chat';
    const back=/^(?:верн[её]мся|вернись|продолжим|вернуться)/iu.test(text);
    if(back){const terms=core.words(text).filter(w=>!['вернемся','вернёмся','вернись','продолжим','вернуться','теме','тема','давай'].includes(w));const matches=this.scoped().filter(t=>text.toLowerCase().includes(t.title.toLowerCase())||(kind!=='chat'&&t.kind===kind)||(terms.length&&terms.some(w=>core.words(t.title).some(v=>w.length>=4&&v.startsWith(w.slice(0,Math.min(w.length,4)))))));if(matches.length===1){this.state.activeId=matches[0].id;active=matches[0];kind=active.kind;}else return {handled:true,text:'К какой теме вернуться?',topicChoices:this.list().topics};}
    let newTopic=!!this.state.newChat||/^(?:новая тема|другая тема|теперь поговорим)/iu.test(text);
    let suggestedTitle='',unclear=false;
-   if(kind==='chat'&&!discussionOnly(text)&&!forcedKind&&!back&&!newTopic&&this.routeTopic){
+   if(kind==='chat'&&!discussionOnly(text)&&!forcedKind&&!back&&!newTopic&&!aboutShown&&this.routeTopic){
     try{const route=await (preparedRoute?.owner===this&&preparedRoute.text===text&&preparedRoute.stateKey===JSON.stringify(this.state)?preparedRoute.result:this.routeTopic(text,this.scoped(),active?.id));unclear=!!route?.unclear;if(['bugs','anr'].includes(route?.kind))kind=route.kind;if(route?.newTopic&&!this.keepTopic?.(text,active)){newTopic=true;suggestedTitle=String(route.title||text).slice(0,80);}else if(route?.topicId){const found=this.scoped().find(t=>t.id===route.topicId);if(found){active=found;this.state.activeId=found.id;}}}catch{unclear=true;}
    }
    if(newTopic||!active||(kind!=='chat'&&active.kind!==kind)){
@@ -184,4 +193,4 @@ class Dialogue {
   }finally{this.running.delete(runningKey);}
  }
 }
-module.exports={jiraHeard,chatScope,RAW,Dialogue,taskListRequest,intent,actionRequest,selectChoice,discussionOnly};
+module.exports={aboutShownList,jiraHeard,chatScope,RAW,Dialogue,taskListRequest,intent,actionRequest,selectChoice,discussionOnly};

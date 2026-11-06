@@ -35,3 +35,27 @@ const f=require('../src/features/list-followup.cjs');
  topic.messages=[{role:'assistant',text:'Привет'}];assert.equal(await listFollowup.turn('Какие из этих задач сделать сначала?'),null);
  console.log('List follow-up: «какие из этих сначала» and status filters («на ревью», «в работе») answer from the latest shown list, closed items skipped, partial lists named, no list → pipeline passed');
 })().catch(e=>{console.error(e);process.exit(1);});
+// «На кого эти задачи можно перевести?»: colleagues from the team directory with their Jira load, in this chat, nothing reassigned.
+(async()=>{
+ const list='Незавершённые назначенные задачи: 3.\nBW-4577 — Лиги: подгружать лидерборд пачками (New)\nBW-4580 — Портрет героя в углу сейфов (New)\nBW-4100 — Старое (Done)';
+ const topic={id:'mine',messages:[{role:'user',text:'Какие задачи в 19.3 на мне?'},{role:'assistant',text:list}]};let sent=null,jql='';
+ const settings={model:'m',ollamaUrl:'x',userName:'Alex',teamMembers:JSON.stringify([{name:'Alex Silaev',role:'Lead'},{name:'Oleg Petrov',role:'Client developer',jiraId:'a2'},{name:'Polina Samarina',role:'Project Manager',jiraId:'a3'}])};
+ const s={settings,core:{localEndpoint:u=>u},requestProgress:{report(){}},
+  workspace:{settings:()=>({}),api:async(_r,o)=>{jql=JSON.parse(o.body).jql;return {isLast:true,issues:[{fields:{assignee:{accountId:'a2'}}},{fields:{assignee:{accountId:'a2'}}},{fields:{assignee:{accountId:'a3'}}}]};}},
+  request:async(_u,o)=>{sent=JSON.parse(JSON.parse(o.body).messages[1].content);return {message:{content:'BW-4577 — Лиги → Oleg Petrov: клиентский разработчик'}};},
+  dialogue:{active:()=>topic,rememberAction:(c,t)=>topic.messages.push({role:'user',text:c},{role:'assistant',text:t}),persist(){}}};
+ const {listFollowup}=f.setup(s);
+ const r=await listFollowup.turn('На кого эти задачи можно перевести?');
+ assert.equal(r.by,'кому передать');assert.equal(r.topicId,'mine','answered in this chat');
+ assert.deepEqual(sent.tasks.map(t=>t.key),['BW-4577','BW-4580'],'only open tasks of the shown list');
+ assert.deepEqual(sent.team.map(p=>p.name),['Oleg Petrov','Polina Samarina'],'the user is not a candidate');
+ assert.equal(sent.team[0].openTasks,2);assert.match(jql,/assignee in \("a2","a3"\)/);
+ assert.match(r.text,/Oleg Petrov/);assert.match(r.text,/Сам ничего не переназначал/);
+ // one named task of the list; an empty team says how to fill it
+ const one=await listFollowup.turn('На кого можно переназначить BW-4580?');assert.deepEqual(sent.tasks.map(t=>t.key),['BW-4580']);
+ settings.teamMembers='[]';assert.match((await listFollowup.turn('Кому из команды их отдать?')).text,/Заполни команду/);
+ // the dialogue keeps a question about the shown list in this chat
+ const {aboutShownList}=require('../src/dialogue.cjs');
+ assert.ok(aboutShownList('Что общего у этих задач?',{messages:[{role:'assistant',text:list}]}));assert.ok(!aboutShownList('Какие баги открыты?',{messages:[{role:'assistant',text:list}]}));
+ console.log('List follow-up: «на кого эти задачи перевести» suggests colleagues with Jira load in the same chat passed');
+})().catch(e=>{console.error(e);process.exit(1);});

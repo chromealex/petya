@@ -46,7 +46,8 @@
   }
   function paint(){
     const selected=state.items.find(item=>item.id===state.selected);
-    bar.hidden=!state.items.length;clear.hidden=!selected;
+    // The bar shows only what the next question is about; an object is picked on its card or when Petya asks.
+    bar.hidden=!selected&&!restricted;clear.hidden=!selected;
     choose.textContent=selected?selected.title:'Выбрать объект · '+choices().length;
     choose.title=selected?.subtitle||'Выбрать результат из этого чата';
     paintPicker();
@@ -87,7 +88,7 @@
     if(result.changeEditor)await window.showChangeEditor?.();
     if(result.attachment)await window.openChatAttachment(result.attachment,topicSelect.value);
     if(Number.isInteger(result.resultJump))await window.jumpToChatMessage(result.resultJump);
-    if(result.resultChoices?.length){restricted={ids:result.resultChoices,action:result.resultAction};paintPicker();picker.hidden=false;}
+    if(result.resultChoices?.length){restricted={ids:result.resultChoices,action:result.resultAction};paint();picker.hidden=false;}
   };
   refresh();
 })();

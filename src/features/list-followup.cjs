@@ -14,6 +14,9 @@ const GROUPS=[
  {name:'не закрыты',ask:/незаверш|не\s+закрыт|не\s+готов|открыт|активн/iu,status:null},
  {name:'закрыты',ask:/закрыт|готов|сделан|выполнен|done|released|завершён|завершен/iu,status:CLOSED}];
 const clean=command=>String(command).trim().replace(/^петя[\s,:.!?—-]*/iu,'');
+// «На кого эти задачи можно перевести?», «Кому из команды их отдать?»: who could take the shown tasks.
+const ASSIGN=/(?:на\s+кого|кому)\s+(?:\p{L}+\s+){0,4}?(?:перевести|переназначить|отдать|передать|перекинуть|скинуть|делегировать|раздать|поручить)|кто\s+(?:\p{L}+\s+){0,2}?(?:может|мог\s+бы|сможет)\s+(?:\p{L}+\s+){0,2}?(?:взять|забрать|сделать|подхватить)\s+(?:эти|их|из\s+них)/iu;
+function assignQuestion(command=''){return ASSIGN.test(clean(command));}
 function question(command=''){const text=clean(command);return ASK.test(text)&&CHOOSE.test(text);}
 // «Какие из них на ревью?» → the status group; «из них» alone without a status is not a filter.
 function filterQuestion(command=''){const text=clean(command);if(!ASK.test(text)&&!/^(?:а\s+)?(?:какие|что|сколько|покажи|оставь)\b.*\b(?:из\s+них|из\s+этих|среди\s+них|из\s+списка)/iu.test(text))return null;
@@ -28,11 +31,11 @@ function lastList(messages=[]){for(const m of [...messages].reverse().filter(m=>
 const shownOf=text=>{const m=/найдено\s+(\d+)/u.exec(String(text||''));return m?Number(m[1]):0;};
 module.exports={
  name:'list-followup',
- question,filterQuestion,items,open,pick,lastList,
+ question,filterQuestion,assignQuestion,items,open,pick,lastList,
  setup(s){
   const model=async(system,data)=>{const response=await s.request(s.core.localEndpoint(s.settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:s.settings.model,stream:false,think:false,options:{temperature:0.2,num_predict:900},messages:[{role:'system',content:system},{role:'user',content:JSON.stringify(data)}]})});return String(response?.message?.content||'').trim();};
   const turn=async command=>{
-   const choose=question(command),group=!choose&&filterQuestion(command);if(!choose&&!group)return null;
+   const assign=assignQuestion(command),choose=!assign&&question(command),group=!assign&&!choose&&filterQuestion(command);if(!assign&&!choose&&!group)return null;
    let topic=s.dialogue.active();let list=lastList(topic?.messages);
    // The conversation may have moved to another chat since the list (a calculation, «вернёмся к задачам»):
    // take the latest list of this project from the last 30 minutes, preferring one about what is named.
@@ -41,6 +44,7 @@ module.exports={
     if(found){topic=found.t;list=lastList(found.t.messages);s.dialogue.state.activeId=found.t.id;}}
    if(!list)return null; // no list in this chat: the usual pipeline answers
    const all=list.rows,total=shownOf(list.text),partial=total>all.length?' (в списке показаны '+all.length+' из '+total+')':'';
+   if(assign){const keys=String(command).match(/[A-Z][A-Z0-9]+-\d+/gu)||[],named=open(all).filter(r=>keys.includes(r.key));if(keys.length&&!named.length)return null;return record(command,await reassign(command,named.length?named:open(all),named.length?'':partial),'кому передать');}
    if(group){const rows=pick(all,group);
     let text=rows.length?'Из показанного списка '+group.name+' — '+rows.length+partial+':\n'+rows.map(r=>r.key+' — '+r.title+(r.status?' ('+r.status+')':'')).join('\n'):'В показанном списке'+partial+' задач со статусом «'+group.name+'» нет. Статусы в списке: '+[...new Set(all.map(r=>r.status).filter(Boolean))].join(', ')+'.';
     // Part of a longer list: the rest may hold such tasks, so say how to ask for all of them.
@@ -57,6 +61,34 @@ module.exports={
    const skipped=all.length-rows.length;if(skipped&&rows.length)text+='\n\nЗакрытые задачи из списка не учитывал: '+skipped+'.';
    if(partial&&rows.length)text+='\n\nВыбирал из показанной части'+partial+'.';
    return record(command,text,'выбор из списка');
+  };
+  // Suggest colleagues from the team directory for the open tasks of the list, with their Jira load when known.
+  // Nothing is reassigned here: «переназначь KEY на Имя» does it with a confirmation.
+  const reassign=async(command,rows,partial)=>{
+   if(!rows.length)return 'В показанном списке все задачи уже закрыты — переводить нечего.';
+   const me=String(s.settings.userName||'').trim().toLocaleLowerCase();
+   const team=require('../team.cjs').members(s.settings).filter(m=>!me||m.name.toLocaleLowerCase()!==me&&!m.name.toLocaleLowerCase().startsWith(me+' '));
+   if(!team.length)return 'Не из кого выбирать: в разделе «Команда» никого нет. Скажи «Заполни команду» — соберу коллег из Slack и Jira, и тогда подскажу, кому отдать эти задачи.';
+   s.requestProgress?.report('Смотрю, кому из команды подходят задачи');
+   const load=await workload(team).catch(()=>null);
+   const people=team.map(m=>({name:m.name,role:m.role||'',responsibilities:String(m.responsibilities||'').slice(0,300),projects:String(m.projects||'').slice(0,200),...load&&m.jiraId?{openTasks:load.get(m.jiraId)||0}:{}}));
+   if(!s.settings.model)return 'Команда: '+people.map(p=>p.name+(p.role?' — '+p.role:'')).join('; ')+'. Чтобы подобрать исполнителя к каждой задаче, настрой локальную модель.';
+   let text=require('../informal.cjs').informal(await model('Ты Петя, рабочий ассистент. Пользователь спрашивает, на кого из коллег можно перевести задачи из показанного списка. Для каждой задачи предложи 1–2 человека только из списка команды, с короткой причиной по роли, обязанностям, проектам и числу открытых задач (openTasks, если есть: меньше — свободнее). Если по данным никто явно не подходит — так и скажи для этой задачи. Не придумывай людей, роли и сроки. Формат: «KEY — название → Имя: причина». На «ты», без вступлений.',{question:command,tasks:rows.slice(0,30),team:people.slice(0,40)}));
+   if(!text)return 'Не получилось подобрать: модель не ответила. Команда: '+people.map(p=>p.name+(p.role?' — '+p.role:'')).join('; ')+'.';
+   if(!load)text+='\n\nЗагрузку коллег в Jira не проверил'+(team.some(m=>m.jiraId)?' — Jira не ответила.':' — у карточек команды нет Jira ID.');
+   if(partial)text+='\n\nПодбирал для показанной части'+partial+'.';
+   return text+'\n\nСам ничего не переназначал. Чтобы перевести, скажи, например, «переназначь '+rows[0].key+' на '+people[0].name.split(' ')[0]+'».';
+  };
+  // Open tasks per Jira account of the team, from one search.
+  const workload=async team=>{
+   const ids=[...new Set(team.map(m=>m.jiraId).filter(Boolean))].slice(0,40);if(!ids.length||!s.workspace?.api)return null;
+   const counts=new Map();let token;
+   for(let page=0;page<5;page++){
+    const r=await s.workspace.api('/rest/api/3/search/jql',{method:'POST',body:JSON.stringify({jql:'assignee in ('+ids.map(id=>JSON.stringify(id)).join(',')+') AND statusCategory != Done',maxResults:100,fields:['assignee'],...token?{nextPageToken:token}:{}})},s.workspace.settings?.());
+    for(const issue of r?.issues||[]){const id=issue.fields?.assignee?.accountId;if(id)counts.set(id,(counts.get(id)||0)+1);}
+    if(r?.isLast!==false||!r?.nextPageToken)break;token=r.nextPageToken;
+   }
+   return counts;
   };
   const record=(command,text,by)=>{s.dialogue.rememberAction(command,text);const t=s.dialogue.active();const msg=t?.messages?.at(-1);if(msg?.role==='assistant')msg.by=by;s.dialogue.persist();
    return {handled:true,text,by,topicId:t?.id,topicTitle:t?.title,messages:t?.messages};};
