@@ -1,0 +1,30 @@
+name: Model release
+# A model tag (petya-v1.0) publishes that version's folder as a GitHub release; the weights live
+# on this `models` branch, never on main or in the project folder.
+on:
+  push:
+    tags: ['petya-v*']
+permissions:
+  contents: write
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Check the hashes and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="$GITHUB_REF_NAME"; dir="$tag"
+          test -f "$dir/model.json"
+          python3 - "$dir" <<'PY'
+          import hashlib,json,sys,pathlib
+          d=pathlib.Path(sys.argv[1]);m=json.loads((d/'model.json').read_text())
+          for name,expected in m['adapter']['files'].items():
+              assert hashlib.sha256((d/name).read_bytes()).hexdigest()==expected,name
+          PY
+          pre=$(python3 -c "import json,sys;print('--prerelease' if 'experimental' in json.load(open('$dir/model.json'))['status'] else '')")
+          if gh release view "$tag" >/dev/null 2>&1; then gh release upload "$tag" "$dir"/* --clobber
+          else gh release create "$tag" "$dir"/* --target "$GITHUB_SHA" --title "Petya model ${tag#petya-v}" --notes-file "$dir/NOTES.md" $pre; fi
