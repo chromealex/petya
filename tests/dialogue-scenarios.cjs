@@ -39,8 +39,8 @@ function fixture(){
  }
  {
   const f=fixture();await f.turn('Проверь баги Альфа');const id=f.d.active().id;
-  await f.turn('Посмотри ANR');const n=f.queries.length;
-  assert.equal((await f.turn('Вернёмся к багам')).topicId,id);assert.equal(f.queries.length,n);
+  f.d.select('');await f.turn('Посмотри ANR');const n=f.queries.length;
+  const back=await f.turn('Вернёмся к багам');assert.notEqual(back.topicId,id);assert.equal(back.chatOffer.topicId,id);assert.equal(f.queries.length,n);f.d.select(id);
   await f.turn('Обнови');assert.equal(f.queries.length,n+1);
   f.offline();assert.equal((await f.turn('Обнови')).error,true);assert.equal(f.d.busy,false);
  }

@@ -17,7 +17,7 @@ class QwenSpeech{
    if(result.error||typeof result.text!=='string')request.reject(Error('Ошибка Qwen3-ASR: '+String(result.error||'нет текста').slice(0,250)));else request.resolve(result.text);
   });return this.starting;
  }
- async transcribe(audio){await this.ensure();if(!this.child)throw Error('Распознавание остановлено.');return new Promise((resolve,reject)=>{const id=++this.sequence;this.requests.set(id,{resolve,reject,timer:setTimeout(()=>this.stop('Распознавание Qwen3-ASR не ответило вовремя.'),30000)});this.child.stdin.write(JSON.stringify({id,audio:Buffer.from(audio).toString('base64')})+'\n');});}
+ async transcribe(audio,language=''){await this.ensure();if(!this.child)throw Error('Распознавание остановлено.');return new Promise((resolve,reject)=>{const id=++this.sequence;this.requests.set(id,{resolve,reject,timer:setTimeout(()=>this.stop('Распознавание Qwen3-ASR не ответило вовремя.'),30000)});this.child.stdin.write(JSON.stringify({id,audio:Buffer.from(audio).toString('base64'),...language?{language}:{}})+'\n');});}
  stop(message='Распознавание остановлено.'){
   const child=this.child;this.child=null;clearTimeout(this.startTimer);this.ready?.reject(Error(message));this.ready=null;this.starting=null;
   for(const request of this.requests.values()){clearTimeout(request.timer);request.reject(Error(message));}this.requests.clear();child?.kill();

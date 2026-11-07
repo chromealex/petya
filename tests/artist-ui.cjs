@@ -24,16 +24,17 @@ require.cache[require.resolve('./smoke.cjs')] = { exports: async win => {
     await ui("window.extensionHost.open('artist')");
     await wait(() => ui("!$('artist-enable').disabled && $('artist-enable').getBoundingClientRect().width > 0"));
     await ui("$('artist-url').value='http://127.0.0.1:" + server.address().port + "'; $('artist-connect').click();");
-    await wait(() => ui("!$('artist-form').hidden"));
-    await ui("$('artist-prompt').value='Ночной маяк'; $('artist-format').value='portrait'; $('artist-quality').value='draft'; $('artist-draw').click(); view('home');");
+    // Settings hold the model and the server only; drawing is asked for in the chat.
+    assert.equal(await ui("!!document.getElementById('artist-prompt')"), false);
+    await wait(() => ui("$('artist-model-status').textContent.includes('свой сервер')"));
+    const drawing = ui("window.petya.feature('artist','generate',{prompt:'Ночной маяк',format:'portrait',quality:'draft'})");await ui("view('home')");
     await wait(() => Boolean(respond));
     assert.deepEqual([body.prompt, body.width, body.height, body.steps], ['Ночной маяк', 640, 1024, 12]);
     await wait(() => ui("!!document.querySelector('[data-notification-id=artist] progress')"));
     assert.equal(await ui("window.petya.feature('artist','status').then(s=>s.busy)"), true);
     await assert.rejects(ui("window.petya.feature('artist','generate',{prompt:'Второй рисунок'})"), /занят/);
     respond();
-    await wait(() => ui("!$('artist-result').hidden"));
-    assert.equal(await ui("$('artist-download').href"), 'data:image/png;base64,' + image);
+    assert.equal((await drawing).image, image);
     assert.equal(await ui("window.petya.feature('artist','status').then(s=>s.phase)"), 'done');
     const failure = ui("window.petya.feature('artist','generate',{prompt:'Отменяемый рисунок'})");
     await wait(() => ui("window.petya.feature('artist','status').then(s=>s.busy)"));

@@ -12,7 +12,7 @@ module.exports=async win=>win.webContents.executeJavaScript(`(async()=>{
  const question={handled:true,question:true,text:'Какую версию посмотреть?',clarificationOptions:['В репозитории','В Jira'],topicId:first};
  await showDialogueReply(question,false);await new Promise(r=>setTimeout(r,100));
  // Choices are plain buttons of the unified clarification panel, next to its free-text Продолжить/Отмена.
- const choices=()=>[...dialogueChoices.querySelectorAll('button')].filter(b=>!['Продолжить','Отмена'].includes(b.textContent.trim())).length;
+ const choices=()=>[...dialogueChoices.querySelectorAll('button')].filter(b=>!['Ответить','Продолжить','Отмена'].includes(b.textContent.trim())).length;
  assert(choices()===2,'Choices vanished after background completion');
  assert(typeof voiceReply==='function','Clarification lost its answer handler');
  assert((await window.petya.chatJobState(first)).result.question,'New clarification was not stored');

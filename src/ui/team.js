@@ -1,6 +1,13 @@
 (() => {
  const list=$('team-list'),form=$('team-form'),status=$('team-status');let loaded=false,dirty=false;
- const fields=[['name','Имя',120],['aliases','Как вы называете человека',240],['role','Роль',160],['projects','Проекты',400],['responsibilities','За что отвечает',1600],['email','Email',254],['slackId','Slack member ID (необязательно)',80],['jiraId','Jira',160],['jiraName','Имя в Jira',200]];
+ const fields=[['name','Имя',120],['aliases','Как вы называете человека',240],['role','Роль',160],['projects','Проекты',400],['responsibilities','За что отвечает',1600],['email','Email',254],['slackId','Slack member ID (необязательно)',80],['jiraId','Jira',160],['jiraName','Имя в Jira',200],['zoomName','Имя в Zoom',240]];
+ // Zoom names seen in meetings: the list for «Имя в Zoom» and the automatic match as each card's hint.
+ let zoomNames=[];
+ window.paintZoomNames=()=>{let list=document.getElementById('team-zoom-names');if(!list){list=document.createElement('datalist');list.id='team-zoom-names';document.body.append(list);}
+  list.replaceChildren(...zoomNames.map(z=>Object.assign(document.createElement('option'),{value:z.name,label:z.member?'сейчас: '+z.member:'не сопоставлен'})));
+  for(const input of document.querySelectorAll('#team-list [data-field="zoomName"]')){const owner=input.closest('.team-member')?.querySelector('[data-field="name"]')?.value.trim();const auto=zoomNames.filter(z=>z.member&&z.member===owner).map(z=>z.name);input.placeholder=auto.length?'Сам определил: '+auto.slice(0,3).join(', '):'Определю сам по имени';}};
+ const loadZoomNames=()=>window.petya.feature('materials','zoomNames').then(v=>{zoomNames=v||[];window.paintZoomNames();}).catch(()=>{});
+ document.addEventListener('petya-view',e=>{if(e.detail==='team')loadZoomNames();});loadZoomNames();
  function add(member={}){
   const card=document.createElement('article');card.className='card team-member';
   const details=document.createElement('details');details.open=!member.name;
@@ -18,12 +25,16 @@
    if(['name','role','projects'].includes(key))input.addEventListener('input',updateSummary);
    if(key==='email')input.type='email';
    if(key==='aliases')input.placeholder='Полина, Поля';
+   // «Имя в Zoom»: empty means Petya matches the name himself (shown as a hint); a chosen one wins. Names seen
+   // in meetings are offered in the list.
+   if(key==='zoomName'){input.setAttribute('list','team-zoom-names');input.placeholder='Определю сам по имени';input.dataset.member=member.name||'';wrap.title='Как человек подписан в Zoom. Можно несколько через запятую.';}
    if(key==='projects')input.placeholder='Название проекта, ключ Jira';
    if(key==='responsibilities'){input.rows=2;input.placeholder='Например: QA, проверка релизных сборок Android';}
    input.addEventListener('invalid',()=>{details.open=true;});
    wrap.append(input);editor.append(wrap);
   }
   addJiraPicker(editor,member);
+  window.paintZoomNames?.();
   updateSummary();
   const actions=document.createElement('div');actions.className='actions team-member-wide';
   const remove=document.createElement('button');remove.type='button';remove.className='quiet';remove.textContent='Удалить участника';remove.onclick=()=>{dirty=true;card.remove();status.textContent='Изменения не сохранены.';};
@@ -51,5 +62,6 @@
  form.addEventListener('input',()=>{dirty=true;status.textContent='Изменения не сохранены.';});
  document.addEventListener('petya-team-updated',()=>{if(dirty){status.textContent='Петя обновил команду. У вас есть несохранённые правки — обновите список перед сохранением.';$('team-save').disabled=true;return;}load().catch(e=>notice(e.message,true));});
  const reload=document.createElement('button');reload.type='button';reload.textContent='Обновить список';reload.onclick=run(()=>load(true));$('team-add').after(reload);
- form.onsubmit=run(async()=>{const members=[...list.children].map(card=>Object.fromEntries([...card.querySelectorAll('[data-field]')].map(e=>[e.dataset.field,e.value])));$('team-save').disabled=true;try{await window.petya.teamSave({members,notes:$('team-notes').value});dirty=false;status.textContent='Команда сохранена. Петя учитывает её в диалоге и при подготовке задач.';}finally{$('team-save').disabled=false;}});
+ window.saveTeamNow=()=>new Promise(resolve=>{const done=()=>{document.removeEventListener('petya-team-saved',done);resolve();};document.addEventListener('petya-team-saved',done);form.requestSubmit();setTimeout(done,5000);});
+ form.onsubmit=run(async()=>{const members=[...list.children].map(card=>Object.fromEntries([...card.querySelectorAll('[data-field]')].map(e=>[e.dataset.field,e.value])));$('team-save').disabled=true;try{await window.petya.teamSave({members,notes:$('team-notes').value});dirty=false;status.textContent='Команда сохранена. Петя учитывает её в диалоге и при подготовке задач.';}finally{$('team-save').disabled=false;document.dispatchEvent(new Event('petya-team-saved'));}});
 })();

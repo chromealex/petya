@@ -9,8 +9,12 @@ function matchesContact(row,query){const q=normalize(query);if(q.startsWith('@')
 function clean(text){return String(text).replace(/^петя[,\s]+/iu,'').trim();}
 function denied(text){return /(?:^|\s)(?:не\s+(?:найди|ищи|открывай|переключай|вводи|нажимай)|как\s+(?:найти|открыть|искать)|например|допустим|объясни|что значит|если бы)(?:\s|$)/iu.test(text);}
 const telegram=/(?:в\s+)?(?:телеграм(?:м)?(?:е|ме)?|telegram|тг)/iu;
+// «Сделай скрин из слака», «возьми управление компом и сфоткай экран»: a screenshot of an app window or the screen.
+const APPS=[[/slack|слак/iu,'Slack'],[/telegram|телеграм|(?:^|\s)тг(?=\s|$)/iu,'Telegram'],[/chrome|хром/iu,'Google Chrome'],[/safari|сафари/iu,'Safari'],[/zoom|зум/iu,'Zoom'],[/jira|жир/iu,'Jira'],[/unity|юнит/iu,'Unity'],[/finder|файндер/iu,'Finder'],[/figma|фигм/iu,'Figma'],[/xcode/iu,'Xcode']];
+function screenshot(s){if(!/(?:скрин|скриншот|снимок экрана|screenshot|сфоткай|сфотографируй)/iu.test(s)||/(?:как сделать|как снять|почему|что такое|(?:^|\s)не\s+(?:делай|снимай|надо|нужно))/iu.test(s))return null;const app=APPS.find(([re])=>re.test(s.replace(/скрин\S*|скриншот\S*/giu,' ')));return {intent:'screenshot',app:app?.[1]||''};}
 function direct(text){
  const s=clean(text);if(denied(s))return null;
+ const shot=screenshot(s);if(shot)return shot;
  if(telegram.test(s)&&/(?:найди|поищи|отыщи|найдешь|найдёшь|можешь найти)/iu.test(s)){
  let q=s.replace(telegram,'').replace(/^(?:сходи|зайди|загляни|открой|перейди)\s*(?:и\s+)?/iu,'').replace(/^\s*и\s+/iu,'').replace(/(?:^|\s)там(?=\s|$)/giu,' ').replace(/^(?:пожалуйста[,\s]*|можешь\s+|можно\s+|ты\s+)*/iu,'').replace(/(?:найди|поищи|отыщи|найдешь|найдёшь|найти)/iu,'').replace(/(?:^|\s)(?:мне|пожалуйста|контакт|человека|по имени)(?=\s|$)/giu,' ').replace(/^[\s,:«»"']+|[\s,.!?«»"']+$/gu,'').trim();
  if(q&&!/[\n;]|(?:\sи\s|сообщени|отправ|напиш)/iu.test(q)&&q.length<=120)return {intent:'contact_search',app:'Telegram',query:q};
@@ -32,11 +36,12 @@ function parseRoute(response,command){let r;try{r=JSON.parse(response.message?.c
  if(!['copy','paste','undo','redo','selectAll','save'].includes(r.key))return null;return {intent:'key',key:r.key};
 }
 class ComputerIntent{
- constructor({computer,model=async()=>null}){Object.assign(this,{computer,model});}
- async turn(command){if(!candidate(command))return null;const generation=this.computer.generation;let route;try{route=parseRoute(await this.model(command),command);}catch{}if(!route)route=direct(command);
+ constructor({computer,model=async()=>null,capture=null}){Object.assign(this,{computer,model,capture});}
+ async turn(command){if(!candidate(command))return null;const generation=this.computer.generation;let route=direct(command)?.intent==='screenshot'?direct(command):null;if(!route){try{route=parseRoute(await this.model(command),command);}catch{}}if(!route)route=direct(command);
  if(!route)return null;
  if(generation!==this.computer.generation)throw Error('Управление изменилось. Повторите просьбу.');
  if(route.intent==='clarify')return {handled:true,question:true,text:route.question};
+ if(route.intent==='screenshot'){if(!this.capture)throw Error('Скриншоты здесь недоступны.');return this.capture({app:route.app,command});}
  if(route.intent==='contact_search')return this.search(route.query);
  if(route.intent==='app_focus'){
  const names={'телеграм':'Telegram','телеграмм':'Telegram','telegram':'Telegram','сафари':'Safari','safari':'Safari','хром':'Google Chrome','гугл хром':'Google Chrome','chrome':'Google Chrome','google chrome':'Google Chrome','файндер':'Finder','finder':'Finder','слак':'Slack','slack':'Slack','блокнот':process.platform==='win32'?'notepad':'TextEdit','заметки':'Notes','notes':'Notes','терминал':'Terminal','terminal':'Terminal'};
@@ -54,4 +59,4 @@ class ComputerIntent{
 
  }
 }
-module.exports={ComputerIntent,routingRequest,parseRoute,direct,candidate,matchesContact,searchName,stem};
+module.exports={ComputerIntent,routingRequest,parseRoute,direct,candidate,matchesContact,searchName,stem,screenshot};

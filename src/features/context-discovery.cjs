@@ -13,7 +13,11 @@ function resolve({rows,topic,project,channels=[],members=[],now=Date.now()}){
   return r.source==='Zoom'&&project.name?.length>2&&String(r.title+' '+r.text).toLocaleLowerCase().includes(project.name.toLocaleLowerCase());
  });
  const meetings=eligible.filter(r=>r.source==='Zoom').sort((a,b)=>b.at-a.at);
- if(meetings.length){const latest=meetings[0];return {kind:'found',rows:eligible.filter(r=>(r.source==='Zoom'||r.source==='Микрофон')&&(latest.sessionId?r.sessionId===latest.sessionId:r.id===latest.id)).sort((a,b)=>a.at-b.at),reason:'Последний сохранённый разговор Zoom'};}
+ if(meetings.length){const latest=meetings[0],echo=require('./materials.cjs').echoes(eligible),bad=r=>echo.has(r.id)||!!require('../speech-transcript.cjs').hallucination(r.text),talk=eligible.filter(r=>(r.source==='Zoom'||r.source==='Микрофон')&&!bad(r));
+  // A meeting whose recording restarted is several sessions within minutes of each other: take them all.
+  const ids=new Set([latest.sessionId||latest.id]);let start=Math.min(...talk.filter(r=>ids.has(r.sessionId||r.id)).map(r=>r.at));
+  for(let grown=true;grown;){grown=false;for(const r of talk){const id=r.sessionId||r.id;if(ids.has(id))continue;const rows=talk.filter(x=>(x.sessionId||x.id)===id);if(Math.max(...rows.map(x=>x.at))>=start-15*60000&&Math.min(...rows.map(x=>x.at))<=latest.at){ids.add(id);start=Math.min(start,...rows.map(x=>x.at));grown=true;}}}
+  return {kind:'found',rows:talk.filter(r=>ids.has(r.sessionId||r.id)).sort((a,b)=>a.at-b.at),reason:'Последний сохранённый разговор Zoom'};}
  const slack=eligible.filter(r=>r.source==='Slack'&&(r.messages||[]).some(m=>!m.bot_id&&m.user&&(!members.length||members.includes(m.user))&&m.at<=now&&now-m.at<=7*DAY&&requestText.test(m.text||''))).sort((a,b)=>b.at-a.at);
  const source=topic?.slackSource?.url&&slack.filter(r=>r.url===topic.slackSource.url);
  const candidates=source?.length?source:slack;
@@ -22,10 +26,10 @@ function resolve({rows,topic,project,channels=[],members=[],now=Date.now()}){
  if(candidates.length)return {kind:'found',rows:candidates.slice(0,5),reason:'Запросы команды в сохранённых сообщениях Slack'};
  return {kind:'empty',text:'Не нашёл подходящий сохранённый разговор Zoom или запрос команды в Slack для этого проекта. Уточни проект или канал, либо включи запись контекста встречи и обнови Slack.'};
 }
-function evidence(result){
+function evidence(result,team=[]){
  if(result.kind!=='found')return result;
  let budget=32000;
- return {...result,rows:result.rows.map(r=>{const text=String(r.text).slice(0,Math.min(12000,budget));budget-=text.length;return {id:r.id,source:r.source,title:r.title,at:r.at,url:r.url||'',text,truncated:text.length<String(r.text).length};}).filter(r=>r.text)};
+ return {...result,rows:result.rows.map(r=>{const text=String(r.text).slice(0,Math.min(12000,budget));budget-=text.length;return {id:r.id,source:r.source,...r.source==='Микрофон'&&r.sessionId?{speaker:'пользователь (его микрофон)'}:r.source==='Zoom'&&r.sessionId?{speaker:r.speaker?(()=>{const l=require('../team-match.cjs').label(r.speaker,team);return l.name+(l.role?', '+l.role:'')+(l.member?' (из команды)':' (имя в Zoom)');})():'собеседники (звук встречи)'}:{},title:r.title,at:r.at,url:r.url||'',text,truncated:text.length<String(r.text).length};}).filter(r=>r.text)};
 }
 module.exports={name:'contextDiscovery',defaults:{},validate(){},resolve,evidence,
  setup(s){return {contextDiscovery:{async turn(command){
@@ -34,7 +38,7 @@ module.exports={name:'contextDiscovery',defaults:{},validate(){},resolve,evidenc
   if(s.attachments.list().length||current?.attachments?.length||current?.messages?.some(m=>m.role==='user'&&!isContextReference(m.text)&&Date.now()-(m.at||current.at)<30*60000))return null;
   s.requestProgress.report('Ищу контекст в Zoom и запросах команды в Slack');
   const project=s.dialogue.state.projects.find(p=>p.id===s.dialogue.state.activeProjectId),context=s.projectMemory.context();
-  const collect=()=>evidence(resolve({rows:s.memory.prune().filter(r=>r.source!=='Slack'||s.modules.enabled(s.settings,'slack')),topic:current,project,channels:context.projectChannels,members:s.team.members(s.settings).map(m=>m.slackId).filter(Boolean)}));
+  const collect=()=>evidence(resolve({rows:s.memory.prune().filter(r=>r.source!=='Slack'||s.modules.enabled(s.settings,'slack')),topic:current,project,channels:context.projectChannels,members:s.team.members(s.settings).map(m=>m.slackId).filter(Boolean)}),(()=>{try{return s.team.members(s.settings);}catch{return [];}})());
   let found=collect();
   if(found.kind==='empty'&&s.modules.enabled(s.settings,'slack')&&s.slackSync){
    try{await s.slackSync.start();found=collect();if(found.kind==='empty')found.text+=' Slack обновляется; из-за лимитов сервиса ещё не все каналы могли загрузиться.';}

@@ -10,7 +10,7 @@ function guess(name=''){
  return /[ая]$/u.test(first)||/(?:a|ia|ya)$/u.test(first)?'f':'m';
 }
 const SAY=/^(?:петя[,!\s]+)?(?:пожалуйста[,\s]+)?(?:обращайся ко мне|говори со мной|называй меня)\s+в\s+(женском|мужском)\s+роде[.!]*$|^(?:петя[,!\s]+)?я\s+(девушка|женщина|парень|мужчина)[.!]*$/iu;
-module.exports={
+module.exports={matches:t=>SAY.test(String(t||'').trim()),
  name:'address',
  guess,
  defaults:{userGender:''},

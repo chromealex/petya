@@ -22,7 +22,10 @@ module.exports={
   let chosen=null; // {command, skill, at}: read by the dialogue request built for this command
   const dialogueRequest=require('../dialogue-request.cjs');
   dialogueRequest.skill=command=>{if(!chosen||Date.now()-chosen.at>TTL||String(command).trim()!==chosen.command)return null;chosen.used=true;return chosen.skill;};
-  const skills=()=>library.library(s.instructionSkills?.list?.()||[]);
+  // Installed skill packages and skills from the open project's folders (skills/, .claude/skills, …) join the library.
+  const projectSkills=()=>{try{const d=s.dialogue,project=d?.state?.projects?.find(p=>p.id===(d.active?.()?.projectId||d.state.activeProjectId));const own=(()=>{try{return s.installedSkills?.()||[];}catch{return [];}})();return [...own,...(project?require('../skill-library/project-skills.cjs').forProject(project,new Set(library.BUILTIN.map(x=>x.name))):[])];}catch{return [];}};
+  let cached=null;
+  const skills=()=>{const own=s.instructionSkills?.list?.()||[],extra=projectSkills(),key=[own,extra];if(cached&&cached.own===own&&cached.extra.length===extra.length&&cached.extra.every((x,i)=>x===extra[i]))return cached.list;cached={own,extra,list:[...extra,...library.library(own)]};return cached.list;};
   const choose=async command=>{
    const text=String(command||'').trim();
    if(!text||s.settings.autoSkills==='false'||!s.settings.model||s.settings.semanticTools==='false')return null;

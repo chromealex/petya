@@ -5,14 +5,15 @@ class SlackContext {
   reset() { this.epoch++; this.queue = []; this.next = {}; this.status = { message: 'Настройки Slack изменены', pending: 0 }; }
   start() {
     const s = this.settings(); if (!s.slackToken && !s.slackCredential) throw new Error('Подключите Slack.');
-    const ids = channels(s.slackChannels);
+    // Without a channel list, the channels the user is a member of are loaded.
+    const memberOnly = !String(s.slackChannels || '').trim(), ids = memberOnly ? ['*'] : channels(s.slackChannels);
     if (!this.queue.length && !this.running) {
       // Rescan the whole retained window so edits and replies on older roots are discovered.
       const oldest = String((this.now() - Number(s.contextDays) * DAY) / 1000);
       this.discovered = new Set(ids.filter(id => channelId.test(id)));
       this.listCursors = new Set();
       this.queue = [...this.discovered].map(channel => ({ method: 'conversations.history', channel, oldest }));
-      if (ids.some(id => !channelId.test(id))) this.queue.unshift({ method: 'conversations.list', selectors: ids, oldest });
+      if (ids.some(id => !channelId.test(id))) this.queue.unshift({ method: 'conversations.list', selectors: ids, oldest, memberOnly });
       this.status.errors = [];
       this.status.message = 'Обновляю Slack, включая треды…';
     }
@@ -34,7 +35,7 @@ class SlackContext {
       if (!data.ok) throw new Error('Slack: ' + data.error);
       if (job.method === 'conversations.list') {
         for (const c of data.channels || []) {
-          if (!c.is_archived && channelId.test(c.id) && matches(c.name, job.selectors) && !this.discovered.has(c.id)) {
+          if (!c.is_archived && channelId.test(c.id) && (!job.memberOnly || c.is_member) && matches(c.name, job.selectors) && !this.discovered.has(c.id)) {
             this.discovered.add(c.id);
             this.queue.push({ method: 'conversations.history', channel: c.id, oldest: job.oldest });
           }

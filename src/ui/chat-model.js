@@ -4,25 +4,28 @@
  const select=document.createElement('select');select.setAttribute('aria-label','Модель для ответов в этом чате');
  wrap.append(select);
  const size=n=>n>=1e9?(n/1e9).toLocaleString('ru-RU',{maximumFractionDigits:1})+' ГБ':n?Math.round(n/1e6)+' МБ':'';
- let loading=0;
+ let loading=0,selection=null;
  async function refresh(){
   const epoch=++loading;let state;
-  try{state=await window.petya.chatModels();}catch{state={models:[],current:'',defaultModel:'',error:'Ollama недоступна'};}
+  try{state=await window.petya.chatModels();}catch{state={models:[],current:'',defaultModel:'',error:'Не удалось получить список моделей'};}
   if(epoch!==loading)return;
-  const options=[new Option('Модель: '+(state.defaultModel||'по умолчанию'),'')];options[0].title='По умолчанию из «Подключения → Ollama»';
-  for(const m of state.models){if(m.name===state.defaultModel)continue;const o=new Option(m.name+(m.size?' · '+size(m.size):''),m.name);options.push(o);}
+  const options=[new Option('Модель: '+(state.defaultModel||'по умолчанию'),'')];options[0].title='Модель по умолчанию из настроек';
+  // Models only for images and video are picked by Petya itself for attachments, not chosen for answers.
+  const visionOnly=new Set(['gemma3:4b']);
+  for(const m of state.models){if(m.name===state.defaultModel||visionOnly.has(m.name))continue;const o=new Option(m.name+(m.size?' · '+size(m.size):''),m.name);options.push(o);}
   if(state.current&&!state.models.some(m=>m.name===state.current))options.push(new Option(state.current+' · не найдена',state.current));
   // Optional models are not kept on disk: offer to download the ones that are missing.
-  let optional=[];try{optional=(await window.petya.feature('optional-models','list')).models.filter(m=>!m.installed&&!state.models.some(x=>x.name===m.name));}catch{}
+  let optional=[];try{optional=(await window.petya.feature('optional-models','list')).models.filter(m=>!m.installed&&!m.vision&&!state.models.some(x=>x.name===m.name));}catch{}
   if(epoch!==loading)return;
   if(optional.length){const group=document.createElement('optgroup');group.label='Скачать при необходимости';for(const m of optional){const o=new Option('Скачать '+m.name+' · '+size(m.size),'download:'+m.name);o.title=m.purpose;group.append(o);}options.push(group);}
+  selection={chatId:state.chatId,current:state.current||''};
   select.replaceChildren(...options);select.value=state.current||'';
   select.disabled=!state.models.length&&!state.current;wrap.title=state.error||'Модель для ответов в этом чате';
   wrap.dataset.custom=state.current?'true':'';
  }
- select.onchange=async()=>{const value=select.value;
+ select.onchange=async()=>{const value=select.value,chosen=selection,epoch=loading;
   if(value.startsWith('download:')){const name=value.slice(9);try{const r=await window.petya.feature('optional-models','download',name);notice('Скачиваю '+r.model+' (~'+size(r.size)+'). Прогресс — в уведомлениях; после загрузки модель появится в списке.');}catch(e){notice(e.message);}refresh();return;}
- try{const r=await window.petya.chatModelSet(value);wrap.dataset.custom=r.current?'true':'';notice(r.current?'В этом чате отвечает '+r.current+'.':'В этом чате отвечает модель по умолчанию.');}catch(e){notice(e.message,true);refresh();}};
+ try{const r=await window.petya.chatModelSet(value,chosen?.chatId,chosen?.current);if(selection!==chosen||epoch!==loading){refresh();return;}if(selection)selection.current=r.current||'';wrap.dataset.custom=r.current?'true':'';notice(r.current?'В этом чате отвечает '+r.current+'.':'В этом чате отвечает модель по умолчанию.');}catch(e){notice(e.message,true);refresh();}};
  select.onfocus=()=>refresh();
  function place(){const mic=document.querySelector('#home .mic-control');if(mic&&wrap.previousElementSibling!==mic)mic.after(wrap);}
  document.addEventListener('petya-topic-changed',()=>{place();refresh();});

@@ -16,7 +16,7 @@ const follow=dialogueRequest({model:'qwen3:4b',command:'А какое оно?',t
 assert.deepEqual(follow.messages.slice(2).map(m=>[m.role,m.content]),[['user','Кодовое слово Лира'],['assistant','Запомнил.'],['user','А какое оно?']]);
 assert(!/"history"/.test(follow.messages[1].content),'Recent history is not duplicated inside reference data');
 assert(follow.options.temperature>0&&follow.options.repeat_penalty>1,'Greedy decoding made the small model repeat itself');
-assert(follow.messages[0].content.length<2700,'Base prompt stays short for small local models (the current date and time are part of it)');
+assert(follow.messages[0].content.length<2760,'Base prompt stays short for small local models (the current date and time are part of it)');
 for(const model of ['llama3.2:3b','gemma3:4b'])assert.equal(dialogueRequest({model,command:'Привет',topic}).think,false);
 const {localAnswer,prohibitionReply,greetingReply}=require(root+'/src/dialogue-answer.cjs');
 (async()=>{

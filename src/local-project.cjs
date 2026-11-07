@@ -18,11 +18,13 @@ async function readProject(value,command=''){
  try{const {stdout}=await exec('git',['-C',root,'ls-files','--cached','--others','--exclude-standard','-z'],{timeout:5000,maxBuffer:2*1024*1024,env:{...process.env,GIT_OPTIONAL_LOCKS:'0'}});names=stdout.split('\0').filter(Boolean);}
  catch{names=(await fs.readdir(root,{withFileTypes:true})).filter(e=>e.isFile()).map(e=>e.name);limited=true;}
  names=[...new Set(names)].filter(n=>!blocked.test(n)&&allowed.test(n)).sort();if(names.length>2000){names=names.slice(0,2000);limited=true;}
+ const instructions=await require('./features/project-instructions.cjs').readRoot(root);
+ names=names.filter(name=>!require('./features/project-instructions.cjs').isInstruction(name));
  const words=String(command).toLowerCase().match(/[\p{L}\p{N}_-]{3,}/gu)||[];
  const score=n=>(/^(?:readme(?:\.[^.]+)?|agents\.md|package\.json|pyproject\.toml|cargo\.toml)$/i.test(n)?100:0)+words.filter(w=>n.toLowerCase().includes(w)).length*20;
  const candidates=names.filter(n=>score(n)>0).sort((a,b)=>score(b)-score(a)||a.localeCompare(b)).slice(0,8);
  const files=[];let remaining=14000;
  for(const name of candidates){try{const content=await safeFile(root,name);if(content===null)continue;const text=content.slice(0,Math.min(5000,remaining));if(!text)break;files.push({path:name,text,truncated:text.length<content.length});remaining-=text.length;}catch{limited=true;}}
- return {root,readAt:new Date().toISOString(),files,structure:names.slice(0,100),partial:true,notice:limited?'Неполная выборка; без Git доступны только файлы корня.':'Выборка документации и файлов по словам в вопросе, не полный анализ репозитория.'};
+ return {root,instructions,readAt:new Date().toISOString(),files,structure:names.slice(0,100),partial:true,notice:limited?'Неполная выборка; без Git доступны только файлы корня.':'Выборка документации и файлов по словам в вопросе, не полный анализ репозитория.'};
 }
 module.exports={readProject,rootFolder,safeFile};

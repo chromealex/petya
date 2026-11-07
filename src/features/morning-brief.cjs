@@ -12,7 +12,7 @@ function due({time,days='1-5',last='',now=new Date()}){
  const today=now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
  return last!==today&&(now.getHours()>h||now.getHours()===h&&now.getMinutes()>=m)&&now.getHours()<h+3?today:false; // not hours late after the Mac slept all morning
 }
-module.exports={
+module.exports={matches:t=>{t=String(t||'').trim();return SET.test(t)||OFF.test(t);},
  name:'morning-brief',due,REQUEST,
  defaults:{morningBrief:'',morningBriefDays:'1-5',morningBriefLast:''},
  validate(next){if(!valid(next.morningBrief))next.morningBrief='';if(!/^[1-7]-[1-7]$/.test(next.morningBriefDays))next.morningBriefDays='1-5';if(!/^(?:\d{4}-\d{2}-\d{2})?$/.test(next.morningBriefLast))next.morningBriefLast='';},

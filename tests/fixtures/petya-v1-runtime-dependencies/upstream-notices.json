@@ -1,0 +1,49 @@
+{
+  "sources": [
+    {
+      "name": "sentencepiece",
+      "version": "0.2.3",
+      "metadata_url": "https://pypi.org/pypi/sentencepiece/0.2.3/json",
+      "url": "https://files.pythonhosted.org/packages/54/83/0664683546ffca8e36653d39d6217c361d931953f40ce28210b56927a9b6/sentencepiece-0.2.3.tar.gz",
+      "sha256": "21618ad31f0453a1ebf5ec58defed99758d54af0b670546ecac639ddd8b86fbd",
+      "filename": "sentencepiece-0.2.3.tar.gz",
+      "files": [
+        {
+          "archive_member": "sentencepiece-0.2.3/sentencepiece/LICENSE",
+          "saved_path": "upstream-notices/sentencepiece/LICENSE",
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "bytes": 11358
+        },
+        {
+          "archive_member": "sentencepiece-0.2.3/sentencepiece/third_party/darts_clone/LICENSE",
+          "saved_path": "upstream-notices/sentencepiece/third_party/darts_clone/LICENSE",
+          "sha256": "155f59997298ee336602c49f9c1110f268ac394ca2197eb02647a3555935ad52",
+          "bytes": 1481
+        },
+        {
+          "archive_member": "sentencepiece-0.2.3/sentencepiece/third_party/libsais/LICENSE",
+          "saved_path": "upstream-notices/sentencepiece/third_party/libsais/LICENSE",
+          "sha256": "e38f5960984c2350dba530a89395789c0ea6039a1b551511b478b94dec1d5dfa",
+          "bytes": 10757
+        }
+      ]
+    },
+    {
+      "name": "tokenizers",
+      "version": "0.23.3",
+      "metadata_url": "https://pypi.org/pypi/tokenizers/0.23.3/json",
+      "url": "https://files.pythonhosted.org/packages/e0/7c/2cabb2174e772636683008f2c5621949b645da7d303c596589e84516a184/tokenizers-0.23.3.tar.gz",
+      "sha256": "cded33237c77caeef62944d32aa9a7ef42bdce2b3497e18d137e072a8c4be438",
+      "filename": "tokenizers-0.23.3.tar.gz",
+      "files": [
+        {
+          "archive_member": "tokenizers-0.23.3/tokenizers/LICENSE",
+          "saved_path": "upstream-notices/tokenizers/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "bytes": 11357
+        }
+      ]
+    }
+  ],
+  "scope": "Supplemental notice texts from exact-version PyPI source distributions, verified against PyPI archive SHA-256. No code installed or executed. This does not prove binary build provenance or complete bundled Rust/C++ dependency notice coverage."
+}

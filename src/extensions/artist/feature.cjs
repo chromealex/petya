@@ -81,8 +81,17 @@ module.exports = {
         throw Error(message);
       } finally { recheck = undefined; }
     }
-    const snapshot = () => ({ ...state, enabled: s.settings.artistEnabled === 'true', url: s.settings.artistUrl });
-    return { artist: { generate, stop }, ipc: { generate: input => generate(input), status: snapshot, stop,
+    let installedNow = false;
+    const snapshot = async () => { installedNow = await runtime.installed().catch(() => false); return { ...state, enabled: s.settings.artistEnabled === 'true', url: s.settings.artistUrl, installed: installedNow }; };
+    // The model is downloaded from settings with progress; drawing itself is asked for in the chat.
+    async function download() {
+      if (controller) throw Error('Художник занят. Дождитесь результата.');
+      controller = new AbortController();
+      try { publish('download', 'Скачиваю генератор и модель…', 0); await runtime.install(); controller = null; publish('done', 'Модель скачана. Рисунки можно просить в чате.'); }
+      catch (error) { controller = null; publish('error', error.message); throw error; }
+      return snapshot();
+    }
+    return { artist: { generate, stop }, ipc: { generate: input => generate(input), status: snapshot, download, stop,
       async remove() {
         if (controller) throw Error('Дождитесь завершения работы Художника.');
         const result = await dialog.showMessageBox(s.win, { message: 'Удалить скачанный генератор и модель Художника с этого компьютера?',

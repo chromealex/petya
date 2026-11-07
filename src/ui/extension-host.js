@@ -10,12 +10,15 @@
  }
  async function mount(entry){
   for(const [file] of entry.scripts)await load('../extensions/'+entry.id+'/'+file);
-  const card=document.querySelector('[data-extension="'+entry.id+'"]');if(card){card.hidden=entry.service?!moduleEnabled(entry.id):!entry.installed;fold(card);}
+  let card=document.querySelector('[data-extension="'+entry.id+'"]');
+  // An installed extension without its own settings still gets a card, so everything added is visible in settings.
+  if(!card&&!entry.service&&entry.installed){card=document.createElement('article');card.className='card';card.dataset.extension=entry.id;const h=document.createElement('h2');h.textContent=entry.name||entry.id;const p=document.createElement('p');p.textContent=(entry.description||'')+' Используется в чате, настроек нет.';card.append(h,p);document.getElementById('settings-form').append(card);}
+  if(card){card.hidden=entry.service?!moduleEnabled(entry.id):!entry.installed;fold(card);}
   document.dispatchEvent(new CustomEvent('petya-extension-open',{detail:entry.id}));
   document.dispatchEvent(new Event('petya-extensions-changed'));return card;
  }
- window.extensionHost={async remove(id){entries=await window.petya.feature('extensionUI','uninstall',id);const card=document.querySelector('[data-extension="'+id+'"]');if(card)card.hidden=true;document.dispatchEvent(new Event('petya-extensions-changed'));},async render(parent,message){for(const entry of entries)for(const [key,handler] of Object.entries(entry.results||{})){const data=message.extensionData?.[key]||message[key];if(!data)continue;try{parent.dataset.extensionPresentation='true';if(!window[handler])await mount(entry);window[handler]?.(parent,data);}catch(e){notice(e.message,true);}}},async open(id){entries=await window.petya.feature('extensionUI','install',id);const entry=entries.find(e=>e.id===id),card=await mount(entry);view('settings');if(card)window.revealSettings?.(card);else notice('Расширение добавлено. Используйте его в чате.');}};
- window.addEventListener('load',()=>{for(const card of document.querySelectorAll('[data-extension]'))fold(card);document.dispatchEvent(new Event('petya-extensions-changed'));});
+ window.extensionHost={async remove(id){entries=await window.petya.feature('extensionUI','uninstall',id);const card=document.querySelector('[data-extension="'+id+'"]');if(card)card.hidden=true;document.dispatchEvent(new Event('petya-extensions-changed'));},async render(parent,message){for(const entry of entries)for(const [key,handler] of Object.entries(entry.results||{})){const data=message.extensionData?.[key]||message[key];if(!data)continue;try{parent.dataset.extensionPresentation='true';if(!window[handler])await mount(entry);window[handler]?.(parent,data);}catch(e){notice(e.message,true);}}},async open(id,{stay=false}={}){entries=await window.petya.feature('extensionUI','install',id);const entry=entries.find(e=>e.id===id),card=await mount(entry);if(stay){notice('«'+(entry.name||id)+'» добавлено.');return;}view('settings');if(card)window.revealSettings?.(card);else notice('Расширение добавлено. Используйте его в чате.');}};
+ window.addEventListener('load',()=>{for(const card of document.querySelectorAll('[data-extension]'))fold(card);for(const entry of entries)if(!entry.service&&entry.installed&&!document.querySelector('[data-extension="'+entry.id+'"]'))mount(entry).catch(()=>{});document.dispatchEvent(new Event('petya-extensions-changed'));});
  for(const entry of entries)if(entry.template){const form=document.getElementById('settings-form');form.querySelector(':scope>button[type=submit]').insertAdjacentHTML('beforebegin',entry.template);}
  const scripts=[];
  for(const node of document.querySelectorAll('script[type="application/petya-script"]')){

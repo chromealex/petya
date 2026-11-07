@@ -103,7 +103,15 @@ module.exports=async function(ctx) {
     s.settings.semanticTools='true';
     const app={...s,unity:feature,saveSettings:patch=>Object.assign(s.settings,patch),requestProgress:{report(){}}};
     const extension=require('../src/features/extension-replies.cjs').setup(app).extensionReplies;
-    const chatReply=await extension.turn('Разберись почему персонаж проваливается сквозь пол');
+    const beforeChatApproval=calls.length;
+    let approval;
+    await assert.rejects(extension.turn('Разберись почему персонаж проваливается сквозь пол'),error=>{
+      assert.equal(error.name,'InputRequired');assert.deepEqual(error.spec.options,['Разрешить','Отмена']);
+      approval=error;return true;
+    });
+    assert.equal(calls.length,beforeChatApproval,'Chat must not contact Unity before consent');
+    const chatReply=await approval.resume('Разрешить');
+    assert.throws(()=>approval.resume('Разрешить'),/уже ответили/);
     assert.match(chatReply.text,/Предлагаю включить коллайдер/);
     const proposed=topic.messages.at(-1).unityAgent;
     assert.ok(proposed.proposalId);

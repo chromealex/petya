@@ -11,6 +11,24 @@ function isTeamFill(text) {
  if(rolesRequest(text))return true;
  return /^(?:пожалуйста[,\s]+)?(?:заполни|дополни|обнови|собери|сформируй)\s+(?:(?:раздел|справочник|состав|карточки)\s+)?(?:нашу\s+|мою\s+)?(?:команду|команды|команда)(?=$|[\s,.!:—-])/iu.test(clean(text));
 }
+// «тестирование и пм» → role «QA-инженер, менеджер проекта», responsibilities «Тестирование, управление проектом»:
+// the user's words are turned into the usual titles and areas instead of being copied as typed.
+const ROLES=[[/тест|(?:^|[^\p{L}])(?:qa|кьюа)(?![\p{L}])/iu,'QA-инженер','тестирование'],[/(?:^|[^\p{L}])(?:пм|pm|проджект)(?![\p{L}])|менеджер\s+проект|управлени\S*\s+проект/iu,'менеджер проекта','управление проектом'],
+ [/продакт|(?:^|[^\p{L}])(?:product|po)(?![\p{L}])/iu,'продакт-менеджер','продукт'],[/андроид|android/iu,'Android-разработчик','Android'],[/(?:^|[^\p{L}])(?:ios|айос)(?![\p{L}])/iu,'iOS-разработчик','iOS'],
+ [/б[эе]к(?:енд)?|backend|сервер/iu,'бэкенд-разработчик','сервер'],[/фронт|frontend|(?:^|[^\p{L}])веб(?![\p{L}])/iu,'фронтенд-разработчик','веб'],[/unity|юнити/iu,'Unity-разработчик','Unity'],
+ [/гейм\s*диз|геймдиз|game\s*design|баланс/iu,'гейм-дизайнер','геймдизайн'],[/(?:^|[^\p{L}])(?:арт|art|2d|3d)(?![\p{L}])|художни/iu,'художник','арт'],[/дизайн|(?:^|[^\p{L}])(?:ui|ux)(?![\p{L}])/iu,'дизайнер','дизайн интерфейсов'],
+ [/аналит|analytic/iu,'аналитик','аналитика'],[/devops|девопс|инфраструктур|сборк|билд/iu,'DevOps-инженер','инфраструктура и сборки'],[/тимлид|team\s*lead|(?:^|[^\p{L}])лид(?![\p{L}])/iu,'тимлид','руководство командой'],
+ [/маркет/iu,'маркетолог','маркетинг'],[/поддержк|саппорт|support/iu,'специалист поддержки','поддержка'],[/(?:^|[^\p{L}])(?:ai|ии|ml)(?![\p{L}])|нейросет/iu,'ML-инженер','AI'],[/клиент|client/iu,'разработчик клиента','клиент']];
+// Capitalise the first letter unless the word is spelled its own way (iOS, macOS, eSports).
+const upper=v=>!v||/^[a-z][A-Z]/.test(v)?v:v[0].toLocaleUpperCase('ru')+v.slice(1);
+function prettyRole(text){
+ const parts=String(text||'').split(/\s*(?:,|;|\/|&|\+|\s(?:и|а также)\s)\s*/u).map(v=>v.trim().replace(/[.!]+$/,'')).filter(Boolean);
+ const roles=[],areas=[];
+ for(const part of parts){const hit=ROLES.find(([re])=>re.test(part));if(hit){if(!roles.includes(hit[1]))roles.push(hit[1]);if(!areas.includes(hit[2]))areas.push(hit[2]);}else{const v=/[A-Za-z]/.test(part)?part:part.toLocaleLowerCase('ru');if(!areas.some(x=>x.toLowerCase()===v.toLowerCase()))areas.push(v);}}
+ return {role:upper(roles.join(', ')),responsibilities:upper(areas.map(a=>/^[A-Z]/.test(a)?a:a).join(', '))};
+}
+// After the quotes are checked against the source: the words become titles and areas (prettyRole).
+function polish(row){const m=row.member;if(!m.responsibilities)return row;const p=prettyRole(m.responsibilities);return {...row,member:{...m,...!m.role&&p.role?{role:p.role}:{},responsibilities:p.responsibilities||m.responsibilities}};}
 function directRows(sources) {
  const rows=[];
  for(const source of sources)for(const line of source.text.replace(/^(?:петя[\s,:.!?—-]*)?(?:заполни|дополни|обнови|собери|сформируй)\s+(?:(?:раздел|справочник|состав|карточки)\s+)?(?:нашу\s+|мою\s+)?(?:команду|команды|команда)[\s:,.!—-]*/iu,'').split(/[\n;]|,(?=\s*[\p{L}]+(?:\s+[\p{L}]+){0,2}\s+[—–-])/u)) {
@@ -82,7 +100,7 @@ class TeamFill {
    if(!sources.length)return this.askDetails('В памяти пока нет сведений о коллегах. Назовите имена и обязанности, например: «Полина — тестирование, Иван — серверная часть».');
    const extracted=roster===null?(this.extract?await this.extract(sources,clean(command)):directRows(sources.filter(s=>s.direct))):null;
    if(epoch!==this.epoch||scope!==this.scope()||baseline!==(this.settings().teamMembers||'[]')||notes!==(this.settings().teamRoles||''))return this.reply('Сведения или компания изменились во время заполнения. Повторите команду.');
-   const stats={};let candidates=roster===null?grounded(extracted,sources,stats):roster;const members=team.members(settings),conflicts=[];let added=0,filled=0,ambiguous=0;
+   const stats={};let candidates=roster===null?grounded(extracted,sources,stats).map(polish):roster;const members=team.members(settings),conflicts=[];let added=0,filled=0,ambiguous=0;
    // Nothing in Slack or memory: the people assigned in Jira are the team (names, Jira IDs, projects).
    // Nobody with roles in the window: the people from the sidebar's direct messages are the team (names only).
    let fromSidebar=false;if(!candidates.length&&screenSources){const names=directMessages(screenSources.map(x=>x.text).join('\n'));if(names.length){candidates=names.map(name=>({member:team.validate([{name}])[0],evidence:'Slack: личные сообщения · '+name,source:'Slack · личные сообщения'}));fromSidebar=true;}}
@@ -117,7 +135,7 @@ class TeamFill {
    const missing=withoutRows.filter(c=>c.slackProfile==='missing').map(c=>c.member.name),empty=withoutRows.filter(c=>c.slackProfile==='empty').map(c=>c.member.name);
    const slackNote=!slack?'':slack.error?' Профили Slack прочитать не удалось: '+slack.error+'.':missing.length&&(slack.limited||!slack.complete)?' Slack '+(slack.limited?'ограничил запросы':'отдал не весь список пользователей')+', поэтому профили не найдены у: '+missing.slice(0,8).join(', ')+'. Повтори «Добавь команде роли» через пару минут.':missing.length?' В Slack не нашёл профили: '+missing.slice(0,8).join(', ')+' (возможно, другое имя в Slack).':'';
    const emptyNote=empty.length?' В профиле Slack не указана должность у: '+empty.slice(0,8).join(', ')+'.':'';
-   return this.reply(summary+(fromSidebar?' Взял коллег из личных сообщений Slack слева.':'')+(fromJira?' Взял исполнителей задач из Jira.':'')+(enriched?' Роли и обязанности добавил для '+enriched+': должность — из профиля Slack, обязанности — по компонентам и меткам их задач в Jira.':'')+(without.length?' Без роли остались: '+without.slice(0,8).join(', ')+(without.length>8?' и ещё '+(without.length-8):'')+'.'+slackNote+emptyNote+' В Jira у них нет компонентов и меток. Допиши в «Команде» или скажи «Заполни команду: '+without[0]+' — тестирование».':'')+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled)});
+   return this.reply(summary+(fromSidebar?' Взял коллег из личных сообщений Slack слева.':'')+(fromJira?' Взял исполнителей задач из Jira.':'')+(enriched?' Роли и обязанности добавил для '+enriched+': должность — из профиля Slack, обязанности — по компонентам и меткам их задач в Jira.':'')+(without.length?' Без роли остались: '+without.slice(0,8).join(', ')+(without.length>8?' и ещё '+(without.length-8):'')+'.'+slackNote+emptyNote+' В Jira у них нет компонентов и меток. Напиши в ответ, кто чем занимается, — например «'+without[0]+' — тестирование и PM», можно несколькими строками.':'')+' Сведения сохранены в разделе «Команда».',{teamUpdated:!!(added||filled),...without.length?(this.pending={kind:'details',scope:this.scope(),at:this.now(),prefix:'Заполни команду\n'},{question:true,teamFillReply:true,clarificationInput:{placeholder:without[0]+' — тестирование и PM'}}):{}});
   }catch(e){
    // Slack rate limit: offer to read the Slack app window instead of waiting.
    if(!screenSources&&(e.status===429||/HTTP 429|ограничил запросы/u.test(e.message||''))){const rows=await this.fromJira().catch(()=>null);if(rows?.length){this.busy=false;return this.turn(command,false,null,rows);}}
@@ -137,7 +155,7 @@ class TeamFill {
  // The question was recorded into a chat created for it: the pending answer belongs to that chat now.
  rescope(){if(this.pending)this.pending.scope=this.scope();}
  askDetails(text){this.pending={kind:'details',scope:this.scope(),at:this.now()};return this.reply(text,{question:true,teamFillReply:true});}
- question(){const p=this.pending,c=p.conflicts[0],member=JSON.parse(p.baseline)[c.index];return this.reply(p.summary+' '+member.name+', '+labels[c.key]+': сохранено «'+member[c.key]+'», найдено «'+c.value+'» ('+c.source+'). Оставить прежнее или заменить?',{teamUpdated:true,question:true,teamFillReply:true});}
+ question(){const p=this.pending,c=p.conflicts[0],member=JSON.parse(p.baseline)[c.index];return this.reply(p.summary+' '+member.name+', '+labels[c.key]+': сохранено «'+member[c.key]+'», найдено «'+c.value+'» ('+c.source+'). Оставить прежнее или заменить?',{teamUpdated:true,question:true,teamFillReply:true,clarificationOptions:['Оставить «'+String(member[c.key]).slice(0,40)+'»','Заменить на «'+String(c.value).slice(0,40)+'»'],clarificationInput:{choicesOnly:true}});}
  respond(command){
   const p=this.pending;
   if(!p||p.scope!==this.scope()||this.now()-p.at>600000){this.pending=null;return this.reply('Уточнение устарело. Скажите «заполни команду» ещё раз.');}
@@ -162,8 +180,9 @@ class TeamFill {
    this.busy=false;return this.turn((p.prefix||'Заполни команду\n')+command);
   }
   if(p.baseline!==(this.settings().teamMembers||'[]')){this.pending=null;return this.reply('Команда уже изменена. Повторите заполнение, чтобы учесть новые данные.');}
-  const replace=/^(?:замени|заменить|обнови|новое|второй|второе|2)$/.test(value);
-  const keep=/^(?:оставь|оставить|оставь прежнее|оставь как есть|прежнее|первый|первое|1)$/.test(value);
+  // The buttons send «Оставить «…»» / «Заменить на «…»»; words and numbers work too.
+  const replace=/^(?:замени(?:ть)?(?:\s+на\s+.*)?|обнови|новое|второй|второе|2)$/.test(value);
+  const keep=/^(?:оставь|оставить|оставь прежнее|оставить прежнее|оставь как есть|прежнее|первый|первое|1|оставить\s+«.*)$/.test(value);
   if(!replace&&!keep)return this.question();
   const c=p.conflicts.shift(),members=JSON.parse(p.baseline);
   if(replace){members[c.index][c.key]=c.value;this.save(team.validate(members));p.baseline=JSON.stringify(members);}

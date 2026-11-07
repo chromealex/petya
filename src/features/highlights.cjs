@@ -22,7 +22,8 @@ function collect(state,topic,command=''){
 function list(state,topicId){const topic=state.topics.find(t=>t.id===topicId);const project=topic&&state.projects?.find(p=>p.id===topic.projectId);return {chat:(topic?.highlights||[]).map(h=>({...h,scope:'chat'})),project:(project?.highlights||[]).map(h=>({...h,scope:'project'})),projectName:project?.name||''};}
 function owner(state,topicId,scope){const topic=state.topics.find(t=>t.id===topicId);if(!topic)throw Error('Чат не найден.');if(scope==='project'){const project=state.projects?.find(p=>p.id===topic.projectId);if(!project)throw Error('Проект не найден.');return project;}return topic;}
 function find(state,id){for(const holder of [...state.topics,...(state.projects||[])]){const i=(holder.highlights||[]).findIndex(h=>h.id===id);if(i>=0)return {holder,i};}throw Error('Отметка не найдена.');}
-module.exports={
+const RECALL=/^(?:петя[,!\s]+)?(?:а\s+)?(?:что|какие|покажи|напомни)(?=[\s,]).{0,40}?(?:важн\p{L}*\s+(?:не\s+забыть|помнить)|отмеча\p{L}*\s+(?:как\s+)?важн|отметк\p{L}*(?!\p{L})|важное(?!\p{L})\s*(?:$|[?.!]|в\s|по\s|из\s|для\s)|важные\s+(?:отметки|пункты|моменты))/iu;
+module.exports={matches:t=>{t=String(t||'').trim();return SAY.test(t)||RECALL.test(t);},
  name:'highlights',
  collect,
  setup(s){
@@ -51,7 +52,6 @@ module.exports={
   };
   // «Что важно не забыть?», «Что я отмечал как важное?» — the marks themselves, not a model guess or a Jira query.
   // Marks of this chat and project first; when there are none, marks of the project's other chats from the last day.
-  const RECALL=/^(?:петя[,!\s]+)?(?:а\s+)?(?:что|какие|покажи|напомни)(?=[\s,]).{0,40}?(?:важн\p{L}*\s+(?:не\s+забыть|помнить)|отмеча\p{L}*\s+(?:как\s+)?важн|отметк\p{L}*(?!\p{L})|важное(?!\p{L})\s*(?:$|[?.!]|в\s|по\s|из\s|для\s)|важные\s+(?:отметки|пункты|моменты))/iu;
   const recall=command=>{if(!RECALL.test(String(command).trim()))return null;const topic=s.dialogue.active();
    let marks=topic?collect(state(),topic):[];
    if(!marks.length){const since=Date.now()-86400000,home=topic?.projectId||state().activeProjectId;marks=state().topics.filter(t=>t!==topic&&!t.archived&&t.projectId===home).flatMap(t=>(t.highlights||[]).filter(h=>(h.at||0)>=since).map(h=>clean(h.text)));marks=[...new Set(marks)];}

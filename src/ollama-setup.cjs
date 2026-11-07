@@ -26,10 +26,6 @@ module.exports=ctx=>{
     // Downloads cancel immediately; let an installation finish before quitting.
     ollamaReady.pending?.finally(() => ctx.app.quit());
   });
-  // Per-chat answer model: local Ollama models only; empty means the default from settings.
-  const localModels=async()=>{const base=new URL(ctx.core.localEndpoint(ctx.settings.ollamaUrl));const tags=await ctx.directRequest(new URL('/api/tags',base).href,{});return (Array.isArray(tags?.models)?tags.models:[]).filter(m=>typeof m.name==='string'&&!/cloud/i.test(m.name)&&!/embed/i.test(m.name)&&!m.remote_host).map(m=>({name:m.name,size:Number(m.size)||0})).sort((a,b)=>a.size-b.size);};
-  ctx.handle('chatModels',async()=>{const topic=ctx.dialogue.active();let models=[],error='';try{models=await localModels();}catch(e){error='Ollama недоступна: '+e.message;}return {models,current:typeof topic?.model==='string'?topic.model:'',defaultModel:ctx.settings.model||'',error};});
-  ctx.handle('chatModelSet',async model=>{if(model!==''&&(typeof model!=='string'||model.length>200))throw Error('Некорректная модель.');if(model&&!(await localModels()).some(m=>m.name===model))throw Error('Модель не найдена в Ollama.');const topic=ctx.dialogue.active();if(!topic)throw Error('Откройте чат.');if(model)topic.model=model;else delete topic.model;ctx.dialogue.persist();return {current:topic.model||'',defaultModel:ctx.settings.model||''};});
   ctx.handle('restartOllama', () => {if(visionReady.state.busy)throw Error('Дождитесь загрузки модели для изображений.');return ollamaReady.restart();});
   ctx.handle('openOllama', () => {if(visionReady.state.busy)throw Error('Дождитесь загрузки модели для изображений.');return ollamaReady.start();});
   return {ollamaInstaller,ollamaReady,visionReady};

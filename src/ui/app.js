@@ -13,12 +13,17 @@ function updateChromeStatus(){
 document.body.dataset.view='home';
 $('chrome-status').onclick=()=>{view('home');document.querySelector('main').scrollIntoView({block:'start'});};
 
-function notice(message, error = false) {
+// Messages pop up at the top of the window and go away by themselves; a pointer over one keeps it.
+// notice(text, error, {action:{label, run}}) adds a button, e.g. «Откатить».
+function notice(message, error = false, options = {}) {
  document.dispatchEvent(new CustomEvent('petya-notice',{detail:{message,error}}));
- const panel=$('notice');panel.hidden=false;panel.textContent=message;panel.classList.toggle('error',error);
- clearTimeout(noticePinTimer);panel.classList.add('notice-pinned');
- updateChromeStatus();
- noticePinTimer=setTimeout(()=>{panel.classList.remove('notice-pinned');noticePinTimer=null;},5000);
+ const panel=$('notice');panel.hidden=false;panel.replaceChildren(document.createTextNode(message));panel.classList.toggle('error',error);panel.classList.add('notice-toast');
+ if(options.action){const b=document.createElement('button');b.type='button';b.className='notice-action';b.textContent=options.action.label;b.onclick=async()=>{hide();try{await options.action.run();}catch(e){notice(e.message,true);}};panel.append(b);}
+ const close=document.createElement('button');close.type='button';close.className='notice-close';close.setAttribute('aria-label','Закрыть');close.onclick=()=>hide();panel.append(close);
+ const hide=()=>{clearTimeout(noticePinTimer);noticePinTimer=null;panel.hidden=true;updateChromeStatus();};
+ const arm=()=>{clearTimeout(noticePinTimer);noticePinTimer=setTimeout(hide,(options.action?8000:error?7000:4000));};
+ panel.onmouseenter=()=>clearTimeout(noticePinTimer);panel.onmouseleave=arm;
+ updateChromeStatus();arm();
 }
 function run(fn) { return async event => {
  if(event)event.preventDefault();const b=event?.currentTarget;const feedback=b?.tagName==='BUTTON'&&/^(Обновить|Проверить|Загрузить|Синхронизировать)/.test(b.textContent.trim());
@@ -152,11 +157,10 @@ $('meeting').onclick = run(async () => { $('meeting').disabled = true; try { if 
 window.petyaEvents.onNavigate(page => [...document.querySelectorAll('.nav')].find(button => button.dataset.view === page)?.click());
 window.petyaEvents.onToggle(run(toggleMic));
 window.petyaEvents.onPause(run(async () => { await window.petya.pauseAutoMeeting(); mic.stop(); await window.petyaStopAutomaticMeeting(true); updateAudio(); }));
+// The materials page is drawn by materials.js from the grouped list; until it is loaded the data waits for it.
 async function refreshContexts() {
-  const contexts = await window.petya.contexts(); $('source-stats').replaceChildren(Object.assign(document.createElement('span'), { textContent: 'Всего записей:' }), document.createTextNode(' '+contexts.length));
-  $('context-list').replaceChildren();
-  if (!contexts.length) $('context-list').textContent = 'Пока нет сохранённых материалов. Нажмите «Добавить материал», чтобы сохранить первую запись.';
-  for (const context of [...contexts].reverse().slice(0, 500)) { const card = document.createElement('article'); card.className = 'context-item';card.dataset.source=context.source; const title = document.createElement('strong'); title.textContent = context.title; const meta = document.createElement('p'); meta.className = 'small'; meta.textContent = `${context.source} · ${new Date(context.at).toLocaleString('ru-RU')}`; const body = document.createElement('p'); body.textContent = context.text; const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Прочитать запись';details.append(summary,body);const ask=document.createElement('button');ask.type='button';ask.textContent='Спросить Петю';ask.onclick=()=>{view('home');$('command').value='По материалу «'+context.title+'»: ';$('command').focus();};card.append(title,meta,details,ask); $('context-list').append(card); }
+  const value = await window.petya.feature('materials', 'list');
+  window.materialsData = value; window.renderMaterials?.(value);
 }
 async function makeDraft(context, route = null, { reviewOnly = false } = {}) {
   activeContext = context;
@@ -243,6 +247,17 @@ $('import').onchange = run(async event => { const file = event.target.files[0]; 
 $('clear-contexts').onclick = run(async () => { if (workspaceBusy) throw new Error('Дождитесь завершения работы с планом.'); $('workspace-card').hidden = true; $('batch-tasks').replaceChildren(); $('docs-list').replaceChildren(); activeContext = null; await window.petya.clearContexts(); if(typeof selectDialogueTopic==='function')await selectDialogueTopic(''); currentDraft = null; $('draft-card').hidden = true; $('resolution').hidden = true; await refreshContexts(); notice('Память и черновики очищены.'); });
 $('sync-slack').onclick = run(async () => { $('sync-slack').disabled = true; try { const count = await window.petya.syncSlack(); await refreshContexts(); notice(count.message); } finally { $('sync-slack').disabled = false; } });
 function displaySettings(settings) { for (const element of $('settings-form').elements) { if (element.name in settings && element.type !== 'checkbox') { if (element.tagName === 'SELECT' && settings[element.name] && ![...element.options].some(o => o.value === settings[element.name])) element.add(new Option('Сохранённый выбор · ' + settings[element.name], settings[element.name])); element.value = settings[element.name]; } if (element.type === 'checkbox' && element.name) element.checked = settings[element.name] === 'true'; } $('connection-state').textContent = `Slack: ${settings.hasSlackToken ? 'настроен' : 'не подключён'} · Jira: ${settings.hasJiraToken ? 'настроен' : 'не подключён'} · Notion: ${settings.hasNotionToken ? 'настроен' : 'не подключён'}`; document.dispatchEvent(new Event('petya-settings-displayed')); }
+function collectSettings(){const form=$('settings-form');const data=Object.fromEntries(new FormData(form));for(const key of ['semanticTools','smartNotifications','interpretationEnabled','slackAutoSync','zoomAutoRecord','zoomCaptureMic'])if(form.elements[key])data[key]=String(form.elements[key].checked);for(const key of ['clear_slackToken','clear_jiraToken','clear_notionToken'])if(form.elements[key])data[key]=form.elements[key].checked;return data;}
+// Settings save themselves: a change of a named field is saved shortly after, and a toast offers «Откатить».
+(()=>{const form=$('settings-form');let timer=null,saving=Promise.resolve(),shown=null;
+ document.addEventListener('petya-settings-displayed',()=>{try{shown=collectSettings();}catch{}});
+ const save=()=>{clearTimeout(timer);timer=null;const previous=shown,data=collectSettings();saving=saving.then(async()=>{try{displaySettings(await window.petya.saveSettings(data));
+   notice('Настройки сохранены',false,previous?{action:{label:'Откатить',run:async()=>{displaySettings(await window.petya.saveSettings({...previous,clear_slackToken:false,clear_jiraToken:false,clear_notionToken:false}));notice('Изменение отменено');}}}:{});}
+  catch(error){notice('Не удалось сохранить: '+error.message,true);}});return saving;};
+ const changed=event=>{const t=event.target;if(!t?.name||t.type==='search'||t.closest('[data-manual-save]'))return;clearTimeout(timer);timer=setTimeout(save,t.type==='checkbox'||t.tagName==='SELECT'?150:700);};
+ form.addEventListener('change',changed);
+ window.flushSettings=()=>timer?save():saving;
+})();
 $('settings-form').onsubmit = async event => {
  event.preventDefault();
  const form=$('settings-form'),button=form.querySelector('[type="submit"]');
@@ -250,7 +265,7 @@ $('settings-form').onsubmit = async event => {
  let feedback=form.querySelector('.settings-save-feedback');
  if(!feedback){feedback=document.createElement('p');feedback.className='small settings-save-feedback';feedback.setAttribute('role','status');button.after(feedback);}
  button.disabled=true;button.setAttribute('aria-busy','true');feedback.classList.remove('error');feedback.textContent='Сохраняю подключения…';
- try { const data = Object.fromEntries(new FormData($('settings-form'))); for (const key of ['semanticTools', 'smartNotifications', 'interpretationEnabled', 'slackAutoSync', 'zoomAutoRecord', 'zoomCaptureMic']) data[key] = String($('settings-form').elements[key].checked); for (const key of ['clear_slackToken', 'clear_jiraToken', 'clear_notionToken']) data[key] = $('settings-form').elements[key].checked; displaySettings(await window.petya.saveSettings(data)); document.querySelectorAll('.connection-status').forEach(e => { e.textContent = 'Настройки сохранены · проверьте доступ заново'; e.className = 'connection-status'; }); feedback.textContent='Подключения сохранены.'; }
+ try { displaySettings(await window.petya.saveSettings(collectSettings())); document.querySelectorAll('.connection-status').forEach(e => { e.textContent = 'Настройки сохранены · проверьте доступ заново'; e.className = 'connection-status'; }); feedback.textContent='Подключения сохранены.'; }
  catch(error){feedback.classList.add('error');feedback.textContent='Не удалось сохранить подключения: '+error.message;}
  finally{button.disabled=false;button.removeAttribute('aria-busy');}
 };

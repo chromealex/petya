@@ -11,6 +11,9 @@ function createServer(deps) {
     description:'Текущая компания подключения MCP. Переключение компании доступно только в приложении: оно отзывает этот доступ и требует нового подключения для другой компании.',
     inputSchema:{}, annotations:{readOnlyHint:true,destructiveHint:false,openWorldHint:false}
   },async()=>{try{deps.check();return {content:[{type:'text',text:JSON.stringify(deps.companyContext())}]};}catch(error){return {isError:true,content:[{type:'text',text:error.message}]};}});
+  require('./features/project-instructions.cjs').register(server,z,deps);
+  require('./features/model-runtime.cjs').register(server,z,deps);
+  require('./features/chat-models.cjs').register(server,z,deps);
   require('./mcp-chat-tools.cjs').register(server, z, deps);
   require('./features/python.cjs').register(server,z,deps);
   require('./features/disk-space.cjs').register(server, z, deps);

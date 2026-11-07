@@ -35,5 +35,6 @@ module.exports=ctx=>{
 
 
   ctx.handle('dialogueRename',(id,title)=>ctx.dialogue.rename(id,title));
-  ctx.handle('dialogueSelect',id=>ctx.dialogue.select(typeof id==='string'?id:''));
+  // Opening a chat is seeing what it asked for: its «Требуют внимания» and unread marks go away.
+  ctx.handle('dialogueSelect',id=>{const topic=ctx.dialogue.select(typeof id==='string'?id:'');const t=ctx.dialogue.state.topics.find(t=>t.id===id);if(t?.chatJob&&['done','attention'].includes(t.chatJob.state)&&!t.chatJob.acknowledged){t.chatJob.acknowledged=true;ctx.dialogue.persist();}return topic;});
 };

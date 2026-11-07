@@ -12,3 +12,5 @@ assert.equal(parse('petya://message/../../etc/passwd'),null);
 assert.equal(attention({chatJob:{state:'attention',acknowledged:true},lastChatResult:{computerApproval:true}}),'Разрешить управление компьютером');
 assert.equal(attention({chatJob:{state:'done'}}),'');
 console.log('Message links: version lookup, moved indices, expired messages and attention passed');
+// A seen error leaves «Требуют внимания».
+{const {attention}=require('../src/chat-location.cjs');const a=require('node:assert/strict');a.equal(attention({chatJob:{state:'attention',acknowledged:true},lastChatResult:{text:'Google пока не показал выдачу',error:true}}),'');a.ok(attention({chatJob:{state:'attention'},lastChatResult:{text:'Ошибка',error:true}}));console.log('Attention: a seen error leaves the list passed');}

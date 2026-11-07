@@ -2,8 +2,6 @@
  document.documentElement.dataset.platform=window.petyaPlatform;
  let current='',settingsDirty=false,switching=false;
  const tabs=$('company-tabs');
- $('settings-form').addEventListener('input',()=>settingsDirty=true);
- document.addEventListener('petya-settings-displayed',()=>settingsDirty=false);
  function setBusy(busy){switching=busy;tabs.querySelectorAll('button').forEach(button=>button.disabled=busy);}
  async function switchCompany(target){
   if(switching)return;
@@ -11,7 +9,8 @@
   if(target===current){view('home');return;}
   setBusy(true);
   try{
-   if(settingsDirty||$('team-status').textContent==='Изменения не сохранены.')throw Error('Сохраните изменения команды или подключений перед переключением.');
+   // Nothing to save by hand: pending settings are saved now, team edits are saved before the switch.
+   await window.flushSettings?.();if($('team-status').textContent==='Изменения не сохранены.')await window.saveTeamNow?.();
    if(mic.active)throw Error('Выключите микрофон перед переключением компании.');if(meeting.active||window.petyaAutoMeetingActive)throw Error('Остановите запись системного звука перед переключением компании.');if(currentDraft||workspaceBusy)throw Error('Завершите или закройте черновик в Ассистенте.');if(planning||draftBusy||agentBusy)throw Error('Дождитесь завершения текущего запроса; статус показан в верхней панели.');
    const result=await window.petya.companySwitch(target);
    if(result.switching){notice('Переключаю компанию…');document.querySelectorAll('button,input,textarea,select').forEach(e=>e.disabled=true);}

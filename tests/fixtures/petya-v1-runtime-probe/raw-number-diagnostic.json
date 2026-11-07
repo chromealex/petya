@@ -1,0 +1,332 @@
+{
+  "scope": "CPU grammar/tokenizer feasibility only; no model weights loaded or GPU generation performed.",
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "base_revision": "8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "schema_sha256": "32e42ba780cf41f09b7756ed049e5dfc8d69dc3f933ace82d5ce150ecb1fde79",
+  "tokenizer_sha256": "87a7830d63fcf43bf241c3c5242e96e62dd3fdc29224ca26fed8ea333db72de4",
+  "vocabulary_size": 248077,
+  "checks": [
+    {
+      "name": "unicode-label",
+      "text": "{\"understood\":true,\"answer\":\"Счёт_QA-0046: -48 < x ≤ -12.\",\"clarificationOptions\":[]}",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "two-choices",
+      "text": "{\"understood\":true,\"answer\":\"Кому отправить?\",\"clarificationOptions\":[\"Мастеру\",\"Ученику\"]}",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "optional-omitted",
+      "text": "{\"understood\":true,\"answer\":\"Готово.\"}",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "false-boolean",
+      "text": "{\"understood\":false,\"answer\":\"Уточни вопрос.\"}",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "wrong-type",
+      "text": "{\"understood\":\"yes\",\"answer\":\"bad\"}",
+      "expected": false,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "extra-property",
+      "text": "{\"understood\":true,\"answer\":\"ok\",\"extra\":\"bad\"}",
+      "expected": false,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "five-choices",
+      "text": "{\"understood\":true,\"answer\":\"Выбери.\",\"clarificationOptions\":[\"А\",\"Б\",\"В\",\"Г\",\"Д\"]}",
+      "expected": false,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "missing-answer",
+      "text": "{\"understood\":true}",
+      "expected": false,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "duplicate-key",
+      "text": "{\"understood\":true,\"answer\":\"a\",\"answer\":\"b\"}",
+      "expected": false,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "truncated-json",
+      "text": "{\"understood\":true,\"answer\":\"abc",
+      "expected": false,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "generic-object",
+      "text": "{\"description\":\"Код только для посылки\",\"questions\":[],\"summary\":\"Код\"}",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "generic-array-rejected",
+      "text": "[1,2]",
+      "expected": false,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "any-object",
+      "text": "{\"код\":\"Счёт_QA-0046\",\"граница\":-48}",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "any-array",
+      "text": "[-63,-37,-14,-14]",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "any-string",
+      "text": "\"Привет\"",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "any-number",
+      "text": "-48.25",
+      "expected": true,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": [
+        {
+          "token": 12,
+          "text": "-",
+          "allowed": true
+        },
+        {
+          "token": 19,
+          "text": "4",
+          "allowed": true
+        },
+        {
+          "token": 23,
+          "text": "8",
+          "allowed": true
+        },
+        {
+          "token": 13,
+          "text": ".",
+          "allowed": false
+        },
+        {
+          "finished": true,
+          "eos_allowed": true
+        }
+      ],
+      "passed": false
+    },
+    {
+      "name": "any-boolean",
+      "text": "true",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "any-null",
+      "text": "null",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "any-truncated",
+      "text": "{\"код\":",
+      "expected": false,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "any-nonfinite",
+      "text": "NaN",
+      "expected": false,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "number-schema",
+      "text": "-48.25",
+      "expected": true,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": [
+        {
+          "token": 12,
+          "text": "-",
+          "allowed": true
+        },
+        {
+          "token": 19,
+          "text": "4",
+          "allowed": true
+        },
+        {
+          "token": 23,
+          "text": "8",
+          "allowed": true
+        },
+        {
+          "token": 13,
+          "text": ".",
+          "allowed": false
+        },
+        {
+          "finished": true,
+          "eos_allowed": true
+        }
+      ],
+      "passed": false
+    },
+    {
+      "name": "explicit-any-number",
+      "text": "-48.25",
+      "expected": true,
+      "accepted_complete": false,
+      "finished": false,
+      "eos_allowed": false,
+      "diagnostic": [
+        {
+          "token": 12,
+          "text": "-",
+          "allowed": true
+        },
+        {
+          "token": 19,
+          "text": "4",
+          "allowed": true
+        },
+        {
+          "token": 23,
+          "text": "8",
+          "allowed": true
+        },
+        {
+          "token": 13,
+          "text": ".",
+          "allowed": false
+        },
+        {
+          "finished": true,
+          "eos_allowed": true
+        }
+      ],
+      "passed": false
+    },
+    {
+      "name": "explicit-any-array",
+      "text": "[-63,-37,-14,-14]",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    },
+    {
+      "name": "explicit-any-object",
+      "text": "{\"число\":-48.25}",
+      "expected": true,
+      "accepted_complete": true,
+      "finished": true,
+      "eos_allowed": true,
+      "diagnostic": null,
+      "passed": true
+    }
+  ],
+  "versions": {
+    "outlines": "1.3.3",
+    "outlines_core": "0.2.14",
+    "mlx-lm": "0.32.2",
+    "transformers": "5.22.1"
+  },
+  "eos_note": "Guide.accepts_tokens checks grammar text. After complete text, is_finished and get_tokens authorize EOS; do not append EOS to accepts_tokens."
+}

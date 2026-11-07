@@ -1,6 +1,9 @@
 // Feature modules: each declares its setting defaults and validation and registers its services and
 // IPC handlers through the shared services object. Add a feature here instead of editing main.cjs.
 module.exports=[
+ require('./features/model-runtime.cjs'),
+ require('./features/chat-models.cjs'),
+ require('./features/project-instructions.cjs'),
  require('./features/jira-slack-people.cjs'),
  require('./features/python.cjs'),
  require('./features/disk-space.cjs'),
@@ -12,6 +15,9 @@ module.exports=[
  require('./features/slack-screen.cjs'),
  require('./features/context-discovery.cjs'),
  require('./features/meeting-memory.cjs'),
+ require('./features/materials.cjs'),
+ require('./features/meeting-summary.cjs'),
+ require('./features/recurring.cjs'),
  require('./features/chat-return.cjs'),
  require('./features/chat-library.cjs'),
  require('./features/agents.cjs'),
@@ -21,11 +27,13 @@ module.exports=[
  require('./features/fresh-data.cjs'),
  require('./features/list-followup.cjs'),
  require('./features/team-intent.cjs'),
+ require('./features/skill-packages.cjs'),
  require('./features/skill-choice.cjs'),
  require('./features/selftest.cjs'),
  require('./features/morning-brief.cjs'),
  require('./features/optional-models.cjs'),
  require('./features/extension-replies.cjs'),
  require('./features/chat-results.cjs'),
- require('./features/chat-changes.cjs')
+ require('./features/chat-changes.cjs'),
+ require('./features/model-parts.cjs')
 ];

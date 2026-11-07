@@ -1,0 +1,9 @@
+{
+  "files": {
+    "tests/fixtures/petya-v1-runtime-probe/run-service.cjs": "c7c55a9a5ebbd2c9cb465a40e13be8e106c194867a1fa0d73f2eb8c1a3a54679",
+    "tests/fixtures/petya-v1-runtime-probe/replay-development-manifest.json": "22cbb9c284529f11c93db3efc6a12ff700526f237358b6dfeb4c6a3f249a4dd0",
+    "tests/fixtures/petya-v1-runtime-probe/service-probe-result.json": "639c1678e04f6ff3b47bc05ca33ea13d1eee1182bbb9ac6f87655f2db7de52bc",
+    "tests/fixtures/petya-v1-runtime-probe/installed-runtime-requirements.txt": "6023871fee4d0be1389f92a8d6abba9e4c8545cd5edb875f2a6145c0c6a36446"
+  },
+  "scope": "Real GPU runtime smoke test with unqualified development adapter. No reserved quality set was used; no app settings changed."
+}

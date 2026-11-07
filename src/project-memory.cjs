@@ -57,4 +57,6 @@ class ProjectMemory {
   }catch(e){return this.reply('Связь не сохранена: '+e.message,{error:true});}finally{this.busy=false;}
  }
 }
-module.exports={ProjectMemory};
+// Whether the text is a project-memory command (switch, current project, forget, remember a link).
+const matches=raw=>{const t=clean(raw);return /^(?:(?:теперь\s+)?работаем\s+(?:над|с)\s+(?:другим\s+)?проектом|переключись\s+на\s+проект|выбери\s+проект)/iu.test(t)||/^(?:какой (?:сейчас |текущий )?проект|покажи (?:связи|память) проекта)$/iu.test(t)||/^забудь проект\s+\S/iu.test(t)||/^(?:запомни[,\s]*|сохрани\s+)(?:для этого проекта\s+)?(?:канал|проект (?:jira|жиры)|репозиторий|участника?)/iu.test(t);};
+module.exports={ProjectMemory,matches};

@@ -26,5 +26,5 @@ module.exports=ctx=>{
   ctx.handle('gmailGuide',()=>require('electron').shell.openExternal('https://developers.google.com/identity/protocols/oauth2/native-app'));
   ctx.handle('mailSkills',()=>({recipes:mailSkill.list(),draft:mailSkill.draft()}));
   ctx.handle('mailSkillSave',input=>{const value=mailSkill.put(input);mailSkill.setDraft(null);return value;});ctx.handle('mailSkillDelete',id=>mailSkill.remove(id));ctx.handle('mailSkillTest',input=>mailSkill.run(input));
-  return {mailSkill,clientDefaults};
+  return {mailSkill,clientDefaults,mailAccounts:gmail};
 };

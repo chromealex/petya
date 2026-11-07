@@ -13,7 +13,7 @@ module.exports=ctx=>{
 module.exports.transcribe = async (ctx, bytes) => {
     if (!(bytes instanceof ArrayBuffer) || bytes.byteLength < 44 || bytes.byteLength > 4e6) throw new Error('Некорректное аудио.');
     const audio=require('./speech-audio.cjs').prepareCommandAudio(bytes);if(!audio)return null;
-    if(ctx.qwenSpeech.available)return require('./speech-transcript.cjs').transcriptResult(await ctx.qwenSpeech.transcribe(audio));
+    if(ctx.qwenSpeech.available)return require('./speech-transcript.cjs').transcriptResult(await ctx.qwenSpeech.transcribe(audio,/^[a-z]{2}$/.test(ctx.settings.communicationLanguage||'')?ctx.settings.communicationLanguage:'ru'));
     const form = new FormData(); form.append('file', new Blob([audio], { type: 'audio/wav' }), 'audio.wav'); form.append('language', 'ru'); form.append('response_format', 'json'); form.append('temperature', '0'); form.append('temperature_inc', '0'); form.append('suppress_non_speech', 'true');
     const endpoint = ctx.core.localEndpoint(ctx.settings.whisperUrl);
     try {

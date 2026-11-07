@@ -249,3 +249,76 @@ Operation notifications work with settings closed and restore from a snapshot.
 Run `node tests/python.cjs`, `node tests/python-ui.cjs`, `node tests/python-live.cjs` (Docker required),
 `node tests/python-model-live.cjs` (local model and Docker required), and
 `node tests/mcp.cjs` to check behavior and the MCP client contract.
+
+### Project instruction files
+
+Petya reads root `AGENTS.md` and `petya.md` (case-insensitive filenames) on each local-project request, including Git-ignored instruction files. They are separate project instructions, not keyword-selected reference documents. `petya.md` refines `AGENTS.md`; current user instructions and existing permission/confirmation requirements take precedence. Rules remain scoped to their connected project folder. Nested files are not automatically applied. Symlinks, ambiguous case variants, invalid UTF-8 and oversized files fail explicitly; instructions are never silently truncated. The combined instruction payload is limited to 24 KB.
+
+MCP `read_project_instructions(projectId)` exposes the same reader for folders already connected in Petya, subject to the MCP project scope. It accepts no filesystem path and changes no files or permissions. The application feature API is `projectInstructions.read(projectId)`.
+
+### Petya model runtime lifecycle
+
+`petya_model_status`, `start_petya_model` and `stop_petya_model` share the
+`modelRuntime` application feature and controller. Status requires MCP access to
+the whole company; start/stop additionally require `edit`. Checks are repeated
+inside the operation. No executable paths, tokens or arbitrary model names are
+accepted. Stop cancels the service's queued and active inference requests.
+
+Progress uses the stable `petya-model-runtime` notification, independent of the
+settings view, with snapshot recovery after reopening. Start supports cancellation
+and terminal errors support retry. Company teardown disposes the controller.
+
+The bundled release catalog is intentionally empty until qualification and a
+verified installation are complete. Starting therefore reports that a checked
+release is unavailable. These controls do not download weights, change the chat
+model. Requests explicitly selecting `petya-v1` on the configured local chat
+endpoint now use the shared `modelRuntime` service through both scoped request
+paths, including speculative answers. Other models retain their existing path.
+The own runtime does not start automatically or fall back to Ollama on failure.
+Cancellation and company teardown suppress stale chunks and final responses.
+The installer, default-model setup and final platform validation remain
+release work; the empty catalog still prevents loading an unqualified release.
+
+The shared dialogue answer handler keeps an explicitly selected `petya-v1`
+model pinned: it does not discover an alternative Ollama knowledge model,
+restart Ollama, or apply Ollama-specific low-memory recovery to its failures.
+Errors refer to Petya's model service; cancellation is reported as cancellation.
+Malformed-response retry and the existing repeat guard remain active. This is
+answer handling; production model execution still needs a qualified installation
+and live application verification. `tests/dialogue-own-runtime.cjs` exercises this behavior
+without loading model weights.
+
+
+The internal own-model request route is shared application logic, not a new
+raw-inference IPC or MCP endpoint. MCP lifecycle tools use the same controller;
+they cannot supply runtime addresses or bypass installation qualification.
+Chat submission and its existing application confirmations remain unchanged.
+Routing is covered by `tests/model-runtime-router.cjs` and the feature test;
+MCP lifecycle access remains covered by `tests/mcp.cjs`.
+
+`tests/model-runtime-route-http.cjs` connects the shared feature, router,
+controller and real runtime HTTP client to an authenticated loopback fixture.
+It checks streaming and non-streaming responses, unchanged role history and
+sampling, active and queued cancellation, no fallback on a stopped service,
+restart and disposal. Its supervisor and replies are fixtures: this proves
+transport integration, not model answer quality or an installed application
+release.
+
+
+### Shared per-chat model selection
+
+`chatModels` owns the existing UI picker and MCP `list_chat_models(chatId)` /
+`set_chat_model(chatId, model, previous)`. Pass the current selection returned
+by the list as `previous`; an empty model restores the default. Reads respect
+project scope. Writes require `edit` and recheck scope, chat identity, project,
+version and prior selection after asynchronous discovery. No model is downloaded
+or started by selection, and no chat message is submitted.
+
+A qualified, ready own runtime exposes `petya-v1` independently of Ollama.
+Selecting it does not call Ollama. A stopped or unqualified runtime cannot be
+selected; an Ollama tag named `petya-v1` cannot bypass that gate. Other installed
+local models retain the Ollama discovery path, with remote models excluded.
+The picker supplies its chat ID and previous selection so a delayed request
+cannot alter a different active conversation. Tests cover the shared service,
+renderer binding and authenticated MCP calls. The production catalog remains
+empty, so this does not admit the experimental training adapter.

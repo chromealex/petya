@@ -23,6 +23,34 @@ func attribute(_ element: AXUIElement, _ key: String) -> CFTypeRef? {
     AXUIElementCopyAttributeValue(element, key as CFString, &value)
     return value
 }
+// `--speakers`: texts of Zoom's meeting windows (tile labels, the active speaker, the participant list) for
+// naming who talks in a meeting recording. Reads only; never presses anything. Petya parses the texts.
+if CommandLine.arguments.contains("--speakers") {
+    var texts = [String]()
+    if AXIsProcessTrusted() {
+        for pid in zoom {
+            let root = AXUIElementCreateApplication(pid)
+            AXUIElementSetMessagingTimeout(root, 0.1)
+            for window in attribute(root, kAXWindowsAttribute) as? [AXUIElement] ?? [] {
+                var pending: [(AXUIElement, Int)] = [(window, 0)]
+                var count = 0
+                let deadline = Date().addingTimeInterval(0.8)
+                while let (element, depth) = pending.popLast(), count < 1500, Date() < deadline {
+                    count += 1
+                    for key in [kAXTitleAttribute, kAXDescriptionAttribute, kAXValueAttribute, kAXHelpAttribute] {
+                        if let text = attribute(element, key) as? String, !text.isEmpty, text.count <= 200, !texts.contains(text) { texts.append(text) }
+                    }
+                    if depth < 20, let children = attribute(element, kAXChildrenAttribute) as? [AXUIElement] {
+                        pending.append(contentsOf: children.reversed().map { ($0, depth + 1) })
+                    }
+                }
+            }
+        }
+    }
+    let out: [String: Any] = ["trusted": AXIsProcessTrusted(), "zoomOpen": !zoom.isEmpty, "texts": Array(texts.prefix(400))]
+    print(String(data: try JSONSerialization.data(withJSONObject: out), encoding: .utf8)!)
+    exit(0)
+}
 func meetingObservation(_ pid: pid_t) -> (Bool, String) {
     guard AXIsProcessTrusted() else { return (false, "") }
     let root = AXUIElementCreateApplication(pid)

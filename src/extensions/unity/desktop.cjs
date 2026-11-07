@@ -38,14 +38,15 @@ module.exports={
       try{const result=await perform(...args);progress(result.isError?'Unity сообщила об ошибке.':'Ответ Unity получен.',false,!!result.isError);return result;}
       catch(error){progress(error.message,false,true);throw error;}
     }
-    async function assistTurn(command,verify=()=>{}) {
+    async function assistTurn(command,verify=()=>{},approved=false) {
       let topic=s.dialogue.active();
       if(!topic){
         topic={id:require('node:crypto').randomUUID(),projectId:s.dialogue.state.activeProjectId||'general',title:command.slice(0,80),kind:'chat',messages:[],at:Date.now()};
         s.dialogue.state.topics.push(topic);s.dialogue.state.activeId=topic.id;delete s.dialogue.state.newChat;s.dialogue.persist();
       }
       require('./enable.cjs')(s,()=>assistTurn(command,verify));
-      const result=await invoke(topic.id,'assist',{command},verify);
+      if(!approved)return require('./approval.cjs')(s,command,()=>assistTurn(command,verify,true));
+      const result=await invoke(topic.id,'assist',{command},verify,undefined,true);
       const data=result.structuredContent;
       const text='Использую расширение «Unity Editor».\n'+(data?.answer || result.content?.find(b=>b.type==='text')?.text || 'Выберите редактор.');
       s.dialogue.rememberAction(command,text);
@@ -96,7 +97,7 @@ module.exports={
       message.unitySelection={...selected,view:open||problem?selected.view:view};s.dialogue.persist();s.chatResults?.adopt(topic,message);
       return {handled:true,text,topicId:topic.id,messages:topic.messages};
     }
-    async function perform(id,tool,args,verify=()=>{},instance){
+    async function perform(id,tool,args,verify=()=>{},instance,approved=false){
       const company=s.companyId,url=s.settings.unityUrl,token=s.settings.unityToken,topic=s.dialogue.active(),version=topic?.versionIndex,owner=topic?.messages.at(-1),project=topic?.projectId;
       function check(){
         require('../../answer-cancel.cjs').check();verify();
@@ -113,8 +114,8 @@ module.exports={
           proposal.version!==version || proposal.project!==project || proposal.company!==company || proposal.url!==url || proposal.token!==token))
         throw Error('Предложение устарело. Повторите диагностику.');
       if(proposal)instance=proposal.instance;
-      const response=await dialog().showMessageBox(s.win,{type:'question',message:tools[tool].description,detail:[url,instance||'Редактор будет проверен перед вызовом',tool==='call_tool'?parsed.name:tool,JSON.stringify(proposal?.call || parsed.arguments||parsed,null,2)].join('\n'),buttons:['Продолжить','Отмена'],defaultId:1,cancelId:1});
-      if(response.response!==0)throw Error('Действие отменено.');
+      if(!(approved&&tool==='assist')){const response=await dialog().showMessageBox(s.win,{type:'question',message:tools[tool].description,detail:[url,instance||'Редактор будет проверен перед вызовом',tool==='call_tool'?parsed.name:tool,JSON.stringify(proposal?.call || parsed.arguments||parsed,null,2)].join('\n'),buttons:['Продолжить','Отмена'],defaultId:1,cancelId:1});
+      if(response.response!==0)throw Error('Действие отменено.');}
       check();
       progress('Выполняю запрос MCP…',true);
       const result=await connect(s.settings,async client=>{

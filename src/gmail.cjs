@@ -31,6 +31,21 @@ class Gmail{
  async access(){this.check();const generation=this.generation,stored=this.load();if(!stored.tokens?.refresh_token)throw Error('Подключите Gmail через Google в «Подключениях».');if(stored.tokens.expiresAt>Date.now()+60000)return stored.tokens.access_token;
   if(!this.refreshing)this.refreshing=(async()=>{const result=await this.token({grant_type:'refresh_token',refresh_token:stored.tokens.refresh_token});if(generation!==this.generation)throw Error('Подключение Gmail изменилось. Повторите запрос.');this.check();if(!result.access_token)throw Error('Google не вернул токен доступа.');const tokens={access_token:result.access_token,refresh_token:result.refresh_token||stored.tokens.refresh_token,expiresAt:Date.now()+Number(result.expires_in||3600)*1000};this.save({...stored,tokens});return tokens.access_token;})().finally(()=>{this.refreshing=null;});return this.refreshing;
  }
+ // Messages for a Gmail query with their whole text and small text attachments (.vtt / .txt transcripts):
+ // used to find the transcript Zoom mails after a meeting.
+ async search(q,max=5){const generation=this.generation,access=await this.access(),headers={Authorization:'Bearer '+access};
+  const list=await this.json('https://gmail.googleapis.com/gmail/v1/users/me/messages?'+new URLSearchParams({q,maxResults:String(Math.min(10,max))}),{headers});const out=[];
+  for(const item of list.messages||[]){if(generation!==this.generation)throw Error('Подключение Gmail изменилось.');if(!/^[a-f0-9]+$/i.test(item.id))continue;
+   const m=await this.json('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+item.id+'?format=full',{headers}),get=name=>(m.payload?.headers||[]).find(h=>h.name.toLowerCase()===name.toLowerCase())?.value||'';
+   const texts=[],html=[],files=[];const walk=(p,depth=0)=>{if(!p||depth>10)return;
+    if(p.filename&&/\.(?:vtt|txt|srt)$/i.test(p.filename)&&p.body?.attachmentId&&Number(p.body.size||0)<2e6)files.push({name:p.filename.slice(0,200),id:p.body.attachmentId});
+    else if(!p.filename&&p.body?.data){const t=Buffer.from(p.body.data,'base64url').toString('utf8');if(p.mimeType==='text/plain')texts.push(t);else if(p.mimeType==='text/html')html.push(t.replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi,'').replace(/<br\s*\/?>|<\/(?:p|div|li|tr|h\d)>/gi,'\n').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/[ \t]+/g,' '));}
+    for(const child of p.parts||[])walk(child,depth+1);};walk(m.payload);
+   const attachments=[];for(const f of files.slice(0,3)){if(!/^[\w-]+$/.test(f.id))continue;try{const a=await this.json('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+item.id+'/attachments/'+f.id,{headers});attachments.push({name:f.name,text:Buffer.from(a.data||'','base64url').toString('utf8').slice(0,400000)});}catch{}}
+   out.push({id:m.id,from:get('From').slice(0,500),subject:get('Subject').slice(0,500),date:get('Date').slice(0,100),at:Number(m.internalDate)||Date.parse(get('Date'))||0,text:(texts.join('\n')||html.join('\n')||m.snippet||'').slice(0,100000),attachments});
+  }
+  return out;
+ }
  async read(recipe){const generation=this.generation,access=await this.access();const headers={Authorization:'Bearer '+access};const q=['in:inbox','newer_than:'+recipe.days+'d',recipe.unread?'is:unread':'',recipe.skipPromotions?'-category:promotions -category:social':''].filter(Boolean).join(' ');
   const list=await this.json('https://gmail.googleapis.com/gmail/v1/users/me/messages?'+new URLSearchParams({q,maxResults:'20'}),{headers});const messages=[];
   for(const item of list.messages||[]){if(generation!==this.generation)throw Error('Подключение Gmail изменилось. Повторите запрос.');if(!/^[a-f0-9]+$/i.test(item.id))throw Error('Gmail вернул неверный ID письма.');const m=await this.json('https://gmail.googleapis.com/gmail/v1/users/me/messages/'+item.id+'?format=full',{headers});const get=name=>(m.payload?.headers||[]).find(h=>h.name.toLowerCase()===name.toLowerCase())?.value||'';

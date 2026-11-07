@@ -10,7 +10,7 @@ module.exports=async win=>{
    await processCommand('Заполни команду: Полина — релизы');
    if(!voiceReply)throw Error('No voice conflict reply');
    await voiceTurn.dispatch('замени',Date.now());saved=await window.petya.teamList();
-   if(saved.members[0].responsibilities!=='релизы')throw Error('Voice conflict selection not saved');
+   if(saved.members[0].responsibilities!=='Релизы')throw Error('Voice conflict selection not saved');
    await processCommand('Заполни команду: Полина — релизы');
    if((await window.petya.teamList()).members.length!==1)throw Error('Duplicate team member');
   } finally {

@@ -37,8 +37,10 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
  const calculation=require('./explicit-calculation.cjs').explicitCalculation(command);if(calculation!==null)return mark('калькулятор',calculation);
  const evidence=require('./work-answer.cjs').workEvidenceReply(command,topic,teamMembers,teamNotes,supplementalContext);if(evidence)return mark('данные сервисов',evidence);
  if(!model)return {text:'Не выбрана локальная модель для ответов. Откройте «Подключения → Ollama» и подготовьте модель.',error:true};
+ const ownRuntime=model==='petya-v1';
+ const modelHelp=ownRuntime?'Проверь состояние сервиса модели Пети и повтори запрос.':'Проверь модель в «Подключения → Ollama» и повтори запрос.';
  let modelOverrides={};
- if(chooseKnowledgeModel&&require('./knowledge-model.cjs').standaloneKnowledge(command,topic,supplementalContext)){const selected=await chooseKnowledgeModel();if(selected)modelOverrides={model:selected,think:false};}
+ if(!ownRuntime&&chooseKnowledgeModel&&require('./knowledge-model.cjs').standaloneKnowledge(command,topic,supplementalContext)){const selected=await chooseKnowledgeModel();if(selected)modelOverrides={model:selected,think:false};}
  const repeat=require('./answer-repeat.cjs');let repeatRetry=false,lowMemory=false,restarted=false;
  for(let attempt=0;attempt<2;attempt++){
   let response;
@@ -48,8 +50,12 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
    // Ollama answers 500 when the model cannot be loaded with this context (usually memory).
    // Retry once with a smaller window before reporting an outage.
    // A crashed runner (panic, Metal/CUDA failure) is fixed by restarting Ollama, not by a smaller context.
-   if(status>=500&&recover&&!restarted&&/runner|panic|terminated|metal|cuda|exit status/iu.test(String(error.detail||''))){restarted=true;console.error('Ollama runner crashed, restarting: '+error.detail);try{await recover();}catch(e){console.error(e);}attempt--;continue;}
-   if(status>=500&&!lowMemory){lowMemory=true;console.error('Ollama '+status+': '+(error.detail||error.message));modelOverrides={...modelOverrides,think:false,options:{temperature:0.6,top_p:0.9,repeat_penalty:1.1,num_ctx:4096,num_predict:1024}};attempt--;continue;}
+   if(!ownRuntime&&status>=500&&recover&&!restarted&&/runner|panic|terminated|metal|cuda|exit status/iu.test(String(error.detail||''))){restarted=true;console.error('Ollama runner crashed, restarting: '+error.detail);try{await recover();}catch(e){console.error(e);}attempt--;continue;}
+   if(!ownRuntime&&status>=500&&!lowMemory){lowMemory=true;console.error('Ollama '+status+': '+(error.detail||error.message));modelOverrides={...modelOverrides,think:false,options:{temperature:0.6,top_p:0.9,repeat_penalty:1.1,num_ctx:4096,num_predict:1024}};attempt--;continue;}
+   if(ownRuntime){
+    const reason=error.name==='AbortError'?'Запрос к модели Пети отменён.':error.name==='TimeoutError'?'Модель Пети не ответила вовремя.':status===404?'Установленная модель Пети не найдена.':status===429?'Очередь запросов к модели Пети заполнена.':'Не удалось получить ответ модели Пети.';
+    return {text:reason+(error.name==='AbortError'?'':' '+modelHelp),error:true};
+   }
    const detail=String(error.detail||'').match(/"error"\s*:\s*"([^"]{1,200})/)?.[1]||'';
    const reason=status===404?'Выбранная модель не найдена.':status===429?'Ollama вернула HTTP 429 — ограничение запросов.':status>=500?'Ollama не смогла обработать запрос.':error.name==='TimeoutError'||error.name==='AbortError'?'Ollama не ответила вовремя.':'Не удалось связаться с Ollama.';
    return {text:reason+(detail?' Ollama: '+detail+'.':'')+' Проверьте «Подключения → Ollama» и повторите запрос.',error:true};
@@ -61,7 +67,7 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
    // with the same question/context and no thinking; never reinterpret an outage.
    // Small models occasionally break the JSON format; one more try is cheaper than an error.
    if(attempt===0)continue;
-   return {text:'Локальная модель вернула некорректный ответ. Повторите запрос; если ошибка повторится, проверьте модель в «Подключения → Ollama».',error:true};
+   return {text:'Локальная модель вернула некорректный ответ. '+modelHelp,error:true};
   }
   // Always «ты»: rewrite slips into «вы»/«ваш»/«проверьте» deterministically.
   const answer=require('./informal.cjs').informal(parsed.answer.trim().slice(0,12000));

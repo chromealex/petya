@@ -1,0 +1,49 @@
+{
+  "part": "Andromeda D2",
+  "protocol": "tests/fixtures/requirements-draft-d2/protocol.json",
+  "python": "/tmp/peter-v10/eval-env/bin/python",
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "work": "/tmp/petya-andromeda-d2",
+  "trainer": "tests/fixtures/requirements-draft-v21/train_checkpointed.py",
+  "helper": "tests/fixtures/requirements-draft-v21/checkpoint.py",
+  "initial_stop_after": 16,
+  "resume_retries": 4,
+  "evaluator": "tests/fixtures/requirements-draft-v8/evaluate.py",
+  "verify_artifact": "tests/fixtures/requirements-draft-v21/verify_artifact.py",
+  "verify_continuation": "tests/fixtures/requirements-draft-v21/verify_continuation.py",
+  "parent_evaluations": [
+    {
+      "name": "D1 on 54 generated held-out drafts",
+      "data": "tests/fixtures/requirements-draft-d2/holdout.jsonl",
+      "output": "d1-holdout.jsonl"
+    },
+    {
+      "name": "D1 on 801 familiar cases",
+      "data": "tests/fixtures/requirements-draft-v22/acquisition.jsonl",
+      "output": "d1-familiar.jsonl"
+    }
+  ],
+  "trained_evaluations": [
+    {
+      "name": "D2 on 54 generated held-out drafts",
+      "data": "tests/fixtures/requirements-draft-d2/holdout.jsonl",
+      "output": "d2-holdout.jsonl"
+    },
+    {
+      "name": "D2 on 30 v22 checks",
+      "data": "tests/fixtures/requirements-draft-v22/check.jsonl",
+      "output": "d2-v22-check.jsonl"
+    },
+    {
+      "name": "D2 on 12 v22 drafts",
+      "data": "tests/fixtures/requirements-draft-v22/fresh-drafts.jsonl",
+      "output": "d2-v22-drafts.jsonl"
+    },
+    {
+      "name": "D2 on 801 familiar cases",
+      "data": "tests/fixtures/requirements-draft-v22/acquisition.jsonl",
+      "output": "d2-familiar.jsonl"
+    }
+  ],
+  "limits": "Evaluates D1, trains D2, verifies it and evaluates it. Review of the drafts and the decision come next; nothing is published from here."
+}

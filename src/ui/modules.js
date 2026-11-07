@@ -29,5 +29,6 @@ for (const [id, title] of optionalModules) {
     finally { moduleChecks.forEach(c => c.disabled = false); }
   };
 }
-$('settings-form').prepend(modulePicker);
+// Services are added and removed in the app catalogue; this list stays as the hidden store of the switches.
+modulePicker.classList.add('never-shown');$('settings-form').prepend(modulePicker);
 const modulesReady = window.petya.settings().then(renderModules).catch(e => notice(e.message, true));

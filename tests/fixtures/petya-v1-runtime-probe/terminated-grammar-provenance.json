@@ -1,0 +1,17 @@
+{
+  "files": {
+    "model-runtime/grammar.py": "5eb7672e6c26a0b3b3c9658bfa958659447f752528012c2731c075b0406e8d5b",
+    "model-runtime/engine.py": "0b17f01a1db4fe494be8c44e3f2141f3e7f6a2d71720982893474330edd729b9",
+    "tests/fixtures/petya-v1-runtime-probe/check_grammar.py": "bd5451084b6350521ee00389980eabb4b403535d1e76a455ea34d13fd94d126b",
+    "tests/fixtures/petya-v1-runtime-probe/raw-number-diagnostic.json": "0cf1bfac49304f8cc79d6391d50a8710f1e5593ce298ab2096ad9d70544b61af",
+    "tests/fixtures/petya-v1-runtime-probe/terminated-grammar-result.json": "920d35bab08737e0ebbe01bdc3b52eea9cc3b0f0176a405a7acdc947e8a70aa4"
+  },
+  "scope": "CPU tokenizer grammar evidence only; real GPU constrained generation remains required.",
+  "raw_failures": [
+    "any-number",
+    "number-schema",
+    "explicit-any-number"
+  ],
+  "corrected_passed": 24,
+  "cause_observed": "The installed raw grammar forbids the decimal point after the integer prefix. A mandatory JSON whitespace newline defers final DFA acceptance."
+}

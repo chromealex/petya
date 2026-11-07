@@ -83,7 +83,7 @@ const { ServiceOAuth } = require('./service-oauth.cjs');
 const serviceOAuth = { asana: new ServiceOAuth('asana', directRequest), slack: new ServiceOAuth('slack', directRequest), notion: new ServiceOAuth('notion', directRequest) };
 const modules = require('./modules.cjs');
 const team = require('./team.cjs');
-const defaults = { ...modules.defaults, speechStyle:'0', userName:'', userNameVariants:'', userNameExcluded:'', communicationLanguage:'ru', semanticTools:'true', teamMembers:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', gmailCredential:'', microsoftCredential:'', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto',googlePlayCredential:'', asanaCredential: '', asanaWorkspace: '', slackCredential: '', notionCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', notionToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'false', slackInterval: '5', zoomAutoRecord: 'false', zoomWindowTitle: '', zoomCaptureMic: 'true' };
+const defaults = { ...modules.defaults, speechStyle:'0', userName:'', userNameVariants:'', userNameExcluded:'', communicationLanguage:'ru', semanticTools:'true', teamMembers:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', gmailCredential:'', microsoftCredential:'', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto',googlePlayCredential:'', asanaCredential: '', asanaWorkspace: '', slackCredential: '', notionCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', notionToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'true', slackInterval: '5', zoomAutoRecord: 'false', zoomWindowTitle: '', zoomCaptureMic: 'true' };
 // Feature modules (src/features.cjs) bring their own setting defaults and validation.
 const features = require('./features.cjs');
 for (const feature of features) Object.assign(defaults, feature.defaults || {});
@@ -245,8 +245,9 @@ function setupHandlers() {
   const scope=companyScope=new (require('./company-lifecycle.cjs').CompanyLifecycle)({app,powerMonitor,ipcMain});
   const addContext=(...args)=>{scope.check();return applicationAddContext(...args);};
   const notify=(...args)=>{if(!scope.closed)applicationNotify(...args);};
-  const request=async(url,options)=>{scope.check();const result=await applicationRequest(url,scope.options(options),settings,()=>scope.check());scope.check();return result;};
-  const directRequest=async(url,options)=>{scope.check();const result=await applicationDirectRequest(url,scope.options(options));scope.check();return result;};
+  let routeModelRequest=(url,options,fallback)=>fallback(url,options);
+  const request=async(url,options)=>{scope.check();const result=await routeModelRequest(url,scope.options(options),(target,opts)=>applicationRequest(target,opts,settings,()=>scope.check()));scope.check();return result;};
+  const directRequest=async(url,options)=>{scope.check();const result=await routeModelRequest(url,scope.options(options),applicationDirectRequest);scope.check();return result;};
   const saveSettings=(...args)=>{scope.check();const result=applicationSaveSettings(args[0],args[1],{workspace,memory,maintenance,telegramSource,buildRepair,buildQuestion,buildWatch,slackLogs,slackSync,stopWebSearch});settings=profileState().settings;return result;};
   const handle=(name,fn)=>{scope.names.add(name);applicationHandle(name,(...args)=>{scope.check();return fn(...args);});};
   handle('takeMessageLink',()=>{const raw=pendingMessageLink;pendingMessageLink='';return raw;});
@@ -261,7 +262,7 @@ function setupHandlers() {
     return location.company===companyId?chatLocation.resolve(dialogue.state,location):{company:location.company};
   });
   let projectMemory;
-  const {computer,computerApproval,computerIntent}=require('./computer-setup.cjs')({get BrowserWindow(){return BrowserWindow;},get app(){return app;},get companyId(){return companyId;},get core(){return core;},get dialogue(){return dialogue;},get fs(){return fs;},get handle(){return handle;},get path(){return path;},get powerMonitor(){return powerMonitor;},get request(){return request;},get settings(){return settings;},get slackDigest(){return slackDigest;},get smoke(){return smoke;},get systemPreferences(){return systemPreferences;},get teamFill(){return teamFill;},get text(){return text;}});
+  const {computer,computerApproval,computerIntent}=require('./computer-setup.cjs')({get attachments(){return attachments;},get BrowserWindow(){return BrowserWindow;},get app(){return app;},get companyId(){return companyId;},get core(){return core;},get dialogue(){return dialogue;},get fs(){return fs;},get handle(){return handle;},get path(){return path;},get powerMonitor(){return powerMonitor;},get request(){return request;},get settings(){return settings;},get slackDigest(){return slackDigest;},get smoke(){return smoke;},get systemPreferences(){return systemPreferences;},get teamFill(){return teamFill;},get text(){return text;}});
 
   const historyFile = path.join(dataRoot, 'batch-history.json');
   let history = [];
@@ -412,14 +413,15 @@ function setupHandlers() {
   handle('webSearchOpen',()=>searchBrowser.show());
   let pendingWeb;
   const runWeb=async(original,search,resume=false)=>{
-    if(!search.fresh&&!search.topicId)search.topicId=dialogue.active()?.id;
+    if(!search.topicId)search.topicId=dialogue.active()?.id;
     let result;try{result=await webSearch.search(search.query,{resume});pendingWeb=null;}catch(e){if(e.code==='BROWSER_ATTENTION')pendingWeb={original,search};return {handled:true,error:true,text:e.message,webPending:e.code==='BROWSER_ATTENTION'};}
-    let topic=search.fresh?null:dialogue.state.topics.find(t=>t.id===search.topicId);if(!topic?.webQuery){topic={id:randomUUID(),title:'Поиск: '+result.query.slice(0,65),kind:'chat',messages:[],at:Date.now()};dialogue.state.topics.push(topic);}
+    // The answer stays in the chat it was asked in; a chat is made only when none is open.
+    let topic=dialogue.state.topics.find(t=>t.id===search.topicId)||dialogue.active();if(!topic){topic={id:randomUUID(),projectId:dialogue.state.activeProjectId||'general',title:'Поиск: '+result.query.slice(0,65),kind:'chat',messages:[],at:Date.now()};dialogue.state.topics.push(topic);}
     topic.webQuery=result.query;topic.at=Date.now();topic.messages.push({role:'user',text:original,at:Date.now()},{role:'assistant',text:result.text,sources:result.sources,at:Date.now()});dialogue.state.activeId=topic.id;dialogue.persist();return {handled:true,...result,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
   };
   handle('webSearchContinue',()=>{if(!pendingWeb)throw Error('Нет поиска для продолжения.');return runWeb(pendingWeb.original,pendingWeb.search,true);});
-  const {mailSkill,clientDefaults}=require('./mail-setup.cjs')({get app(){return app;},get core(){return core;},get fs(){return fs;},get handle(){return handle;},get learning(){return learning;},get modules(){return modules;},get request(){return request;},get saveSettings(){return saveSettings;},get settings(){return settings;},get win(){return win;}});
-  const {dailyBrief,dictionary,dictionaryScope,undoLast}=require('./learning-setup.cjs')({get agents(){return agents;},get app(){return app;},get dialogue(){return dialogue;},get handle(){return handle;},get learning(){return learning;},get memory(){return memory;},get modules(){return modules;},get settings(){return settings;},get smoke(){return smoke;},get text(){return text;},get workspace(){return workspace;}});
+  const {mailSkill,clientDefaults,mailAccounts}=require('./mail-setup.cjs')({get app(){return app;},get core(){return core;},get fs(){return fs;},get handle(){return handle;},get learning(){return learning;},get modules(){return modules;},get request(){return request;},get saveSettings(){return saveSettings;},get settings(){return settings;},get win(){return win;}});
+  const {dailyBrief,dictionary,dictionaryScope,undoLast}=require('./learning-setup.cjs')({get recurring(){return services.recurring;},get agents(){return agents;},get app(){return app;},get dialogue(){return dialogue;},get handle(){return handle;},get learning(){return learning;},get memory(){return memory;},get modules(){return modules;},get settings(){return settings;},get smoke(){return smoke;},get text(){return text;},get workspace(){return workspace;}});
   const projectFile=path.join(dataRoot,'project-memory.json');
   const projectState=fs.existsSync(projectFile)?JSON.parse(safeStorage.decryptString(Buffer.from(JSON.parse(fs.readFileSync(projectFile,'utf8')).encrypted,'base64'))):undefined;
   const slackAccount=()=>require('node:crypto').createHash('sha256').update(settings.slackCredential||settings.slackToken||'').digest('hex');
@@ -523,7 +525,7 @@ function setupHandlers() {
     get instructionSkills(){return instructionSkills;},
     get learning(){return learning;},
     get localImages(){return localImages;},
-    get mailSkill(){return mailSkill;},
+    get mailSkill(){return mailSkill;},get mailAccounts(){return mailAccounts;},
     get modules(){return modules;},
     get pendingWeb(){return pendingWeb;},
     get projectMemory(){return projectMemory;},
@@ -532,6 +534,7 @@ function setupHandlers() {
     get requestProgress(){return requestProgress;},
     get runReview(){return runReview;},
     get runWeb(){return runWeb;},
+    get webSearchEngine(){return webSearch;},
     get saveSettings(){return saveSettings;},
     get searchCommand(){return searchCommand;},
     get serviceAccess(){return serviceAccess;},
@@ -558,6 +561,8 @@ function setupHandlers() {
     handle, dialogue, attachments, chatJobs, memory, addContext, companyId,
     companyContext:()=>({id:companyId,name:companies.get(companyId).name,switching:switchingCompany,switchInAppOnly:true}),
     meetingRecording: (...args)=>services.meetingRecording(...args),
+    modelRuntime: method=>services.modelRuntime.invoke(method),
+    chatModels: (method,...args)=>services.chatModels[method](...args),
     zoomBot: (...args)=>services.zoomBot(...args),
     generatePainting: (args, check) => services.artist.generate(args, check),
     check() { if (switchingCompany || quitting) throw Error('Компания закрывается.'); },
@@ -583,6 +588,14 @@ function setupHandlers() {
     const keyFile=result.filePaths[0];if(fs.statSync(keyFile).size>20000)throw new Error('Файл ключа слишком большой.');
     const credential=require('./google-play.cjs').credential(fs.readFileSync(keyFile,'utf8'));
     return saveSettings({googlePlayCredential:JSON.stringify(credential),module_googleplay:'true'},true);
+  });
+  // One click: sign in with Google in the browser; the service account key stays as the fallback.
+  handle('googlePlayConnect',async()=>{
+    const play=require('./google-play.cjs'),client=require('./integration-clients.cjs').load().google;
+    const credential=await play.login({client:client&&{client_id:client.client_id,client_secret:client.client_secret},open:url=>require('electron').shell.openExternal(url),request});
+    const saved=saveSettings({googlePlayCredential:JSON.stringify(credential),module_googleplay:'true'},true);
+    let apps=null;try{apps=(await googlePlay.apps()).length;}catch{}
+    return {...saved,playApps:apps};
   });
   handle('googlePlayDisconnect',()=>saveSettings({clear_googlePlayCredential:true},true));
   handle('googlePlayCheck',async()=>({apps:await googlePlay.apps()}));
@@ -644,6 +657,7 @@ function setupHandlers() {
   // window.petya.feature(name, method, ...args) — so features need no preload or main.cjs edits either.
   const featureIpc = new Map();
   for (const feature of features) { const { ipc, ...provided } = feature.setup(services) || {}; if (ipc) featureIpc.set(feature.name, ipc); for (const [key, value] of Object.entries(provided)) Object.defineProperty(services, key, { value, enumerable: true, configurable: true }); }
+  routeModelRequest=services.modelRuntime.routeRequest;
   publishProfile({workspace,dialogue,telegramSource,serviceAccess,serviceBrowser,slackLogs,buildWatch,reviewAssistant,buildQuestion,buildRepair,slackSync,maintenance,stopWebSearch});
   scope.capture();
   handle('feature', (name, method, ...args) => { const ipc = featureIpc.get(name); if (typeof name !== 'string' || typeof method !== 'string' || !ipc || !Object.hasOwn(ipc, method) || typeof ipc[method] !== 'function') throw Error('Неизвестная функция.'); return ipc[method](...args); });
@@ -702,15 +716,17 @@ else {
       start: () => win.webContents.executeJavaScript('window.petyaStartAutomaticMeeting()', true),
       stop: () => win.webContents.executeJavaScript('window.petyaStopAutomaticMeeting(true)', true)
     });
-    win.webContents.once('did-finish-load', () => { if(pendingMessageLink||process.argv.includes('--petya-company-open'))show(); if (!smoke && process.env.PETYA_VERIFY_BUILD !== '1') { backgroundTimer = setInterval(backgroundTick, 5000); backgroundTick(); } });
+    win.webContents.once('did-finish-load', () => { // The window opens at start; closing or minimising it keeps Petya in the tray. «--hidden» starts in the tray.
+      if(!smoke&&!process.argv.includes('--hidden')||pendingMessageLink||process.argv.includes('--petya-company-open'))show(); if (!smoke && process.env.PETYA_VERIFY_BUILD !== '1') { backgroundTimer = setInterval(backgroundTick, 5000); backgroundTick(); } });
     if (process.env.PETYA_VERIFY_BUILD === '1') {
       win.webContents.once('did-finish-load', async () => {
         let valid = await win.webContents.executeJavaScript('document.title === "Петя" && typeof window.petya.plan === "function"');
         // app.dock.hide() settles asynchronously on macOS; give it a moment before judging the tray start.
         for (let i = 0; i < 20 && process.platform === 'darwin' && app.dock.isVisible(); i++) await new Promise(r => setTimeout(r, 100));
-        const hidden = !win.isVisible(), dockHidden = process.platform !== 'darwin' || !app.dock.isVisible();
-        const startedInTray = hidden && !tray.isDestroyed() && dockHidden;
-        if (!startedInTray) console.log('Tray start check: ' + JSON.stringify({ windowHidden: hidden, dockHidden, tray: !tray.isDestroyed() }));
+        const shown = win.isVisible(), dockHidden = process.platform !== 'darwin' || !app.dock.isVisible();
+        const startedInTray = shown && !tray.isDestroyed() && dockHidden;
+        if (!startedInTray) console.log('Start check: ' + JSON.stringify({ windowShown: shown, dockHidden, tray: !tray.isDestroyed() }));
+        win.close();
         tray.emit('click');
         const openedFromTray = win.isVisible();
         win.close();
@@ -721,7 +737,7 @@ else {
         );
         win.close();
         valid = valid && startedInTray && openedFromTray && closedToTray && reopenedFromTray && !win.isVisible();
-        console.log('Tray lifecycle: ' + JSON.stringify({ startedInTray, openedFromTray, closedToTray, reopenedFromTray }));
+        console.log('Tray lifecycle: ' + JSON.stringify({ startedOpen: startedInTray, openedFromTray, closedToTray, reopenedFromTray }));
         try { if (process.env.PETYA_VERIFY_ZOOM === '1') { const state = await inspectZoomWindows(true); console.log('Zoom diagnostic: ' + JSON.stringify({ permission: state.permission, zoomOpen: state.zoomOpen, windows: state.windows.length, electronPermission: systemPreferences.getMediaAccessStatus('screen') })); } if (process.env.PETYA_VERIFY_SPEECH === '1') { await win.webContents.executeJavaScript('window.petya.ensureSpeech()'); console.log('Packaged speech startup verified'); } console.log(valid ? 'Packaged app verified' : 'Packaged app failed'); speech.stop(); qwenSpeech.stop(); app.exit(valid ? 0 : 1); } catch (error) { console.error(error); speech.stop(); qwenSpeech.stop(); app.exit(1); }
       });
     }
@@ -735,7 +751,7 @@ else {
     }
     if (!app.isPackaged && process.env.PETYA_SMOKE_TEST === '1') {
       win.webContents.once('did-finish-load', async () => {
-        try { if(process.env.PETYA_COMPANY_SWITCH_TEST==='1')await require('../tests/company-switch.cjs')(win,app);else await require('../tests/smoke.cjs')(win, workspace); console.log('UI smoke test passed'); app.exit(0); }
+        try { if(process.env.PETYA_UI_SCRIPT)await require(require('node:path').resolve(process.env.PETYA_UI_SCRIPT))(win,{app,workspace});else if(process.env.PETYA_COMPANY_SWITCH_TEST==='1')await require('../tests/company-switch.cjs')(win,app);else await require('../tests/smoke.cjs')(win, workspace); console.log('UI smoke test passed'); app.exit(0); }
         catch (error) { console.error(error); app.exit(1); }
       });
     }

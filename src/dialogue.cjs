@@ -47,8 +47,12 @@ function intent(text,active){
  if(active&&['bugs','anr','tasks'].includes(active.kind)&&(/^(?:в|по|для)\s+проект[еу]?\s+[\p{L}\p{N}][\p{L}\p{N} _-]*$/iu.test(continuation)||/^теперь\s+в\s+[\p{L}\p{N}][\p{L}\p{N} _-]*[.!?]*$/iu.test(text)||/^(?:обнови(?: ответ| данные)?|сколько(?: их)?(?: всего| осталось| открытых| закрытых)?|посмотри ещё|проверь ещё)$/iu.test(continuation)||/^(?:по|за|в|для)\s+(?:эт|предыдущ|последн|прошл|текущ|нов|сегодня|вчера|\d)/iu.test(continuation)))return active.kind;
  return 'chat';
 }
+const versionNumbers=text=>String(text).match(/\d+(?:\.\d+)+/g)||[];
 function selectChoice(text,options){
- const value=text.toLocaleLowerCase().replace(/[.,!?]/g,'').trim();
+ const value=text.toLocaleLowerCase().replace(/[,!?]/g,'').replace(/\.(?!\d)/g,'').trim();
+ // «19.3», «версия 19.3»: the option whose version number is or ends with it.
+ const asked=versionNumbers(value);
+ if(asked.length===1){const hit=options.filter(o=>versionNumbers(o.label).some(v=>v===asked[0]||v.endsWith('.'+asked[0])));if(hit.length)return hit;}
  const ordinal={первый:0,первая:0,первое:0,второй:1,вторая:1,второе:1,третий:2,третья:2,третье:2};
  const index=/^\d+$/.test(value)?Number(value)-1:ordinal[value];
  if(Number.isInteger(index))return options[index]?[options[index]]:[];
@@ -144,38 +148,44 @@ class Dialogue {
   const runningKey=this.active()?.id||'new:'+this.state.activeProjectId;if(this.running.has(runningKey))throw new Error('Дождитесь ответа Пети.');this.running.add(runningKey);
   try{
    this.prune();let active=this.active();
-   if(choice){if(!active?.pending||!active.pending.options.some(o=>o.id===choice))throw new Error('Уточнение устарело.');active[active.pending.field]=choice;text=active.pending.field==='versionId'?active.pending.command.replace(/последн[а-я]*|свеж[а-я]*|текущ[а-я]*|предыдущ[а-я]*/giu,''):active.pending.command;forcedKind=active.pending.kind;delete active.pending;}
-   else if(active?.pending){const matches=selectChoice(text,active.pending.options);if(matches.length===1){active[active.pending.field]=matches[0].id;text=active.pending.field==='versionId'?active.pending.command.replace(/последн[а-я]*|свеж[а-я]*|текущ[а-я]*|предыдущ[а-я]*/giu,''):active.pending.command;forcedKind=active.pending.kind;delete active.pending;}else {if(/^\d+[.!?]*$/u.test(text.trim()))return {handled:true,text:'Выбери один из предложенных вариантов.',question:true,options:active.pending.options,topicId:active.id};delete active.pending;this.persist();if(/^(?:отмена|отложи|не надо|стоп)[.!?]*$/iu.test(text.trim()))return {handled:true,text:'Отменено.',topicId:active.id};} }
+   // The user's pick goes into the chat history as their message; the original request is what gets answered.
+   let picked='';
+   if(choice){if(!active?.pending||!active.pending.options.some(o=>o.id===choice))throw new Error('Уточнение устарело.');picked=String(active.pending.options.find(o=>o.id===choice).label||choice).split(' · ')[0];active[active.pending.field]=choice;text=active.pending.field==='versionId'?active.pending.command.replace(/последн[а-я]*|свеж[а-я]*|текущ[а-я]*|предыдущ[а-я]*/giu,''):active.pending.command;forcedKind=active.pending.kind;delete active.pending;}
+   else if(active?.pending){const matches=selectChoice(text,active.pending.options);if(matches.length===1){picked=text;active[active.pending.field]=matches[0].id;text=active.pending.field==='versionId'?active.pending.command.replace(/последн[а-я]*|свеж[а-я]*|текущ[а-я]*|предыдущ[а-я]*/giu,''):active.pending.command;forcedKind=active.pending.kind;delete active.pending;}else {if(/^\d+[.!?]*$/u.test(text.trim()))return {handled:true,text:'Выбери один из предложенных вариантов.',question:true,options:active.pending.options,topicId:active.id};delete active.pending;this.persist();if(/^(?:отмена|отложи|не надо|стоп)[.!?]*$/iu.test(text.trim()))return {handled:true,text:'Отменено.',topicId:active.id};} }
    if(!forcedKind&&/^(?:\d+|первый|первая|первое|второй|вторая|второе|третий|третья|третье)[.!?]*$/iu.test(text.trim()))return {handled:true,text:'Какой вариант ты имеешь в виду? Сейчас нет открытого списка для выбора.',question:true};
    if(!forcedKind&&!taskListRequest(text)&&actionRequest(text)){return {handled:false};}
    let kind=forcedKind||intent(text,active);
    // «эти задачи», «из них» about what this chat just showed: answer here from it, not with a new Jira query in another chat.
    const aboutShown=!forcedKind&&!!active&&aboutShownList(text,active);
    if(aboutShown)kind='chat';
-   const back=/^(?:верн[её]мся|вернись|продолжим|вернуться)/iu.test(text);
-   if(back){const terms=core.words(text).filter(w=>!['вернемся','вернёмся','вернись','продолжим','вернуться','теме','тема','давай'].includes(w));const matches=this.scoped().filter(t=>text.toLowerCase().includes(t.title.toLowerCase())||(kind!=='chat'&&t.kind===kind)||(terms.length&&terms.some(w=>core.words(t.title).some(v=>w.length>=4&&v.startsWith(w.slice(0,Math.min(w.length,4)))))));if(matches.length===1){this.state.activeId=matches[0].id;active=matches[0];kind=active.kind;}else return {handled:true,text:'К какой теме вернуться?',topicChoices:this.list().topics};}
-   let newTopic=!!this.state.newChat||/^(?:новая тема|другая тема|теперь поговорим)/iu.test(text);
-   let suggestedTitle='',unclear=false;
+   const back=/^(?:верн[её]мся|вернись|продолжим|вернуться)/iu.test(text);let backOffer=null;
+   if(back){const terms=core.words(text).filter(w=>!['вернемся','вернёмся','вернись','продолжим','вернуться','теме','тема','давай'].includes(w));const matches=this.scoped().filter(t=>text.toLowerCase().includes(t.title.toLowerCase())||(kind!=='chat'&&t.kind===kind)||(terms.length&&terms.some(w=>core.words(t.title).some(v=>w.length>=4&&v.startsWith(w.slice(0,Math.min(w.length,4)))))));if(matches.length===1&&matches[0].id!==active?.id){backOffer=matches[0];kind=active?.kind||'chat';}else if(matches.length===1)kind=active.kind;else return {handled:true,text:'К какой теме вернуться?',topicChoices:this.list().topics};}
+   // «Новая тема», «вернёмся к багам»: Petya offers the other chat (or a new one) with a button and answers here;
+   // only the «+» button and the chat list open another chat.
+   const askedNew=/^(?:новая тема|другая тема|теперь поговорим)/iu.test(text);
+   let newTopic=!!this.state.newChat;
+   let suggestedTitle='',unclear=false,offer=backOffer;
    // Chats are made by the user (the «+» button, «новый чат», «новая тема»): Petya answers in the open chat and
    // never moves the conversation to another or a new chat on its own guess about the subject (settings.autoTopics='true' brings that back).
    if(this.autoTopics?.()&&kind==='chat'&&!discussionOnly(text)&&!forcedKind&&!back&&!newTopic&&!aboutShown&&!freshChat(active)&&this.routeTopic){
-    try{const route=await (preparedRoute?.owner===this&&preparedRoute.text===text&&preparedRoute.stateKey===JSON.stringify(this.state)?preparedRoute.result:this.routeTopic(text,this.scoped(),active?.id));unclear=!!route?.unclear;if(['bugs','anr'].includes(route?.kind))kind=route.kind;if(route?.newTopic&&!this.keepTopic?.(text,active)){newTopic=true;suggestedTitle=String(route.title||text).slice(0,80);}else if(route?.topicId){const found=this.scoped().find(t=>t.id===route.topicId);if(found){active=found;this.state.activeId=found.id;}}}catch{unclear=true;}
+    try{const route=await (preparedRoute?.owner===this&&preparedRoute.text===text&&preparedRoute.stateKey===JSON.stringify(this.state)?preparedRoute.result:this.routeTopic(text,this.scoped(),active?.id));unclear=!!route?.unclear;if(['bugs','anr'].includes(route?.kind))kind=route.kind;if(route?.topicId&&route.topicId!==active?.id){const found=this.scoped().find(t=>t.id===route.topicId);if(found)offer=found;}}catch{unclear=true;}
    }
-   // Tasks, bugs or ANR asked in an open chat are answered there; the chat takes that kind for the follow-ups.
-   if(!newTopic&&active&&kind!=='chat'&&active.kind!==kind&&!this.autoTopics?.())active.kind=kind;
+   // Tasks, bugs or ANR are answered in the open chat, which takes that kind for the follow-ups; without an open chat
+   // a new one is made. They never go to another existing chat (only «вернёмся к багам» opens one).
+   if(!newTopic&&active&&kind!=='chat'&&active.kind!==kind)active.kind=kind;
    if(newTopic||!active||(kind!=='chat'&&active.kind!==kind)){
     const hint=!newTopic&&active?(active.title+' '+active.messages.slice(-2).map(m=>m.text).join(' ')):'';const previousProject=!newTopic?active?.jiraProject:undefined;const previousVersion=!newTopic?active?.versionId:undefined;
-    const same=!newTopic&&this.scoped().filter(t=>t.kind===kind);
-    active=same?.length===1?same[0]:{id:randomUUID(),title:kind==='bugs'?'Баги в Jira':kind==='tasks'?'Задачи в Jira':kind==='anr'?'ANR в Google Play':(suggestedTitle||text.slice(0,80)),kind,messages:[],at:this.now(),contextHint:hint,...['bugs','tasks'].includes(kind)&&previousProject?{jiraProject:previousProject,...previousVersion?{versionId:previousVersion}:{}}:{}};
+    active={id:randomUUID(),title:kind==='bugs'?'Баги в Jira':kind==='tasks'?'Задачи в Jira':kind==='anr'?'ANR в Google Play':(suggestedTitle||text.slice(0,80)),kind,messages:[],at:this.now(),contextHint:hint,...['bugs','tasks'].includes(kind)&&previousProject?{jiraProject:previousProject,...previousVersion?{versionId:previousVersion}:{}}:{}};
     if(!this.state.topics.includes(active))this.state.topics.push(active);this.state.activeId=active.id;
    }
    const before=structuredClone(active);
-   active.at=this.now();(takePlaceholder(active,text),active.messages.push(userMessage(active,text,this.now())));this.persist();
+   active.at=this.now();(takePlaceholder(active,text),active.messages.push(userMessage(active,picked||text,this.now())));this.persist();
    let result;
    try{
     // «Вернёмся к багам» shows the saved answer; «Вернёмся к книгам: посоветуй ещё одну» asks a new question in that topic.
     const followUp=back&&/[:,—]\s*\S{3,}|\s(?:и|а)\s+(?:посоветуй|расскажи|покажи|объясни|назови|напомни|скажи|дай|что|как|какой|какая|какие|сколько|почему)/iu.test(text.replace(/^(?:верн[её]мся|вернись|продолжим|вернуться)/iu,''));
-    if(back&&!followUp){const last=active.messages.filter(m=>m.role==='assistant').at(-1);result={text:'Вернулись к теме «'+active.title+'». '+(last?'Последний сохранённый ответ от '+new Date(last.at).toLocaleString('ru-RU')+': '+last.text+' Для свежих данных скажите «обнови».':'Что обсудим?')};}
+    if(backOffer&&!followUp)result={text:'Чат «'+backOffer.title+'» уже есть. Перейти в него?'};
+    else if(back&&!followUp){const last=active.messages.filter(m=>m.role==='assistant').at(-1);result={text:'Вернулись к теме «'+active.title+'». '+(last?'Последний сохранённый ответ от '+new Date(last.at).toLocaleString('ru-RU')+': '+last.text+' Для свежих данных скажите «обнови».':'Что обсудим?')};}
     else if(kind==='bugs'||kind==='anr'||kind==='tasks'){
      result=await this.readers[kind](text,active,active.contextHint||this.context());
      if(result.question){active.pending={command:text,kind,field:result.field,options:result.options||[]};result.text=result.question;}
@@ -183,17 +193,15 @@ class Dialogue {
     }else {const answer=await this.answer(text,active,unclear);result=typeof answer==='string'?{text:answer}:{...answer};if(active.answeredBy&&!result.by)result.by=active.answeredBy;delete active.answeredBy;}
    }catch(error){result={text:'Не удалось проверить данные: '+error.message,error:true,...(['bugs','tasks','anr'].includes(kind)?{retryStep:kind}:{})};}
    require('./answer-cancel.cjs').check();
-   if(result.title && before.lastData && result.title!==before.title){
-    const changed={...active,id:randomUUID(),messages:[userMessage(active,text,this.now())]};
-    Object.assign(active,before);
-    active=this.scoped().find(t=>t.title===result.title&&t.kind===kind)||changed;
-    if(active!==changed)(takePlaceholder(active,text),active.messages.push(userMessage(active,text,this.now())));else this.state.topics.push(active);
-    this.state.activeId=active.id;
-   }
+   // Petya never switches chats on his own: the answer stays here, and a chat that already holds this subject
+   // (the same Jira list, «Баги в Jira», the chat the router picked) is offered with a button.
+   offer=offer||this.scoped().filter(t=>t.id!==active.id&&t.messages.length&&((result.title&&t.title===result.title)||(kind!=='chat'&&t.kind===kind))).sort((a,b)=>b.at-a.at)[0]||null;
+   if(offer)result.chatOffer={topicId:offer.id,title:offer.title};
+   else if(askedNew&&!freshChat(before))result.chatOffer={newChat:true,command:text.replace(/^(?:новая тема|другая тема|теперь поговорим)[\s,:.—-]*/iu,'').slice(0,4000)};
    if(result.title)active.title=result.title;
    if(result.data)active.lastData=result.data;
    if(result.error && kind==='chat' && active.attachments?.length)result.retryStep='files';
-   active.messages.push({role:'assistant',text:result.text,error:!!result.error,...(result.error&&(['bugs','tasks','anr'].includes(kind)||result.retryStep)?{retryStep:result.retryStep||kind}:{}),sources:result.sources||[],jiraItems:require('./extensions/jira/result.cjs').capture(result),usedMaterials:result.usedMaterials||[],at:this.now(),...(result.by?{by:result.by}:{})});this.persist();
+   active.messages.push({role:'assistant',text:result.text,error:!!result.error,...(result.error&&(['bugs','tasks','anr'].includes(kind)||result.retryStep)?{retryStep:result.retryStep||kind}:{}),sources:result.sources||[],jiraItems:require('./extensions/jira/result.cjs').capture(result),usedMaterials:result.usedMaterials||[],at:this.now(),...(result.by?{by:result.by}:{}),...(result.chatOffer?{chatOffer:result.chatOffer}:{})});this.persist();
    return {handled:true,...result,topicId:active.id,topicTitle:active.title,messages:active.messages,topics:this.list()};
   }finally{this.running.delete(runningKey);}
  }

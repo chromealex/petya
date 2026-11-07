@@ -2,7 +2,7 @@
 // downloaded when they are needed — from the chat model picker, or when a task asks for one — and can be
 // removed again. Progress goes to the notification center like the main model's preparation.
 const CATALOG=[
- {name:'gemma3:4b',size:3.3e9,purpose:'скриншоты и видео во вложениях'},
+ {name:'gemma3:4b',size:3.3e9,purpose:'скриншоты и видео во вложениях',vision:true},
  {name:'qwen2.5-coder:7b',size:4.7e9,purpose:'разбор кода во вложениях'},
  {name:'qwen3:4b',size:2.5e9,purpose:'быстрые короткие ответы'}];
 const known=name=>CATALOG.find(m=>m.name===name);
@@ -27,6 +27,8 @@ module.exports={
   const ipc={
    list:async()=>{let names=[],error='';try{names=await installed();}catch(e){error='Ollama недоступна: '+e.message;}
     return {models:CATALOG.map(m=>({...m,installed:names.includes(m.name)})),busy:!!ready?.state?.busy,error};},
+   // Names of every installed model (the answer model too), for «already installed» states in settings.
+   installed:async()=>{try{return {names:await installed()};}catch(e){return {names:[],error:e.message};}},
    download,
    cancel:()=>ready?.cancel?.(),
    status:()=>ready?.state||{phase:'idle'},

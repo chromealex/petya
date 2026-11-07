@@ -7,9 +7,11 @@ const slack=(id,channel,text,user='alex')=>({id,channel,text,user,at:now,source:
 (async()=>{
  for(const text of ['посмотри что не так','Петя, глянь, что там не так?','разберись в чём проблема','можешь проверить что случилось','проверь почему не работает'])assert(isContextReference(text),text);
  for(const text of ['не посмотри что не так','посмотри что не так и удали проект','проверь почту'])assert(!isContextReference(text),text);
- const rows=[zoom('old','old',now-1000,'Старая встреча'),zoom('a','new',now-200,'Не работает вход'),zoom('b','new',now-100,'После обновления'),slack('s','C1','Проверь авторизацию')];
+ const rows=[zoom('old','old',now-3*3600000,'Старая встреча'),zoom('a','new',now-200,'Не работает вход'),zoom('b','new',now-100,'После обновления'),slack('s','C1','Проверь авторизацию')];
  const resolve=(extra={})=>feature.resolve({rows,project,now,...extra});
  assert.deepEqual(resolve().rows.map(r=>r.id),['a','b']);
+ // A recording that restarted a few minutes earlier is the same meeting.
+ assert.deepEqual(feature.resolve({rows:[...rows,zoom('c','restart',now-5*60000,'Начало встречи')],project,now}).rows.map(r=>r.id),['c','a','b']);
  assert.equal(resolve({rows:[rows[3]]}).kind,'found');
  assert.equal(resolve({rows:[rows[3]],members:['other']}).kind,'empty');
  assert.equal(resolve({rows:[rows[3]],topic:{excludedMaterials:['s']}}).kind,'empty');

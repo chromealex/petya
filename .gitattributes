@@ -2,3 +2,6 @@
 /output/pdf/*.pdf -text
 /output/review/*.zip -text
 /zoom-bot/review/evidence/* -text -whitespace
+
+# Preserve the assembled upstream license texts byte-for-byte.
+/src/model-runtime/THIRD_PARTY_NOTICES.txt -text -whitespace

@@ -79,25 +79,20 @@ ChatJobs.prototype.executeFull=async function(job){
   if(job.cancelled)return;
   if(job.scope!==this.scope(topic.projectId))throw Error('Настройки или компания изменились. Повторите запрос с новым контекстом.');
   if(!result||!result.handled)throw Error('Для этого запроса нужно действие. Откройте чат и повторите запрос.');
-  // The pipeline may answer in another chat, e.g. an existing «Баги в Jira» topic or a new Slack log.
-  // An agent's chat keeps its own answer even when the pipeline also wrote it into another chat: it sits under
-  // the chat that started the agents, and the combined answer reads it from there.
-  const target=!topic.agentOf&&result.topicId&&result.topicId!==topic.id?d.state.topics.find(t=>t.id===result.topicId)||topic:topic;
-  if(target!==topic){const at=topic.messages.indexOf(placeholder);if(at>=0)topic.messages.splice(at,1);
-   // The empty chat made for this request goes away; whoever was looking at it is taken to the answer, and its
-   // progress ends instead of hanging on the last label.
-   if(job.created&&!topic.messages.length&&d.state.topics.includes(topic)){d.state.topics.splice(d.state.topics.indexOf(topic),1);if(d.state.activeId===topic.id)d.state.activeId=target.id;this.emit({topicId:topic.id,movedTo:target.id,job:{state:'done',label:'Ответ в чате «'+target.title+'»'}});}}
-  else settle();
+  // The answer always stays in the chat that asked: Petya never switches chats himself. When the pipeline also wrote
+  // it into another chat (an existing «Баги в Jira», a Slack log), that chat is offered with a button.
+  const elsewhere=!topic.agentOf&&result.topicId&&result.topicId!==topic.id?d.state.topics.find(t=>t.id===result.topicId):null;
+  const target=topic;settle();
+  if(elsewhere&&!result.chatOffer)result.chatOffer={topicId:elsewhere.id,title:elsewhere.title};
   if(!d.state.topics.includes(target))return;
   record(target);
   if(placeholder.replyTo){const turn=target.messages.findLast(m=>m.role==='user'&&m.at>=placeholder.at);if(turn)turn.replyTo=placeholder.replyTo;}
   const last=target.messages.at(-1);if(result.error&&last?.role==='assistant'&&last.text===result.text)last.error=true;
-  if(result.text&&!(last?.role==='assistant'&&last.text===result.text))target.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:Date.now(),...(result.by?{by:result.by}:{})});
+  if(result.text&&!(last?.role==='assistant'&&last.text===result.text))target.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:Date.now(),...(result.by?{by:result.by}:{}),...(result.chatOffer?{chatOffer:result.chatOffer}:{})});
   if(target.title==='Новый чат')target.title=command.slice(0,80);
   const answer=target.messages.at(-1);if(answer?.role==='assistant'&&!answer.steps?.length){const now=Date.now();answer.steps=result.steps?.length?result.steps:(topic.chatJob?.steps||[]).map(s=>({label:s.label,ms:Math.max(0,(s.done||now)-s.at)}));}
   const waiting=needsUser(result);
   target.lastChatResult={...result,question:result.question||waiting,topicId:target.id,topicTitle:target.title,messages:undefined,topics:undefined};
-  if(target!==topic){target.chatJob={...topic.chatJob};if(d.state.topics.includes(topic))this.update(topic,'done','Ответ в чате «'+target.title+'»');}
   this.update(target,result.error||waiting?'attention':'done',result.error?'Ошибка — откройте чат':waiting?'Нужно уточнение':'Готово');
  }catch(e){job.answered=true;settle();if(!job.cancelled&&d.state.topics.includes(topic)){record(topic);topic.messages.push({role:'assistant',text:e.message,error:true,at:Date.now(),error:true});this.update(topic,'attention',e.message);}}
 };

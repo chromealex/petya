@@ -13,6 +13,7 @@ const {Dialogue}=require('../src/dialogue.cjs');
   const notes=[];
   let zoomMode='auto';
   const ctx={companyContext:()=>({id:'default',name:'Компания 1',switching:false,switchInAppOnly:true}),zoomBot:(method)=>method==='status'?{mode:zoomMode,id:'detected',phase:'detected'}:{phase:method==='dismiss'?'dismissed':'joining'},meetingRecording:(method,id)=>method==='status'?[]:method==='captureStatus'?{mode:zoomMode,phase:'detected'}:{id,phase:method==='startCapture'?'recording':'processing'},companyId:'default',dialogue,attachments:new Attachments({}),chatJobs:{busy:()=>busy},memory:{prune:()=>notes},addContext:note=>{const item={...note,id:'note'};notes.push(item);return item;},check(){},changed(){},run:fn=>fn()};
+  const runtimeCalls=[];ctx.modelRuntime=method=>{runtimeCalls.push(method);return {phase:method==='stop'?'stopped':method==='start'?'starting':'idle',releaseAvailable:false};};
   const endpoint=await startMcp(ctx,{port:0});
   const client=new Client({name:'petya-test',version:'1'});
   try{
@@ -27,6 +28,39 @@ const {Dialogue}=require('../src/dialogue.cjs');
       assert.ok(!r.isError,r.content[0].text);
       return JSON.parse(r.content[0].text);
     }
+    const fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
+    const instructionRoot=await fs.mkdtemp(path.join(os.tmpdir(),'petya-mcp-instructions-'));
+    dialogue.state.projects.push({id:'instructions-test',name:'Instructions',folders:[instructionRoot]});
+    try{
+      await fs.writeFile(path.join(instructionRoot,'AGENTS.md'),'Правило проекта');await fs.writeFile(path.join(instructionRoot,'petya.md'),'Правило Пети');
+      const found=await call('read_project_instructions',{projectId:'instructions-test'});
+      assert.deepEqual(found.projects[0].instructions.map(f=>f.text),['Правило проекта','Правило Пети']);
+      ctx.access={mode:'read',projectId:'general'};await call('read_project_instructions',{projectId:'instructions-test'},true);
+      ctx.access={mode:'read',projectId:'instructions-test'};assert.equal((await call('read_project_instructions',{projectId:'instructions-test'})).projects.length,1);
+      await call('read_project_instructions',{projectId:'missing'},true);
+    }finally{delete ctx.access;dialogue.state.projects=dialogue.state.projects.filter(p=>p.id!=='instructions-test');await fs.rm(instructionRoot,{recursive:true,force:true});}
+    assert.equal((await call('petya_model_status')).phase,'idle');
+    await call('start_petya_model',{},true);await call('stop_petya_model',{},true);
+    for(const mode of ['read','drafts']){ctx.access={mode};await call('start_petya_model',{},true);await call('stop_petya_model',{},true);}
+    assert.deepEqual(runtimeCalls,['status']);
+    ctx.access={mode:'edit',projectId:'general'};for(const name of ['petya_model_status','start_petya_model','stop_petya_model'])await call(name,{},true);
+    assert.deepEqual(runtimeCalls,['status']);
+    ctx.access={mode:'edit'};assert.equal((await call('start_petya_model')).phase,'starting');assert.equal((await call('stop_petya_model')).phase,'stopped');
+    const runBeforeRuntime=ctx.run;ctx.run=fn=>{ctx.access={mode:'read'};return fn();};
+    await call('start_petya_model',{},true);assert.deepEqual(runtimeCalls,['status','start','stop']);ctx.run=runBeforeRuntime;delete ctx.access;
+    let modelReady=true;
+    const modelService=require('../src/features/chat-models.cjs').create({dialogue,settings:{ollamaUrl:'http://127.0.0.1:11434/api/chat'},modelRuntime:{invoke:()=>({releaseAvailable:modelReady,phase:modelReady?'ready':'idle',model:'petya-v1'})},directRequest:async()=>{throw Error('Ollama offline');}});
+    ctx.chatModels=(method,...args)=>modelService[method](...args);
+    assert.equal((await call('list_chat_models',{chatId:'one'})).models[0].name,'petya-v1');
+    for(const mode of ['read','drafts']){ctx.access={mode,projectId:'general'};await call('set_chat_model',{chatId:'one',model:'petya-v1',previous:''},true);}
+    ctx.access={mode:'edit',projectId:'wrong'};await call('list_chat_models',{chatId:'one'},true);await call('set_chat_model',{chatId:'one',model:'petya-v1',previous:''},true);
+    ctx.access={mode:'edit',projectId:'general'};
+    assert.equal((await call('set_chat_model',{chatId:'one',model:'petya-v1',previous:''})).current,'petya-v1');
+    await call('set_chat_model',{chatId:'one',model:'',previous:''},true);
+    modelReady=false;await call('set_chat_model',{chatId:'one',model:'petya-v1',previous:'petya-v1'},true);
+    assert.equal((await call('set_chat_model',{chatId:'one',model:'',previous:'petya-v1'})).current,'');
+    const beforeSelection=ctx.run;ctx.run=fn=>{ctx.access={mode:'read',projectId:'general'};return fn();};
+    await call('set_chat_model',{chatId:'one',model:'',previous:''},true);ctx.run=beforeSelection;delete ctx.access;
     assert.equal((await call('check_model_disk_space')).status,'space_only');
     assert.deepEqual(await call('get_company_context'),{id:'default',name:'Компания 1',switching:false,switchInAppOnly:true});
     notes.push({id:'meeting-context-test',source:'Zoom',title:'Встреча',text:'После обновления не работает вход',at:Date.now(),sessionId:'test-call'});

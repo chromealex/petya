@@ -1,0 +1,5 @@
+# Keep hashed notice bytes intact across platforms.
+SUPPLIED_NOTICES.txt -text
+*.json text eol=lf
+*.py text eol=lf
+*.md text eol=lf

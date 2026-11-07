@@ -1,16 +1,40 @@
 const {createSign,createPrivateKey}=require('node:crypto');
 const ROOT='https://playdeveloperreporting.googleapis.com/v1beta1/';
-function credential(value){const c=typeof value==='string'?JSON.parse(value):value;if(c?.type!=='service_account'||typeof c.client_email!=='string'||!c.client_email.endsWith('.gserviceaccount.com')||typeof c.private_key!=='string')throw new Error('Выберите JSON ключ сервисного аккаунта Google.');createPrivateKey(c.private_key);return {type:c.type,client_email:c.client_email,private_key:c.private_key};}
+function credential(value){const c=typeof value==='string'?JSON.parse(value):value;if(c?.type==='oauth'){if(typeof c.refresh_token!=='string'||!c.client?.client_id)throw new Error('Подключите Google Play заново.');return {type:'oauth',client:{client_id:c.client.client_id,client_secret:c.client.client_secret},refresh_token:c.refresh_token,email:String(c.email||'')};}if(c?.type!=='service_account'||typeof c.client_email!=='string'||!c.client_email.endsWith('.gserviceaccount.com')||typeof c.private_key!=='string')throw new Error('Выберите JSON ключ сервисного аккаунта Google.');createPrivateKey(c.private_key);return {type:c.type,client_email:c.client_email,private_key:c.private_key};}
 const date=d=>({year:d.getUTCFullYear(),month:d.getUTCMonth()+1,day:d.getUTCDate(),timeZone:{id:'America/Los_Angeles'}});
 const day=t=>new Date(Date.UTC(t.year,t.month-1,t.day));
 const fmt=t=>`${t.year}-${String(t.month).padStart(2,'0')}-${String(t.day).padStart(2,'0')}`;
 function metric(row,name){const raw=row?.metrics?.find(m=>m.metric===name)?.decimalValue?.value;return raw!==undefined&&Number.isFinite(Number(raw))?Number(raw):null;}
+// One-click connection: the Google account of the Play Console user signs in in the browser (OAuth for desktop apps,
+// loopback redirect with PKCE) and grants read access to Android vitals reports. Resolves with the credential to save.
+const SCOPE='https://www.googleapis.com/auth/playdeveloperreporting';
+async function login({client,open,request,timeout=300000}){
+ if(!client?.client_id)throw new Error('В сборке нет OAuth-клиента Google. Импортируйте ключ сервисного аккаунта.');
+ const http=require('node:http'),{randomBytes,createHash}=require('node:crypto');
+ const state=randomBytes(32).toString('base64url'),verifier=randomBytes(32).toString('base64url');let redirect,done,fail;
+ const result=new Promise((resolve,reject)=>{done=resolve;fail=reject;});
+ const server=http.createServer(async(req,res)=>{res.setHeader('Content-Type','text/plain; charset=utf-8');const u=new URL(req.url,'http://127.0.0.1');
+  if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state){res.writeHead(400);res.end('Недопустимый ответ авторизации.');return;}
+  try{if(u.searchParams.has('error')||!u.searchParams.get('code'))throw new Error('Вход отменён в Google.');
+   const tokens=await request('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...client,grant_type:'authorization_code',code:u.searchParams.get('code'),redirect_uri:redirect,code_verifier:verifier}).toString()});
+   if(!tokens.refresh_token||!String(tokens.scope||'').split(' ').includes(SCOPE))throw new Error('Google не дал постоянный доступ к отчётам Google Play.');
+   res.end('Google Play подключён. Вернитесь в Петю.');done({type:'oauth',client,refresh_token:tokens.refresh_token});
+  }catch(e){res.end(e.message);fail(e);}
+ });
+ await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
+ redirect='http://127.0.0.1:'+server.address().port+'/callback';
+ const timer=setTimeout(()=>fail(new Error('Время входа истекло. Нажмите «Подключить» ещё раз.')),timeout);timer.unref?.();
+ try{await open('https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:client.client_id,redirect_uri:redirect,response_type:'code',scope:SCOPE,state,code_challenge:createHash('sha256').update(verifier).digest('base64url'),code_challenge_method:'S256',access_type:'offline',prompt:'consent select_account'}));return await result;}
+ finally{clearTimeout(timer);server.close();}
+}
 class GooglePlay {
  constructor({settings,request}){this.settings=settings;this.request=request;}
  async token(){
   const s=this.settings();if(s.module_googleplay==='false')throw new Error('Включите Google Play в подключениях.');if(!s.googlePlayCredential)throw new Error('Подключите Google Play: импортируйте ключ сервисного аккаунта с доступом к Android vitals.');
   if(this.cached?.key===s.googlePlayCredential&&this.cached.until>Date.now()+60000)return this.cached.token;
-  const c=credential(s.googlePlayCredential),now=Math.floor(Date.now()/1000),b64=v=>Buffer.from(JSON.stringify(v)).toString('base64url');
+  const c=credential(s.googlePlayCredential);
+  if(c.type==='oauth'){const result=await this.request('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...c.client,grant_type:'refresh_token',refresh_token:c.refresh_token}).toString()});if(!result.access_token)throw new Error('Вход Google Play истёк. Нажмите «Подключить» ещё раз.');this.cached={key:s.googlePlayCredential,token:result.access_token,until:Date.now()+Number(result.expires_in||3600)*1000};return result.access_token;}
+  const now=Math.floor(Date.now()/1000),b64=v=>Buffer.from(JSON.stringify(v)).toString('base64url');
   const unsigned=b64({alg:'RS256',typ:'JWT'})+'.'+b64({iss:c.client_email,scope:'https://www.googleapis.com/auth/playdeveloperreporting',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600});
   const sign=createSign('RSA-SHA256');sign.update(unsigned);const assertion=unsigned+'.'+sign.sign(c.private_key,'base64url');
   const result=await this.request('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion}).toString()});
@@ -55,4 +79,4 @@ class GooglePlay {
   return {text:`${app.label}${topic.versionCode?' · versionCode '+topic.versionCode:''}: последние доступные данные за ${fmt(latest.startTime)}, часовой пояс Google Play — Лос-Анджелес. ANR: ${value(rate)}; заметные пользователям ANR: ${value(perceived)}. Средневзвешенный показатель заметных ANR за 7 дней: ${value(week)}. Это доля пользователей, а не число зависаний.`,title:'ANR · '+app.label,sources,data:{app:app.id,date:fmt(latest.startTime),versionCode:topic.versionCode||null,rate,perceived,week,at:Date.now(),rows}};
  }
 }
-module.exports={GooglePlay,credential,metric};
+module.exports={GooglePlay,credential,metric,login,SCOPE};

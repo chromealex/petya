@@ -1043,3 +1043,69 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .message-steps li details{padding:0;border:0;background:none;margin:0}.message-steps li summary{cursor:pointer}.message-steps li pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;margin:8px 0 0}
 .chat-job-status:has(>.message-steps)>span,.chat-running-reply .command-progress:has(.message-steps)>p,.chat-running-reply .command-progress:has(.message-steps)>.small{display:none!important}
 #home .chat-feed .chat-running-reply .message-steps{flex-basis:100%;margin:8px 0 16px}
+
+/* Notifications: a toast at the top of the window in every view, gone after a few seconds. */
+#notice.notice-toast,body:not([data-view="home"]) #notice.notice-toast,.chat-feed #notice.notice-toast{display:flex;align-items:center;gap:12px;position:fixed;top:calc(var(--chrome-height, 48px) + 10px);left:50%;transform:translateX(-50%);z-index:3000;margin:0;max-width:min(680px,calc(100vw - 32px));padding:10px 12px 10px 16px;border:1px solid var(--line);border-radius:12px;background:#1f2524;box-shadow:0 10px 30px rgba(0,0,0,.45);overflow-wrap:anywhere;animation:notice-in .18s ease-out}
+#notice.notice-toast[hidden]{display:none}
+#notice.notice-toast.error{border-color:#7a3b36;background:#2a1d1c}
+#notice .notice-action{flex:none;padding:4px 10px;border-radius:8px}
+#notice .notice-close{flex:none;margin-left:auto;padding:0 6px;border:0;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer}
+#notice .notice-close:hover{color:var(--ink)}
+#notice .notice-close::before{content:"×"}
+@keyframes notice-in{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translate(-50%,0)}}
+
+/* Blocks kept for their state but not shown: module switches, service access, chat extensions list, status popover. */
+.never-shown{display:none!important}
+
+/* App catalogue: the title, close button and search stay on top while the list scrolls. */
+.app-catalog{display:flex;flex-direction:column;padding:0;overflow:hidden}
+.app-catalog-top{position:sticky;top:0;z-index:1;padding:16px 16px 8px;background:var(--panel);border-bottom:1px solid var(--line)}
+.app-catalog-rows{overflow:auto;padding:0 16px 12px}
+.icon-button{display:inline-grid;place-items:center;width:32px;height:32px;padding:0;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer}
+.icon-button:hover{color:var(--ink);background:#262d2b}
+.remove-added-app.icon-button:hover,.app-catalog-row .icon-button:hover{color:#f0a49b;border-color:#6d3a35}
+.app-catalog-close{border-color:transparent}
+/* Materials page: groups by app, records with size, progress and deletion (materials.js). */
+.material-group{border:1px solid var(--line);border-radius:14px;background:var(--panel);margin:0 0 14px;padding:0 18px}
+.material-group>summary{display:flex;align-items:baseline;gap:12px;padding:14px 0;cursor:pointer;list-style:none}
+.material-group>summary::-webkit-details-marker{display:none}
+.material-group>summary::before{content:'›';display:inline-block;transition:transform .15s;color:var(--muted);font-size:18px;line-height:1}
+.material-group[open]>summary::before{transform:rotate(90deg)}
+.material-group-title{font-size:16px;font-weight:600;color:var(--ink)}
+.material-group-meta{font-size:12px;color:var(--muted)}
+.material-recording{font-size:12px;color:var(--muted);margin:-4px 0 8px;display:flex;align-items:center;gap:8px}
+.material-recording button{padding:4px 10px;font-size:12px}
+.material-item{border-top:1px solid var(--line);padding:12px 0}
+.material-head{display:flex;gap:14px;align-items:flex-start;justify-content:space-between}
+.material-info{min-width:0;flex:1}
+.material-info strong{font-size:14px;display:block;overflow-wrap:anywhere}
+.material-meta{margin:2px 0 0;font-size:12px;color:#acc093}
+.material-status{margin:6px 0 0;font-size:12px;color:var(--green);display:flex;align-items:center;gap:10px}
+.material-progress{display:inline-block;width:140px;height:4px;border-radius:2px;background:#303637;overflow:hidden}
+.material-progress>span{display:block;height:100%;background:var(--green);transition:width .3s}
+.material-warning{margin:6px 0 0;font-size:12px;color:#f3c58b}
+.material-actions{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.material-actions button{padding:6px 12px;font-size:12px}
+.material-delete{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0!important;color:var(--muted)}
+.material-delete:hover{color:#ffb4a6;border-color:#8c5349}
+.material-delete.confirm{width:auto;padding:0 10px!important;color:#ffd7ce;background:#402b28;border-color:#8c5349}
+.material-text>summary{font-size:12px;color:var(--muted);cursor:pointer;margin-top:6px}
+.material-body{max-height:360px;overflow:auto;padding:8px 8px 0 0}
+.material-body p{margin:0 0 6px;font-size:13px;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere}
+.material-time{color:var(--muted);font-variant-numeric:tabular-nums}
+.material-empty{color:var(--muted)}
+.material-item details.material-text{margin:6px 0 0;padding:0;border:0;background:none}.material-text>summary{margin:0}
+/* Learning page: recurring commands with timers (learning-page.js) and Petya's own words on the growth page. */
+.recurring-row{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;border-top:1px solid var(--line);padding:12px 0}
+.recurring-row.paused{opacity:.6}.recurring-info{min-width:0;flex:1}.recurring-info strong{display:block;font-size:14px}
+.recurring-timer{display:inline-block;margin-top:4px;font-size:12px;color:var(--green);font-variant-numeric:tabular-nums}
+details.learning-manual{margin:10px 0 0}details.learning-manual>summary{cursor:pointer;font-size:12px;color:var(--muted)}
+blockquote.growth-learned{margin:6px 0;padding:8px 12px;border-left:3px solid var(--green);background:#ffffff06;border-radius:0 8px 8px 0;color:var(--ink);font-size:13px}
+.growth-event textarea{margin:6px 0}
+.material-who{color:#9fc8ff;font-weight:600}.material-who.me{color:var(--green)}
+.material-summary{margin:8px 0 4px;padding:10px 12px;border-radius:10px;background:#ffffff07;border:1px solid var(--line)}
+.material-summary-head{margin:6px 0 2px;font-size:12px;font-weight:600;color:var(--green)}.material-summary-head:first-child{margin-top:0}
+.material-summary ul{margin:0 0 4px;padding-left:18px}.material-summary li{font-size:13px;color:var(--ink);margin:2px 0}
+.chat-offer{display:block;margin-top:8px}
+.understood-as{display:block;margin-top:4px;opacity:.7}
+.model-part{display:grid;gap:4px;padding:8px 0;border-top:1px solid rgba(255,255,255,.08)}.model-part small{opacity:.75}

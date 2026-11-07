@@ -41,10 +41,12 @@
    voiceReply=text=>perform(()=>reply(text));dialogueChoices.dataset.selected='clarification';
    if(!choicesOnly){
     box.classList.add('text-clarification');
-    button(result.clarificationInput?.submit||'Продолжить',()=>{},!buttons.childElementCount).onclick=()=>{
+    // «Продолжить» sends the typed answer; it stays disabled until there is one, so it never looks dead.
+    const go=button(result.clarificationInput?.submit||'Ответить',()=>{},!buttons.childElementCount);go.onclick=()=>{
      const input=$('command'),text=input.value.trim();if(!text){input.focus();return;}
      if(busy||owner!==topicSelect.value)return;input.value='';input.dispatchEvent(new Event('input'));answer(text);
     };
+    const sync=()=>{if(!go.isConnected){$('command').removeEventListener('input',sync);return;}go.disabled=!$('command').value.trim();go.title=go.disabled?'Напишите ответ в поле ниже':'';};$('command').addEventListener('input',sync);sync();
     const input=$('command');input.placeholder=result.clarificationInput?.placeholder||'Напишите ответ…';delete input.dataset.suggestion;
     requestAnimationFrame(()=>{if(box.isConnected)input.focus({preventScroll:true});});
    }

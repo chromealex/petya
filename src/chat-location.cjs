@@ -26,6 +26,8 @@ function resolve(state,location){
 function attention(t){
   if(t.chatJob?.state!=='attention')return '';
   const r=t.lastChatResult||{};
+  // Seen errors and answers leave the list; a pending approval or question stays until it is answered.
+  if(t.chatJob.acknowledged&&!r.computerApproval&&!r.clarificationOptions?.length&&!r.question&&!r.integrationChoices?.length)return '';
   if(r.computerApproval)return 'Разрешить управление компьютером';
   if(r.clarificationOptions?.length || r.question)return String(r.text||'Ответить на уточнение').slice(0,180);
   if(r.integrationChoices?.length)return 'Выбрать подключение';

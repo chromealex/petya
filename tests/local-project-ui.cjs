@@ -18,7 +18,10 @@ module.exports=async win=>{
    if(!card||!card.querySelector('.connected')||card.querySelector('select').value!==id)throw Error('Connection card not updated');
    view('settings');window.revealSettings(card);
    card.scrollIntoView();
-   await window.petya.converse('Работаем над проектом Другой локальный');
+   // Petya does not switch chats himself: the other project's chat is offered and opened by the button.
+   const moved=await window.petya.converse('Работаем над проектом Другой локальный');
+   if(!moved.chatOffer?.topicId)throw Error('Project chat not offered');
+   if(moved.chatOffer.projectId)await window.petya.chatProjectSelect(moved.chatOffer.projectId);await window.petya.dialogueSelect(moved.chatOffer.topicId);
    state=await window.petya.localProjectStatus();if(state.projects.find(p=>p.id===state.activeId).folder)throw Error('Folder leaked to another project');
    await window.petya.localProjectDisconnect(id);
    try{await window.petya.localProjectRefresh(id);throw Error('Disconnected project read');}catch(e){if(!e.message.includes('Подключите'))throw e;}

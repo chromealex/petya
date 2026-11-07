@@ -23,6 +23,7 @@ class ContextStore {
     if (Buffer.byteLength(JSON.stringify(next)) > 100 * 1024 * 1024) throw new Error('Память контекста достигла 100 МБ. Уменьшите срок хранения или очистите память.');
     this.save(next); this.items = next;
   }
+  remove(ids) { const drop = new Set(ids); const next = this.items.filter(x => !drop.has(x.id)); const removed = this.items.length - next.length; if (removed) { this.save(next); this.items = next; } return removed; }
   clear() { this.save([]); this.items = []; }
 }
 module.exports = { ContextStore, retention, DAY };

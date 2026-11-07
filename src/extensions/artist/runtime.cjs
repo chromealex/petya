@@ -112,7 +112,12 @@ function createArtistRuntime(root, confirmDownload, status = () => {}) {
       } finally { await fsp.rm(job, { recursive: true, force: true }); }
     } finally { active = null; status('', -1); }
   }
-  return { generate, stop: () => active?.abort(), remove() {
+  // Whether the generator and the model are on disk, and the download alone (from settings, with progress).
+  const installed = async () => (await Promise.all([
+    fsp.stat(path.join(directory, modelName)).then(s => s.size === model.size, () => false),
+    fsp.access(path.join(directory, exeName), fs.constants.X_OK).then(() => true, () => false)])).every(Boolean);
+  async function install() { if (active) throw Error('Дождитесь завершения работы Художника.'); active = new AbortController(); try { await prepare(active.signal); } finally { active = null; } }
+  return { generate, installed, install, stop: () => active?.abort(), remove() {
     if (active) throw Error('Дождитесь завершения работы Художника.');
     fs.rmSync(root, { recursive: true, force: true });
   } };

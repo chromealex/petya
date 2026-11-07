@@ -1,0 +1,25 @@
+{
+  "part": "D2",
+  "group": "Andromeda",
+  "parent": "../requirements-draft-v21/repair4-adapter",
+  "parent_sha256": "e4750435ed3c09b138b0cb735c227ce074e9377612b3b147a657a885531a12d0",
+  "training_file": "train.jsonl",
+  "steps": 1521,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 1e-06,
+  "hashes": {
+    "train.jsonl": "5b860d0e14bbb76c5331e98a1e66a8fd9514c1fdbf6acc41a65c9653754a056f",
+    "new-train.jsonl": "7d47c8442a914deb4b11b3138cae1d9fe0debb0dd92a9540b9792b4d8417e895",
+    "holdout.jsonl": "5b51097323c8f46ee79ccfcb7df061edf46baa1bddc8c492191268625dc1c03f",
+    "generate.py": "a66dfc61e0def93f7ee6bee7a7b64c0b77fbeb116a0cdaeba680a7522c34c91d"
+  },
+  "sources": {
+    "tests/fixtures/requirements-draft-v21/train_checkpointed.py": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+    "tests/fixtures/requirements-draft-v21/checkpoint.py": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549"
+  },
+  "recipe": "801 familiar cases once plus 720 new generated correction dialogues (nine families, 80 each); continue from D1. Same trainer, rank, layers, learning rate and seed as the v21/v22 repairs.",
+  "gate": "D2 replaces D1 only if, on the same sets: the 54 generated held-out drafts improve with no D1 success lost, the 42 v22 cases are not worse than D1 (27/30, 6/12) with no D1 success lost, and familiar retention is not below D1. Every non-exact draft is reviewed against its dialogue. Live dialogue, runtime and packaging stay separate gates for stable.",
+  "limits": "Generated synthetic data; held-out pools and part of the phrasings are disjoint, but the families are the same. The v22 cases are the independent check."
+}

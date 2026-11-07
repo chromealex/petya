@@ -53,12 +53,8 @@ module.exports = async (win, workspace) => {
     for(let i=0;i<100&&!document.querySelectorAll('#company-tabs button')[1];i++)await new Promise(r=>setTimeout(r,20));
     const otherCompany=(await window.petya.companies()).companies.find(c=>c.name==='Smoke company');
     if(!otherCompany||![...document.querySelectorAll('#company-tabs button')].some(b=>b.dataset.companyId===otherCompany.id))throw Error('New company tab missing');
-    $('settings-form').dispatchEvent(new Event('input',{bubbles:true}));
-    [...document.querySelectorAll('#company-tabs button')].find(b=>b.dataset.companyId===otherCompany.id).click();
-    await new Promise(r=>setTimeout(r,20));
-    if(!document.getElementById('notice').textContent.includes('Сохраните изменения'))throw Error('Company tab lost unsaved changes guard');
-    if((await window.petya.companies()).activeId!==initialCompanies.activeId)throw Error('Blocked tab changed company');
-    document.dispatchEvent(new Event('petya-settings-displayed'));
+    // Settings save themselves: typing in settings never blocks a company switch with «Сохраните изменения».
+    if(typeof window.flushSettings!=='function')throw Error('Settings are not saved automatically');
     await window.petya.companyRename(otherCompany.id,'Second company');
     if(!(await window.petya.companies()).companies.some(c=>c.name==='Second company'))throw Error('Company rename failed');
     let switchCheck;for(let attempt=0;attempt<300;attempt++){try{switchCheck=await window.petya.companySwitch(otherCompany.id);break;}catch(error){if(!error.message.includes('завершает текущую операцию')||attempt===299)throw error;await new Promise(resolve=>setTimeout(resolve,100));}}if(!switchCheck.testOnly)throw Error('Smoke must not restart the real app');
@@ -354,17 +350,16 @@ module.exports = async (win, workspace) => {
   await win.webContents.executeJavaScript(`(async()=>{
     await selectDialogueTopic('');await window.petya.converse('Обсудим тестовую тему');
     const correction=await window.petya.converse('Ты неправильно понял — я имел в виду тестовую проверку');
-    if(!correction.dictionaryProposal)throw new Error('Correction proposal missing');
-    if((await window.petya.learningList()).dictionary.length)throw new Error('Correction saved without choice');
-    await showDialogueReply(correction);if(!dialogueChoices.textContent.includes('Запомнить'))throw new Error('Correction choice missing');
-    await window.petya.dictionarySave(correction.dictionaryProposal);
+    // A correction in the chat is learned at once and the corrected request answered.
+    const learned=(await window.petya.learningList()).dictionary.find(r=>r.to==='тестовую проверку'&&r.kind==='correction');if(!learned)throw new Error('Correction not learned from the chat');
+    if(!correction.messages?.some(m=>m.role==='assistant'&&/Запомнил/.test(m.text)))throw new Error('Learned correction not reported in the chat');
     const alias=await window.petya.dictionarySave({from:'мобилка',to:'TEST',scope:'',kind:'alias'});
     const routed=await window.petya.converse('создай задачу для мобилка');
     if(routed.handled||!routed.resolvedCommand.includes('TEST'))throw new Error('Alias not passed to planner');
     const dangerous=await window.petya.dictionarySave({from:'условная фраза',to:'создай задачу',kind:'correction'});
     const guarded=await window.petya.converse('условная фраза');if(!guarded.handled||!guarded.text.includes('целиком'))throw new Error('Correction silently launched action');
     view('learning');await refreshDictionary();if(!$('dictionary-list').textContent.includes('мобилка'))throw new Error('Dictionary editor empty');
-    await window.petya.dictionaryDelete(alias.id);await window.petya.dictionaryDelete(dangerous.id);await window.petya.dictionaryDelete(correction.dictionaryProposal.id);
+    await window.petya.dictionaryDelete(alias.id);await window.petya.dictionaryDelete(dangerous.id);await window.petya.dictionaryDelete(learned.id);
     const records=await window.petya.agentHistory();const submitted=records.find(r=>r.state==='submitted');
     if(submitted){const progress=await window.petya.taskProgress(submitted.id);if(!progress.text.includes('Проверено сейчас'))throw new Error('Progress not fetched');}
   })()`);

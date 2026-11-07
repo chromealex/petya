@@ -207,6 +207,8 @@ function setupConnections() {
       window.petya.settings().then(s=>{toggle.checked=s.semanticTools!=='false';});
       content.append(semantic,connectionNode('p','Модель выбирает чтение Jira, ANR, почты, поиск и сводку по смыслу запроса. Действия выполняются доступными инструментами Пети. Qwen3.5:9B загружается на компьютер; для слабых устройств можно оставить меньшую модель.','small'));
       controls.append(brain);
+      // The answer model already on disk needs no «Подготовить».
+      const brainState=()=>window.petya.feature('optional-models','installed').then(r=>{brain.hidden=r.names.includes('qwen3.5:9b');}).catch(()=>{});brainState();window.petyaEvents.onOllamaInstall(state=>{if(!state.busy)brainState();});
       controls.append(open, restart);
     }
     if (def.id === 'whisper') {

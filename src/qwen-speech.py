@@ -21,7 +21,9 @@ for line in sys.stdin:
         # Main process validates canonical mono PCM16/16kHz before dispatch.
         pcm = np.frombuffer(data, dtype='<i2', offset=44).astype(np.float32) / 32768.0
         with contextlib.redirect_stdout(sys.stderr):
-            result = session.transcribe((pcm, 16000), language=None, max_new_tokens=256)
+            # The conversation language is given: without it Russian was heard as Czech or Chinese.
+            language = request.get('language') if isinstance(request.get('language'), str) and len(request.get('language')) <= 20 else None
+            result = session.transcribe((pcm, 16000), language=language or None, max_new_tokens=256)
         print(json.dumps({'id': request['id'], 'text': result.text}, ensure_ascii=False), flush=True)
     except Exception as error:
         print(json.dumps({'id': request.get('id'), 'error': str(error)}), flush=True)

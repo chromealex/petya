@@ -1,0 +1,10 @@
+{
+  "name": "petya-v19-original-development",
+  "digest": "f04ec9aca4548fac96397ccf9a2890209b461872cd95fb43cc7527668d667fa8",
+  "verified_bytes": 6035323454,
+  "verified_files": 14,
+  "qualification": "development",
+  "elapsed_seconds": 6.9573716670129215,
+  "verifier_sha256": "b6fd4c55a5595844f34364e3902e5e5d6026335c0c17e93d73017a7ae3ce52d4",
+  "scope": "Actual local file integrity only; no weights loaded into an inference runtime and no release qualification claimed."
+}

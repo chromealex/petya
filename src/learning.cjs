@@ -44,7 +44,9 @@ class Learning{
   growth.record(next,collection,after,before,this.now());
   this.commit(next);
  }
- growth(){return growth.summary(this.state);}
+ growth(extra=[]){return growth.summary(this.state,extra);}
+ // The user's own wording for «Чему я научился»; an empty text brings back Petya's.
+ growthNote(key,text){if(typeof key!=='string'||!/^[\w:.-]{1,200}$/.test(key)||typeof text!=='string'||text.length>2000)throw new Error('Некорректная запись.');const next=this.list();next.growth.notes={...next.growth.notes};if(text.trim())next.growth.notes[key]=text.trim();else delete next.growth.notes[key];this.commit(next);return growth.summary(next);}
  undoInfo(){const op=[...this.state.undoLog].reverse().find(o=>!o.undone);return op?{id:op.id,label:op.label,at:op.at}:null;}
  undo(id){
   const next=this.list(),op=next.undoLog.find(o=>o.id===id&&!o.undone);if(!op||this.undoInfo()?.id!==id)throw new Error('Последнее действие изменилось. Обновите список.');

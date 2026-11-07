@@ -20,14 +20,16 @@ module.exports = {
    save:item=>memory.put([item]),
    emit:state=>{if(company===s.companyId&&s.win&&!s.win.isDestroyed())s.win.webContents.send('meeting-memory-progress',state);}
   });
-  const local=new (require('../extensions/zoom-bot/local-controller.cjs').LocalMeeting)({settings:()=>s.settings,inspect:()=>require('../meeting-monitor.cjs').desktopState(),recording,
+  // Names of speakers from Zoom's window; the last window texts are kept locally for tuning the parser.
+  const speakers=new (require('../zoom-speakers.cjs').SpeakerTimeline)({keep:sample=>{try{require('node:fs').writeFileSync(require('node:path').join(s.dataRoot,'zoom-speakers-sample.json'),JSON.stringify(sample),{mode:0o600});}catch{}}});
+  const local=new (require('../extensions/zoom-bot/local-controller.cjs').LocalMeeting)({speakers,settings:()=>s.settings,inspect:()=>require('../meeting-monitor.cjs').desktopState(),recording,
    createCapture:options=>new (require('../extensions/zoom-bot/local-capture.cjs').LocalCapture)(options),
    emit:state=>{if(company===s.companyId&&s.win&&!s.win.isDestroyed())s.win.webContents.send('local-meeting-progress',state);}
   });
   const timer=setInterval(()=>{if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1')local.tick().catch(()=>{});},5000);timer.unref();
   app.once('before-quit',async()=>{clearInterval(timer);await local.stop(false);});
   const ipc={captureStatus:()=>local.snapshot(),startCapture:()=>local.start(),stopCapture:()=>local.stop(true),read:args=>read(s.memory,args),begin:()=>recording.begin(),append:(...args)=>recording.append(...args),finish:id=>recording.finish(id),retry:id=>recording.retry(id),status:()=>recording.status()};
-  return {ipc,meetingRecording:(method,...args)=>{if(!['status','retry','captureStatus','startCapture','stopCapture'].includes(method))throw Error('Операция доступна только в приложении.');return ipc[method](...args);}};
+  return {ipc,meetingSessions:{status:()=>recording.status(),remove:id=>recording.remove(id),settings:()=>({mode:s.settings.zoomBotMode||'auto',capture:s.settings.zoomCaptureMode||'local'})},meetingRecording:(method,...args)=>{if(!['status','retry','captureStatus','startCapture','stopCapture'].includes(method))throw Error('Операция доступна только в приложении.');return ipc[method](...args);}};
  },
  register(server,z,ctx) {
   for(const method of ['status','retry'])server.registerTool(method==='status'?'meeting_recording_status':'retry_meeting_processing',{
