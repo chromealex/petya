@@ -28,5 +28,6 @@
     "holdout_v21": "45/48 checks, 9/16 drafts (parent 42/48, 7/16)",
     "holdout_v22": "27/30 checks, 6/12 drafts"
   },
-  "previously": "petya-v1.0"
+  "previously": "petya-v1.0",
+  "bytes": 58227644
 }

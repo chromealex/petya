@@ -10,5 +10,6 @@
     "revision": "8b2b98c00a6b4d291155e4890773ca8f769aee53",
     "runtime": "MLX (Apple Silicon)"
   },
-  "adapter": null
+  "adapter": null,
+  "bytes": 0
 }
