@@ -1,0 +1,157 @@
+{
+  "d2-hold-permission-1": {
+    "passed": true,
+    "reason": "Field, no seal, sending allowed.",
+    "answer_sha256": "f5411067256d967a110b48d47e988af75efd889c776540782db5d8f4621a9144"
+  },
+  "d2-hold-two-recipients-2": {
+    "passed": false,
+    "reason": "Loses «без пояснения».",
+    "answer_sha256": "31bde5b7d7e726bf5a8ec272fb4b6fe3960c3623201f08854fb4e82d40215299"
+  },
+  "d2-hold-quote-6": {
+    "passed": false,
+    "reason": "Loses «дословно»; garbled summary «Нацитаты».",
+    "answer_sha256": "77470ddb8060714387207cf0987d7a66668c19e38a8f49ef694aa5f32a0a0af0"
+  },
+  "d2-hold-code-8": {
+    "passed": false,
+    "reason": "Loses the next pickup by a new code.",
+    "answer_sha256": "28853f1ec39ce665e37ef0fa91ce11ee72cef43dda5cfdd72eeee99a211b79ed"
+  },
+  "d2-hold-cancel-one-9": {
+    "passed": true,
+    "reason": "Rename and the kept field.",
+    "answer_sha256": "983181a10f52dca54056cfc29589ae03e74cbf2eb5376aada9b6fe87ebf19c09"
+  },
+  "d2-hold-permission-10": {
+    "passed": true,
+    "reason": "Field, sending allowed, no signature.",
+    "answer_sha256": "ef24b4c07f7360e9a9d25fbb70ada296fd5df53d9a32e70ed7286650ed0a8dd2"
+  },
+  "d2-hold-two-recipients-11": {
+    "passed": true,
+    "reason": "Permissions per recipient.",
+    "answer_sha256": "f2b5b3879926b30ad9d7c17ebacea8e86e38bfa1f1be190e5da80c108dd73b12"
+  },
+  "d2-hold-quote-15": {
+    "passed": false,
+    "reason": "Loses the recipient; invents a question about the quote.",
+    "answer_sha256": "5bf577d35c203ad13d984e9a141762e0c4fab2cd80f017b36bba941f2ae301ac"
+  },
+  "d2-hold-code-17": {
+    "passed": false,
+    "reason": "«Отправки планшета курьеру» changes what the code is for.",
+    "answer_sha256": "c65bc07ce25df22eb9e022114575b9877713408866ea05809714d27104c0bdd3"
+  },
+  "d2-hold-permission-19": {
+    "passed": false,
+    "reason": "«Копия никому не передаётся» contradicts the allowed sending.",
+    "answer_sha256": "219f4186903f1265b70fc81faf6f3f9c05f62d566e64c855899fe46f184512af"
+  },
+  "d2-hold-two-recipients-20": {
+    "passed": false,
+    "reason": "Invents a condition on the ban («до дальнейшего решения»).",
+    "answer_sha256": "b647e97638671823e94550e86c8654f4ceed6539a79fd71f74bf10c7b92f3bb7"
+  },
+  "d2-hold-quote-24": {
+    "passed": false,
+    "reason": "Misleading summary «Визит метрологу».",
+    "answer_sha256": "5784d04b7417ad8ba30688de9a759726a475d443aee1d4d43b2987edf4116580"
+  },
+  "d2-hold-code-26": {
+    "passed": false,
+    "reason": "Loses the next pickup by a new code.",
+    "answer_sha256": "bc60ec0b28a5e2bf88265569248388ef45052d4df6ecc3699e6d7c02c3ac09e7"
+  },
+  "d2-hold-cancel-one-27": {
+    "passed": true,
+    "reason": "Rename and the kept field.",
+    "answer_sha256": "16e21c44d65dfb463d9fdf5f786fe951628939637dea6b76bda2f704ceb7e69e"
+  },
+  "d2-hold-permission-28": {
+    "passed": true,
+    "reason": "Field, no signature, sending allowed, ban withdrawn.",
+    "answer_sha256": "d3832772afcc299f07e621f17573c359b667674eccbfd0c1e45febe396a0edb1"
+  },
+  "d2-hold-two-recipients-29": {
+    "passed": true,
+    "reason": "Identical copies without explanation, permissions per recipient.",
+    "answer_sha256": "0b93e7327c4cfd086d99344401e205fbe590f7136cc9f17e54e3b752eefb694e"
+  },
+  "d2-hold-screen-only-32": {
+    "passed": true,
+    "reason": "All requirements.",
+    "answer_sha256": "8fa6856c12e608432a07b1a69c5046a2a8372d1dc2a4b159fe1f3fc9e6857bbe"
+  },
+  "d2-hold-quote-33": {
+    "passed": true,
+    "reason": "Verbatim quote, transmission allowed, quote not a ban.",
+    "answer_sha256": "917b730c8d24fa7fb0af06d5fb026033e437d2dbfa92570d3eff00e80d39f0d3"
+  },
+  "d2-hold-open-recipient-34": {
+    "passed": true,
+    "reason": "All requirements and the question.",
+    "answer_sha256": "850b90da911c018feba816c72829b856f99802077c3b6fe9f977cd83df9b0135"
+  },
+  "d2-hold-code-35": {
+    "passed": false,
+    "reason": "Says the code has no duration instead of an open one; no question.",
+    "answer_sha256": "ce0be49f42aa702b386e65569c8e91cba7a8af62ce86bdde479d25b66253b4f7"
+  },
+  "d2-hold-cancel-one-36": {
+    "passed": true,
+    "reason": "Rename and the kept field.",
+    "answer_sha256": "5e42430287fe546b0de450adf56aab5eb1729e1021dc87374425a7f7dbd30ff2"
+  },
+  "d2-hold-permission-37": {
+    "passed": false,
+    "reason": "Permission not stated, only «получатель».",
+    "answer_sha256": "c82361eccc2f995e6c50c77d1fe2f1db279aa9fa0b4bfac6d6e44044f3232bb8"
+  },
+  "d2-hold-two-recipients-38": {
+    "passed": true,
+    "reason": "Permissions per recipient.",
+    "answer_sha256": "9dfb19bc791b37dbba234e72b7d3cf9143cd40598913757381652cf5f153a083"
+  },
+  "d2-hold-exact-name-40": {
+    "passed": true,
+    "reason": "Literals and zeros.",
+    "answer_sha256": "b6283c63a601b791db335c7e835d6109f00cb52241d5c55a4bd50baf9e91fded"
+  },
+  "d2-hold-screen-only-41": {
+    "passed": true,
+    "reason": "All requirements.",
+    "answer_sha256": "e3e2d4545d446282bbc24f8987c3defeaa12acc34936c4b196b71a0c7c9dc04d"
+  },
+  "d2-hold-quote-42": {
+    "passed": false,
+    "reason": "Loses «дословно».",
+    "answer_sha256": "e57135898f72eccf6dcf822571547a2bf13a5b7da8ae5fee0b889fc05b043246"
+  },
+  "d2-hold-open-recipient-43": {
+    "passed": true,
+    "reason": "All requirements and the question.",
+    "answer_sha256": "127e753e31a5b776bf1b0a72fd91d174b89eac7ed18a183e90dd421ead553d2f"
+  },
+  "d2-hold-code-44": {
+    "passed": false,
+    "reason": "Loses the next pickup by a new code.",
+    "answer_sha256": "ea09a8858b6fb98a0ab74acec72571a845b73feb2b46b9893aee546a2ec5ee64"
+  },
+  "d2-hold-permission-46": {
+    "passed": true,
+    "reason": "Field, no version, sending allowed.",
+    "answer_sha256": "e625ee52ee69faadb5f503cc507821b2782db2b958d5d48ff158766a60e12db9"
+  },
+  "d2-hold-quote-51": {
+    "passed": false,
+    "reason": "Turns the permission into an order; loses «дословно».",
+    "answer_sha256": "6f62b7230a6efe867d95ad04265b5eb9d0af94072bfe536f4e4b65acbb953964"
+  },
+  "d2-hold-code-53": {
+    "passed": false,
+    "reason": "Junk phrase «примитивную ценность».",
+    "answer_sha256": "3998760bf90b3f6c27696df51896f40a860514036807c6753397c563ac20d2b2"
+  }
+}

@@ -1,0 +1,272 @@
+{
+  "d2-hold-cancel-one-0": {
+    "passed": true,
+    "reason": "Both decisions kept.",
+    "answer_sha256": "1e13d49247edf9872584fb74ca45877ec61d6583e05e99b04ea9db8adcc122e0"
+  },
+  "d2-hold-permission-1": {
+    "passed": false,
+    "reason": "Turns the permission into an order to send.",
+    "answer_sha256": "1010f0dd28c2655ff22fd15c86ea31c6ab73c6de00d012364194a591a8b04a18"
+  },
+  "d2-hold-two-recipients-2": {
+    "passed": false,
+    "reason": "Invents a condition on the ban («пока содержание одинаковое»).",
+    "answer_sha256": "5538d8b5215ea1af937161c88b6806d74a5b7cecca3348e085b7a59b3182f4d8"
+  },
+  "d2-hold-add-field-3": {
+    "passed": false,
+    "reason": "Loses «названия не сокращать».",
+    "answer_sha256": "0cc3a96531a4221202f86256062345080c34c3fe46249f67f2440a6475a06821"
+  },
+  "d2-hold-exact-name-4": {
+    "passed": false,
+    "reason": "Invents «пробелами», a ban on other files and «копии не делать».",
+    "answer_sha256": "d17729821664e374c2d4f09d278f03e072ecc27888bfa112ac68aea3af6f8174"
+  },
+  "d2-hold-screen-only-5": {
+    "passed": false,
+    "reason": "«Не скрывать» contradicts hiding the old name.",
+    "answer_sha256": "0a3b4d7f187338bb7e7a834dbcfeaed21b2e0b9445e4f4adf4a6778df997e77e"
+  },
+  "d2-hold-quote-6": {
+    "passed": false,
+    "reason": "Turns the permission into an order to send.",
+    "answer_sha256": "744ba2db6bf6311557f5ddde1a8ac0544a70fb250f6b42d87f39a3678d6bb3df"
+  },
+  "d2-hold-open-recipient-7": {
+    "passed": true,
+    "reason": "Room, no-send rule and the question kept; keeping a draft is harmless.",
+    "answer_sha256": "139aecdb432942c02c1dcee7ccc0eace673937ea6518a4cdace7998e2d941bde"
+  },
+  "d2-hold-code-8": {
+    "passed": true,
+    "reason": "120 s, single use, not for login, a new code next time.",
+    "answer_sha256": "04c078fd07cf8b4c907eb01cadc25927824cbdead1ff19e93a15075abf7c2aa2"
+  },
+  "d2-hold-cancel-one-9": {
+    "passed": true,
+    "reason": "crew_code renamed, dock_slot kept.",
+    "answer_sha256": "1227e9f584f04e39ee77857a4066a38cf29401194f5908d1bae8ee015bfb47a8"
+  },
+  "d2-hold-permission-10": {
+    "passed": false,
+    "reason": "Generalises the permission to anyone.",
+    "answer_sha256": "5b581736a968fb23bbbbf5364d1143d1a712d5066b13f19891e5b592d9e88647"
+  },
+  "d2-hold-two-recipients-11": {
+    "passed": true,
+    "reason": "Identical copies, notary allowed, trainee not.",
+    "answer_sha256": "8fcbc96c30f282dd7d2c4c8c8ec038637b4af9f4413cc1930b8abdc940a6d25a"
+  },
+  "d2-hold-add-field-12": {
+    "passed": true,
+    "reason": "Addition with both fields kept, names not shortened.",
+    "answer_sha256": "06bbeb6ed0d61b7ee488dee4284d943e058b508eb9229e4b8ca88155bcf1f082"
+  },
+  "d2-hold-exact-name-13": {
+    "passed": true,
+    "reason": "Exact literals and zeros; scope stated, no extra ban.",
+    "answer_sha256": "e59972a4f3753fadea4e4513c8d3751cb9dc8cc4ca5fc22e1964bc4dc9dfda38"
+  },
+  "d2-hold-screen-only-14": {
+    "passed": false,
+    "reason": "Loses hiding the old name.",
+    "answer_sha256": "bb1b22380ca2813fcd13111de57784412b1cf62a59ea454dde75238f28cc5581"
+  },
+  "d2-hold-quote-15": {
+    "passed": false,
+    "reason": "Loses «дословно»; junk sentence.",
+    "answer_sha256": "42c535c8529d89b80b4e73cf43e6cc8da6d4d76f2487225715ad77b95f6557f6"
+  },
+  "d2-hold-open-recipient-16": {
+    "passed": false,
+    "reason": "No question for the open recipient.",
+    "answer_sha256": "bdab355be0f57be6a118730d71fb3bd71b67a66050a4ee063cdaf1343c1a221f"
+  },
+  "d2-hold-code-17": {
+    "passed": true,
+    "reason": "120 s, single use, new code, not for login.",
+    "answer_sha256": "4c9c5cc4930a68fc429e248ed968a909a82741e615a249eac0d2670734de30fb"
+  },
+  "d2-hold-cancel-one-18": {
+    "passed": false,
+    "reason": "Keeps gate_id instead of renaming it.",
+    "answer_sha256": "968564b4f520feb41871f41bf3e91e75174ed07ac87f0003b9d1f9f22e255c87"
+  },
+  "d2-hold-permission-19": {
+    "passed": false,
+    "reason": "Forbids sending to the trainee, which was allowed.",
+    "answer_sha256": "572510b8026bdfe95cfc1da982685e878a3b6ed2ab3a99cc7336e11aa94b1091"
+  },
+  "d2-hold-two-recipients-20": {
+    "passed": true,
+    "reason": "Permissions per recipient kept.",
+    "answer_sha256": "ec3c2257445cf57b3985ee92426ae55cee8f8442e0b2d4634fc3eb4c4fd128de"
+  },
+  "d2-hold-add-field-21": {
+    "passed": true,
+    "reason": "Addition kept, not shortened.",
+    "answer_sha256": "f4fb5c4009ea3fd5885ded3d360c35376a7eec97b570abe2c74c77b76bf02abd"
+  },
+  "d2-hold-exact-name-22": {
+    "passed": true,
+    "reason": "Exact literals, zeros, scope.",
+    "answer_sha256": "224ccefd7b850e89cb69e18b028da227a173f3a3be9f409e3a1546a934dedd42"
+  },
+  "d2-hold-screen-only-23": {
+    "passed": false,
+    "reason": "Loses the no-migration requirement.",
+    "answer_sha256": "54101c876a80e4cc49c43c56e49d47427bac37117ed02c5d1bd42b7782746ebc"
+  },
+  "d2-hold-quote-24": {
+    "passed": true,
+    "reason": "Verbatim quote kept, transmission allowed.",
+    "answer_sha256": "2cf31e1672f734e58a00322642d9cae3b1fa1a46380daf13f3f051a671b7f906"
+  },
+  "d2-hold-open-recipient-25": {
+    "passed": false,
+    "reason": "Invents a possible recipient and a ban; no question.",
+    "answer_sha256": "e5682e4db6fdec183a8ae6448a01deec959463c6b09c5edef5a4fddcedc346cf"
+  },
+  "d2-hold-code-26": {
+    "passed": false,
+    "reason": "Loses «не для входа».",
+    "answer_sha256": "efde22b11e0fd59a210f6810113d2b6b9343fc948b460b3e413d9333014f4937"
+  },
+  "d2-hold-cancel-one-27": {
+    "passed": true,
+    "reason": "Rename and the kept field.",
+    "answer_sha256": "c72019ecfd4e9bf64b1fa6f5f3b9845147cc70355834cc82cd2ea4b635c95a19"
+  },
+  "d2-hold-permission-28": {
+    "passed": true,
+    "reason": "Field, no signature, sending allowed.",
+    "answer_sha256": "5246aeccb4670c6c5d78bc8bb3d09d877495c64ca78937636bfc7cbf20533c08"
+  },
+  "d2-hold-two-recipients-29": {
+    "passed": false,
+    "reason": "Broken Russian («с один текстом»).",
+    "answer_sha256": "ddf8f840b7b4b3246e315e13c34fabf6b0601e225f3f1abe548b0b6e78201acd"
+  },
+  "d2-hold-add-field-30": {
+    "passed": true,
+    "reason": "Addition kept.",
+    "answer_sha256": "aee5ccf5f334c3a01ea0bcb1b723d96b58d0a3879cdd4028336a837b7f922c7b"
+  },
+  "d2-hold-exact-name-31": {
+    "passed": true,
+    "reason": "Literals, spelling, zeros, scope.",
+    "answer_sha256": "593a272a237e0d9b7d8e12874a456d1b8769d36f0a095d44a571767b1b08572d"
+  },
+  "d2-hold-screen-only-32": {
+    "passed": false,
+    "reason": "Reverses the rename.",
+    "answer_sha256": "97e50508afdd084ac9080d92af7e80e11d97236c613659e071395005b3c3f82f"
+  },
+  "d2-hold-quote-33": {
+    "passed": true,
+    "reason": "Verbatim quote, transmission allowed.",
+    "answer_sha256": "e89c0703c859637feeeafc8a499e1307fa551c3f8f3bbbdbf5d9557b159c60c1"
+  },
+  "d2-hold-open-recipient-34": {
+    "passed": false,
+    "reason": "Garbled text, invented bans, no question.",
+    "answer_sha256": "6b6fc30b652766e352e788c84089872b1176492ca9398d30212684f358c53a3b"
+  },
+  "d2-hold-code-35": {
+    "passed": false,
+    "reason": "No question for the open duration.",
+    "answer_sha256": "d18db4138f944b4f50033f28e99e0b5060ccf1a60c1ba97fe45682ef90c4b762"
+  },
+  "d2-hold-cancel-one-36": {
+    "passed": true,
+    "reason": "Rename and the kept field.",
+    "answer_sha256": "443b41133428878e2e8b7cc3131455850e2016306b5880d9e39919fa853716fe"
+  },
+  "d2-hold-permission-37": {
+    "passed": false,
+    "reason": "English word in the summary; permission not stated.",
+    "answer_sha256": "e4bb6a0aebc6b31cf6fe07eb53f5a1fdb14f0a83ac754bf5414cb3cdaa36d7ac"
+  },
+  "d2-hold-two-recipients-38": {
+    "passed": true,
+    "reason": "Permissions per recipient.",
+    "answer_sha256": "f07ac3af5301191f65ab24de757d97a300470fe6dd0f51f87ea4b00e473e455c"
+  },
+  "d2-hold-add-field-39": {
+    "passed": true,
+    "reason": "Addition kept.",
+    "answer_sha256": "6c316b3340cbe36337c8f29042f11cd607f9c5707a610e299b1b50c9fda5938b"
+  },
+  "d2-hold-exact-name-40": {
+    "passed": false,
+    "reason": "Loses the file name and says to rename both files.",
+    "answer_sha256": "128ebed174f1775d83283c309210145e145037bc509270c2e6a2242594951cb5"
+  },
+  "d2-hold-screen-only-41": {
+    "passed": false,
+    "reason": "Loses the screen-only scope.",
+    "answer_sha256": "48a9f2f66b47435d29c9100b7668c3ae43d81eb5b7cc4079b9d57531ea7f81b7"
+  },
+  "d2-hold-quote-42": {
+    "passed": false,
+    "reason": "Turns the permission into an order to send.",
+    "answer_sha256": "2ba2b5bf372c326d97b887da856c47650705015aeefb4f1ef4c9f602de71f0bc"
+  },
+  "d2-hold-open-recipient-43": {
+    "passed": false,
+    "reason": "No question for the open recipient.",
+    "answer_sha256": "75e8f3acf9697bb07c0ed10f9fd09d5d5fbbce3a6a20e2c35d6df9108b6c0e72"
+  },
+  "d2-hold-code-44": {
+    "passed": false,
+    "reason": "Loses «не для входа».",
+    "answer_sha256": "8ae918b240895f1537f5075c4f6e33d1556d2259a6352b4ba697fc90d070f127"
+  },
+  "d2-hold-cancel-one-45": {
+    "passed": true,
+    "reason": "Rename and the kept field; extra «не менять» is harmless.",
+    "answer_sha256": "a90179600a15602200d04cf991726ea849612594d5a06a8b323fd9275a878850"
+  },
+  "d2-hold-permission-46": {
+    "passed": true,
+    "reason": "Field, no version, sending allowed.",
+    "answer_sha256": "e0a0202ef14fcf16e57aff7c94addf92aa0be4cdc2cbbe142c4c88d70acadcad"
+  },
+  "d2-hold-two-recipients-47": {
+    "passed": true,
+    "reason": "Permissions per recipient.",
+    "answer_sha256": "2c5a56aa4dabed20b7d690f8cda0c3d4f831dada32c9af9b18e3908979bfcc24"
+  },
+  "d2-hold-add-field-48": {
+    "passed": true,
+    "reason": "Addition kept; echoes the user but keeps every requirement.",
+    "answer_sha256": "699ea33a6c9a01ac96f2e0eb95ea53f3d1266571c41d747f53027e781bfeb799"
+  },
+  "d2-hold-exact-name-49": {
+    "passed": false,
+    "reason": "Says to transliterate, the opposite of the request.",
+    "answer_sha256": "7acb0de5fcc3daa47eabc7dabc63b7ee7de731ff560d3e12e2bcd6ef38f9ae86"
+  },
+  "d2-hold-screen-only-50": {
+    "passed": false,
+    "reason": "Loses the no-migration requirement.",
+    "answer_sha256": "0881a1a5954913d2e897d84ccc532c633ebd7e6d21fe8db17c4ebf8213842d5c"
+  },
+  "d2-hold-quote-51": {
+    "passed": false,
+    "reason": "Loses «дословно».",
+    "answer_sha256": "be401d002efb77aac94287aea6ef3a6538c8e7fe9fbc9fb99dc862decb6b2d23"
+  },
+  "d2-hold-open-recipient-52": {
+    "passed": false,
+    "reason": "No question for the open recipient.",
+    "answer_sha256": "b94e1fe1099fe1b03304f7770168c4067ba15750bdeed068f9fbeb242b0d52ab"
+  },
+  "d2-hold-code-53": {
+    "passed": false,
+    "reason": "No question for the open duration.",
+    "answer_sha256": "32784245123d724771328598892d498ce48a9441547e6880787704e4cf2c3d0f"
+  }
+}

@@ -1,0 +1,277 @@
+{
+  "seven-two-open": {
+    "passed": false,
+    "reason": "Grammar «не выбрано»; «текстом» lost.",
+    "answer_sha256": "0df7d7c02876c32375a8feb66d73bc8b686be113f38453cf1015dd83cdf2b471"
+  },
+  "v14-repeat": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "01621e9825e1cea8b77cc959303a872c2a4526098b4d8908d3c097c1c49e2152"
+  },
+  "v18-code-lifetime": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "08d8831339fe725dddd06a2578de4fbbb4d2ef33b0f1dfd9ec68ace779758042"
+  },
+  "v18-partial-send": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "1344de618b98322876fdf9e54327beac83740a47b3d2868b8256f62062447cd8"
+  },
+  "v18-revoke-after-grant": {
+    "passed": false,
+    "reason": "Says sending is allowed; the permission was withdrawn.",
+    "answer_sha256": "2cc2f05fcf39999d057dfa0cc785087febf79a48dd07cea1bbb98e7811fe0a29"
+  },
+  "v18-field-not-source": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "e45aee2eccb12c10560d7bec0ec0d7d6644007004309a8cdd3beb9e0a4b4510a"
+  },
+  "v18-topic-return": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "3015f9e4be319d4e4c10e296474861b4efca419182d126925ac44f12cc913c33"
+  },
+  "v18-ambiguous-recipient": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "15838f8d2b9ed19706cfb066e48d11078134ea34d5b03d5b11211d154adefbb2"
+  },
+  "v18-separate-names": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "173f8349f849ff36386e5c15878439d1340cdf4c39bbab86c794120675cd57b6"
+  },
+  "v19-failure-0-0": {
+    "passed": false,
+    "reason": "Loses showing the author’s email and «при успехе не сообщать»; invents «без кода ошибки».",
+    "answer_sha256": "954956a8a060ee59f9af2d6c2b48fb843cca3eaf2fa301befdf1f90404c717dd"
+  },
+  "v19-repeat": {
+    "passed": false,
+    "reason": "Wrong inflection «257 секунду».",
+    "answer_sha256": "34dbd815e0e85d126b2ec5aa7aedf5660c80635c0714c2e731c9e37a1a0e23f5"
+  },
+  "v19-exact-identifier": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "8aa4416c727f45e52c5d0e0fb89917e22ed0cb25d176088e2d81a5068aaf1cc1"
+  },
+  "v19-proposal-status": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "2378c1be6e102c04001767d5a6045959e0228475aa375a914d78ebcad50fadd4"
+  },
+  "v19-inclusive-prose": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "082a257ef40f6c2ec3d4a328b85d0219bd5421294afe87aaa2ebe3f10d0fc18b"
+  },
+  "v19-missing-destination": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "ef3181f78e95ccd06228d8c5cfafd5e97ff156cf9449a14c2e2697ddcb9446b8"
+  },
+  "v19-quoted-permission": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "9f851b344637f6c590f7d4147f4e6f4ebffca082b1dd0168a8cdcf96679cccdf"
+  },
+  "v19-double-reversal": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "cd1a94bb429704e6afb4a2c65a570661d3df034112e7729c9e152cd9eaecbaa8"
+  },
+  "v20-repeat": {
+    "passed": false,
+    "reason": "Wrong inflection «293 секунду».",
+    "answer_sha256": "bbb38af43960db17ca16abe20aaebac35ceb7b4135083f512943181724409e85"
+  },
+  "v20-withdrawn-latest": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "cd7ea277ffc7225dca173f42776c8c4e07b9cec4d954b66b588039be104442a2"
+  },
+  "v20-only-one-recipient": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "5e6cef42774c26df7593508ba51892b34024e5ac2a009a1adf4d3260c2a95e51"
+  },
+  "v20-preserve-and-add": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "fc645e63773c3a48293b917ffd2d4e22136c45a96438b4a721a76276de95eef3"
+  },
+  "v20-verbatim-name": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "428fd156a236d31dde82aa78b1bfcac5150ab213101dc646a000c2446b9ae95b"
+  },
+  "v20-destination-not-guessed": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "573aeb360aec41d7a9a7f9aa3f823e270b02553de70a74a7654d7cb39f73210f"
+  },
+  "v20-quoted-ban-not-action": {
+    "passed": false,
+    "reason": "Typo «отровку».",
+    "answer_sha256": "e81d56ab1d99d207d2bca33792872e8f043e24897212108c426d1fffe10744cc"
+  },
+  "v20-service-unselected": {
+    "passed": false,
+    "reason": "Loses «при успехе не уведомлять».",
+    "answer_sha256": "026787d4173879e1b88de4b45a6588c1bb8acbfe96b5f3614b62cd9e2ca3995b"
+  },
+  "v20-single-use-scope": {
+    "passed": false,
+    "reason": "Loses «повторное использование запрещено».",
+    "answer_sha256": "949b2e5fb5f91e040e0501b6c5951c00b2af72e68c631ddb7b8c5c632c0ba364"
+  },
+  "v20-view-not-storage": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "54ee8905816ff5f321fff3f686ec7455f4fbf450a31323dff1fba86f5e374381"
+  },
+  "v21-previous-draft-payment": {
+    "passed": false,
+    "reason": "Invents a field «пересылка»; loses the reason.",
+    "answer_sha256": "06b2e20a8312954ab02d0e8986355d5c2fc54053bc1751b089839c4107ddf1f9"
+  },
+  "v21-previous-draft-copies": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "0b66d166d0cb30509ccdf6b81e7dbdedc852af576abd2538e084dbbd500eda15"
+  },
+  "v21-previous-draft-export": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "8f6493ef7ee347b63495844f265c6b793a07c18e7bd1fc63fea64a135beb20c3"
+  },
+  "v21-previous-draft-quote": {
+    "passed": false,
+    "reason": "Confused «запрет только на эту цитату».",
+    "answer_sha256": "742029b2cb075a9e85b8f1a8d90eb91ab7cdbf70c776315e845c43709792d6c8"
+  },
+  "v21-previous-draft-display": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "2196b9a0cd535b09ce8923cd171fc9b9161f4e7f532fd493ffb11f158d26d76f"
+  },
+  "v21-previous-draft-versions": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "b64f4838520bba1c77711423b923c71806716ec312cd91f980b07bc6897bfdef"
+  },
+  "v21-previous-draft-reallow": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "61905806b11af4aa07c621328d04e7acd0c9e814a7c73562e3f08147aa009482"
+  },
+  "v21-previous-draft-token": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "4a211a1f6e3b0f4b02847427ca0c1e0e496e32bee77ec844cf4b932d7512168f"
+  },
+  "v21-previous-draft-recipient": {
+    "passed": false,
+    "reason": "Loses not auto-choosing the previous customer.",
+    "answer_sha256": "0955cdf91a97fdbf9b2a73bce056222604be31526b2201bf9fc28daa5d752760"
+  },
+  "v21-previous-draft-label-colour": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "c3ac1042abda9e96bd12b67c56259c653fc9b4ed54fda1d3fd1198c4fcfbdfd7"
+  },
+  "v21-previous-draft-unset-lifetime": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "d0ebe6596defc7da235601e723d65a3716f83ef4271f78ee8da3bda64339dcd8"
+  },
+  "fresh-sort-3-1-1": {
+    "passed": false,
+    "reason": "Drops an element.",
+    "answer_sha256": "ef5107eac928901fee79972b80e719ad4eca02ae95f676c7c826bd4b982b163e"
+  },
+  "fresh-cancel-first": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "403787fa0299bbbd9beccfdacfceba956118b681f28d307852f0609920632721"
+  },
+  "fresh-cancel-second": {
+    "passed": false,
+    "reason": "Keeps source_no, which is renamed.",
+    "answer_sha256": "0d29a04c4455f980886dd795318285c3b447b3accbfe2c20edb47bd5ee59f268"
+  },
+  "fresh-revoke-transmit": {
+    "passed": false,
+    "reason": "Loses the appraiser; «публикацию не выполнять» is not the decision.",
+    "answer_sha256": "36f1d3e8b199646cd7c276996b1e2daebbad702f9c3328060741b25ecf0879e2"
+  },
+  "fresh-unchanged-field-send": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "667b5649eefb3db812be5fa53dae8185698ef00521953e02b2da8ad589822194"
+  },
+  "fresh-copy-scope": {
+    "passed": false,
+    "reason": "«Без пересылки» contradicts the allowed forwarding.",
+    "answer_sha256": "fbb3fd7d3f02e6a3d52fe0ac68f3e126108a2ffd904622ba26e0b89b2fdb8d59"
+  },
+  "fresh-undo-ban": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "2c2f8b74f2eeb75a6fdb51ae4bcc4177119e84d0691929168b720ff5785a4c9b"
+  },
+  "fresh-add-not-replace": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "32055825f776d6e3c03031b8b9417fc62d395675b994c8f963801fcd2d68355a"
+  },
+  "fresh-code-versus-item": {
+    "passed": false,
+    "reason": "Loses single use and the new badge by a new code; garbled login sentence.",
+    "answer_sha256": "a09542806c9bc826cd515eb3f6534d2c5cc7d73ac9e58d135ee57807ae2cd292"
+  },
+  "fresh-duration-open": {
+    "passed": false,
+    "reason": "English «Duration», loses single use and not-for-login.",
+    "answer_sha256": "9e858ad3cc44506b55363a8362be1981ec851315c21e3ce0f72eb2c92dd47583"
+  },
+  "fresh-exact-caption": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "df3c457000c9e923364ce0ae00e4ebce5c83cbad9d25b2260bca8031d8d5ff1c"
+  },
+  "fresh-display-only": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "d6df6a0ab67812dd26ba3f6554d33e77b945941a08468f2f8d2e19649b701cb5"
+  },
+  "fresh-quoted-instruction": {
+    "passed": false,
+    "reason": "Grammar «Разрешить отправка».",
+    "answer_sha256": "4cd4d0da3a255516893d6b1cef5636e74f418252f1fd386dd88309d3ea722c8f"
+  },
+  "fresh-negative-order": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "178b1d6853d9f5a85fa7659f337218172c4f63df63858bb56c099139ee83369a"
+  },
+  "fresh-interval-prose": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "384fbc8cb652b4389d6425b0aad513c46e6ad4b702dc55739cd84c1cb20ecaf4"
+  },
+  "fresh-recipient-pending": {
+    "passed": false,
+    "reason": "Truncated question; loses not auto-assigning the lecturer.",
+    "answer_sha256": "871cbd822ef76028bb388bc013d340ad9bfbfa86a2f5668e2af28f72e10d5374"
+  },
+  "fresh-rename-withdrawn": {
+    "passed": true,
+    "reason": "Same requirements in other words.",
+    "answer_sha256": "541a6af2f0dfa4e361951fed19cfb609c2b1e85a021c3aabc5be32364fd906a7"
+  }
+}

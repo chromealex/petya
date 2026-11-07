@@ -19,3 +19,19 @@ screen, a quote that is not an instruction, an open recipient or duration that b
 Gate: D2 replaces D1 only if the 54 held-out drafts improve with no D1 success lost, the 42 v22 cases are not worse
 with no D1 success lost, and familiar retention is not below D1. Non-exact drafts are reviewed against their
 dialogue. A rejected D2 is still published as a pre-release with its evaluation (docs/MODELS.md).
+
+## Result: D2 rejected, D1 stays
+
+Reviews (hash-bound) are in `results/*-review.json`, the comparison in `results/summary.json`.
+
+| | D1 | D2 |
+|---|---|---|
+| 54 generated held-out drafts | 24 | 39 |
+| 42 v22 cases (30 checks + 12 drafts) | 27 + 6 | 27 + 7 |
+| 801 familiar cases | 787 | 782 |
+
+D2 learns the trained kinds of correction (fifteen more new dialogues right) but loses four D1 successes on the
+generated set, two on v22 (`v22-new-cancel-two` reversed, `v22-new-quote` permits sending the quote) and ten
+familiar cases, one of which (`v18-revoke-after-grant`) says sending is allowed after the permission was withdrawn.
+The gate rejects it; it is published as the pre-release `andromeda-d2` with this evaluation. The next stage keeps
+the new data and weights the familiar rehearsal more, to keep the gains without the forgetting.

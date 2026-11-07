@@ -1,0 +1,41 @@
+{
+  "part": "Andromeda D2",
+  "adapter_sha256": "068b02673baa6e9f48f10cae7dcbae20804b9ef773034e9b030f8c115a9e3afe",
+  "parent": "D1 (e4750435…a12d0)",
+  "generated_holdout": {
+    "D2": 39,
+    "D1": 24,
+    "total": 54,
+    "lost_D1_successes": [
+      "d2-hold-code-8",
+      "d2-hold-code-17",
+      "d2-hold-two-recipients-20",
+      "d2-hold-quote-24"
+    ]
+  },
+  "v22": {
+    "checks": {
+      "D2": 27,
+      "D1": 27,
+      "total": 30
+    },
+    "drafts": {
+      "D2": 7,
+      "D1": 6,
+      "total": 12,
+      "lost_D1_successes": [
+        "v22-new-cancel-two",
+        "v22-new-quote"
+      ]
+    }
+  },
+  "familiar": {
+    "D2": 782,
+    "D1": 787,
+    "total": 801,
+    "lost": 10,
+    "gained": 5
+  },
+  "gate": "rejected: D1 successes lost on both held-out sets and familiar retention below D1 (782 < 787); D1 stays the group’s D",
+  "reading": "The new data helps the trained kinds of correction a lot (24 → 39 of 54 new dialogues, 33 → 34 of 42 v22 cases), but one rehearsal of the familiar set is not enough: ten familiar cases regress, one of them inverting a withdrawn permission."
+}

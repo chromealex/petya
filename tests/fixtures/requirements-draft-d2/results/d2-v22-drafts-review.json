@@ -1,0 +1,62 @@
+{
+  "v22-new-cancel-one": {
+    "passed": false,
+    "reason": "Uses final_key instead of keeping draft_key (as D1).",
+    "answer_sha256": "49ce5db274f8a0d67ade764b807294a36a11169bef89f8f6748cb463f213e4c3"
+  },
+  "v22-new-cancel-two": {
+    "passed": false,
+    "reason": "Reverses the decision: keeps river_id and renames hill_id. D1 passed.",
+    "answer_sha256": "b8f99ce9b3d8a2c5dd87ee6da0350ae5579a0af1e906b8ed26cc1284c979f9fe"
+  },
+  "v22-new-two-recipients": {
+    "passed": true,
+    "reason": "Identical sheets, no explanation, permissions per recipient; the extra «записями о передаче» changes nothing.",
+    "answer_sha256": "50866642aab55e1a2adbb2445ca410052115ed86b2724029d578943556f4dd38"
+  },
+  "v22-new-revoke-send": {
+    "passed": false,
+    "reason": "Loses «дату не добавлять» (as D1).",
+    "answer_sha256": "a180c977ce9a531ee1894dccd6ed2b008369e6ad32f4cdf03819a327c4b1f344"
+  },
+  "v22-new-restore-send": {
+    "passed": true,
+    "reason": "Seat and time, no cost, sending to the cashier allowed.",
+    "answer_sha256": "8f8f84382975942da52028cbb2e05011706f8176de4c11cb9f30c1da6245da23"
+  },
+  "v22-new-code-item": {
+    "passed": true,
+    "reason": "347 s, single use, another set by a new code, not for login.",
+    "answer_sha256": "f8781c6908197be3976f423152c5cf7d694d4320615f549d6d93249fc36b7534"
+  },
+  "v22-new-open-duration": {
+    "passed": false,
+    "reason": "Junk word «безумнольчиту».",
+    "answer_sha256": "1ee2773b716420a0e1054fcc783eae0d49f43aec96b1bed44e9730995a85d60b"
+  },
+  "v22-new-exact-name": {
+    "passed": true,
+    "reason": "Exact literals and zeros, no extra ban.",
+    "answer_sha256": "adde27a4fbb32568f2c56f9ffea05af144f7922a34a7f250faf1497cbf2f256d"
+  },
+  "v22-new-screen-only": {
+    "passed": true,
+    "reason": "All requirements.",
+    "answer_sha256": "a73e2108d6d7990fadba8fde6254ff300debd9ba61ac2fe71e7c73a4f381a81d"
+  },
+  "v22-new-add-separate": {
+    "passed": true,
+    "reason": "All requirements.",
+    "answer_sha256": "ea34b73b7f5426c1b8c131fb7327ba02a9a99795613ddc6c7010b28a292007c7"
+  },
+  "v22-new-quote": {
+    "passed": false,
+    "reason": "Permits sending «цитаты» instead of the manual; typo «отровку». D1 passed.",
+    "answer_sha256": "3e4de620c50a1cedba135dd59abd021ec02c655da4ec06b5b9286f4901ac268a"
+  },
+  "v22-new-recipient-open": {
+    "passed": true,
+    "reason": "All requirements and the question.",
+    "answer_sha256": "d6c81ac3f00222de765219202d0ebd0d5e42694f5f01f76ff24a6c7eb1d2d23f"
+  }
+}
