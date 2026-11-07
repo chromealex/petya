@@ -1,9 +1,11 @@
 name: Model release
-# A model tag (petya-v1.0) publishes that version's folder as a GitHub release; the weights live
-# on this `models` branch, never on main or in the project folder.
+# Every version folder on this `models` branch (petya-v1.0/, petya-v1.1/, …) becomes a GitHub release with the
+# same tag once it is pushed; the weights live on this branch and in the releases, never on main or in the
+# project folder. Hashes in model.json are checked before publishing.
 on:
   push:
-    tags: ['petya-v*']
+    branches: [models]
+  workflow_dispatch:
 permissions:
   contents: write
 jobs:
@@ -11,20 +13,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-      - name: Check the hashes and publish
+      - name: Publish new versions
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="$GITHUB_REF_NAME"; dir="$tag"
-          test -f "$dir/model.json"
-          python3 - "$dir" <<'PY'
+          for dir in petya-v*/; do
+            tag="${dir%/}"
+            if gh release view "$tag" >/dev/null 2>&1; then continue; fi
+            python3 - "$tag" <<'PY'
           import hashlib,json,sys,pathlib
           d=pathlib.Path(sys.argv[1]);m=json.loads((d/'model.json').read_text())
+          assert m['release']==d.name,'model.json release must equal the folder name'
           for name,expected in m['adapter']['files'].items():
               assert hashlib.sha256((d/name).read_bytes()).hexdigest()==expected,name
           PY
-          pre=$(python3 -c "import json,sys;print('--prerelease' if 'experimental' in json.load(open('$dir/model.json'))['status'] else '')")
-          if gh release view "$tag" >/dev/null 2>&1; then gh release upload "$tag" "$dir"/* --clobber
-          else gh release create "$tag" "$dir"/* --target "$GITHUB_SHA" --title "Petya model ${tag#petya-v}" --notes-file "$dir/NOTES.md" $pre; fi
+            pre=$(python3 -c "import json;print('--prerelease' if json.load(open('$tag/model.json'))['status'].startswith('experimental') else '')")
+            gh release create "$tag" "$tag"/* --target "$GITHUB_SHA" --title "Petya model ${tag#petya-v}" --notes-file "$tag/NOTES.md" $pre
+          done

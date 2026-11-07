@@ -1,6 +1,6 @@
 # Petya models
 
-Each model version is a folder here and a tag `petya-vX.Y` that publishes it as a GitHub release
+Each model version is a folder `petya-vX.Y/` here; pushing it publishes a GitHub release with that tag
 (`.github/workflows/model-release.yml`). Weights are stored on this branch (plain git, each adapter is under 100 MB) and in the release
 assets only; the project folder and `main` keep training data and evidence, not weights.
 
@@ -12,4 +12,4 @@ Versions: every training stage adds 0.1 (1.1, 1.2, …), whatever its result, so
 rolled back; the first version that passes all gates (familiar, held-out, live dialogue, runtime, packaging) becomes 2.0.
 
 A new version: train (Train Petya), evaluate against the previous version, add `petya-vX.Y/` with
-`model.json` (hashes, base, evaluation, status) and `NOTES.md`, push, then push the tag.
+`model.json` (hashes, base, evaluation, status) and `NOTES.md`, then push this branch.
