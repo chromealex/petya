@@ -1,0 +1,24 @@
+{
+  "part": "D3",
+  "group": "Andromeda",
+  "parent": "../requirements-draft-v21/repair4-adapter",
+  "parent_sha256": "e4750435ed3c09b138b0cb735c227ce074e9377612b3b147a657a885531a12d0",
+  "training_file": "train.jsonl",
+  "steps": 2322,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 1e-06,
+  "hashes": {
+    "train.jsonl": "1626471fb7525994f4f9fdff9ed2dcf591f85596738bca2dc4e61acb932a3fd1",
+    "../requirements-draft-d2/new-train.jsonl": "7d47c8442a914deb4b11b3138cae1d9fe0debb0dd92a9540b9792b4d8417e895",
+    "../requirements-draft-d2/holdout.jsonl": "5b51097323c8f46ee79ccfcb7df061edf46baa1bddc8c492191268625dc1c03f"
+  },
+  "sources": {
+    "tests/fixtures/requirements-draft-v21/train_checkpointed.py": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+    "tests/fixtures/requirements-draft-v21/checkpoint.py": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549"
+  },
+  "recipe": "The 801 familiar cases twice plus the 720 D2 dialogues once (2,322 presentations); continue from D1. Same trainer, rank, layers, learning rate and seed.",
+  "gate": "D3 replaces D1 only if the 54 generated held-out drafts improve with no D1 success lost, the 42 v22 cases are not worse than D1 with no D1 success lost, and familiar retention is not below D1 (787/801). D1 results are those recorded in requirements-draft-d2/results.",
+  "limits": "Same data and held-out sets as D2; only the rehearsal weight changes."
+}
