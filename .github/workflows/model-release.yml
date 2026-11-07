@@ -27,6 +27,6 @@ jobs:
           for name,expected in m['adapter']['files'].items():
               assert hashlib.sha256((d/name).read_bytes()).hexdigest()==expected,name
           PY
-            pre=$(python3 -c "import json;print('--prerelease' if json.load(open('$tag/model.json'))['status'].startswith('experimental') else '')")
+            pre=$(python3 -c "import json;print('' if json.load(open('$tag/model.json'))['status'].startswith('stable') else '--prerelease')")
             gh release create "$tag" "$tag"/* --target "$GITHUB_SHA" --title "Petya model ${tag#petya-v}" --notes-file "$tag/NOTES.md" $pre
           done
