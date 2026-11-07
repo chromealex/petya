@@ -10,7 +10,7 @@ learningView.innerHTML=`<h1>Обучение Пети</h1><p>Научите Пе
 <label>Проверочная фраза<input id="learn-example" maxlength="4000"></label><button id="learn-test" type="button">Проверить без выполнения</button><p id="learn-result" role="status"></p></form></article>
 <article class="card"><h2>Напоминания</h2><p>Петя уведомит вас, пока работает в трее. Если компьютер спал или приложение было закрыто, напоминание появится после пробуждения или запуска. Уведомления должны быть разрешены в настройках ОС. Напоминание ничего не отправляет в другие сервисы.</p><div id="learn-reminders"></div><button id="learn-refresh" type="button">Обновить</button></article>`;
 document.querySelector('main footer').before(learningView);
-const growthView=document.createElement('section');growthView.id='growth';growthView.className='view';growthView.hidden=true;growthView.innerHTML='<h1>Развитие</h1><p class="intro">Уровень Пети и результаты вашей команды.</p>';growthView.append($('growth-card'));learningView.after(growthView);
+const growthView=document.createElement('section');growthView.id='growth';growthView.className='view';growthView.hidden=true;growthView.innerHTML='<h1>Развитие</h1><p class="intro">Ваши результаты и результаты команды в Jira.</p>';growthView.append($('growth-card'));learningView.after(growthView);
 const growthNav=document.createElement('button');growthNav.className='nav';growthNav.dataset.view='growth';growthNav.textContent='Развитие';document.querySelector('aside nav [data-view="home"]').after(growthNav);growthNav.onclick=run(async()=>{view('growth');await refreshLearning();});
 let editingSkill='';
 function learningDraft(){return {...editingSkill?{id:editingSkill}:{},name:$('learn-name').value,action:$('learn-action').value,patterns:$('learn-patterns').value.split('\n'),output:$('learn-output').value,enabled:$('learn-enabled').checked};}
@@ -29,7 +29,11 @@ $('learn-refresh').onclick=run(refreshLearning);
 const teachButton=document.createElement('button');teachButton.type='button';teachButton.textContent='Научить новой фразе';$('command-shortcuts').append(teachButton);teachButton.onclick=run(async()=>{view('learning');editLearning();const phrase=$('command').value.replace(/^петя[,\s]+/iu,'').trim();$('learn-patterns').value=phrase;$('learn-example').value=phrase;await refreshLearning();$('learn-name').focus();});
 learningActionHelp();
 
-const undoButton=document.createElement('button');undoButton.type='button';undoButton.textContent='Отменить последнее локальное действие';learningView.prepend(undoButton);undoButton.onclick=run(async()=>{const info=await window.petya.undoInfo();if(!info){notice('Нет действия для отмены.');return;}if(!await window.confirmLocalUndo?.(info))return;const result=await window.petya.undoLast(info.id);await refreshLearning();await refreshDictionary();await showDialogueReply(result);view('home');});
+const undoButton=document.createElement('button');undoButton.type='button';undoButton.textContent='Отменить последнее локальное действие';learningView.prepend(undoButton);
+// Name the action that will be undone and hide the button when there is nothing to undo.
+undoButton.className='learning-undo quiet';undoButton.hidden=true;
+async function syncUndo(){try{const info=await window.petya.undoInfo();undoButton.hidden=!info;if(info){undoButton.textContent='↶ Отменить: '+info.label;undoButton.title=new Date(info.at).toLocaleString('ru-RU');}}catch{undoButton.hidden=true;}}
+document.addEventListener('petya-view',event=>{if(event.detail==='learning')syncUndo();});undoButton.onclick=run(async()=>{const info=await window.petya.undoInfo();if(!info){notice('Нет действия для отмены.');return;}if(!await window.confirmLocalUndo?.(info))return;const result=await window.petya.undoLast(info.id);await refreshLearning();await refreshDictionary();await syncUndo();await showDialogueReply(result);view('home');});
 
 function renderGrowth(growth){
  const root=$('growth-content');root.replaceChildren();if(!growth)return;

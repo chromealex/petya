@@ -169,6 +169,9 @@ $('find-docs').onclick = run(findDocs); $('load-metadata').onclick = run(refresh
 $('find-people').onclick = run(async () => { const people = await window.petya.jiraPeople($('people-query').value, activeJiraRoute?.id); mergePeople(people); notice(`Найдено исполнителей: ${people.length}. Выберите их в задачах.`); });
 $('decompose').onclick = run(decompose); $('add-task').onclick = () => { if ($('batch-tasks').children.length < 12) taskEditor(); else notice('Максимум 12 задач в пакете.'); };
 $('submit-batch').onclick = run(sendBatch); $('refresh-history').onclick = run(refreshHistory);
+// History refreshes itself when opened; the manual button stays only as a fallback in the help section.
+document.addEventListener('petya-view', event => { if (event.detail === 'history') refreshHistory().catch(error => notice(error.message, true)); });
+$('refresh-history').hidden = true;
 $('close-workspace').onclick = () => { if (!workspaceBusy) { $('workspace-card').hidden = true; frozenBatch = null; } };
 $('expand-draft').onclick = run(() => openWorkspace(activeContext));
 

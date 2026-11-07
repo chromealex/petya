@@ -6,12 +6,19 @@ function updateChromeStatus(){
  const active=chromeProgress&&['working','waiting','error'].includes(chromeProgress.state);
  const message=active?chromeProgress.label:!$('notice').hidden?$('notice').textContent:$('status').textContent;
  const state=active?chromeProgress.state:!$('notice').hidden&&$('notice').classList.contains('error')?'error':'idle';
- $('chrome-status-text').textContent=message.replace(/\s+/g,' ').trim();
- button.dataset.state=state;button.title=message+' — открыть подробности в Ассистенте';
+ // A short label fits the top bar; the full text opens on click.
+ const full=message.replace(/\s+/g,' ').trim(),short=state==='error'?'Ошибка · подробнее':state==='waiting'?'Ждёт ответа':state==='working'?(full.length>34?full.slice(0,32)+'…':full||'Петя работает…'):(full.length>34?full.slice(0,32)+'…':full);
+ $('chrome-status-text').textContent=short;button.dataset.full=full;
+ button.dataset.state=state;button.title=full;
  button.setAttribute('aria-label',button.title);
 }
 document.body.dataset.view='home';
-$('chrome-status').onclick=()=>{view('home');document.querySelector('main').scrollIntoView({block:'start'});};
+$('chrome-status').onclick=()=>{const button=$('chrome-status');let pop=document.getElementById('chrome-status-details');if(pop){pop.remove();button.setAttribute('aria-expanded','false');return;}
+ pop=document.createElement('div');pop.id='chrome-status-details';pop.className='chrome-status-details';pop.setAttribute('role','dialog');pop.setAttribute('aria-label','Подробности статуса');
+ const text=document.createElement('p');text.textContent=button.dataset.full||'';const open=document.createElement('button');open.type='button';open.textContent='Открыть в Ассистенте';open.onclick=()=>{pop.remove();view('home');document.querySelector('main').scrollIntoView({block:'start'});};
+ pop.append(text,open);document.body.append(pop);const box=button.getBoundingClientRect();pop.style.top=(box.bottom+8)+'px';pop.style.right=Math.max(8,innerWidth-box.right)+'px';button.setAttribute('aria-expanded','true');open.focus();
+ const dismiss=event=>{if(event.type==='keydown'&&event.key!=='Escape')return;if(event.type==='pointerdown'&&(pop.contains(event.target)||button.contains(event.target)))return;pop.remove();button.setAttribute('aria-expanded','false');document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);};
+ document.addEventListener('pointerdown',dismiss);document.addEventListener('keydown',dismiss);};
 
 function notice(message, error = false) {
  document.dispatchEvent(new CustomEvent('petya-notice',{detail:{message,error}}));
@@ -152,11 +159,13 @@ $('meeting').onclick = run(async () => { $('meeting').disabled = true; try { if 
 window.petyaEvents.onNavigate(page => [...document.querySelectorAll('.nav')].find(button => button.dataset.view === page)?.click());
 window.petyaEvents.onToggle(run(toggleMic));
 window.petyaEvents.onPause(run(async () => { await window.petya.pauseAutoMeeting(); mic.stop(); await window.petyaStopAutomaticMeeting(true); updateAudio(); }));
+// «сегодня, 14:05», «вчера, 22:55» or a short date; no seconds.
+function materialDate(at){const d=new Date(at);if(Number.isNaN(d.getTime()))return '';const time=d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}),today=new Date(),yesterday=new Date(today.getFullYear(),today.getMonth(),today.getDate()-1);if(d.toDateString()===today.toDateString())return 'сегодня, '+time;if(d.toDateString()===yesterday.toDateString())return 'вчера, '+time;return d.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:d.getFullYear()===today.getFullYear()?undefined:'numeric'})+', '+time;}
 async function refreshContexts() {
   const contexts = await window.petya.contexts(); $('source-stats').replaceChildren(Object.assign(document.createElement('span'), { textContent: 'Всего записей:' }), document.createTextNode(' '+contexts.length));
   $('context-list').replaceChildren();
   if (!contexts.length) $('context-list').textContent = 'Пока нет сохранённых материалов. Нажмите «Добавить материал», чтобы сохранить первую запись.';
-  for (const context of [...contexts].reverse().slice(0, 500)) { const card = document.createElement('article'); card.className = 'context-item';card.dataset.source=context.source; const title = document.createElement('strong'); title.textContent = context.title; const meta = document.createElement('p'); meta.className = 'small'; meta.textContent = `${context.source} · ${new Date(context.at).toLocaleString('ru-RU')}`; const body = document.createElement('p'); body.textContent = context.text; const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Прочитать запись';details.append(summary,body);const ask=document.createElement('button');ask.type='button';ask.textContent='Спросить Петю';ask.onclick=()=>{view('home');$('command').value='По материалу «'+context.title+'»: ';$('command').focus();};card.append(title,meta,details,ask); $('context-list').append(card); }
+  for (const context of [...contexts].reverse().slice(0, 500)) { const card = document.createElement('article'); card.className = 'context-item';card.dataset.source=context.source; const title = document.createElement('strong'); title.textContent = context.title; const meta = document.createElement('p'); meta.className = 'small'; meta.textContent = `${context.source} · ${materialDate(context.at)}`; meta.title=new Date(context.at).toLocaleString('ru-RU'); const text=String(context.text||''); const preview=document.createElement('p'); preview.className='context-preview'; preview.textContent=text.replace(/\s+/g,' ').slice(0,240); const body = document.createElement('p'); body.textContent = text; const details=document.createElement('details'),summary=document.createElement('summary');summary.textContent='Показать полностью';details.append(summary,body);details.ontoggle=()=>preview.hidden=details.open;const ask=document.createElement('button');ask.type='button';ask.className='context-ask';ask.title='Спросить Петю об этом материале';ask.setAttribute('aria-label',ask.title+' «'+context.title+'»');ask.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z M8 9h8 M8 12h5"/></svg>';ask.onclick=()=>{view('home');$('command').value='По материалу «'+context.title+'»: ';$('command').focus();};card.append(title,meta,preview);if(text.length>240)card.append(details);card.append(ask); $('context-list').append(card); }
 }
 async function makeDraft(context, route = null, { reviewOnly = false } = {}) {
   activeContext = context;
