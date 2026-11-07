@@ -1,8 +1,9 @@
 {
-  "name": "petya",
-  "version": "1.0",
-  "codename": "Andromeda",
-  "release": "petya-v1.0",
+  "group": "Andromeda",
+  "component": "D",
+  "version": 1,
+  "id": "D1",
+  "role": "drafts: requirements from Russian dialogues with corrections (summary, description, open questions as JSON)",
   "status": "experimental: best evaluated adapter so far, not release-qualified",
   "base": {
     "repository": "mlx-community/Qwen3.5-9B-4bit",
@@ -27,5 +28,5 @@
     "holdout_v21": "45/48 checks, 9/16 drafts (parent 42/48, 7/16)",
     "holdout_v22": "27/30 checks, 6/12 drafts"
   },
-  "task": "Requirements drafting from Russian dialogues with corrections: summary, description and open questions as JSON."
+  "previously": "petya-v1.0"
 }

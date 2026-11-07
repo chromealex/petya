@@ -1,0 +1,14 @@
+{
+  "group": "Andromeda",
+  "version": "R1-A1-D1",
+  "components": {
+    "R": "R1",
+    "A": "A1",
+    "D": "D1"
+  },
+  "optional": [
+    "A"
+  ],
+  "status": "experimental",
+  "notes": "R picks the function and passes the request to A (answers) or D (requirement drafts)."
+}

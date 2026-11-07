@@ -1,21 +1,32 @@
 # Petya models
 
-Each model version is a folder `petya-vX.Y/` here; pushing it publishes a GitHub release with that tag
-(`.github/workflows/model-release.yml`). Weights are stored on this branch (plain git, each adapter is under 100 MB) and in the release
-assets only; the project folder and `main` keep training data and evidence, not weights.
+Petya runs a **group** of models named after a constellation. Inside a group:
 
-| Version | Name | Status | Base | Adapter SHA-256 | Notes |
-|---|---|---|---|---|---|
-| 1.0 | Andromeda | experimental | mlx-community/Qwen3.5-9B-4bit @ 8b2b98c | e4750435…a12d0 | v21 fourth repair; v21 holdout 45/48 checks, 9/16 drafts; v22 holdout 27/30, 6/12 |
+- **R** — router: picks the function for a request and restates it, then passes it on.
+- **A** — answers and conversation. **Optional**: downloaded separately, only when turned on; without it R answers.
+- **D** — drafts: requirements from dialogues with corrections (JSON summary, description, open questions).
 
-Versions: every training stage adds 0.1 (1.1, 1.2, …), whatever its result, so each run can be compared and
-rolled back (a rejected stage is published too, as a pre-release with its evaluation); only `status: stable`
-is a full release. The first version that passes all gates (familiar, held-out, live dialogue, runtime, packaging) becomes 2.0.
+A group's version lists its parts: **Petya Andromeda R1-A1-D1**. Retraining a part raises only its number
+(D1 → D2 gives R1-A1-D2); a new group name (Bootes, Cassiopeia, Draco, …, alphabetical) starts when the set of
+parts or a base model changes. When every part of a group passes all gates (familiar, held-out, live dialogue,
+runtime, packaging) the group is marked stable.
 
-A new version: train (Train Petya), evaluate against the previous version, add `petya-vX.Y/` with
-`model.json` (hashes, base, evaluation, status) and `NOTES.md`, then push this branch.
+## Layout
 
-Names are constellations in alphabetical order, one per version (the next stage takes the next name, whatever its
-number): Andromeda, Bootes, Cassiopeia, Draco, Eridanus, Fornax, Gemini, Hercules, Indus, Lyra, Monoceros, Norma,
-Orion, Pegasus, Reticulum, Scorpius, Taurus, Ursa, Vela, Volans; then Aquila, Cygnus, Delphinus, … in the
-same order. The name is `codename` in `model.json` and part of the release title.
+```
+andromeda/group.json       current set (R1-A1-D1), optional parts
+andromeda/D1/              model.json (role, base, hashes, evaluation, status), NOTES.md, adapter files
+andromeda/R1/, A1/         model.json; weights only when the part has an adapter
+```
+
+Pushing a part folder with weights publishes a release tagged `<group>-<part>` (`andromeda-d1`) with its files and
+`group.json` (`.github/workflows/model-release.yml`); a pre-release unless `status` starts with `stable`. Each part
+is a separate download, so A can be fetched on its own. Base models are not stored here: `model.json` names the
+Hugging Face repository and revision. Weights live only on this branch and in releases, not on `main` or in the
+project folder.
+
+## Versions
+
+| Group | Version | Status | Parts |
+|---|---|---|---|
+| Andromeda | R1-A1-D1 | experimental | R1, A1: Qwen3.5-9B-4bit @ 8b2b98c without adapter; D1: v21 fourth repair adapter e4750435…a12d0 (formerly petya-v1.0; v21 held-out 45/48, 9/16; v22 held-out 27/30, 6/12) |

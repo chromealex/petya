@@ -1,0 +1,16 @@
+{
+  "group": "Andromeda",
+  "component": "A",
+  "version": 1,
+  "id": "A1",
+  "role": "answers and conversation",
+  "optional": true,
+  "download": "separately, only when the user turns it on; without it R answers",
+  "status": "experimental: base model, no adapter",
+  "base": {
+    "repository": "mlx-community/Qwen3.5-9B-4bit",
+    "revision": "8b2b98c00a6b4d291155e4890773ca8f769aee53",
+    "runtime": "MLX (Apple Silicon)"
+  },
+  "adapter": null
+}

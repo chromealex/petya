@@ -1,7 +1,7 @@
 name: Model release
-# Every version folder on this `models` branch (petya-v1.0/, petya-v1.1/, …) becomes a GitHub release with the
-# same tag once it is pushed; the weights live on this branch and in the releases, never on main or in the
-# project folder. Hashes in model.json are checked before publishing.
+# Every part folder with weights on this `models` branch (andromeda/D1/, andromeda/R2/, …) becomes a GitHub release
+# tagged <group>-<part> (andromeda-d1) with its files and the group's group.json. Hashes in model.json are checked
+# before publishing; only `status: stable…` makes a full release. Weights never go to main or the project folder.
 on:
   push:
     branches: [models]
@@ -13,21 +13,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Publish new versions
+      - name: Publish new parts
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          for dir in petya-v*/; do
-            tag="${dir%/}"
-            name=$(python3 -c "import json;m=json.load(open('$tag/model.json'));print('Petya model '+m['version']+(' «'+m['codename']+'»' if m.get('codename') else ''))")
-            if gh release view "$tag" >/dev/null 2>&1; then gh release edit "$tag" --title "$name" --notes-file "$tag/NOTES.md"; gh release upload "$tag" "$tag/model.json" "$tag/NOTES.md" --clobber; continue; fi
-            python3 - "$tag" <<'PY'
+          # The first drafts model was published as petya-v1.0 before groups: it becomes andromeda-d1.
+          if gh release view petya-v1.0 >/dev/null 2>&1 && ! gh release view andromeda-d1 >/dev/null 2>&1; then gh release edit petya-v1.0 --tag andromeda-d1; fi
+          for model in */[RAD][0-9]*/model.json; do
+            dir="${model%/model.json}"; group="${dir%%/*}"; part="${dir##*/}"
+            info=$(python3 - "$dir" <<'PY'
           import hashlib,json,sys,pathlib
           d=pathlib.Path(sys.argv[1]);m=json.loads((d/'model.json').read_text())
-          assert m['release']==d.name,'model.json release must equal the folder name'
-          for name,expected in m['adapter']['files'].items():
+          assert m['id']==d.name and m['group'].lower()==d.parent.name,'model.json id and group must match the folders'
+          files=(m.get('adapter') or {}).get('files') or {}
+          for name,expected in files.items():
               assert hashlib.sha256((d/name).read_bytes()).hexdigest()==expected,name
+          print(('weights' if files else 'none')+'|'+('' if m['status'].startswith('stable') else '--prerelease')+'|Petya '+m['group']+' '+m['id'])
           PY
-            pre=$(python3 -c "import json;print('' if json.load(open('$tag/model.json'))['status'].startswith('stable') else '--prerelease')")
-            gh release create "$tag" "$tag"/* --target "$GITHUB_SHA" --title "$name" --notes-file "$tag/NOTES.md" $pre
+            )
+            IFS='|' read -r weights pre title <<<"$info"
+            [ "$weights" = weights ] || continue
+            tag="$group-$(echo "$part" | tr 'A-Z' 'a-z')"
+            if gh release view "$tag" >/dev/null 2>&1; then
+              gh release edit "$tag" --title "$title" --notes-file "$dir/NOTES.md" $([ -z "$pre" ] && echo --prerelease=false || echo --prerelease)
+              gh release upload "$tag" "$dir"/* "$group/group.json" --clobber
+            else
+              gh release create "$tag" "$dir"/* "$group/group.json" --target "$GITHUB_SHA" --title "$title" --notes-file "$dir/NOTES.md" $pre
+            fi
           done
