@@ -1,6 +1,7 @@
 {
   "name": "petya",
   "version": "1.0",
+  "codename": "Andromeda",
   "release": "petya-v1.0",
   "status": "experimental: best evaluated adapter so far, not release-qualified",
   "base": {

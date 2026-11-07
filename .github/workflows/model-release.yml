@@ -19,7 +19,8 @@ jobs:
         run: |
           for dir in petya-v*/; do
             tag="${dir%/}"
-            if gh release view "$tag" >/dev/null 2>&1; then continue; fi
+            name=$(python3 -c "import json;m=json.load(open('$tag/model.json'));print('Petya model '+m['version']+(' «'+m['codename']+'»' if m.get('codename') else ''))")
+            if gh release view "$tag" >/dev/null 2>&1; then gh release edit "$tag" --title "$name" --notes-file "$tag/NOTES.md"; gh release upload "$tag" "$tag/model.json" "$tag/NOTES.md" --clobber; continue; fi
             python3 - "$tag" <<'PY'
           import hashlib,json,sys,pathlib
           d=pathlib.Path(sys.argv[1]);m=json.loads((d/'model.json').read_text())
@@ -28,5 +29,5 @@ jobs:
               assert hashlib.sha256((d/name).read_bytes()).hexdigest()==expected,name
           PY
             pre=$(python3 -c "import json;print('' if json.load(open('$tag/model.json'))['status'].startswith('stable') else '--prerelease')")
-            gh release create "$tag" "$tag"/* --target "$GITHUB_SHA" --title "Petya model ${tag#petya-v}" --notes-file "$tag/NOTES.md" $pre
+            gh release create "$tag" "$tag"/* --target "$GITHUB_SHA" --title "$name" --notes-file "$tag/NOTES.md" $pre
           done
