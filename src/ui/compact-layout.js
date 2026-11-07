@@ -10,7 +10,7 @@
   agents:['Claude и Codex','M7 17L17 7 M7 7h10v10'],
   history:['История','M3 10a9 9 0 1 1 1 7 M3 4v6h6 M12 7v5l3 2'],
   settings:['Настройки','M4 6h9 M17 6h3 M4 12h3 M11 12h9 M4 18h11 M19 18h1 M15 4v4 M9 10v4 M17 16v4'],
-  learning:['Словарь и команды','M4 20l1-5L16 4a2 2 0 0 1 4 4L9 19z M14 6l4 4 M4 20h16']
+  learning:['Навыки','M4 20l1-5L16 4a2 2 0 0 1 4 4L9 19z M14 6l4 4 M4 20h16']
  };
  for(const button of document.querySelectorAll('aside .nav')){
   const item=navigationIcons[button.dataset.view];if(!item)continue;
