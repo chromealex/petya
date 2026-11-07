@@ -21,6 +21,6 @@ const assert=require('node:assert/strict');const {Dialogue,freshChat}=require('.
  await d.turn('Расскажи про осень в Петербурге');assert.equal(routed,0);assert.equal(state.topics.length,1);
  assert.equal(d.prepareRoute('А зимой?'),null);
  const r=await d.turn('Какие баги открыты?');assert.equal(r.topicId,'c','bugs are answered in the open chat');assert.equal(state.topics.length,1);assert.equal(state.topics[0].kind,'bugs');
- const n=await d.turn('Новая тема: отпуск');assert.equal(state.topics.length,2,'«новая тема» still makes a chat');
+ const n=await d.turn('Новая тема: отпуск');assert.equal(state.topics.length,1,'«новая тема» switched chats by itself');assert.deepEqual(n.chatOffer,{newChat:true,command:'отпуск'},'«новая тема» offers a new chat');
  console.log('Chats: made only on request; tasks and bugs answered in the open chat passed');
 })().catch(e=>{console.error(e);process.exit(1);});

@@ -6,12 +6,19 @@ function updateChromeStatus(){
  const active=chromeProgress&&['working','waiting','error'].includes(chromeProgress.state);
  const message=active?chromeProgress.label:!$('notice').hidden?$('notice').textContent:$('status').textContent;
  const state=active?chromeProgress.state:!$('notice').hidden&&$('notice').classList.contains('error')?'error':'idle';
- $('chrome-status-text').textContent=message.replace(/\s+/g,' ').trim();
- button.dataset.state=state;button.title=message+' — открыть подробности в Ассистенте';
+ // A short label fits the top bar; the full text opens on click.
+ const full=message.replace(/\s+/g,' ').trim(),short=state==='error'?'Ошибка · подробнее':state==='waiting'?'Ждёт ответа':state==='working'?(full.length>34?full.slice(0,32)+'…':full||'Петя работает…'):(full.length>34?full.slice(0,32)+'…':full);
+ $('chrome-status-text').textContent=short;button.dataset.full=full;
+ button.dataset.state=state;button.title=full;
  button.setAttribute('aria-label',button.title);
 }
 document.body.dataset.view='home';
-$('chrome-status').onclick=()=>{view('home');document.querySelector('main').scrollIntoView({block:'start'});};
+$('chrome-status').onclick=()=>{const button=$('chrome-status');let pop=document.getElementById('chrome-status-details');if(pop){pop.remove();button.setAttribute('aria-expanded','false');return;}
+ pop=document.createElement('div');pop.id='chrome-status-details';pop.className='chrome-status-details';pop.setAttribute('role','dialog');pop.setAttribute('aria-label','Подробности статуса');
+ const text=document.createElement('p');text.textContent=button.dataset.full||'';const open=document.createElement('button');open.type='button';open.textContent='Открыть в Ассистенте';open.onclick=()=>{pop.remove();view('home');document.querySelector('main').scrollIntoView({block:'start'});};
+ pop.append(text,open);document.body.append(pop);const box=button.getBoundingClientRect();pop.style.top=(box.bottom+8)+'px';pop.style.right=Math.max(8,innerWidth-box.right)+'px';button.setAttribute('aria-expanded','true');open.focus();
+ const dismiss=event=>{if(event.type==='keydown'&&event.key!=='Escape')return;if(event.type==='pointerdown'&&(pop.contains(event.target)||button.contains(event.target)))return;pop.remove();button.setAttribute('aria-expanded','false');document.removeEventListener('pointerdown',dismiss);document.removeEventListener('keydown',dismiss);};
+ document.addEventListener('pointerdown',dismiss);document.addEventListener('keydown',dismiss);};
 
 // Messages pop up at the top of the window and go away by themselves; a pointer over one keeps it.
 // notice(text, error, {action:{label, run}}) adds a button, e.g. «Откатить».

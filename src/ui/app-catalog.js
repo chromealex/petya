@@ -9,6 +9,8 @@
  async function extensionRemoveButtons(){for(const card of document.querySelectorAll('[data-extension]')){const id=card.dataset.extension,heading=card.querySelector('h2');if(!heading||card.querySelector('.remove-added-app')||optionalModules.some(([key])=>key===id))continue;const button=document.createElement('button');button.type='button';button.className='remove-added-app icon-button';button.innerHTML=trash;button.title='Удалить';button.setAttribute('aria-label','Удалить '+heading.textContent);button.onclick=async event=>{event.preventDefault();event.stopPropagation();button.disabled=true;try{await window.removeAddedApp(id);}catch(error){notice(error.message,true);}finally{button.disabled=false;}};(card.querySelector('summary')||heading.parentNode).append(button);}}
  document.addEventListener('petya-extensions-changed',()=>extensionRemoveButtons().catch(()=>{}));
  Promise.all([connectionsReady,modulesReady]).then(removeButtons);document.addEventListener('petya-extensions-changed',removeButtons);
+ // Turn on a service module and open its settings card; shared by the catalog and the settings quick start.
+ window.enableAppModule=async id=>{if(!moduleEnabled(id)){const check=moduleChecks.get(id);if(!check)throw Error('Приложение не найдено.');check.checked=true;await check.onchange();if(!moduleEnabled(id))return false;}view('settings');const card=$('settings').querySelector('[data-service="'+id+'"]');if(card)window.revealSettings(card);return true;};
  window.openAppCatalog=async function(term=''){
  let extensions=await window.petya.feature('extensionUI','catalog');
   const previous=document.activeElement,d=document.createElement('dialog');d.className='app-catalog';

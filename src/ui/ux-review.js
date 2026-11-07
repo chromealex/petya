@@ -5,7 +5,7 @@
  const search=(placeholder)=>{const n=el('input');n.type='search';n.placeholder=placeholder;n.setAttribute('aria-label',placeholder);return n;};
  function disclosure(node,title){const d=el('details',null,'ux-editor'),s=el('summary',title);node.before(d);d.append(s,node);d.addEventListener('invalid',()=>d.open=true,true);return d;}
  function watchList(list,apply){new MutationObserver(apply).observe(list,{childList:true,subtree:true,characterData:true});apply();}
- function filters(list,placeholder,match){const bar=el('div',null,'ux-filters'),q=search(placeholder),count=el('span',null,'small');bar.append(q,count);bar.addEventListener('input',event=>event.stopPropagation());list.before(bar);const apply=()=>{let total=0,shown=0;for(const row of list.children){if(row.matches('[data-empty]'))continue;total++;const visible=match?match(row,q.value.toLocaleLowerCase()):row.textContent.toLocaleLowerCase().includes(q.value.toLocaleLowerCase());row.classList.toggle('ux-filtered',!visible);if(visible)shown++;}count.textContent=total?(shown?'Показано: '+shown+' из '+total:'Ничего не найдено'):'';};q.oninput=apply;list.addEventListener('invalid',event=>{for(let n=event.target;n&&n!==list;n=n.parentElement){n.classList.remove('ux-filtered');if(n.tagName==='DETAILS')n.open=true;}},true);watchList(list,apply);return {bar,q,apply};}
+ function filters(list,placeholder,match){const bar=el('div',null,'ux-filters'),q=search(placeholder),count=el('span',null,'small');bar.append(q,count);bar.addEventListener('input',event=>event.stopPropagation());list.before(bar);const apply=()=>{let total=0,shown=0;for(const row of list.children){if(row.matches('[data-empty]'))continue;total++;const visible=match?match(row,q.value.toLocaleLowerCase()):row.textContent.toLocaleLowerCase().includes(q.value.toLocaleLowerCase());row.classList.toggle('ux-filtered',!visible);if(visible)shown++;}count.textContent=total?(shown?'Показано: '+shown+' из '+total:'Ничего не найдено'):'';bar.classList.toggle('is-empty',!total&&!q.value);};q.oninput=apply;list.addEventListener('invalid',event=>{for(let n=event.target;n&&n!==list;n=n.parentElement){n.classList.remove('ux-filtered');if(n.tagName==='DETAILS')n.open=true;}},true);watchList(list,apply);return {bar,q,apply};}
  function segmented(host,items,onChange){const bar=el('div',null,'ux-tabs');bar.setAttribute('role','group');bar.setAttribute('aria-label','Разделы');const select=id=>{for(const b of bar.children)b.setAttribute('aria-pressed',String(b.dataset.tab===id));onChange(id);};for(const [id,title]of items){const b=button(title,()=>select(id));b.dataset.tab=id;bar.append(b);}host.append(bar);return {bar,select};}
  const day=at=>new Date(at).toLocaleDateString('ru-RU');
  // Every section keeps its own result message, including failures from asynchronous actions.
@@ -24,7 +24,7 @@
  $('context-source').setAttribute('title','Источник — подпись записи, а не автоматическая загрузка');$('source-help').hidden=true;
  materialForm.addEventListener('submit',()=>{materialEditor.open=true;});
  // Team: a searchable roster, optional service IDs, persistent save strip.
- const teamList=$('team-list');if(teamList){let project='';const teamFilters=filters(teamList,'Найти человека',(row,q)=>row.textContent.toLocaleLowerCase().includes(q)&&(!project||(row.querySelector('[data-field="projects"]')?.value||'').split(',').map(x=>x.trim()).includes(project)));const select=el('select');select.setAttribute('aria-label','Проект команды');teamFilters.bar.append(select);select.onchange=()=>{project=select.value;teamFilters.apply();};
+ const teamList=$('team-list');if(teamList){let project='';const teamFilters=filters(teamList,'Найти человека',(row,q)=>row.textContent.toLocaleLowerCase().includes(q)&&(!project||(row.querySelector('[data-field="projects"]')?.value||'').split(',').map(x=>x.trim()).includes(project)));const select=el('select');select.setAttribute('aria-label','Проект команды');teamFilters.bar.append(select);const addMember=$('team-add'),reloadTeam=addMember?.nextElementSibling;if(addMember){teamFilters.bar.append(addMember);if(reloadTeam?.tagName==='BUTTON')teamFilters.bar.append(reloadTeam);}select.onchange=()=>{project=select.value;teamFilters.apply();};
  const adapt=()=>{const projects=new Set();for(const row of teamList.children){for(const p of (row.querySelector('[data-field="projects"]')?.value||'').split(',').map(s=>s.trim()).filter(Boolean))projects.add(p);const fields=row.querySelector('.team-member-fields');if(fields&&!fields.querySelector('.ux-service-ids')){const d=el('details',null,'ux-service-ids team-member-wide');d.append(el('summary','Связи с сервисами'));for(const key of ['slackId']){const input=fields.querySelector('[data-field="'+key+'"]');if(input)d.append(input.closest('label'));}fields.append(d);}}
  const value=select.value;select.replaceChildren(new Option('Все проекты',''),...[...projects].sort().map(p=>new Option(p,p)));select.value=value;teamFilters.apply();};new MutationObserver(adapt).observe(teamList,{childList:true});adapt();
  const notes=$('team-notes')?.closest('article');if(notes)disclosure(notes,'Общие заметки о команде');const strip=el('div',null,'ux-save-strip');$('team-save').before(strip);strip.append($('team-save'),$('team-status'));}
@@ -41,19 +41,24 @@
    return 'app';
  };
  const settingsEmpty=el('p',null,'small');controls.after(settingsEmpty);
+ // First run: suggest the common work services right on the «Сервисы» tab instead of an almost empty page.
+ const settingsStart=el('article',null,'card settings-start');settingsStart.append(el('h2','С чего начать'),el('p','Подключите рабочие сервисы — Петя будет брать из них контекст и ставить задачи. Остальные приложения — в каталоге.'));
+ const startActions=el('div',null,'actions');for(const [id,name] of [['slack','Slack'],['jira','Jira'],['notion','Notion'],['gmail','Почта']])startActions.append(button(name,async()=>{try{await window.enableAppModule?.(id);}catch(e){notice(e.message,true);}}));startActions.append(button('Все приложения…',()=>window.openAppCatalog()));settingsStart.append(startActions);settingsEmpty.after(settingsStart);
+ const settingsIntro=[...settings.querySelectorAll(':scope>p.intro')],chatExtensions=$('chat-extension-details');
  const filterSettings=()=>{
    const services=group==='services',query=find.value.trim().toLocaleLowerCase();
-   let shown=false,added=false;
+   let shown=false,added=false,addedService=false;
    for(const card of cards()){
      const selected=!!card.dataset.extension||serviceIds.has(card.dataset.service)&&moduleSettings['module_'+card.dataset.service]==='true';
-     if(selected)added=true;
+     if(selected)added=true;if(serviceIds.has(card.dataset.service)&&moduleSettings['module_'+card.dataset.service]==='true')addedService=true;
      const connected=card.querySelector('.connection-status')?.classList.contains('connected');
      const matchesState=state==='all'||(state==='connected'?connected:!connected);
      const visible=category(card)===group&&card.textContent.toLocaleLowerCase().includes(query)&&(!services||(selected&&matchesState));
      card.classList.toggle('ux-filtered',!visible);
      if(visible&&!card.hidden)shown=true;
    }
-   statusFilter.hidden=!services;catalogButton.hidden=!services;settingsEmpty.hidden=shown;
+   statusFilter.hidden=!services;catalogButton.hidden=!services;settingsEmpty.hidden=shown||services&&!added;settingsStart.hidden=!(services&&!addedService&&!query);
+   for(const intro of settingsIntro)intro.hidden=!services||!settingsStart.hidden;if(chatExtensions)chatExtensions.hidden=group!=='app'||!chatExtensions.textContent.toLocaleLowerCase().includes(query);
    settingsEmpty.textContent=services&&!added?'Пока нет добавленных сервисов. Выберите приложение в каталоге.':'По этим фильтрам ничего не найдено.';
  };
  const catalogButton=button('Каталог приложений',()=>window.openAppCatalog());catalogButton.className='app-catalog-trigger';
@@ -72,16 +77,18 @@
  $('settings-form').addEventListener('invalid',event=>{const card=event.target.closest('article.settings-card');if(card)window.revealSettings(card);},true);
  settingsTabs.select('services');document.addEventListener('petya-modules-changed',filterSettings);document.addEventListener('petya-extensions-changed',filterSettings);
  // Settings save themselves (app.js): the manual save strip is not shown.
- const savePanel=settings.querySelector('.settings-save-panel');if(savePanel)savePanel.hidden=true;if(false){savePanel.classList.add('ux-save-strip');const note=el('span','Изменений нет','small');note.title='Ручные поля сохраняются этой кнопкой. Вход в сервис, переключатели модулей и проверка доступа выполняются сразу.';savePanel.append(note);const save=savePanel.querySelector('button');save.textContent='Сохранить настройки';$('settings-form').addEventListener('input',()=>{note.textContent='Есть несохранённые изменения';save.classList.add('primary');});document.addEventListener('petya-settings-displayed',()=>{note.textContent='Настройки сохранены';});}
+ const savePanel=settings.querySelector('.settings-save-panel');if(savePanel)savePanel.hidden=true;if(false){savePanel.classList.add('ux-save-strip');const note=el('span','Изменений нет','small');note.title='Ручные поля сохраняются этой кнопкой. Вход в сервис, переключатели модулей и проверка доступа выполняются сразу.';savePanel.append(note);const save=savePanel.querySelector('button');save.textContent='Сохранить настройки';// The save strip appears only with unsaved manual edits, and briefly confirms a save.
+ let idleTimer;const idle=value=>{clearTimeout(idleTimer);savePanel.classList.toggle('is-idle',value);};idle(true);
+ $('settings-form').addEventListener('input',()=>{note.textContent='Есть несохранённые изменения';save.classList.add('primary');idle(false);});document.addEventListener('petya-settings-displayed',()=>{if(savePanel.classList.contains('is-idle'))return;note.textContent='Настройки сохранены';save.classList.remove('primary');idleTimer=setTimeout(()=>idle(true),2500);});}
  // Permissions: keep long recovery advice available, without filling the whole page.
  const permissionList=$('permission-list');if(permissionList)new MutationObserver(()=>{for(const p of permissionList.querySelectorAll('p.small'))if(p.textContent.length>240&&!p.closest('details'))disclosure(p,'Как восстановить доступ');}).observe(permissionList,{childList:true});
  // Learning: separate corrections, phrase commands and reminders.
- const learning=$('learning');learning.querySelector('h1').textContent='Команды и исправления';learning.querySelector(':scope>p:not(.ux-page-status)').textContent='Исправляйте распознавание, добавляйте команды и управляйте напоминаниями.';
+ const learning=$('learning');learning.querySelector('h1').textContent='Навыки';learning.querySelector(':scope>p:not(.ux-page-status)').textContent='Исправляйте распознавание, добавляйте команды и управляйте напоминаниями.';
  const learningGroups=new Map();for(const card of learning.querySelectorAll(':scope>article')){const text=card.querySelector('h2')?.textContent||'';learningGroups.set(card,/Напоминания/.test(text)?'reminders':/словарь|исправления/i.test(text)?'dictionary':'commands');}
  const tabsHost=el('div');learning.querySelector(':scope>p:not(.ux-page-status)').after(tabsHost);const learnTabs=segmented(tabsHost,[['dictionary','Исправления фраз'],['commands','Команды'],['reminders','Напоминания']],id=>{for(const [card,tab]of learningGroups)card.classList.toggle('ux-filtered',tab!==id);});learnTabs.select('dictionary');
  const growth=$('growth-card');if(growth){growth.querySelector('h2').textContent='Уровень Пети';const update=()=>growth.hidden=!$('growth-content').textContent.trim();watchList($('growth-content'),update);}
  // Instruction scenarios: list first, editor only when requested.
- const skills=$('skills');if(skills){skills.querySelector('h1').textContent='Сценарии';skills.querySelector(':scope>p:not(.ux-page-status)').textContent='Сценарий задаёт порядок работы и формат ответа. Выберите готовый или создайте свой; команды и исправления фраз находятся в соседнем разделе.';
+ const skills=$('skills');if(skills){skills.querySelector('h1').textContent='Сценарии';skills.querySelector(':scope>p:not(.ux-page-status)').textContent='Сценарий задаёт порядок работы и формат ответа. Выберите готовый или создайте свой. Голосовые команды и исправления фраз — в разделе «Словарь и команды».';
  skills.querySelector('h2').textContent='Мои сценарии';$('instruction-new').textContent='Создать сценарий';
  const editor=$('instruction-form').closest('article');editor.classList.add('ux-scenario-editor');editor.hidden=true;$('instruction-form').querySelector('h2').textContent='Настройка сценария';
  document.addEventListener('petya-scenario-edit',()=>{editor.hidden=false;editor.scrollIntoView({block:'nearest'});});
@@ -91,6 +98,21 @@
  const explanation=label.nextElementSibling;if(explanation?.tagName==='P')disclosure(explanation,'Формат импорта и ограничения');
  filters($('instruction-list'),'Найти сценарий');
  const testRow=el('div',null,'ux-filters'),example=search('Пример запроса для проверки');example.type='text';const test=button('Проверить на примере',run(async()=>{if(!$('instruction-name').value||!example.value.trim())throw Error('Сохраните сценарий и введите пример запроса.');const rows=await window.petya.skillsList();const saved=rows.find(s=>s.name===$('instruction-name').value);if(!saved)throw Error('Сначала сохраните сценарий.');$('command').value='/'+saved.name+' '+example.value;view('home');await processCommand($('command').value);}));testRow.append(example,test);$('instruction-result').after(testRow);}
+ // One section for everything Petya is taught: scenarios, voice commands, phrase corrections and reminders.
+ if(skills){const scenarios=el('div',null,'learning-scenarios');scenarios.append(...[...skills.children].filter(n=>n.tagName!=='H1'&&!n.matches('p:not(.ux-page-status)')));
+  const intro=el('p',skills.querySelector(':scope>p:not(.ux-page-status)')?.textContent.replace(/\s*Голосовые команды[^.]*\./,'')||'','small learning-scenarios-intro');scenarios.prepend(intro);
+  tabsHost.after(scenarios);learningGroups.set(scenarios,'scenarios');skills.remove();
+  learning.querySelector('h1').textContent='Навыки';learning.querySelector(':scope>p:not(.ux-page-status)').textContent='Сценарии ответов, голосовые команды, исправления распознавания и напоминания.';
+  const skillsNav=document.querySelector('aside .nav[data-view="skills"]'),learningNav=document.querySelector('aside .nav[data-view="learning"]');
+  if(skillsNav)skillsNav.hidden=true;if(learningNav){learningNav.setAttribute('aria-label','Навыки');if(learningNav.title)learningNav.title='Навыки';const label=learningNav.querySelector('span');if(label)label.textContent='Навыки';}
+  const tab=learnTabs.bar.ownerDocument.createElement('button');tab.type='button';tab.dataset.tab='scenarios';tab.textContent='Сценарии';tab.onclick=()=>learnTabs.select('scenarios');learnTabs.bar.prepend(tab);
+  // Opening scenarios loads them through the original handler; «skills» links land on this tab.
+  const originalView=window.view;let opening=false;
+  window.view=name=>{if(name!=='skills')return originalView(name);originalView('learning');if(!opening){opening=true;try{learnTabs.select('scenarios');}finally{opening=false;}}};
+  const select=learnTabs.select;learnTabs.select=id=>{select(id);if(id==='scenarios'&&!opening&&skillsNav){opening=true;Promise.resolve(skillsNav.onclick?.()).finally(()=>{opening=false;});}};
+  for(const b of learnTabs.bar.children)b.onclick=()=>learnTabs.select(b.dataset.tab);
+  select('scenarios');
+  document.addEventListener('petya-view',event=>{if(event.detail==='learning'&&!opening&&learnTabs.bar.querySelector('[data-tab="scenarios"][aria-pressed="true"]'))learnTabs.select('scenarios');});}
  // Histories: common search plus state and date filters; keep operation previews intact.
  const history=$('batch-history');let period='all',result='all',projectHistory='';const hf=filters(history,'Найти задачу или проект',(row,q)=>row.textContent.toLocaleLowerCase().includes(q)&&(!projectHistory||row.dataset.project===projectHistory)&&(period==='all'||Number(row.dataset.at)>=Date.now()-Number(period)*86400000)&&(result==='all'||row.dataset.result===result));const dates=el('select'),states=el('select');dates.setAttribute('aria-label','Период истории');states.setAttribute('aria-label','Результат действия');for(const [v,t]of [['all','За всё время'],['1','Сегодня и последние сутки'],['7','За неделю'],['30','За месяц']])dates.add(new Option(t,v));for(const [v,t]of [['all','Все результаты'],['done','Выполнено'],['attention','Требует внимания']])states.add(new Option(t,v));const hp=el('select');hp.setAttribute('aria-label','Проект истории');hp.add(new Option('Все проекты',''));hf.bar.append(dates,states,hp);hp.onchange=()=>{projectHistory=hp.value;hf.apply();};new MutationObserver(()=>{const value=hp.value;hp.replaceChildren(new Option('Все проекты',''),...[...new Set([...history.children].map(r=>r.dataset.project).filter(Boolean))].map(p=>new Option(p,p)));hp.value=value;}).observe(history,{childList:true});dates.onchange=()=>{period=dates.value;hf.apply();};states.onchange=()=>{result=states.value;hf.apply();};
  $('agents').querySelector('h1').textContent='Claude и Codex';const handoff=button('Передать задачу',()=>{view('home');$('command').value='Передай задачу Codex: ';$('command').focus();},'primary');$('refresh-agents').before(handoff);filters($('agent-history'),'Найти передачу или проект');run(refreshAgents)();

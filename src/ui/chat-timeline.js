@@ -6,6 +6,8 @@
  preview.className='chat-timeline-preview';preview.id='chat-timeline-preview';preview.hidden=true;preview.setAttribute('role','tooltip');
  shell.append(rail);document.body.append(preview);
  let marks=[],frame=0,hovered=null,lastCurrent=null;
+ // Labels and previews show readable text, not raw Markdown.
+ const plain=text=>String(text||'').replace(/```[\s\S]*?(```|$)/g,' ').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/[*_`#>|]+/g,'').replace(/^\s*(?:[-+]|\d+\.)\s+/gm,'').replace(/\s+/g,' ').trim();
  const important=new Set();
  function highlights(){
   important.clear();const state=window.petyaHighlightState;
@@ -21,7 +23,7 @@
  function show(button,index){
   hide();hovered=button;const message=chatHistory[index];if(!message)return;
   const title=document.createElement('strong'),body=document.createElement('span');
-  title.textContent=(important.has(index)?'★ Важное · ':'')+(message.role==='user'?'Вы':'Петя');body.textContent=message.text||'Вложение';
+  title.textContent=(important.has(index)?'★ Важное · ':'')+(message.role==='user'?'Вы':'Петя');body.textContent=plain(message.text)||'Вложение';
   preview.replaceChildren(title,body);preview.hidden=false;button.setAttribute('aria-describedby',preview.id);
   const rect=button.getBoundingClientRect();preview.style.left=Math.min(rect.right+12,innerWidth-preview.offsetWidth-8)+'px';
   preview.style.top=Math.max(8,Math.min(rect.top-preview.offsetHeight/2,innerHeight-preview.offsetHeight-8))+'px';
@@ -38,12 +40,14 @@
  }
  function schedule(){if(!frame)frame=requestAnimationFrame(position);}
  function draw(){
-  hide();rail.replaceChildren();marks=[];rail.hidden=chatHistory.length<2;
+  hide();rail.replaceChildren();marks=[];
+  // The rail lives in the gutter left of the 800px message column; in a narrow chat, inset the feed so the rail never covers text.
+  rail.hidden=chatHistory.length<2;shell.classList.toggle('timeline-inset',!rail.hidden&&shell.clientWidth<900);
   // Keep one mark per message; the rail has its own scroll viewport.
   const stride=1;
   for(let index=0;index<chatHistory.length;index+=stride){
    const b=document.createElement('button');b.type='button';b.dataset.index=index;b.className=chatHistory[index].role==='user'?'user':'';
-   b.dataset.label='Сообщение '+(index+1)+': '+(chatHistory[index].text||'Вложение').slice(0,100);b.setAttribute('aria-label',b.dataset.label);
+   b.dataset.label='Сообщение '+(index+1)+': '+(plain(chatHistory[index].text)||'Вложение').slice(0,100);b.setAttribute('aria-label',b.dataset.label);
    b.onpointerenter=()=>show(b,index);b.onpointerleave=hide;b.onfocus=()=>show(b,index);b.onblur=hide;
    b.onclick=async()=>{hide();try{await window.jumpToChatMessage(index);schedule();}catch(e){notice(e.message,true);}};
    rail.append(b);marks.push(b);
