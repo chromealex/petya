@@ -4,6 +4,8 @@
 // one skill from that shortlist or none (src/features/skill-choice.cjs).
 const {validate}=require('../instruction-skills.cjs');
 const BUILTIN=[...require('./work.cjs'),...require('./team.cjs')].map(s=>({...validate(s),builtin:true,enabled:true}));
+// Skill packages from public repositories, with their files (src/skill-library/packages).
+BUILTIN.push(...require('./packages.cjs').packages());
 if(new Set(BUILTIN.map(s=>s.name)).size!==BUILTIN.length)throw Error('Built-in skill names must be unique');
 // Words that say nothing about which skill fits: requests and descriptions are full of them.
 const STOP=new Set(('и в во на с со к ко о об от до по за из у а но или ли не ни же бы то это этот эта эти этого этой этих тот так как что чтобы '+
@@ -30,7 +32,7 @@ function library(user=[]){
  return [...own.filter(s=>s.enabled),...BUILTIN.filter(s=>!names.has(s.name))];
 }
 // Best skills for a request by shared words, weighted by how rare each word is across the library.
-function shortlist(command,skills=BUILTIN,limit=6){
+function shortlist(command,skills=BUILTIN,limit=8){
  if(!cache||cache.skills!==skills)cache={skills,...index(skills)};
  const ask=stems(command);if(!ask.length)return [];
  return cache.rows.map(r=>{let score=0;const hits=[];

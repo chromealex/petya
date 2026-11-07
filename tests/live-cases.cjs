@@ -4,7 +4,7 @@ assert.equal(cases.reduce((n,s)=>n+s.turns.length,0),500);assert.equal(new Set(c
 for(const s of cases)for(const t of s.turns){const [q,c]=Array.isArray(t)?t:[t,{}];assert.ok(typeof q==='string'&&q.trim());for(const k of ['by','notBy','has','not'])if(c[k])new RegExp(c[k],'iu');}
 // Every built-in skill has a live case.
 const named=new Set(cases.flatMap(s=>s.turns).map(t=>Array.isArray(t)&&/^скилл (\S+)$/.exec(t[1].by||'')?.[1]).filter(Boolean));
-for(const s of require('../src/skill-library/index.cjs').BUILTIN)if(s.name!=='translate')assert.ok(named.has(s.name),s.name);
+for(const s of require('../src/skill-library/index.cjs').BUILTIN)if(s.name!=='translate'&&!s.package)assert.ok(named.has(s.name),s.name);
 assert.deepEqual(grade({text:'Привет! Чем помочь?',by:'шаблон: приветствие'},{has:'привет'}),[]);
 assert.ok(grade({text:''}).includes('пустой ответ'));
 assert.ok(grade({text:'Hello'}).includes('ответ не по-русски'));assert.deepEqual(grade({text:'Hello'},{en:true}),[]);
