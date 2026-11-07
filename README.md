@@ -30,3 +30,10 @@ project folder.
 | Group | Version | Status | Parts |
 |---|---|---|---|
 | Andromeda | R1-A1-D1 | experimental | R1, A1: Qwen3.5-9B-4bit @ 8b2b98c without adapter; D1: v21 fourth repair adapter e4750435…a12d0 (formerly petya-v1.0; v21 held-out 45/48, 9/16; v22 held-out 27/30, 6/12) |
+
+### Part history
+
+| Part | Status | Result |
+|---|---|---|
+| D1 | in the group | v21 fourth repair |
+| D2 | rejected | new dialogues 39/54 (D1 24), v22 34/42 (D1 33), familiar 782/801 (D1 787) |
