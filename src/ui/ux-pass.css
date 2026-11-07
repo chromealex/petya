@@ -1,13 +1,26 @@
 /* UX review pass: chat column, navigation rail, project list and section polish.
    Loaded last so these rules refine the layered layout in style.css. */
 
-/* --- Chat: «Важное» sits inside the message column and stays compact until opened. --- */
-#home .chat-sticky-header>.important-panel{max-width:800px;margin:0 auto 6px;padding:0;border:0;background:none;box-sizing:border-box}
-#home .chat-sticky-header>.important-panel>summary{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid #e8bc6540;border-radius:999px;list-style:none}
-#home .chat-sticky-header>.important-panel>summary::-webkit-details-marker{display:none}
+/* --- Chat header: one row — project, title, tools, «Контекст» and «Важное» chips, menu.
+   The heading's children join the header row (display:contents); chip contents open as popovers so the row height never changes. --- */
+#home .chat-feed>.chat-sticky-header{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-bottom:4px;padding-top:10px;padding-bottom:8px;padding-inline:max(32px,calc((100% - 736px) / 2))}
+#home .chat-sticky-header>.chat-heading{display:contents}
+#home .chat-sticky-header .chat-heading .chat-project-badge{order:1;flex:0 1 auto;min-width:60px}
+#home .chat-sticky-header .chat-heading .chat-title-label{order:2;flex:4 1 0;min-width:90px;max-width:max-content}
+#home .chat-sticky-header #project-git-open{order:4}
+#home .chat-sticky-header .chat-heading>button:not(.chat-project-badge):not(.chat-title-label):not(#project-git-open):not(.chat-heading-more){order:5}
+#home .chat-sticky-header>.chat-project-context{order:6;width:auto;max-width:none;margin:0!important}
+#home .chat-sticky-header>.important-panel{order:7}
+#home .chat-sticky-header .chat-heading .chat-heading-more{order:8;margin-left:0}
+#home .chat-sticky-header>:not(.chat-heading):not(.chat-project-context):not(.important-panel){order:20;flex-basis:100%}
+#home .chat-sticky-header>:is(.chat-project-context,.important-panel){position:relative;margin:0;padding:0;border:0;background:none;font-size:12px}
+#home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary{display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px;white-space:nowrap;list-style:none;cursor:pointer}
+#home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary::-webkit-details-marker{display:none}
+#home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary:hover,#home .chat-sticky-header>:is(.chat-project-context,.important-panel)[open]>summary{color:var(--ink);border-color:var(--muted)}
+#home .chat-sticky-header>.important-panel>summary{border-color:#e8bc6540;color:#e8bc65}
 #home .chat-sticky-header>.important-panel>summary::before{content:'★';font-size:11px}
-#home .chat-sticky-header>.important-panel[open]{padding:8px 10px;border:1px solid #e8bc6540;border-radius:10px;background:var(--panel)}
-#home .chat-sticky-header>.important-panel[open]>summary{border:0;padding:0 0 2px}
+#home .chat-sticky-header>:is(.chat-project-context,.important-panel)>:is(.chat-context-body,.important-list){position:absolute;top:calc(100% + 6px);right:0;z-index:20;width:min(460px,calc(100vw - 120px));max-height:50vh;overflow:auto;margin:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:0 12px 32px #0008;box-sizing:border-box}
+@media(max-width:700px){#home .chat-sticky-header>.chat-project-context{margin-left:0}}
 /* Scrolled text fades out under the sticky header instead of being cut sharply. */
 #home .chat-feed>.chat-sticky-header::after{content:'';position:absolute;left:0;right:0;top:100%;height:14px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
 
@@ -120,3 +133,12 @@ label.file-label:hover{background:#2e3533}
 /* --- Narrow chat: keep a gutter for the message rail so its marks never overlap text. --- */
 #home .chat-shell.timeline-inset .chat-feed{padding-left:44px}
 @media(max-width:700px){#home .chat-shell.timeline-inset .chat-feed{padding-left:36px}}
+/* Narrow chats: chips and the project badge shrink with ellipsis so the header stays on one row. */
+#home .chat-sticky-header>:is(.chat-project-context,.important-panel){flex:0 1 auto;min-width:0}
+#home .chat-sticky-header>.chat-project-context{min-width:84px}
+#home .chat-sticky-header>.important-panel{flex-shrink:0}
+#home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;box-sizing:border-box;line-height:20px}
+#home .chat-sticky-header>.important-panel>summary::before{margin-right:5px}
+/* Line breaking uses flex-basis, so shrinkable items start from 0 and grow back up to their natural width. */
+#home .chat-sticky-header .chat-heading .chat-project-badge{flex:1 1 0;max-width:max-content}
+#home .chat-sticky-header>.chat-project-context{flex:1 1 0;max-width:max-content}

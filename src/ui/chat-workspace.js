@@ -186,7 +186,7 @@
       label.append(check,el('span',row.name));box.append(label);
     }
   });
-  manage.classList.add('chat-materials-manage');(context?.querySelector('.chat-context-links')||context)?.append(manage);
+  manage.classList.add('chat-materials-manage');(context?.querySelector('.chat-context-links')||context?.querySelector('.chat-context-body')||context)?.append(manage);
   // Capture the selection before clicking the action collapses the browser selection.
   let selected='', selectedIndex=-1;
   const task=el('div');

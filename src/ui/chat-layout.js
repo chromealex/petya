@@ -63,6 +63,10 @@
  new MutationObserver(micState).observe($('mic-action'),{childList:true});micState();
  $('command-help').hidden=true;$('command').setAttribute('aria-label','Сообщение Пете');
  document.addEventListener('click',event=>{if(!menu.contains(event.target))menu.open=false;});
+ // Header chips («Контекст», «Важное») open as popovers: close them on an outside click or Esc.
+ const closeChips=except=>{for(const d of header.querySelectorAll(':scope>details[open]'))if(d!==except)d.open=false;};
+ document.addEventListener('pointerdown',event=>closeChips(event.target.closest?.('.chat-sticky-header>details')));
+ header.addEventListener('keydown',event=>{if(event.key==='Escape'&&header.querySelector(':scope>details[open]')){event.preventDefault();event.stopPropagation();const open=header.querySelector(':scope>details[open]');open.open=false;open.querySelector('summary')?.focus();}});
  menu.addEventListener('keydown',event=>{if(event.key==='Escape'){menu.open=false;toggle.focus();}});
  // Remove only the old empty containers after moving their live children.
  dialogueCard.remove();hero.remove();grid.remove();
