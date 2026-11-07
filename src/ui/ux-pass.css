@@ -142,3 +142,15 @@ label.file-label:hover{background:#2e3533}
 /* Line breaking uses flex-basis, so shrinkable items start from 0 and grow back up to their natural width. */
 #home .chat-sticky-header .chat-heading .chat-project-badge{flex:1 1 0;max-width:max-content}
 #home .chat-sticky-header>.chat-project-context{flex:1 1 0;max-width:max-content}
+
+/* --- Subprojects: nested groups under their parent, with a guide line. --- */
+.project-subfolders:empty{display:none}
+.project-subfolders{margin:2px 0 4px 12px;padding-left:4px;border-left:1px solid var(--line)}
+.project-sidebar-subgroup>.project-sidebar-project .project-chat-title{font-weight:500}
+.project-sidebar-subgroup .project-folder-icon{opacity:.85}
+/* Project settings: what a subproject inherits. */
+.project-edit-dialog .project-inherited{margin:4px 0 10px;padding:10px 12px;border:1px dashed var(--line);border-radius:10px;font-size:13px;color:var(--muted)}
+.project-edit-dialog .project-inherited strong{display:block;color:var(--ink);font-size:13px;margin-bottom:4px}
+.project-edit-dialog .project-inherited p{margin:0 0 4px;white-space:pre-wrap}
+.project-edit-dialog .project-folder-inherited{display:flex;align-items:center;gap:8px;opacity:.7}
+.project-edit-dialog .project-folder-inherited small{color:var(--muted);white-space:nowrap}

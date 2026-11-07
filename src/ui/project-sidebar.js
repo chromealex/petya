@@ -42,8 +42,8 @@
  const expanded=new Set();let archiveMode=false,dragging='';
  const archiveButton=button('Архив',()=>{archiveMode=!archiveMode;archiveButton.textContent=archiveMode?'← Все проекты':'Архив';refresh();});archiveButton.className='project-archive-toggle';panel.append(archiveButton);
  const menu=node('div',null,'project-context-menu');menu.hidden=true;menu.setAttribute('role','menu');document.body.append(menu);
- const menuPaths={pin:'M8 3h8l-1 6 3 4v2H6v-2l3-4-1-6M12 15v6',unpin:'M3 3l18 18M9 3h7l-1 6 3 4v2h-3M6 15v-2l2-3M12 15v6',rename:'M4 20l4-1L20 7l-3-3L5 16l-1 4M14 7l3 3',move:'M3 7V4h6l3 3h9v13H3V7M8 13h8m-3-3 3 3-3 3',settings:'M4 6h16M4 12h16M4 18h16M8 3v6M16 9v6M10 15v6',archive:'M4 8v12h16V8M3 4h18v4H3V4M9 12h6',restore:'M4 8v12h16V8M3 4h18v4H3V4M12 17v-6m-3 3 3-3 3 3',add:'M12 5v14M5 12h14',folder:'M3 7V4h6l3 3h9v13H3V7'};
- function menuIcon(label){const key=label==='Закрепить'?'pin':label==='Открепить'?'unpin':label==='Переименовать'?'rename':label.startsWith('Перенести')?'move':label.startsWith('Настройки')?'settings':label==='В архив'?'archive':label==='Восстановить'?'restore':label==='Новый чат'?'add':'folder';const icon=node('span',null,'project-menu-icon');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+menuPaths[key]+'"/></svg>';return icon;}
+ const menuPaths={pin:'M8 3h8l-1 6 3 4v2H6v-2l3-4-1-6M12 15v6',unpin:'M3 3l18 18M9 3h7l-1 6 3 4v2h-3M6 15v-2l2-3M12 15v6',rename:'M4 20l4-1L20 7l-3-3L5 16l-1 4M14 7l3 3',move:'M3 7V4h6l3 3h9v13H3V7M8 13h8m-3-3 3 3-3 3',settings:'M4 6h16M4 12h16M4 18h16M8 3v6M16 9v6M10 15v6',archive:'M4 8v12h16V8M3 4h18v4H3V4M9 12h6',restore:'M4 8v12h16V8M3 4h18v4H3V4M12 17v-6m-3 3 3-3 3 3',add:'M12 5v14M5 12h14',subfolder:'M3 7V5a1 1 0 0 1 1-1h6l2 3h8a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7zM12 11v6M9 14h6',folder:'M3 7V4h6l3 3h9v13H3V7'};
+ function menuIcon(label){const key=label==='Закрепить'?'pin':label==='Открепить'?'unpin':label==='Переименовать'?'rename':label.startsWith('Перенести')?'move':label.startsWith('Настройки')?'settings':label==='В архив'?'archive':label==='Восстановить'?'restore':label==='Новый чат'?'add':label==='Новая подпапка'?'subfolder':'folder';const icon=node('span',null,'project-menu-icon');icon.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+menuPaths[key]+'"/></svg>';return icon;}
  function closeMenu(){menu.hidden=true;}
  function openMenu(anchor,items){menu.replaceChildren();for(const [label,fn]of items){const item=button(label,()=>{closeMenu();fn();});item.prepend(menuIcon(label));item.setAttribute('role','menuitem');menu.append(item);}menu.hidden=false;const box=anchor.getBoundingClientRect();menu.style.left=Math.max(8,Math.min(innerWidth-menu.offsetWidth-8,box.right-menu.offsetWidth))+'px';menu.style.top=Math.max(8,Math.min(innerHeight-menu.offsetHeight-8,box.bottom+4))+'px';menu.querySelector('button')?.focus();}
  document.addEventListener('pointerdown',e=>{if(!menu.contains(e.target)&&!e.target.closest('.project-more'))closeMenu();});
@@ -87,8 +87,12 @@
  }
  const titleSizes=new ResizeObserver(entries=>{for(const {target}of entries)target.classList.toggle('is-truncated',target.scrollWidth>target.clientWidth+1);});
  const agentView=new Map();
- function draw(state){titleSizes.disconnect();list.replaceChildren();for(const p of [...state.projects].sort((a,b)=>Number(b.id==='general')-Number(a.id==='general')||Number(!!b.pinned)-Number(!!a.pinned))){const allRows=state.topics.filter(t=>t.projectId===p.id),rows=allRows.filter(t=>archiveMode?p.archived||t.archived:!t.archived).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||(a.order??-a.at)-(b.order??-b.at));if(!archiveMode&&p.archived)continue;if(archiveMode&&!p.archived&&!rows.length&&p.id!=='general')continue;if(search.value&&!rows.length&&p.id!=='general')continue;
-  const group=node('div',null,'project-sidebar-group'),bar=node('div',null,'project-sidebar-project');group.dataset.projectId=p.id;
+ function draw(state){titleSizes.disconnect();list.replaceChildren();
+  // Subprojects render inside their parent's group, so parents are drawn first.
+  const depthOf=p=>{let d=0;for(let n=p,seen=new Set();n?.parentId&&!seen.has(n.id);n=state.projects.find(x=>x.id===n.parentId)){seen.add(n.id);d++;}return d;};
+  const groups=new Map();
+  for(const p of [...state.projects].sort((a,b)=>depthOf(a)-depthOf(b)||Number(b.id==='general')-Number(a.id==='general')||Number(!!b.pinned)-Number(!!a.pinned))){const allRows=state.topics.filter(t=>t.projectId===p.id),rows=allRows.filter(t=>archiveMode?p.archived||t.archived:!t.archived).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||(a.order??-a.at)-(b.order??-b.at));if(!archiveMode&&p.archived)continue;if(archiveMode&&!p.archived&&!rows.length&&p.id!=='general')continue;if(search.value&&!rows.length&&p.id!=='general')continue;
+  const group=node('div',null,'project-sidebar-group'),bar=node('div',null,'project-sidebar-project');group.dataset.projectId=p.id;const subfolders=node('div',null,'project-subfolders');groups.set(p.id,subfolders);if(p.parentId)group.classList.add('project-sidebar-subgroup');
   const select=button('',action(async()=>{if(p.archived)throw Error('Восстановите проект через меню «…».');if(p.id!==state.activeProjectId){await window.petya.chatProjectSelect(p.id);await selectDialogueTopic('');}await refresh();}));
   const projectTitle=node('span',p.name,'project-chat-title');
   select.append(projectTitle);
@@ -98,7 +102,7 @@
   const add=button('+',newChat);add.title='Новый чат в «'+p.name+'»';add.setAttribute('aria-label',add.title);add.className='project-new-chat';add.hidden=!!p.archived;
   const options=more('Действия с проектом «'+p.name+'»',()=>p.archived?[
    ['Восстановить',action(()=>archive('project',p.id,false))],['Настройки проекта',()=>window.openProjectSettings(p.id)]
-  ]:[['Новый чат',newChat],['Настройки проекта',()=>window.openProjectSettings(p.id)],...(p.id==='general'?[]:[[p.pinned?'Открепить':'Закрепить',action(async()=>{await window.petya.chatProjectPin(p.id,!p.pinned);await refresh();})],['В архив',action(()=>archive('project',p.id,true))]])]);bar.append(select,add,options);group.append(bar);if(!archiveMode)bindDrop(bar,p.id);
+  ]:[['Новый чат',newChat],...(p.id==='general'||depthOf(p)>=2?[]:[['Новая подпапка',()=>window.openProjectSettings('',{parentId:p.id})]]),['Настройки проекта',()=>window.openProjectSettings(p.id)],...(p.id==='general'?[]:[[p.pinned?'Открепить':'Закрепить',action(async()=>{await window.petya.chatProjectPin(p.id,!p.pinned);await refresh();})],['В архив',action(()=>archive('project',p.id,true))]])]);bar.append(select,add,options);group.append(bar,subfolders);if(!archiveMode)bindDrop(bar,p.id);
   if(!archiveMode){
     const unsent=state.drafts?.['draft:'+p.id];
     if(unsent){const row=node('div',null,'project-chat-row'),b=button('Новый чат',newChat);b.className='project-sidebar-chat';row.append(b);showDraft(row,b,unsent);group.append(row);}
@@ -116,7 +120,7 @@
    const toggle=button((open?'▾ ':'▸ ')+'Агенты · '+children.length,()=>{agentView.set(t.id,!open);draw(state);});toggle.className='agent-chat-toggle';toggle.setAttribute('aria-expanded',String(open));
    const running=children.filter(c=>['running','queued'].includes(c.job?.state)).length;if(running)toggle.append(node('span',' · в работе '+running,'agent-chat-running'));group.append(toggle,box);}
   if(!search.value&&ordinary.length>5){const all=button(expanded.has(p.id)?'Свернуть':'View all ('+ordinary.length+')',()=>{expanded.has(p.id)?expanded.delete(p.id):expanded.add(p.id);draw(state);});all.className='project-view-all';group.append(all);}
-  if(!rows.length&&p.id===state.activeProjectId)group.append(node('small','Пока нет чатов'));list.append(group);
+  if(!rows.length&&p.id===state.activeProjectId&&!state.projects.some(c=>c.parentId===p.id&&!c.archived))group.append(node('small','Пока нет чатов'));(p.parentId&&groups.get(p.parentId)||list).append(group);
  }if(!list.children.length)list.append(node('p','Ничего не найдено'));}
  let draftTimer;
  const redrawDrafts=()=>{clearTimeout(draftTimer);draftTimer=setTimeout(refresh,200);};
@@ -130,7 +134,7 @@
  async function refreshContext(){const current=++contextRevision;const value=await window.petya.chatProjectContext();if(current!==contextRevision)return;
   summary.textContent='Контекст'+(value.jira?' · '+value.jira:'')+(value.channels.length?' · Slack: '+value.channels.length:'')+(value.files.length?' · Файлы: '+value.files.length:'');
   const manage=context.querySelector('.chat-materials-manage');
-  body.replaceChildren();body.append(node('p','Проект: '+value.projectName));
+  body.replaceChildren();body.append(node('p','Проект: '+(value.projectPath||value.projectName)));
   const sources=node('div',null,'chat-context-sources');sources.append(node('span','Jira: '+(value.jira||'не выбран')),node('span','Slack: '+(value.channels.map(c=>'#'+c.name).join(', ')||'каналы не выбраны')));body.append(sources);
   if(value.effectiveName)body.append(node('p','Связи рабочего проекта: '+value.effectiveName));
   if(value.files.length){const files=node('ul');for(const file of value.files)files.append(node('li',file.name+(file.scope==='draft'?' · прикреплён к следующему запросу':'')));body.append(files);}else body.append(node('p','В этом чате нет прикреплённых файлов.'));
