@@ -5,8 +5,12 @@
  const panel=node('section',null,'project-sidebar');panel.setAttribute('aria-label','Проекты и чаты');panel.id='project-sidebar';
  const head=node('div',null,'project-sidebar-head'),title=node('strong','Проекты'),status=node('p',null,'project-sidebar-status');status.hidden=true;status.setAttribute('role','status');
  const toggle=button('›',()=>setCollapsed(!home.classList.contains('projects-collapsed')));toggle.className='project-sidebar-toggle';toggle.setAttribute('aria-controls',panel.id);
- const close=button('‹',()=>setCollapsed(true));close.title='Свернуть проекты';close.setAttribute('aria-label',close.title);head.append(title,close);
- const manage=button('+ Проект',()=>window.openProjectSettings());manage.title='Добавить проект';
+ const close=button('‹',()=>setCollapsed(true));close.title='Свернуть проекты';close.setAttribute('aria-label',close.title);
+ // A new chat is the common action; adding a project is a secondary icon in the header.
+ const addProject=button('',()=>window.openProjectSettings());addProject.className='project-add';addProject.title='Добавить проект';addProject.setAttribute('aria-label',addProject.title);addProject.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a1 1 0 0 1 1-1h6l2 3h8a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7zM12 11v6M9 14h6"/></svg>';
+ const headActions=node('div',null,'project-sidebar-head-actions');headActions.append(addProject,close);head.append(title,headActions);
+ const manage=button('',()=>startChat());manage.className='project-new-chat-main';manage.title='Новый чат в текущем проекте ('+(navigator.platform?.startsWith('Mac')?'⌘N':'Ctrl+N')+')';
+ manage.innerHTML='<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg><span>Новый чат</span><kbd>'+(navigator.platform?.startsWith('Mac')?'⌘N':'Ctrl+N')+'</kbd>';
  const search=node('input');search.type='search';search.placeholder='Поиск по всем чатам';search.setAttribute('aria-label',search.placeholder);search.maxLength=200;
  const list=node('nav',null,'project-sidebar-tree');list.setAttribute('aria-label','Чаты по проектам');
  const attention=node('details',null,'project-attention'),attentionLabel=node('summary'),attentionRows=node('div');
@@ -19,13 +23,21 @@
      b.append(node('small',t.attention));attentionRows.append(b);
    }
  }
- panel.append(head,manage,search,status,attention,list);home.prepend(panel);home.append(toggle);home.classList.add('with-project-sidebar');const chatTitle=node('span',null,'chat-title-label');shell.querySelector('.chat-heading').append(chatTitle);topicControls.hidden=true;dialogueTitle.hidden=true;const syncTitle=()=>{chatTitle.textContent=topicSelect.value?(topicSelect.selectedOptions[0]?.textContent||'Чат'):'Новый чат';};new MutationObserver(syncTitle).observe(topicSelect,{childList:true});syncTitle();
+ panel.append(head,manage,search,status,attention,list);home.prepend(panel);home.append(toggle);home.classList.add('with-project-sidebar');// Chat header: project badge, a title that renames on click and the chat's action menu.
+ const chatHeading=shell.querySelector('.chat-heading'),activeTopic=()=>latestState?.topics.find(t=>t.id===topicSelect.value);
+ const projectBadge=button('',()=>window.openProjectSettings(topicSelect.dataset.projectId));projectBadge.className='chat-project-badge';
+ const chatTitle=button('',()=>{const t=activeTopic();if(t)renameChat(t);});chatTitle.className='chat-title-label';
+ const headerMore=more('Действия с чатом',()=>{const t=activeTopic();return t?chatMenuItems(t,headerMore):[];});headerMore.classList.add('chat-heading-more');
+ chatHeading.append(projectBadge,chatTitle,headerMore);topicControls.hidden=true;dialogueTitle.hidden=true;
+ const syncTitle=()=>{const has=!!topicSelect.value,name=topicSelect.dataset.projectName||'Общее';chatTitle.textContent=has?(topicSelect.selectedOptions[0]?.textContent||'Чат'):'Новый чат';chatTitle.disabled=!has;chatTitle.title=has?'Переименовать чат':'';projectBadge.textContent=name;projectBadge.title='Настройки проекта «'+name+'»';headerMore.hidden=!has;};
+ new MutationObserver(syncTitle).observe(topicSelect,{childList:true});document.addEventListener('petya-dialogue-state',syncTitle);syncTitle();
  function setCollapsed(value){home.classList.toggle('projects-collapsed',value);toggle.setAttribute('aria-expanded',String(!value));toggle.title=value?'Показать проекты':'Свернуть проекты';toggle.setAttribute('aria-label',toggle.title);try{localStorage.setItem('petya-projects-collapsed',String(value));}catch{}}
  let collapsed=false;try{collapsed=localStorage.getItem('petya-projects-collapsed')==='true';}catch{}setCollapsed(collapsed||matchMedia('(max-width:800px)').matches);
  const guard=()=>{if(window.chatStartPending||commandProgress.busy||chatQueue?.active||(voiceReply&&!window.backgroundClarification)||currentDraft||workspaceBusy)throw Error('Завершите текущий запрос, уточнение или очередь перед переключением.');};
  window.guardChatNavigation=guard;
  const action=fn=>async()=>{status.hidden=true;try{guard();window.chatNavigationPending=true;await fn();}catch(e){status.textContent=e.message;status.hidden=false;}finally{window.chatNavigationPending=false;}};
  let revision=0,timer,latestState;
+ function startChat(){return action(async()=>{view('home');await selectDialogueTopic('');await refresh();$('command').focus();})();}
  async function refresh(){const revisionAtStart=++revision;try{const state=await window.petya.chatNavigation(search.value);if(revisionAtStart!==revision)return;const attentionState=search.value?await window.petya.chatNavigation(''):state;if(revisionAtStart!==revision)return;latestState=state;refreshAttention(attentionState);draw(state);await refreshContext();}catch(e){if(revisionAtStart===revision){status.textContent=e.message;status.hidden=false;}}}
  const expanded=new Set();let archiveMode=false,dragging='';
  const archiveButton=button('Архив',()=>{archiveMode=!archiveMode;archiveButton.textContent=archiveMode?'← Все проекты':'Архив';refresh();});archiveButton.className='project-archive-toggle';panel.append(archiveButton);
@@ -54,16 +66,23 @@
      pencil.setAttribute('aria-label',hint);row.append(pencil);
    }
  }
- function chatRow(t){const row=node('div',null,'project-chat-row'),b=button('',action(async()=>{if(t.archived||latestState.projects.find(p=>p.id===t.projectId)?.archived)throw Error('Сначала восстановите чат или проект из архива через меню «…».');await selectDialogueTopic(t.id);if(t.job)await window.petya.chatJobAcknowledge(t.id,t.job.at);await refresh();if(t.index>=0)await window.jumpToChatMessage(t.index);if(matchMedia('(max-width:800px)').matches)setCollapsed(true);}));b.className='project-sidebar-chat';b.title=t.title;b.setAttribute('aria-current',String(t.id===latestState.activeId));if(t.pinned)b.prepend(node('span','⌁ ','chat-pin-mark'));
-  const label=node('span',t.title,'project-chat-title');b.append(label);titleSizes.observe(label);
-  if(t.job){const running=['running','queued'].includes(t.job.state),unread=!t.job.acknowledged&&['done','attention'].includes(t.job.state);if(running||unread){b.dataset.jobState=t.job.state;const description=t.job.state==='running'?'В процессе':t.job.state==='queued'?'В очереди':t.job.state==='attention'?'Нужно внимание':'Работа завершена';b.setAttribute('aria-label',t.title+' — '+description);if(unread){const dot=node('span',null,'chat-job-dot');dot.dataset.state=t.job.state;dot.title=description;dot.setAttribute('aria-hidden','true');row.append(dot);}}}if(t.snippet)b.append(node('small',t.snippet));
-  let options;options=more('Действия с чатом «'+t.title+'»',()=>t.archived?[
+ // Compact last-activity label: «5 мин», «14:20», «вчера», «3 дн», «12.10».
+ function activity(at){const date=new Date(Number(at));if(!at||Number.isNaN(date.getTime()))return null;const now=new Date(),ms=now-date,minute=60000,day=86400000;let text;
+  if(ms<minute)text='сейчас';else if(ms<60*minute)text=Math.floor(ms/minute)+' мин';else if(date.toDateString()===now.toDateString())text=date.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
+  else{const midnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),days=Math.ceil((midnight-date.getTime())/day);text=days<=1?'вчера':days<7?days+' дн':date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});}
+  return {text,iso:date.toISOString(),full:'Последняя активность: '+date.toLocaleString('ru-RU')};}
+ function chatMenuItems(t,anchor){return t.archived?[
    ['Восстановить',action(()=>archive('chat',t.id,false))],['Переименовать',()=>renameChat(t)]
   ]:[
    [t.pinned?'Открепить':'Закрепить',action(async()=>{await window.petya.chatPin(t.id,!t.pinned);await refresh();})],
-   ['Переименовать',()=>renameChat(t)],['Перенести в проект…',()=>chooseDestination(t,options)],
+   ['Переименовать',()=>renameChat(t)],['Перенести в проект…',()=>chooseDestination(t,anchor)],
    ['Настройки проекта',()=>window.openProjectSettings(t.projectId)],['В архив',action(()=>archive('chat',t.id,true))]
-  ]);row.append(b,options);row.dataset.chatId=t.id;showDraft(row,b,latestState.drafts?.[t.id]);
+  ];}
+ function chatRow(t){const row=node('div',null,'project-chat-row'),b=button('',action(async()=>{if(t.archived||latestState.projects.find(p=>p.id===t.projectId)?.archived)throw Error('Сначала восстановите чат или проект из архива через меню «…».');await selectDialogueTopic(t.id);if(t.job)await window.petya.chatJobAcknowledge(t.id,t.job.at);await refresh();if(t.index>=0)await window.jumpToChatMessage(t.index);if(matchMedia('(max-width:800px)').matches)setCollapsed(true);}));b.className='project-sidebar-chat';b.title=t.title;b.setAttribute('aria-current',String(t.id===latestState.activeId));if(t.pinned)b.prepend(node('span','⌁ ','chat-pin-mark'));
+  const label=node('span',t.title,'project-chat-title');b.append(label);titleSizes.observe(label);
+  const when=activity(t.at);if(when){const time=node('time',when.text,'project-chat-time');time.dateTime=when.iso;time.title=when.full;b.append(time);}
+  if(t.job){const running=['running','queued'].includes(t.job.state),unread=!t.job.acknowledged&&['done','attention'].includes(t.job.state);if(running||unread){b.dataset.jobState=t.job.state;const description=t.job.state==='running'?'В процессе':t.job.state==='queued'?'В очереди':t.job.state==='attention'?'Нужно внимание':'Работа завершена';b.setAttribute('aria-label',t.title+' — '+description);if(unread){const dot=node('span',null,'chat-job-dot');dot.dataset.state=t.job.state;dot.title=description;dot.setAttribute('aria-hidden','true');row.append(dot);}}}if(t.snippet)b.append(node('small',t.snippet));
+  let options;options=more('Действия с чатом «'+t.title+'»',()=>chatMenuItems(t,options));row.append(b,options);row.dataset.chatId=t.id;showDraft(row,b,latestState.drafts?.[t.id]);
   row.draggable=!t.archived&&!['running','queued'].includes(t.job?.state);row.ondragstart=e=>{dragging=t.id;e.dataTransfer.setData('application/x-petya-chat',t.id);e.dataTransfer.effectAllowed='move';};row.ondragend=()=>{dragging='';document.querySelectorAll('.chat-drop-target').forEach(n=>n.classList.remove('chat-drop-target'));};if(!archiveMode)bindDrop(row,t.projectId,t.id);return row;
  }
  const titleSizes=new ResizeObserver(entries=>{for(const {target}of entries)target.classList.toggle('is-truncated',target.scrollWidth>target.clientWidth+1);});
@@ -120,6 +139,9 @@
   const materials=button('Открыть материалы',()=>view('sources')),connections=button('Настроить подключения',()=>view('settings'));const links=node('div',null,'chat-context-links');links.append(button('Настройки проекта',()=>window.openProjectSettings(value.projectId)),materials,connections);if(manage)links.append(manage);body.append(links);
 
  }
+ // ⌘N / Ctrl+N starts a new chat in the current project.
+
+ document.addEventListener('keydown',event=>{if(!(event.metaKey||event.ctrlKey)||event.shiftKey||event.altKey||event.key.toLowerCase()!=='n'&&event.code!=='KeyN')return;if(document.querySelector('dialog[open]'))return;event.preventDefault();startChat();});
  document.addEventListener('petya-dialogue-state',refresh);document.addEventListener('petya-chat-job',()=>{clearTimeout(timer);timer=setTimeout(refresh,80);});
  document.addEventListener('petya-project-settings',refresh);
  document.addEventListener('petya-view',()=>{if(!home.hidden)refresh();});

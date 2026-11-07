@@ -1,0 +1,122 @@
+/* UX review pass: chat column, navigation rail, project list and section polish.
+   Loaded last so these rules refine the layered layout in style.css. */
+
+/* --- Chat: «Важное» sits inside the message column and stays compact until opened. --- */
+#home .chat-sticky-header>.important-panel{max-width:800px;margin:0 auto 6px;padding:0;border:0;background:none;box-sizing:border-box}
+#home .chat-sticky-header>.important-panel>summary{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border:1px solid #e8bc6540;border-radius:999px;list-style:none}
+#home .chat-sticky-header>.important-panel>summary::-webkit-details-marker{display:none}
+#home .chat-sticky-header>.important-panel>summary::before{content:'★';font-size:11px}
+#home .chat-sticky-header>.important-panel[open]{padding:8px 10px;border:1px solid #e8bc6540;border-radius:10px;background:var(--panel)}
+#home .chat-sticky-header>.important-panel[open]>summary{border:0;padding:0 0 2px}
+/* Scrolled text fades out under the sticky header instead of being cut sharply. */
+#home .chat-feed>.chat-sticky-header::after{content:'';position:absolute;left:0;right:0;top:100%;height:14px;background:linear-gradient(var(--bg),transparent);pointer-events:none}
+
+/* --- Chat: tighter rhythm between turns. --- */
+#home .chat-feed .dialogue-messages{gap:14px}
+#home .chat-feed .message-meta{min-height:20px;margin-top:2px}
+#home .chat-feed .message-steps{margin-bottom:6px}
+
+/* --- Chat: time is always visible; actions appear on hover or focus. --- */
+#home .chat-feed .message-meta{opacity:1}
+#home .chat-feed .message-meta>time,#home .chat-feed .message-meta>.message-source{opacity:.7}
+#home .chat-feed .message-meta>:not(time):not(.message-source){opacity:0;transition:opacity .12s}
+#home .chat-feed article:is(:hover,:focus-within)>.message-meta>*{opacity:1}
+@media(hover:none){#home .chat-feed .message-meta>*{opacity:1}}
+@media(prefers-reduced-motion:reduce){#home .chat-feed .message-meta>*{transition:none}}
+
+/* --- Chat header: project badge, renamable title, actions. --- */
+#home .chat-heading .chat-project-badge{flex:0 1 auto;max-width:220px;min-height:24px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#home .chat-heading .chat-project-badge:hover{color:var(--ink);border-color:var(--muted)}
+#home .chat-heading .chat-title-label{display:block;flex:0 1 auto;min-width:0;min-height:28px;padding:2px 6px;border:0;border-radius:6px;background:transparent;color:var(--ink);font-size:15px;font-weight:600;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}
+#home .chat-heading .chat-title-label:hover:not(:disabled){background:#ffffff0d}
+#home .chat-heading .chat-title-label:disabled{cursor:default;opacity:1;color:var(--muted)}
+#home .chat-heading .chat-heading-more{order:10;margin-left:auto;opacity:1;pointer-events:auto;display:grid;place-items:center;width:30px;height:28px;min-height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--muted)}
+#home .chat-heading .chat-heading-more:hover{color:var(--ink);background:#ffffff0d}
+#home .chat-heading .chat-heading-more[hidden]{display:none}
+#home .chat-heading #project-git-open{display:inline-flex;align-items:center;gap:5px}
+
+/* --- Composer: microphone is an icon with a state dot; the label stays for screen readers. --- */
+#home .mic-control #mic{position:relative;gap:0}
+#home .chat-composer #mic-action{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+#home .chat-composer #mic.is-listening #mic-action{position:static;width:auto;height:auto;clip:auto;margin-left:6px}
+#home .chat-composer #mic::after{content:'';position:absolute;right:3px;top:4px;width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.5}
+#home .chat-composer #mic.is-listening::after{background:var(--green);opacity:1;animation:mic-pulse 1.4s ease-in-out infinite}
+@keyframes mic-pulse{50%{opacity:.35}}
+@media(prefers-reduced-motion:reduce){#home .chat-composer #mic.is-listening::after{animation:none}}
+
+/* --- Composer «+» menu groups. --- */
+.chat-tools-group{padding:8px 10px 2px;font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.chat-tools-group:first-child{padding-top:2px}
+.chat-tools-panel #meeting-status{margin:0;padding:0 10px 6px;font-size:11px;color:var(--muted)}
+
+/* --- Navigation rail: optional expanded mode with section names. --- */
+body>aside .rail-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+body>aside .rail-expand{display:grid;place-items:center;width:44px;height:36px;min-height:36px;margin-top:12px;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted)}
+body>aside .rail-expand:hover{color:var(--ink);background:#ffffff0d}
+@media(min-width:701px){
+ body.rail-expanded{padding-left:200px}
+ body.rail-expanded>aside{width:200px}
+ body.rail-expanded>aside .nav,body.rail-expanded>aside .sidebar-connections>summary,body.rail-expanded>aside .rail-expand{display:flex;align-items:center;justify-content:flex-start;gap:12px;width:100%;padding:0 12px}
+ body.rail-expanded>aside .nav>span,body.rail-expanded>aside .rail-label{text-transform:none;letter-spacing:normal;font-weight:400;color:inherit;position:static;width:auto;height:auto;clip-path:none;overflow:hidden;text-overflow:ellipsis;font-size:13px;line-height:1.3}
+ body.rail-expanded>aside .rail-expand svg{transform:scaleX(-1)}
+ body.rail-expanded .growth-nav-ring{inset:0 auto 0 2px}
+ body.rail-expanded>aside .sidebar-services-popup{left:200px}
+ body.rail-expanded .sidebar-tooltip{display:none}
+}
+
+/* --- Project list: new chat is the primary action; project add is a header icon. --- */
+.project-sidebar-head-actions{display:flex;align-items:center;gap:2px}
+.project-sidebar-head .project-add{display:grid;place-items:center;width:30px;height:30px;min-height:30px;padding:0;border-radius:6px;color:var(--muted)}
+.project-sidebar-head .project-add:hover{color:var(--ink);background:#ffffff0d}
+.project-sidebar>button.project-new-chat-main{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;font-size:13px;font-weight:600;border:1px solid #d0f59640;background:#d0f59614;color:var(--green);border-radius:10px}
+.project-sidebar>button.project-new-chat-main:hover{background:#d0f59624}
+.project-new-chat-main>span{flex:1;text-align:left}
+.project-new-chat-main>kbd{font:inherit;font-size:11px;font-weight:400;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 5px}
+/* Last activity sits at the end of the row; the «…» menu takes its place on hover. */
+.project-sidebar-chat{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.project-sidebar-chat>.project-chat-title{flex:1 1 0;min-width:0}
+.project-sidebar-chat>.project-chat-time{flex:0 0 auto;font-size:11px;color:var(--muted);opacity:.75;font-variant-numeric:tabular-nums}
+.project-chat-row:is(:hover,:focus-within) .project-chat-time{visibility:hidden}
+/* «Архив» reads as a quiet link rather than a full-width button. */
+.project-sidebar>button.project-archive-toggle{align-self:flex-start;width:auto;border:0;background:none;padding:6px 4px;color:var(--muted);font-size:12px;text-decoration:underline;text-underline-offset:3px}
+.project-sidebar>button.project-archive-toggle:hover{color:var(--ink)}
+
+/* --- Materials: preview lines and an icon action. --- */
+.context-item>.context-preview{grid-column:1 / -1;margin:0;color:var(--muted);font-size:13px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.context-item>button.context-ask{display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border-radius:8px;color:var(--muted)}
+.context-item>button.context-ask:hover{color:var(--green);border-color:#d0f59660}
+
+/* --- Team: initials, header actions, save strip only with unsaved edits. --- */
+.team-member summary{display:flex;align-items:center;gap:12px}
+.team-avatar{flex:0 0 32px;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#2c3a2a;color:var(--green);font-size:12px;font-weight:600;letter-spacing:.02em}
+#team-form:not(.is-dirty) #team-save{display:none}
+#team-form.is-dirty .ux-save-strip{position:sticky;bottom:12px;z-index:5;box-shadow:0 8px 24px #0007}
+#team .ux-filters>button{flex:0 0 auto;margin:0;align-self:center}
+
+/* --- Lists: search and filters stay hidden until there is something to filter; buttons remain. --- */
+.ux-filters.is-empty>:not(button){display:none}
+.ux-filters.is-empty:not(:has(>button)){display:none}
+
+/* --- File pickers look and size like the neighbouring buttons. --- */
+label.file-label{display:inline-flex;align-items:center;min-height:38px;padding:8px 12px;border:1px solid #414847;border-radius:9px;background:#252b2a;color:var(--ink);font-size:14px;font-weight:400;line-height:1.45;vertical-align:middle}
+label.file-label:hover{background:#2e3533}
+
+/* --- «Словарь и команды»: the undo action names what it reverts. --- */
+#learning .learning-undo{display:inline-flex;align-items:center;gap:6px;font-size:13px}
+#learning .learning-undo[hidden]{display:none}
+
+/* --- Settings: quick start, save strip only with unsaved edits. --- */
+#settings .settings-save-panel.is-idle{display:none}
+#settings .settings-start{margin:12px 0}
+#settings .settings-start h2{margin:0 0 6px;font-size:16px}
+#settings .settings-start p{margin:0 0 12px;color:var(--muted)}
+#settings .settings-start[hidden]{display:none}
+
+/* --- Top bar status: short label, full text in a popover. --- */
+.chrome-status-details{position:fixed;z-index:80;width:min(360px,calc(100vw - 16px));padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#232b27;box-shadow:0 12px 32px #0008}
+.chrome-status-details p{margin:0 0 10px;font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.chrome-status-details button{min-height:32px;padding:5px 10px;font-size:13px}
+
+/* --- Narrow chat: keep a gutter for the message rail so its marks never overlap text. --- */
+#home .chat-shell.timeline-inset .chat-feed{padding-left:44px}
+@media(max-width:700px){#home .chat-shell.timeline-inset .chat-feed{padding-left:36px}}

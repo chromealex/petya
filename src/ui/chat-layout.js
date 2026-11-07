@@ -31,16 +31,21 @@
  const tools=document.createElement('div');tools.className='chat-tools-panel';
  const options=document.createElement('dialog');options.className='chat-options';
  const close=document.createElement('button');close.type='button';close.textContent='Закрыть';close.className='chat-options-close';close.onclick=()=>options.close();
- const optionsTitle=document.createElement('h2');optionsTitle.textContent='Вложения и команды';optionsTitle.id='chat-options-title';options.setAttribute('aria-labelledby',optionsTitle.id);options.append(close,optionsTitle,extras);document.body.append(options);$('settings').append(previewVoice);heading.append(stopSpeech);stopSpeech.classList.add('quiet');stopSpeech.textContent='Остановить озвучивание';const syncSpeech=()=>stopSpeech.hidden=!window.petyaSpeaking;document.addEventListener('petya-speaking',syncSpeech);syncSpeech();tools.append($('meeting-status'));
+ const optionsTitle=document.createElement('h2');optionsTitle.textContent='Вложения и команды';optionsTitle.id='chat-options-title';options.setAttribute('aria-labelledby',optionsTitle.id);options.append(close,optionsTitle,extras);document.body.append(options);$('settings').append(previewVoice);heading.append(stopSpeech);stopSpeech.classList.add('quiet');stopSpeech.textContent='Остановить озвучивание';const syncSpeech=()=>stopSpeech.hidden=!window.petyaSpeaking;document.addEventListener('petya-speaking',syncSpeech);syncSpeech();
  function openOptions(kind){for(const d of extras.children)d.hidden=kind==='files'?!d.contains(attachmentCard):!d.contains($('command-shortcuts'));optionsTitle.textContent=kind==='files'?'Файлы этой темы':'Быстрые команды';options.showModal();}
  function action(label,fn){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=()=>{menu.open=false;fn();};tools.append(b);}
+ // Grouped menu: files first, then context, then meeting capture with its status underneath.
+ const group=label=>{const h=document.createElement('div');h.className='chat-tools-group';h.textContent=label;h.setAttribute('role','presentation');tools.append(h);};
+ group('Файлы');
  action('Прикрепить файл…',()=>$('attachment-pick').click());
- action('Файлы из Slack / Telegram…',()=>{openOptions('files');attachmentCard.closest('details').open=true;$('attachment-sources').click();});
+ action('Из Slack / Telegram…',()=>{openOptions('files');attachmentCard.closest('details').open=true;$('attachment-sources').click();});
+ action('Файлы этого чата…',()=>{openOptions('files');attachmentCard.closest('details').open=true;});
+ group('Контекст');
  action('Сохранённые материалы',()=>view('sources'));
- $('meeting').addEventListener('click',()=>menu.open=false);
- tools.append($('meeting'));
- action('Вложения и файлы…',()=>{openOptions('files');attachmentCard.closest('details').open=true;});
  action('Быстрые команды…',()=>{openOptions('commands');$('command-shortcuts').closest('details').open=true;});
+ group('Встреча');
+ $('meeting').addEventListener('click',()=>menu.open=false);
+ tools.append($('meeting'),$('meeting-status'));
  menu.append(toggle,tools);
  const toolbar=composer.querySelector(':scope>.actions');toolbar.prepend(menu);
  dialogueTitle.hidden=true;newTopic.textContent='＋';newTopic.title='Новый чат';newTopic.setAttribute('aria-label','Новый чат');

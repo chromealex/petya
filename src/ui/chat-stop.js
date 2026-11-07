@@ -21,5 +21,7 @@
   try{if(saved.background)await window.resumeBackgroundChat(saved.id);else if(saved.request){if(!await commandProgress.resume(saved.request)&&commandProgress.state==='error')throw Error(commandProgress.label);}else{await saved.voice?.();}if(paused===saved)paused=null;}
   catch(error){notice('Не удалось продолжить ответ: '+error.message,true);}finally{resuming=false;sync();}
  };
+ // Esc stops the running answer when nothing else (menu, dialog, search) is open to receive it.
+ document.addEventListener('keydown',event=>{if(event.key!=='Escape'||event.defaultPrevented||stop.hidden||stop.disabled)return;if(document.querySelector('dialog[open],details[open].chat-tools,details[open].message-actions-menu,.project-context-menu:not([hidden]),#notification-center:not([hidden]),.chat-result-picker:not([hidden]),#chrome-status-details'))return;if(event.target.closest?.('dialog,details[open],.chat-find'))return;event.preventDefault();stop.click();});
  document.addEventListener('petya-chat-job',sync);document.addEventListener('petya-speaking',sync);document.addEventListener('petya-dialogue-state',sync);setInterval(sync,100);sync();
 })();

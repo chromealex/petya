@@ -9,7 +9,7 @@ window.renderSteps = function(steps,{live=false,open=false}={}){
  const seconds=ms=>window.formatDuration(ms);
  const total=rows.reduce((sum,s)=>sum+(Number(s.ms)||0),0);
  label.className='steps-label';label.textContent=live?(rows.at(-1)?.label||'Думаю…'):'Ход работы · '+rows.length+' '+(rows.length%10===1&&rows.length%100!==11?'шаг':rows.length%10>=2&&rows.length%10<=4&&(rows.length%100<10||rows.length%100>=20)?'шага':'шагов');
- time.className='steps-duration';time.textContent=seconds(total);if(live)time.dataset.started=String(Date.now()-total);summary.append(label,time);
+ time.className='steps-duration';time.textContent=seconds(total);if(live)time.dataset.started=String(Date.now()-total);summary.append(label);if(live||total>=1000)summary.append(time);
  const list=document.createElement('ol');
  rows.forEach((s,i)=>{
   const li=document.createElement('li'),current=live&&i===rows.length-1;
@@ -77,6 +77,8 @@ window.renderMessage = function(message){
  if(message.role!=='user'&&Array.isArray(message.steps)&&message.steps.length>0)node.insertBefore(window.renderSteps(message.steps),content);
  copy.onclick=async()=>{try{await navigator.clipboard.writeText(message.text||'');paint(true);setTimeout(()=>paint(false),1800);}catch{notice('Не удалось скопировать сообщение. Выделите текст и нажмите ⌘C / Ctrl+C.',true);}};meta.append(copy);node.append(meta);
  window.enhanceChatMessage?.(node,message);
+ // Icon-only actions get a visible tooltip from their accessible name.
+ for(const control of meta.querySelectorAll('button,summary'))if(!control.title&&control.getAttribute('aria-label'))control.title=control.getAttribute('aria-label');
  const menu=node.querySelector('.message-actions-menu');
  if(menu){
   const close=()=>{menu.open=false;};

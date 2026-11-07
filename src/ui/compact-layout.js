@@ -9,8 +9,8 @@
   team:['Команда','M9 11a4 4 0 1 0 0-8a4 4 0 1 0 0 8 M2 21v-2a7 7 0 0 1 14 0v2 M17 4a4 4 0 0 1 0 7 M19 15a6 6 0 0 1 3 5'],
   agents:['Claude и Codex','M7 17L17 7 M7 7h10v10'],
   history:['История','M3 10a9 9 0 1 1 1 7 M3 4v6h6 M12 7v5l3 2'],
-  settings:['Настройки','M8 3v5 M16 3v5 M5 8h14v3a7 7 0 0 1-14 0z M12 18v4'],
-  learning:['Команды и исправления','M4 20l1-5L16 4a2 2 0 0 1 4 4L9 19z M14 6l4 4 M4 20h16']
+  settings:['Настройки','M4 6h9 M17 6h3 M4 12h3 M11 12h9 M4 18h11 M19 18h1 M15 4v4 M9 10v4 M17 16v4'],
+  learning:['Словарь и команды','M4 20l1-5L16 4a2 2 0 0 1 4 4L9 19z M14 6l4 4 M4 20h16']
  };
  for(const button of document.querySelectorAll('aside .nav')){
   const item=navigationIcons[button.dataset.view];if(!item)continue;
@@ -33,6 +33,14 @@
  document.addEventListener('click',event=>{if(!services.contains(event.target))services.open=false;});
  services.addEventListener('keydown',event=>{if(event.key==='Escape'){services.open=false;summary.focus();}});
  document.querySelector('.aside-bottom').title='Локальное распознавание. Аудио не сохраняется. Контекст хранится до 7 дней.';
+ // Labels on demand: the rail can expand to show section names next to the icons; the choice is remembered.
+ summary.insertAdjacentHTML('beforeend','<span class="rail-label">Сервисы</span>');
+ const expand=document.createElement('button');expand.type='button';expand.className='rail-expand';
+ const syncExpand=()=>{const on=document.body.classList.contains('rail-expanded'),label=on?'Скрыть подписи':'Показать подписи';expand.dataset.tooltip=label;expand.setAttribute('aria-label',label);expand.setAttribute('aria-pressed',String(on));};
+ expand.innerHTML='<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5v14 M9 12h11 M15 7l5 5-5 5"/></svg><span class="rail-label">Скрыть подписи</span>';
+ try{document.body.classList.toggle('rail-expanded',localStorage.getItem('petya-rail-expanded')==='true');}catch{}
+ expand.title='Показать подписи';expand.onclick=()=>{const on=document.body.classList.toggle('rail-expanded');try{localStorage.setItem('petya-rail-expanded',String(on));}catch{}syncExpand();};syncExpand();
+ document.querySelector('body>aside .aside-bottom')?.before(expand);
  const tooltip=document.createElement('div');tooltip.className='sidebar-tooltip';tooltip.id='sidebar-tooltip';tooltip.setAttribute('role','tooltip');tooltip.hidden=true;document.body.append(tooltip);
  let tooltipTarget=null;
  const hideTooltip=()=>{tooltip.hidden=true;tooltipTarget?.removeAttribute('aria-describedby');tooltipTarget=null;};
