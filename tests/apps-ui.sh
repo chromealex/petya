@@ -5,7 +5,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 log=$(mktemp)
 status=0
-for test in tests/app-catalog-ui.cjs tests/offer-cards-ui.cjs $(ls tests/*-ui.cjs | grep -E 'tests/(regex-cron|github-settings|ci-builds|pull-requests|crashes|store-reviews|calendar|build-size|localization|dependencies|disk-usage|app-links|meetings|meeting-apps|discord|support|sprint-planning|standup|ad-revenue|competitors|who-knows|glossary)-ui\.cjs'); do
+for test in tests/app-catalog-ui.cjs tests/offer-cards-ui.cjs $(ls tests/*-ui.cjs | grep -E 'tests/(regex-cron|github-settings|ci-builds|pull-requests|crashes|store-reviews|calendar|build-size|localization|dependencies|disk-usage|app-links|meetings|meeting-apps|discord|support|sprint-planning|standup|ad-revenue|competitors|who-knows|glossary|reminders|journal)-ui\.cjs'); do
   [ -f "$test" ] || continue
   if timeout 180 xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox "$test" >"$log" 2>&1 && grep -q "UI smoke test passed" "$log"; then
     grep -E "passed$" "$log" | grep -v "UI smoke test passed"
