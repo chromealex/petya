@@ -251,3 +251,11 @@ button.delete-button svg{width:16px;height:16px}
 .team-account-main dl{cursor:default}
 /* User messages: the time stays at the right edge; the actions appear to its left on hover. */
 #home .chat-feed .message-user .message-meta>time{order:99}
+/* Rule: the app's own chrome (titles, tabs, buttons, labels, statuses) is not selectable; content people may
+   copy is — messages, inputs, code, file and document text, errors. See AGENTS.md → «Interface rules». */
+body{-webkit-user-select:none;user-select:none}
+input,textarea,select,[contenteditable]:not([contenteditable="false"]),pre,code,
+.message-content,.message-content *,.sent-quote,.context-item p,.chat-context-preview,.chat-result-context,
+.kit-panel-body,.kit-title,.kit-meta,.jira-description,.jira-comment-text,.mail-excerpt,.doc-excerpt,.file-body,.file-code,.file-full-table,
+.material-body,.material-body *,.chat-file-body,.history-preview,.notification-item p,.team-account dd,.selectable,
+#notice,.kit-toast span,.error{-webkit-user-select:text;user-select:text}
