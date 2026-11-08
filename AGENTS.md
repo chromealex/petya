@@ -50,8 +50,8 @@
 
 # Adding a feature
 
-- New functionality goes into a feature module in `src/features/` and one line in `src/features.cjs`, not into `src/main.cjs`.
-- A feature exports `{ name, defaults, validate(next), setup(services) }`: `defaults` are its settings, `validate` checks them on save, `setup` creates its services and IPC handlers (`services.handle(...)`) and returns the services other code may use (they become `services.<name>`, e.g. `services.agentTeam` in `converse.cjs`).
+- A capability the user adds from the catalog (a service, cards, an app) is an **extension** — see «Extensions» below. Core functionality goes into a feature module in `src/features/` and one line in `src/features.cjs`, not into `src/main.cjs`.
+- A feature exports `{ name, defaults, validate(next), setup(services) }`: `defaults` are its settings, `validate` checks them on save, `setup` creates its services and IPC handlers and returns `{ipc}` (reachable as `window.petya.feature(name, method, …)`) plus the services other code may use. Everything except `ipc` is merged **flat** into `services` (`services.agentTeam` in `converse.cjs`): return one unique key (best: the feature's `name`) or none, never a generic one that overwrites another service.
 - `services` gives live access to shared state (`settings`, `dialogue`, `chatJobs`, `request`, `win`, …). Features are set up last, so everything they read already exists.
 - Larger groups of existing main-process code live in `src/*-setup.cjs`; move code out of `main.cjs` rather than adding to it.
 
@@ -63,12 +63,24 @@
 - Show real progress percentages only when the total is known; otherwise show the actual stage with indeterminate progress. Do not imply that checking, downloading, and installing are the same stage.
 - Verify progress and completion with settings closed, failure handling, and duplicate-start behavior. Keep notifications compact and accessible.
 
-# Extension settings ownership
+# Extensions
 
-- Each extension directory declares `extension.json`, including whether it has settings. Keep its settings markup, renderer, operation notifications and backend implementation in that directory.
-- Use the generic extension host and catalog. Do not add extension-specific settings controls, script tags or activation branches to the application shell.
-- Reuse shared credential adapters for service connections; do not duplicate credentials. Extensions without settings must explicitly declare that fact.
-- Validate extension discovery and installed/uninstalled behavior, including notifications while settings are closed.
+The full specification, the minimal example and the checklist are in `docs/extensions.md`; read it before writing or changing an extension. Obligatory:
+
+- **One directory owns everything.** An extension is `src/extensions/<id>/` (bundled), `<userData>/extensions/<id>/` (installed from a folder or .zip) or the development folder, with the same layout: `extension.json`, `icon.svg`, `feature.cjs`, `offer.cjs`, cards, `settings.js`, providers, `docs/apps/<id>.md` for bundled ones. Its settings markup, renderer, notifications and backend stay in that directory; do not add extension-specific settings controls, script tags or activation branches to the application shell, the catalog or the host.
+- `extension.json` declares id, Russian name/description, `category`, `icon`, 2–6 `examples`, `setting` (`extension_<id>`), whether it has settings (`"settings": false` explicitly), `feature`, `scripts`, `results`, and `connects`/`uses`/`provides`/`downloads`/`version` when they apply.
+- **Discovery goes through `src/extension-registry.cjs`.** Code that scans extension folders uses `registry.live()`/`registry.files(name)` and caches with `registry.cached()`; never read `src/extensions` directly. Bundled ids win: an external extension can never shadow or patch a bundled one.
+- **`feature.turn(s, command)` returns `null` unless the request is clearly for this app and `kit.installed(s, id)`**; added but not connected → a short question saying where to connect. `setup` returns `{ipc}` and at most its own name (flat-merge rule above); `teardown()` stops everything `setup` started.
+- **`offer.cjs` is precise**: explicit `names`, narrow `topics`, every known near-miss in `avoid`, `ready` = added and connected; add `own`/`not` rows to `tests/extension-offers-matrix.cjs`. Ties are asked, never guessed.
+- **Cards** are built only with `window.resultKit`, contain a real visualization of the data, never set `innerHTML` from data, mark content `data-no-i18n` and format with `window.petyaLocale`.
+- **Side effects only after explicit confirmation** (a button the user pressed or the shared question panel), never from a chat turn by itself; long work goes to the notification center; missing input is a clarification (`input-required.cjs`) before side effects.
+- Actions that belong to another app go through `k.links(kind, …)` and `provides` (`src/features/app-links.cjs`); never hard-code another app. Several services for one kind of data → a source kind, not branches.
+- Reuse shared credential adapters for service connections; do not duplicate credentials. Tokens are feature `secrets`.
+- Downloads are declared in `downloads` with `downloads.cjs` `present()`; the catalog shows the weight.
+- Translations ship with the strings (`src/locales/en.json`; external extensions: their `locales/en.json`).
+- **Tests:** a unit test with stubbed services (near-misses, not added, not connected, errors, no model); a UI test that renders the card and saves a `tests/card-shot.cjs` screenshot **that you open and look at**; the test in the `tests/apps-ui.sh` list; validate discovery and added/removed behaviour, including notifications while settings are closed; then `npm test`. No real credentials: real endpoints, stubbed responses, and say in the docs what is verified live.
+- **Installed extensions are not sandboxed**: they run with Petya's rights. Keep the review dialog, the explicit confirmation, the archive/path checks and the `petya-ext://` confinement intact; never load external code another way.
+- **Build extensions against a running Petya, not a rebuild**: Settings → «Расширения» → «Папка разработки» loads a folder as an extension and reloads it on every save (`docs/extensions.md` §15).
 
 # Missing information in chat
 
