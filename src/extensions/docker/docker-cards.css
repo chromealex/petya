@@ -1,4 +1,5 @@
 .dk-card{width:620px;max-width:100%;margin:12px 0}
+.dk-card details{margin:0}
 .dk-body{display:flex;flex-direction:column;gap:10px;min-width:0}
 .dk-muted{color:var(--muted);font-size:12px;margin:0}
 .dk-text{margin:0;font-size:13.5px;line-height:1.45}
