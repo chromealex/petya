@@ -1,0 +1,18 @@
+{
+  "id": "mentor",
+  "name": "Петя-наставник",
+  "description": "Раз в неделю или по просьбе находит в истории чатов, что вы повторяете руками, и предлагает расписание, скилл, расширение или готовое приложение. Всё остаётся на этом компьютере",
+  "category": "personal",
+  "icon": "icon.svg",
+  "examples": ["Что мне автоматизировать?","Что я делаю руками?","Включи наставника по пятницам в 17:00"],
+  "setting": "extension_mentor",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["mentor-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "mentorCard": "renderMentorCard"
+  }
+}
