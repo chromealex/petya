@@ -50,7 +50,7 @@
 
  // Expanded card: the whole task right here — description, comments, attachments — and edits in place
  // (title, description, a new comment). Every change goes to Jira at once with «Отменить».
- const when=v=>{const d=new Date(v);return Number.isFinite(d.getTime())?d.toLocaleString(window.petyaLocale||'ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';};
+ const when=v=>{const d=new Date(v);return Number.isFinite(d.getTime())?window.relativeTime(d):'';};
  function paragraphs(k,text,className){const box=k.el('div',className);const parts=String(text||'').split(/\n{2,}/);for(const part of parts){const p=k.el('p');const lines=part.split('\n');lines.forEach((line,i)=>{if(i)p.append(document.createElement('br'));p.append(document.createTextNode(line));});box.append(p);}return box;}
  function editor(k,{value,multiline,label,save,done}){
   const box=k.el('div','jira-edit');const input=k.el(multiline?'textarea':'input');input.value=value||'';input.setAttribute('aria-label',label);if(multiline)input.rows=Math.min(18,Math.max(7,String(value||'').split('\n').length+3));
