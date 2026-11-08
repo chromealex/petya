@@ -1,6 +1,6 @@
 // «Календарь» cards in the real chat: day timeline with events, free gaps and the «сейчас» line, week strip,
 // slot search with lanes and the chosen slot, the confirm step (editable title, «Видеозвонок» with the providers —
-// here the Zoom extension's personal room and Meet —, known rooms and a typed link) and the created state with «Петя
+// here the Zoom extension's personal room and the Google Meet extension's call —, known rooms and a typed link) and the created state with «Петя
 // запишет встречу»; a running Zoom event offers «Записать Петей» only once the Zoom extension is added.
 process.env.PETYA_SMOKE_TEST='1';
 const assert=require('node:assert/strict');
@@ -34,7 +34,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("window.extensionHost.open('zoom',{stay:true})");
  // The video choices come from the main process for a real card; here a fixture of what it returns.
  await js(`window.petyaCalendar={...window.petyaCalendar,videoChoices:async()=>({providers:[{id:'zoom',label:'Zoom (личная комната)',hint:'Одна и та же комната для всех встреч'},{id:'google-meet',label:'Google Meet'}],
-  rooms:[{key:'zoom:1112223334',name:'Синк по релизу · Zoom',reason:'те же участники · похожее название · использовалась 12 раз',url:'https://us02web.zoom.us/j/1112223334',strong:true},{key:'meet:abc-defg-hij',name:'Стендап команды · Meet',reason:'использовалась 31 раз',url:'https://meet.google.com/abc-defg-hij',strong:false}],strong:'zoom:1112223334'})};0`);
+  rooms:[{key:'zoom:1112223334',name:'Синк по релизу · Zoom',reason:'те же участники · похожее название · использовалась 12 раз',url:'https://us02web.zoom.us/j/1112223334',strong:true},{key:'meet:abc-defg-hij',name:'Стендап команды · Google Meet',reason:'использовалась 31 раз',url:'https://meet.google.com/abc-defg-hij',strong:false}],strong:'zoom:1112223334'})};0`);
  await js(`view('home');showDialogueMessages([{role:'user',text:'что у меня сегодня'},${JSON.stringify(msg('Сегодня 4 встречи.',day))},${JSON.stringify(msg('На этой неделе 11 встреч.',week))},${JSON.stringify(msg('Нашёл 4 варианта.',slots))},${JSON.stringify(msg('Создано.',created))}],'Календарь')`);
  for(let i=0;i<150;i++){if(await js("document.querySelectorAll('.cal-card').length===4"))break;await new Promise(r=>setTimeout(r,30));}
  assert.equal(await js("document.querySelectorAll('.cal-card').length"),4);
