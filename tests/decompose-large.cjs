@@ -41,16 +41,21 @@ function ollama({ limit = plan.SIZE, failing = () => false, tasks, verbose = 0, 
     const ids = (data.notes || []).map(n => n.id);
     return { tasks: [{ summary: 'Бэкенд', description: 'API', assigneeId: '', assignmentReason: '', dependsOn: [], covers: ids.slice(0, -1) }, { summary: 'Экран', description: 'UI', assigneeId: '', assignmentReason: '', dependsOn: [0], covers: [] }], questions: [] };
   };
+  let running = 0, peak = 0;
   const request = async (url, options = {}) => {
     const u = new URL(url);
-    if (u.pathname === '/api/chat') { const body = JSON.parse(options.body); assert(options.timeoutMs >= 60000); return { message: { content: JSON.stringify(respond(body)) }, prompt_eval_count: 100, eval_count: 50, done_reason: 'stop' }; }
+    if (u.pathname === '/api/chat') {
+      const body = JSON.parse(options.body); assert(options.timeoutMs >= 60000);
+      running++; peak = Math.max(peak, running);
+      try { await new Promise(r => setTimeout(r, 2)); return { message: { content: JSON.stringify(respond(body)) }, prompt_eval_count: 100, eval_count: 50, done_reason: 'stop' }; } finally { running--; }
+    }
     if (u.pathname === '/rest/agile/1.0/board') return { values: [{ id: 1 }], isLast: true };
     if (u.pathname.endsWith('/versions')) return [];
     if (u.pathname.endsWith('/sprint')) return { values: [], isLast: true };
     if (u.pathname.endsWith('/user/assignable/search')) return [{ accountId: 'u1', displayName: 'Иван Петров', active: true }];
     throw new Error('Unexpected URL ' + url);
   };
-  return { request, log };
+  return { request, log, peak: () => peak };
 }
 function workspace(fake, page) {
   const progress = [];
@@ -91,7 +96,15 @@ const context = { title: 'Оплата', text: 'Обсудили новую оп
     assert.equal(result.coverage.mode, 'notes'); assert.equal(result.coverage.uncovered.length, 1);
     assert(result.coverage.warnings[0].includes('по частям')); assert(result.coverage.warnings.some(x => x.includes('Ни одна задача не покрывает 1')));
     assert(result.tasks[0].description.includes('Разделы: Спецификация оплаты'));
-    assert(progress.some(p => p.stage === 'reading' && p.total === read.length));
+    // Each agent reads its own contiguous range: together they read every part exactly once.
+    const last = progress.filter(p => p.stage === 'reading').at(-1);
+    assert.equal(last.agents.length, plan.AGENTS); assert(last.agents.every(a => a.state === 'done' && a.done === a.total));
+    assert.equal(last.agents.reduce((n, a) => n + a.total, 0), read.length);
+    const labels = read.map(l => JSON.parse(l.user).source); assert.equal(new Set(labels).size, labels.length);
+    assert(fake.peak() > 1 && fake.peak() <= plan.AGENTS, 'agents did not read in parallel: ' + fake.peak());
+    // The overall bar only moves forward and ends at 100.
+    const percents = progress.map(p => p.percent).filter(Number.isFinite);
+    assert(percents.every((p, i) => !i || p >= percents[i - 1])); assert(percents.some(p => p > 0 && p < 100)); assert.equal(percents.at(-1), 100);
     assert.equal(progress.at(-1).stage, 'done'); assert.equal(w.decomposing, null);
   });
   await test('notes that do not fit are merged, and a note the merge forgets is kept', async () => {
@@ -135,11 +148,28 @@ const context = { title: 'Оплата', text: 'Обсудили новую оп
     w.docs.set('notion:abc', { id: 'notion:abc', source: 'Notion', title: 'Оплата', text: 'начало', more: true, url: 'https://www.notion.so/abc' });
     await w.prepare('декомпозируй', context, ['notion:abc']); assert(fake.log.at(-1).user.includes('REQ-99'));
   });
+  await test('agent ranges are contiguous, balanced and never overlap', () => {
+    const all = plan.parts({ title: 'Док', text: plan.outline(spec(40)) }, 3000), ranges = plan.assign(all, 3);
+    assert.equal(ranges.length, 3); assert.deepEqual(ranges.flat(), all);
+    const cost = r => r.reduce((n, p) => n + p.text.length, 0), sizes = ranges.map(cost);
+    assert(Math.max(...sizes) < Math.min(...sizes) * 2, 'unbalanced: ' + sizes);
+    assert.equal(plan.assign(all.slice(0, 2), 3).length, 2); assert.deepEqual(plan.assign([], 3), []);
+    const meter = plan.createMeter(); meter.add(100); meter.finish(50); assert.equal(meter.percent(), 50); meter.add(100); assert.equal(meter.percent(), 50); meter.finish(150); assert.equal(meter.percent(), 99);
+  });
   await test('a large team is narrowed to the people the material names, and the planner says so', () => {
     const people = Array.from({ length: 900 }, (_, i) => ({ id: 'u' + i, name: 'Сотрудник' + i + ' Фамилия' + i })).concat({ id: 'masha', name: 'Мария Соколова' });
     const result = plan.trimPeople(people, 'Бэкенд делает Соколова', 1500);
     assert.deepEqual(result.people.map(p => p.id), ['masha']); assert(result.note.includes('1 из 901'));
     assert.equal(plan.trimPeople(people.slice(0, 3), '', 1500).note, '');
+  });
+  await test('a model failure stops all agents and is reported, not hidden', async () => {
+    const fake = ollama({ failing: user => user.includes('REQ-30:') }), { w, progress } = workspace(fake, spec(60));
+    const original = fake.request; let calls = 0;
+    const broken = { request: async (url, options) => { if (url.includes('/api/chat') && options.body.includes('REQ-30:')) throw new Error('Ollama не отвечает'); if (url.includes('/api/chat')) calls++; return original(url, options); } };
+    const ws = new Workspace({ settings: () => settings, request: async (url, options) => url.includes('/wiki/') ? { results: [{ id: '5', title: 'Спецификация', body: { storage: { value: spec(60) } } }] } : broken.request(url, options), progress: s => progress.push(s) });
+    await ws.searchDocs(context); await assert.rejects(() => ws.prepare('декомпозируй', context, ['confluence:5']), /Ollama не отвечает/);
+    assert.equal(ws.decomposing, null); assert.equal(progress.at(-1).stage, 'error');
+    assert(calls < 25, 'agents kept reading after a failure: ' + calls);
   });
   await test('a second decomposition does not start while one is running', async () => {
     const fake = ollama(), { w } = workspace(fake, spec(1, 500)); await w.searchDocs(context);

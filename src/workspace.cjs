@@ -84,11 +84,11 @@ class Workspace {
     if (!s.model) throw new Error('Для декомпозиции укажите установленную модель Ollama в подключениях. Можно также добавить задачи вручную.');
     if (this.decomposing) throw new Error('Декомпозиция уже идёт. Дождитесь её окончания.');
     const run = { id: require('node:crypto').randomUUID(), title: String(context.title || 'Фича').slice(0, 120), stage: 'starting', busy: true, at: Date.now() };
-    const report = state => { Object.assign(run, { done: undefined, total: undefined, label: undefined }, state, { at: Date.now() }); this.decomposing = run.busy ? run : null; try { this.progress({ ...run }); } catch {} };
-    report({ stage: 'starting' });
+    const report = state => { Object.assign(run, { done: undefined, total: undefined, label: undefined, agents: undefined }, state, { at: Date.now() }); this.decomposing = run.busy ? run : null; try { this.progress({ ...run }); } catch {} };
+    report({ stage: 'starting', percent: 0 });
     try {
       const result = await this.decompose(command, context, documentIds, boardId, s, report);
-      report({ stage: 'done', busy: false, tasks: result.tasks.length, warnings: result.coverage.warnings.length });
+      report({ stage: 'done', busy: false, percent: 100, tasks: result.tasks.length, warnings: result.coverage.warnings.length });
       return result;
     } catch (error) { report({ stage: 'error', busy: false, error: error.message }); throw error; }
   }
@@ -105,8 +105,10 @@ class Workspace {
     const material = sources.map(x => x.title + '\n' + x.text).join('\n\n');
     const { people, note: peopleNote } = plan.trimPeople(everyone, command + '\n' + teamRoles + '\n' + material, 1500);
     const budget = plan.SIZE - plan.FINAL_PREDICT - plan.MARGIN - plan.estimate(PLAN_SYSTEM + NOTES_RULE + command + teamRoles + JSON.stringify(people)) - 200;
+    // The plan's share of the progress bar is reserved before anything is read.
+    const planShare = plan.planCost(Math.max(1000, budget / 2)); decomposer.meter.add(planShare);
     const final = async (data, rule) => {
-      report({ stage: 'planning' });
+      report({ stage: 'planning', percent: decomposer.meter.percent() });
       const messages = [{ role: 'system', content: PLAN_SYSTEM + rule }, { role: 'user', content: JSON.stringify({ command, ...data, people, teamRoles }) }];
       let outcome = await decomposer.ask(messages, PLAN_FORMAT, plan.FINAL_PREDICT);
       // A plan longer than the answer room: once more with shorter descriptions.
