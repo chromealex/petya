@@ -2,6 +2,8 @@
   "name": "Blender",
   "description": "Проверка и очистка анимаций",
   "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Проверь анимации в этом файле Blender","Почисти лишние ключи в анимации","Найди проблемы в анимациях персонажа"],
   "setting": "extension_blender",
   "scripts": [
     [

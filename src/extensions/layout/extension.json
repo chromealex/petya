@@ -2,6 +2,8 @@
   "name": "Вёрстка Unity",
   "description": "Макеты Figma и Zeplin, изображения и шрифты",
   "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Сверстай экран по макету из Figma","Собери окно магазина по макету Zeplin","Подбери шрифты и картинки для макета"],
   "setting": "extension_layout",
   "scripts": [
     [

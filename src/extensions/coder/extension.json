@@ -3,6 +3,8 @@
   "name": "Программист",
   "description": "Петя сам пишет и правит код проекта в отдельной ветке и показывает дифф",
   "category": "dev",
+  "icon": "icon.svg",
+  "examples": ["Исправь эту ошибку в коде проекта","Добавь проверку на пустой ответ сервера","Покажи дифф последней правки"],
   "downloads": [{"id": "model", "name": "Своя модель для кода, например qwen3-coder:30b", "bytes": 19000000000, "approx": true, "optional": true}],
   "setting": "extension_coder",
   "settings": true,

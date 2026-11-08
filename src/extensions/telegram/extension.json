@@ -2,6 +2,8 @@
   "name": "Telegram",
   "description": "Личный аккаунт и обсуждения",
   "category": "comms",
+  "icon": "icon.svg",
+  "examples": ["Что писали в Telegram-чате команды?","Напиши Полине в Telegram, что билд готов","Найди в Telegram сообщение про релиз"],
   "setting": "module_telegram",
   "service": "telegram",
   "settings": true,

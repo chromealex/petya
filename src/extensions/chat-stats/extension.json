@@ -2,6 +2,8 @@
   "name": "Статистика чата",
   "description": "Диаграммы сообщений",
   "category": "analytics",
+  "icon": "icon.svg",
+  "examples": ["Покажи статистику сообщений в этом чате","Кто больше всех писал за неделю?","Построй диаграмму сообщений по дням"],
   "setting": "extension_chat-stats",
   "settings": false,
   "scripts": [],

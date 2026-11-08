@@ -3,6 +3,8 @@
   "name": "Место на диске",
   "description": "Чем забит диск: кэши Xcode, Unity, Gradle, npm, модели Ollama, загрузки — и очистка в корзину после подтверждения",
   "category": "computer",
+  "icon": "icon.svg",
+  "examples": ["Чем забит диск?","Освободи место на диске","Сколько занимают кэши Xcode?"],
   "setting": "extension_disk-usage",
   "settings": false,
   "feature": "feature.cjs",

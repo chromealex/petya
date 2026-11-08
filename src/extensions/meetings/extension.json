@@ -3,6 +3,7 @@
   "name": "Встречи",
   "description": "Сводка встречи карточкой: решения, задачи с исполнителями, что не обсудили",
   "category": "meetings",
+  "uses": ["task-tracker","share-message"],
   "settings": false,
   "scripts": [
     ["summary-cards.js", "message-format.js"]
