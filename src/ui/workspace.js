@@ -127,7 +127,7 @@ function decomposeStageText(state) {
   return ({
     starting: 'Готовлю декомпозицию',
     fetching: 'Читаю «' + (state.label || 'документ') + '» целиком',
-    reading: 'Агенты читают материал по частям',
+    reading: 'Читаю материал по частям',
     merging: 'Сжимаю требования, чтобы они уместились в модель' + count,
     planning: 'Составляю задачи',
     done: 'План готов' + (state.warnings ? ' — есть предупреждения' : ''),
@@ -140,6 +140,8 @@ let lastDecompose = null;
 function renderDecomposeProgress(state) {
   const box = $('decompose-progress'); lastDecompose = state;
   if (!state) { box.hidden = true; return; }
+  // One line like the chat's steps; the agents open on click and stay open while the run goes on.
+  if (state.stage === 'starting') box.open = false;
   box.hidden = false; box.dataset.stage = state.stage;
   $('decompose-stage').textContent = decomposeStageText(state);
   // A real percentage once the work is measured; before that, and for a single planning request, the stage only.
@@ -159,7 +161,12 @@ function renderDecomposeProgress(state) {
     item.append(head, own, range); list.append(item);
   }
   list.hidden = !(state.agents || []).length;
+  box.classList.toggle('single', list.hidden); if (list.hidden) box.open = false;
+  // The collapsed line still says what the agents do: how many read now and how many parts are done.
+  const agents = state.agents || [], reading = agents.filter(a => a.state === 'reading').length;
+  if (agents.length && state.busy) $('decompose-stage').textContent += ` · ${agents.reduce((n, a) => n + a.done, 0)} из ${agents.reduce((n, a) => n + a.total, 0)}, агентов: ${reading || agents.length}`;
 }
+$('decompose-progress').addEventListener('click', event => { if (event.target.closest('summary') && $('decompose-progress').classList.contains('single')) event.preventDefault(); });
 window.petyaEvents.onDecompose(state => { if (!$('workspace-card').hidden || state.busy) renderDecomposeProgress(state); });
 window.petya.decomposeStatus().then(state => { if (state?.busy) renderDecomposeProgress(state); }).catch(() => {});
 // What of the material reached the plan; losses are highlighted.
