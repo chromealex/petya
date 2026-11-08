@@ -5722,6 +5722,11 @@
   "Когда в Zoom идёт встреча, Петя видит её окно: запись начинается сама (или Петя спросит — как выбрано в «Запись встреч»), а в расшифровке подписано, кто говорит. Вход в Zoom не нужен.": "When a Zoom meeting is on, Petya sees its window: recording starts by itself (or Petya asks, as chosen in «Meeting recording»), and the transcript says who is talking. No Zoom sign-in is needed.",
   "Запись встречи · Zoom": "Meeting recording · Zoom",
   "Как подписан на встречах": "Name shown in meetings",
-  "Чтобы слушать звук встречи и понимать, что встреча идёт. Видео не сохраняю.": "To hear the meeting's sound and know that a meeting is on. I don't keep video."
+  "Чтобы слушать звук встречи и понимать, что встреча идёт. Видео не сохраняю.": "To hear the meeting's sound and know that a meeting is on. I don't keep video.",
+  "Адрес Jira: укажите его в виде https://company.atlassian.net": "Jira address: enter it as https://company.atlassian.net",
+  "Адрес сервиса Zoom: укажите его в виде https://…": "Zoom service address: enter it as https://…",
+  "Адрес Ollama": "Ollama address",
+  "Адрес whisper.cpp": "whisper.cpp address",
+  "укажите адрес вида ": "enter an address like "
  }
 }
