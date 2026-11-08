@@ -19,6 +19,7 @@ module.exports=[
  require('./features/context-discovery.cjs'),
  require('./features/meeting-sources.cjs'),
  require('./features/crash-sources.cjs'),
+ require('./features/meeting-stream.cjs'),
  require('./features/meeting-memory.cjs'),
  require('./features/materials.cjs'),
  require('./features/meeting-summary.cjs'),
