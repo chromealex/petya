@@ -162,6 +162,8 @@ async function turn(s,command){
  return createTurn(s,command,r);
 }
 
+// The service of each company set up in this process (UI tests reach the live backend through it).
+const instances=new Map();
 // --- Background: timer, chat message, notifications -----------------------------------------------------------------
 function setup(s,{now:clock=()=>Date.now(),interval=15000}={}){
  const company=s.companyId,file=path.join(s.dataRoot||'.','extensions',ID,'reminders.json');
@@ -186,6 +188,7 @@ function setup(s,{now:clock=()=>Date.now(),interval=15000}={}){
  }
  const triggers=registry.create(s);
  const reminders=service.create({s,file,now:clock,triggers,publish,post,system});
+ instances.set(company,reminders);
  let timer=null;
  if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){
   timer=setInterval(()=>{if(company!==s.companyId){clearInterval(timer);return;}reminders.tick().catch(e=>console.error('Reminders:',e.message));},interval);timer.unref?.();
@@ -205,4 +208,4 @@ function setup(s,{now:clock=()=>Date.now(),interval=15000}={}){
  };
  return {reminders:{service:reminders,now:clock,triggers},ipc};
 }
-module.exports={name:'reminders',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,route,subject};
+module.exports={name:'reminders',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,route,subject,instance:company=>company?instances.get(company):[...instances.values()].at(-1)};

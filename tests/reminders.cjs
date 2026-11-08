@@ -130,6 +130,9 @@ async function say(s,text,answers=[]){
  const rep=r.extensionData.reminderCard.items.find(i=>i.repeat);assert.equal(rep.icon,'repeat');assert.equal(rep.text,'Планёрку');assert.match(r.text,/каждый понедельник в 10:00/);
  clock.t=new Date(2026,10,16,10,0,5).getTime();await p.svc.tick();
  assert.equal(new Date(p.svc.view(rep.id).at).getDate(),23,'next Monday');assert.equal(p.svc.view(rep.id).status,'active');
+ // Snoozing a repeating one makes a one-off copy; the schedule stays.
+ const copy=p.ipc.snooze(rep.id,{minutes:15});assert.notEqual(copy.id,rep.id);assert.equal(copy.repeat,null);assert.ok(p.svc.view(rep.id).repeat,'still repeats');
+ p.ipc.remove(copy.id);
 
  // Clarifications: no time → options, the answer creates it; no subject → asked; past time → asked again.
  clock.t=T0;

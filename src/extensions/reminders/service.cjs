@@ -112,7 +112,11 @@ function create({s,file,now=()=>Date.now(),triggers,publish=()=>{},post=()=>{},s
   const at=Number.isFinite(until)?until:t+Math.max(1,Math.min(60*24*30,Number(minutes)||10))*MIN;
   if(at<=t)throw Error('Это время уже прошло.');
   if(item.kind==='event'&&item.status==='active')throw Error('Это напоминание ещё ждёт события. Отложить можно сработавшее.');
-  if(item.repeat&&item.status==='active'){item.snoozeOf=item.at;}
+  // A repeating reminder keeps its schedule: the snoozed occurrence becomes a one-off copy.
+  if(item.repeat){
+   const copy={...item,id:randomUUID(),kind:'time',at,status:'active',snoozed:true,createdAt:t};delete copy.repeat;delete copy.firedAt;delete copy.lastFiredAt;
+   data.items.push(copy);persist();settle(item,'Отложено до '+when.describe(copy,t)+': «'+item.text+'»','info');return view(copy,t);
+  }
   item.kind='time';item.at=at;item.status='active';item.snoozed=true;delete item.repeat;
   persist();settle(item,'Отложено до '+when.describe(item,t)+': «'+item.text+'»','info');return view(item,t);
  }
