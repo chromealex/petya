@@ -1,15 +1,18 @@
-// When to offer «Крэши» to someone who has not added or connected it. Only Sentry is promised:
-// Firebase Crashlytics has no public REST API for issues (see docs/apps/crashes.md).
-const {SENTRY,CRASH,ANR,BUILD}=require('./query.cjs');
+// When to offer «Крэши» to someone who has not added it or has no connected crash source. The pitch names no
+// service: the sources (Sentry, Firebase Crashlytics, Google Play, …) have their own offers, made when a request
+// names them. After adding, a request without a connected source is answered with the choice of sources.
+const {CRASH,ANR,BUILD,NOT_APP}=require('./query.cjs');
+const sources=settings=>require('../../features/crash-sources.cjs').create({settings}).list();
 module.exports={
  id:'crashes',name:'Крэши',
- pitch:'покажу крэши из Sentry: топ за период, новые после релиза, график по дням, а по кнопке — в задачу Jira, Программисту или «Решено»',
- names:[SENTRY],
+ pitch:'соберу крэши из подключённых сервисов — Sentry, Firebase Crashlytics, Google Play: топ за период, новые после релиза, график по дням, а по кнопке — в задачу, Программисту или «Решено»',
+ names:[],
  topics:[CRASH],
- // ANR is Google Play's, a red build is CI's; «падение продаж», «вылет рейса» are not crashes of the app;
- // Crashlytics is not supported, so it is not offered for it.
- avoid:[ANR,BUILD,/(?:падени\p{L}*|вылет\p{L}*)\s+(?:\p{L}+\s+)?(?:продаж|выручк|доход|курс|цен|рейтинг|онлайн|ретеншн|конверси|трафик|метрик|fps|фпс|самол|рейс|давлени)/iu,/crashlytics|крашлитикс\p{L}*/iu],
+ // ANR is Google Play's card, a red build is CI's; «падение продаж», «вылет рейса» are not crashes of the app.
+ avoid:[ANR,BUILD,NOT_APP],
  requests:[/(?:какие|сколько|топ|новые|покажи|что с|за неделю|вчера|после релиза)/iu],
- connect:'settings',
- ready:settings=>settings.extension_crashes==='true'&&!!settings.sentryToken&&!!settings.sentryOrg
+ connect:'install',
+ // Connected: at least one crash source is added and connected.
+ connected:settings=>sources(settings).length>0,
+ ready:settings=>settings.extension_crashes==='true'&&sources(settings).length>0
 };

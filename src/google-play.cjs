@@ -34,14 +34,29 @@ class GooglePlay {
   if(this.cached?.key===s.googlePlayCredential&&this.cached.until>Date.now()+60000)return this.cached.token;
   const c=credential(s.googlePlayCredential);
   if(c.type==='oauth'){const result=await this.request('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...c.client,grant_type:'refresh_token',refresh_token:c.refresh_token}).toString()});if(!result.access_token)throw new Error('Вход Google Play истёк. Нажмите «Подключить» ещё раз.');this.cached={key:s.googlePlayCredential,token:result.access_token,until:Date.now()+Number(result.expires_in||3600)*1000};return result.access_token;}
-  const now=Math.floor(Date.now()/1000),b64=v=>Buffer.from(JSON.stringify(v)).toString('base64url');
-  const unsigned=b64({alg:'RS256',typ:'JWT'})+'.'+b64({iss:c.client_email,scope:'https://www.googleapis.com/auth/playdeveloperreporting',aud:'https://oauth2.googleapis.com/token',iat:now,exp:now+3600});
-  const sign=createSign('RSA-SHA256');sign.update(unsigned);const assertion=unsigned+'.'+sign.sign(c.private_key,'base64url');
-  const result=await this.request('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({grant_type:'urn:ietf:params:oauth:grant-type:jwt-bearer',assertion}).toString()});
-  if(!result.access_token)throw new Error('Google не выдал доступ к отчётам.');this.cached={key:s.googlePlayCredential,token:result.access_token,until:Date.now()+Number(result.expires_in||3600)*1000};return result.access_token;
+  const token=await require('./google-service-account.cjs').token(c,SCOPE,this.request);
+  this.cached={key:s.googlePlayCredential,token,until:Date.now()+3000000};return token;
  }
  async api(route,body){const token=await this.token();return this.request(ROOT+route,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...body?{body:JSON.stringify(body)}:{}});}
  async apps(){let pageToken;const all=[];for(let page=0;page<100;page++){const result=await this.api('apps:search?'+new URLSearchParams({pageSize:100,...pageToken?{pageToken}:{}}));all.push(...result.apps||[]);pageToken=result.nextPageToken;if(!pageToken)return all.map(a=>({id:a.name,label:a.displayName||a.packageName||a.name,packageName:a.packageName||a.name.replace(/^apps\//,'')}));}throw new Error('Слишком много приложений Google Play.');}
+ // Android vitals errors (the «Крэши» crash source, src/extensions/google-play/crash-source.cjs).
+ // The last complete day of a DAILY metric set (America/Los_Angeles calendar date), or null.
+ async freshness(app,set){const info=await this.api(app+'/'+set);const end=info?.freshnessInfo?.freshnesses?.find(f=>f.aggregationPeriod==='DAILY')?.latestEndTime;return end?.year?day(end):null;}
+ // Error issues with reports in [start, end) (UTC, hour-aligned), most reports first: vitals.errors.issues.search.
+ async errorIssues(app,{start,end,filter,pageSize=100}){
+  const hour=d=>new Date(Math.floor(d.getTime()/3600000)*3600000);
+  const at=(prefix,d)=>({[prefix+'.year']:d.getUTCFullYear(),[prefix+'.month']:d.getUTCMonth()+1,[prefix+'.day']:d.getUTCDate(),[prefix+'.hours']:d.getUTCHours()});
+  const query=new URLSearchParams({...at('interval.startTime',hour(start)),...at('interval.endTime',hour(end)),...filter?{filter}:{},orderBy:'errorReportCount desc',pageSize:String(pageSize)});
+  const result=await this.api(app+'/errorIssues:search?'+query);
+  return {issues:Array.isArray(result?.errorIssues)?result.errorIssues:[],more:!!result?.nextPageToken};
+ }
+ // Rows of a DAILY metric set between two dates (end exclusive), all pages: errorCountMetricSet, crashRateMetricSet.
+ async metricRows(app,set,{start,end,dimensions=[],metrics,filter}){
+  const body={timelineSpec:{aggregationPeriod:'DAILY',startTime:date(start),endTime:date(end)},...dimensions.length?{dimensions}:{},metrics,...filter?{filter}:{},pageSize:10000};
+  const rows=[];let pageToken;
+  for(let page=0;page<10;page++){const result=await this.api(app+'/'+set+':query',{...body,...pageToken?{pageToken}:{}});rows.push(...result?.rows||[]);pageToken=result?.nextPageToken;if(!pageToken)return rows;}
+  throw new Error('Google вернул слишком много строк.');
+ }
  async read(command,topic,context=''){
   const apps=await this.apps();if(!apps.length)throw new Error('Нет доступных приложений Google Play. Проверьте права сервисного аккаунта.');const hay=(command+' '+context).toLowerCase();
   const explicit=apps.filter(a=>[a.label,a.packageName].some(n=>n&&command.toLowerCase().includes(n.toLowerCase())));
@@ -79,4 +94,4 @@ class GooglePlay {
   return {text:`${app.label}${topic.versionCode?' · versionCode '+topic.versionCode:''}: последние доступные данные за ${fmt(latest.startTime)}, часовой пояс Google Play — Лос-Анджелес. ANR: ${value(rate)}; заметные пользователям ANR: ${value(perceived)}. Средневзвешенный показатель заметных ANR за 7 дней: ${value(week)}. Это доля пользователей, а не число зависаний.`,title:'ANR · '+app.label,sources,data:{app:app.id,date:fmt(latest.startTime),versionCode:topic.versionCode||null,rate,perceived,week,at:Date.now(),rows}};
  }
 }
-module.exports={GooglePlay,credential,metric,login,SCOPE};
+module.exports={GooglePlay,credential,metric,login,SCOPE,date,day,fmt};
