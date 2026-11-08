@@ -274,6 +274,8 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
    const asked=typeof command==='string'?command.trim():'',last=owner.messages.filter(m=>m.role==='user').at(-1);
    if(asked&&!(last&&last.text===asked&&(last.pending||last.at>=startedAt-1000)))owner.messages.push({role:'user',text:asked,at:Date.now()});
    const offer={topicId:other.id,title:other.title,...(other.projectId&&other.projectId!==owner.projectId?{projectId:other.projectId}:{})};
+   // A project switch is offered too: its chat is ready, the user goes there with the button.
+   if(result.projectChanged)result={...result,text:'Чат «'+other.title+'» готов. Перейти в него?'};
    if(result.text)owner.messages.push({role:'assistant',text:result.text,error:!!result.error,sources:result.sources||[],usedMaterials:result.usedMaterials||[],at:Date.now(),...(result.by?{by:result.by}:{}),chatOffer:offer});
    owner.at=Date.now();d.persist();
    return {...result,topicId:owner.id,topicTitle:owner.title,messages:owner.messages,chatOffer:offer,projectChanged:false};

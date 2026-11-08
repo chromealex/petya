@@ -153,8 +153,10 @@ module.exports = async (win, workspace) => {
     const plan = await window.petya.plan('Создай задачу про форму входа', Date.now());
     commandSnapshot = 'Создай задачу про форму входа'; currentIntent = 'jira';
     await makeDraft(plan.options[0]);
-    if (routePanel.hidden || currentDraft) throw new Error('Ambiguous project was silently selected');
-    const other = [...routePanel.querySelectorAll('button')].find(b => b.textContent.includes('(OTHER)'));
+    // The project question is asked in the chat (chat-clarification.js), not in the old route panel.
+    const question = dialogueChoices.querySelector('.chat-question');
+    if (!question || currentDraft) throw new Error('Ambiguous project was silently selected');
+    const other = [...question.querySelectorAll('button')].find(b => b.textContent.includes('(OTHER)'));
     if (!other) throw new Error('Missing contextual project clarification');
     other.click();
     for (let i=0; i<150 && !currentDraft; i++) await new Promise(r => setTimeout(r,20));
@@ -385,11 +387,15 @@ module.exports = async (win, workspace) => {
   await win.webContents.executeJavaScript(`new Promise(resolve => { view('settings'); document.querySelector('[data-service="notion"] details').open = false; window.scrollTo(0, 0); requestAnimationFrame(() => requestAnimationFrame(resolve)); })`);
   fs.writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-connections.png'), (await win.webContents.capturePage()).toPNG());
   await win.webContents.executeJavaScript(`(async()=>{
+    // Petya never switches chats himself: the project chat is offered with a button in the open chat.
     const first=await window.petya.converse('Работаем над проектом Проверочный');
-    if(!first.projectChanged)throw Error('Project switch failed');
+    if(first.projectChanged||!first.chatOffer?.projectId)throw Error('Project chat not offered');
     await showDialogueReply(first);
+    const go=[...document.querySelectorAll('.chat-offer')].find(b=>b.textContent.includes('Проверочный'));
+    if(!go)throw Error('Project chat button missing');
+    go.click();for(let i=0;i<100&&!dialogueTitle.textContent.includes('Проверочный');i++)await new Promise(r=>setTimeout(r,20));
     const state=await window.petya.dialogueTopics();
-    if(!state.activeId)throw Error('Project topic missing');
+    if(!state.activeId||!dialogueTitle.textContent.includes('Проверочный'))throw Error('Project topic missing');
     const question=await window.petya.converse('Работаем над другим проектом');
     if(!question.projectMemoryReply)throw Error('Project voice clarification missing');
     const invalid=await window.petya.projectMemoryReply('9');if(!invalid.question)throw Error('Invalid project option was accepted');
