@@ -11,9 +11,8 @@
   '<div class="rc-settings-actions"><button type="button" class="rc-add quiet">Добавить пункт</button><button type="button" class="rc-reset quiet">Вернуть стандартный</button><button type="button" class="rc-save">Сохранить чек-лист</button></div>'+
   '<p class="connection-status" role="status"></p>';
  document.getElementById('settings-form').append(card);
- const style=document.createElement('style');
- style.textContent='.rc-template{display:flex;flex-direction:column;gap:6px;margin:8px 0}.rc-row{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1.4fr) auto;gap:6px;align-items:center}.rc-row input,.rc-row select{min-width:0;margin:0}.rc-settings-actions{display:flex;flex-wrap:wrap;gap:8px}@media (max-width:640px){.rc-row{grid-template-columns:1fr 1fr}}';
- document.head.append(style);
+ // Styles of the template editor live in the cards' stylesheet (inline <style> is not allowed by the page policy).
+ if(!document.querySelector('link[href$="checklist-cards.css"]')){const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('checklist-cards.css',document.currentScript.src).href;document.head.append(style);}
  const q=s=>card.querySelector(s),status=q('[role=status]'),call=(method,...args)=>window.petya.feature('releaseChecklist',method,...args);
  const say=(text,kind='')=>{status.textContent=text;status.className='connection-status'+(kind?' '+kind:'');};
  let checks=[],projectId='';
@@ -23,7 +22,7 @@
   const group=document.createElement('input');group.type='text';group.className='rc-item-group';group.value=item.group||'';group.placeholder='Группа';group.setAttribute('aria-label','Группа');
   const kind=document.createElement('select');kind.className='rc-item-check';kind.setAttribute('aria-label','Как проверять');
   const manual=document.createElement('option');manual.value='';manual.textContent='Вручную';kind.append(manual);
-  for(const c of checks){const o=document.createElement('option');o.value=c.id;o.textContent=c.title+' · '+c.name;kind.append(o);}
+  for(const c of checks){const o=document.createElement('option');o.value=c.id;o.textContent=c.name+': '+c.title;kind.append(o);}
   if(item.check&&!checks.some(c=>c.id===item.check)){const o=document.createElement('option');o.value=item.check;o.textContent=item.check;kind.append(o);}
   kind.value=item.check||'';
   // Template items are user text: the interface translator leaves inputs alone.
