@@ -40,6 +40,7 @@ async function answerAttachments({settings,request,topic,question,skill}){
  const base=new URL(localEndpoint(settings.ollamaUrl));
  const call=(route,data)=>request(new URL(route,base).href,{method:data?'POST':'GET',...data?{headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}:{}});
  const files=topic.attachments||[],visual=views(files);
+ if(skill&&skill.context===undefined)skill={...skill,body:skill.body,context:await require('./skill-library/context.cjs').prepare(skill,question,{request,settings})};
  if(visual.length>24)throw Error('Слишком много изображений и кадров. Разберите материалы по отдельности.');
  const technical=files.some(a=>/\.(?:log|out|js|cjs|mjs|jsx|ts|tsx|py|cs|sql|java|go|rs|cpp|c|h|sh)(?:\.txt)?$/i.test(a.name||''));
  const checked=!visual.length?require('./static-review.cjs').findings(files,question):[];

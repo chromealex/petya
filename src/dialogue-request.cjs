@@ -31,7 +31,7 @@ function dialogueRequest({model,command,topic,company,projectContext='',localPro
  for(const rule of featureRules)rules+='\n- '+rule;
  // A skill chosen for this request (src/features/skill-choice.cjs) shapes the answer; it grants no tools.
  const skill=typeof module.exports.skill==='function'?module.exports.skill(command):null;
- if(skill)rules+=require('./instruction-skills.cjs').instruction(skill,{auto:true});
+ if(skill)rules+=require('./instruction-skills.cjs').instruction(skill,{auto:true,query:command});
  if(important.length)rules+='\n- important в справочных данных — то, что собеседник сам отметил как важное. Учитывай это в первую очередь; если важное противоречит старым сообщениям, верно важное.';
  if(/(?:\banr\b|(?:^|\s)анр(?=\s|[.!?,]|$))/iu.test(command))rules+=' Справка по терминологии приложения: ANR — Application Not Responding: приложение Android не отвечает; система может предложить подождать или закрыть его. Не путай ANR с сетевыми ошибками.';
  const context=require('./conversation-archive.cjs').conversationContext(topic,command);

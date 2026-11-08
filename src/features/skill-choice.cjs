@@ -43,7 +43,12 @@ module.exports={
    try{skill=await choose(command);}catch(e){console.error('Skill choice:',e.message);}
    // A short follow-up to an answer made with a skill («Давай», «Что-то не в рифму», «Короче») keeps that skill.
    if(!skill&&s.settings.autoSkills!=='false'&&String(command).trim().length<=80){const last=[...(s.dialogue?.active?.()?.messages||[])].reverse().find(m=>m.role==='assistant');const name=/^скилл (\S+)$/u.exec(last?.by||'')?.[1];if(name)skill=skills().find(x=>x.name===name)||null;}
-   if(skill){chosen={command:String(command).trim(),skill,at:Date.now()};s.requestProgress?.report('Беру скилл '+skill.name);}
+   if(skill){
+    s.requestProgress?.report('Беру навык '+skill.name);
+    // The skill's text for this request: whole when it fits, otherwise the sections it needs, compacted.
+    let context;try{context=await require('../skill-library/context.cjs').prepare(skill,command,{request:s.request,settings:s.settings,progress:t=>s.requestProgress?.report(t)});}catch(e){if(e?.name==='AbortError')throw e;}
+    chosen={command:String(command).trim(),skill:{name:skill.name,description:skill.description,body:skill.body,...context!==undefined?{context}:{}},at:Date.now()};
+   }
    return skill;
   };
   // Whether the answer was actually built with the skill (a Jira report or a shortcut answer is not).

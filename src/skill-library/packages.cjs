@@ -42,13 +42,17 @@ function packages(){
  }
  return cache=out;
 }
-// The instructions for the model: SKILL.md, then reference texts of the package that fit, then the file list.
-const TEXT=/\.(?:md|txt)$/i,BUDGET=12000;
+// The full instructions of a package: SKILL.md, every reference text it mentions and the list of its files.
+// Nothing is cut here; src/skill-library/context.cjs fits them to one request.
+const TEXT=/\.(?:md|txt)$/i;
+const bodies=new WeakMap();
 function body(skill){
- let text=skill.raw.length>BUDGET?skill.raw.slice(0,BUDGET)+'\n…(SKILL.md сокращён)':skill.raw;
- const refs=skill.files.filter(f=>TEXT.test(f)&&!/licen[cs]e|notice/i.test(f)&&text.includes(path.basename(f)));
- for(const f of refs){const t=fs.readFileSync(path.join(skill.folder,f),'utf8');if(text.length+t.length>BUDGET*1.5)continue;text+='\n\n## Файл '+f+'\n'+t;}
- if(skill.files.length)text+='\n\nФайлы скилла (в папке '+skill.source+'/'+skill.original+'): '+skill.files.filter(f=>!/\.(?:ttf|otf|xsd)$/i.test(f)).slice(0,40).join(', ')+'. Скрипты отсюда сам не запускаешь: опиши, что и как запустить, или выполни расчёт через Python, если он подключён.';
- return text+'\n\nИсточник: '+skill.source+' (лицензия в папке скилла). Отвечай по-русски, если пользователь пишет по-русски.';
+ if(bodies.has(skill))return bodies.get(skill);
+ let text=skill.raw;
+ const refs=skill.files.filter(f=>TEXT.test(f)&&!/licen[cs]e|notice/i.test(f)&&(skill.raw.includes(f)||skill.raw.includes(path.basename(f))));
+ for(const f of refs){try{text+='\n\n## Файл '+f+'\n'+fs.readFileSync(path.join(skill.folder,f),'utf8');}catch{/* A missing reference is listed, not invented. */}}
+ if(skill.files.length)text+='\n\nФайлы навыка (в папке '+skill.source+'/'+skill.original+'): '+skill.files.filter(f=>!/\.(?:ttf|otf|xsd)$/i.test(f)).join(', ')+'.'+require('./scripts.cjs').note(skill);
+ text+='\n\nИсточник: '+skill.source+' (лицензия в папке навыка). Отвечай по-русски, если пользователь пишет по-русски.';
+ bodies.set(skill,text);return text;
 }
 module.exports={packages,frontMatter,body,ROOT};

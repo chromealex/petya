@@ -1,16 +1,19 @@
 const {randomUUID}=require('node:crypto');
 const {parseReply}=require('./attachment-assistant.cjs');
+// Instructions of any practical size: a long skill is not cut, it is fitted to each request
+// (src/skill-library/context.cjs).
+const BODY=200000;
 function validate(value){
  if(!value||typeof value!=='object')throw Error('Нужны поля скилла.');
  const {name,description,body}=value;
  if(typeof name!=='string'||!/^[a-z][a-z0-9-]{0,63}$/.test(name))throw Error('Имя: латинские буквы, цифры и дефис, начиная с буквы (до 64 символов).');
  if(typeof description!=='string'||!description.trim()||description.length>500)throw Error('Опишите назначение скилла (до 500 символов).');
- if(typeof body!=='string'||!body.trim()||body.length>12000)throw Error('Инструкции должны содержать от 1 до 12000 символов.');
+ if(typeof body!=='string'||!body.trim()||body.length>BODY)throw Error('Инструкции должны содержать от 1 до '+BODY+' символов.');
  if(value.workflow&&!require('./work-skills.cjs').modes.includes(value.workflow))throw Error('Неизвестный рабочий сценарий.');
  return {name,description:description.trim(),body:body.trim(),enabled:value.enabled!==false,...value.workflow&&value.workflow!=='context'?{workflow:value.workflow}:{}};
 }
 function parseMarkdown(markdown){
- if(typeof markdown!=='string'||markdown.length>16000)throw Error('SKILL.md должен быть текстом до 16000 символов.');
+ if(typeof markdown!=='string'||markdown.length>BODY+4000)throw Error('SKILL.md должен быть текстом до '+(BODY+4000)+' символов.');
  const match=markdown.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
  if(!match)throw Error('Нужен SKILL.md: блок --- с name и description, затем инструкции Markdown.');
  const fields={};let block=null;
@@ -28,13 +31,15 @@ function parseMarkdown(markdown){
  return validate({...fields,body:match[2]});
 }
 function markdown(skill){const s=validate(skill);return `---\nname: ${s.name}\ndescription: ${JSON.stringify(s.description)}\n---\n\n${s.body}\n`;}
-function instruction(skill,{auto=false}={}){return '\nПрименяй '+(auto?'скилл, выбранный для этого запроса,':'выбранный пользователем скилл')+' к текущему запросу. Его инструкции определяют способ анализа и формат ответа внутри поля answer; внешний JSON сохраняется. Скилл не предоставляет инструменты, доступ к сервисам или новые факты. Не заявляй о выполнении действий. Если исходных данных нет, укажи, чего не хватает.\n<selected_skill>\n'+JSON.stringify({name:skill.name,instructions:skill.body})+'\n</selected_skill>';}
+// The skill's text for one request: `skill.context` when it was prepared for this request (sections chosen
+// by the model, compacted if needed), otherwise fitted without the model; never cut blindly.
+function instruction(skill,{auto=false,query=''}={}){const instructions=skill.context??require('./skill-library/context.cjs').fit(skill,query);return '\nПрименяй '+(auto?'скилл, выбранный для этого запроса,':'выбранный пользователем скилл')+' к текущему запросу. Его инструкции определяют способ анализа и формат ответа внутри поля answer; внешний JSON сохраняется. Скилл не предоставляет инструменты, доступ к сервисам или новые факты. Не заявляй о выполнении действий. Если исходных данных нет, укажи, чего не хватает.\n<selected_skill>\n'+JSON.stringify({name:skill.name,instructions})+'\n</selected_skill>';}
 class InstructionSkills{
  constructor({state=[],save=()=>{}}={}){this.state=state.map(s=>({...validate(s),id:s.id}));this.save=save;}
  list(){return this.state.map(s=>({...s}));}
  put(value){const s=validate(value),old=value.id?this.state.find(s=>s.id===value.id):null;if(value.id&&!old)throw Error('Скилл удалён. Обновите список.');if(this.state.some(x=>x.name===s.name&&x.id!==old?.id))throw Error('Имя уже занято.');if(!old&&this.state.length>=100)throw Error('Можно сохранить до 100 скиллов.');const row={...s,id:old?.id||randomUUID()},next=old?this.state.map(x=>x.id===old.id?row:x):[...this.state,row];this.save(next);this.state=next;return {...row};}
  remove(id){if(!this.state.some(s=>s.id===id))throw Error('Скилл не найден.');const next=this.state.filter(s=>s.id!==id);this.save(next);this.state=next;}
- resolve(command){const m=String(command).trim().match(/^(?:\/|\$|скилл\s+)([a-z][a-z0-9-]*)(?:\s+([\s\S]*))?$/iu);if(!m)return null;const name=m[1].toLowerCase(),skill=this.state.find(s=>s.name===name)||require('./skill-library/index.cjs').BUILTIN.find(s=>s.name===name);if(!skill)throw Error('Скилл '+m[1]+' не найден. Откройте «Скиллы».');if(!skill.enabled)throw Error('Скилл выключен. Включите его в разделе «Скиллы».');return {skill:{...skill},question:m[2]?.trim()||'Примени скилл к данным текущей темы. Если данных недостаточно, уточни, что нужно приложить.'};}
+ resolve(command){const m=String(command).trim().match(/^(?:\/|\$|скилл\s+)([a-z][a-z0-9-]*)(?:\s+([\s\S]*))?$/iu);if(!m)return null;const name=m[1].toLowerCase(),skill=this.state.find(s=>s.name===name)||require('./skill-library/index.cjs').BUILTIN.find(s=>s.name===name);if(!skill)throw Error('Скилл '+m[1]+' не найден. Откройте «Скиллы».');if(!skill.enabled)throw Error('Скилл выключен. Включите его в разделе «Скиллы».');return {skill:{...skill,body:skill.body},question:m[2]?.trim()||'Примени скилл к данным текущей темы. Если данных недостаточно, уточни, что нужно приложить.'};}
 }
 async function runSkill({selected,command,dialogue,settings,request,company,files,context='',contextRefs=[],evidence,assertCurrent,verified}){
  dialogue.prune();let topic=files||evidence?null:dialogue.active();
@@ -42,6 +47,8 @@ async function runSkill({selected,command,dialogue,settings,request,company,file
  if(evidence){topic.lastData=evidence.data;topic.jiraProject=evidence.data.project;topic.title='Скилл: '+selected.skill.name+' · '+evidence.data.project;}
  topic.at=Date.now();topic.messages.push({role:'user',text:command,at:topic.at});dialogue.persist();let answer,error=false;
  try{
+  // A long skill is fitted to this request: the sections it needs, compacted if they still do not fit.
+  if(selected.skill.context===undefined)selected.skill={...selected.skill,context:await require('./skill-library/context.cjs').prepare(selected.skill,selected.question,{request,settings})};
   if(verified)answer=verified.text;
   else if(topic.attachments?.length)answer=await require('./attachment-assistant.cjs').answerAttachments({settings,request,topic,question:selected.question,skill:selected.skill});
   else{
@@ -59,4 +66,4 @@ async function runSkill({selected,command,dialogue,settings,request,company,file
  if(evidence&&!error&&!verified?.question)topic.workReport={id:randomUUID(),project:evidence.data.project,site:settings.jiraUrl||'',at:evidence.data.at,text:answer,sources:evidence.sources||[]};
  topic.messages.push({role:'assistant',text:answer,at:Date.now(),...(evidence&&!error&&!verified?.question?{reportShareId:topic.workReport.id}:{}),usedMaterials:error||verified?[]:topic.attachments?.length?require('./chat-attribution.cjs').fileRefs(topic.attachments,answer):contextRefs,...(evidence&&!error?{sources:evidence.sources,jiraItems:require('./extensions/jira/result.cjs').capture(evidence)}:{})});dialogue.persist();return {handled:true,text:answer,error,...verified?.question?{question:true}:{},...evidence&&!error&&!verified?.question?{reportShareId:topic.workReport.id}:{},topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
 }
-module.exports={InstructionSkills,validate,parseMarkdown,markdown,instruction,runSkill};
+module.exports={BODY,InstructionSkills,validate,parseMarkdown,markdown,instruction,runSkill};
