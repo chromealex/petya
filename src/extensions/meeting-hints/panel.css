@@ -1,0 +1,20 @@
+:root{--card:#1d2321f2;--ink:#eef4f1;--muted:#a9b7b1;--line:#ffffff1f;--button:#ffffff14;--button-hover:#ffffff26;--decision:#e5ce8c;--promise:#f0b4a8;--term:#c9ed9d}
+@media (prefers-color-scheme:light){:root{--card:#fbfcfbf5;--ink:#18201d;--muted:#5d6b65;--line:#0000001a;--button:#0000000d;--button-hover:#0000001a}}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent;user-select:none;font:13px/1.35 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+[hidden]{display:none!important}
+.hint{--accent:var(--decision);position:absolute;inset:6px;display:flex;flex-direction:column;gap:6px;padding:10px 12px 10px 15px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:inset 4px 0 0 var(--accent),0 4px 14px #0006}
+.hint[data-kind="promise"]{--accent:var(--promise)}.hint[data-kind="term"]{--accent:var(--term)}
+header{display:flex;align-items:center;gap:8px;min-width:0}
+.kind{flex:none;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;color:#1c1c1c;background:var(--decision)}
+.hint[data-kind="promise"] .kind{background:var(--promise)}.hint[data-kind="term"] .kind{background:var(--term)}
+header strong{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px}
+.close{flex:none;width:22px;height:22px;border:0;border-radius:6px;background:transparent;color:var(--muted);font-size:16px;line-height:1;cursor:pointer}
+.close:hover{background:var(--button-hover);color:var(--ink)}
+.text{margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;user-select:text}
+.source{margin:0;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+footer{display:flex;gap:6px;margin-top:auto}
+footer button{border:0;border-radius:7px;padding:4px 9px;background:var(--button);color:var(--ink);font:inherit;font-size:12px;cursor:pointer;white-space:nowrap}
+footer button:hover{background:var(--button-hover)}
+footer .quiet{background:transparent;color:var(--muted);margin-left:auto;padding:4px 4px}
+footer button:focus-visible,.close:focus-visible{outline:2px solid var(--decision);outline-offset:1px}
