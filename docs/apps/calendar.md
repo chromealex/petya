@@ -36,7 +36,8 @@ as free. The settings let you change the working hours, the default length, and 
 ## Writes
 
 The chat turn never creates an event. «Поставить встречу» on the card opens a confirm step with an editable
-title, the time, the attendees, and a Meet/Teams checkbox. Only «Создать в календаре» calls the
+title, the time, the attendees, and «Видеозвонок» (video-meeting providers of added apps, known rooms, a typed link or
+none; see [cross-integrations.md](cross-integrations.md)). Only «Создать в календаре» calls the
 `calendarApp.create` IPC. The event is built from the card data stored in the chat message, not from data the
 page sends. Only the slot index and the title come from the page.
 
@@ -44,8 +45,10 @@ A duplicate click is refused, and an event that was already created is returned,
 service gives no answer, the card is marked `unknown`, and Petya refuses to repeat the write until the user
 checks the calendar.
 
-The Google insert uses `sendUpdates=all` and `conferenceDataVersion=1` with `hangoutsMeet`. The Graph
-`POST /me/events` uses `isOnlineMeeting` with `teamsForBusiness`. While the browser consent is open, it is shown
+The Google insert uses `sendUpdates=all`. A video call that the service creates with the event is added by its app
+through `prepareEvent` (Google Meet: `conferenceDataVersion=1` and `conferenceData.createRequest`; Microsoft Teams:
+`isOnlineMeeting`); the calendar names no meeting service and reads a created call's link from
+`conferenceData.entryPoints` (Google) or `onlineMeeting.joinUrl` (Graph). While the browser consent is open, it is shown
 in the notification center (`calendar-connect`), and the state is restored through `status`.
 
 ## Endpoints
@@ -98,7 +101,8 @@ Azure / Entra app registration (the Application ID used for Outlook mail):
 ## Limits
 
 - Personal Microsoft accounts have no `getSchedule`. For them, only the user's own busy time is used (taken from
-  `calendarView`), and colleagues are marked unknown. Teams links may not be available for personal accounts.
+  `calendarView`), and colleagues are marked unknown. Teams meetings are not offered for personal accounts
+(`accounts.cjs` tells work and personal accounts apart, see [teams.md](teams.md)).
 - Only the primary calendar is read. All-day events are shown as chips and do not block slots.
 - Time zone: the computer's local zone (an IANA name for Google; UTC on the wire for Graph).
 
@@ -118,4 +122,4 @@ Everything was tested with stubs. No real credentials were available.
 Still to verify live:
 - the consent screens with the real Google and Azure clients, and the scope strings the services return
 - freeBusy and getSchedule access to colleagues' calendars in a real Workspace / Microsoft 365 tenant
-- the Meet and Teams link creation
+- the Meet and Teams link creation (now in the [Google Meet](google-meet.md) and [Teams](teams.md) extensions)
