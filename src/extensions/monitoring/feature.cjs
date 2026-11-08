@@ -27,6 +27,7 @@ const store=s=>Store.open(s);
 const tr=text=>{try{return require('../../interface-language.cjs').t(text);}catch{return text;}};
 const ago=ms=>{const m=Math.max(1,Math.round(ms/MIN));return m<60?m+' мин':m<1440?Math.round(m/60)+' ч':Math.round(m/1440)+' дн';};
 const pct=v=>v==null?'—':(Math.floor(v*10000)/100).toLocaleString('ru-RU')+'%';
+const num=v=>Number(v).toLocaleString('ru-RU',{maximumFractionDigits:1});
 
 // Whether «Логи сервера» can take «логи сервиса X за последний час»: added → ask it; only offered → the shared offer.
 function logsApp(s){
@@ -137,9 +138,9 @@ async function boardTurn(s,command,intent,now=Date.now()){
   const th={...P.THRESHOLDS,...(store(s).services()[focusName]?.thresholds||{})};
   if(svc){
    if(svc.signals.errorRate!=null&&svc.signals.errorRate>=th.errorRate[0])reasons.push('Ошибок: '+pct(svc.signals.errorRate)+' запросов.');
-   if(svc.signals.latencyP95!=null&&svc.signals.latencyP95>=th.latencyP95[0])reasons.push('p95 задержки: '+svc.signals.latencyP95.toFixed(2)+' с.');
+   if(svc.signals.latencyP95!=null&&svc.signals.latencyP95>=th.latencyP95[0])reasons.push('p95 задержки: '+Number(svc.signals.latencyP95).toLocaleString('ru-RU',{maximumFractionDigits:2})+' с.');
    if(svc.signals.saturation!=null&&svc.signals.saturation>=th.saturation[0])reasons.push('Загрузка: '+pct(svc.signals.saturation)+'.');
-   if(svc.signals.rps!=null&&svc.series.rps?.length>4){const first=svc.series.rps[0][1],last=svc.signals.rps;if(first>0&&last<first*0.3)reasons.push('Трафик упал с '+first.toFixed(1)+' до '+last.toFixed(1)+' запросов/с.');}
+   if(svc.signals.rps!=null&&svc.series.rps?.length>4){const first=svc.series.rps[0][1],last=svc.signals.rps;if(first>0&&last<first*0.3)reasons.push('Трафик упал с '+num(first)+' до '+num(last)+' запросов/с.');}
   }
   for(const c of checks.filter(c=>c.last&&!c.last.ok))reasons.push('Проверка «'+c.name+'»: '+(c.last.error||'не отвечает')+'.');
   const recent=incidents.filter(e=>e.service===focusName).slice(0,2);

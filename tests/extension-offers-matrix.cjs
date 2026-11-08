@@ -65,7 +65,8 @@ const own={
  'file-search':['где презентация про Китай с графиком LTV?','найди скрипт, который сохраняет прогресс','документы про монетизацию','в каком файле считается урон?','поищи заметки про онбординг'],
  logs:['покажи логи сервера за последний час','ошибки оплаты в логах за час','логи сервиса payments за последний час','что в Loki за сутки','найди ошибки в Кибане','логи пода api за 15 минут'],
  kubernetes:['что с подами в кубере','покажи поды в k8s','почему падает под в kubernetes','какие поды в CrashLoopBackOff','статус деплоймента в кубере'],
- 'ua-campaigns':['сколько потратили на закупку трафика за неделю','какой CPI по сетям','покажи расходы на рекламные кампании вчера','какой ROAS за неделю','сколько стоит установка по сетям']
+ 'ua-campaigns':['сколько потратили на закупку трафика за неделю','какой CPI по сетям','покажи расходы на рекламные кампании вчера','какой ROAS за неделю','сколько стоит установка по сетям'],
+ monitoring:['что с серверами','всё ли живое','какие алерты горят','аптайм за неделю','почему лежит api','инциденты за неделю','что в Grafana','найди все адреса серваков в проекте','какие сервера использует игра']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -161,7 +162,10 @@ const not={
  // Kubernetes: Docker, pod logs (the logs app), monitoring, dialogue lines, store releases and «под Windows» are not it.
  kubernetes:['что в докере','перезапусти контейнер redis','логи пода api','что с серверами','какие алерты горят','реплики персонажа в диалоге','собери под Windows','выкатка в Google Play','подпиши договор'],
  // Buying users: ad revenue in our games, starting or stopping ads, marketing in general and purchases are not it.
- 'ua-campaigns':['сколько заработали на рекламе вчера','eCPM по сетям','выручка с рекламы за неделю','запусти рекламу в TikTok','отключи рекламу','маркетинговые кампании','покупки в приложении','расходы на обед','что в Unity']
+ 'ua-campaigns':['сколько заработали на рекламе вчера','eCPM по сетям','выручка с рекламы за неделю','запусти рекламу в TikTok','отключи рекламу','маркетинговые кампании','покупки в приложении','расходы на обед','что в Unity'],
+ // Server health only: competitors / mentions monitoring, the screen, this computer's uptime, a calendar alert, logs,
+ // Kubernetes objects, Docker containers, office or computer addresses and API requests belong to others.
+ monitoring:['мониторинг конкурентов','мониторинг упоминаний бренда','второй монитор не работает','настрой яркость монитора','аптайм компьютера','поставь алерт в календаре','логи сервиса api за последний час','что с подами в kubernetes','почему падает контейнер postgres','что запущено в докере','адрес офиса','IP моего компьютера','проверь, отвечает ли staging','какие эндпоинты в openapi проекта','что нового у конкурентов','метрики команды']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -180,7 +184,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

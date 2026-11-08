@@ -48,6 +48,8 @@ function about(text){
  const named=MONITOR.test(t);
  if(NOT.test(t)&&!named&&!ALERT.test(t))return false;
  if(NOT.test(t)&&/календар|напомин|будильник|конкурент|упоминани/iu.test(t))return false;
+ // One HTTP request to a health endpoint («какой статус у health-check прода», «отвечает ли staging») is «API-клиент».
+ if(!named&&/health-?check|хелс-?чек|хелсчек|отвечает ли/iu.test(t))return false;
  if(named)return true;
  if(ALIVE.test(t))return true;
  if(SILENCE.test(t)&&ALERT.test(t))return true;

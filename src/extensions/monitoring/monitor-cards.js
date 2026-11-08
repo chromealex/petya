@@ -38,7 +38,7 @@
   const name=raw(k.el('button','mon-svc-name',x.name));name.type='button';name.title='Почему так — подробнее';
   name.onclick=e=>{e.stopPropagation();k.ask('Почему '+(x.status==='critical'?'лежит ':x.status==='warn'?'тормозит ':'так себя ведёт ')+x.name,{send:true});};
   head.append(dot,name);
-  if(x.since&&x.status!=='ok'){const s=k.el('small','mon-since');s.append(document.createTextNode('с '),time(x.since));head.append(s);}
+  if(x.since&&x.status!=='ok'){const s=k.el('small','mon-since');s.append(document.createTextNode('началось '),time(x.since));head.append(s);}
   if(x.note)head.append(raw(k.el('small','mon-note',x.note)));
   const sig=k.el('div','mon-signals');
   for(const [key,label,format] of SIGNALS){
@@ -58,7 +58,7 @@
   if(a.service)top.append(raw(k.el('span','mon-alert-svc',a.service)));
   if(a.state==='pending')top.append(k.chip({label:'ожидает',tone:''}));
   if(a.silenced)top.append(k.chip({label:'заглушён',tone:''}));
-  const age=k.el('small','mon-age');if(a.startsAt){age.append(document.createTextNode('горит с '),time(a.startsAt));}top.append(age);
+  const age=k.el('small','mon-age');if(a.startsAt){age.append(document.createTextNode(a.state==='pending'?'появился ':'загорелся '),time(a.startsAt));}top.append(age);
   li.append(top);
   const summary=a.annotations?.summary||a.annotations?.description;
   if(summary)li.append(raw(k.el('p','mon-alert-text',summary)));
@@ -96,7 +96,7 @@
   const head=k.el('div','mon-uptime-head');
   const dot=k.el('span','mon-dot');dot.title=STATUS[u.status]?.label||'';
   head.append(dot,raw(k.el('b','mon-uptime-name',u.name)),k.el('span','mon-uptime-pct',pct(u.periodPercent??u.percent)));
-  if(u.last?.ms!=null)head.append(k.el('small','mon-note',num(u.last.ms,0)+' мс'));
+  if(u.last?.ms!=null)head.append(k.el('small','mon-ms',num(u.last.ms,0)+' мс'));
   if(u.tlsDays!=null)head.append(k.chip({label:u.tlsDays<0?'сертификат истёк':'TLS: '+u.tlsDays+' дн.',tone:u.tlsDays<7?'alert':u.tlsDays<21?'progress':'',title:'До окончания сертификата'}));
   const strip=k.el('div','mon-strip');strip.setAttribute('role','img');strip.setAttribute('aria-label','Доступность за 30 дней');
   (u.strip||[]).forEach((p,i)=>{const cell=k.el('span','mon-cell');cell.dataset.level=p==null?'none':p>=0.999?'ok':p>=0.98?'warn':'bad';cell.title=(p==null?'нет данных':pct(p))+' · '+(30-i)+' дн. назад';strip.append(cell);});
@@ -109,12 +109,14 @@
  window.renderMonitorCard=(parent,c)=>{
   const k=window.resultKit;if(!k||!c||parent.querySelector('.mon-card'))return;
   const body=k.el('div','mon-body');
-  const services=c.services||[],alerts=c.alerts||[],now=Number(c.now)||Date.now();
+  const services=c.services||[],now=Number(c.now)||Date.now();
+  // «почему лежит X»: the alerts and incidents of that service only.
+  const alerts=(c.alerts||[]).filter(a=>!c.focus||a.service===c.focus.service),incidentList=(c.incidents||[]).filter(e=>!c.focus||e.service===c.focus.service);
   for(const x of (c.sources||[]).filter(x=>x.error))body.append(raw(k.el('p','mon-error',x.name+': '+x.error)));
   if(c.focus){
    const f=k.el('div','mon-focus');f.dataset.status=c.focus.status;
    const h=k.el('div','mon-focus-head');h.append(k.el('span','mon-dot'),raw(k.el('b',null,c.focus.service)),k.chip({label:STATUS[c.focus.status]?.label||'',tone:STATUS[c.focus.status]?.tone||''}));
-   if(c.focus.since&&c.focus.status!=='ok'){const s=k.el('small','mon-since');s.append(document.createTextNode('с '),time(c.focus.since));h.append(s);}
+   if(c.focus.since&&c.focus.status!=='ok'){const s=k.el('small','mon-since');s.append(document.createTextNode('началось '),time(c.focus.since));h.append(s);}
    f.append(h);
    if(c.focus.reasons?.length){const ul=k.el('ul','mon-reasons');for(const r of c.focus.reasons)ul.append(raw(k.el('li',null,r)));f.append(ul);}
    else f.append(k.el('p','mon-empty','Явных причин в метриках и алертах не видно.'));
@@ -129,7 +131,7 @@
   const parts={
    board:shown.length?section(k,'Сервисы',shown.length,svcList,'mon-services'):null,
    alerts:alerts.length||c.mode==='alerts'?section(k,'Алерты',alerts.filter(a=>!a.silenced).length,alerts.length?alertList:k.el('p','mon-empty','Алертов нет.'),'mon-alerts'):null,
-   incidents:(c.incidents||[]).length||c.mode==='incidents'?section(k,'Инциденты недели',(c.incidents||[]).length,(c.incidents||[]).length?incidents(k,c.incidents,now):k.el('p','mon-empty','Инцидентов не было.'),'mon-week-box'):null,
+   incidents:incidentList.length||c.mode==='incidents'?section(k,'Инциденты недели',incidentList.length,incidentList.length?incidents(k,incidentList,now):k.el('p','mon-empty','Инцидентов не было.'),'mon-week-box'):null,
    uptime:uptime.length||c.mode==='uptime'?section(k,'Аптайм · '+(c.mode==='uptime'?c.period?.label||'':'30 дней'),uptime.length,uptime.length?upList:k.el('p','mon-empty','Проверок доступности нет.'),'mon-uptime-box'):null
   };
   const order={alerts:['alerts','board','incidents','uptime'],uptime:['uptime','incidents','board','alerts'],incidents:['incidents','alerts','board','uptime'],why:['board','alerts','incidents','uptime']}[c.mode]||['board','alerts','incidents','uptime'];
@@ -197,7 +199,7 @@
   return parts;
  }
  function addressRow(k,a,c,picked){
-  const li=k.el('li','mon-addr');li.dataset.category=a.category;li.dataset.env=(a.envs||[]).join(' ');li.dataset.key=a.key;
+  const li=k.el('li','mon-addr');li.dataset.category=a.category;li.dataset.env=(a.envs||[]).join(' ');li.dataset.key=a.key;li.dataset.host=a.host;
   const top=k.el('div','mon-addr-top');
   if(a.category!=='third'&&!a.partial&&/^https?$/.test(a.scheme)&&!a.display.includes('@')){
    const box=k.el('input');box.type='checkbox';box.className='mon-pick';box.setAttribute('aria-label','Следить за '+a.host);box.checked=picked.has(a.key);
@@ -226,7 +228,7 @@
   const picked=new Set();
   const body=k.el('div','mon-body');
   const tiles=k.el('div','mon-tiles');
-  const hosts=new Set(addresses.filter(a=>a.category==='own').map(a=>a.host));
+  const hosts=new Set(addresses.filter(a=>a.category==='own'&&!a.host.startsWith('{')).map(a=>a.host));
   for(const [v,l] of [[hosts.size,plural(hosts.size,['свой хост','своих хоста','своих хостов'])],[c.counts?.cdn||0,'CDN и хранилища'],[c.counts?.third||0,'сторонние SDK'],[c.stats?.files||0,plural(c.stats?.files||0,['файл просмотрен','файла просмотрено','файлов просмотрено'])]]){const t=k.el('div','mon-tile');t.append(k.el('b',null,num(v,0)),k.el('span',null,l));tiles.append(t);}
   body.append(tiles);
   // Environment filter.
@@ -234,12 +236,19 @@
   const filter=k.el('div','mon-filter');filter.setAttribute('role','group');filter.setAttribute('aria-label','Окружение');
   const envs=['all',...['prod','staging','dev'].filter(e=>addresses.some(a=>(a.envs||[]).includes(e)))];
   const lists=[];
-  const apply=()=>{for(const b of filter.children)b.setAttribute('aria-pressed',String(b.dataset.env===env));for(const li of body.querySelectorAll('.mon-addr'))li.hidden=env!=='all'&&!li.dataset.env.split(' ').includes(env);};
+  const apply=()=>{for(const b of filter.children)b.setAttribute('aria-pressed',String(b.dataset.env===env));for(const li of body.querySelectorAll('.mon-addr'))li.hidden=env!=='all'&&!li.dataset.env.split(' ').includes(env);
+   for(const h of body.querySelectorAll('.mon-host'))h.hidden=![...body.querySelectorAll('.mon-addr')].some(li=>li.dataset.host===h.dataset.host&&!li.hidden);};
   for(const e of envs){const b=k.el('button',null,e==='all'?'Все окружения':ENV[e]);b.type='button';b.dataset.env=e;b.onclick=()=>{env=e;apply();};filter.append(b);}
   if(envs.length>2)body.append(filter);
   for(const [cat,title] of GROUPS){
    const own=addresses.filter(a=>a.category===cat);if(!own.length)continue;
-   const ul=k.el('ul','mon-list mon-addrs');ul.append(k.collapse(own.map(a=>addressRow(k,a,c,picked)),cat==='own'?10:5,'Ещё адреса'));
+   // Own servers: grouped under their host («api.mygame.com · 8»), so one server's endpoints read together.
+   const nodes=[];let last='';
+   for(const a of own){
+    if(cat==='own'&&a.host!==last){last=a.host;const n=own.filter(b=>b.host===a.host).length;const h=k.el('li','mon-host');h.append(a.host.startsWith('{')?k.el('b',null,'Адрес задаётся в рантайме'):raw(k.el('b',null,a.host)));if(n>1)h.append(k.el('small',null,String(n)));h.dataset.host=a.host;nodes.push(h);}
+    nodes.push(addressRow(k,a,c,picked));
+   }
+   const ul=k.el('ul','mon-list mon-addrs');ul.append(k.collapse(nodes,cat==='own'?14:5,'Ещё адреса'));
    const s=section(k,title,own.length,ul,'mon-group');s.dataset.category=cat;body.append(s);lists.push(ul);
   }
   if(!addresses.length)body.append(k.el('p','mon-empty','Адресов серверов не нашлось.'));
