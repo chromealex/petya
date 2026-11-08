@@ -4,7 +4,7 @@
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('regex-cards.css',document.currentScript.src).href;document.head.append(style);
  const copy=async(k,text)=>{try{await navigator.clipboard.writeText(text);k.toast('Скопировано');}catch{k.toast('Не удалось скопировать',{error:true});}};
  function highlighted(k,line,matches){
-  const box=k.el('span','line');let at=0;
+  const box=k.el('span','line');box.dataset.noI18n='';let at=0;
   for(const m of [...matches].sort((a,b)=>a.index-b.index)){if(m.index<at)continue;box.append(line.slice(at,m.index));const mark=k.el('mark',null,m.text||'∅');if(m.groups?.some(g=>g!==null))mark.title='Группы: '+m.groups.map((g,i)=>'$'+(i+1)+'='+(g??'—')).join(', ');box.append(mark);at=m.index+m.text.length;}
   box.append(line.slice(at));return box;
  }
@@ -13,8 +13,8 @@
   const literal='/'+r.pattern+'/'+(r.flags||'');
   const body=k.el('div','regex-body');
   if(r.error)body.append(k.el('p','regex-warn',r.error));
-  if(r.summary)body.append(k.el('p','regex-summary',r.summary));
-  if(r.parts?.length){const ul=k.el('ul','regex-parts');for(const p of r.parts){const li=k.el('li');li.append(k.el('code',null,p.part),k.el('span',null,p.meaning));ul.append(li);}body.append(ul);}
+  if(r.summary){const p=k.el('p','regex-summary',r.summary);p.dataset.noI18n='';body.append(p);}
+  if(r.parts?.length){const ul=k.el('ul','regex-parts');for(const p of r.parts){const li=k.el('li');li.dataset.noI18n='';li.append(k.el('code',null,p.part),k.el('span',null,p.meaning));ul.append(li);}body.append(ul);}
   if(r.rows?.length){
    const ul=k.el('ul','regex-lines');
    for(const row of r.rows){
@@ -40,12 +40,12 @@
   const body=k.el('div','regex-body');
   if(c.error)body.append(k.el('p','regex-warn',c.error));
   else{
-   body.append(k.el('p','regex-summary',c.description[0].toUpperCase()+c.description.slice(1)+'.'));
-   const fields=k.el('div','cron-fields');c.fields.forEach((f,i)=>{const box=k.el('div','cron-field');box.append(k.el('code',null,f),k.el('small',null,NAMES[i]));fields.append(box);});body.append(fields);
+   {const p=k.el('p','regex-summary',c.description[0].toUpperCase()+c.description.slice(1)+'.');p.dataset.noI18n='';body.append(p);}
+   const fields=k.el('div','cron-fields');c.fields.forEach((f,i)=>{const box=k.el('div','cron-field');const code=k.el('code',null,f);code.dataset.noI18n='';box.append(code,k.el('small',null,NAMES[i]));fields.append(box);});body.append(fields);
    if(c.runs?.length){
     body.append(k.el('small','kit-meta','Ближайшие запуски (время этого компьютера)'));
     const ul=k.el('ul','cron-runs');
-    for(const iso of c.runs){const d=new Date(iso),li=k.el('li');li.append(k.el('span',null,d.toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'})),k.el('span',null,d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})));ul.append(li);}
+    for(const iso of c.runs){const d=new Date(iso),li=k.el('li');li.append(k.el('span',null,d.toLocaleDateString(window.petyaLocale||'ru-RU',{weekday:'short',day:'numeric',month:'short'})),k.el('span',null,d.toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'})));ul.append(li);}
     body.append(ul);
    }
   }
