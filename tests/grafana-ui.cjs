@@ -41,7 +41,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
   assert.match(await js(P(8)+".querySelector('a.gf-open-text').href"),/viewPanel=8$/);
   assert.equal(await js(card+".querySelectorAll('b,img,script').length===0||!"+card+".querySelector('img')"),true,'no Grafana HTML');
   assert.equal(await js(card+".querySelector('.gf-ranges [aria-pressed=true]').dataset.range"),'now-24h');
-  assert.match(await js(card+".querySelector('.gf-more-panels').textContent"),/Ещё 1 панель/);
+  assert.match(await js(card+".querySelector('.gf-more-panels').textContent"),/Ещё панелей в Grafana: 1/);
   assert.equal(await js(card+".querySelectorAll('.gf-var').length"),2,'server and league, the hidden ones not shown');
   await js(card+".querySelector('.gf-ranges [data-range=\"now-7d\"]').click()");
   assert.equal(await wait("window.__asked.length===1",50,20),true);

@@ -48,7 +48,7 @@ function explain(e,c){
  let text=map[e?.status];
  if(!text){
   const code=e?.code||e?.cause?.code||'';
-  if(e?.name==='TimeoutError'||e?.name==='AbortError'||/timeout|timed out/i.test(String(e?.message)))text='Grafana ('+host+') не ответила за '+Math.round(TIMEOUT/1000)+' с.';
+  if(e?.name==='TimeoutError'||e?.name==='AbortError'||/timeout|timed out/i.test(String(e?.message)))text='Grafana ('+host+') не ответила за '+Math.round(TIMEOUT/1000)+' секунд.';
   else if(/redirect/i.test(String(e?.message)+' '+String(e?.cause?.message)))text='Grafana перенаправила запрос (обычно на страницу входа). Проверьте адрес: с префиксом пути, если Grafana открыта не в корне сайта.';
   else if(/ECONNREFUSED|ENOTFOUND|EAI_AGAIN|ECONNRESET|EHOSTUNREACH/.test(code)||/fetch failed/i.test(String(e?.message)))text='Grafana недоступна по адресу '+c.url+'. Проверьте адрес и сеть (VPN).';
   else if(e instanceof SyntaxError)text='Адрес '+c.url+' отвечает не как API Grafana. Проверьте адрес.';

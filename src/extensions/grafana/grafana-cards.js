@@ -200,7 +200,7 @@
   if(vars.length){const row=k.el('div','gf-vars');for(const v of vars.slice(0,6)){const chip=k.el('span','gf-var'+(v.from!=='dashboard'?' set':''));chip.append(raw(k.el('span','gf-var-name',v.label)),raw(k.el('span',null,v.text.join(', '))));chip.dataset.var=v.name;row.append(chip);}bar.append(row);}
   body.append(bar);
   const grid=k.el('div','gf-grid');for(const p of c.panels)grid.append(panel(k,c,p));body.append(grid);
-  if(c.total>c.panels.length&&c.viewPanel===null)body.append(k.el('p','gf-more-panels','Ещё '+(c.total-c.panels.length)+' '+plural(c.total-c.panels.length,['панель','панели','панелей'])+' — в Grafana'));
+  if(c.total>c.panels.length&&c.viewPanel===null)body.append(k.el('p','gf-more-panels','Ещё панелей в Grafana: '+(c.total-c.panels.length)));
   const failed=c.panels.filter(p=>p.error).length;
   const status=failed?{label:'не загрузилось: '+failed,tone:'alert'}:{label:c.viewPanel!==null?'панель':c.panels.length+' '+plural(c.panels.length,['панель','панели','панелей']),tone:'done'};
   const facts=c.panels.filter(p=>p.kind==='stat'&&p.items?.length).slice(0,4).map(p=>(p.title||p.items[0].name)+' '+(p.items[0].text??value(p.items[0].value,p.items[0].unit,p.items[0].decimals)));
