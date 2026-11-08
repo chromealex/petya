@@ -192,3 +192,13 @@ label.file-label:hover{background:#2e3533}
 .company-tab>.company-icon{flex:0 0 20px;width:20px;height:20px;border-radius:5px;object-fit:cover}
 .company-tab>span.company-icon{display:grid;place-items:center;background:#2c3a2a;color:var(--green);font-size:11px;font-weight:600;line-height:1}
 .company-tab:not([aria-current])>.company-icon{opacity:.8}
+/* Team card: how the person appears in each service */
+.team-accounts{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.team-accounts-title{font-size:12px;color:var(--muted)}
+.team-account{display:flex;align-items:flex-start;gap:12px;padding:8px 10px;border:1px solid #ffffff12;border-radius:8px}
+.team-account-service{flex:0 0 84px;font-size:13px;font-weight:600}
+.team-account dl{flex:1;display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0;font-size:12px;min-width:0}
+.team-account dt{color:var(--muted)}
+.team-account dd{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.team-account dd.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;cursor:copy}
+.team-account>button{min-height:26px;padding:2px 8px;font-size:12px}

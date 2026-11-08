@@ -55,8 +55,16 @@ const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}
  const empty=new TeamFill({settings:()=>({teamMembers:'[]'}),save:()=>{},sources:()=>[],scope:()=>'s'});assert.match((await empty.turn('Добавь роли команде')).text,/пока никого нет/);
  console.log('Team roles: «добавь команде роли» enriches the saved team (no Slack re-read), empty team asks to fill it first passed');
 })().catch(e=>{console.error(e);process.exit(1);});
+// Deactivated accounts are reported apart; an empty title is looked up in the custom «Должность» field.
+(async()=>{const calls=[];const r=await slackProfiles({slackToken:'x'},async url=>{calls.push(url);
+  if(url.includes('users.list'))return {ok:true,members:[{id:'U1',profile:{real_name:'Lev Silaev'}},{id:'U9',deleted:true,profile:{real_name:'Old Colleague'}}],response_metadata:{next_cursor:''}};
+  if(url.includes('team.profile.get'))return {ok:true,profile:{fields:[{id:'Xf1',label:'Должность'},{id:'Xf2',label:'Хобби'}]}};
+  if(url.includes('users.profile.get'))return {ok:true,profile:{fields:{Xf2:{value:'Шахматы'},Xf1:{value:'Unity-разработчик'}}}};
+  return {ok:false};},[{name:'Lev Silaev'},{name:'Old Colleague'}],{wait:async()=>{}});
+ assert.equal(r.profiles.find(p=>p.slackId==='U1').title,'Unity-разработчик');assert.deepEqual(r.deleted.map(d=>d.slackId),['U9']);assert(!r.profiles.some(p=>p.slackId==='U9'));
+ console.log('Team enrich: deactivated Slack accounts apart, role from the custom profile field passed');})().catch(e=>{console.error(e);process.exit(1);});
 // early stop: once everyone wanted is found, no more pages
-(async()=>{let page=0;const r=await slackProfiles({slackToken:'x'},async()=>{const i=page++;return {ok:true,members:[{id:'U'+i,profile:{real_name:i===1?'Polina Samarina':'X'+i}}],response_metadata:{next_cursor:'c'+i}};},[{name:'Polina Samarina'}],{wait:async()=>{}});
+(async()=>{let page=0;const r=await slackProfiles({slackToken:'x'},async url=>{if(!url.includes('users.list'))return {ok:false};const i=page++;return {ok:true,members:[{id:'U'+i,profile:{real_name:i===1?'Polina Samarina':'X'+i}}],response_metadata:{next_cursor:'c'+i}};},[{name:'Polina Samarina'}],{wait:async()=>{}});
  assert.equal(page,2);assert(r.complete);console.log('Team enrich: Slack walk stops once everyone is found passed');})().catch(e=>{console.error(e);process.exit(1);});
 // «Сходи в жиру, возьми все имена, потом в слаке по ним должности и заполни команду»: people from Jira, roles from Slack.
 (async()=>{const {jiraPeople}=require('../src/team-fill.cjs'),{complexRequest,agentRequest,dependentSteps}=require('../src/agent-team.cjs');
@@ -72,6 +80,6 @@ const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}
   enrich:async r=>enrich(r,[{slackId:'U1',names:['polina samarina'],name:'Polina Samarina',title:'Project Manager, Jet Whales',email:''},{slackId:'U2',names:['oleg petrov'],name:'Oleg Petrov',title:'Backend',email:''}],new Map())});
  const r=await fill.turn(command,false,null,null,{force:true});
  const saved=JSON.parse(settings.teamMembers);assert.equal(saved.length,2,r.text);assert.equal(slackRoster,0,'the Slack roster is not where the people come from');
- assert.equal(saved.find(m=>m.name==='Polina Samarina').role,'Project Manager, Jet Whales');assert.match(r.text,/из Jira/);
+ const polina=saved.find(m=>m.name==='Полина Самарина');assert.equal(polina.role,'Project Manager, Jet Whales');assert.match(polina.aliases,/Polina Samarina/,'the Latin spelling stays for Slack and Jira');assert.match(r.text,/из Jira/);
  console.log('Team fill: names from Jira, roles from Slack profiles, not split into agent parts passed');
 })().catch(e=>{console.error(e);process.exit(1);});

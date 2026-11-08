@@ -16,7 +16,7 @@ async function roster(workspace,live){
   if(r?.isLast!==false||!r?.nextPageToken)break;token=r.nextPageToken;
  }
  return [...people.entries()].filter(([,p])=>p.name).map(([id,p])=>{const projects=[...p.projects.entries()].sort((a,b)=>b[1]-a[1]);const total=projects.reduce((n,[,c])=>n+c,0);
-  return {member:{name:p.name,aliases:'',role:'',projects:projects.map(([k])=>k).join(', '),responsibilities:'',email:p.email,slackId:'',jiraId:id,jiraName:p.name},
+  return {member:{name:p.name,aliases:'',role:'',projects:projects.map(([k])=>k).join(', '),responsibilities:'',email:p.email,slackId:'',jiraId:id,jiraName:p.name,accounts:{jira:{id,name:p.name,email:p.email}}},
    evidence:'Jira: исполнитель '+total+' задач за 90 дней ('+projects.map(([k,c])=>k+' — '+c).join(', ')+')',source:'Jira'};});
 }
 module.exports={roster};

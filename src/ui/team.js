@@ -36,11 +36,31 @@
    wrap.append(input);editor.append(wrap);
   }
   addJiraPicker(editor,member);
+  addAccounts(editor,member);
   window.paintZoomNames?.();
   updateSummary();
   const actions=document.createElement('div');actions.className='actions team-member-wide';
   const remove=document.createElement('button');remove.type='button';remove.className='quiet';remove.textContent='Удалить участника';remove.onclick=()=>{setDirty(true);card.remove();status.textContent='Изменения не сохранены.';};
   actions.append(remove);editor.append(actions);details.append(summary,editor);card.append(details);list.append(card);return card;
+ }
+ // How the person appears in each service (filled by the services themselves: Slack, Jira, …). Read-only here;
+ // the hidden field keeps them when the team is saved.
+ const SERVICES={slack:'Slack',jira:'Jira',telegram:'Telegram',zoom:'Zoom',asana:'Asana',notion:'Notion',confluence:'Confluence',gmail:'Почта',github:'GitHub'};
+ const FIELDS={name:'Имя',handle:'Ник',title:'Должность',email:'Email',id:'ID'};
+ function addAccounts(editor,member){
+  const hidden=document.createElement('input');hidden.type='hidden';hidden.dataset.field='accounts';hidden.value=member.accounts&&Object.keys(member.accounts).length?JSON.stringify(member.accounts):'';editor.append(hidden);
+  const accounts=member.accounts||{};const rows=Object.entries(accounts);if(!rows.length)return;
+  const box=document.createElement('div');box.className='team-accounts team-member-wide';const head=document.createElement('div');head.className='team-accounts-title';head.textContent='В сервисах';box.append(head);
+  for(const [service,entry] of rows){
+   const item=document.createElement('div');item.className='team-account';
+   const name=document.createElement('span');name.className='team-account-service';name.textContent=SERVICES[service]||service;item.append(name);
+   const list=document.createElement('dl');
+   for(const [key,label] of Object.entries(FIELDS)){if(!entry[key])continue;const dt=document.createElement('dt');dt.textContent=label;const dd=document.createElement('dd');dd.textContent=entry[key];if(key==='id'){dd.className='mono';dd.title='Скопировать';dd.tabIndex=0;dd.onclick=()=>navigator.clipboard?.writeText(entry[key]).catch(()=>{});}list.append(dt,dd);}
+   const forget=document.createElement('button');forget.type='button';forget.className='quiet';forget.textContent='Отвязать';forget.title='Убрать связь с '+(SERVICES[service]||service);
+   forget.onclick=()=>{const next={...JSON.parse(hidden.value||'{}')};delete next[service];hidden.value=Object.keys(next).length?JSON.stringify(next):'';item.remove();if(!box.querySelector('.team-account'))box.remove();setDirty(true);status.textContent='Изменения не сохранены.';};
+   item.append(list,forget);box.append(item);
+  }
+  editor.append(box);
  }
  function addJiraPicker(editor,member){
   const box=document.createElement('div');box.className='team-jira-picker team-member-wide';const heading=document.createElement('label');heading.textContent='Человек в Jira';

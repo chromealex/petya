@@ -1,6 +1,16 @@
 const team = require('./team.cjs');
 const clean = value => String(value || '').trim().replace(/^петя[\s,:.!?—-]*/iu, '');
-const normalized = value => value.trim().toLocaleLowerCase().replace(/ё/g, 'е');
+const normalized = value => String(value||'').trim().toLocaleLowerCase().replace(/ё/g, 'е');
+const {russian} = require('./name-ru.cjs');
+const nameTokens = value => require('./team-match.cjs').latin(value).split(/[^a-z0-9]+/).filter(Boolean);
+const spellings = m => [m.name, ...String(m.aliases||'').split(/[,;]/)].map(v=>v.trim()).filter(Boolean);
+// «Полина» and «Polina Samarina» are one person: every word of the shorter name is in the longer one (any alphabet).
+function samePerson(a, b) {
+  return spellings(a).some(x => spellings(b).some(y => { const p = nameTokens(x), q = nameTokens(y); const [short, long] = p.length <= q.length ? [p, q] : [q, p];
+    return short.length > 0 && short.some(t => t.length >= 3) && short.every(t => long.includes(t)); }));
+}
+const addAlias = (m, value) => { const v = String(value||'').trim(); if (!v || normalized(v) === normalized(m.name) || spellings(m).some(x => normalized(x) === normalized(v))) return false;
+  const next = [m.aliases, v].filter(Boolean).join(', '); if (next.length > team.limits.aliases) return false; m.aliases = next; return true; };
 const labels = {name:'имя',aliases:'варианты имени',role:'роль',projects:'проекты',responsibilities:'обязанности',email:'email',slackId:'Slack ID',jiraId:'Jira ID'};
 // «Можешь команде добавить роли?», «Проставь роли в команде», «Заполни обязанности коллег»: add roles to the saved team.
 function rolesRequest(text) {
@@ -106,22 +116,50 @@ class TeamFill {
    let fromSidebar=false;if(!candidates.length&&screenSources){const names=directMessages(screenSources.map(x=>x.text).join('\n'));if(names.length){candidates=names.map(name=>({member:team.validate([{name}])[0],evidence:'Slack: личные сообщения · '+name,source:'Slack · личные сообщения'}));fromSidebar=true;}}
    let fromJira=!!preset;if(!candidates.length&&!preset){const rows=await this.fromJira();if(rows?.length){candidates=rows;fromJira=true;}}
    // Names without roles (sidebar, Jira, a plain list): add the Slack profile title and the Jira components and labels.
-   let enriched=0,slack=null;if(candidates.length&&this.enrich&&candidates.some(c=>!c.member.role||!c.member.responsibilities)){try{const before=candidates.filter(c=>c.member.role||c.member.responsibilities).length;candidates=await this.enrich(candidates);slack=candidates.slack||null;enriched=candidates.filter(c=>c.member.role||c.member.responsibilities).length-before;}catch(e){console.error('Team enrich:',e.message);}}
+   // Always looked up: Slack profiles also say which accounts are deactivated.
+   let enriched=0,slack=null;if(candidates.length&&this.enrich){try{const before=candidates.filter(c=>c.member.role||c.member.responsibilities).length;candidates=await this.enrich(candidates,members);slack=candidates.slack||null;enriched=candidates.filter(c=>c.member.role||c.member.responsibilities).length-before;}catch(e){console.error('Team enrich:',e.message);}}
+   // Deactivated Slack accounts are not the team: they are not added, and saved cards of them are removed.
+   const gone=slack?.deleted||[],activeNames=new Set((slack?.profiles||[]).flatMap(p=>p.names));
+   const deactivated=m=>{if(m.slackId)return gone.some(d=>d.slackId===m.slackId);const n=normalized(m.name).replace(/\s+/g,' ');return !!n&&gone.some(d=>d.names.includes(n))&&!activeNames.has(n);};
+   const skipped=candidates.filter(c=>deactivated(c.member)).map(c=>c.member.name);candidates=candidates.filter(c=>!deactivated(c.member));
+   const removed=[];for(let i=members.length-1;i>=0;i--)if(deactivated(members[i])){removed.push(members[i].name);members.splice(i,1);}
+   let renamed=0,joined=0;
+   // Saved duplicates of one person («Полина» and «Polina Samarina» from an earlier refresh) become one card:
+   // the earlier card keeps its values, the other fills its gaps; both spellings stay as aliases.
+   const idsDiffer=(a,b)=>['slackId','jiraId','email'].some(k=>a[k]&&b[k]&&normalized(a[k])!==normalized(b[k]));
+   for(let i=0;i<members.length;i++)for(let j=members.length-1;j>i;j--){const a=members[i],b=members[j];
+    if(idsDiffer(a,b)||!samePerson(a,b))continue;
+    if(members.filter(x=>x!==a&&samePerson(x,a)).length!==1||members.filter(x=>x!==b&&samePerson(x,b)).length!==1)continue;
+    if(nameTokens(b.name).length>nameTokens(a.name).length){const old=a.name;a.name=b.name;addAlias(a,old);}else addAlias(a,b.name);
+    for(const alias of String(b.aliases||'').split(/[,;]/))addAlias(a,alias);
+    for(const key of Object.keys(team.limits))if(key!=='name'&&key!=='aliases'&&!a[key]&&b[key])a[key]=b[key];
+    a.accounts=team.mergeAccounts(a.accounts,b.accounts);members.splice(j,1);joined++;}
    for(const {member,evidence,source} of candidates) {
     const ids=['slackId','jiraId','email'];
+    const idConflict=m=>ids.some(k=>member[k]&&m[k]&&normalized(member[k])!==normalized(m[k]));
     let matches=members.map((m,i)=>({m,i})).filter(({m})=>ids.some(k=>member[k]&&m[k]&&normalized(member[k])===normalized(m[k])));
-    if(!matches.length)matches=members.map((m,i)=>({m,i})).filter(({m})=>normalized(m.name)===normalized(member.name)&&!ids.some(k=>member[k]&&m[k]&&normalized(member[k])!==normalized(m[k])));
+    if(!matches.length)matches=members.map((m,i)=>({m,i})).filter(({m})=>spellings(m).some(n=>normalized(n)===normalized(member.name))&&!idConflict(m));
+    // «Полина» saved by hand and «Polina Samarina» from Slack: the same person when nobody else fits either way.
+    if(!matches.length){const near=members.map((m,i)=>({m,i})).filter(({m})=>samePerson(m,member)&&!idConflict(m));
+     if(near.length===1&&candidates.filter(c=>samePerson(near[0].m,c.member)).length===1)matches=near;}
     if(matches.length>1){ambiguous++;continue;}
     if(!matches.length){if(members.length>=100){ambiguous++;continue;}members.push(member);added++;continue;}
     const {m,i}=matches[0];
+    // The fuller name wins («Полина» → «Polina Samarina», shown in Russian below); the other spelling stays as an alias.
+    if(normalized(m.name)!==normalized(member.name)){if(nameTokens(member.name).length>nameTokens(m.name).length){const old=m.name;m.name=member.name;addAlias(m,old);filled++;}else if(addAlias(m,member.name))filled++;}
+    for(const alias of String(member.aliases||'').split(/[,;]/))if(addAlias(m,alias))filled++;
+    const accounts=team.mergeAccounts(m.accounts,member.accounts);if(JSON.stringify(accounts)!==JSON.stringify(m.accounts||{})){m.accounts=accounts;filled++;}
     for(const key of Object.keys(team.limits)) {
-     if(!member[key]||normalized(m[key])===normalized(member[key]))continue;
+     if(key==='name'||key==='aliases'||!member[key]||normalized(m[key])===normalized(member[key]))continue;
      if(!m[key]){m[key]=member[key];filled++;}
      else if(!conflicts.some(c=>c.index===i&&c.key===key&&c.value===member[key]))conflicts.push({index:i,key,value:member[key],evidence,source});
     }
    }
-   if(added||filled)this.save(team.validate(members));
-   const summary=`Добавлено коллег: ${added}. Заполнено полей: ${filled}.`+(ambiguous?' Неоднозначные карточки не изменены: '+ambiguous+'. Уточните полные имена и контакты.':'');
+   // Names in Russian; the Latin spelling stays as an alias so Slack, Jira and Zoom still find the person.
+   for(const m of members){const ru=russian(m.name);if(ru&&ru!==m.name){const old=m.name;m.name=ru;addAlias(m,old);renamed++;}}
+   if(added||filled||renamed||joined||removed.length)this.save(team.validate(members));
+   const gonePeople=[...new Set([...skipped,...removed])];
+   const summary=`Добавлено коллег: ${added}. Заполнено полей: ${filled}.`+(joined?' Объединил повторяющиеся карточки: '+joined+'.':'')+(renamed?' Имена на русском: '+renamed+'.':'')+(gonePeople.length?' Деактивированы в Slack, в команду не беру'+(removed.length?' (и убрал из списка)':'')+': '+gonePeople.slice(0,8).join(', ')+'.':'')+(ambiguous?' Неоднозначные карточки не изменены: '+ambiguous+'. Уточните полные имена и контакты.':'');
    if(conflicts.length){this.pending={kind:'conflict',conflicts,baseline:JSON.stringify(members),scope,at:this.now(),summary};return this.question();}
    if(!candidates.length){
     // Say what was read and why nothing was taken, instead of a bare «не нашёл».

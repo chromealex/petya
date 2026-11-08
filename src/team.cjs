@@ -7,9 +7,30 @@ function validate(rows){
   if(!result.name)throw Error('Укажите имя каждого участника.');
   if(result.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(result.email))throw Error('Проверьте email участника '+result.name+'.');
   if(result.slackId&&!/^[UW][A-Z0-9]+$/.test(result.slackId))throw Error('Slack ID должен иметь вид U012ABCDEF (не имя или ссылка).');
+  const accounts=accountsOf(row.accounts);
+  // The editable Slack ID and Jira link are the source of truth for those two services.
+  if(result.slackId){if(accounts.slack?.id!==result.slackId)accounts.slack={...(accounts.slack&&!accounts.slack.id?accounts.slack:{}),id:result.slackId};}else delete accounts.slack;
+  if(result.jiraId){if(accounts.jira?.id!==result.jiraId)accounts.jira={id:result.jiraId};if(result.jiraName)accounts.jira.name=result.jiraName;}else delete accounts.jira;
+  if(Object.keys(accounts).length)result.accounts=accounts;
   return result;
  });
 }
+// How the person appears in each connected service: {slack:{id,name,handle}, jira:{id,name}, ...}. Services
+// (plugins) write their own entry; the card shows them all. Unknown keys and oversized values are dropped.
+const ACCOUNT_FIELDS=['id','name','handle','email','url','title'];
+function accountsOf(value){
+ let raw=value;if(typeof raw==='string'){if(!raw.trim())return {};try{raw=JSON.parse(raw);}catch{throw Error('Некорректные аккаунты участника.');}}
+ if(!raw||typeof raw!=='object'||Array.isArray(raw))return {};
+ const out={};
+ for(const [service,entry] of Object.entries(raw).slice(0,12)){
+  if(!/^[a-z][a-z0-9-]{0,30}$/.test(service)||!entry||typeof entry!=='object'||Array.isArray(entry))continue;
+  const clean={};for(const key of ACCOUNT_FIELDS){const v=entry[key];if(typeof v==='string'&&v.trim())clean[key]=v.trim().slice(0,200);}
+  if(Object.keys(clean).length)out[service]=clean;
+ }
+ return out;
+}
+// Merge service entries: fill what is missing, keep what is there.
+function mergeAccounts(a={},b={}){const out={...a};for(const [k,v] of Object.entries(b||{}))out[k]={...v,...(out[k]||{})};return accountsOf(out);}
 function members(settings){return validate(JSON.parse(settings.teamMembers||'[]'));}
 function context(settings,query='',max=16000){
  const words=String(query).toLocaleLowerCase().match(/[\p{L}\p{N}]{3,}/gu)||[];
@@ -22,4 +43,4 @@ function context(settings,query='',max=16000){
  if(settings.teamRoles)result+=('Дополнительные сведения о команде: '+settings.teamRoles).slice(0,Math.max(0,max-result.length));
  return result;
 }
-module.exports={validate,members,context,limits};
+module.exports={validate,members,context,limits,accountsOf,mergeAccounts};
