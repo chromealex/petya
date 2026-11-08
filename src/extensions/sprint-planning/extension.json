@@ -1,0 +1,19 @@
+{
+  "id": "sprint-planning",
+  "name": "Планирование спринта",
+  "description": "Скорость команды по прошлым спринтам Jira, ёмкость следующего с учётом отпусков, перенос и предложенный объём из бэклога — в Jira только после подтверждения",
+  "category": "team",
+  "icon": "icon.svg",
+  "examples": ["Спланируй спринт","Что влезет в следующий спринт?","Какая у нас скорость?","Кто перегружен в спринте?"],
+  "connects": "Jira",
+  "uses": ["share-message"],
+  "setting": "extension_sprint-planning",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["sprint-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "sprintPlan": "renderSprintPlan"
+  }
+}
