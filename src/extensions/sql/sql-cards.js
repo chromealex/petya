@@ -43,8 +43,9 @@
    if(e.limit){label.append(k.el('span','sql-cost-limit','лимит '+bytes(e.limit)));share=e.value/e.limit;}
   }else if(e.kind==='rows'){
    label.append(k.el('span',null,c.connection.dialect==='postgres'?'Оценка планировщика ≈ ':'Прочитает ≈ '),raw(k.el('b',null,count(e.value)+' '+plural(Math.round(e.value),['строка','строки','строк']))));
-   if(e.tables)label.append(k.el('span','sql-cost-limit',e.tables+' '+plural(e.tables,['таблица','таблицы','таблиц'])));
-   share=Math.min(1,Math.log10(1+e.value)/9);
+   // ClickHouse: the share of the tables' rows it reads; the planner's PostgreSQL estimate has no such reference.
+   if(e.of){label.append(k.el('span','sql-cost-limit','из ≈ '+count(e.of)+' в '+plural(e.tables||1,['таблице','таблицах','таблицах'])));share=Math.min(1,e.value/e.of);}
+   else if(e.tables)label.append(k.el('span','sql-cost-limit',e.tables+' '+plural(e.tables,['таблица','таблицы','таблиц'])));
   }else{
    label.append(k.el('span','sql-cost-unknown','Стоимость заранее не известна'));
    if(e.note)label.title=e.note;
@@ -110,8 +111,8 @@
   if(r.rows.length&&ch?.type!=='number'||r.columns.length>2){
    const rows=r.rows.map(row=>Object.fromEntries(row.map((v,i)=>[i,v])));
    const columns=r.columns.map((col,i)=>({label:col.name,value:row=>{const span=raw(k.el('span',typeof row[i]==='number'?'sql-num':null,cell(row[i])));return span;}}));
-   const shown=k.table(columns,rows.slice(0,15));raw(shown);shown.classList.add('selectable');box.append(shown);
-   if(rows.length>15){const more=k.el('details','sql-more');more.append(k.el('summary',null,'Показать все строки · '+rows.length));const all=k.table(columns,rows.slice(15));raw(all);all.classList.add('selectable');more.append(all);box.append(more);}
+   const shown=k.table(columns,rows.slice(0,10));raw(shown);shown.classList.add('selectable');box.append(shown);
+   if(rows.length>10){const more=k.el('details','sql-more');more.append(k.el('summary',null,'Показать все строки · '+rows.length));const all=k.table(columns,rows.slice(10));raw(all);all.classList.add('selectable');more.append(all);box.append(more);}
   }
   if(!r.rows.length)box.append(k.el('p','sql-empty','Запрос выполнен, строк нет.'));
   const meta=[r.total+(r.truncated?'+':'')+' '+plural(r.total,['строка','строки','строк']),fmt(r.elapsedMs/1000,2)+' с',r.bytesRead?'прочитано '+bytes(r.bytesRead):'',r.kept<r.total?'в карточке первые '+r.kept:''].filter(Boolean);

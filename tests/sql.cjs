@@ -199,7 +199,7 @@ const saKey=JSON.stringify({type:'service_account',client_email:'reader@game-ana
  const q=await app.turn(s,'Сколько игроков дошли до 10 уровня за неделю');
  const card=q.extensionData.sqlQuery;
  assert.equal(card.state,'pending');assert.match(card.sql,/LIMIT 500$/);assert.equal(card.limited,true);
- assert.deepEqual(card.estimate,{kind:'rows',value:2300000,tables:1});
+ assert.deepEqual(card.estimate,{kind:'rows',value:2300000,tables:1,of:125000000});
  assert.match(q.text,/прочитает ≈ 2,3 млн строк\. Проверьте SQL и нажмите «Выполнить»/);
  assert.equal(card.assumptions.length,2);assert.equal(last().by,'SQL по словам');
  assert.ok(!ch.seen.some(x=>/uniqExact/.test(x.body)&&!/^EXPLAIN/.test(x.body)),'nothing runs before «Выполнить»');

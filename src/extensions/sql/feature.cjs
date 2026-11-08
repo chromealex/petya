@@ -189,6 +189,12 @@ async function queryTurn(s,text,conn,typed=''){
  card.limit=d.checked.limit;card.limited=d.checked.limited;
  s.requestProgress?.report('Оцениваю стоимость запроса');
  let estimate;try{estimate=await sources.engine(s,conn).estimate(card.sql);}catch(e){estimate={kind:'unknown',note:e.message};}
+ // ClickHouse reads part of its tables: the share of the tables' rows the estimate covers (from the cached schema).
+ if(estimate.kind==='rows'&&conn.dialect==='clickhouse'&&schema){
+  const names=new Set(V.tables(card.sql,conn.dialect).map(t=>t.name.toLowerCase()));
+  const total=schema.tables.filter(t=>names.has(t.name.toLowerCase())&&Number.isFinite(t.rows)).reduce((n,t)=>n+t.rows,0);
+  if(total>0)estimate.of=total;
+ }
  card.estimate=estimate;
  if(estimate.kind==='bytes'&&estimate.limit&&estimate.value>estimate.limit){
   return kit.reply(s,text,{by:BY,error:true,text:'Запрос прочитал бы ≈ '+bytes(estimate.value)+' — больше лимита '+bytes(estimate.limit)+'. Сузьте период или увеличьте лимит в настройках.',data:{sqlQuery:{...card,state:'blocked'}}});
