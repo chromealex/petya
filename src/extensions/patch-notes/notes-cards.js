@@ -39,9 +39,9 @@
   box.append(k.collapse(rows,cut,'Показать все изменения'));
   return box;
  }
- function tabs(k,list,current,onPick,label){
+ function tabs(k,list,current,onPick,label,own=false){
   const bar=k.el('div','pn-tabs');bar.setAttribute('role','tablist');bar.setAttribute('aria-label',label);
-  for(const [id,name] of list){const b=k.el('button','pn-tab',name);b.type='button';b.setAttribute('role','tab');b.dataset.tab=id;b.setAttribute('aria-selected',String(id===current));b.onclick=()=>onPick(id);bar.append(b);}
+  for(const [id,name] of list){const b=k.el('button','pn-tab',name);b.type='button';b.setAttribute('role','tab');b.dataset.tab=id;b.setAttribute('aria-selected',String(id===current));b.onclick=()=>onPick(id);if(own)raw(b);bar.append(b);}
   return bar;
  }
  function preview(k,c,view){
@@ -78,7 +78,7 @@
   const current=()=>state.dest==='internal'?c.internal:c.texts?.[state.lang]?.[state.dest];
   function paint(){
    area.replaceChildren();
-   if(c.languages.length>1)area.append(tabs(k,c.languages.map(l=>[l,l.toUpperCase()]),state.lang,id=>{state.lang=id;paint();},'Язык'));
+   if(c.languages.length>1)area.append(tabs(k,c.languages.map(l=>[l,l.toUpperCase()]),state.lang,id=>{state.lang=id;paint();},'Язык',true));
    area.append(tabs(k,DEST.filter(([id])=>id==='internal'||c.languages.length),state.dest,id=>{state.dest=id;paint();},'Куда'));
    const view=current();if(!view)return;
    area.append(counter(k,view),preview(k,c,view));
