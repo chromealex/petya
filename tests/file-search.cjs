@@ -136,6 +136,12 @@ function services({installed=true,enabled=false,project}={}){
  fs.rmSync(path.join(root,'docs/plan.docx'));
  const again=await s.semanticIndex.sync('files');assert.equal(again.indexed,1);assert.equal(again.removed,1);
  r=await feature.turn(s,'в каком файле урон огнём дракона?');assert.equal(r.extensionData.fileSearch.hits[0].name,'Enemy.cs');
+ // «Поиск по всему» takes files found by meaning from the index (its hook), within the given folders only.
+ {const all=require('../src/extensions/search-all/sources.cjs');
+  const found=await all.indexedFiles(s,'презентация про Китай с графиком LTV',{roots:[root]});
+  assert.equal(found[0].source,'files');assert.equal(found[0].title,path.join('docs','Китай.pptx'));assert.match(found[0].meta,/слайд 2 · по смыслу/);
+  assert.deepEqual(await all.indexedFiles(s,'презентация',{roots:[path.join(root,'Assets')]}).then(x=>x.every(i=>i.path.startsWith(path.join(root,'Assets')))),true);
+  assert.deepEqual(await all.indexedFiles({settings:{}},'что угодно',{roots:[root]}),[],'no index → nothing');}
  // Card actions: only files of the indexed folders.
  const opened=[];feature.deps.shell=()=>({openPath:async p=>{opened.push(p);return '';},showItemInFolder:p=>opened.push('show:'+p)});
  const attached=[];s.attachments={list:()=>[],add:async(name,bytes)=>{attached.push([name,bytes.length]);return {name};}};

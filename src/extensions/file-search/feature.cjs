@@ -133,4 +133,6 @@ module.exports={name:'fileSearch',defaults:{['extension_'+ID]:'false',fileSearch
   if(next.fileSearchFolders!==undefined){let list;try{list=JSON.parse(next.fileSearchFolders);}catch{list=null;}if(!Array.isArray(list)||list.length>50||list.some(p=>typeof p!=='string'||!path.isAbsolute(p)))throw Error('Проверьте папки поиска по смыслу.');}
   if(next.fileSearchProject!==undefined&&!['true','false'].includes(next.fileSearchProject))throw Error('Проверьте настройку папок проекта.');
  },
+ // A search is read-only: a dashboard may repeat it («документы про релиз» as a widget). No ready-made widgets.
+ dashboard:{accepts:command=>!!route.wanted(command),size:'m',widgets:[]},
  setup,turn,searchTurn,snippet,row,deps};

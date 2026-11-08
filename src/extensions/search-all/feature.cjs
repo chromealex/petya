@@ -61,7 +61,9 @@ async function search(s,topic){
  else if(!mem.kinds.has('mail'))set('mail','off',{note:'Почта не подключена.'});
  if(!mem.kinds.has('telegram'))set('telegram','off',{note:'Нет сохранённых чатов Telegram.'});
  if(!mem.kinds.has('meetings'))set('meetings','off',{note:'Нет записанных встреч.'});
- run(['files'],deps.timeouts.files,()=>src.files(s,terms));
+ // Files: the word search, plus files found by meaning when the semantic index has its file collection on
+ // (docs/foundations/semantic-index.md); a file found both ways is kept once (the index's piece first).
+ run(['files'],deps.timeouts.files,async()=>{const [words,meaning]=await Promise.all([src.files(s,terms),Promise.resolve(src.indexedFiles?.(s,topic)).catch(()=>[]).then(x=>x||[])]);return {...words,items:[...meaning,...words.items||[]]};});
  run(['glossary'],deps.timeouts.remote,()=>src.glossary(s,terms));
  if(tasks.length)s.requestProgress?.report('Жду ответа источников');
  await Promise.all(tasks);

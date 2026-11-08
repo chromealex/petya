@@ -34,6 +34,10 @@ Credential-looking text is replaced with «[скрыто]» before indexing.
 
 Actions only work for files inside the indexed folders. Nothing is written, moved or deleted.
 
+«Поиск по всему» uses the same index for its «Файлы проекта» source (files found by meaning in the chat project's
+folders come before word matches). A search can be a dashboard widget (`dashboard.accepts` = the same routing; it
+only reads).
+
 ## Settings
 
 Switch «Индексировать папки» (what is read is written under it), «Папки проектов компании», added folders with

@@ -191,4 +191,16 @@ function glossary(s,terms){
  return {items:list.filter(t=>{const text=Q.norm([t.term,t.definition,...(t.synonyms||[]),...Object.values(t.translations||{})].join(' '));re.lastIndex=0;return re.test(text);}).map(t=>({source:'glossary',id:'glossary:'+t.id,title:one(t.term).slice(0,80),
   text:[one(t.definition),(t.synonyms||[]).length?'Синонимы: '+t.synonyms.join(', '):'',Object.entries(t.translations||{}).map(([k,v])=>k+': '+v).join(', ')].filter(Boolean).join('\n').slice(0,2000),url:'',at:Number(t.updatedAt||t.at)||0,meta:''}))};
 }
-module.exports={memory,slack,docs,docsConnected,jira,jiraConnected,mail,mailAccounts,files,glossary,projectRoots,kindOf,slackLink,adfText,memoryItems};
+// Files found by meaning in the semantic index (s.semanticIndex, collection «files» of «Поиск файлов по смыслу»),
+// limited to the chat project's folders like the word search. Nothing when the index is absent, off or not ready.
+async function indexedFiles(s,question,{roots=projectRoots(s),k=10}={}){
+ const index=s.semanticIndex;
+ if(!index?.enabled?.('files')||!roots.length)return [];
+ const r=await index.search('files',question,{k,filter:{pathPrefix:roots.map(r=>r.endsWith(path.sep)?r:r+path.sep)}});
+ return (r?.hits||[]).filter(h=>h.meta?.path).map(h=>{
+  const full=h.meta.path,root=roots.find(r=>full.startsWith(r+path.sep))||path.dirname(full),l=h.loc||{};
+  const where=l.slide?'слайд '+l.slide:l.page?'стр. '+l.page:l.line?'строка '+l.line:'';
+  return {source:'files',id:'file:'+full,title:path.relative(root,full),text:String(h.text||'').slice(0,1200),url:'',at:Number(h.meta.mtime)||0,meta:where?where+' · по смыслу':'по смыслу',path:full,line:l.line||0};
+ });
+}
+module.exports={memory,slack,docs,docsConnected,jira,jiraConnected,mail,mailAccounts,files,indexedFiles,glossary,projectRoots,kindOf,slackLink,adfText,memoryItems};

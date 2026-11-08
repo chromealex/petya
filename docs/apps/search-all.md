@@ -21,7 +21,9 @@ failing source marks itself on the card and the rest is shown.
 - **Project files** — a breadth-first walk of the chat project's folders: text extensions only, skips
   `node_modules`, `.git`, `Library`, `Temp`, build/vendor folders, files over 512 KB and binary files; at most 4000
   files, 40 MB, 60 matches and ~3.5 s; the card says when a limit stopped it. «Показать в папке» (ipc `reveal`,
-  only inside the project's folders).
+  only inside the project's folders). When «Поиск файлов по смыслу» has its local index on, the files it finds by
+  meaning in the same folders come first («… · по смыслу», `sources.indexedFiles`, see
+  `docs/foundations/semantic-index.md`).
 - **Glossary** — accepted terms of the project's glossary (`<company>/extensions/glossary/glossary.json`).
 
 ## Ranking

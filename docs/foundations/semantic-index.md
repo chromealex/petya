@@ -150,13 +150,17 @@ or letters, refresh 30 min). Their switches are in the «Поиск файлов
 
 How to use them:
 
-- **Search everything** («поиск по всему», a separate app in progress): call
-  `s.semanticIndex?.search('*', query, {k})` and merge the hits by `collection` (`files` → `meta.path`,
-  `chats` → `id` is the topic id and `loc.from/to` the message indexes, `meetings` → `id` is the meeting session id).
-  When `semanticIndex` is missing, nothing is enabled or `ready:false`, fall back to the existing keyword search. This
-  is the whole hook — no change in the index is needed.
+- **«Поиск по всему»** (`src/extensions/search-all`) already uses the index for files: its `files` source also asks
+  `sources.indexedFiles(s, question)` — `s.semanticIndex.search('files', question, {k:10, filter:{pathPrefix: chat
+  project folders}})` — and puts those files (meta «… · по смыслу», the index's best piece as text) before the word
+  matches; a file found both ways is kept once. With no index, the collection off or the model missing it returns
+  nothing and the word search answers alone. Its optional re-ranker (`embed.cjs`) also picks up `qwen3-embedding`
+  once it is installed. To add chats and meetings there later: `search(['chats','meetings'], question, {k})` and map
+  `chats` hits to the topic (`id` is the topic id, `loc.from/to` the message indexes) and `meetings` hits to the
+  session (`id` is the meeting session id).
 - **Mentor / past conversations**: `search(['chats','meetings'], question, {k:5, filter:(meta)=>meta.projectId===id})`
-  and quote `text` with its chat title (`meta.title`) as the source.
+  and quote `text` with its chat title (`meta.title`) as the source. Not wired yet.
+- Any app: check `s.semanticIndex?.enabled(id)` first; `search` answers `{hits:[]}` at once when nothing is on.
 
 ## Tests
 
