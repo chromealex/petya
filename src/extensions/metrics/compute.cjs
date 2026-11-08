@@ -24,14 +24,17 @@ const sum=list=>list.reduce((a,v)=>a+(v||0),0);
 const known=list=>list.filter(v=>v!==null);
 const change=(now,before)=>Number.isFinite(now)&&Number.isFinite(before)&&before>0?now/before-1:null;
 
-// Same-weekday baseline: the 4 previous weeks. Flags |x − mean| > 3σ (sample σ); needs all 4 points and σ > 0.
+// Same-weekday baseline: the 4 previous weeks. Flags |x − mean| > 3σ (sample σ); needs all 4 points. A σ from
+// four points can be tiny when the weeks happen to be alike, so it is floored at 2% of the mean: a 3% wiggle on a
+// very steady game is not an anomaly.
+const FLOOR=0.02;
 function anomalies(series,dates,metric){
  const by=new Map(series.map(p=>[p.date,p.value])),out=[];
  for(const d of dates){
   const x=by.get(d);if(!Number.isFinite(x))continue;
   const base=[7,14,21,28].map(k=>by.get(shift(d,-k)));
   if(base.some(v=>!Number.isFinite(v)))continue;
-  const mean=base.reduce((a,b)=>a+b,0)/4,sd=Math.sqrt(base.reduce((a,b)=>a+(b-mean)**2,0)/3);
+  const mean=base.reduce((a,b)=>a+b,0)/4,sd=Math.max(Math.sqrt(base.reduce((a,b)=>a+(b-mean)**2,0)/3),FLOOR*Math.abs(mean));
   if(sd>0&&Math.abs(x-mean)>3*sd)out.push({date:d,metric,value:x,mean,sd,z:(x-mean)/sd,direction:x>mean?'up':'down'});
  }
  return out;

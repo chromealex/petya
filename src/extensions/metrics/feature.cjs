@@ -17,8 +17,9 @@ const money=(v,unit)=>ru(v,v<100?2:0)+' '+({'currency:RUB':'₽','currency:USD':
 const DAYS_TEXT=d=>d===1?'вчера':'за '+d+' '+kit.plural(d,['день','дня','дней']);
 const PREV_TEXT=d=>d===1?'позавчера':'прошлые '+d+' '+kit.plural(d,['день','дня','дней']);
 
-let sources=null;
-const list=s=>(sources||(sources=registry.create(s)));
+// The declared sources are read from disk once; which of them are added and connected is read per request.
+let declared=null,override=null;
+const list=s=>override||registry.create(s,{sources:declared||(declared=registry.load())});
 
 async function readSource(s,x,ask,w){
  const q={from:w.from,to:w.to,metrics:['dau','new','revenue'],platform:ask.platform,version:ask.version,app:null};
@@ -99,4 +100,4 @@ async function turn(s,command){
  try{return await metricsTurn(s,text);}
  catch(e){return kit.failure(s,command,BY,e);}
 }
-module.exports={name:'gameMetrics',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,metricsTurn,summary,reset:()=>{sources=null;},useSources:x=>{sources=x;}};
+module.exports={name:'gameMetrics',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,metricsTurn,summary,reset:()=>{override=null;},useSources:x=>{override=x;}};

@@ -77,10 +77,14 @@ const find=(calls,pred)=>calls.find(c=>pred(c.url.searchParams,c.url.pathname));
  // --- Pure computations ---
  const w=compute.window(7,NOW);
  assert.deepEqual([w.start,w.end,w.prevStart,w.prevEnd,w.chartStart,w.from],['2026-11-02','2026-11-08','2026-10-26','2026-11-01','2026-10-26','2026-09-28']);
- // 3σ on the same weekday: baseline 100,102,98,100 → mean 100, σ=1.633; 105 is 3.06σ (flagged), 104 is 2.45σ (not).
- const base=['2026-10-07','2026-10-14','2026-10-21','2026-10-28'].map((date,i)=>({date,value:[100,102,98,100][i]}));
- assert.equal(compute.anomalies([...base,{date:'2026-11-04',value:105}],['2026-11-04'],'dau').length,1);
- assert.equal(compute.anomalies([...base,{date:'2026-11-04',value:104}],['2026-11-04'],'dau').length,0);
+ // 3σ on the same weekday: baseline 100,104,96,100 → mean 100, σ=3.266 (sample); 109.9 is 3.03σ (flagged), 109.7 is
+ // 2.97σ (not). A σ below 2% of the mean is floored: 100,101,99,100 (σ=0.816) needs more than ±6, not ±2.45.
+ const base=['2026-10-07','2026-10-14','2026-10-21','2026-10-28'].map((date,i)=>({date,value:[100,104,96,100][i]}));
+ assert.equal(compute.anomalies([...base,{date:'2026-11-04',value:109.9}],['2026-11-04'],'dau').length,1);
+ assert.equal(compute.anomalies([...base,{date:'2026-11-04',value:109.7}],['2026-11-04'],'dau').length,0);
+ const steady=base.map((x,i)=>({...x,value:[100,101,99,100][i]}));
+ assert.equal(compute.anomalies([...steady,{date:'2026-11-04',value:105}],['2026-11-04'],'dau').length,0);
+ assert.equal(compute.anomalies([...steady,{date:'2026-11-04',value:93.9}],['2026-11-04'],'dau')[0].direction,'down');
  assert.equal(compute.anomalies([...base.slice(1),{date:'2026-11-04',value:500}],['2026-11-04'],'dau').length,0,'needs 4 weeks of baseline');
  assert.deepEqual(registry.normalize('x',{series:[{metric:'dau',series:[{date:'2026-11-01',value:'5'},{date:'bad',value:1},{date:'2026-11-02',value:NaN}]},{metric:'secret',series:[]}]}),[{source:'x',metric:'dau',unit:'users',series:[{date:'2026-11-01',value:5}],dimensions:{}}]);
 

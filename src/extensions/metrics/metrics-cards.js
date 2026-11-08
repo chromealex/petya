@@ -8,7 +8,7 @@
  const COLORS={dau:'#86c2ff',new:'#c9a8f0',revenue:'#9dd9c9'};
  const locale=()=>window.petyaLocale||'ru-RU';
  const fmt=(n,d=0)=>Number(n).toLocaleString(locale(),{maximumFractionDigits:d});
- const compact=n=>Math.abs(n)>=10000?new Intl.NumberFormat(locale(),{notation:'compact',maximumFractionDigits:1}).format(n):fmt(n,Math.abs(n)<100?2:0);
+ const compact=n=>Math.abs(n)>=10000?new Intl.NumberFormat(locale(),{notation:'compact',maximumFractionDigits:Math.abs(n)>=100000&&Math.abs(n)<1e6?0:1}).format(n):fmt(n,Math.abs(n)<100?2:0);
  const day=d=>new Date(d+'T12:00:00Z').toLocaleDateString(locale(),{day:'numeric',month:'short'});
  const weekday=d=>new Date(d+'T12:00:00Z').toLocaleDateString(locale(),{weekday:'short'});
  const CUR={'currency:RUB':'₽','currency:USD':'$','currency:EUR':'€'};
@@ -26,7 +26,9 @@
 
  function tile(k,kpi){
   const box=k.el('div','metrics-tile');box.dataset.kpi=kpi.id;
-  box.append(k.el('span','metrics-label',kpi.label),k.el('span','metrics-value',value(kpi.value,kpi.unit,kpi.precise)));
+  // Money: the currency goes to the label so the number keeps the tile's width.
+  const cur=CUR[kpi.unit],shown=kpi.value===null||kpi.value===undefined?'—':cur?(kpi.precise?fmt(kpi.value,2):compact(kpi.value)):value(kpi.value,kpi.unit,kpi.precise);
+  box.append(k.el('span','metrics-label',cur?kpi.label+', '+cur:kpi.label),k.el('span','metrics-value',shown));
   if(kpi.change!==null&&kpi.change!==undefined){
    const up=kpi.change>0,flat=Math.abs(kpi.change)<(kpi.points?0.001:0.005);
    const text=(up?'▲ ':flat?'':'▼ ')+(kpi.points?fmt(Math.abs(kpi.change)*100,1)+' п.п.':fmt(Math.abs(kpi.change)*100,1)+'%');
@@ -54,7 +56,7 @@
   const firstIn=b.chart.dates.indexOf(b.chart.from);
   if(firstIn>0)svg.append(el('rect',{x:L,y:T,width:x(firstIn)-L-(W-L-R)/(n-1)/2,height:H-T-B,class:'outside'}));
   const step=Math.max(1,Math.ceil(n/7));
-  b.chart.dates.forEach((d,i)=>{if(i%step&&i!==n-1)return;const t=el('text',{x:x(i),y:H-6,class:'tick','text-anchor':i===0?'start':i===n-1?'end':'middle'});t.textContent=day(d);svg.append(t);});
+  b.chart.dates.forEach((d,i)=>{if(i!==n-1&&(i%step||n-1-i<step*0.75))return;const t=el('text',{x:x(i),y:H-6,class:'tick','text-anchor':i===0?'start':i===n-1?'end':'middle'});t.textContent=day(d);svg.append(t);});
   const path=(values,unit)=>{let p='',pen=false;values.forEach((v,i)=>{if(v===null){pen=false;return;}p+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(v,unit).toFixed(1);pen=true;});return p;};
   for(const l of shown){
    if(state.compare&&l.previous.some(v=>v!==null))svg.append(el('path',{d:path(l.previous,l.unit),class:'line previous',stroke:COLORS[l.metric]}));
