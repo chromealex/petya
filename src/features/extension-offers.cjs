@@ -1,0 +1,113 @@
+// Offers an extension the user does not have yet when the conversation enters its subject.
+// Each extension may declare `offer.cjs` beside its extension.json:
+//   { id, name, pitch, names:[RegExp], topics:[RegExp], avoid:[RegExp], requests?:[RegExp],
+//     connect:'install'|'settings', ready(settings) }
+// `names` are explicit service names (Sentry, App Store), `topics` the subject words (крэш, отзывы),
+// `avoid` near-misses that belong to someone else («код-ревью» is not store reviews).
+// A direct request («покажи крэши за неделю») is answered by the offer itself and resumes after connecting;
+// a mention in ordinary talk gets a small offer under Petya's answer, once per chat. Two extensions that fit
+// equally well are never guessed between: the offer names both.
+const fs=require('node:fs');
+const path=require('node:path');
+const {randomUUID}=require('node:crypto');
+const directory=path.join(__dirname,'../extensions');
+
+function load(dir=directory){
+ return fs.readdirSync(dir,{withFileTypes:true}).filter(e=>e.isDirectory()).map(e=>path.join(dir,e.name,'offer.cjs'))
+  .filter(f=>fs.existsSync(f)).map(f=>{const o=require(f);if(o.id!==path.basename(path.dirname(f)))throw Error('Invalid extension offer '+f);return o;});
+}
+// Asking or telling Petya to show, check or count something: the request needs data the extension would bring.
+const REQUEST=/(?:^|[\s,.!?«"])(?:покажи|показать|выведи|сколько|какие|какой|какая|что с |что там|что по |проверь|глянь|посмотри|найди|сравни|разбери|собери|дай|открой|запусти|перезапусти|последн\p{L}*|топ\b|список|почему (?:упал|упала|упало|не собрал))/iu;
+// Talking about something without wanting it now: no offer at all.
+const QUIET=/^(?:а\s+)?(?:не\s+(?:надо|нужно|показывай|подключай)|что такое|как (?:подключить|настроить|работает)|объясни,? что такое|запомни|напомни)/iu;
+const any=(list,text)=>(list||[]).some(r=>r.test(text));
+const count=(list,text)=>(list||[]).filter(r=>r.test(text)).length;
+
+function muted(settings){try{const v=JSON.parse(settings.extensionOffersMuted||'[]');return Array.isArray(v)?v:[];}catch{return [];}}
+
+function candidates(command,{offers,settings,topic}){
+ const text=String(command||'').trim();
+ if(!text||QUIET.test(text))return [];
+ const off=muted(settings);
+ const rows=[];
+ for(const o of offers){
+  if(off.includes(o.id))continue;
+  let ready=false;try{ready=!!o.ready(settings||{});}catch{ready=false;}
+  if(ready)continue;
+  if(any(o.avoid,text))continue;
+  const named=any(o.names,text),subject=count(o.topics,text);
+  if(!named&&!subject)continue;
+  rows.push({offer:o,named,score:(named?10:0)+subject,direct:named&&REQUEST.test(text)||subject>0&&(any(o.requests,text)||REQUEST.test(text))});
+ }
+ // A named service wins over subject words: «отзывы в App Store» is not «отзывы в Google Play».
+ const pool=rows.some(r=>r.named)?rows.filter(r=>r.named):rows;
+ return pool.sort((a,b)=>b.score-a.score);
+}
+// One clear winner, or a tie that must be asked about.
+function decide(rows){
+ if(!rows.length)return null;
+ const top=rows.filter(r=>r.score===rows[0].score);
+ return top.length===1?{one:top[0]}:{tie:top.slice(0,3)};
+}
+
+function setup(s){
+ const offers=load();
+ const pending=new Map();
+ const prune=()=>{for(const [k,v]of pending)if(Date.now()-v.at>30*60000)pending.delete(k);};
+ const keep=(o,command,topicId,direct)=>{prune();const id=randomUUID();pending.set(id,{id,ext:o.id,command,topicId,direct,at:Date.now()});return {id,ext:o.id,name:o.name,pitch:o.pitch,connect:o.connect||'install'};};
+ const services=command=>{try{return require('../service-access.cjs').detect(command,null);}catch{return [];}};
+ function ownedByPetya(command,topic){try{return require('./extension-replies.cjs').ownedByPetya(command,topic);}catch{return false;}}
+
+ // Called before Petya answers. Only a direct request about a missing extension's subject is answered by the
+ // offer; everything else is left to Petya and maybe annotated afterwards.
+ function turn(command){
+  const topic=s.dialogue.active();
+  if(services(command).length||ownedByPetya(command,topic))return null;
+  const choice=decide(candidates(command,{offers,settings:s.settings,topic}).filter(r=>r.direct));
+  if(!choice)return null;
+  const rows=choice.one?[choice.one]:choice.tie;
+  const items=rows.map(r=>keep(r.offer,command,topic?.id,true));
+  const text=choice.one?'Для этого нужно расширение «'+rows[0].offer.name+'»: '+rows[0].offer.pitch+'. Подключить?':
+   'Это может сделать одно из расширений: '+rows.map(r=>'«'+r.offer.name+'» — '+r.offer.pitch).join('; ')+'. Какое подключить?';
+  s.dialogue.rememberAction(command,text);
+  const t=s.dialogue.active(),message=t.messages.at(-1);
+  message.by='расширения';message.extensionData={...message.extensionData,extensionOffer:{items,direct:true}};
+  if(t){t.extensionOffers=[...new Set([...(t.extensionOffers||[]),...items.map(i=>i.ext)])];}
+  s.dialogue.persist();
+  return {handled:true,question:true,text,by:'расширения',topicId:t.id,topicTitle:t.title,messages:t.messages,extensionData:{extensionOffer:{items,direct:true}}};
+ }
+ // Called after Petya answered something on the subject: a quiet offer under the answer, once per chat.
+ function annotate(command,result){
+  const topic=s.dialogue.active();
+  if(!result?.handled||result.error||result.question||!topic||services(command).length)return result;
+  const message=topic.messages.at(-1);
+  if(message?.role!=='assistant'||message.extensionData?.extensionOffer)return result;
+  const choice=decide(candidates(command,{offers,settings:s.settings,topic}).filter(r=>!(topic.extensionOffers||[]).includes(r.offer.id)));
+  if(!choice?.one)return result;
+  const item=keep(choice.one.offer,command,topic.id,false);
+  const data={extensionOffer:{items:[item],direct:false}};
+  message.extensionData={...message.extensionData,...data};
+  topic.extensionOffers=[...(topic.extensionOffers||[]),item.ext];
+  s.dialogue.persist();
+  return {...result,extensionData:{...result.extensionData,...data}};
+ }
+ function find(id){prune();const row=pending.get(id);if(!row)throw Error('Предложение устарело. Повторите запрос.');return row;}
+ function accept(id){
+  const row=find(id),o=offers.find(x=>x.id===row.ext);
+  // Same switch the catalog's «Добавить» uses: the descriptor's setting.
+  const descriptor=require('./extension-ui.cjs').descriptors.find(d=>d.id===o.id);
+  if(descriptor?.setting)s.saveSettings({[descriptor.setting]:'true'});
+  pending.delete(id);
+  let ready=false;try{ready=!!o.ready(s.settings);}catch{ready=false;}
+  if(ready||o.connect!=='settings')return {installed:o.id,name:o.name,retry:row.direct?row.command:null,text:'Расширение «'+o.name+'» добавлено.'};
+  return {installed:o.id,name:o.name,settings:o.id,retry:row.command,text:'Расширение «'+o.name+'» добавлено. Подключите его в настройках — запрос сохранён: скажите «готово», и я продолжу.'};
+ }
+ function dismiss(id,forever=false){
+  const row=find(id);pending.delete(id);
+  if(forever){const list=muted(s.settings);if(!list.includes(row.ext))s.saveSettings({extensionOffersMuted:JSON.stringify([...list,row.ext])});}
+  return {dismissed:row.ext,forever};
+ }
+ function unmute(ext){s.saveSettings({extensionOffersMuted:JSON.stringify(muted(s.settings).filter(x=>x!==ext))});return muted(s.settings);}
+ return {extensionOffers:{turn,annotate,offers},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
+}
+module.exports={name:'extensionOffers',defaults:{extensionOffersMuted:'[]'},validate(){},setup,load,candidates,decide,REQUEST};

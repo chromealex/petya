@@ -41,6 +41,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     // («Раздать агентам» / «Ответить одним сообщением», the choice can be remembered).
     // Plugins first: a plugin may own this chat's next message (e.g. corrections to a work plan).
     if(!choice){const plugin=await ctx.extensionTurn?.(original);if(plugin)return via(plugin.by||'расширение',plugin);}
+    // A direct request about the subject of an extension the user does not have yet is answered by the offer to add it.
+    if(!choice&&!background&&!ctx.attachments.list().length){const offered=ctx.extensionOffers?.turn(original);if(offered)return offered;}
     let teamChecked=false;
     if(!choice&&!ctx.dialogue.active()?.agentOf){
       const team=require('./agent-team.cjs'),explicit=team.agentRequest(original);
@@ -326,6 +328,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     // Keep what Petya did with the answer, so the chat can show the steps later.
     const steps=require('./request-progress.cjs').steps();
     if(steps.length&&result&&typeof result==='object'){result.steps=steps;const last=chat?.messages?.at(-1);if(last?.role==='assistant'&&!last.steps&&result.handled){last.steps=steps;ctx.dialogue.persist();}}
+    // An answer on the subject of a missing extension gets a quiet offer to add it, once per chat.
+    if(!choice&&!background&&spoken&&chat===ctx.dialogue.active()&&ctx.extensionOffers)result=ctx.extensionOffers.annotate(spoken,result);
     if(chat?.messages?.at(-1)!==beforeMessage)ctx.chatResults?.adopt(chat,chat?.messages?.at(-1));
     return result;};
 };
