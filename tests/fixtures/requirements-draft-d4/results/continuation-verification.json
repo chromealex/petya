@@ -1,0 +1,9 @@
+{
+  "steps": 2322,
+  "adapter_sha256": "46dcf95b51f19d5d04a46bfdd5581fa51d07810cb0e9479501ceb2e7c39dfe6d",
+  "checkpoint_sha256": "ca2bc1e8282f206fb9e9db20b68bebb1c808e7d089b27e76b3865114b8e5f667",
+  "adapter_tensor_count": 256,
+  "exact_checkpoint_weights": true,
+  "complete_adam_and_loss_history": true,
+  "scope": "Completed artifact/checkpoint binding only; no answer-quality or release qualification."
+}
