@@ -45,7 +45,7 @@ function setup(s){
   for(const [other,v] of views)if(other!==id&&w.contentView.children.includes(v))w.contentView.removeChildView(v);
   shown=id;const v=views.get(id);if(!v||!rect)return;
   if(!w.contentView.children.includes(v))w.contentView.addChildView(v);
-  const zoom=w.webContents.getZoomFactor();v.setBounds({x:Math.round(rect.x*zoom),y:Math.round(rect.y*zoom),width:Math.max(0,Math.round(rect.width*zoom)),height:Math.max(0,Math.round(rect.height*zoom))});
+  const scale=w.webContents.getZoomFactor();v.setBounds({x:Math.round(rect.x*scale),y:Math.round(rect.y*scale),width:Math.max(0,Math.round(rect.width*scale)),height:Math.max(0,Math.round(rect.height*scale))});
  }
  function hide(){const w=s.win;if(w&&!w.isDestroyed())for(const v of views.values())if(w.contentView.children.includes(v))w.contentView.removeChildView(v);shown=null;return true;}
  async function open(id,url='',{partition}={}){
