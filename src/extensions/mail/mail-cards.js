@@ -35,6 +35,8 @@
    key:name(item.from),href:openUrl(item),status:item.priority?{label:'Важное',tone:'accent'}:null,subtitle:[item.account,when(item.date)].filter(Boolean).join(' · '),
    title:item.subject||'(без темы)',body,presentation:item.id?key(item):undefined,className:'mail-card',
    actions:[{label:'Ответить',primary:!!item.priority,run:()=>draft(k,item,card)},{label:'В задачу',title:'Подготовить задачу в Jira по письму',run:()=>k.ask('Создай задачу в Jira по письму «'+(item.subject||'')+'» от '+name(item.from)+': ')}]});
+  // A colleague's letter shows their team photo next to the name.
+  k.loadTeam?.().then(()=>{const who=k.person(name(item.from))||k.person(address(item.from));if(who){const a=k.avatar(who.name,{size:20});card.querySelector('.kit-key')?.before(a);}}).catch(()=>{});
   return card;
  }
  window.renderMailItems=(parent,items)=>{

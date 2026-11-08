@@ -18,7 +18,7 @@
   const title=document.createElement('strong'),subtitle=document.createElement('span');subtitle.className='team-member-subtitle';
   const avatar=document.createElement('span');avatar.className='team-avatar';avatar.setAttribute('aria-hidden','true');heading.append(title,subtitle);summary.append(avatar,heading);
   const editor=document.createElement('div');editor.className='team-member-fields';
-  const updateSummary=()=>{const value=key=>editor.querySelector('[data-field="'+key+'"]')?.value.trim()||'';title.textContent=value('name')||'Новый участник';avatar.textContent=(value('name').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('')||'+').toLocaleUpperCase();subtitle.textContent=[value('role'),value('projects')].filter(Boolean).join(' · ')||'Роль и проекты не указаны';};
+  const updateSummary=()=>{const value=key=>editor.querySelector('[data-field="'+key+'"]')?.value.trim()||'';title.textContent=value('name')||'Новый участник';const photo=value('photo');if(/^data:image\/(png|jpeg);base64,/.test(photo)){const img=avatar.querySelector('img')||document.createElement('img');img.src=photo;img.alt='';avatar.replaceChildren(img);avatar.classList.add('has-photo');}else{avatar.classList.remove('has-photo');avatar.textContent=(value('name').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('')||'+').toLocaleUpperCase();}subtitle.textContent=[value('role'),value('projects')].filter(Boolean).join(' · ')||'Роль и проекты не указаны';};
   for(const [key,label,max] of fields){
    const wrap=document.createElement('label');wrap.textContent=label;if(key==='responsibilities')wrap.className='team-member-wide';
    const input=document.createElement(key==='responsibilities'?'textarea':'input');input.dataset.field=key;input.value=member[key]||'';input.maxLength=max;
@@ -48,6 +48,7 @@
  const FIELDS={name:'Имя',handle:'Ник',title:'Должность',email:'Email',id:'ID'};
  const node=(tag,className,text)=>{const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=text;return n;};
  function addAccounts(editor,member){
+  const photo=node('input');photo.type='hidden';photo.dataset.field='photo';photo.value=member.photo||'';editor.append(photo);
   const hidden=node('input');hidden.type='hidden';hidden.dataset.field='accounts';hidden.value=member.accounts&&Object.keys(member.accounts).length?JSON.stringify(member.accounts):'';editor.append(hidden);
   const field=key=>editor.querySelector('[data-field="'+key+'"]');
   const read=()=>{try{return JSON.parse(hidden.value||'{}');}catch{return {};}};

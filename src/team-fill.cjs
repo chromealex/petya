@@ -84,7 +84,7 @@ const JIRA=/(?:jira|джир\p{L}*|(?:в|из|по|с)\s+жир[аеуыо]\p{L}
 const jiraPeople=command=>JIRA.test(command)&&PEOPLE.test(command);
 class TeamFill {
  // screen(): reads the visible Slack window; approve(): asks for computer control when it is needed.
- constructor({settings,save,sources,extract,roster,jiraRoster,enrich,scope,screen,approve,now=Date.now}) {Object.assign(this,{settings,save,sources,extract,roster,jiraRoster,enrich,scope,screen,approve,now});this.pending=null;this.busy=false;this.epoch=0;}
+ constructor({settings,save,sources,extract,roster,jiraRoster,enrich,photos,scope,screen,approve,now=Date.now}) {Object.assign(this,{settings,save,sources,extract,roster,jiraRoster,enrich,photos,scope,screen,approve,now});this.pending=null;this.busy=false;this.epoch=0;}
  reset(){this.pending=null;this.epoch++;}
  reply(text,extra={}){return {handled:true,text,...extra};}
  // opts.force: the request was recognised as team filling by meaning (team-intent); opts.existing: only the saved team.
@@ -157,9 +157,11 @@ class TeamFill {
    }
    // Names in Russian; the Latin spelling stays as an alias so Slack, Jira and Zoom still find the person.
    for(const m of members){const ru=russian(m.name);if(ru&&ru!==m.name){const old=m.name;m.name=ru;addAlias(m,old);renamed++;}}
-   if(added||filled||renamed||joined||removed.length)this.save(team.validate(members));
+   // Profile photos from Slack / Jira for cards that have none yet.
+   let photos=0;if(this.photos){try{photos=await this.photos(members);}catch(e){console.error('Team photos:',e.message);}}
+   if(added||filled||renamed||joined||photos||removed.length)this.save(team.validate(members));
    const gonePeople=[...new Set([...skipped,...removed])];
-   const summary=`Добавлено коллег: ${added}. Заполнено полей: ${filled}.`+(joined?' Объединил повторяющиеся карточки: '+joined+'.':'')+(renamed?' Имена на русском: '+renamed+'.':'')+(gonePeople.length?' Деактивированы в Slack, в команду не беру'+(removed.length?' (и убрал из списка)':'')+': '+gonePeople.slice(0,8).join(', ')+'.':'')+(ambiguous?' Неоднозначные карточки не изменены: '+ambiguous+'. Уточните полные имена и контакты.':'');
+   const summary=`Добавлено коллег: ${added}. Заполнено полей: ${filled}.`+(joined?' Объединил повторяющиеся карточки: '+joined+'.':'')+(renamed?' Имена на русском: '+renamed+'.':'')+(photos?' Фото: '+photos+'.':'')+(gonePeople.length?' Деактивированы в Slack, в команду не беру'+(removed.length?' (и убрал из списка)':'')+': '+gonePeople.slice(0,8).join(', ')+'.':'')+(ambiguous?' Неоднозначные карточки не изменены: '+ambiguous+'. Уточните полные имена и контакты.':'');
    if(conflicts.length){this.pending={kind:'conflict',conflicts,baseline:JSON.stringify(members),scope,at:this.now(),summary};return this.question();}
    if(!candidates.length){
     // Say what was read and why nothing was taken, instead of a bare «не нашёл».

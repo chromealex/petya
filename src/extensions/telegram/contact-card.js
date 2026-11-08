@@ -10,6 +10,8 @@ window.renderTelegramContacts=(message,data)=>{
   if(typeof contact.name!=='string'||!contact.name.trim())continue;
   const card=document.createElement('section');card.className='telegram-contact-card';
   const icon=document.createElement('span');icon.className='telegram-contact-avatar';icon.textContent=Array.from(contact.name.trim())[0];icon.setAttribute('aria-hidden','true');
+  // The team photo replaces the letter when the contact is in «Команда».
+  window.resultKit?.loadTeam?.().then(()=>{const m=window.resultKit.person(contact.name);if(m?.photo&&/^data:image\/(png|jpeg);base64,/.test(m.photo)){const img=document.createElement('img');img.src=m.photo;img.alt='';icon.replaceChildren(img);icon.classList.add('has-photo');}}).catch(()=>{});
   const info=document.createElement('div'),name=document.createElement('strong'),source=document.createElement('small');
   name.textContent=contact.name;source.textContent='Совпадение в поиске Telegram';info.append(name,source);
   if(contact.observed&&contact.observed!==contact.name){const detail=document.createElement('p');detail.textContent=contact.observed.startsWith(contact.name+' · ')?contact.observed.slice(contact.name.length+3):contact.observed;info.append(detail);}
@@ -20,7 +22,7 @@ window.renderTelegramContacts=(message,data)=>{
   const write=document.createElement('button');write.type='button';write.textContent='Написать';write.onclick=say('Напиши в Telegram '+contact.name+': ');
   const thread=document.createElement('button');thread.type='button';thread.textContent='Переписка';thread.onclick=()=>window.processCommand?.('Покажи последнюю переписку с '+contact.name+' в Telegram');
   const actions=document.createElement('div');actions.className='telegram-contact-actions';actions.append(write,thread,copy);
-  window.petya.teamList?.().then(team=>{const person=(team?.members||[]).find(m=>m.name&&(m.name===contact.name||(m.aliases||[]).includes?.(contact.name)));if(person?.role){source.textContent=person.role+' · из команды';}}).catch(()=>{});
+  window.petya.teamList?.().then(team=>{const person=window.resultKit?.person?.(contact.name)||(team?.members||[]).find(m=>m.name&&(m.name===contact.name||String(m.aliases||'').split(/[,;]/).map(a=>a.trim()).includes(contact.name)));if(person?.role){source.textContent=person.role+' · из команды';}}).catch(()=>{});
   card.append(icon,info,actions);list.append(card);
  }
  message.append(list);

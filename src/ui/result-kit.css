@@ -89,3 +89,7 @@ button.kit-chip{cursor:pointer}button.kit-chip:hover{color:var(--ink);border-col
 @media(max-width:900px){#home.with-side-panel{position:relative}.kit-panel{position:absolute;inset:0 0 0 auto;width:min(92vw,var(--kit-panel-w));z-index:14;box-shadow:-12px 0 32px #0008}
  #home.with-project-sidebar.with-side-panel,#home.with-project-sidebar.projects-collapsed.with-side-panel{grid-template-columns:238px minmax(0,1fr)}}
 @media(max-width:800px){#home.with-project-sidebar.with-side-panel,#home.with-project-sidebar.projects-collapsed.with-side-panel{grid-template-columns:minmax(0,1fr)}}
+/* People */
+.kit-person{--size:20px;display:inline-grid;place-items:center;flex:0 0 var(--size);width:var(--size);height:var(--size);border-radius:50%;overflow:hidden;background:#2b3431;color:var(--ink);font-size:calc(var(--size) * .42);font-weight:600;line-height:1;vertical-align:middle}
+.kit-person img{width:100%;height:100%;object-fit:cover;display:block}
+.kit-chip .kit-person{margin-left:-5px}

@@ -21,7 +21,7 @@
   const status=k.chip({label:item.status||'Статус',tone:tone(item.category),title:'Статус в Jira',
    menu:edit('transitions')?async()=>(await window.chatResultsApi.perform(pk,'transitions')).options:null,
    pick:async option=>{const r=await run('status',{id:option.id},status,option.label);status.className='kit-chip'+(tone(option.category)?' tone-'+tone(option.category):'');return r;}});
-  const assignee=k.chip({label:item.assignee||'Не назначен',title:'Исполнитель',
+  const assignee=k.chip({label:item.assignee||'Не назначен',title:'Исполнитель',who:item.assignee||'',
    menu:edit('people')?async()=>(await window.chatResultsApi.perform(pk,'people')).options:null,
    pick:option=>run('assignee',{id:option.id,label:option.label},assignee,option.label)});
   const priority=item.priority||edit('priorities')?k.chip({label:item.priority||'Приоритет',title:'Приоритет',

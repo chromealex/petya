@@ -12,11 +12,11 @@ async function roster(workspace,live){
  for(let page=0;page<5;page++){
   const r=await workspace.api('/rest/api/3/search/jql',{method:'POST',body:JSON.stringify({jql,maxResults:100,fields:['assignee','project'],...token?{nextPageToken:token}:{}})},s);
   for(const issue of r?.issues||[]){const a=issue.fields?.assignee,key=issue.fields?.project?.key;if(!a?.accountId||a.active===false||a.accountType&&a.accountType!=='atlassian')continue;
-   const p=people.get(a.accountId)||{name:String(a.displayName||'').trim(),email:a.emailAddress||'',projects:new Map()};p.projects.set(key,(p.projects.get(key)||0)+1);people.set(a.accountId,p);}
+   const p=people.get(a.accountId)||{name:String(a.displayName||'').trim(),email:a.emailAddress||'',image:String(a.avatarUrls?.['48x48']||''),projects:new Map()};p.projects.set(key,(p.projects.get(key)||0)+1);people.set(a.accountId,p);}
   if(r?.isLast!==false||!r?.nextPageToken)break;token=r.nextPageToken;
  }
  return [...people.entries()].filter(([,p])=>p.name).map(([id,p])=>{const projects=[...p.projects.entries()].sort((a,b)=>b[1]-a[1]);const total=projects.reduce((n,[,c])=>n+c,0);
-  return {member:{name:p.name,aliases:'',role:'',projects:projects.map(([k])=>k).join(', '),responsibilities:'',email:p.email,slackId:'',jiraId:id,jiraName:p.name,accounts:{jira:{id,name:p.name,email:p.email}}},
+  return {member:{name:p.name,aliases:'',role:'',projects:projects.map(([k])=>k).join(', '),responsibilities:'',email:p.email,slackId:'',jiraId:id,jiraName:p.name,accounts:{jira:{id,name:p.name,email:p.email,image:p.image}}},
    evidence:'Jira: исполнитель '+total+' задач за 90 дней ('+projects.map(([k,c])=>k+' — '+c).join(', ')+')',source:'Jira'};});
 }
 module.exports={roster};

@@ -45,6 +45,7 @@ module.exports=ctx=>{
       for(const m of saved)if(!wanted.some(w=>w.name===m.name))wanted.push({name:m.name,email:m.email||''});
       try{slack=await e.slackProfiles(ctx.settings,ctx.request,wanted);}catch(err){console.error('Slack profiles:',err.message);slack.error=err.message;}
       const out=e.enrich(rows,slack,work);out.slack=slack;return out;},
+    photos:members=>require('./team-photos.cjs').fill(members,{nativeImage:require('electron').nativeImage}),
     // Fallback when the Slack API is rate-limited: bring Slack to the front and read its visible window.
     screen:readSlackScreen,
     approve:(command,action)=>ctx.computerApproval.request(command,action),

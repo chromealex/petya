@@ -14,7 +14,7 @@ async function slackProfiles(settings,request,wanted=[],{wait=ms=>new Promise(r=
  // Deactivated accounts are remembered separately: they must not become (or stay) team members.
  const add=u=>{if(!u||u.is_bot||u.is_app_user||u.id==='USLACKBOT')return;const p=u.profile||{};
   if(u.deleted){if(!result.deleted.some(x=>x.slackId===u.id))result.deleted.push({slackId:u.id,names:namesOf(u,p),name:String(p.real_name||u.real_name||'').trim()});return;}
-  if(!result.profiles.some(x=>x.slackId===u.id))result.profiles.push({slackId:u.id,names:namesOf(u,p),name:String(p.real_name||u.real_name||'').trim(),handle:String(p.display_name||'').trim(),title:String(p.title||'').trim(),email:typeof p.email==='string'?p.email:''});};
+  if(!result.profiles.some(x=>x.slackId===u.id))result.profiles.push({slackId:u.id,names:namesOf(u,p),name:String(p.real_name||u.real_name||'').trim(),handle:String(p.display_name||'').trim(),title:String(p.title||'').trim(),email:typeof p.email==='string'?p.email:'',image:p.is_custom_image===false?'':String(p.image_192||p.image_72||'')});};
  const names=wanted.map(w=>norm(w.name)).filter(Boolean),found=()=>names.every(n=>result.profiles.some(p=>p.names.includes(n)));
  let cursor='';
  try{
@@ -48,7 +48,7 @@ async function jiraWork(workspace,people){
  const quote=v=>'"'+String(v).replace(/["\\]/g,'\\$&')+'"';
  const r=await workspace.api('/rest/api/3/search/jql',{method:'POST',body:JSON.stringify({jql:'project IN ('+allowed.map(quote).join(',')+') AND assignee IS NOT EMPTY AND updated >= -90d ORDER BY updated DESC',maxResults:100,fields:['assignee','components','labels','project']})},s);
  const work=new Map();
- for(const issue of r?.issues||[]){const a=issue.fields?.assignee;if(!a?.accountId||a.active===false)continue;const w=work.get(a.accountId)||{name:norm(a.displayName),displayName:String(a.displayName||'').trim(),email:a.emailAddress||'',projects:new Map(),topics:new Map()};
+ for(const issue of r?.issues||[]){const a=issue.fields?.assignee;if(!a?.accountId||a.active===false)continue;const w=work.get(a.accountId)||{name:norm(a.displayName),displayName:String(a.displayName||'').trim(),image:String(a.avatarUrls?.['48x48']||''),email:a.emailAddress||'',projects:new Map(),topics:new Map()};
   const key=issue.fields?.project?.key;if(key)w.projects.set(key,(w.projects.get(key)||0)+1);
   for(const t of [...(issue.fields?.components||[]).map(c=>c?.name),...(issue.fields?.labels||[])].filter(Boolean))w.topics.set(t,(w.topics.get(t)||0)+1);
   work.set(a.accountId,w);}
@@ -65,10 +65,10 @@ function enrich(rows,slack=[],work=new Map()){
   const profile=profiles.find(p=>m.slackId&&p.slackId===m.slackId)||profiles.find(p=>p.names.includes(name))||profiles.find(p=>p.email&&(p.email===m.email||p.email===jiraEmail));
   m.slackProfile=profile?(profile.title?'title':'empty'):'missing';
   if(profile){if(!m.role&&profile.title){m.role=profile.title;notes.push('роль из профиля Slack');}if(!m.slackId)m.slackId=profile.slackId;if(!m.email&&profile.email)m.email=profile.email;}
-  if(profile)m.accounts=team.mergeAccounts(m.accounts,{slack:{id:profile.slackId,name:profile.name,handle:profile.handle,title:profile.title,email:profile.email}});
+  if(profile)m.accounts=team.mergeAccounts(m.accounts,{slack:{id:profile.slackId,name:profile.name,handle:profile.handle,title:profile.title,email:profile.email,image:profile.image}});
   const job=(m.jiraId&&work.get(m.jiraId))||[...work.entries()].find(([,w])=>w.name===name||profile&&profile.names.includes(w.name))?.[1];
   const id=m.jiraId||[...work.entries()].find(([,w])=>w===job)?.[0];
-  if(job&&id)m.accounts=team.mergeAccounts(m.accounts,{jira:{id,name:job.displayName||m.jiraName||'',email:job.email}});
+  if(job&&id)m.accounts=team.mergeAccounts(m.accounts,{jira:{id,name:job.displayName||m.jiraName||'',email:job.email,image:job.image}});
   if(job){if(!m.jiraId&&id)m.jiraId=id;if(!m.projects&&job.projects.size)m.projects=top(job.projects,4).join(', ');
    const topics=top(job.topics,4);if(!m.responsibilities&&topics.length){m.responsibilities=topics.join(', ');notes.push('обязанности по компонентам и меткам задач Jira');}
    if(!m.email&&job.email)m.email=job.email;}

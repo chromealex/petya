@@ -14,7 +14,7 @@
   const tasks=list(k,'Задачи',m.tasks,t=>{
    const li=k.el('li','meeting-task');const box=k.el('input','kit-check');box.type='checkbox';box.setAttribute('aria-label','Выбрать задачу');box.onchange=()=>{box.checked?chosen.add(t):chosen.delete(t);if(createButton)createButton.textContent=chosen.size?'Создать в Jira · '+chosen.size:'Создать все в Jira';};
    const text=k.el('div','meeting-task-text');text.append(k.el('span',null,t.what));
-   const chips=k.el('div','kit-chips');if(t.who)chips.append(k.chip({label:t.who}));if(t.due)chips.append(k.chip({label:'Срок: '+t.due,tone:'progress'}));text.append(chips);
+   const chips=k.el('div','kit-chips');if(t.who)chips.append(k.chip({label:t.who,who:t.who}));if(t.due)chips.append(k.chip({label:'Срок: '+t.due,tone:'progress'}));text.append(chips);
    const one=k.el('button',null,'В Jira');one.type='button';one.title='Подготовить задачу в Jira — Петя покажет её перед созданием';one.onclick=()=>k.ask('Создай задачу в Jira: '+taskText(t),{send:true});
    li.append(box,text,one);return li;});
   const open=list(k,'Не обсудили',m.notDiscussed,d=>k.el('li',null,d));

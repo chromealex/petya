@@ -54,8 +54,9 @@
  }
 
  // --- Card ------------------------------------------------------------------------------------
- function chip({label,title,tone='',menu:load,pick,onClick,editable=!!load||!!onClick}){
+ function chip({label,title,tone='',menu:load,pick,onClick,editable=!!load||!!onClick,who}){
   const node=el(editable?'button':'span','kit-chip'+(tone?' tone-'+tone:''),label+(load?' ▾':''));
+  if(who)node.prepend(avatar(who,{size:16}));
   if(title)node.title=title;
   if(editable){node.type='button';if(load){node.setAttribute('aria-haspopup','menu');node.setAttribute('aria-expanded','false');node.onclick=event=>{event.stopPropagation();menu(node,load,pick);};}else node.onclick=event=>{event.stopPropagation();onClick();};}
   return node;
@@ -170,11 +171,28 @@
  for(const ev of ['petya-dialogue-state','petya-chat-opened'])document.addEventListener(ev,()=>{if(side?.box.isConnected&&typeof topicSelect!=='undefined'&&topicSelect.value!==side.topic)closePanel();});
  const panelOpen=id=>!!side?.box.isConnected&&side.id===id;
 
+ // --- People: team photos next to names in cards (Slack authors, Jira assignees, meeting tasks, …) -------------
+ let team=null,teamLoad=null;
+ const key=v=>String(v||'').toLocaleLowerCase().replace(/ё/g,'е').replace(/^@/,'').replace(/\s+/g,' ').trim();
+ function loadTeam(force=false){if(force)teamLoad=null;if(!teamLoad)teamLoad=(window.petya?.teamList?.()||Promise.resolve(null)).then(data=>{const index=new Map();
+   for(const m of data?.members||[]){for(const n of [m.name,m.email,...String(m.aliases||'').split(/[,;]/),...Object.values(m.accounts||{}).flatMap(a=>[a.name,a.handle,a.id,a.email])])if(key(n)&&!index.has(key(n)))index.set(key(n),m);if(m.slackId)index.set(key(m.slackId),m);}
+   team=index;document.querySelectorAll('.kit-person[data-person]').forEach(fillPerson);return index;}).catch(()=>{team=new Map();return team;});return teamLoad;}
+ const person=name=>team?.get(key(name))||null;
+ function fillPerson(node){const m=person(node.dataset.person);if(!m)return;node.title=m.name+(m.role?' · '+m.role:'');
+  if(m.photo&&/^data:image\/(png|jpeg);base64,/.test(m.photo)&&!node.querySelector('img')){const img=el('img');img.src=m.photo;img.alt='';node.replaceChildren(img);node.classList.add('has-photo');}}
+ // A round avatar: the team photo when the person is in «Команда», otherwise the initials.
+ function avatar(name,{size=20}={}){
+  const node=el('span','kit-person');node.dataset.person=String(name||'');node.style.setProperty('--size',size+'px');node.setAttribute('aria-hidden','true');
+  node.textContent=String(name||'?').replace(/^@/,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>Array.from(w)[0]).join('').toLocaleUpperCase()||'?';
+  if(team)fillPerson(node);else loadTeam();return node;
+ }
+ for(const ev of ['petya-team-updated','petya-team-saved'])document.addEventListener(ev,()=>loadTeam(true));
+
  // Hand a follow-up to the chat: send it right away, or put it into the composer for the user to finish.
  async function ask(text,{send=false}={}){
   const box=document.getElementById('command');
   if(send&&typeof submitChatCommand==='function'){await submitChatCommand(text);return;}
   if(box){box.value=text;box.dispatchEvent(new Event('input',{bubbles:true}));box.focus();box.setSelectionRange?.(text.length,text.length);}
  }
- window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen};
+ window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam};
 })();
