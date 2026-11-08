@@ -47,12 +47,12 @@ async function sizes(services,{platform=process.platform,timeout=4000,free}={}){
  return {apps:out,available,reserve:512*1024**2};
 }
 module.exports={name:'extensionUI',descriptors,groups,sizes,bytesOf,features:descriptors.filter(d=>d.feature).map(d=>require(path.join(directory,d.id,d.feature))),setup(s){
- // `connected` (only for apps that declare `connects`): the app's offer says it is ready, or one of its
+ // `connected` (only for apps that declare `connects`): the app's offer says it is connected (or ready), or one of its
  // `connectsKeys` settings is filled. Secrets themselves never leave the main process.
  const connected=d=>{
   if(!d.connects)return null;
   const offer=offers.get(d.id);
-  try{if(offer)return !!offer.ready(s.settings||{});}catch{return false;}
+  try{if(offer)return !!(offer.connected||offer.ready)(s.settings||{});}catch{return false;}
   return (d.connectsKeys||[]).some(k=>!!String(s.settings?.[k]||'').trim());
  };
  const catalog=()=>descriptors.map(d=>({...d,installed:!d.setting||s.settings[d.setting]==='true',connected:connected(d)}));

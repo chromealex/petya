@@ -63,7 +63,7 @@ offer).
 
 | Card | task-tracker | code-fix | share-message | video-meeting | meeting-recording |
 |---|---|---|---|---|---|
-| Crashes (Sentry), per issue | ✓ (bug) | ✓ | card: new crashes | | |
+| Crashes (Sentry, Crashlytics, Google Play), per issue | ✓ (bug) | ✓ | card: new crashes | | |
 | Store reviews, per complaint theme | ✓ | ✓ | ✓ | | |
 | Store reviews, per review | ✓ | | | | |
 | CI builds, failed run | ✓ (bug) | ✓ (the existing hand-off text) | ✓ | | |

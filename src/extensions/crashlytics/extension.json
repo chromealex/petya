@@ -1,0 +1,18 @@
+{
+  "id": "crashlytics",
+  "name": "Firebase Crashlytics",
+  "description": "Источник для «Крэшей»: крэши Firebase Crashlytics из выгрузки в BigQuery — топ за период, новые, график по дням",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Что в Crashlytics за неделю?","Новые крэши в Firebase после релиза 2.3.0","Крэши Crashlytics на iOS за сутки"],
+  "connects": "Google BigQuery",
+  "setting": "extension_crashlytics",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["settings.js", "notifications.js"]
+  ],
+  "provides": {
+    "crash-source": "crash-source.cjs"
+  }
+}

@@ -1,72 +1,99 @@
 # Crashes («Крэши»)
 
-Category: gamedev. Directory: `src/extensions/crashes/`.
+Category: gamedev. Directory: `src/extensions/crashes/`. The app knows no crash service: it shows the crashes of
+every connected **crash source** in one chat card. Sources are extensions that declare a `crash-source`:
 
-Shows Sentry crashes in the chat as one card: totals for the period (issues, events, users affected), a stacked
-daily events chart (five most frequent issues plus the rest), crash-free sessions/users for a named release, and
-the top issues with level, title, culprit, events/users, a 14-day sparkline and a «новый» mark. Per issue:
-«Открыть в Sentry», «В задачу Jira» (sends a Jira creation request to the chat; the Jira flow confirms),
-«Отдать Программисту» (sends «Исправь баг в коде — крэш из Sentry: …» to the chat) and «Решено» (resolves in
-Sentry only when pressed; the toast's «Отменить» reopens it). Chat turns only read.
+| Source | Extension | How it reads | «Решено» | Doc |
+|---|---|---|---|---|
+| Sentry | `sentry` | Sentry REST API (token) | yes | [sentry.md](sentry.md) |
+| Firebase Crashlytics | `crashlytics` | Crashlytics BigQuery export, `jobs.query` (service-account key) | no | [crashlytics.md](crashlytics.md) |
+| Google Play | `google-play` | Play Developer Reporting API, Android vitals errors (the Google Play connection) | no | [google-play.md](google-play.md) |
+
+Possible later sources (not implemented): Unity Cloud Diagnostics / Backtrace (REST API with a token), Bugsnag
+(Data Access API). App Store Connect has no API that lists crashes (only diagnostic logs and Xcode Organizer), so
+iOS crashes come through Sentry or Crashlytics.
+
+## The card
+
+Totals for the period (issues, events, users affected), a per-source strip (each source's share of the events, its
+issues and events; a click asks for that source only), crash-free tiles of the sources that report it for a named
+release (Sentry: sessions and users; Google Play: users), a stacked daily events chart split **by source** (default
+with several sources) or **by issue** (the five most frequent issues across sources plus the rest), an optional
+«Общее: …» line from the local model, notes (a source that failed or had nothing to say), and the top issues grouped
+by source. Each row has a source chip, level, «новый», title, culprit, versions, events/users, a 14-day sparkline,
+«Открыть в <источник>», «В задачу …» and «Отдать Программисту» (cross-app links) and «Решено» only for sources that can
+resolve. Issues are never merged across sources: the same bug in Sentry and Crashlytics stays two rows.
+
+Chat turns only read. «Решено» / «Отменить» call `crashes` ipc `resolve(source, id)` / `reopen(source, id)` and only
+for a source with `resolve`.
 
 ## Phrases
 
-Triggers (when the app is added): «какие крэши за неделю», «топ крэшей», «новые крэши после релиза 1.4.2»,
-«что с крэшами на андроиде», «сколько падений вчера», «что в Sentry за сутки», «краши на iOS».
+Triggers (when the app is added): «какие крэши за неделю», «топ крэшей», «новые крэши после релиза 1.4.2», «что с
+крэшами на андроиде», «сколько падений вчера», «покажи краши на iOS». Naming a source reads only it: «что в Sentry
+за сутки», «только Sentry», «что в Crashlytics за неделю», «крэши в Firebase», «крэши в Google Play», «крэши в гугл
+плей». Sentry and Crashlytics are crash requests by name alone; Google Play and Firebase need a crash word (Google
+Play alone is the ANR card or reviews, Firebase alone is any Firebase product).
 
-Filters read from the request: period (вчера, сегодня/за сутки, за неделю, за N дней/часов, за месяц; default
-7 days), release (`релиз/версия 1.4.2` or a bare `1.4.2`), platform (Android/iOS → `os.name:` tag), environment
-(«в проде» → production, else the settings value), a configured project slug, «новые».
+Filters read from the request: period (вчера, сегодня/за сутки, за неделю, за N дней/часов, за месяц; default 7 days),
+release (`релиз/версия 1.4.2`, a bare `1.4.2`, `versionCode 10422` for Google Play), platform (Android/iOS), environment
+(«в проде» → production; Sentry falls back to its setting), «новые». A release with no period starts the period at the
+release date given by a source that knows releases (Sentry), else 30 days.
 
-Not triggered: ANR (Google Play extension), «упала сборка» and other red builds (CI), «сервер упал» without a
-crash or Sentry word, «падение продаж», fix requests («исправь крэш…» → Programmer), Jira task requests,
-«что такое крэш-репорт». The offer (`offer.cjs`) promises Sentry only and is not shown for Crashlytics.
+Not triggered: ANR (the Google Play ANR card), «упала сборка» and other red builds (CI), «сервер упал» without a crash
+word, «падение продаж», fix requests («исправь крэш…» → Programmer), Jira task requests, «что такое крэш-репорт»,
+Firebase Analytics / Remote Config / Auth.
 
-## Setup
+## No source connected
 
-Settings → «Крэши · Sentry»: address (`https://sentry.io`, a regional `https://de.sentry.io`, or a self-hosted
-https URL), auth token (stored as a secret, `sentryToken`), organization slug, projects (loaded from the API
-after the token is saved; none checked = all projects), optional environment and an extra search filter
-appended to `is:unresolved` (e.g. `error.unhandled:true`).
+When «Крэши» is added but no source is ready, the answer is the shared offer card (`extensionOffers.propose`) listing the
+sources to connect («Крэши пока неоткуда взять: подключите источник — Sentry, Firebase Crashlytics или Google Play»).
+A request that names a source that is not connected gets the offer for that source only. Accepting adds the source
+(and opens its settings, or Petya's Google Play service card); the request is kept and resumed with «Готово —
+продолжить». Offers: «Крэши» itself is offered by crash words with a generic pitch; each source has its own offer by
+name (`sentry`, `crashlytics`, `google-play`), and accepting one also adds «Крэши» (`also` in `offer.cjs`).
 
-Token scopes: `org:read`, `project:read`, `event:read`; `event:write` for «Решено».
+Settings → «Крэши» lists the sources with their state and a button to set each up.
 
-## Sentry API used
+## The crash source interface
 
-- `GET /api/0/organizations/` and `/organizations/{org}/projects/` — settings pickers and slug → id.
-- `GET /api/0/organizations/{org}/releases/?query=1.4.2` — exact versions (`com.game@1.4.2+102`, not `1.4.20`).
-- `GET /api/0/organizations/{org}/issues/` with `project`, `query`, `environment`, `statsPeriod` or `start/end`,
-  `groupStatsPeriod=14d`, `sort=freq`, `limit=100` — counts, users, firstSeen/lastSeen, level, culprit, stats.
-- `GET /api/0/organizations/{org}/sessions/` with `crash_free_rate(session)`, `crash_free_rate(user)`,
-  `sum(session)` for the release — optional; any failure or no sessions just hides the tile.
-- `PUT /api/0/organizations/{org}/issues/?id=…` with `{"status":"resolved"|"unresolved"}`.
+Declared in `extension.json` as `"provides": {"crash-source": "<file>.cjs"}`, served by
+`src/features/crash-sources.cjs` (`services.crashSources`; the shared `scan` of `src/features/app-links.cjs`). The file
+exports:
 
-The model (optional, `app-kit.modelJSON`) adds one «Общее: …» line for 3+ issues; the card is complete without it.
+```
+{ id?, name?, color?, names?: [RegExp], standalone?: [RegExp], service?: '<module>',
+  ready(settings) -> bool,
+  async issues(services, query) -> {issues, more?, url?, scope?, note?},
+  async release?(services, name) -> {name, date, versions} | null,
+  async crashFree?(services, query) -> {sessions, users, total?} | null,
+  async resolve?(services, id), async reopen?(services, id) }
+```
+
+`query` is `{text, period:{label, kind, start, end, days, statsPeriod?}, since, release, found, platform, environment,
+onlyNew, now}` (`found` is this source's own `release()` answer). An issue is `{id, title, culprit, level, events, users,
+firstSeen, lastSeen, versions, platform, project, shortId, daily:[{day, count}], isNew, url, unhandled}`; the registry
+normalizes it (numbers, ISO times, https links only) and adds `source`. A source counts while its extension is added
+(`setting`) and `ready`. Only crash issues: no ANR or non-fatal reports.
 
 ## Limits
 
-- Totals are over the fetched page (up to 100 issues, shown as «100+»); users are summed per issue (an upper bound).
-- The chart and sparklines use Sentry's 14-day daily buckets, so a 30-day period shows the last 14 days.
-- Platform filtering relies on the `os.name` tag sent by the SDK.
-
-## Firebase Crashlytics (not implemented)
-
-Crashlytics has no public REST API for issues/crash lists. The only programmatic access is the Crashlytics
-BigQuery export (`firebase_crashlytics.<package>_<PLATFORM>` tables, daily batch or streaming). Supporting it
-would need: the export enabled in Firebase, a Google Cloud service account or OAuth with
-`bigquery.jobs.create` and dataset read access, the project/dataset/table names in settings, SQL that groups
-by `issue_id` (count events, `COUNT(DISTINCT installation_uuid)`, min/max `event_timestamp`, `application.display_version`
-for releases), and no «Решено» (issue state is not writable outside the console). The offer names Sentry only.
+- Totals are over each source's first page (Sentry and Crashlytics up to 100 issues, Google Play 100 per app; «100+»);
+  users are summed per issue (an upper bound).
+- The chart and sparklines cover the last 14 days (Sentry's daily buckets; Play days are America/Los_Angeles dates and
+  end at the last complete day).
+- Platform filtering: Sentry `os.name` tag, Crashlytics tables per platform, Google Play is Android only.
 
 ## Verification
 
-Everything was tested with stubs; no real Sentry credentials were available.
-- `node tests/crashes.cjs` — routing and near-misses, not added / not connected, request parameters, card data,
-  release/crash-free, errors (401/403/bad JSON), model on/off, resolve/reopen ipc, settings validation, offer.
-- `timeout 120 xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/crashes-ui.cjs`
-  — renders cards, screenshots `/tmp/petya-crashes.png`, `-2.png`, `-settings.png`; then end to end through the
-  real main process against a local fake Sentry: settings saved, a chat request answered with a card, the settings
-  project list, and «Решено» / «Отменить» reaching the server.
-
-To verify live: token scopes and regional routing on sentry.io, the `release:[…]` list syntax and `os.name`
-filter on a real org, the sessions endpoint on an org with release health, the resolve PUT with `event:write`.
+Everything was tested with stubs; no real Sentry, Google Play or BigQuery credentials were available.
+- `node tests/crashes.cjs` (also runs `tests/sentry.cjs`, `tests/google-play-crashes.cjs`, `tests/crashlytics.cjs`) —
+  routing and near-misses, filters, the registry (declarations, readiness, names, normalization), no-source and
+  named-source offers, the merged card of three sources, source filters, partial and total failures, release flow,
+  model line, resolve/reopen ipc, offers.
+- `tests/extension-offers.cjs` (`propose`, `also`, `service`), `tests/extension-offers-matrix.cjs` (rows for crashes,
+  sentry, crashlytics, google-play), `tests/extension-ui.cjs`.
+- `timeout 180 xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/crashes-ui.cjs`
+  — the three-source card (`/tmp/petya-crashes.png`, `-2.png`), the no-source offer (`petya-crashes-offer.png`), the
+  Sentry, «Крэши» and Crashlytics settings cards (`petya-crashes-settings.png`, `petya-crashes-sources.png`,
+  `petya-crashlytics-settings.png`), and Sentry end to end against a local fake server with «Решено» / «Отменить».
