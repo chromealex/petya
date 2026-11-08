@@ -6,7 +6,7 @@
 // - Services: `s.activity` {spans(range), summary(range, groupBy), status(), enable(on), pause(minutes), resume(),
 //   wipe(), classifiers()}. IPC: window.petya.feature('activity', 'status' | 'pause' | 'resume' | 'wipe' | 'enable').
 // - Classifiers: an app declares `"provides": {"activity-classifier": "<file>.cjs"}`; the file exports
-//   {id, name?, classify({app, title, private}) -> {project?, task?, category?, label?, url?} | null}. Tags are applied
+//   {id, name?, order?, classify({app, title, private}, settings) -> {project?, task?, category?, label?, url?} | null}. Tags are applied
 //   when spans are read, never stored, so a new classifier applies to past days too.
 // Storage: `<company data>/activity/` (src/activity/store.cjs). Sampling: src/activity/foreground.cjs.
 const path=require('node:path');
@@ -32,7 +32,7 @@ function validate(next){
 
 // The tracker bound to live services. `deps` replaces the clock, sampler, idle reader and classifiers in tests.
 function create(s,{now=()=>Date.now(),sample,idleSeconds,classifiers,dir}={}){
- const registry=classifiers||(()=>{let list=null;return ()=>{if(!list){try{list=load();}catch(e){console.error('Activity classifiers:',e.message);list=[];}}return list.filter(x=>!x.setting||s.settings?.[x.setting]==='true');};})();
+ const registry=classifiers||(()=>{let list=null;return ()=>{if(!list){try{list=load();}catch(e){console.error('Activity classifiers:',e.message);list=[];}}return list.filter(x=>!x.setting||s.settings?.[x.setting]==='true').map(x=>({...x,classify:w=>x.classify(w,s.settings||{})}));};})();
  const where=dir||(()=>s.dataRoot?path.join(s.dataRoot,'activity'):'');
  let root=where();
  const store=require('../activity/store.cjs').create({dir:()=>root});

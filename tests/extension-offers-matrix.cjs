@@ -66,7 +66,8 @@ const own={
  logs:['покажи логи сервера за последний час','ошибки оплаты в логах за час','логи сервиса payments за последний час','что в Loki за сутки','найди ошибки в Кибане','логи пода api за 15 минут'],
  kubernetes:['что с подами в кубере','покажи поды в k8s','почему падает под в kubernetes','какие поды в CrashLoopBackOff','статус деплоймента в кубере'],
  'ua-campaigns':['сколько потратили на закупку трафика за неделю','какой CPI по сетям','покажи расходы на рекламные кампании вчера','какой ROAS за неделю','сколько стоит установка по сетям'],
- monitoring:['что с серверами','всё ли живое','какие алерты горят','аптайм за неделю','почему лежит api','инциденты за неделю','что в Grafana','найди все адреса серваков в проекте','какие сервера использует игра']
+ monitoring:['что с серверами','всё ли живое','какие алерты горят','аптайм за неделю','почему лежит api','инциденты за неделю','что в Grafana','найди все адреса серваков в проекте','какие сервера использует игра'],
+ 'time-tracking':['на что ушёл день','сколько я сидел в Unity на этой неделе','время по задачам','куда ушло время на этой неделе','запиши время в Jira'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -135,6 +136,8 @@ const not={
  zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи'],
  // A plain screenshot is Petya's computer control; store screenshots and bugs in code belong to others.
  'screenshot-task':['сделай скриншот','скриншоты стора','баг в коде','заведи баг в Jira'],
+ // The clock, focus sessions, the journal of what was done, build and meeting durations, money are not time tracking.
+ 'time-tracking':['который час','сколько времени','сколько я сегодня сфокусировался','что я сегодня сделал','сколько времени займёт сборка','время встречи с Олегом','учёт расходов за месяц','сколько я был в отпуске'],
  // Currency, text translation and shortening an answer are not files.
  converter:['конвертер валют','переведи текст','сожми ответ','переведи задачу в другой статус','переведи 100 долларов в рубли'],
  // Code review of my changes: the concept, store reviews, people's reviews, PR lists, Jira tasks on review and showing a diff are not it.
