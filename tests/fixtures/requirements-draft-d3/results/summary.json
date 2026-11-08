@@ -1,0 +1,51 @@
+{
+  "part": "Andromeda D3",
+  "adapter_sha256": "e3df18e0a6aed26d20517a6c9149916889869511fc0f5d095da7266cd74e24ff",
+  "parent": "D1 (e4750435…a12d0)",
+  "steps": 2322,
+  "generated_holdout": {
+    "D3": 39,
+    "D2": 39,
+    "D1": 24,
+    "total": 54,
+    "lost_D1_successes": [
+      "d2-hold-code-8",
+      "d2-hold-quote-24",
+      "d2-hold-two-recipients-38",
+      "d2-hold-two-recipients-47"
+    ]
+  },
+  "v22": {
+    "checks": {
+      "D3": 27,
+      "D1": 27,
+      "total": 30
+    },
+    "drafts": {
+      "D3": 6,
+      "D2": 7,
+      "D1": 6,
+      "total": 12
+    }
+  },
+  "familiar": {
+    "D3": 783,
+    "D2": 782,
+    "D1": 787,
+    "total": 801,
+    "lost": [
+      "seven-two-open",
+      "v18-revoke-after-grant",
+      "v20-quoted-ban-not-action",
+      "v21-previous-draft-payment",
+      "v21-previous-draft-quote",
+      "v21-previous-draft-display",
+      "v21-previous-draft-versions",
+      "fresh-revoke-transmit",
+      "fresh-negative-order"
+    ],
+    "gained": 5
+  },
+  "gate": "rejected: D1 successes lost on the new dialogues and familiar retention below D1 (783 < 787); D1 stays the group’s D",
+  "reading": "Rehearsing the familiar set twice keeps D2's gains on new corrections (39 of 54) but barely changes retention (782 → 783): the forgetting is not about how often the familiar cases are seen. Lost cases are mostly dropped secondary constraints and garbled grammar."
+}

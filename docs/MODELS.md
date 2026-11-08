@@ -15,7 +15,8 @@ Weights are kept only on GitHub: the `models` branch of `chromealex/petya` has `
 per part (`andromeda/D1/`) with `model.json` (role, base and revision, hashes, evaluation, status) and the adapter;
 each part with weights is a release tagged `<group>-<part>` (`andromeda-d1`), downloadable without a token since
 the repository is public (`https://github.com/chromealex/petya/releases/download/andromeda-d1/<file>`). D1 is the
-v21 fourth repair adapter.
+v21 fourth repair adapter. D2 and D3 (new correction dialogues, one and two rehearsals of the familiar cases) were
+rejected for forgetting familiar cases and are published as pre-releases `andromeda-d2` and `andromeda-d3`.
 
 Training keeps here what the next stage needs: data, protocols, scripts, evidence, the training environment in
 `/tmp/peter-v10/eval-env`, the base model in the Hugging Face cache and the parent adapter of the next stage.

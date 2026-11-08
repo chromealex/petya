@@ -1,0 +1,162 @@
+{
+ "d2-hold-permission-1": {
+  "passed": true,
+  "reason": "Field kept, no seal, sending allowed.",
+  "answer_sha256": "1cfdd5030e49718ce7ee4df692c46a5ce6688e5dfd0ac66adb1bf7e1d28c4651"
+ },
+ "d2-hold-two-recipients-2": {
+  "passed": false,
+  "reason": "«Без пояснения» (no comment) lost.",
+  "answer_sha256": "90e574c9e637454a711ad1ef08a705f0b30e9362ddc2c7046ab28ad42b59cb17"
+ },
+ "d2-hold-screen-only-5": {
+  "passed": false,
+  "reason": "«Миграцию не выполнять» lost.",
+  "answer_sha256": "4654ef0518756c99d961ca520ba606790c7d3343f36b4538c10e842e2c6bad54"
+ },
+ "d2-hold-quote-6": {
+  "passed": false,
+  "reason": "Placeholder summary; document name «регламент» lost.",
+  "answer_sha256": "ee36da8aeebf66b62d1f983a2946242aa3a6fb5b84881695a131386acbd23ac7"
+ },
+ "d2-hold-code-8": {
+  "passed": false,
+  "reason": "Loses the next pickup by a new code.",
+  "answer_sha256": "28853f1ec39ce665e37ef0fa91ce11ee72cef43dda5cfdd72eeee99a211b79ed"
+ },
+ "d2-hold-cancel-one-9": {
+  "passed": true,
+  "reason": "Rename and the kept field.",
+  "answer_sha256": "983181a10f52dca54056cfc29589ae03e74cbf2eb5376aada9b6fe87ebf19c09"
+ },
+ "d2-hold-permission-10": {
+  "passed": true,
+  "reason": "Field, no signature, sending allowed.",
+  "answer_sha256": "9cb804497c5569cc66496d3871219b203b25d3cc84162f6610674eb39abebf18"
+ },
+ "d2-hold-quote-15": {
+  "passed": false,
+  "reason": "Recipient «стажёру» lost.",
+  "answer_sha256": "8ba8839529a5e9561f680f797be63a809f1e2687d4871d7d4ae264e6b5b8d694"
+ },
+ "d2-hold-code-17": {
+  "passed": true,
+  "reason": "Duration, not for login, no reuse, new code for next.",
+  "answer_sha256": "dd9371a3a7af7c58ce3bb49a81fc5b4412d64302abcd2253afba2d55133d6ba5"
+ },
+ "d2-hold-permission-19": {
+  "passed": false,
+  "reason": "«Без даты» lost; invented ban for others.",
+  "answer_sha256": "286b871319a599e270ba181ed6d5615dbb8ff1346a61d90551dff87c77e68429"
+ },
+ "d2-hold-two-recipients-20": {
+  "passed": true,
+  "reason": "Identical copies, per-recipient permissions.",
+  "answer_sha256": "ca0af9defa804647abfe61fbb93b00a103c46593c8de2fbeb1f79b9d9c042de5"
+ },
+ "d2-hold-quote-24": {
+  "passed": false,
+  "reason": "Document name lost; grammar «цитата сохранить».",
+  "answer_sha256": "99d7631ab7c14218afc3d96e50da0d773c5dba4521a442b51284999e7691773b"
+ },
+ "d2-hold-code-26": {
+  "passed": false,
+  "reason": "Loses the next pickup by a new code.",
+  "answer_sha256": "bc60ec0b28a5e2bf88265569248388ef45052d4df6ecc3699e6d7c02c3ac09e7"
+ },
+ "d2-hold-cancel-one-27": {
+  "passed": true,
+  "reason": "Rename and the kept field.",
+  "answer_sha256": "16e21c44d65dfb463d9fdf5f786fe951628939637dea6b76bda2f704ceb7e69e"
+ },
+ "d2-hold-permission-28": {
+  "passed": true,
+  "reason": "Field, no signature, sending allowed, ban withdrawn.",
+  "answer_sha256": "d3832772afcc299f07e621f17573c359b667674eccbfd0c1e45febe396a0edb1"
+ },
+ "d2-hold-two-recipients-29": {
+  "passed": true,
+  "reason": "Identical copies without explanation, permissions per recipient.",
+  "answer_sha256": "0b93e7327c4cfd086d99344401e205fbe590f7136cc9f17e54e3b752eefb694e"
+ },
+ "d2-hold-screen-only-32": {
+  "passed": true,
+  "reason": "Display only, hidden old, no data/schema/migration.",
+  "answer_sha256": "8652bfad19fdb5368f09fa35cd0dcde1669be219af12b216ac714e36678a13ec"
+ },
+ "d2-hold-quote-33": {
+  "passed": true,
+  "reason": "Quote verbatim, transfer allowed, not a ban.",
+  "answer_sha256": "0369b47b5712dfa1cef4b8db52618b28fc3465aba1f51d32e20b389a5754cc3b"
+ },
+ "d2-hold-open-recipient-34": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "850b90da911c018feba816c72829b856f99802077c3b6fe9f977cd83df9b0135"
+ },
+ "d2-hold-code-35": {
+  "passed": false,
+  "reason": "Undetermined duration turned into «без срока действия»; open question lost.",
+  "answer_sha256": "4c0143c07d1762479235be1cc05f2fed0799fd6b0a3d67c2832d24a5ec529ea6"
+ },
+ "d2-hold-cancel-one-36": {
+  "passed": true,
+  "reason": "Rename and the kept field.",
+  "answer_sha256": "5e42430287fe546b0de450adf56aab5eb1729e1021dc87374425a7f7dbd30ff2"
+ },
+ "d2-hold-permission-37": {
+  "passed": false,
+  "reason": "Permission not stated, only «получатель».",
+  "answer_sha256": "c82361eccc2f995e6c50c77d1fe2f1db279aa9fa0b4bfac6d6e44044f3232bb8"
+ },
+ "d2-hold-two-recipients-38": {
+  "passed": false,
+  "reason": "Invented «без текста».",
+  "answer_sha256": "b938ec5009460e86187bd7d58eb0dbc4dd8000476f62fac34bbbcb4b94b6f8c2"
+ },
+ "d2-hold-screen-only-41": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "e3e2d4545d446282bbc24f8987c3defeaa12acc34936c4b196b71a0c7c9dc04d"
+ },
+ "d2-hold-quote-42": {
+  "passed": true,
+  "reason": "Quote verbatim, transfer to dispatcher allowed.",
+  "answer_sha256": "81f8a53cd71931a1209805b697da3d5673dc5b22f3e25a0e0de50c9d04986c2a"
+ },
+ "d2-hold-open-recipient-43": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "127e753e31a5b776bf1b0a72fd91d174b89eac7ed18a183e90dd421ead553d2f"
+ },
+ "d2-hold-code-44": {
+  "passed": false,
+  "reason": "«Не для входа» lost.",
+  "answer_sha256": "841a851894a66c973978f603a647d196ec1a95609f70e75d1dab54a4b9bcdecb"
+ },
+ "d2-hold-permission-46": {
+  "passed": true,
+  "reason": "Field, no version, ban lifted.",
+  "answer_sha256": "82e2411619b5a265ec9624e312899db99d09da17eaf3abc0a48878225f7b53fd"
+ },
+ "d2-hold-two-recipients-47": {
+  "passed": false,
+  "reason": "Wrong document names.",
+  "answer_sha256": "83921f92bcb804cb1818372912a09f4d5f26ef9934d3ea408c266cbec0390cd5"
+ },
+ "d2-hold-quote-51": {
+  "passed": true,
+  "reason": "Quote kept, transfer allowed.",
+  "answer_sha256": "982c575010103be72e9cc773293e182f7350b5b13a193a3a884dfbe3df2e30a3"
+ },
+ "d2-hold-open-recipient-52": {
+  "passed": false,
+  "reason": "Open recipient question lost.",
+  "answer_sha256": "29331191b1ee422b0f2e93f845c9af5a33678f593621a54c255b461788427449"
+ },
+ "d2-hold-code-53": {
+  "passed": false,
+  "reason": "Garbled «без авторизации», «примите без значения».",
+  "answer_sha256": "ff11102d2ec4bf5f4a025c9964717e2f1657008ef050b7e1e6dcb0a9cc5c36cd"
+ }
+}

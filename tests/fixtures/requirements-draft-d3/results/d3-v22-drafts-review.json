@@ -1,0 +1,62 @@
+{
+ "v22-new-cancel-one": {
+  "passed": false,
+  "reason": "Clarification that values may change lost.",
+  "answer_sha256": "5a7cd000c51600f1b6fe40d3626fa8ea74949beb8ab00f6321081de1e3b238ea"
+ },
+ "v22-new-cancel-two": {
+  "passed": false,
+  "reason": "Inverted: kept river_id, renamed hill_id.",
+  "answer_sha256": "463e45980ec52a95a2ff612647a5be418383e5bc3f453062f7c2f5e7f1307b4b"
+ },
+ "v22-new-two-recipients": {
+  "passed": false,
+  "reason": "Invented fields; broken quote.",
+  "answer_sha256": "6f2b870f0fd70f5668f4694f581d284d633d9f7cf1bf256ef24da7361213060b"
+ },
+ "v22-new-revoke-send": {
+  "passed": false,
+  "reason": "«Дату не добавлять» lost.",
+  "answer_sha256": "daaba0804e191afad1992b9eae1b19760556d63d072874e48c88297fd4fd3a26"
+ },
+ "v22-new-restore-send": {
+  "passed": false,
+  "reason": "Object «талон» missing: «Подготовить с номером места».",
+  "answer_sha256": "1b0206d4e941ce89a7e559d079e25b5474309a705b07da63feb14e91656dd122"
+ },
+ "v22-new-code-item": {
+  "passed": true,
+  "reason": "All four constraints kept.",
+  "answer_sha256": "c06ba9db5ab395ea53882da7585569839ff59f7585e0f651e589f2761d7f6b60"
+ },
+ "v22-new-open-duration": {
+  "passed": true,
+  "reason": "Open duration with question, not for login.",
+  "answer_sha256": "6fb82372ad55d7daa86476ff39027d76b812ad6baa0867fb821fddd728137b57"
+ },
+ "v22-new-exact-name": {
+  "passed": true,
+  "reason": "Exact literals and zeros, no extra ban.",
+  "answer_sha256": "adde27a4fbb32568f2c56f9ffea05af144f7922a34a7f250faf1497cbf2f256d"
+ },
+ "v22-new-screen-only": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "a73e2108d6d7990fadba8fde6254ff300debd9ba61ac2fe71e7c73a4f381a81d"
+ },
+ "v22-new-add-separate": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "ea34b73b7f5426c1b8c131fb7327ba02a9a99795613ddc6c7010b28a292007c7"
+ },
+ "v22-new-quote": {
+  "passed": false,
+  "reason": "Says sending the «макет» is allowed instead of the методичка.",
+  "answer_sha256": "2c81de1e17dc18295dcfaa7c42adb620050f14d0cb542f8022508b1aca867c1b"
+ },
+ "v22-new-recipient-open": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "d6c81ac3f00222de765219202d0ebd0d5e42694f5f01f76ff24a6c7eb1d2d23f"
+ }
+}

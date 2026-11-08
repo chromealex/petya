@@ -1,0 +1,227 @@
+{
+ "seven-two-open": {
+  "passed": false,
+  "reason": "«Текстом» lost.",
+  "answer_sha256": "6b6fef5c5a9657f209f56ec75f1d96cf5267422dc47ed596c3ab403557ed1999"
+ },
+ "v10-f-rename-0-10": {
+  "passed": true,
+  "reason": "Same requirements.",
+  "answer_sha256": "62af9a0edbc2dbaf9c0ff469896e66112214f6b5e658003bb908916f3640d11e"
+ },
+ "v14-repeat": {
+  "passed": true,
+  "reason": "Requirements exact; summary says «записей» for «заявок».",
+  "answer_sha256": "01621e9825e1cea8b77cc959303a872c2a4526098b4d8908d3c097c1c49e2152"
+ },
+ "v18-code-lifetime": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "08d8831339fe725dddd06a2578de4fbbb4d2ef33b0f1dfd9ec68ace779758042"
+ },
+ "v18-partial-send": {
+  "passed": true,
+  "reason": "Kladovshchik allowed, buyer not sent.",
+  "answer_sha256": "baa4c3f499f45e610cb24c4621a5c805646cd4de2c2cc023a41f471752490452"
+ },
+ "v18-revoke-after-grant": {
+  "passed": false,
+  "reason": "Says sending is allowed; the permission was withdrawn.",
+  "answer_sha256": "2cc2f05fcf39999d057dfa0cc785087febf79a48dd07cea1bbb98e7811fe0a29"
+ },
+ "v18-field-not-source": {
+  "passed": true,
+  "reason": "Same requirements.",
+  "answer_sha256": "70c50c71677ab0834a92e27756d3b00f7731a62d07cde435df8f8315e81b8146"
+ },
+ "v18-ambiguous-recipient": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "006ca6bafee736daa0564a9e142fa3f5a49b3e3ea87130aa016410795bab16f3"
+ },
+ "v18-separate-names": {
+  "passed": true,
+  "reason": "Exact names.",
+  "answer_sha256": "4d0a2545ce726fe46d6caa46438fd06c49358eb936323eba743398886616ca37"
+ },
+ "v19-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «257 секунду».",
+  "answer_sha256": "34dbd815e0e85d126b2ec5aa7aedf5660c80635c0714c2e731c9e37a1a0e23f5"
+ },
+ "v19-exact-identifier": {
+  "passed": true,
+  "reason": "Exact names, no normalisation.",
+  "answer_sha256": "9de2124d08b1afd480d1347a742f84630f82a84a13a4aac7ffd050888dbd323f"
+ },
+ "v19-proposal-status": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "2378c1be6e102c04001767d5a6045959e0228475aa375a914d78ebcad50fadd4"
+ },
+ "v19-missing-destination": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "ef3181f78e95ccd06228d8c5cfafd5e97ff156cf9449a14c2e2697ddcb9446b8"
+ },
+ "v20-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «293 секунду».",
+  "answer_sha256": "bbb38af43960db17ca16abe20aaebac35ceb7b4135083f512943181724409e85"
+ },
+ "v20-withdrawn-latest": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "cd7ea277ffc7225dca173f42776c8c4e07b9cec4d954b66b588039be104442a2"
+ },
+ "v20-only-one-recipient": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "c105866027c8e942876750ca3514370f284482bec31546269a4729800309b5a6"
+ },
+ "v20-preserve-and-add": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "fc645e63773c3a48293b917ffd2d4e22136c45a96438b4a721a76276de95eef3"
+ },
+ "v20-destination-not-guessed": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "7d55420fa0f9dd84526f77700b8ed1cf3c6e119199d7a7db1bebf8b41cfabb40"
+ },
+ "v20-quoted-ban-not-action": {
+  "passed": false,
+  "reason": "Typo «отровку».",
+  "answer_sha256": "e81d56ab1d99d207d2bca33792872e8f043e24897212108c426d1fffe10744cc"
+ },
+ "v20-single-use-scope": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "069c29a1176e7b874a6ed9c1aed074963b0d1754ea6fa622e2b27fbbd9ca4102"
+ },
+ "v21-previous-draft-payment": {
+  "passed": false,
+  "reason": "Invented «пересылка» field; amount lost.",
+  "answer_sha256": "d7a202ec41c4b53a3742df43d62c35942b95c72eac2f9447ad8254040e710886"
+ },
+ "v21-previous-draft-copies": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "0b66d166d0cb30509ccdf6b81e7dbdedc852af576abd2538e084dbbd500eda15"
+ },
+ "v21-previous-draft-quote": {
+  "passed": false,
+  "reason": "Garbled: «запрет только на эту цитату», «цитату не добавлять».",
+  "answer_sha256": "ed9f991dc8f6e12755b94ed6ac8d71f7fa55e54b597ad3fc2fbf19b544de3619"
+ },
+ "v21-previous-draft-display": {
+  "passed": false,
+  "reason": "Grammar «На строку интерфейса показывать».",
+  "answer_sha256": "3424fbf0d4faa8ce480984b101896bfd7b2527ec8709756754b5609a22005231"
+ },
+ "v21-previous-draft-versions": {
+  "passed": false,
+  "reason": "Recipient of the short version lost.",
+  "answer_sha256": "72c142b2ca39ccea9641bbec7cd511deca11ca26277e6823f476f151faaaa1ad"
+ },
+ "v21-previous-draft-token": {
+  "passed": true,
+  "reason": "Same constraints.",
+  "answer_sha256": "da454173c64ba8d40a8c7f1d5d19768a89eb2bce2c1f622bda8780e65b13f4ee"
+ },
+ "v21-previous-draft-label-colour": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "c3ac1042abda9e96bd12b67c56259c653fc9b4ed54fda1d3fd1198c4fcfbdfd7"
+ },
+ "v21-previous-draft-unset-lifetime": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "d0980ca3106da09bdf5b6a0b297e6cbe6faff22ee1be9344be632c93649ade61"
+ },
+ "fresh-sort-3-1-1": {
+  "passed": false,
+  "reason": "Drops an element.",
+  "answer_sha256": "ef5107eac928901fee79972b80e719ad4eca02ae95f676c7c826bd4b982b163e"
+ },
+ "fresh-cancel-first": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "403787fa0299bbbd9beccfdacfceba956118b681f28d307852f0609920632721"
+ },
+ "fresh-cancel-second": {
+  "passed": false,
+  "reason": "Keeps source_no, which is renamed.",
+  "answer_sha256": "0d29a04c4455f980886dd795318285c3b447b3accbfe2c20edb47bd5ee59f268"
+ },
+ "fresh-revoke-transmit": {
+  "passed": false,
+  "reason": "Recipient lost; «публикацию»; abbreviated summary.",
+  "answer_sha256": "723e6d219456bc50af508d54fe4827dba8916ef48277c7fed6271ff567ec435d"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "b7ad07fab679fc6bf5e106a0ed4c043d0c552e5a016b748ebf4d9c0d765edb28"
+ },
+ "fresh-copy-scope": {
+  "passed": false,
+  "reason": "Contradiction: «без пересылки» and economist allowed.",
+  "answer_sha256": "7498908c4b20bec90ad7b6089b9c2595a2766044ed672cddcd180e7a75e6e7e3"
+ },
+ "fresh-undo-ban": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "f9a76be3eeb7974d23243ee529a66e11ca56dba97e9ba9029be9233efc1d7dcb"
+ },
+ "fresh-add-not-replace": {
+  "passed": true,
+  "reason": "Fields kept, one added, full names.",
+  "answer_sha256": "471882549e716cdd6fa42e68f5cbbd7cac3f0c7c61ebaada96a7d4554ca86e91"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Inverted: allows reuse of the code.",
+  "answer_sha256": "498e20b5e9fbf0d745f00aa01349ddc118a7102627d37362f85df70b0de3a53d"
+ },
+ "fresh-duration-open": {
+  "passed": false,
+  "reason": "Garbled «Duration», «вместо кода входа».",
+  "answer_sha256": "e8956d7b4694dc30b28f828280277f0c725166dabc90901bb95040a40edd334f"
+ },
+ "fresh-exact-caption": {
+  "passed": true,
+  "reason": "Exact names, no normalisation.",
+  "answer_sha256": "2387826ba5f9b8d6ae5e92c16459a787bdbac6a0c51840b1c7f3dc07c63f2044"
+ },
+ "fresh-display-only": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "7bb0e6ae98637ee8065a118b04923bbf940058549c41c5ccadfaa40190af2c04"
+ },
+ "fresh-quoted-instruction": {
+  "passed": false,
+  "reason": "Grammar «Разрешить отправка».",
+  "answer_sha256": "4cd4d0da3a255516893d6b1cef5636e74f418252f1fd386dd88309d3ea722c8f"
+ },
+ "fresh-negative-order": {
+  "passed": false,
+  "reason": "Sorted result lost.",
+  "answer_sha256": "ef23e8a79d99b34985262a0bf3a63fa5039606a6a80b12c26d15f59f008a14d8"
+ },
+ "fresh-interval-prose": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "384fbc8cb652b4389d6425b0aad513c46e6ad4b702dc55739cd84c1cb20ecaf4"
+ },
+ "fresh-recipient-pending": {
+  "passed": false,
+  "reason": "Truncated question; loses not auto-assigning the lecturer.",
+  "answer_sha256": "871cbd822ef76028bb388bc013d340ad9bfbfa86a2f5668e2af28f72e10d5374"
+ },
+ "fresh-rename-withdrawn": {
+  "passed": true,
+  "reason": "Name kept, colour, link.",
+  "answer_sha256": "30bae60e54715493da5b0df2a5579f5157aaa09e3737baff6cc4b027cf1b7dde"
+ }
+}
