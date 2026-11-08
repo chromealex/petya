@@ -4401,7 +4401,6 @@
   "Читаю настройки git…": "Reading git settings…",
   "Чтобы видеть открытый тред в Slack и по твоей просьбе нажимать кнопки в приложениях.": "To see the open Slack thread and press buttons in apps when you ask.",
   "Чтобы помогать по-настоящему, мне нужен доступ. По одному, без спешки.": "To really help, I need some access. One at a time, no rush.",
-  "Чтобы слушать звук встречи в Zoom и понимать, что встреча идёт. Видео не сохраняю.": "To hear the Zoom meeting audio and know a meeting is on. I don't keep video.",
   "Чтобы слышать «Петя, …» и твой голос на встречах. Аудио не сохраняю.": "To hear “Petya, …” and your voice in meetings. I don't keep audio.",
   "или": "or",
   "настройки git": "git settings",
@@ -5721,6 +5720,8 @@
   "Не нашёл подходящий сохранённый разговор на встрече или запрос команды в Slack для этого проекта. Уточни проект или канал, либо запиши встречу и обнови Slack.": "I did not find a suitable saved meeting conversation or team request in Slack for this project. Specify the project or channel, or record a meeting and refresh Slack.",
   "Разрешение экрана есть. Для проверки звуковой дорожки нажмите «Проверить доступ к звуку».": "Screen permission granted. To check the audio track, press «Check audio access».",
   "Когда в Zoom идёт встреча, Петя видит её окно: запись начинается сама (или Петя спросит — как выбрано в «Запись встреч»), а в расшифровке подписано, кто говорит. Вход в Zoom не нужен.": "When a Zoom meeting is on, Petya sees its window: recording starts by itself (or Petya asks, as chosen in «Meeting recording»), and the transcript says who is talking. No Zoom sign-in is needed.",
-  "Запись встречи · Zoom": "Meeting recording · Zoom"
+  "Запись встречи · Zoom": "Meeting recording · Zoom",
+  "Как подписан на встречах": "Name shown in meetings",
+  "Чтобы слушать звук встречи и понимать, что встреча идёт. Видео не сохраняю.": "To hear the meeting's sound and know that a meeting is on. I don't keep video."
  }
 }
