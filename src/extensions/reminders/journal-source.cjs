@@ -10,6 +10,6 @@ module.exports={
   const end=new Date(now);end.setDate(end.getDate()+1);end.setHours(23,59,59,999);
   const carry=svc.list().filter(r=>r.group==='fired'||r.kind==='time'&&!r.repeat&&r.at<=end.getTime()).slice(0,12)
    .map(r=>({id:'reminder:'+r.id,title:r.text,detail:r.group==='fired'?'сработало, не отмечено':r.words,source:'reminders'}));
-  return {items,carry,totals:{reminders:items.length}};
+  return {items,carry};
  }
 };
