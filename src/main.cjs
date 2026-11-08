@@ -605,6 +605,9 @@ function setupHandlers() {
   handle('requestAttention', () => { if (process.env.PETYA_VERIFY_BUILD !== '1') show(); });
   handle('companies',()=>({...companies.list(),activeId:companyId}));
   handle('companyCreate',name=>companies.create(name,settings));
+  // Company icon: Slack workspace (API, then the open Slack window), then Jira; refreshed daily or after connecting a service.
+  handle('companyIconRefresh',async(force=false)=>{await require('./company-icon.cjs').refreshCompanyIcon({companies,companyId,force:!!force,settings,request,nativeImage:require('electron').nativeImage,download:async(url,options={})=>{const response=await fetch(url,{headers:options.headers,redirect:'error',signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('HTTP '+response.status);return new Uint8Array(await response.arrayBuffer());},
+    getSources:options=>require('electron').desktopCapturer.getSources(options),screenAllowed:()=>process.platform!=='darwin'||require('electron').systemPreferences.getMediaAccessStatus('screen')==='granted',atlassianToken:credential=>atlassianOAuth.token(credential)});return {...companies.list(),activeId:companyId};});
   handle('companyRename',(id,name)=>{companies.rename(id,name);win.setTitle('Петя · '+companies.get(companyId).name);refreshTrayMenu();return {...companies.list(),activeId:companyId};});
   handle('companySwitch',async(id,raw)=>{
     if(raw && chatLocation.parse(raw)?.company!==id)throw Error('Некорректная ссылка на компанию.');

@@ -11,7 +11,7 @@ Server: https://auth.petya-app.ru, RUVDS 194.87.110.60. Entry point: oauth/serve
 | Service | Callback | Permissions |
 |---|---|---|
 | Atlassian | /oauth/atlassian/callback | Jira and Confluence search, list below |
-| Slack | /oauth/slack/callback | channels:read, groups:read, channels:history, groups:history, im:history, mpim:history; user scopes only |
+| Slack | /oauth/slack/callback | channels:read, groups:read, channels:history, groups:history, im:history, mpim:history, team:read (workspace icon for the company tab); user scopes only |
 | Notion | /oauth/notion/callback | Read content; no write access and no email reading |
 
 Server variables: PUBLIC_ORIGIN, TOKEN_ENCRYPTION_KEY, ATLASSIAN_CLIENT_ID, ATLASSIAN_CLIENT_SECRET, ATLASSIAN_SCOPES, SLACK_CLIENT_ID, SLACK_CLIENT_SECRET, NOTION_CLIENT_ID, NOTION_CLIENT_SECRET. Do not include secrets in builds, the repository or logs.

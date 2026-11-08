@@ -154,3 +154,10 @@ label.file-label:hover{background:#2e3533}
 .project-edit-dialog .project-inherited p{margin:0 0 4px;white-space:pre-wrap}
 .project-edit-dialog .project-folder-inherited{display:flex;align-items:center;gap:8px;opacity:.7}
 .project-edit-dialog .project-folder-inherited small{color:var(--muted);white-space:nowrap}
+
+/* --- Company tabs: Slack workspace icon or the first letter. --- */
+.company-tab{display:inline-flex;align-items:center;gap:8px}
+.company-tab>span:last-child{overflow:hidden;text-overflow:ellipsis}
+.company-tab>.company-icon{flex:0 0 20px;width:20px;height:20px;border-radius:5px;object-fit:cover}
+.company-tab>span.company-icon{display:grid;place-items:center;background:#2c3a2a;color:var(--green);font-size:11px;font-weight:600;line-height:1}
+.company-tab:not([aria-current])>.company-icon{opacity:.8}
