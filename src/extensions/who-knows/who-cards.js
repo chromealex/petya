@@ -8,7 +8,8 @@
  const MODES={expert:'кто разбирается',author:'кто работал над кодом',last:'кто последним трогал'};
  const locale=()=>window.petyaLocale||'ru-RU';
  const num=v=>Number(v||0).toLocaleString(locale(),{maximumFractionDigits:1});
- const date=ms=>{const d=new Date(ms);return isNaN(d)?'':d.toLocaleDateString(locale(),{day:'numeric',month:'short',...(d.getFullYear()!==new Date().getFullYear()?{year:'numeric'}:{})});};
+ // Moments are relative where the app has the shared helper (src/ui/relative-time.js); a short date otherwise.
+ const date=ms=>{const d=new Date(ms);if(isNaN(d))return '';if(typeof window.shortTime==='function')return window.shortTime(d);return d.toLocaleDateString(locale(),{day:'numeric',month:'short',...(d.getFullYear()!==new Date().getFullYear()?{year:'numeric'}:{})});};
  const plural=(n,[a,b,c])=>{const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
  // Names, commit subjects, issue summaries, file paths and quotes are data, never translated.
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
@@ -43,7 +44,7 @@
   const issues=p.issues.map(i=>{const li=k.el('li');li.append(link(k,i.key,i.url,'who-hash'),raw(k.el('span','who-text',i.summary)),k.el('small',null,[...i.roles,i.status].filter(Boolean).join(' · ')));return li;});
   const threads=p.threads.map(t=>{const li=k.el('li');li.append(link(k,t.title||'Slack',t.url,'who-hash who-thread'),raw(k.el('q','who-quote',t.text)),k.el('small',null,date(t.at)));return li;});
   const meetings=p.meetings.map(m=>{const li=k.el('li');li.append(raw(k.el('span','who-hash who-thread',m.title)),raw(k.el('q','who-quote',m.text)),k.el('small',null,date(m.at)+(m.count>1?' · реплик: '+m.count:'')));return li;});
-  const box=k.el('div','who-evidence');
+  const box=k.el('div','who-evidence selectable');
   for(const s of [section(k,'Файлы',files),section(k,'Коммиты',commits),section(k,'Задачи Jira',issues),section(k,'Slack',threads),section(k,'Встречи',meetings)])if(s)box.append(s);
   const total=files.length+commits.length+issues.length+threads.length+meetings.length;
   const details=k.el('details','who-details');const summary=k.el('summary',null,'Основания · '+total);details.append(summary,box);return details;

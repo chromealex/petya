@@ -37,7 +37,7 @@
   const meter=k.el('span','gl-meter');const fill=k.el('i');fill.style.width=(ctx.maxUsage?Math.max(total?6:0,100*total/ctx.maxUsage):0)+'%';meter.append(fill);
   usage.append(meter,k.el('b',null,num(total)));head.append(usage);
   row.append(head);
-  row.append(t.definition?raw(k.el('p','gl-def',t.definition)):k.el('p','gl-def empty','Определения нет — добавьте в «Изменить».'));
+  row.append(t.definition?raw(k.el('p','gl-def selectable',t.definition)):k.el('p','gl-def empty','Определения нет — добавьте в «Изменить».'));
   const chips=k.el('div','gl-chips');
   for(const [lang,text] of Object.entries(t.translations||{})){
    const node=k.el('span','gl-tr');node.append(raw(k.el('b',null,lang.toUpperCase())),raw(k.el('span',null,text)));
@@ -52,7 +52,7 @@
    ...(t.chat||[]).map(m=>{const li=k.el('li');const label=raw(k.el(m.url?'a':'b','gl-src',m.source+(m.title?' · '+m.title:'')));if(m.url&&k.safeUrl(m.url)){label.href=k.safeUrl(m.url);label.target='_blank';label.rel='noopener';}li.append(label,raw(k.el('q',null,m.text)));return li;})];
   const links=(t.sources||[]).map(s=>{const node=raw(k.el(s.url?'a':'span','gl-source',s.label));if(s.url&&k.safeUrl(s.url)){node.href=k.safeUrl(s.url);node.target='_blank';node.rel='noopener';}node.dataset.kind=s.kind||'';return node;});
   if(ex.length||links.length){
-   const d=k.el('details','gl-more');d.append(k.el('summary',null,'Где встречается'+(ex.length?' · '+ex.length:'')));
+   const d=k.el('details','gl-more selectable');d.append(k.el('summary',null,'Где встречается'+(ex.length?' · '+ex.length:'')));
    if(ex.length){const ul=k.el('ul');ul.append(...ex);d.append(ul);}
    if(links.length){const p=k.el('p','gl-sources');p.append(k.el('span',null,'Источники: '),...links);d.append(p);}
    row.append(d);
@@ -121,7 +121,7 @@
    const cell=(text,cls)=>raw(k.el('span',cls,text));
    const table=k.table([{label:'Термин',value:i=>cell(i.term,'gl-cell-term')},{label:'Язык',value:i=>cell(i.lang.toUpperCase())},{label:'Ключ',value:i=>{const c=cell(i.key,'gl-cell-key');c.title=i.set;return c;}},{label:'Строка',value:i=>cell(i.text,'gl-cell-text')},
     {label:'Проблема',value:i=>{const c=raw(k.el('span','gl-issue '+(KIND[i.kind]||''),issueText(i)));c.dataset.kind=i.kind;return c;}}],shown);
-   table.classList.add('gl-table');box.append(table);
+   table.classList.add('gl-table','selectable');box.append(table);
    if(check.total>shown.length)box.append(k.el('p','gl-note','Показаны первые '+shown.length+' из '+num(check.total)+'.'));
   }else box.append(k.el('p','gl-note ok','Строки согласованы с глоссарием.'));
   return box;
