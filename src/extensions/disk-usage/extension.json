@@ -1,0 +1,16 @@
+{
+  "id": "disk-usage",
+  "name": "Место на диске",
+  "description": "Чем забит диск: кэши Xcode, Unity, Gradle, npm, модели Ollama, загрузки — и очистка в корзину после подтверждения",
+  "category": "computer",
+  "setting": "extension_disk-usage",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["disk-cards.js", "message-format.js"],
+    ["disk-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "diskUsage": "renderDiskUsage"
+  }
+}
