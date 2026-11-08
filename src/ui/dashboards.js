@@ -11,7 +11,7 @@
  const ICON={grid:'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',refresh:'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7',more:'M5 12h.01M12 12h.01M19 12h.01',pin:'M12 17v5M8 3h8l-1 6 4 4H5l4-4z',back:'M15 18l-6-6 6-6',plus:'M12 5v14M5 12h14',share:'M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13',drag:'M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01'};
  const button=(label,path,onClick,className='')=>{const b=el('button',className);b.type='button';if(path){b.innerHTML=icon(path);if(label){b.title=label;b.setAttribute('aria-label',label);}}else b.textContent=label;b.onclick=onClick;return b;};
  const fail=e=>{const k=kit();if(k)k.toast(e.message||String(e),{error:true});else notice(e.message,true);};
- const SIZE_LABEL={s:'Узкий',m:'Средний',l:'Широкий',w:'Во всю ширину'};
+ const SIZE_LABEL={auto:'Авто',s:'Узкий',m:'Средний',l:'Широкий',w:'Во всю ширину'};
  const EVERY_LABEL={0:'Только вручную',5:'Каждые 5 минут',15:'Каждые 15 минут',60:'Каждый час',240:'Каждые 4 часа',1440:'Раз в день'};
  const shell=document.querySelector('#home .chat-shell');
  const screen=el('section','dash-screen');screen.setAttribute('aria-label','Дашборд');screen.hidden=true;shell?.append(screen);
@@ -94,14 +94,27 @@
   if(!compact)dragging(box,d);
   return box;
  }
- // Six columns; a widget takes 2, 3, 4 or 6 of them. A row is always full: when the next widget does not fit,
- // the last one in the row grows to the edge — no holes. Widgets of one row share its height.
+ // Six columns. A widget with a fixed size takes 2, 3, 4 or 6 of them; «Авто» widgets share a row two or three
+ // at a time. A row is always full — what is left goes to its «Авто» widgets (or grows the last one) — and the
+ // widgets of a row share its height. Content adapts to the widget's width (container queries in dashboards.css).
  const SPAN={s:2,m:3,l:4,w:6};
  function pack(box){
-  const cards=[...box.children].filter(n=>n.classList.contains('dash-widget'));let used=0,last=null;
-  const close=()=>{if(last&&used<6)last.style.setProperty('--span',String(Number(last.style.getPropertyValue('--span'))+6-used));used=0;last=null;};
-  for(const card of cards){const span=SPAN[card.dataset.size]||3;if(used+span>6)close();card.style.setProperty('--span',String(span));used+=span;last=card;if(used===6)close();}
-  close();
+  const cards=[...box.children].filter(n=>n.classList.contains('dash-widget'));
+  let row=[],used=0;
+  const flush=()=>{if(!row.length)return;let left=6-used;const autos=row.filter(r=>r.auto),targets=autos.length?autos:[row.at(-1)];
+   for(let k=0;left>0;k++,left--)targets[k%targets.length].span++;
+   for(const r of row)r.card.style.setProperty('--span',String(r.span));row=[];used=0;};
+  const put=(card,span,auto)=>{if(used+span>6)flush();row.push({card,span,auto});used+=span;if(used===6)flush();};
+  for(let i=0;i<cards.length;){
+   const size=cards[i].dataset.size;
+   if(size!=='auto'){put(cards[i],SPAN[size]||3,false);i++;continue;}
+   // A run of «Авто» widgets: fill what the row has left, then rows of two (three when that avoids a lone one).
+   let j=i;while(j<cards.length&&cards[j].dataset.size==='auto')j++;
+   if(row.length){const fit=Math.min(j-i,Math.floor((6-used)/2));for(let k=0;k<fit;k++)put(cards[i++],2,true);flush();}
+   const n=j-i,counts=n===0?[]:n===1?[1]:n%2?[3,...Array((n-3)/2).fill(2)]:Array(n/2).fill(2);
+   for(const take of counts){for(let k=0;k<take;k++)put(cards[i++],6/take,true);flush();}
+  }
+  flush();
  }
  function dragging(box,d){
   let moving=null;

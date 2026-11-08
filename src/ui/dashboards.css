@@ -59,7 +59,7 @@
 .dash-widget:hover .dash-widget-tools,.dash-widget:focus-within .dash-widget-tools,.dash-widget:hover .dash-widget-drag{opacity:1}
 .dash-widget[draggable=true] .dash-widget-head{cursor:grab}
 
-.dash-widget-body{flex:1;display:flex;flex-direction:column;justify-content:safe center;min-height:0;padding:8px 16px 16px;max-height:560px;overflow:auto}
+.dash-widget-body{flex:1;display:flex;flex-direction:column;justify-content:flex-start;min-height:0;padding:8px 16px 16px;max-height:560px;overflow:auto}
 .dash-widget-content{min-width:0}
 .dash-widget-text{margin:0;font-size:13px;line-height:1.5;white-space:pre-wrap;user-select:text;color:#d9dfd9}
 .dash-widget-empty{margin:0;font-size:12.5px;color:var(--muted);text-align:center;padding:14px 0}
@@ -115,3 +115,15 @@
 .dash-widget-content .chart-donut{justify-content:center;gap:28px}
 .dash-widget-content .chart-legend{flex:0 1 380px}
 .dash-widget-content .chart-bars li{grid-template-columns:minmax(90px,28%) minmax(0,1fr) auto}
+/* Content follows the widget's own width, not the window's. */
+.dash-widget-body{container-type:inline-size;container-name:dash}
+@container dash (min-width:640px){
+ .dash-widget-content .jira-issue-list{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+ .dash-widget-content .jira-issue-list>*{min-width:0}
+}
+@container dash (min-width:980px){.dash-widget-content .jira-issue-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@container dash (max-width:440px){
+ .dash-widget-content .chart-donut{flex-direction:column;align-items:stretch;gap:12px}
+ .dash-widget-content .chart-donut svg{align-self:center}
+ .dash-widget-content .chart-legend{flex:1 1 auto}
+}

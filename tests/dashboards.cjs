@@ -11,7 +11,7 @@ assert.equal(p.title,'Релиз 2.4');assert.deepEqual(p.parts,['баги сп�
 p=model.phrases('собери дашборд по крэши за неделю; мои PR');assert.deepEqual(p.parts,['крэши за неделю','мои PR']);
 assert.throws(()=>model.widget({source:{kind:'extension',extension:'Bad id',command:'x'}}),/Источник/);
 const snap=model.widget({title:'x',source:{kind:'snapshot'},data:{charts:[1]},every:60});assert.equal(snap.every,0,'snapshots never refresh');
-assert.equal(model.widget({size:'huge',source:{kind:'jira',jql:'a'}}).size,'m');
+assert.equal(model.widget({size:'huge',source:{kind:'jira',jql:'a'}}).size,'auto','the layout chooses unless a size is set');
 const shared=model.shareable(model.dashboard({title:'T',widgets:[snap,{title:'J',source:{kind:'jira',jql:'project = BW'}}]}));
 assert.equal(shared.widgets.length,1,'snapshots are not shared');assert(!('data' in shared.widgets[0]));
 assert.equal(model.slug('Релиз 2.4 — Android'),'reliz-2-4-android');

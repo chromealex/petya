@@ -18,8 +18,10 @@ meetings, charts. A widget keeps its **source**, not only its data, so it refres
   platforms, countries and a tutorial funnel (`src/dashboard-example.cjs`), marked «Демо-данные».
 
 ## Layout
-Six columns; a widget spans 2, 3, 4 or 6 (`s`, `m`, `l`, `w`). Rows are always full: when the next widget does
-not fit, the last one in the row grows to the edge, and widgets of a row share its height. Cards drawn inside a
+Six columns. New widgets are «Авто»: they share a row two at a time (three when that avoids a lone one). A fixed
+size spans 2, 3, 4 or 6 (`s`, `m`, `l`, `w`). Rows are always full — what is left goes to the row's «Авто»
+widgets, or grows the last one — and widgets of a row share its height. Content follows the widget's own width
+(container queries): Jira cards go into two or three columns in a wide widget, a donut stacks in a narrow one. Cards drawn inside a
 widget lose their own frame. Below 1100 px: two columns.
 
 ## Charts for analytics

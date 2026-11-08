@@ -8,7 +8,8 @@
 // (`.petya/dashboards/<slug>.json`, definitions only — the data is never written there). See docs/dashboards.md.
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
-const SIZES=['s','m','l','w'];
+// 'auto': the layout chooses (two or three in a row, the row always full); the others are fixed spans.
+const SIZES=['auto','s','m','l','w'];
 const EVERY=[0,5,15,60,240,1440];
 const KINDS=['extension','provider','jira','snapshot'];
 const LIMIT={dashboards:100,widgets:40,title:120,command:1000,jql:2000};
@@ -24,7 +25,7 @@ function source(value){
 }
 function widget(value){
   const out={id:/^[\w-]{6,64}$/.test(String(value?.id||''))?value.id:randomUUID(),title:text(value?.title,LIMIT.title)||'Виджет',
-    size:SIZES.includes(value?.size)?value.size:'m',every:EVERY.includes(Number(value?.every))?Number(value.every):15,source:source(value?.source)};
+    size:SIZES.includes(value?.size)?value.size:'auto',every:EVERY.includes(Number(value?.every))?Number(value.every):15,source:source(value?.source)};
   if(out.source.kind==='snapshot'){out.every=0;out.data=value?.data&&typeof value.data==='object'?value.data:{};if(value?.text)out.text=String(value.text).slice(0,4000);out.at=Number(value?.at)||Date.now();}
   if(value?.chat&&typeof value.chat==='object')out.chat={topicId:text(value.chat.topicId,80),index:Number.isInteger(value.chat.index)?value.chat.index:undefined};
   return out;

@@ -143,20 +143,20 @@ function setup(s){
     const m=topic.messages[index];if(!m||m.role!=='assistant')throw Error('Сообщение не найдено.');
     const command=commandBefore(topic,index),chat={topicId:topic.id,index};
     const name=cap(command).slice(0,80)||m.by||'Карточка';
-    if(m.extensionResult?.provider&&providers.some(p=>p.type===m.extensionResult.provider))return model.widget({title:name,size:'m',chat,source:{kind:'provider',provider:m.extensionResult.provider,query:m.extensionResult.query||command,selected:m.extensionResult.selected}});
+    if(m.extensionResult?.provider&&providers.some(p=>p.type===m.extensionResult.provider))return model.widget({title:name,size:'auto',chat,source:{kind:'provider',provider:m.extensionResult.provider,query:m.extensionResult.query||command,selected:m.extensionResult.selected}});
     if(m.jiraItems?.length){
       const keys=[...new Set(m.jiraItems.map(i=>i.key))].slice(0,50);
       const phrase=jira.jqlFor(command,jira.projectsOf(s,topic));
-      return model.widget({title:name||'Задачи Jira',size:keys.length>6?'w':'m',chat,source:{kind:'jira',jql:phrase||'key in ('+keys.join(', ')+') ORDER BY updated DESC'}});
+      return model.widget({title:name||'Задачи Jira',size:'auto',chat,source:{kind:'jira',jql:phrase||'key in ('+keys.join(', ')+') ORDER BY updated DESC'}});
     }
     // The app that answered: by its name on the message (kit.reply sets `by`), then by the card's data key.
     const ids=[...[...plugins].filter(([,e])=>e.d.name===m.by).map(([id])=>id),...Object.keys(m.extensionData||{}).map(key=>byKey.get(key))];
     for(const id of ids){
       const entry=plugins.get(id);
-      if(entry&&command&&entry.mod.dashboard.accepts(command))return model.widget({title:name,size:entry.mod.dashboard.size||'m',chat,source:{kind:'extension',extension:id,command}});
+      if(entry&&command&&entry.mod.dashboard.accepts(command))return model.widget({title:name,size:entry.mod.dashboard.size||'auto',chat,source:{kind:'extension',extension:id,command}});
     }
     const data={...(m.extensionData||{})};if(m.jiraItems)data.jiraItems=m.jiraItems;
-    return model.widget({title:name,size:'m',chat,source:{kind:'snapshot'},data,text:String(m.text||'').slice(0,4000),at:m.at});
+    return model.widget({title:name,size:'auto',chat,source:{kind:'snapshot'},data,text:String(m.text||'').slice(0,4000),at:m.at});
   }
   // A card added from the chat shows its data at once; its source refreshes it afterwards.
   const seeds=new WeakMap();
@@ -191,9 +191,9 @@ function setup(s){
     return rows;
   }
   function widgetFor(phrase,projectId){
-    for(const [id,{d,mod}] of plugins)if(installed(id)&&mod.dashboard.accepts(phrase))return model.widget({title:cap(phrase),size:mod.dashboard.size||'m',source:{kind:'extension',extension:id,command:phrase}});
-    if(jira.connected(s)){const jql=jira.jqlFor(phrase,jira.projectsOf(s,{projectMemoryId:project(projectId)?.memoryId}));if(jql)return model.widget({title:jira.titleFor(phrase),size:'m',source:{kind:'jira',jql}});}
-    for(const p of providers)if(installed(p.type)||p.service&&s.modules?.enabled?.(s.settings,p.type))try{if(p.matches?.(phrase,{settings:s.settings,topic:null}))return model.widget({title:cap(phrase),size:'m',source:{kind:'provider',provider:p.type,query:phrase}});}catch{}
+    for(const [id,{d,mod}] of plugins)if(installed(id)&&mod.dashboard.accepts(phrase))return model.widget({title:cap(phrase),size:mod.dashboard.size||'auto',source:{kind:'extension',extension:id,command:phrase}});
+    if(jira.connected(s)){const jql=jira.jqlFor(phrase,jira.projectsOf(s,{projectMemoryId:project(projectId)?.memoryId}));if(jql)return model.widget({title:jira.titleFor(phrase),size:'auto',source:{kind:'jira',jql}});}
+    for(const p of providers)if(installed(p.type)||p.service&&s.modules?.enabled?.(s.settings,p.type))try{if(p.matches?.(phrase,{settings:s.settings,topic:null}))return model.widget({title:cap(phrase),size:'auto',source:{kind:'provider',provider:p.type,query:phrase}});}catch{}
     return null;
   }
   function compose(description,projectId){
