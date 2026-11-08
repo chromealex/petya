@@ -9,7 +9,7 @@ const {Dialogue}=require('../src/dialogue.cjs'),{ChatJobs}=require('../src/chat-
   while(jobs.any())await new Promise(r=>setTimeout(r,5));
   const topic=d.state.topics.find(t=>t.id===result.topicId);assert.equal(topic.chatJob.state,'done');return topic;
  }
- let topic=await turn('Что ты умеешь?');const first=topic.messages.at(-1).text;assert.match(first,/Jira/);assert.match(first,/скилл/);assert(!/по проектам BW и MW2/iu.test(first));
+ let topic=await turn('Что ты умеешь?');const first=topic.messages.at(-1).text;assert.match(first,/Jira/);assert.match(first,/навык/);assert(!/по проектам BW и MW2/iu.test(first));
  topic=await turn('А что еще?',topic.id);const second=topic.messages.at(-1).text;assert.match(second,/примеры/);assert.notEqual(second,first);
  topic=await turn('А ещё что?',topic.id);assert.match(topic.messages.at(-1).text,/SKILL.md/);
  topic=await turn('Это все?',topic.id);assert(topic.messages.at(-1).text.length>60);

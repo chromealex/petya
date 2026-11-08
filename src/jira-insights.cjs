@@ -26,7 +26,7 @@ class JiraInsights {
   if(options.wholeProject){delete topic.versionId;delete topic.versionField;}
   const explicit=choose(command,{title:'',text:''},projects);
   const explicitMatches=require('./jira-routing.cjs').matches(command,projects);
-  const unspecified=/^Примени скилл к данным текущей темы[.]/.test(command)||/^(?:в )?(?:текущем|этом) проекте[.!?]*$/iu.test(command.trim());
+  const unspecified=/^Примени навык к данным текущей темы[.]/.test(command)||/^(?:в )?(?:текущем|этом) проекте[.!?]*$/iu.test(command.trim());
   // A status the user named in passing («таски в new») counts only if Jira has a status with that name.
   if(personalFilter?.guess){const statuses=await api('/rest/api/3/status',{},s).catch(()=>[]);const found=(Array.isArray(statuses)?statuses:[]).find(v=>String(v?.name||'').toLowerCase()===personalFilter.name.toLowerCase());if(found)personalFilter.name=found.name;else delete personalFilter.name;delete personalFilter.guess;}
   const namedKey=/(?:проект[еу]?|(?:теперь )?в)\s+([A-Z][A-Z0-9_-]*)\b/u.exec(command)?.[1];

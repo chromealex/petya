@@ -65,7 +65,7 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     if(!choice&&!background){const repeat=ctx.recurring?.turn(original);if(repeat)return repeat;}
     // «Сводка по встрече», «что обсудили на встрече» (src/features/meeting-summary.cjs).
     if(!choice&&!background){const summary=await ctx.meetingSummary?.turn(original);if(summary)return summary;}
-    // «Сделай скилл: …»: Petya writes a skill for himself (src/features/skill-packages.cjs).
+    // «Сделай навык: …»: Petya writes a skill for himself (src/features/skill-packages.cjs).
     if(!choice&&!background){const made=await ctx.skillPackages?.turn(original);if(made)return made;}
     // «Сделай презентацию…», «выгрузи в Excel», «/docx …»: a real file, attached to the answer (src/features/office-files.cjs).
     if(!choice&&!background&&!ctx.attachments.list().length){const file=await ctx.officeFiles?.turn(original);if(file)return file;}
@@ -124,13 +124,13 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     }
     if(!choice&&!ctx.attachments.list().length&&!ctx.learning.preview(original).matched){const quick=ctx.dialogue.greeting(original);if(quick)return via('шаблон: приветствие',quick);}
     const duplicateReply=await ctx.taskDuplicates.turn(original,choice);if(duplicateReply)return via('дубликаты задач',duplicateReply);
-    if(!choice){const skillReply=await ctx.executeSkill(original);if(skillReply)return via('скилл',skillReply);}
+    if(!choice){const skillReply=await ctx.executeSkill(original);if(skillReply)return via('навык',skillReply);}
     if(!choice&&!ctx.attachments.list().length){const info=require('./capabilities-reply.cjs').reply(original,ctx.dialogue.active(),ctx.settings,ctx.instructionSkills.list());if(info){ctx.dialogue.rememberAction(original,info.text);const topic=ctx.dialogue.active();topic.capabilityReply=info.text;topic.capabilityPage=info.capabilityPage;ctx.dialogue.persist();return via('шаблон: возможности',{...info,topicId:topic.id,topicTitle:topic.title,messages:topic.messages});}}
     // Requests about the team are understood by meaning before the Jira reports take «команда» as workload.
     if(!choice&&!teamChecked){const team=await ctx.teamIntent?.turn(original);if(team)return via('заполнение команды',team);}
     if(!choice&&!ctx.attachments.list().length&&!ctx.dialogue.active()?.attachments?.length&&!require('./team-fill.cjs').isTeamFill(original)){
       const workRoute=require('./work-query-route.cjs');
-      const report=async(command,workflow)=>{const offer=await ctx.serviceAccess.offer('Проверь Jira: '+command,null);if(offer)return offer;const skill=ctx.instructionSkills.list().find(s=>s.enabled&&s.workflow===workflow);if(!skill)return {handled:true,text:'Для этого отчёта включи скилл '+workflow+' в разделе «Скиллы».'};return ctx.workSkills.turn({skill,question:command,verified:true},command);};
+      const report=async(command,workflow)=>{const offer=await ctx.serviceAccess.offer('Проверь Jira: '+command,null);if(offer)return offer;const skill=ctx.instructionSkills.list().find(s=>s.enabled&&s.workflow===workflow);if(!skill)return {handled:true,text:'Для этого отчёта включи навык '+workflow+' в разделе «Навыки».'};return ctx.workSkills.turn({skill,question:command,verified:true},command);};
       const selected=workRoute.classify(original,ctx.dialogue.active());
       const routeStep={personal:'Смотрю твои задачи в Jira',workload:'Собираю задачи команды в Jira',status:'Собираю статус проекта',action:'Проверяю действие в Jira'}[selected?.kind];if(routeStep)step(routeStep);
       const workReply=await workRoute.dispatch(selected,original,{personal:async command=>{const offer=await ctx.serviceAccess.offer('Проверь Jira: '+command,null);return offer||ctx.dialogue.turn(command,undefined,'tasks');},workload:command=>report(command,'team-workload'),status:command=>report(command,'project-status'),chat:command=>ctx.dialogue.turn(command,undefined,'chat'),action:command=>require('./dialogue.cjs').actionRequest(command)?null:{handled:true,text:'Эта команда требует изменения Jira. Выполнить её напрямую этим способом пока не могу; открой задачу в Jira для изменения.'}});
@@ -256,7 +256,7 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     // A skill with its own files (references, templates, scripts) is carried out step by step.
     if(skill&&ctx.skillRuntime?.handles(skill)){ctx.skillChoice?.done();return ctx.skillRuntime.turn({skill,question:value,command:original});}
     let reply,used=false;try{reply=await ctx.dialogue.turn(value,typeof choice==='string'?choice:undefined,undefined,preparedTopicRoute);}finally{used=!!ctx.skillChoice?.done();}
-    if(skill&&used&&reply?.handled&&!reply.error){reply.by='скилл '+skill.name;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&last.text===reply.text){last.by=reply.by;ctx.dialogue.persist();}}
+    if(skill&&used&&reply?.handled&&!reply.error){reply.by='навык '+skill.name;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&last.text===reply.text){last.by=reply.by;ctx.dialogue.persist();}}
     // The model does not know or is unsure about a public fact: look it up in the background and answer from the pages.
     if(reply?.handled&&!reply.error&&/^модель /u.test(reply.by||'')&&require('./web-fallback.cjs').needed(value,reply.text)&&ctx.webSearchEngine?.enabled?.()){
      ctx.requestProgress?.report('Проверяю в интернете');

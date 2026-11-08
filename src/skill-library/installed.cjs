@@ -19,35 +19,35 @@ function stamp(root){try{return fs.statSync(root).mtimeMs+':'+fs.readdirSync(roo
 // Every file of a zip archive (stored or deflated), with safe relative paths.
 function unzip(bytes){
  let end=-1;for(let i=bytes.length-22;i>=Math.max(0,bytes.length-65557);i--)if(bytes.readUInt32LE(i)===0x06054b50){end=i;break;}
- if(end<0)throw Error('Это не zip-архив скилла.');const count=bytes.readUInt16LE(end+10);let pos=bytes.readUInt32LE(end+16),total=0;if(count>LIMIT.files*2)throw Error('В архиве слишком много файлов.');
+ if(end<0)throw Error('Это не zip-архив навыка.');const count=bytes.readUInt16LE(end+10);let pos=bytes.readUInt32LE(end+16),total=0;if(count>LIMIT.files*2)throw Error('В архиве слишком много файлов.');
  const out=[];
  for(let i=0;i<count;i++){
-  if(pos+46>bytes.length||bytes.readUInt32LE(pos)!==0x02014b50)throw Error('Повреждён архив скилла.');
+  if(pos+46>bytes.length||bytes.readUInt32LE(pos)!==0x02014b50)throw Error('Повреждён архив навыка.');
   const flags=bytes.readUInt16LE(pos+8),method=bytes.readUInt16LE(pos+10),size=bytes.readUInt32LE(pos+20),expanded=bytes.readUInt32LE(pos+24),n=bytes.readUInt16LE(pos+28),extra=bytes.readUInt16LE(pos+30),comment=bytes.readUInt16LE(pos+32),offset=bytes.readUInt32LE(pos+42),name=bytes.subarray(pos+46,pos+46+n).toString('utf8');pos+=46+n+extra+comment;
   if(name.endsWith('/')||/(?:^|\/)(?:__MACOSX|\.DS_Store)(?:\/|$)/.test(name))continue;if(flags&1)throw Error('Архив зашифрован.');
   const clean=path.posix.normalize(name.replace(/\\/g,'/'));if(clean.startsWith('../')||path.posix.isAbsolute(clean))throw Error('Небезопасный путь в архиве: '+name);
-  if(expanded>LIMIT.file||(total+=expanded)>LIMIT.bytes||out.length>=LIMIT.files)throw Error('Скилл слишком большой (до 500 файлов и 50 МБ).');
+  if(expanded>LIMIT.file||(total+=expanded)>LIMIT.bytes||out.length>=LIMIT.files)throw Error('Навык слишком большой (до 500 файлов и 50 МБ).');
   const start=offset+30+bytes.readUInt16LE(offset+26)+bytes.readUInt16LE(offset+28),raw=bytes.subarray(start,start+size);
   const data=method===0?raw:method===8?zlib.inflateRawSync(raw,{maxOutputLength:LIMIT.file}):null;if(!data)throw Error('Неподдерживаемое сжатие в архиве.');
   out.push({name:clean,data});
  }
  return out;
 }
-function readFolder(dir){const files=walk(dir);if(files.length>LIMIT.files)throw Error('Скилл слишком большой (до 500 файлов).');let total=0;
- return files.filter(f=>!/(?:^|\/)(?:\.git|node_modules|\.DS_Store)(?:\/|$)/.test(f)).map(f=>{const data=fs.readFileSync(path.join(dir,f));if((total+=data.length)>LIMIT.bytes)throw Error('Скилл слишком большой (до 50 МБ).');return {name:f.split(path.sep).join('/'),data};});}
+function readFolder(dir){const files=walk(dir);if(files.length>LIMIT.files)throw Error('Навык слишком большой (до 500 файлов).');let total=0;
+ return files.filter(f=>!/(?:^|\/)(?:\.git|node_modules|\.DS_Store)(?:\/|$)/.test(f)).map(f=>{const data=fs.readFileSync(path.join(dir,f));if((total+=data.length)>LIMIT.bytes)throw Error('Навык слишком большой (до 50 МБ).');return {name:f.split(path.sep).join('/'),data};});}
 // Installs from a folder or an archive; SKILL.md may sit at the top or one folder down.
 function install(root,source,taken=new Set()){
  const files=fs.statSync(source).isDirectory()?readFolder(source):unzip(fs.readFileSync(source));
  const skillFile=files.map(f=>f.name).filter(n=>/(?:^|\/)SKILL\.md$/.test(n)).sort((a,b)=>a.split('/').length-b.split('/').length)[0];
- if(!skillFile)throw Error('В скилле нет SKILL.md.');if(skillFile.split('/').length>2)throw Error('SKILL.md должен лежать в корне или в одной папке.');
+ if(!skillFile)throw Error('В навыке нет SKILL.md.');if(skillFile.split('/').length>2)throw Error('SKILL.md должен лежать в корне или в одной папке.');
  const prefix=skillFile.slice(0,-'SKILL.md'.length),parsed=frontMatter(files.find(f=>f.name===skillFile).data.toString('utf8'));
  if(!parsed?.name||!parsed.description)throw Error('В SKILL.md нужны name и description.');
- let name=String(parsed.name).toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,64);if(!NAME.test(name))throw Error('Имя скилла: латиница, цифры и дефис.');
+ let name=String(parsed.name).toLowerCase().replace(/[^a-z0-9-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,64);if(!NAME.test(name))throw Error('Имя навыка: латиница, цифры и дефис.');
  if(taken.has(name))name=('my-'+name).slice(0,64);
  const target=path.join(root,name),temp=target+'.tmp-'+process.pid;fs.rmSync(temp,{recursive:true,force:true});
  for(const f of files){if(!f.name.startsWith(prefix))continue;const rel=f.name.slice(prefix.length);const out=path.join(temp,...rel.split('/'));if(!out.startsWith(temp+path.sep))throw Error('Небезопасный путь.');fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,f.data,{mode:/\.(?:sh|py|js|rb|pl)$/.test(rel)?0o700:0o600});}
  fs.rmSync(target,{recursive:true,force:true});fs.mkdirSync(root,{recursive:true});fs.renameSync(temp,target);cache=null;
  return list(root).find(s=>s.name===name);
 }
-function remove(root,name){if(!NAME.test(name))throw Error('Некорректное имя скилла.');fs.rmSync(path.join(root,name),{recursive:true,force:true});cache=null;return list(root);}
+function remove(root,name){if(!NAME.test(name))throw Error('Некорректное имя навыка.');fs.rmSync(path.join(root,name),{recursive:true,force:true});cache=null;return list(root);}
 module.exports={list,install,remove,unzip};

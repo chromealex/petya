@@ -4,10 +4,10 @@ const {parseReply}=require('./attachment-assistant.cjs');
 // (src/skill-library/context.cjs).
 const BODY=200000;
 function validate(value){
- if(!value||typeof value!=='object')throw Error('Нужны поля скилла.');
+ if(!value||typeof value!=='object')throw Error('Нужны поля навыка.');
  const {name,description,body}=value;
  if(typeof name!=='string'||!/^[a-z][a-z0-9-]{0,63}$/.test(name))throw Error('Имя: латинские буквы, цифры и дефис, начиная с буквы (до 64 символов).');
- if(typeof description!=='string'||!description.trim()||description.length>500)throw Error('Опишите назначение скилла (до 500 символов).');
+ if(typeof description!=='string'||!description.trim()||description.length>500)throw Error('Опишите назначение навыка (до 500 символов).');
  if(typeof body!=='string'||!body.trim()||body.length>BODY)throw Error('Инструкции должны содержать от 1 до '+BODY+' символов.');
  if(value.workflow&&!require('./work-skills.cjs').modes.includes(value.workflow))throw Error('Неизвестный рабочий сценарий.');
  return {name,description:description.trim(),body:body.trim(),enabled:value.enabled!==false,...value.workflow&&value.workflow!=='context'?{workflow:value.workflow}:{}};
@@ -36,18 +36,18 @@ function parseMarkdown(markdown){
 function markdown(skill){const s=validate(skill);return `---\nname: ${s.name}\ndescription: ${JSON.stringify(s.description)}\n---\n\n${s.body}\n`;}
 // The skill's text for one request: `skill.context` when it was prepared for this request (sections chosen
 // by the model, compacted if needed), otherwise fitted without the model; never cut blindly.
-function instruction(skill,{auto=false,query=''}={}){const instructions=skill.context??require('./skill-library/context.cjs').fit(skill,query);return '\nПрименяй '+(auto?'скилл, выбранный для этого запроса,':'выбранный пользователем скилл')+' к текущему запросу. Его инструкции определяют способ анализа и формат ответа внутри поля answer; внешний JSON сохраняется. Скилл не предоставляет инструменты, доступ к сервисам или новые факты. Не заявляй о выполнении действий. Если исходных данных нет, укажи, чего не хватает.\n<selected_skill>\n'+JSON.stringify({name:skill.name,instructions})+'\n</selected_skill>';}
+function instruction(skill,{auto=false,query=''}={}){const instructions=skill.context??require('./skill-library/context.cjs').fit(skill,query);return '\nПрименяй '+(auto?'навык, выбранный для этого запроса,':'выбранный пользователем навык')+' к текущему запросу. Его инструкции определяют способ анализа и формат ответа внутри поля answer; внешний JSON сохраняется. Навык не предоставляет инструменты, доступ к сервисам или новые факты. Не заявляй о выполнении действий. Если исходных данных нет, укажи, чего не хватает.\n<selected_skill>\n'+JSON.stringify({name:skill.name,instructions})+'\n</selected_skill>';}
 class InstructionSkills{
  constructor({state=[],save=()=>{}}={}){this.state=state.map(s=>({...validate(s),id:s.id}));this.save=save;}
  list(){return this.state.map(s=>({...s}));}
- put(value){const s=validate(value),old=value.id?this.state.find(s=>s.id===value.id):null;if(value.id&&!old)throw Error('Скилл удалён. Обновите список.');if(this.state.some(x=>x.name===s.name&&x.id!==old?.id))throw Error('Имя уже занято.');if(!old&&this.state.length>=100)throw Error('Можно сохранить до 100 скиллов.');const row={...s,id:old?.id||randomUUID()},next=old?this.state.map(x=>x.id===old.id?row:x):[...this.state,row];this.save(next);this.state=next;return {...row};}
- remove(id){if(!this.state.some(s=>s.id===id))throw Error('Скилл не найден.');const next=this.state.filter(s=>s.id!==id);this.save(next);this.state=next;}
- resolve(command){const m=String(command).trim().match(/^(?:\/|\$|скилл\s+)([a-z][a-z0-9-]*)(?:\s+([\s\S]*))?$/iu);if(!m)return null;const name=m[1].toLowerCase(),skill=this.state.find(s=>s.name===name)||require('./skill-library/index.cjs').BUILTIN.find(s=>s.name===name);if(!skill)throw Error('Скилл '+m[1]+' не найден. Откройте «Скиллы».');if(!skill.enabled)throw Error('Скилл выключен. Включите его в разделе «Скиллы».');return {skill:{...skill,body:skill.body},question:m[2]?.trim()||'Примени скилл к данным текущей темы. Если данных недостаточно, уточни, что нужно приложить.'};}
+ put(value){const s=validate(value),old=value.id?this.state.find(s=>s.id===value.id):null;if(value.id&&!old)throw Error('Навык удалён. Обновите список.');if(this.state.some(x=>x.name===s.name&&x.id!==old?.id))throw Error('Имя уже занято.');if(!old&&this.state.length>=100)throw Error('Можно сохранить до 100 навыков.');const row={...s,id:old?.id||randomUUID()},next=old?this.state.map(x=>x.id===old.id?row:x):[...this.state,row];this.save(next);this.state=next;return {...row};}
+ remove(id){if(!this.state.some(s=>s.id===id))throw Error('Навык не найден.');const next=this.state.filter(s=>s.id!==id);this.save(next);this.state=next;}
+ resolve(command){const m=String(command).trim().match(/^(?:\/|\$|(?:навык|скилл)\s+)([a-z][a-z0-9-]*)(?:\s+([\s\S]*))?$/iu);if(!m)return null;const name=m[1].toLowerCase(),skill=this.state.find(s=>s.name===name)||require('./skill-library/index.cjs').BUILTIN.find(s=>s.name===name);if(!skill)throw Error('Навык '+m[1]+' не найден. Откройте «Навыки».');if(!skill.enabled)throw Error('Навык выключен. Включите его в разделе «Навыки».');return {skill:{...skill,body:skill.body},question:m[2]?.trim()||'Примени навык к данным текущей темы. Если данных недостаточно, уточни, что нужно приложить.'};}
 }
 async function runSkill({selected,command,dialogue,settings,request,company,files,context='',contextRefs=[],evidence,assertCurrent,verified}){
  dialogue.prune();let topic=files||evidence?null:dialogue.active();
- if(!topic){topic={id:randomUUID(),title:'Скилл: '+selected.skill.name,kind:'chat',projectId:dialogue.state.activeProjectId,messages:[],at:Date.now(),...files?{attachments:files}:{}};dialogue.state.topics.push(topic);dialogue.state.activeId=topic.id;}
- if(evidence){topic.lastData=evidence.data;topic.jiraProject=evidence.data.project;topic.title='Скилл: '+selected.skill.name+' · '+evidence.data.project;}
+ if(!topic){topic={id:randomUUID(),title:'Навык: '+selected.skill.name,kind:'chat',projectId:dialogue.state.activeProjectId,messages:[],at:Date.now(),...files?{attachments:files}:{}};dialogue.state.topics.push(topic);dialogue.state.activeId=topic.id;}
+ if(evidence){topic.lastData=evidence.data;topic.jiraProject=evidence.data.project;topic.title='Навык: '+selected.skill.name+' · '+evidence.data.project;}
  topic.at=Date.now();topic.messages.push({role:'user',text:command,at:topic.at});dialogue.persist();let answer,error=false;
  try{
   // A long skill is fitted to this request: the sections it needs, compacted if they still do not fit.

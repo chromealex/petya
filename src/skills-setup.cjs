@@ -18,7 +18,7 @@ module.exports=ctx=>{
   ctx.handle('skillsDraft',id=>{const context=workSkills.context(ctx.text(id,100));ctx.snapshots.set(context.id,context);return context;});
   ctx.handle('skillsList',()=>instructionSkills.list());ctx.handle('skillsSave',value=>instructionSkills.put(value));ctx.handle('skillsDelete',id=>instructionSkills.remove(id));
   ctx.handle('skillsParse',markdown=>skillModule.parseMarkdown(markdown));
-  ctx.handle('skillsExport',id=>{const skill=instructionSkills.list().find(s=>s.id===id);if(!skill)throw Error('Скилл не найден.');return skillModule.markdown(skill);});
+  ctx.handle('skillsExport',id=>{const skill=instructionSkills.list().find(s=>s.id===id);if(!skill)throw Error('Навык не найден.');return skillModule.markdown(skill);});
   const executeSkill=async(command,ids)=>{const selected=instructionSkills.resolve(command);if(!selected)return null;const files=ids?ctx.attachments.take(ids):undefined;if(ctx.skillRuntime?.handles(selected.skill)){const result=await ctx.skillRuntime.turn({skill:selected.skill,question:selected.question,command,files:files||[]});if(ids)for(const id of ids)ctx.attachments.remove(id);return result;}const result=await workSkills.turn(selected,command,files)||await skillModule.runSkill({selected,command,dialogue:ctx.dialogue,settings:{...ctx.settings},request:ctx.request,company:ctx.companies.get(ctx.companyId).name,files,...require('./chat-attribution.cjs').contextExcerpt(ctx.memory.prune().slice(-10))});if(ids)for(const id of ids)ctx.attachments.remove(id);return result;};
   // skill: a skill chosen for the question about these files (src/features/skill-choice.cjs).
   const inspectAttachments=async(ids,question,{skill}={})=>{
