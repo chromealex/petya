@@ -35,9 +35,9 @@
   tabs.querySelector('[aria-current]')?.scrollIntoView({block:'nearest',inline:'nearest'});
  }
  const companyReady=window.petya.companies().then(render).catch(e=>notice(e.message,true));
- // Pull the workspace icon from Slack in the background; once a day, and right after Slack is connected.
+ // Pull the company icon (Slack, then Jira) in the background; once a day, and right after Slack or Jira is connected.
  const refreshIcon=force=>companyReady.then(()=>window.petya.companyIconRefresh(force)).then(data=>{if(!switching)render(data);}).catch(()=>{});
- refreshIcon(false);document.addEventListener('petya-connection-checked',event=>{if(event.detail?.service==='slack'&&event.detail?.ok)refreshIcon(true);});
+ refreshIcon(false);document.addEventListener('petya-connection-checked',event=>{if(['slack','jira'].includes(event.detail?.service)&&event.detail?.ok)refreshIcon(true);});
  $('company-manage').onclick=()=>view('companies');
  $('company-create-form').onsubmit=run(async()=>{await companyReady;const c=await window.petya.companyCreate($('company-new-name').value);render(await window.petya.companies());$('company-new-name').value='';$('company-status').textContent='Компания «'+c.name+'» добавлена. Выберите её вкладку сверху для переключения.';});
  $('company-rename-form').onsubmit=run(async()=>{await companyReady;render(await window.petya.companyRename(current,$('company-name').value));$('company-status').textContent='Название сохранено.';renameCard.hidden=true;});
