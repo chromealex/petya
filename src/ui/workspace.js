@@ -34,6 +34,7 @@ async function selectJiraRoute(context, resume, project = '', issueType = '') {
   if(automaticVoiceCommand)speakReply(question+' '+labels.map((label,i)=>(i+1)+' — '+label).join('; ')).catch(e=>notice(e.message,true));
   return null;
 }
+let automaticCoverage = null, coverageConfirmed = false;
 let currentIntent = '', currentDecompose = false, activeContext = null, workspaceBusy = false, batchId = '', frozenBatch = null, selectedPeople = [], batchTarget = {};
 const states = { ready: 'Ещё не отправлена', sending: 'Результат создания неизвестен — проверьте Jira', uncertain: 'Результат создания неизвестен — повтор заблокирован', created: 'Создана, ещё не в спринте', scheduling: 'Создана; проверьте спринт', 'schedule-failed': 'Создана, не удалось добавить в спринт', rejected: 'Jira отклонила создание', done: 'Создана и добавлена в спринт' };
 function selectOptions(element, values, selected, placeholder, label = v => v.name) {
@@ -91,7 +92,7 @@ async function openWorkspace(context, route = activeJiraRoute) {
   activeJiraRoute = route;
   activeContext = context; currentDraft = null; frozenBatch = null; batchId = context.skillDraftId || crypto.randomUUID(); selectedPeople = [];
   $('draft-card').hidden = true; $('resolution').hidden = true; $('workspace-card').hidden = false;
-  $('workspace-title').textContent = context.title + (currentIntent === 'jira-agent' ? ' · Jira → агент (отправка в приложении)' : ''); $('batch-tasks').replaceChildren(); $('batch-results').replaceChildren(); $('docs-list').replaceChildren(); $('plan-questions').textContent = ''; $('docs-query').value = '';
+  $('workspace-title').textContent = context.title + (currentIntent === 'jira-agent' ? ' · Jira → агент (отправка в приложении)' : ''); $('batch-tasks').replaceChildren(); $('batch-results').replaceChildren(); $('docs-list').replaceChildren(); $('plan-questions').textContent = ''; automaticCoverage = null; coverageConfirmed = false; renderCoverage(null); window.petya.decomposeStatus().then(state => renderDecomposeProgress(state?.busy ? state : null)).catch(() => renderDecomposeProgress(null)); $('docs-query').value = '';
   for (const name of ['board', 'sprint', 'version']) selectOptions($('batch-' + name), [], '', 'Выберите значение');
   lockPlan(false); $('submit-batch').disabled = false; $('submit-batch').textContent = 'Создать задачи и добавить в спринт';
   const outcomes = await Promise.allSettled([context.skillDraftId?Promise.resolve():findDocs(), currentIntent === 'docs' && !activeJiraRoute ? Promise.resolve() : refreshMetadata()]);
@@ -120,6 +121,54 @@ function taskEditor(task = { summary: '', description: '', assigneeId: '', depen
   $('batch-tasks').append(article);
 }
 function readTasks() { return [...document.querySelectorAll('.task-editor')].map(article => ({ summary: article.querySelector('.task-summary').value, description: article.querySelector('.task-description').value, assigneeId: article.querySelector('.task-assignee').value, dependsOn: article.querySelector('.task-deps').value.split(',').map(v => v.trim()).filter(Boolean).map(v => Number(v) - 1) })); }
+// Decomposition progress: the overall bar and one line per agent with the part of the material it reads.
+function decomposeStageText(state) {
+  const count = state.total ? ` (${state.done} из ${state.total})` : '';
+  return ({
+    starting: 'Готовлю декомпозицию',
+    fetching: 'Читаю «' + (state.label || 'документ') + '» целиком',
+    reading: 'Агенты читают материал по частям',
+    merging: 'Сжимаю требования, чтобы они уместились в модель' + count,
+    planning: 'Составляю задачи',
+    done: 'План готов' + (state.warnings ? ' — есть предупреждения' : ''),
+    error: 'Декомпозиция остановилась: ' + (state.error || 'ошибка')
+  })[state.stage] || 'Декомпозиция';
+}
+window.decomposeStageText = decomposeStageText;
+const AGENT_STATE = { waiting: 'ждёт', reading: 'читает', done: 'готово', failed: 'ошибка', stopped: 'остановлен' };
+let lastDecompose = null;
+function renderDecomposeProgress(state) {
+  const box = $('decompose-progress'); lastDecompose = state;
+  if (!state) { box.hidden = true; return; }
+  box.hidden = false; box.dataset.stage = state.stage;
+  $('decompose-stage').textContent = decomposeStageText(state);
+  // A real percentage once the work is measured; before that, and for a single planning request, the stage only.
+  const measured = Number.isFinite(state.percent) && (state.percent > 0 || state.stage === 'reading' || state.stage === 'merging') && !['starting', 'fetching', 'error'].includes(state.stage);
+  const bar = $('decompose-bar');
+  if (measured) { bar.value = state.percent; $('decompose-percent').textContent = state.percent + '%'; } else { bar.removeAttribute('value'); $('decompose-percent').textContent = ''; }
+  bar.hidden = state.stage === 'error';
+  const list = $('decompose-agents'); list.replaceChildren();
+  for (const agent of state.agents || []) {
+    const item = document.createElement('li'); item.className = 'decompose-agent'; item.dataset.state = agent.state;
+    const head = document.createElement('div'); head.className = 'decompose-agent-head';
+    const name = document.createElement('strong'); name.textContent = 'Агент ' + agent.n;
+    const count = document.createElement('span'); count.textContent = `${agent.done}/${agent.total} · ${AGENT_STATE[agent.state] || agent.state}`;
+    head.append(name, count);
+    const range = document.createElement('span'); range.className = 'small'; range.textContent = agent.current ? 'Сейчас: ' + agent.current : 'Часть: ' + agent.range;
+    const own = document.createElement('progress'); own.max = Math.max(1, agent.total); own.value = agent.done; own.setAttribute('aria-label', 'Агент ' + agent.n + ': ' + agent.done + ' из ' + agent.total);
+    item.append(head, own, range); list.append(item);
+  }
+  list.hidden = !(state.agents || []).length;
+}
+window.petyaEvents.onDecompose(state => { if (!$('workspace-card').hidden || state.busy) renderDecomposeProgress(state); });
+window.petya.decomposeStatus().then(state => { if (state?.busy) renderDecomposeProgress(state); }).catch(() => {});
+// What of the material reached the plan; losses are highlighted.
+function renderCoverage(coverage) {
+  const box = $('plan-coverage'); box.replaceChildren();
+  const warnings = coverage?.warnings || [];
+  box.hidden = !warnings.length; box.classList.toggle('loss', !!coverage?.loss);
+  for (const warning of warnings) { const p = document.createElement('p'); p.textContent = warning; box.append(p); }
+}
 async function decompose() {
   if (!activeJiraRoute) {
     const route = await selectJiraRoute(activeContext, async selected => { activeJiraRoute = selected; await decompose(); });
@@ -131,12 +180,16 @@ async function decompose() {
     const docs = [...document.querySelectorAll('.doc-check:checked')].map(c => c.value);
     if (docs.length > 5) throw new Error('Выберите не больше пяти документов.');
     notice('Разбиваю обсуждение на задачи. Это может занять некоторое время…');
+    renderCoverage(null); renderDecomposeProgress({ stage: 'starting', busy: true });
     const result = await window.petya.prepareBatch(commandSnapshot, activeContext.id, docs, $('batch-board').value, activeJiraRoute.id);
-    automaticBatchQuestions = result.questions;
+    automaticBatchQuestions = result.questions; automaticCoverage = result.coverage || null; coverageConfirmed = false; renderCoverage(result.coverage);
+    // The finished state, whether or not the last progress event arrived before the answer.
+    renderDecomposeProgress({ ...(lastDecompose || {}), stage: 'done', busy: false, percent: 100, warnings: result.coverage?.warnings?.length || 0 });
     renderMetadata(result.metadata, true); mergePeople(result.people); $('batch-tasks').replaceChildren(); result.tasks.forEach(taskEditor);
     $('plan-questions').textContent = result.questions.length ? 'Уточнить: ' + result.questions.join(' • ') : 'Проверьте объём задач и назначения перед отправкой.';
-    notice(`Подготовлено задач: ${result.tasks.length}. Проверьте спринт, версию и исполнителей.`);
-  } finally { workspaceBusy = false; lockPlan(false); }
+    notice(`Подготовлено задач: ${result.tasks.length}. ${result.coverage?.loss ? 'Часть материала не вошла в план — смотрите предупреждения.' : 'Проверьте спринт, версию и исполнителей.'}`, !!result.coverage?.loss);
+  } catch (error) { if (lastDecompose?.busy) renderDecomposeProgress({ ...lastDecompose, stage: 'error', busy: false, error: error.message }); throw error; }
+  finally { workspaceBusy = false; lockPlan(false); }
   if (automaticVoiceCommand) await continueAutomaticBatch();
 }
 function renderResult(target, record) {
@@ -194,6 +247,14 @@ async function continueAutomaticBatch() {
     const options = selectedPeople;
     if (!options.length) {notice('Нет доступных исполнителей. Уточните права в Jira.',true);await window.petya.requestAttention();return;}
     askVoiceChoices('Кому назначить задачу «'+missing.closest('.task-editor').querySelector('.task-summary').value+'»?', options.map(p=>({label:p.name,names:[p.name,p.id],run:async()=>{missing.value=p.id;await continueAutomaticBatch();}}))); return;
+  }
+  // A plan that misses part of the material is not sent by voice without an explicit yes.
+  if (automaticCoverage?.loss && !coverageConfirmed) {
+    const first = automaticCoverage.warnings.find(w => !w.startsWith('Материал больше окна')) || '';
+    askVoiceChoices('Часть материала не вошла в план. ' + first + ' Всё равно создать задачи?', [
+      { label: 'Создать', names: ['да', 'создать', 'создавай', 'создай'], run: async () => { coverageConfirmed = true; await continueAutomaticBatch(); } },
+      { label: 'Не создавать', names: ['нет', 'не надо', 'не создавай', 'стоп'], run: async () => { automaticVoiceCommand = false; voiceReply = null; notice('Задачи не созданы. Проверьте план и предупреждения.'); } }
+    ]); return;
   }
   voiceReply = null; automaticVoiceCommand = false;
   await sendBatch();

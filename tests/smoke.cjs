@@ -193,6 +193,7 @@ module.exports = async (win, workspace) => {
     if (!$('docs-list').textContent.includes('Notion')) throw new Error('Missing Notion source');
     await decompose();
     if (document.querySelectorAll('.task-editor').length !== 2) throw new Error('Missing task editors');
+    if ($('decompose-progress').hidden || $('decompose-bar').value !== 100 || !$('decompose-stage').textContent.startsWith('План готов')) throw new Error('Decomposition progress missing');
     if (!$('batch-version').value || !$('batch-sprint').value) throw new Error('Missing planning metadata');
     await sendBatch();
     const history = await window.petya.batchHistory();

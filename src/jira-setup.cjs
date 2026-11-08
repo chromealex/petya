@@ -8,6 +8,8 @@ module.exports=ctx=>{
     target.lastRouting={project:result.project||'',name:result.name||'',reason:result.reason,source:context.source+' · '+context.title,at:Date.now()};ctx.dialogue.persist();return result;
   });
   const routed = id => id ? routing.settings(id) : (() => { throw new Error('Сначала определите проект по контексту задачи.'); })();
+  // The running decomposition, so a reopened window shows its progress.
+  ctx.handle('decomposeStatus', () => ctx.workspace.decomposing);
   ctx.handle('searchDocs', (id, query) => ctx.workspace.searchDocs(ctx.contextFor(id), query));
   ctx.handle('jiraChoices', project => require('./jira-selection.cjs').choices(ctx.workspace, ctx.settings, project));
   ctx.handle('taskMetrics',input=>require('./task-metrics.cjs').read(ctx.workspace,input));

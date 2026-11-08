@@ -151,7 +151,9 @@ class Workspace {
     coverage.uncovered = notes.filter(n => !covered.has(n.id)).map(n => ({ ref: n.ref, text: n.text }));
     coverage.warnings.unshift(...coverageWarnings(coverage, peopleNote));
     const questions = [...(Array.isArray(parsed.questions) ? parsed.questions.map(String) : []), ...extraQuestions].slice(0, 20);
-    return { tasks, questions, metadata, people: everyone, coverage: { ...coverage, dropped: coverage.dropped.map(n => n.ref) } };
+    // Something of the material is not in the plan: the planner shows it, and the voice flow asks before sending.
+    const loss = coverage.failed.length > 0 || coverage.dropped.length > 0 || coverage.uncovered.length > 0 || coverage.sources.some(x => x.truncated) || extra.length > 0;
+    return { tasks, questions, metadata, people: everyone, coverage: { ...coverage, loss, dropped: coverage.dropped.map(n => n.ref) } };
   }
   checkpoint(batch) {
     const previous = this.history.find(h => h.id === batch.id) || {};
