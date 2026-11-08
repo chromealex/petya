@@ -36,7 +36,30 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("document.querySelector('.dash-widget[data-kind=extension] .dash-widget-tools .dash-tool:last-child').click()");
  await wait("[...document.querySelectorAll('.kit-menu-item')].some(b=>b.textContent==='Во всю ширину')",'widget menu');
  await js("[...document.querySelectorAll('.kit-menu-item')].find(b=>b.textContent==='Во всю ширину').click()");
- await wait("document.querySelector('.dash-widget[data-kind=extension]')?.dataset.size==='w'",'resized');
+ await wait("document.querySelector('.dash-widget[data-kind=extension]')?.style.gridColumn.includes('span 12')",'full width from the menu');
+ // Drag a widget by its header: it moves on the grid, the others make room, the arrangement is saved.
+ const dashNow=await js("document.querySelector('.dash-screen').dataset.id");
+ const drag=async(selector,dx,dy)=>js("(async()=>{const dx="+dx+",dy="+dy+";const el=document.querySelector("+JSON.stringify(selector)+");const r=el.getBoundingClientRect();const x=r.left+r.width/2,y=r.top+r.height/2;const ev=(type,cx,cy)=>el.dispatchEvent(new PointerEvent(type,{bubbles:true,clientX:cx,clientY:cy,button:0,pointerId:1,isPrimary:true}));ev('pointerdown',x,y);for(let k=1;k<=6;k++){ev('pointermove',x+dx*k/6,y+dy*k/6);await new Promise(r=>setTimeout(r,16));}ev('pointerup',x+dx,y+dy);return true;})()");
+ const posOf=async kind=>(await js("window.petya.feature('dashboards','peek',"+JSON.stringify(dashNow)+")")).widgets.find(w=>w.kind===kind||w.title===kind).pos;
+ await wait("Promise.resolve(true)");
+ // Wait until every widget has its place and its height fitted to its data.
+ for(let i=0;i<80;i++){const ws=(await js("window.petya.feature('dashboards','peek',"+JSON.stringify(dashNow)+")")).widgets;if(ws.every(w=>w.pos&&!w.pos.fit))break;await new Promise(r=>setTimeout(r,100));}
+ await new Promise(r=>setTimeout(r,400));
+ const snapBefore=await posOf('Привет');assert(snapBefore,'positions saved on first view');
+ const width=await js("document.querySelector('.dash-grid.free').clientWidth");
+ // The first snapshot widget goes one column-half to the right and down below the others.
+ const helloId=(await js("window.petya.feature('dashboards','peek',"+JSON.stringify(dashNow)+")")).widgets.find(w=>w.title==='Привет').id;
+ await drag('.dash-screen .dash-widget[data-id="'+helloId+'"] .dash-widget-title',Math.round(width/2),900);
+ for(let i=0;i<40;i++){const p=await posOf('Привет');if(p&&(p.x!==snapBefore.x||p.y!==snapBefore.y))break;await new Promise(r=>setTimeout(r,100));}
+ const snapAfter=await posOf('Привет');assert(snapAfter.y>snapBefore.y||snapAfter.x!==snapBefore.x,'moved: '+JSON.stringify([snapBefore,snapAfter]));
+ // Resize by the corner.
+ const extBefore=await posOf('extension');
+ await drag(".dash-screen .dash-widget[data-kind=extension] .dash-resize",-Math.round(width/2),120);
+ for(let i=0;i<40;i++){const p=await posOf('extension');if(p.w!==extBefore.w||p.h!==extBefore.h)break;await new Promise(r=>setTimeout(r,100));}
+ const extAfter=await posOf('extension');assert(extAfter.w<extBefore.w&&extAfter.h>extBefore.h,'resized: '+JSON.stringify([extBefore,extAfter]));
+ // Nothing overlaps.
+ assert(await js("(()=>{const r=[...document.querySelectorAll('.dash-screen .dash-grid.free>.dash-widget')].map(w=>w.getBoundingClientRect());return r.every((a,i)=>r.every((b,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1));})()"),'no overlaps');
+ await shot('arranged');
  // Adder: ready widgets of connected apps.
  await js("document.querySelector('.dash-head-tools .dash-add').click()");
  await wait("[...document.querySelectorAll('.dash-chip')].some(c=>c.textContent.includes('Новые крэши'))",'catalog chips');
@@ -100,7 +123,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await wait("document.querySelector('.dash-head h1')?.textContent==='Пример · аналитика игры'&&document.querySelectorAll('.dash-widget .chart-kpi-tile').length===5&&document.querySelectorAll('.dash-widget .chart-line-svg').length===3",'analytics example');
  assert(await js("!!document.querySelector('.dash-tag.demo')&&!!document.querySelector('.dash-note')"),'made-up numbers are marked');
  // Rows are full: every row of six columns adds up to six.
- assert(await js("(()=>{const rows=new Map();for(const w of document.querySelectorAll('.dash-screen .dash-widget')){const top=Math.round(w.getBoundingClientRect().top);rows.set(top,(rows.get(top)||0)+Number(w.style.getPropertyValue('--span')));}return [...rows.values()].every(v=>v===6);})()"),'no holes in the grid');
+ assert(await js("(()=>{const r=[...document.querySelectorAll('.dash-screen .dash-grid.free>.dash-widget')].map(w=>w.getBoundingClientRect());return r.length===7&&r.every((a,i)=>r.every((b,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1));})()"),'example laid out without overlaps');
  await shot('example');
  await js("document.querySelector('.dash-screen').scrollTop=2000");await shot('example-bottom');
  console.log('Dashboards UI: chat → dashboard, refresh, sidebar, widget menu, adder, start screen, pin and compose passed');

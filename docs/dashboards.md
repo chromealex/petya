@@ -18,11 +18,13 @@ meetings, charts. A widget keeps its **source**, not only its data, so it refres
   platforms, countries and a tutorial funnel (`src/dashboard-example.cjs`), marked «Демо-данные».
 
 ## Layout
-Six columns. New widgets are «Авто»: they share a row two at a time (three when that avoids a lone one). A fixed
-size spans 2, 3, 4 or 6 (`s`, `m`, `l`, `w`). Rows are always full — what is left goes to the row's «Авто»
-widgets, or grows the last one — and widgets of a row share its height. Content follows the widget's own width
-(container queries): Jira cards go into two or three columns in a wide widget, a donut stacks in a narrow one. Cards drawn inside a
-widget lose their own frame. Below 1100 px: two columns.
+A 12-column grid with 32-px rows; each widget keeps `pos: {x, y, w, h}` and the person arranges it: drag a widget
+by its header, resize it by the bottom-right corner, or pick «Ширина» (¼, ⅓, ½, ⅔, full) in its menu. The others
+make room and everything rises to close gaps (vertical compaction). A new widget takes the first free spot with
+the width of its size (`auto` — half) and its height is fitted to its data once (`pos.fit` until then). The
+arrangement is saved per dashboard (`layout` IPC) and travels with a shared dashboard's file. Below ~760 px of
+width the widgets stack in reading order; the small window always stacks. Content follows the widget's own width
+(container queries): Jira cards go into two or three columns in a wide widget, a donut stacks in a narrow one.
 
 ## Charts for analytics
 The charts extension draws `donut`, `bars`, `line` (`labels` + `series`, hover values, legend toggles) and `kpi`
