@@ -1,5 +1,5 @@
 const {createHash}=require('node:crypto');
-const VERSION=1,RECENT=20,BLOCK=12;
+const VERSION=1,RECENT=20,BLOCK=12,LONG=3000;
 const stop=new Set('какой какая какое какие когда почему сколько который этого этой этому теперь сейчас только ответь назови расскажи покажи пожалуйста проект проекта вопрос диалог беседа подробнее подробно'.split(' ').map(w=>w.slice(0,5)));
 function tokens(text){return [...new Set((String(text||'').toLowerCase().replace(/ё/gu,'е').match(/[\p{L}\p{N}]+/gu)||[]).filter(w=>w.length>=3||/^\d+$/u.test(w)).map(w=>w.slice(0,5)).filter(w=>!stop.has(w)))];}
 function scope(topic){return JSON.stringify([topic.id||'',topic.projectId||'',topic.projectMemoryId||'',topic.companyId||'']);}
@@ -26,7 +26,19 @@ function buildArchive(topic){
   });
   chunks.push({from,to,sourceHash,keywords:tokens(rows.map(m=>m.text||'').join(' ')),facts:facts.slice(-12)});
  }
- return {version:VERSION,scope:binding,until,chunks};
+ // Model summaries of long recent messages (src/features/context-compaction.cjs), kept while the message is.
+ const live=new Set(messages.map(m=>typeof m?.text==='string'&&m.text.length>LONG?messageHash(m):'').filter(Boolean));
+ const compacts=Object.fromEntries(Object.entries(old?.compacts||{}).filter(([k])=>live.has(k)));
+ return {version:VERSION,scope:binding,until,chunks,compacts};
+}
+// Chat lines of a block of messages, as compaction reads them.
+function transcript(rows){return rows.filter(m=>typeof m?.text==='string'&&m.text.trim()).map(m=>(m.role==='user'?'Пользователь: ':'Петя: ')+m.text).join('\n');}
+const messageHash=m=>createHash('sha256').update(String(m.role)+'\n'+m.text).digest('hex');
+// A long message in a compact form: its model summary when ready, otherwise its head and tail.
+function shortened(m,archive,limit){
+ const summary=archive.compacts?.[messageHash(m)];
+ if(summary&&summary.length<=limit)return {text:'[Сжатое длинное сообщение; оригинал сохранён в истории чата] '+summary,compacted:true};
+ return {text:require('./context-compactor.cjs').excerpt(m.text,limit,{note:'оригинал сохранён в истории чата'}),compacted:true};
 }
 function refreshArchive(topic){topic.conversationArchive=buildArchive(topic);return topic.conversationArchive;}
 function conversationContext(topic,command=''){
@@ -50,8 +62,22 @@ function conversationContext(topic,command=''){
   }
   if(rows.length)restored.push({from:c.from,to:c.to,messages:rows,complete:rows.length===c.to-c.from&&rows.every(m=>!m.shortened)});
  }
- let recentRoom=8000;const history=[];
- for(let i=messages.length-1;i>=archive.until;i--){const m=messages[i];if(typeof m?.text!=='string')continue;if(m.text.length>recentRoom)break;history.unshift({role:m.role,text:m.text,source:i});recentRoom-=m.text.length;}
+ // Recent messages go in full while they fit; a long one is compacted instead of pushing everything
+ // before it out, and older recent ones that no longer fit in full keep a short form. Nothing is dropped.
+ let recentRoom=8000,shortRoom=3000;const history=[];let compactedRecent=0;
+ for(let i=messages.length-1;i>=archive.until;i--){const m=messages[i];if(typeof m?.text!=='string')continue;
+  if(m.text.length<=LONG&&m.text.length<=recentRoom){history.unshift({role:m.role,text:m.text,source:i});recentRoom-=m.text.length;continue;}
+  // Older ones share the short-form room, so each of them keeps at least a line.
+  const left=i-archive.until+1,limit=m.text.length>LONG&&recentRoom>=1200?Math.min(1500,recentRoom):Math.max(160,Math.min(400,Math.floor(shortRoom/left)));
+  const short=shortened(m,archive,limit);history.unshift({role:m.role,text:short.text,source:i,compacted:true});compactedRecent++;
+  if(m.text.length>LONG&&recentRoom>=1200)recentRoom-=short.text.length;else shortRoom-=short.text.length;
+ }
+ // Model summaries of archived blocks (both sides of the conversation): relevant ones first, then the latest.
+ const archiveCompact=[];let compactRoom=3500;
+ const withSummary=archive.chunks.filter(c=>c.compact);
+ const order=[...ranked.map(r=>r.c).filter(c=>c.compact),...withSummary.slice().reverse()];
+ for(const c of order){if(archiveCompact.some(x=>x.from===c.from))continue;if(c.compact.length>compactRoom)continue;archiveCompact.push({from:c.from,to:c.to,summary:c.compact});compactRoom-=c.compact.length;}
+ archiveCompact.sort((a,b)=>a.from-b.from);
  // Keep recent user assertions separate from assistant replies and questions.
  // This prevents a frequently repeated old answer outweighing a later correction.
  const recentUserFacts=[];let factRoom=2000;
@@ -61,6 +87,6 @@ function conversationContext(topic,command=''){
    if(text.length>factRoom)continue;recentUserFacts.unshift({source:i,kind:'user-statement',text});factRoom-=text.length;
   }
  }
- return {roleFacts:require('./role-facts.cjs').roleFacts(topic),archiveSummary:summary,recentUserFacts,restoredHistory:restored.sort((a,b)=>a.from-b.from),history,archiveInfo:{version:VERSION,archivedMessages:archive.until,summaryIsExtractive:true,olderContextOmitted:archive.until>0,originalsRetained:true,recentContextOmitted:history.length<messages.length-archive.until}};
+ return {roleFacts:require('./role-facts.cjs').roleFacts(topic),archiveSummary:summary,...(archiveCompact.length?{archiveCompact}:{}),recentUserFacts,restoredHistory:restored.sort((a,b)=>a.from-b.from),history,archiveInfo:{version:VERSION,archivedMessages:archive.until,summaryIsExtractive:!archiveCompact.length,compactedBlocks:archiveCompact.length,olderContextOmitted:archive.until>0,originalsRetained:true,compactedRecentMessages:compactedRecent,recentContextOmitted:history.length<messages.slice(archive.until).filter(m=>typeof m?.text==='string').length}};
 }
-module.exports={buildArchive,refreshArchive,conversationContext,tokens};
+module.exports={buildArchive,refreshArchive,conversationContext,tokens,transcript,messageHash,LONG};

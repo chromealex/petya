@@ -306,5 +306,7 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     const steps=require('./request-progress.cjs').steps();
     if(steps.length&&result&&typeof result==='object'){result.steps=steps;const last=chat?.messages?.at(-1);if(last?.role==='assistant'&&!last.steps&&result.handled){last.steps=steps;ctx.dialogue.persist();}}
     if(chat?.messages?.at(-1)!==beforeMessage)ctx.chatResults?.adopt(chat,chat?.messages?.at(-1));
+    // Long chats: compact the archived part in the background once the model is free.
+    if(chat)ctx.contextCompaction?.schedule(chat);
     return result;};
 };

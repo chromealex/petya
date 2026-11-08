@@ -98,9 +98,10 @@ const PROMPTS={
 };
 // Map-reduce compaction with the local model. `target` is the size of the result in tokens; pieces are
 // summarised independently and the joined summaries are compacted again until they fit.
-async function compact({text,purpose='text',question='',target=1500,request,endpoint,model,cache=shared,progress,limit=2,depth=0}){
+// strict: a failed model call throws instead of falling back to an excerpt (for summaries that are stored).
+async function compact({text,purpose='text',question='',target=1500,request,endpoint,model,cache=shared,progress,limit=2,depth=0,strict=false}){
  text=String(text??'');if(tokens(text)<=target)return text;
- if(!request||!endpoint||!model||depth>=5)return excerpt(text,charsFor(target,text));
+ if(!request||!endpoint||!model||depth>=5){if(strict)throw Error('Нет модели для сжатия.');return excerpt(text,charsFor(target,text));}
  const piece=Math.min(7000,Math.max(1500,WINDOW-4000));
  const parts=purpose==='file'&&!depth?lineChunks(text,piece).map(c=>c.text):split(text,charsFor(piece,text));
  const each=Math.max(250,Math.min(1200,Math.floor(target*1.5/parts.length)));
@@ -113,13 +114,13 @@ async function compact({text,purpose='text',question='',target=1500,request,endp
     {role:'user',content:JSON.stringify({question,request:question,part:(i+1)+' из '+parts.length,text:part})}]};
   let summary='';
   try{const r=await request(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});summary=String(JSON.parse(r?.message?.content||'null')?.summary||'').trim();}
-  catch(e){if(e?.name==='AbortError')throw e;}
+  catch(e){if(e?.name==='AbortError'||strict)throw e;}
   // A failed summary falls back to the deterministic excerpt of that piece, never to nothing.
-  if(!summary)summary=excerpt(part,charsFor(each,part));
+  if(!summary){if(strict)throw Error('Модель не вернула сжатый текст.');summary=excerpt(part,charsFor(each,part));}
   else cache.set(key,summary);
   return summary;
  });
  const joined=summaries.map((s,i)=>parts.length>1?'[часть '+(i+1)+' из '+parts.length+'] '+s:s).join('\n\n');
- return compact({text:joined,purpose,question,target,request,endpoint,model,cache,progress,limit,depth:depth+1});
+ return compact({text:joined,purpose,question,target,request,endpoint,model,cache,progress,limit,depth:depth+1,strict});
 }
 module.exports={WINDOW,tokens,charsFor,hash,excerpt,sections,split,lineChunks,relevance,stems,choose,compact,Cache,shared};
