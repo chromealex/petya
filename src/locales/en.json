@@ -5581,6 +5581,20 @@
   "раз": "times",
   "раза": "times",
   "те же участники": "same people",
-  "часть участников та же": "some of the same people"
+  "часть участников та же": "some of the same people",
+  "Docker-образ python:3.12-slim": "Docker image python:3.12-slim",
+  "· вес загрузки ≈": "· download size ≈",
+  "· не хватит места: свободно": "· not enough space: free",
+  "Без загрузок": "No downloads",
+  "Вес загрузки: ≈": "Download size: ≈",
+  "Генератор stable-diffusion.cpp": "stable-diffusion.cpp generator",
+  "Загрузки этих приложений не поместятся на диск": "These apps' downloads will not fit on the disk",
+  "Модель Stable Diffusion 1.5": "Stable Diffusion 1.5 model",
+  "Нужен": "Requires",
+  "По желанию: до ≈": "Optional: up to ≈",
+  "Своя модель для кода, например qwen3-coder:30b": "Own code model, e.g. qwen3-coder:30b",
+  "Уже скачано": "Already downloaded",
+  "и по желанию ещё до ≈": "and optionally up to ≈",
+  "уже скачано": "already downloaded"
  }
 }

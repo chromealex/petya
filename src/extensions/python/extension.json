@@ -3,6 +3,7 @@
   "name": "Python",
   "description": "Изолированные расчёты, CSV и логи через локальный Docker",
   "category": "analytics",
+  "downloads": [{"id": "image", "name": "Docker-образ python:3.12-slim", "bytes": 45000000, "approx": true, "requires": "Docker Desktop"}],
   "setting": "extension_python",
   "settings": false,
   "scripts": [
