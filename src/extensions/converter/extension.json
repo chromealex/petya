@@ -3,6 +3,7 @@
   "name": "Конвертер",
   "description": "Картинки, видео, аудио и документы одной фразой: формат, размер, сжатие до нужного веса, гифка из видео, целая папка по маске. Исходники не трогаю",
   "category": "computer",
+  "icon": "icon.svg",
   "setting": "extension_converter",
   "settings": false,
   "feature": "feature.cjs",
