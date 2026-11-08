@@ -601,7 +601,7 @@ function setupHandlers() {
   });
   handle('googlePlayDisconnect',()=>saveSettings({clear_googlePlayCredential:true},true));
   handle('googlePlayCheck',async()=>({apps:await googlePlay.apps()}));
-  const {routed}=require('./jira-setup.cjs')({get contextFor(){return contextFor;},get delegation(){return delegation;},get dialogue(){return dialogue;},get handle(){return handle;},get projectMemory(){return projectMemory;},get settings(){return settings;},get taskDuplicates(){return taskDuplicates;},get text(){return text;},get workSkills(){return workSkills;},get workspace(){return workspace;}});
+  const {routed}=require('./jira-setup.cjs')({get contextFor(){return contextFor;},get delegation(){return delegation;},get dialogue(){return dialogue;},get handle(){return handle;},get projectMemory(){return projectMemory;},get settings(){return settings;},get modules(){return modules;},get taskDuplicates(){return taskDuplicates;},get text(){return text;},get workSkills(){return workSkills;},get workspace(){return workspace;}});
   require('./asana-setup.cjs')({get addContext(){return addContext;},get composeDraft(){return composeDraft;},get contextFor(){return contextFor;},get handle(){return handle;},get modules(){return modules;},get request(){return request;},get settings(){return settings;},get text(){return text;}});
   // Saved chats may ask for attention right after start; the build check needs a quiet tray start.
   handle('requestAttention', () => { if (process.env.PETYA_VERIFY_BUILD !== '1') show(); });

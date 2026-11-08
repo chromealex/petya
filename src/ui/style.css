@@ -123,6 +123,9 @@ footer{flex-wrap:wrap}
 .team-member details[open]>summary::before{transform:rotate(90deg)}
 .team-member summary:hover{background:#252d28}
 .team-member-heading{display:grid;gap:2px;min-width:0}
+.team-load{margin-left:auto;display:grid;grid-template-columns:auto auto;align-items:baseline;column-gap:4px;row-gap:4px;font-size:12px;color:var(--muted);min-width:72px;justify-items:end}.team-load strong{font-size:15px;font-weight:600;color:var(--text,#e1e6df);font-variant-numeric:tabular-nums}.team-load.unknown{display:block;opacity:.6}
+.team-load-bar{grid-column:1/-1;width:72px;height:3px;border-radius:3px;background:var(--line);overflow:hidden}.team-load-bar>span{display:block;height:100%;background:var(--green);border-radius:3px}
+.team-load-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}.team-load-status{margin:0}
 .team-member-heading strong{font-size:14px;font-weight:600;overflow-wrap:anywhere}
 .team-member-subtitle{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .team-member-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;padding:16px;border-top:1px solid var(--line)}
@@ -1040,7 +1043,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
    over three dots while agents read, two dots meeting while notes merge, list lines being written while the plan is
    made. Preparing keeps the ring. */
 #workspace-card .decompose-progress.live[data-stage]>summary::before{--work:var(--green);--dim:color-mix(in srgb,var(--green) 30%,transparent);border:0;border-radius:0;transform:none}
-#workspace-card .decompose-progress.live[data-stage=starting]>summary::before{width:12px;height:12px;margin:0 5px;border:2px solid var(--dim);border-top-color:var(--work);border-radius:50%;animation:work-spin .9s linear infinite}
+#workspace-card .decompose-progress.live[data-stage=assigning]>summary::before,#workspace-card .decompose-progress.live[data-stage=starting]>summary::before{width:12px;height:12px;margin:0 5px;border:2px solid var(--dim);border-top-color:var(--work);border-radius:50%;animation:work-spin .9s linear infinite}
 #workspace-card .decompose-progress.live[data-stage=fetching]>summary::before{width:10px;height:12px;margin:0 6px;background:linear-gradient(var(--work),var(--work)) center top/2px 0 no-repeat,linear-gradient(var(--work),var(--work)) center bottom/10px 2px no-repeat;animation:work-fetch 1s ease-in infinite}
 @keyframes work-fetch{0%{background-size:2px 0,10px 2px;opacity:1}70%{background-size:2px 9px,10px 2px;opacity:1}100%{background-size:2px 9px,10px 2px;opacity:.35}}
 #workspace-card .decompose-progress.live[data-stage=reading]>summary::before{width:4px;height:4px;margin:0 15px 0 3px;border-radius:50%;background:var(--work);box-shadow:6px 0 var(--dim),12px 0 var(--dim);animation:work-wave 1.2s ease-in-out infinite}
@@ -1137,3 +1140,12 @@ blockquote.growth-learned{margin:6px 0;padding:8px 12px;border-left:3px solid va
 @media (prefers-reduced-motion:reduce){#decompose-bar:indeterminate{animation:none}}
 .decompose-progress.single>summary{cursor:default}.decompose-progress.single>summary::after{content:none!important}.decompose-progress[data-stage=error] .steps-label{color:var(--red,#e5484d)}
 .plan-coverage{margin:12px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);font-size:13px}.plan-coverage p{margin:0 0 6px}.plan-coverage p:last-child{margin:0}.plan-coverage.loss{border-color:#e5a83d;background:#e5a83d14}
+
+/* The plan summary: where it goes, who takes what, and the single send. */
+.assign-summary{margin:14px 0;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#ffffff04}
+.assign-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.assign-head h3{margin:0;font-size:15px}
+.assign-target{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}.assign-target button{border:0;border-radius:0;padding:4px 12px;background:none;color:var(--muted);font-size:12px}.assign-target button[aria-checked=true]{background:color-mix(in srgb,var(--green) 22%,transparent);color:var(--text,#e1e6df)}.assign-target button:disabled{cursor:default}
+.assign-people{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:10px}.assign-person-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}.assign-person-head strong{font-size:14px}.assign-load{margin-left:auto;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.assign-person ol,.assign-unassigned ol{margin:4px 0 0;padding-left:22px;font-size:13px;color:var(--muted)}.assign-person li{margin:1px 0}
+.assign-unassigned{margin-top:12px;padding:8px 10px;border-radius:8px;border:1px solid #e5a83d;background:#e5a83d14;font-size:13px}
+.assign-warnings p{margin:8px 0 0}#assign-where{margin:12px 0 0}.assign-summary .actions{margin-top:10px}

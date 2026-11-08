@@ -173,6 +173,9 @@ async function makeDraft(context, route = null, { reviewOnly = false } = {}) {
   activeContext = context;
   if (currentIntent === 'asana') { await prepareSpokenAsana(context); return; }
   if (currentIntent === 'agent') { await prepareAgent(context); return; }
+  // Without Jira the plan goes to Asana: no Jira project to choose.
+  const planner = currentIntent !== 'do' && (currentIntent === 'docs' || currentDecompose || /(декомпоз|разбей|несколько|задачи|таски|найди.*док|найди.*спек|покажи.*док)/iu.test(commandSnapshot));
+  if (!route && planner && window.plannerTargets && !window.plannerTargets.jira && window.plannerTargets.asana) { activeJiraRoute = null; await openWorkspace(context, null); return; }
   if (!route && currentIntent !== 'docs') {
     route = await selectJiraRoute(context, selected => makeDraft(context, selected, { reviewOnly }));
     if (!route) return;

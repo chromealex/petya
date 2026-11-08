@@ -171,6 +171,11 @@ const context = { title: 'Оплата', text: 'Обсудили новую оп
     assert.equal(ws.decomposing, null); assert.equal(progress.at(-1).stage, 'error');
     assert(calls < 25, 'agents kept reading after a failure: ' + calls);
   });
+  await test('without Jira the plan is made from the material alone (for Asana)', async () => {
+    const fake = ollama(), w = new Workspace({ settings: () => ({ model: 'qwen', ollamaUrl: settings.ollamaUrl, asanaCredential: 'c', asanaWorkspace: '9' }), request: fake.request });
+    const result = await w.prepare('декомпозь давай', context, []);
+    assert.equal(result.metadata, null); assert.deepEqual(result.people, []); assert.equal(result.tasks.length, 2);
+  });
   await test('a second decomposition does not start while one is running', async () => {
     const fake = ollama(), { w } = workspace(fake, spec(1, 500)); await w.searchDocs(context);
     w.decomposing = { busy: true }; await assert.rejects(() => w.prepare('декомпозируй', context, ['confluence:5']), /уже идёт/);
