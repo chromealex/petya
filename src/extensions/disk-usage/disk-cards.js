@@ -93,6 +93,8 @@
     clean.onclick=()=>{if(body.querySelector('.disk-confirm'))return;clean.hidden=true;body.append(confirmBox(k,scan,c,body,()=>{paint();}));body.querySelector('.disk-confirm input')?.focus();};
     actions.append(clean);
    }
+   // Docker's disk image is not cleaned here: the «Docker» app shows what is inside and removes dangling images.
+   if(c.id==='docker'){const more=k.el('button',null,'Подробнее в Docker');more.type='button';more.onclick=()=>k.ask('сколько места занимает докер',{send:true});actions.append(more);}
    if(c.roots?.length&&c.clean!=='ollama'||c.id==='ollama'&&c.roots?.length){
     const show=k.el('button',null,finder());show.type='button';
     show.onclick=async()=>{try{await call('reveal',scan.scanId,c.id,c.roots[0]);}catch(e){k.toast(e.message,{error:true});}};
