@@ -5,8 +5,8 @@ function createGateway(env=process.env,fetcher=fetch) {
  const pages=Object.fromEntries(['index','privacy','terms','contact'].map(name=>[name==='index'?'/':'/'+name,fs.readFileSync(path.join(__dirname,'public',name+'.html'))]));
  const common={origin:env.PUBLIC_ORIGIN,key:env.TOKEN_ENCRYPTION_KEY};
  const configs={atlassian:{...common,file:env.TOKEN_STORE||'/var/lib/petya-auth/tokens.enc',clientId:env.ATLASSIAN_CLIENT_ID,clientSecret:env.ATLASSIAN_CLIENT_SECRET,scopes:env.ATLASSIAN_SCOPES||'read:jira-work write:jira-work read:jira-user search:confluence offline_access'}};
- for(const name of ['slack','notion','asana','zoom']) {
-  const c={...common,name,label:({slack:'Slack',notion:'Notion',asana:'Asana',zoom:'Zoom'})[name],prefix:'/'+name,file:path.join(path.dirname(configs.atlassian.file),name+'.enc'),clientId:env[name.toUpperCase()+'_CLIENT_ID'],clientSecret:env[name.toUpperCase()+'_CLIENT_SECRET']};
+ for(const name of ['slack','notion','asana']) {
+  const c={...common,name,label:({slack:'Slack',notion:'Notion',asana:'Asana'})[name],prefix:'/'+name,file:path.join(path.dirname(configs.atlassian.file),name+'.enc'),clientId:env[name.toUpperCase()+'_CLIENT_ID'],clientSecret:env[name.toUpperCase()+'_CLIENT_SECRET']};
   c.adapter=adapter(name,c);configs[name]=c;
  }
  const brokers=Object.fromEntries(Object.entries(configs).map(([name,c])=>[name,createBroker(c,fetcher)]));
@@ -18,7 +18,7 @@ function createGateway(env=process.env,fetcher=fetch) {
    return res.end(req.method==='HEAD'?undefined:pages[route]);
   }
   if(route==='/health') {res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});return res.end(JSON.stringify({ok:true,providers:Object.fromEntries(Object.entries(configs).map(([n,c])=>[n,!!c.clientId&&!!c.clientSecret]))}));}
-  const name=['slack','notion','asana','zoom'].find(n=>route.startsWith('/'+n+'/')||route==='/oauth/'+n+'/callback')||'atlassian';
+  const name=['slack','notion','asana'].find(n=>route.startsWith('/'+n+'/')||route==='/oauth/'+n+'/callback')||'atlassian';
   brokers[name].emit('request',req,res);
  });
 }

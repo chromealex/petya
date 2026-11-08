@@ -1,5 +1,0 @@
-/opt/node-v22.23.4-linux-x64/bin/node
-/opt/node-v22.23.4-linux-x64/bin/node
-cfdebc238d73c2e8ffd2fc32af7eae4abff9dda644593a36bf2223e7470062da  /opt/petya-auth/server.cjs
-b5dc1e93f51ad2603ce0cb51950643e16a1502542008f1ff706e8321f47732b7  /opt/petya-zoom/zoom-bot/server/store.cjs
-recorder_http=403

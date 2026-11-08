@@ -3,13 +3,12 @@ const assert=require('node:assert/strict'),fs=require('node:fs'),os=require('nod
 const {createGateway}=require('./gateway.cjs');
 (async()=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'petya-providers-'));
- const env={PUBLIC_ORIGIN:'https://auth.petya-app.ru',TOKEN_ENCRYPTION_KEY:'ab'.repeat(32),TOKEN_STORE:path.join(dir,'tokens.enc'),SLACK_CLIENT_ID:'slack-id',SLACK_CLIENT_SECRET:'slack-secret',ASANA_CLIENT_ID:'asana-id',ASANA_CLIENT_SECRET:'asana-secret',ZOOM_CLIENT_ID:'zoom-id',ZOOM_CLIENT_SECRET:'zoom-secret',NOTION_CLIENT_ID:'notion-id',NOTION_CLIENT_SECRET:'notion-secret'};
- const refreshes={slack:0,notion:0,asana:0,zoom:0};
+ const env={PUBLIC_ORIGIN:'https://auth.petya-app.ru',TOKEN_ENCRYPTION_KEY:'ab'.repeat(32),TOKEN_STORE:path.join(dir,'tokens.enc'),SLACK_CLIENT_ID:'slack-id',SLACK_CLIENT_SECRET:'slack-secret',ASANA_CLIENT_ID:'asana-id',ASANA_CLIENT_SECRET:'asana-secret',NOTION_CLIENT_ID:'notion-id',NOTION_CLIENT_SECRET:'notion-secret'};
+ const refreshes={slack:0,notion:0,asana:0};
  const fetcher=async(url,o)=>{
-  if(url==='https://api.zoom.us/v2/users/me')return {ok:true,json:async()=>({id:'Z1',display_name:'Test'})};
-  if(url.startsWith('https://app.asana.com/api/1.0/workspaces'))return {ok:true,json:async()=>({data:[{gid:'123',name:'Work'}]})};
+   if(url.startsWith('https://app.asana.com/api/1.0/workspaces'))return {ok:true,json:async()=>({data:[{gid:'123',name:'Work'}]})};
   if(url==='https://app.asana.com/-/oauth_token'){const b=Object.fromEntries(new URLSearchParams(o.body));assert.equal(b.client_secret,'asana-secret');const refresh=b.grant_type==='refresh_token';if(refresh){assert.equal(b.refresh_token,'asana-refresh');refreshes.asana++;await new Promise(r=>setTimeout(r,20));}return {ok:true,json:async()=>({access_token:refresh?'asana-renewed':'asana-initial',expires_in:refresh?3600:1,...(!refresh?{refresh_token:'asana-refresh'}:{})})};}
-  const name=url.startsWith('https://slack.com/')?'slack':url.startsWith('https://zoom.us/')?'zoom':'notion';
+  const name=url.startsWith('https://slack.com/')?'slack':'notion';
   assert.equal(o.headers.Authorization,'Basic '+Buffer.from(name+'-id:'+name+'-secret').toString('base64'));
   const b=name!=='notion'?Object.fromEntries(new URLSearchParams(o.body)):JSON.parse(o.body);
   let t={access_token:name+'-initial',refresh_token:name+'-refresh',expires_in:1,token_type:'user'};
@@ -22,7 +21,7 @@ const {createGateway}=require('./gateway.cjs');
  const base='http://127.0.0.1:'+server.address().port;
  const call=(route,o={})=>fetch(base+route,{...o,redirect:'manual'});
  const credentials={};
- for(const name of ['slack','notion','asana','zoom']) {
+ for(const name of ['slack','notion','asana']) {
   const s=await (await call('/'+name+'/v1/sessions',{method:'POST'})).json();assert.equal(s.url,env.PUBLIC_ORIGIN+'/'+name+'/authorize?id='+s.id);
   const browser=await call('/'+name+'/authorize?id='+s.id);const cookie=browser.headers.get('set-cookie').split(';')[0];const html=await browser.text();assert.ok(html.includes('action="/'+name+'/authorize"'));
   const form=html.match(/name="form" value="([^"]+)"/)[1];
@@ -40,7 +39,7 @@ const {createGateway}=require('./gateway.cjs');
  assert.equal((await call('/slack/v1/token',{method:'POST',headers:{Authorization:'Bearer '+credentials.notion}})).status,401);
  assert.equal((await call('/notion/v1/token',{method:'POST',headers:{Authorization:'Bearer '+credentials.slack}})).status,401);
  assert.equal((await call('/v1/token',{method:'POST',headers:{Authorization:'Bearer '+credentials.slack}})).status,401);
- for(const name of ['slack','notion','asana','zoom']){const headers={Authorization:'Bearer '+credentials[name]};assert.equal((await call('/'+name+'/v1/connection',{method:'DELETE',headers})).status,200);assert.equal((await call('/'+name+'/v1/token',{method:'POST',headers})).status,401);}
- console.log('Slack/Notion/Asana/Zoom broker flows, refresh and isolation tests passed');
+ for(const name of ['slack','notion','asana']){const headers={Authorization:'Bearer '+credentials[name]};assert.equal((await call('/'+name+'/v1/connection',{method:'DELETE',headers})).status,200);assert.equal((await call('/'+name+'/v1/token',{method:'POST',headers})).status,401);}
+ console.log('Slack/Notion/Asana broker flows, refresh and isolation tests passed');
  } finally {await new Promise(r=>server.close(r));fs.rmSync(dir,{recursive:true});}
 })().catch(e=>{console.error(e);process.exit(1)});

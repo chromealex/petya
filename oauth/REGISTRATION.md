@@ -38,7 +38,7 @@ Atlassian: Resource-level 3LO; site selection from accessible-resources. The cal
 
 ## Local services
 
-Zoom supports a separate Meeting SDK participant through the user-managed Petya application described below; local system-audio capture remains optional. Ollama and Whisper run locally; they do not require OAuth or keys.
+Zoom meetings are recorded locally (system audio and microphone); there is no Zoom Marketplace app and no Zoom OAuth. Ollama and Whisper run locally; they do not require OAuth or keys.
 
 ## Tests
 
@@ -61,17 +61,6 @@ The end-to-end Asana test is complete: login from the installed Petya.app via Sa
 
 04.11.2026: the icon `assets/app-icon.png` was set in the consoles of Slack (A0CEDB1HFD3), Notion (40dd872b-594c-81b7-8b7a-0037d20d3c37), Atlassian for Jira/Confluence (20c1cb45-4b70-42ab-8bb4-aac4e0259dd3) and Asana (1220193688170618). Saving and display were checked in the services' interfaces; Atlassian was additionally checked after a page reload.
 
-## Zoom Meeting SDK participant (2026-11-05)
+## Zoom (removed 2026-11-08)
 
-- Development app: [Petya](https://marketplace.zoom.us/develop/applications/_hd32AsWRJi5vBoZmhd_vA/information?mode=dev), user-managed, Ready for local test.
-- Petya icon saved for light and dark modes. Meeting SDK and meeting-bot use case enabled.
-- Scopes: `user:read:user`, `user:read:token`. Strict callback: `https://auth.petya-app.ru/oauth/zoom/callback`.
-- API and Marketplace terms were accepted with explicit user approval. App credentials are installed in the server's protected environment files, not this repository.
-- SDK Linux x86_64 7.1.5.4432 compiled on the existing server using the pinned official sample and Petya adapter. OAuth broker and recorder systemd services are active. Recorder route: `https://auth.petya-app.ru/zoom-bot/`.
-- End-user OAuth authorization, macOS Accessibility permission, host recording permission, and a live end-to-end meeting test remain required. Development availability is not Marketplace publication or production approval.
-
-### External Zoom beta review (2026-11-05)
-
-Production OAuth callback, contact details and technical design are prepared. With explicit owner approval, the architecture PNG and security disclosures were sent to Zoom, including the absence of formal SSDLC, SAST/DAST and independent penetration-test reports. The external beta sharing request is **Request in Review**; external availability is still LIMITED. The live services continue using development credentials. Approval, production credential activation and live recording acceptance remain outstanding. See `zoom-bot/review/SECURITY-REVIEW.md` for the disclosed limitations.
-
-Desktop recording jobs now retain their original encrypted connection across reauthorization. Explicit retry can recover an unavailable/failed job without automatically replacing active work. Controller, HTTP reauthorization and MCP-client tests passed. The current `Petya.app` was rebuilt with `scripts/build.py --mac`; package, tray-launch and Developer ID signature checks passed.
+The Zoom Marketplace app (OAuth sign-in and the separate Meeting SDK participant) was removed: it will not be published. The development app, the `/zoom` broker route, the recorder service on the server and their environment variables (`ZOOM_CLIENT_ID`, `ZOOM_CLIENT_SECRET`, `ZOOM_STORAGE_KEY`, …) can be retired. Petya keeps local meeting capture only.

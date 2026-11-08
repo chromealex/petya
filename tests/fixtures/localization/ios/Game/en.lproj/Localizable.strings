@@ -1,0 +1,6 @@
+/* Main menu */
+"play" = "Play";
+"daily_reward" = "Daily reward: %@ coins";
+// HUD
+"lives" = "Lives: %d";
+"quote" = "Say \"hi\"";

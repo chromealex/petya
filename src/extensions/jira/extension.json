@@ -1,6 +1,7 @@
 {
   "name": "Jira",
   "description": "Задачи, версии и отчёты",
+  "category": "team",
   "setting": "module_jira",
   "service": "jira",
   "settings": true,
@@ -18,5 +19,8 @@
   "markup": "settings.html",
   "results": {
     "jiraItems": "renderJiraIssues"
+  },
+  "provides": {
+    "task-tracker": "task-tracker.cjs"
   }
 }

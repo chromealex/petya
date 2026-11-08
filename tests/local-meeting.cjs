@@ -3,7 +3,7 @@ const {LocalMeeting}=require('../src/extensions/zoom-bot/local-controller.cjs');
 (async()=>{
  let found=true,mode='auto',begins=0,finishes=0,starts=0,ends=0,inspectionError=false;
  const events=[],appended=[];
- const local=new LocalMeeting({settings:()=>({zoomCaptureMode:'local',zoomBotMode:mode,zoomCaptureMic:'true'}),inspect:async()=>{if(inspectionError)throw Error('temporary');return {meetingActive:found,windows:[]};},recording:{begin:()=>String(++begins),append:(...x)=>appended.push(x),finish:()=>finishes++},emit:s=>events.push(s),createCapture:options=>({async start(config){starts++;assert.equal(config.microphone,true);await options.append('Zoom',{wav:'system'});await options.append('Микрофон',{wav:'self'});},async finish(){ends++;},destroy(){}})});
+ const local=new LocalMeeting({settings:()=>({zoomBotMode:mode,zoomCaptureMic:'true'}),inspect:async()=>{if(inspectionError)throw Error('temporary');return {meetingActive:found,windows:[]};},recording:{begin:()=>String(++begins),append:(...x)=>appended.push(x),finish:()=>finishes++},emit:s=>events.push(s),createCapture:options=>({async start(config){starts++;assert.equal(config.microphone,true);await options.append('Zoom',{wav:'system'});await options.append('Микрофон',{wav:'self'});},async finish(){ends++;},destroy(){}})});
  await local.tick();assert.equal(starts,0);await local.tick();assert.equal(starts,1);assert.equal(finishes,0);assert.equal(appended.length,2);
  await Promise.all([local.start(),local.start()]);assert.equal(starts,1);
  inspectionError=true;await local.tick();assert.equal(ends,0,'Transient observation errors must not terminate capture');inspectionError=false;

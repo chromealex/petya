@@ -2,6 +2,7 @@
   "id": "task-runner",
   "name": "Выполнение задач",
   "description": "«Реализовать» и «Исправить» у задач: план, согласование и работа агентов",
+  "category": "team",
   "settings": false,
   "feature": "feature.cjs",
   "scripts": [

@@ -1,6 +1,7 @@
 {
   "name": "Статистика чата",
   "description": "Диаграммы сообщений",
+  "category": "analytics",
   "setting": "extension_chat-stats",
   "settings": false,
   "scripts": [],

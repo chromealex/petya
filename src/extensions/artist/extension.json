@@ -1,6 +1,7 @@
 {
   "name": "Художник",
   "description": "Локальное рисование и свой сервер Stable Diffusion",
+  "category": "creative",
   "setting": "artistEnabled",
   "scripts": [
     [

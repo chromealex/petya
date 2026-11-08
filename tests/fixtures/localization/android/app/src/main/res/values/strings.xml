@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name" translatable="false">Tower Rush</string>
+    <string name="btn_start">Start</string>
+    <string name="greeting">Hello, %1$s! You have %2$d lives.</string>
+    <string name="rate_us">Enjoying the game? Rate us!</string>
+    <string name="quote">Don\'t give up</string>
+</resources>

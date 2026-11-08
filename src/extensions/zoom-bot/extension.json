@@ -1,7 +1,8 @@
 {
   "id": "zoom-bot",
   "name": "Петя в Zoom",
-  "description": "Отдельный участник встречи и общая память",
+  "description": "Локальная запись встреч и общая память",
+  "category": "meetings",
   "service": "zoom",
   "settings": true,
   "feature": "feature.cjs",
@@ -14,5 +15,9 @@
       "notifications.js",
       "notifications.js"
     ]
-  ]
+  ],
+  "provides": {
+    "video-meeting": "video-meeting.cjs",
+    "meeting-recording": "meeting-recording.cjs"
+  }
 }

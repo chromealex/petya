@@ -1,0 +1,28 @@
+{
+  "id": "calendar",
+  "name": "Календарь",
+  "description": "Встречи на день и неделю, свободное время, общий слот с коллегами и встреча по подтверждению — Google Календарь или Outlook",
+  "category": "meetings",
+  "setting": "extension_calendar",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    [
+      "calendar-cards.js",
+      "message-format.js"
+    ],
+    [
+      "settings.js",
+      "notifications.js"
+    ]
+  ],
+  "results": {
+    "calendarCard": "renderCalendarCard"
+  },
+  "provides": {
+    "video-meeting": [
+      "video-meet.cjs",
+      "video-teams.cjs"
+    ]
+  }
+}

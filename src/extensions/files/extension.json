@@ -1,6 +1,7 @@
 {
   "name": "Файлы",
   "description": "Превью вложений и результаты работы с файлами",
+  "category": "computer",
   "settings": false,
   "scripts": [
     ["file-previews.js", "message-format.js"]

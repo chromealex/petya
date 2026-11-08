@@ -2,6 +2,7 @@
   "id": "coder",
   "name": "Программист",
   "description": "Петя сам пишет и правит код проекта в отдельной ветке и показывает дифф",
+  "category": "dev",
   "setting": "extension_coder",
   "settings": true,
   "feature": "feature.cjs",
@@ -21,5 +22,8 @@
   ],
   "results": {
     "codingRun": "renderCodingRun"
+  },
+  "provides": {
+    "code-fix": "code-fix.cjs"
   }
 }

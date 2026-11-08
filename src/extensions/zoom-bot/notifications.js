@@ -1,7 +1,15 @@
+// Local meeting capture in the notification center: recording, processing and errors with start/stop actions,
+// and scheduled recordings («Петя запишет встречу») with «Отменить» until they start; restored after a reload.
 (()=>{
- function zoomBotProgress(state){if(!state||state.capture==='local')return;document.dispatchEvent(new CustomEvent('petya-voice-input-lock',{detail:{id:'zoom-bot',locked:state.meetingPresent||['joining','waiting','recording'].includes(state.phase)}}));if(state.phase==='idle')return;const actions=state.needsPermission?[['Разрешить доступ',()=>window.petya.feature('zoomBot','requestAccess')]]:state.canJoin?[['Подключить Петю',()=>window.petya.feature('zoomBot','join',state.id)],['Пропустить',()=>window.petya.feature('zoomBot','dismiss',state.id)]]:state.canRetry?[['Повторить',()=>window.petya.feature('zoomBot','retry',state.id)]]:[];document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail:{id:'zoom-bot:'+state.id,title:'Петя в Zoom',text:state.message,busy:state.busy,version:state.phase,kind:state.phase==='error'?'error':state.phase==='done'?'success':'info',actions}}));}
- function localProgress(state){if(!state||state.phase==='idle')return;const actions=state.busy?[['Остановить и обработать',()=>window.petya.feature('meetingMemory','stopCapture')]]:state.canStart||state.canRetry?[['Записать встречу',()=>window.petya.feature('meetingMemory','startCapture')]]:[];document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail:{id:'local-meeting',title:'Запись встречи',text:state.message,busy:state.busy,version:state.id+':'+state.phase,kind:state.phase==='error'?'error':'info',actions}}));}
+ const put=detail=>document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail}));
+ function localProgress(state){if(!state||state.phase==='idle')return;const actions=state.busy?[['Остановить и обработать',()=>window.petya.feature('meetingMemory','stopCapture')]]:state.canStart||state.canRetry?[['Записать встречу',()=>window.petya.feature('meetingMemory','startCapture')]]:[];put({id:'local-meeting',title:'Запись встречи',text:state.message,busy:state.busy,version:state.id+':'+state.phase,kind:state.phase==='error'?'error':'info',actions});}
  window.petyaEvents.onLocalMeeting(localProgress);window.petya.feature('meetingMemory','captureStatus').then(localProgress).catch(()=>{});
- window.petyaEvents.onZoomBot(zoomBotProgress);
- window.petya.feature('zoomBot','status').then(zoomBotProgress).catch(()=>{});
+ // The main process publishes schedule items without functions: the cancel action is added here.
+ function scheduled(item){
+  if(!item||!String(item.id||'').startsWith('meeting-schedule:'))return;
+  const {cancellable,...rest}=item;
+  put({...rest,actions:cancellable?[['Отменить',()=>window.petya.feature('zoomBot','cancelSchedule',cancellable).then(list=>list.forEach(scheduled))]]:[]});
+ }
+ window.petyaEvents.onExtensionInstall(scheduled);
+ window.petya.feature('zoomBot','schedules').then(list=>list.forEach(scheduled)).catch(()=>{});
 })();

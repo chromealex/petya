@@ -9,7 +9,9 @@ class Gmail{
  async token(params){return this.json('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...this.load().client,...params}).toString()});}
  stop(){this.generation++;if(this.pending){clearTimeout(this.pending.timer);this.pending.server.close();this.pending=null;}}
  disconnect(){this.stop();this.lastError='';const old=this.load();this.save({client:old.client});}
- async start(){this.check();this.stop();const generation=this.generation,client=this.load().client;if(!client)throw Error('Сначала импортируйте OAuth JSON Google Desktop app в карточке Gmail.');
+ // Incremental consent: start({scopes,email}) asks for extra scopes (e.g. Calendar) on top of Gmail reading and keeps
+ // the ones already granted (include_granted_scopes); the granted list is stored with the tokens as `scope`.
+ async start({scopes=[],email=''}={}){this.check();this.stop();const generation=this.generation,client=this.load().client;if(!client)throw Error('Сначала импортируйте OAuth JSON Google Desktop app в карточке Gmail.');
   const state=randomBytes(32).toString('base64url'),verifier=randomBytes(32).toString('base64url');let consumed=false;
   const server=http.createServer(async(req,res)=>{res.setHeader('Content-Type','text/plain; charset=utf-8');res.setHeader('Cache-Control','no-store');const u=new URL(req.url,'http://127.0.0.1');
    if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state||consumed){res.writeHead(400);res.end('Недопустимый ответ авторизации.');return;}
@@ -18,18 +20,18 @@ class Gmail{
     if(generation!==this.generation)throw Error('Вход отменён.');this.check();if(!tokens.access_token||!tokens.refresh_token||!String(tokens.scope||'').split(' ').includes(SCOPE))throw Error('Google не предоставил постоянный доступ к чтению Gmail.');
     const profile=await this.json('https://gmail.googleapis.com/gmail/v1/users/me/profile',{headers:{Authorization:'Bearer '+tokens.access_token}});
     if(generation!==this.generation)throw Error('Вход отменён.');if(typeof profile.emailAddress!=='string'||!profile.emailAddress.includes('@'))throw Error('Не удалось определить адрес Gmail.');
-    this.save({client,email:profile.emailAddress,tokens:{access_token:tokens.access_token,refresh_token:tokens.refresh_token,expiresAt:Date.now()+Number(tokens.expires_in||3600)*1000}});this.lastError='';res.end('Gmail подключён. Вернитесь в Петю.');
+    this.save({client,email:profile.emailAddress,tokens:{access_token:tokens.access_token,refresh_token:tokens.refresh_token,expiresAt:Date.now()+Number(tokens.expires_in||3600)*1000,scope:String(tokens.scope||'')}});this.lastError='';res.end(scopes.length?'Доступ выдан. Вернитесь в Петю.':'Gmail подключён. Вернитесь в Петю.');
    }catch(e){this.lastError=e.message;res.end(e.message);}finally{if(generation===this.generation)this.stop();}
   });
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
   if(generation!==this.generation){server.close();throw Error('Вход отменён.');}
   const redirect='http://127.0.0.1:'+server.address().port+'/callback';
   this.pending={server,timer:setTimeout(()=>{this.lastError='Время входа истекло. Повторите подключение.';this.stop();},300000)};this.pending.timer.unref();this.lastError='';
-  const url='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:client.client_id,redirect_uri:redirect,response_type:'code',scope:SCOPE,state,code_challenge:createHash('sha256').update(verifier).digest('base64url'),code_challenge_method:'S256',access_type:'offline',prompt:'consent select_account'});
+  const url='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:client.client_id,redirect_uri:redirect,response_type:'code',scope:[SCOPE,...scopes.filter(x=>x!==SCOPE)].join(' '),state,code_challenge:createHash('sha256').update(verifier).digest('base64url'),code_challenge_method:'S256',access_type:'offline',prompt:'consent select_account',...scopes.length?{include_granted_scopes:'true'}:{},...email?{login_hint:email}:{}});
   try{await this.open(url);}catch(e){this.stop();throw e;}return {pending:true};
  }
  async access(){this.check();const generation=this.generation,stored=this.load();if(!stored.tokens?.refresh_token)throw Error('Подключите Gmail через Google в «Подключениях».');if(stored.tokens.expiresAt>Date.now()+60000)return stored.tokens.access_token;
-  if(!this.refreshing)this.refreshing=(async()=>{const result=await this.token({grant_type:'refresh_token',refresh_token:stored.tokens.refresh_token});if(generation!==this.generation)throw Error('Подключение Gmail изменилось. Повторите запрос.');this.check();if(!result.access_token)throw Error('Google не вернул токен доступа.');const tokens={access_token:result.access_token,refresh_token:result.refresh_token||stored.tokens.refresh_token,expiresAt:Date.now()+Number(result.expires_in||3600)*1000};this.save({...stored,tokens});return tokens.access_token;})().finally(()=>{this.refreshing=null;});return this.refreshing;
+  if(!this.refreshing)this.refreshing=(async()=>{const result=await this.token({grant_type:'refresh_token',refresh_token:stored.tokens.refresh_token});if(generation!==this.generation)throw Error('Подключение Gmail изменилось. Повторите запрос.');this.check();if(!result.access_token)throw Error('Google не вернул токен доступа.');const tokens={...stored.tokens,access_token:result.access_token,refresh_token:result.refresh_token||stored.tokens.refresh_token,expiresAt:Date.now()+Number(result.expires_in||3600)*1000,...result.scope?{scope:String(result.scope)}:{}};this.save({...stored,tokens});return tokens.access_token;})().finally(()=>{this.refreshing=null;});return this.refreshing;
  }
  // Messages for a Gmail query with their whole text and small text attachments (.vtt / .txt transcripts):
  // used to find the transcript Zoom mails after a meeting.

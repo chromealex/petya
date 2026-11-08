@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="btn_start">Empezar</string>
+    <string name="greeting">¡Hola, %1$s! Tienes %2$d vidas.</string>
+    <string name="rate_us">¿Te gusta el juego? ¡Valóranos!</string>
+    <string name="quote">No te rindas</string>
+</resources>

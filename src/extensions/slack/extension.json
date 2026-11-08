@@ -1,1 +1,1 @@
-{"id":"slack","name":"Slack","description":"Сообщения и обсуждения команды","setting":"module_slack","service":"slack","settings":false,"scripts":[["message-cards.js","message-format.js"]],"results":{"slackMessages":"renderSlackMessages"}}
+{"id":"slack","name":"Slack","description":"Сообщения и обсуждения команды","category":"comms","setting":"module_slack","service":"slack","settings":false,"scripts":[["message-cards.js","message-format.js"]],"results":{"slackMessages":"renderSlackMessages"},"provides":{"share-message":"share-message.cjs"}}

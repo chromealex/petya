@@ -6,13 +6,13 @@ class LocalMeeting {
  }
  snapshot(){return {id:this.id||'local-observer',phase:this.phase,present:this.present,active:!!this.capture,busy:!!this.capture||!!this.starting,mode:this.settings().zoomBotMode,message:this.message||'Ожидаю встречу Zoom.',canStart:this.phase==='detected'||this.phase==='stopped'&&this.present,canRetry:this.phase==='error'};}
  publish(phase,message){this.phase=phase;this.message=message;this.emit(this.snapshot());}
- async tick(){try{const enabled=this.settings().zoomCaptureMode==='local'&&this.settings().zoomBotMode!=='off';if(!enabled){await this.stop(false);const changed=this.present||this.phase!=='idle';this.present=false;if(changed)this.publish('idle','Локальная запись выключена.');}await this.monitor.tick(enabled);if(this.present&&!this.capture&&this.monitor.misses>=3){this.present=false;this.publish('idle','Ожидаю встречу Zoom.');}}catch(e){if(!this.capture)this.publish('error',e.message);}}
+ async tick(){try{const enabled=this.settings().zoomBotMode!=='off';if(!enabled){await this.stop(false);const changed=this.present||this.phase!=='idle';this.present=false;if(changed)this.publish('idle','Локальная запись выключена.');}await this.monitor.tick(enabled);if(this.present&&!this.capture&&this.monitor.misses>=3){this.present=false;this.publish('idle','Ожидаю встречу Zoom.');}}catch(e){if(!this.capture)this.publish('error',e.message);}}
  async start(){
   if(this.starting)return this.starting;if(this.capture)return this.snapshot();
   this.starting=this.begin();try{return await this.starting;}finally{this.starting=null;}
  }
  async begin(){
-  const cfg=this.settings();if(cfg.zoomCaptureMode!=='local'||cfg.zoomBotMode==='off')throw Error('Локальная запись выключена в настройках встреч.');
+  const cfg=this.settings();if(cfg.zoomBotMode==='off')throw Error('Локальная запись выключена в настройках встреч.');
   if(!hasMeeting(await this.inspect()))throw Error('Активная встреча Zoom не найдена.');
   this.present=true;this.id=this.recording.begin();this.publish('starting','Подключаю системный звук и микрофон…');
   // The meeting sound gets the name of whoever Zoom shows talking (src/zoom-speakers.cjs).

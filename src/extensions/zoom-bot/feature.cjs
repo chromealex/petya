@@ -1,34 +1,91 @@
-const fs=require('node:fs'),path=require('node:path');
-const {ZoomBot}=require('./controller.cjs');
-const {createRemote,DEFAULT_URL}=require('./remote.cjs');
+// «Петя в Zoom»: settings of the local meeting capture (system audio and, optionally, the microphone), the user's
+// Zoom personal room link, and scheduled recordings («Петя запишет встречу» from the calendar).
+// The capture itself runs in src/features/meeting-memory.cjs (LocalMeeting); there is no meeting bot and no Zoom
+// sign-in. Profiles saved with the removed bot mode keep their start mode and are recorded locally.
+const {randomUUID}=require('node:crypto');
+const room=require('./personal-room.cjs');
+const MODES=['off','ask','auto'];
+const MAX=8,EARLY=60000;
+function parseSchedule(value){try{const list=JSON.parse(value||'[]');return Array.isArray(list)?list.filter(x=>x&&typeof x.id==='string'):[];}catch{return [];}}
 function validate(next){
- if(!['off','ask','auto'].includes(next.zoomBotMode)||!['bot','local'].includes(next.zoomCaptureMode))throw Error('Проверьте режим подключения Zoom.');
- if(next.zoomBotUrl){const u=new URL(next.zoomBotUrl);if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash)throw Error('Сервис Zoom должен использовать HTTPS.');}
+ if(!MODES.includes(next.zoomBotMode))throw Error('Проверьте режим записи встреч.');
+ if(next.zoomPersonalLink){const link=room.valid(next.zoomPersonalLink);if(!link)throw Error('Ссылка на личную комнату Zoom — вида https://…zoom.us/j/1234567890.');next.zoomPersonalLink=link;}
+ const list=parseSchedule(next.meetingRecordingSchedule);
+ if(list.length>MAX)throw Error('Слишком много запланированных записей.');
+ next.meetingRecordingSchedule=JSON.stringify(list);
 }
-module.exports={name:'zoomBot',defaults:{zoomBotMode:'auto',zoomCaptureMode:'local',zoomBotUrl:DEFAULT_URL,zoomBotCredential:'',zoomCredential:''},secrets:['zoomBotCredential','zoomCredential'],validate,
+const hm=iso=>{const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+
+// Scheduled recordings: at the start the local capture is started (and retried while the meeting has not yet
+// appeared in Zoom); each one has a stable notification that can be cancelled.
+function scheduler(s,{now=()=>Date.now(),publish=()=>{}}={}){
+ const list=()=>parseSchedule(s.settings.meetingRecordingSchedule);
+ const save=items=>s.saveSettings({meetingRecordingSchedule:JSON.stringify(items)},true);
+ const note=(item,text,{busy=false,kind='info',cancellable=true}={})=>publish({id:'meeting-schedule:'+item.id,title:'Запись встречи',text,busy,kind,version:kind+':'+text.slice(0,60),cancellable:cancellable?item.id:''});
+ function add({title,start,end}={}){
+  const a=Date.parse(start),b=Date.parse(end);
+  if(!Number.isFinite(a)||!Number.isFinite(b)||b<=a)throw Error('Нет времени встречи.');
+  if(b<=now())throw Error('Эта встреча уже закончилась.');
+  const name=String(title||'Встреча').replace(/\s+/g,' ').trim().slice(0,80)||'Встреча';
+  const items=list().filter(x=>Date.parse(x.end)>now());
+  const same=items.find(x=>x.start===new Date(a).toISOString()&&x.title===name);
+  if(same)return same;
+  if(items.length>=MAX)throw Error('Уже запланировано '+MAX+' записей. Отмените одну из них в уведомлениях.');
+  const item={id:randomUUID(),title:name,start:new Date(a).toISOString(),end:new Date(b).toISOString()};
+  save([...items,item]);
+  note(item,'Петя запишет встречу «'+item.title+'» в '+hm(item.start)+'.');
+  return item;
+ }
+ function cancel(id){
+  const items=list(),item=items.find(x=>x.id===id);if(!item)throw Error('Запись уже отменена или прошла.');
+  save(items.filter(x=>x.id!==id));
+  note(item,'Запись встречи «'+item.title+'» отменена.',{cancellable:false});
+  return list();
+ }
+ let busy=false;
+ async function tick(){
+  if(busy)return;busy=true;
+  try{
+   const items=list();let changed=false;
+   for(const item of items){
+    const a=Date.parse(item.start),b=Date.parse(item.end),t=now();
+    if(t>=b){
+     changed=true;item.done=true;
+     if(!item.started)note(item,'Встреча «'+item.title+'» не записана: Zoom не показал её на этом компьютере.',{kind:'error',cancellable:false});
+     continue;
+    }
+    if(t<a-EARLY||item.started)continue;
+    if(s.settings.zoomBotMode==='off'){changed=true;item.done=true;note(item,'Запись встреч выключена в настройках — встреча «'+item.title+'» не записана.',{kind:'error',cancellable:false});continue;}
+    try{
+     await s.meetingRecording('startCapture');
+     item.started=true;changed=true;
+     note(item,'Петя записывает встречу «'+item.title+'».',{kind:'success',cancellable:false});
+    }catch{
+     if(!item.waiting){item.waiting=true;changed=true;note(item,'Жду встречу «'+item.title+'» в Zoom, чтобы начать запись.',{busy:true});}
+    }
+   }
+   if(changed)save(items.filter(x=>!x.done));
+  }finally{busy=false;}
+ }
+ return {add,cancel,list,tick};
+}
+
+module.exports={name:'zoomBot',defaults:{zoomBotMode:'auto',zoomPersonalLink:'',meetingRecordingSchedule:'[]'},validate,scheduler,
  setup(s){
-  const {app,safeStorage,shell,systemPreferences}=require('electron'),file=path.join(s.dataRoot,'zoom-bot-state.enc');
-  const oauth=new (require('../../service-oauth.cjs').ServiceOAuth)('zoom',s.request);
-  const accessReady=()=>process.platform!=='darwin'||systemPreferences.isTrustedAccessibilityClient(false);
-  const requestAccess=async()=>{if(bot.state.phase==='error'&&!bot.state.jobId)bot.publish({permissionBlocked:true});if(process.platform==='darwin'){systemPreferences.isTrustedAccessibilityClient(true);await shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility');}return status();};
-  const bot=new ZoomBot({accessReady,settings:()=>s.settings,inspect:link=>require('../../meeting-monitor.cjs').desktopState({meetingLink:link}),
-   load:()=>fs.existsSync(file)?JSON.parse(safeStorage.decryptString(fs.readFileSync(file))):null,
-   persist:state=>{if(!safeStorage.isEncryptionAvailable())throw Error('Хранилище ОС недоступно.');fs.writeFileSync(file+'.tmp',safeStorage.encryptString(JSON.stringify(state)),{mode:0o600});fs.renameSync(file+'.tmp',file);},
-   emit:state=>{if(s.win&&!s.win.isDestroyed())s.win.webContents.send('zoom-bot-progress',state);},
-   save:rows=>s.memory.put(rows),transcribe:bytes=>require('../../voice-setup.cjs').transcribe(s,bytes),
-   remote:createRemote({settings:()=>s.settings,bot:()=>bot})
-  });
-  let stopped=false;const tick=()=>{if(!stopped&&process.env.PETYA_VERIFY_BUILD!=='1')bot.tick().catch(()=>{});};
-  const timer=setInterval(tick,5000);timer.unref();app.once('before-quit',()=>{stopped=true;clearInterval(timer);});
-  const status=()=>({...bot.snapshot(),mode:s.settings.zoomBotMode,capture:s.settings.zoomCaptureMode,configured:!!(s.settings.zoomBotCredential||s.settings.zoomCredential),url:s.settings.zoomBotUrl||DEFAULT_URL,connected:!!s.settings.zoomCredential,microphone:s.settings.zoomCaptureMic!=='false'});
-  const configure=input=>{if(s.meetingRecording?.('captureStatus')?.busy)throw Error('Сначала завершите текущую запись встречи.');if(bot.snapshot().busy&&s.settings.zoomCaptureMode==='bot')throw Error('Дождитесь окончания текущей записи или обработки Zoom.');const values={zoomBotMode:input.mode,zoomCaptureMode:input.capture};if(typeof input.microphone==='boolean')values.zoomCaptureMic=String(input.microphone);if(typeof input.url==='string')values.zoomBotUrl=input.url;if(input.credential)values.zoomBotCredential=input.credential;s.saveSettings(values,true);return status();};
-  const ipc={status,configure,requestAccess,async signIn(){const result=await oauth.start();await shell.openExternal(result.url);return result;},completeSignIn:()=>oauth.poll(),async claim(siteId){const result=await oauth.claim(siteId);s.saveSettings({zoomCredential:result.credential},true);return status();},join:id=>bot.action('join',id),dismiss:id=>bot.action('dismiss',id),retry:id=>bot.action('retry',id)};
-  return {ipc,zoomBot:(method,...args)=>{if(!['status','join','dismiss','retry','requestAccess'].includes(method))throw Error('Настройки подключения меняются только в Пете.');return ipc[method](...args);}};
- },
- register(server,z,ctx){for(const method of ['status','join','dismiss','retry','request_access'])server.registerTool('zoom_bot_'+method,{
-  description:method==='request_access'?'Открыть настройки Универсального доступа Пети. Разрешение выдаёт пользователь в macOS; инструмент не может включить его сам.':method==='status'?'Состояние обнаружения встречи и участника Пети.':method==='join'?'Подключить Петю к обнаруженной встрече. В режиме подтверждения требуется подтверждение в приложении.':method==='dismiss'?'Не подключать Петю к текущей обнаруженной встрече.':'Повторить получение ссылки или проверку записи. Ручное подтверждение входа остаётся в Пете.',
-  inputSchema:['status','request_access'].includes(method)?{}:{id:z.string().min(1).max(200)},annotations:{readOnlyHint:method==='status',destructiveHint:false,openWorldHint:method!=='status'}
- },async args=>{try{ctx.check();if(ctx.access?.projectId||method!=='status'&&ctx.access?.mode!=='edit')throw Error('Нужен доступ MCP ко всей компании с соответствующими правами.');
-  return await ctx.run(async()=>{ctx.check();const state=await ctx.zoomBot('status');if(['join','retry'].includes(method)&&state.mode!=='auto')throw Error('Подтвердите вход Пети в приложении.');return {content:[{type:'text',text:JSON.stringify(await ctx.zoomBot(method==='request_access'?'requestAccess':method,...(['status','request_access'].includes(method)?[]:[args.id])))}]};});
- }catch(e){return {isError:true,content:[{type:'text',text:e.message}]};}});}
+  const publish=item=>{if(s.win&&!s.win.isDestroyed?.())s.win.webContents.send('extension-install-progress',item);};
+  const schedule=scheduler(s,{publish});
+  if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){const timer=setInterval(()=>schedule.tick().catch(()=>{}),20000);timer.unref?.();}
+  const status=()=>({mode:s.settings.zoomBotMode,microphone:s.settings.zoomCaptureMic!=='false',personalLink:room.valid(s.settings.zoomPersonalLink),zoomInstalled:room.installed()});
+  const configure=input=>{
+   if(s.meetingRecording?.('captureStatus')?.busy&&input?.mode!==undefined&&input.mode!==s.settings.zoomBotMode)throw Error('Сначала завершите текущую запись встречи.');
+   const values={};
+   if(input?.mode!==undefined)values.zoomBotMode=input.mode;
+   if(typeof input?.microphone==='boolean')values.zoomCaptureMic=String(input.microphone);
+   if(typeof input?.personalLink==='string')values.zoomPersonalLink=input.personalLink.trim();
+   s.saveSettings(values,true);return status();
+  };
+  // Pending schedules for the notification center after a window reload.
+  const schedules=()=>schedule.list().map(x=>({id:'meeting-schedule:'+x.id,title:'Запись встречи',text:x.started?'Петя записывает встречу «'+x.title+'».':'Петя запишет встречу «'+x.title+'» в '+hm(x.start)+'.',busy:!!x.waiting&&!x.started,kind:'info',version:'restore',cancellable:x.started?'':x.id}));
+  return {meetingSchedule:schedule,ipc:{status,configure,schedules,cancelSchedule:id=>{schedule.cancel(String(id||''));return schedules();}}};
+ }
 };

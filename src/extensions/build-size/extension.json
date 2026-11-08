@@ -1,0 +1,15 @@
+{
+  "id": "build-size",
+  "name": "Размер билда",
+  "description": "Из чего состоит APK, AAB или IPA и что выросло между двумя билдами: категории, крупные файлы, замечания",
+  "category": "gamedev",
+  "setting": "extension_build-size",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["build-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "buildSize": "renderBuildSize"
+  }
+}

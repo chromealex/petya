@@ -1149,3 +1149,14 @@ blockquote.growth-learned{margin:6px 0;padding:8px 12px;border-left:3px solid va
 .assign-person ol,.assign-unassigned ol{margin:4px 0 0;padding-left:22px;font-size:13px;color:var(--muted)}.assign-person li{margin:1px 0}
 .assign-unassigned{margin-top:12px;padding:8px 10px;border-radius:8px;border:1px solid #e5a83d;background:#e5a83d14;font-size:13px}
 .assign-warnings p{margin:8px 0 0}#assign-where{margin:12px 0 0}.assign-summary .actions{margin-top:10px}
+/* App catalog grouped by category: add a whole category or pick a part of it. */
+.app-catalog-group{padding:6px 0 4px}
+.app-catalog-group+.app-catalog-group{border-top:1px solid var(--line)}
+.app-catalog-group-head{display:flex;align-items:center;gap:12px;padding:10px 2px 6px;position:sticky;top:0;background:var(--panel);z-index:1}
+.app-catalog-group-head>div{flex:1;min-width:0}.app-catalog-group-head small{display:block;color:var(--muted);font-size:12px}
+.app-catalog-group-head button{white-space:nowrap;font-size:12.5px;padding:5px 10px}
+.app-catalog-pick{width:16px;height:16px;flex:none;accent-color:var(--green);margin:0}
+.app-catalog-row{padding-left:2px}
+.app-catalog-bar{display:flex;align-items:center;gap:10px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line);background:var(--panel)}
+.app-catalog-bar span{margin-right:auto;color:var(--muted);font-size:13px}
+.app-catalog-bar[hidden]{display:none}

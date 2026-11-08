@@ -2,6 +2,7 @@
   "id": "charts",
   "name": "Диаграммы",
   "description": "Пончик и столбцы в ответах: доли, распределения, сравнения",
+  "category": "analytics",
   "settings": false,
   "feature": "feature.cjs",
   "scripts": [

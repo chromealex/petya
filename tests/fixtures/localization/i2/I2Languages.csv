@@ -1,0 +1,8 @@
+Key,Type,Desc,English,German [de],Spanish
+Menu/Play,Text,Main menu button,Play,Spielen,Jugar
+Menu/Quit,Text,,Quit,Beenden,
+Shop/Price,Text,,"Price: %d coins","Preis: %d Münzen","Precio: %s monedas"
+Dialog/Welcome,Text,,"Welcome, {0}!
+Ready?","Willkommen, {0}!
+Bereit?",
+Hud/Score,Text,,Score,Score,Puntos

@@ -1,6 +1,7 @@
 {
   "name": "Confluence",
   "description": "Документы и пространства",
+  "category": "docs",
   "setting": "module_confluence",
   "service": "confluence",
   "settings": true,
