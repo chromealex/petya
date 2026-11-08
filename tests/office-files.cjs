@@ -14,7 +14,7 @@ const part=(bytes,name)=>unzip(bytes).find(f=>f.name===name)?.data.toString('utf
  assert.equal(intent('Оформи это документом Word').format,'docx');
  assert.equal(intent('сделай pdf из отчёта').format,'pdf');
  assert.deepEqual(intent('/docx релиз-ноты 1.20'),{format:'docx',request:'релиз-ноты 1.20'});
- for(const text of ['Создай задачу в Jira про экспорт в PDF','Прочитай этот pdf','Что в этом документе Word?','Напиши письмо Борису и приложи pdf','Как сделать презентацию в PowerPoint?','Добавь слайд про риски'])assert.equal(intent(text),null,text);
+ for(const text of ['Создай задачу в Jira про экспорт в PDF','Прочитай этот pdf','Что в этом документе Word?','Напиши письмо Борису и приложи pdf','Как сделать презентацию в PowerPoint?','Добавь слайд про риски','напиши формулу для Excel','нужна помощь с excel','составь план презентации','напиши, как экспортировать в PDF','нужно ли конвертировать в pdf?','сделай мне выжимку из pdf','сделай ревью pdf','сделай excel формулу для суммы','сделай мне кофе и открой excel'])assert.equal(intent(text),null,text);
  assert.deepEqual(intent('Добавь слайд про риски',{previous:{format:'pptx'}}),{format:'pptx',request:'Добавь слайд про риски',revise:true});
  // Word: headings, lists, tables, links and characters XML cannot hold.
  const md='# Отчёт\n\nТекст с **жирным** и [ссылкой](https://example.com/a?b=1&c=2).\n\n- пункт\n  - вложенный\n1. первый\n\n| A | B |\n|---|---|\n| 1 | <2> |\n\nУправляющий символ:\u0007 конец.';

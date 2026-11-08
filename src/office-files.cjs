@@ -217,7 +217,7 @@ function fileName(title,ext){let base=String(title||'').replace(/[\\/:*?"<>|\x00
 // opening it (macOS quarantine, Windows Mark of the Web). Best effort: the file is kept either way.
 function markDownloaded(file){
  try{
-  if(process.platform==='darwin')require('node:child_process').execFile('/usr/bin/xattr',['-w','com.apple.quarantine','0081;'+Math.floor(Date.now()/1000).toString(16)+';Petya;',file],()=>{});
+  if(process.platform==='darwin')require('node:child_process').execFileSync('/usr/bin/xattr',['-w','com.apple.quarantine','0081;'+Math.floor(Date.now()/1000).toString(16)+';Petya;',file],{timeout:3000,stdio:'ignore'});
   else if(process.platform==='win32')require('node:fs').writeFileSync(file+':Zone.Identifier','[ZoneTransfer]\r\nZoneId=3\r\n');
  }catch{/* Not supported by the file system. */}
 }

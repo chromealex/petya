@@ -38,7 +38,7 @@ const {InputRequired}=require('../src/input-required.cjs');
  const calls={prepare:[],run:[]};let ready=false;
  const sandbox={status:async()=>({ready:true}),ready:async()=>ready,prepare:async(n)=>{calls.prepare.push(n);ready=true;return 'img';},
   // The result comes from inside the container and is untrusted: a script may name files as it likes.
-  run:async(args)=>{calls.run.push(args);return {ok:true,exitCode:0,stdout:'Release 1.20\n',stderr:'',files:{'Release 1.20.docx':Buffer.from('PK fake docx'),'../../evil.bat':Buffer.from('calc'),'a\\..\\b.cmd':Buffer.from('x'),'big.pdf':Buffer.alloc(21*1024*1024)}};}};
+  run:async(args)=>{calls.run.push(args);return {ok:true,exitCode:0,stdout:'Release 1.20\n',stderr:'',files:{'Release 1.20.docx':Buffer.from('PK fake docx'),'../../evil.bat':Buffer.from('calc'),'r\u202Efdp.txt':Buffer.from('x'),'CON.txt':Buffer.from('x'),'a\\..\\b.cmd':Buffer.from('x'),'big.pdf':Buffer.alloc(21*1024*1024)}};}};
  const plan=[{action:'read',path:'references/style.md'},{action:'read',path:'references/style.md#s99'},{action:'read',path:'../../../etc/passwd'},{action:'run',command:['python','scripts/build.py','1.20']},{action:'answer',answer:'Готов отчёт о релизе 1.20.'}];
  const seen=[];
  const dialogue=new Dialogue({save:()=>{}});
@@ -68,7 +68,8 @@ const {InputRequired}=require('../src/input-required.cjs');
  assert.deepEqual(run.need.pip,need.pip);
  const message=dialogue.active().messages.at(-1);
  assert.equal(message.by,'навык release-report');
- assert.deepEqual(message.attachments.map(a=>a.name),['Release 1.20.docx'],'only documents within the size limit are kept: no .bat/.cmd, nothing over 20 МБ');
+ assert.deepEqual(message.attachments.map(a=>a.name).sort(),['Release 1.20.docx','_CON.txt','r_fdp.txt'].sort(),'invisible direction marks and device names are neutralised');
+ assert.deepEqual(message.attachments.filter(a=>/docx$/.test(a.name)).map(a=>a.name),['Release 1.20.docx'],'only documents within the size limit are kept: no .bat/.cmd, nothing over 20 МБ');
  assert.equal(message.attachments[0].localSourcePath,path.join(folder,'release-report','Release 1.20.docx'));
  assert(fs.existsSync(message.attachments[0].localSourcePath)&&message.attachments[0].generated&&!message.attachments[0].made,'files from out/ are saved and attached');
  assert(!fs.readdirSync(folder,{recursive:true}).some(f=>/\.(?:bat|cmd)$|evil/.test(f)),'nothing is written outside the skill folder or with a runnable type');

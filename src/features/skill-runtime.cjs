@@ -50,7 +50,9 @@ module.exports={
   // A file from the sandbox is untrusted: its name, type and size are checked here, it is saved with the
   // «downloaded from the internet» mark, and the chat offers only «Показать в папке» for it.
   function keep(skill,name,bytes,total){
-   const base=path.basename(String(name).replace(/\\/g,'/')).replace(/[\x00-\x1f<>:"|?*]+/g,'_').replace(/^\.+/,'').slice(0,120);
+   // Control and invisible format characters are removed: «r\u202Efdp.txt» must not look like a PDF.
+   let base=path.basename(String(name).replace(/\\/g,'/')).replace(/[\x00-\x1f<>:"|?*\p{Cf}]+/gu,'_').replace(/^\.+/,'').replace(/[. ]+$/,'').slice(0,120);
+   if(/^(?:con|prn|aux|nul|com\d|lpt\d)(?:\.|$)/i.test(base))base='_'+base;
    if(!base||!OUTPUT.test(base))return {skipped:name+' (такой тип файла не передаётся)'};
    if(total+bytes.length>OUT_LIMIT)return {skipped:name+' (превышен общий размер 20 МБ)'};
    const dir=folder(skill.name);fs.mkdirSync(dir,{recursive:true});
@@ -79,7 +81,9 @@ module.exports={
   // allows it once; a change in the scripts asks again. Kept in <userData>/skill-approvals.json.
   const approvals=(()=>{const file=()=>{try{return path.join(s.dataRoot||require('electron').app.getPath('userData'),'skill-approvals.json');}catch{return null;}};
    let rows=(()=>{try{return JSON.parse(fs.readFileSync(file(),'utf8'));}catch{return {};}})();
-   const key=skill=>createHash('sha256').update(skill.name+'\n'+[...scripts.scripts(skill),...(skill.files||[]).filter(f=>/\.(?:sql|psql|ddl)$/i.test(f))].map(f=>{const full=own(skill,f);return f+':'+(full?createHash('sha256').update(fs.readFileSync(full)).digest('hex'):'');}).join('\n')).digest('hex');
+   // The permission covers the exact content of every file of the skill; hashes are cached by size and time.
+   const sums=new Map(),sum=full=>{const st=fs.statSync(full),k=full+'|'+st.size+'|'+st.mtimeMs;let h=sums.get(k);if(!h){h=createHash('sha256').update(fs.readFileSync(full)).digest('hex');sums.set(k,h);}return h;};
+   const key=skill=>createHash('sha256').update(skill.name+'\n'+[...(skill.files||[]),'SKILL.md'].map(f=>{const full=own(skill,f);return f+':'+(full?sum(full):'');}).join('\n')).digest('hex');
    // A built-in skill needs no permission unless its scripts have a critical finding.
    return {has:(skill,critical)=>skill.builtin===true&&!critical||!!rows[key(skill)],add(skill){rows[key(skill)]={name:skill.name,at:Date.now()};try{const f=file();if(f){fs.writeFileSync(f+'.tmp',JSON.stringify(rows));fs.renameSync(f+'.tmp',f);}}catch{/* Kept in memory. */}}};})();
   // Scripts first: allowed, packages ready, being asked, or declined for this request.

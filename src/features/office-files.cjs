@@ -20,7 +20,9 @@ const MAKE=/^(?:сделай|сделать|создай|создать|подг
 const OBJECT=/^(?:docx|word|ворд|xlsx|excel|эксел[ьеия]?|эксель|pptx|powerpoint|keynote|презентаци[юя]|слайды|pdf|пдф)$/iu;
 const LINK=/^(?:в|во|как|виде|формате|файлом|файл|документом|документ|таблицей|таблицу|таблица)$/iu;
 // Words between the verb and the format that make it about something else («выжимку из pdf», «формулу для Excel»).
-const BREAK=/^(?:из|для|про|о|об|по|с|со|от|у|к|ли|помощь|формулу|формулы|план|выжимку|текст|ответ)$/iu;
+const BREAK=/^(?:из|для|про|о|об|по|с|со|от|у|к|ли|и|а|но|или|помощь|формулу|формулы|план|выжимку|текст|ответ|ревью|обзор|разбор|анализ|проверку|перевод|открой|запусти|закрой)$/iu;
+// A noun right after the format makes the format a qualifier of something else («excel формулу», «pdf ревью»).
+const QUALIFIED=/^(?:формул|функци|макрос|скрипт|ревью|обзор|разбор|анализ|проверк|шаблон\S*\s+формул)/iu;
 // A request to make something else — a task, a message, a post — that only mentions a format
 // («создай задачу в Jira про экспорт в PDF», «напиши письмо и приложи pdf»).
 const OTHER=/(?:^|\s)(?:создай|заведи|открой|напиши|отправь|опубликуй|ответь)\s+(?:\S+\s+){0,2}?(?:задач|тикет|баг|issue|письм|сообщени|коммент|пост|ответ)/iu;
@@ -44,6 +46,7 @@ function intent(text,{previous}={}){
  for(let i=0;i<words.length;i++){
   const format=Object.keys(FORMATS).find(k=>FORMATS[k].re.test(words[i]));if(!format)continue;
   const direct=OBJECT.test(words[i]),linked=i>0&&LINK.test(words[i-1]);
+  if(QUALIFIED.test(words[i+1]||''))continue;
   if(!direct&&!linked)continue;
   for(let j=i-1;j>=Math.max(0,i-5);j--){
    if(BREAK.test(words[j]))break;

@@ -27,6 +27,17 @@ has(sql,'m.sql',['critical:sql-drop-db:3','critical:sql-truncate:4','critical:sq
 has('cur.execute("DELETE FROM sessions")\ncur.execute(f"SELECT name FROM users WHERE id={uid}")\ncur.execute("SELECT name FROM users WHERE id=" + uid)\ncur.execute("UPDATE users SET seen=1 WHERE id=%s", (uid,))\n','db.py',['critical:sql-delete-all:1','warning:sql-injection:2','warning:sql-injection:3']);
 assert(!rules('cur.execute("UPDATE users SET seen=1 WHERE id=%s", (uid,))\n','db.py').length,'a parameterised query is fine');
 has('db.query(`DELETE FROM jobs WHERE id=${id}`)\n','db.js',['warning:sql-injection:1']);
+// Found after review: downloads piped into other interpreters, deleting through find, quoted variables,
+// process replacement, hidden eval, aliased child_process.
+has('curl -s https://x | python3\npython -c "$(curl -s https://x)"\nfind / -name x -delete\nrm -rf "$OUT"/*\nrm -rf -- "$dir"\n','x.sh',['critical:pipe-shell:1','critical:pipe-shell:2','critical:find-delete:3','critical:rm-rf:4','critical:rm-rf:5']);
+has('os.execv("/bin/sh",[])\npty.spawn("sh")\n__builtins__["ev"+"al"](c)\n','x.py',['warning:process:1','warning:process:2','warning:exec:3']);
+has('import {exec as run} from "child_process"\n','x.js',['warning:exec:1']);
+// Ordinary migrations and temporary files are not critical.
+assert.deepEqual(rules('DROP TABLE IF EXISTS tmp_import;\n','m.sql'),['warning:sql-drop-if:1']);
+assert.deepEqual(rules('os.remove(tmp)\n','x.py'),['info:remove:1']);
+// Large and malformed files: linear time, no hang on an unclosed quote (it used to take exponential time).
+for(const [text,file] of [['x = """'+'a\\n '.repeat(20000),'x.py'],['DELETE FROM t;\nSELECT * FROM a, b;\n'.repeat(50000),'m.sql'],['cur.execute("DELETE FROM t")\n'.repeat(60000),'x.py']]){
+ const t=Date.now();const out=auditText(text,file);assert(Date.now()-t<3000,file+' took '+(Date.now()-t)+' ms');assert(out.length<=310,'findings per file are capped');}
 // Ordinary code raises nothing.
 for(const [text,file] of [['import json, sys\nprint(json.dumps({"ok": True}))\n','ok.py'],['echo "Готово"\nmkdir -p out\ncp report.md out/\n','ok.sh'],['SELECT id, name FROM users WHERE active = TRUE ORDER BY name LIMIT 50;\nDELETE FROM sessions WHERE expires_at < now();\nUPDATE users SET seen_at = now() WHERE id = 7;\n','ok.sql'],['const x = items.filter(i => i.ok);\nconsole.log(x.length);\n','ok.js']])
  assert.deepEqual(rules(text,file),[],file+' should be clean');
