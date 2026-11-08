@@ -7,9 +7,10 @@
  const TAGS={safe:{label:'можно удалить безопасно',tone:'done'},regen:{label:'пересоздастся',tone:'progress'},caution:{label:'осторожно',tone:'alert'}};
  function human(bytes){
   const n=Number(bytes)||0;
-  for(const [d,u] of [[1e12,'ТБ'],[1e9,'ГБ'],[1e6,'МБ'],[1e3,'КБ']])if(n>=d)return (n/d).toLocaleString('ru-RU',{maximumFractionDigits:n/d>=100?0:1})+' '+u;
+  for(const [d,u] of [[1e12,'ТБ'],[1e9,'ГБ'],[1e6,'МБ'],[1e3,'КБ']])if(n>=d)return (n/d).toLocaleString(locale(),{maximumFractionDigits:n/d>=100?0:1})+' '+u;
   return n+' Б';
  }
+ const locale=()=>window.petyaLocale||'ru-RU';
  const finder=()=>window.petyaPlatform==='win32'?'Показать в Проводнике':'Показать в Finder';
 
  function volumeBar(k,v){
@@ -39,7 +40,8 @@
    const li=k.el('li');const label=k.el('label');const input=k.el('input');input.type='checkbox';
    input.checked=c.tag!=='caution';if(input.checked)chosen.add(target);
    input.onchange=()=>{input.checked?chosen.add(target):chosen.delete(target);sync();};
-   label.append(input,k.el('code',null,ollama?item.name:item.path),k.el('span','disk-size',human(item.bytes)));
+   const code=k.el('code',null,ollama?item.name:item.path);code.setAttribute('data-no-i18n','');
+   label.append(input,code,k.el('span','disk-size',human(item.bytes)));
    li.append(label);list.append(li);
   }
   const cancelButton=k.el('button',null,'Отмена');cancelButton.type='button';cancelButton.onclick=()=>{box.remove();row.querySelector('.disk-clean')?.removeAttribute('hidden');};
@@ -61,7 +63,7 @@
    const li=k.el('div','disk-item'+(item.removed?' removed':''));
    const share=max?Math.max(0.5,100*item.bytes/max):0;
    const fill=k.el('span','disk-item-fill');fill.style.width=share.toFixed(1)+'%';
-   const name=k.el('span','disk-item-name',item.name);name.title=c.clean==='ollama'?item.name:item.path;
+   const name=k.el('span','disk-item-name',item.name);name.setAttribute('data-no-i18n','');name.title=c.clean==='ollama'?item.name:item.path;
    li.append(name,k.el('span','disk-item-track'),k.el('span','disk-size',item.removed?(c.clean==='ollama'?'удалена':'в корзине'):human(item.bytes)));
    li.children[1].append(fill);return li;
   });
@@ -118,7 +120,7 @@
   meta.push('ничего не удаляется без подтверждения');
   const free=scan.volume?scan.volume.free/scan.volume.total:1;
   const status=scan.cancelled?{label:'остановлено',tone:'progress'}:scan.partial?{label:'частично',tone:'progress',title:'Не уложился в лимит времени или часть папок закрыта'}:free<0.1?{label:'мало места',tone:'alert'}:{label:'посчитано',tone:'done'};
-  const when=scan.at?new Date(scan.at).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+  const when=scan.at?new Date(scan.at).toLocaleString(locale(),{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
   parent.append(k.card({app:'Место на диске',initial:'◔',color:'#4a5f8a',key:'Место на диске',status,subtitle:when,body,meta,className:'disk-card',
    actions:[{label:'Проверить снова',run:()=>k.ask('чем забит диск',{send:true})},{label:'Что почистить первым?',run:()=>k.ask('Что из этого безопаснее всего почистить первым?')}]}));
  };
