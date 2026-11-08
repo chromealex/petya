@@ -1,0 +1,5 @@
+wave,enemyId,count,reward
+1,goblin,5,50
+2,goblin,8,80
+3,knight,2,120
+4,troll,1,300

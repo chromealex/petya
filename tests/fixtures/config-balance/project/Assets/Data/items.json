@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "id": "sword", "price": 100, "weight": 3, "slot": "hand" },
+    { "id": "shield", "price": "80", "weight": 5, "slot": "hand" },
+    { "id": "sword", "price": 120, "weight": 3, "slot": "hand" },
+    { "id": "bow", "price": 150, "weight": 2, "slot": "hand" },
+    { "id": "helmet", "price": 60, "weight": 2, "slot": "head" }
+  ]
+}
