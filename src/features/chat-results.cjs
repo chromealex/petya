@@ -35,7 +35,7 @@ function setup(s){
     if(!topic||topic.archived)return {scope:null,items:[],selected:null};
     const rows=collect(topic,s);
     return {scope:scope(s,topic),selected:selected(topic)?.id||null,
-      items:rows.map(({id,objectId,index,title,subtitle,actions,presentationKey})=>({id,objectId,index,title,subtitle,presentationKey,actions:actions.map(({id,label})=>({id,label}))}))};
+      items:rows.map(({id,objectId,index,title,subtitle,actions,presentationKey})=>({id,objectId,index,title,subtitle,presentationKey,actions:actions.map(({id,label,hidden})=>({id,label,hidden:!!hidden}))}))};
   }
   function choose(expected,id){
     const topic=topicFor(expected);
@@ -52,7 +52,7 @@ function setup(s){
   function current(topic,field){
     return selected(topic)?.message?.[field];
   }
-  async function execute(row,action,topic){
+  async function execute(row,action,topic,args){
     const expected=scope(s,topic);
     const check=()=>{
       require('../answer-cancel.cjs').check();
@@ -63,17 +63,19 @@ function setup(s){
     if(action.id==='edit')return s.chatChanges.start(row,expected);
     if(action.id==='details')return {handled:true,text:row.title+'\n'+row.subtitle,resultJump:row.index};
     const project=s.dialogue.state.projects.find(p=>p.id===(topic.projectId||'general'));
-    const result=await require('../modules.cjs').withProject(project,()=>row.adapter.perform(action.id,row,s,check));
+    // Card controls (status chips, checkboxes, replies) pass small JSON arguments to the extension's adapter.
+    const result=await require('../modules.cjs').withProject(project,()=>row.adapter.perform(action.id,row,s,check,args));
     check();return result;
   }
-  async function action(expected,id,actionId){
+  async function action(expected,id,actionId,args){
+    if(args!==undefined&&(typeof args!=='object'||args===null||JSON.stringify(args).length>20000))throw Error('Некорректные параметры действия.');
     const topic=topicFor(expected),row=collect(topic,s).find(item=>item.id===id);
     if(s.chatJobs?.busy(topic.id))throw Error('Дождитесь завершения ответа.');
     const action=row?.actions.find(item=>item.id===actionId);
     if(!action)throw Error('Действие больше недоступно.');
     choose(expected,id);
     if(action.command)return {command:action.command};
-    return execute(row,action,topic);
+    return execute(row,action,topic,args);
   }
   async function turn(command){
     const change=await s.chatChanges?.turn(command);if(change)return change;
@@ -94,7 +96,7 @@ function setup(s){
     const action=row.actions.find(item=>item.id===actionId);
     if(!action)return {handled:true,text:'Для «'+row.title+'» это действие недоступно. Выберите другой объект над полем ввода.'};
     if(action.command)return {resultCommand:action.command};
-    return execute(row,action,topic);
+    return execute(row,action,topic,args);
   }
   return {chatResults:{current,adopt,turn,selected},ipc:{snapshot,choose,action}};
 }

@@ -139,6 +139,9 @@ function setup(s) {
     message.extensionResult={provider:p.type,query,source:source||p.name,base,choices,selected,project};
     if(problem)message.serviceProblem={id:p.type,query:'Обнови результат'};
     message.extensionImages = content.filter(block => block.type === 'image');
+    // Structured charts go to the charts plugin; the picture stays for clients without it.
+    const charts = content.filter(block => block.type === 'chart' && block.chart).map(block => block.chart);
+    if (charts.length) message.extensionData = { ...(message.extensionData || {}), charts };
     dialogue.persist();s.chatResults?.adopt(owner,message);
     return { handled:true, text, by:p.name, topicId:owner.id, topicTitle:owner.title, messages:owner.messages };
   }

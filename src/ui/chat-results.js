@@ -57,14 +57,14 @@
         dialogueMessages.querySelector('[data-message-index="'+item.index+'"]');
       if(!message)continue;
       const presented=item.presentationKey&&[...message.querySelectorAll('[data-result-presentation]')].find(node=>node.dataset.resultPresentation===item.presentationKey);
-      if(presented){const actions=document.createElement('div');actions.className='chat-result-inline-actions';for(const action of item.actions.filter(a=>a.id!=='open'&&a.id!=='details')){const control=button(action.label,()=>act(item,action));control.dataset.action=action.id;control.title=action.label;control.setAttribute('aria-label',action.label);actions.append(control);}presented.append(actions);continue;}
+      if(presented){const actions=document.createElement('div');actions.className='chat-result-inline-actions';for(const action of item.actions.filter(a=>a.id!=='open'&&a.id!=='details'&&!a.hidden)){const control=button(action.label,()=>act(item,action));control.dataset.action=action.id;control.title=action.label;control.setAttribute('aria-label',action.label);actions.append(control);}presented.append(actions);continue;}
       const card=document.createElement('section');card.className='chat-result-card';
       card.classList.toggle('selected',item.id===state.selected);
       const title=button(item.title,async()=>{await call('choose',state.scope,item.id);await refresh();});
       title.className='chat-result-title';title.setAttribute('aria-pressed',String(item.id===state.selected));
       const detail=document.createElement('small');detail.textContent=item.subtitle;
       const actions=document.createElement('div');actions.className='actions';
-      for(const action of item.actions)actions.append(button(action.label,()=>act(item,action)));
+      for(const action of item.actions.filter(a=>!a.hidden))actions.append(button(action.label,()=>act(item,action)));
       card.append(title,detail,actions);message.append(card);
     }
   }
@@ -77,6 +77,14 @@
       state=next;paint();
     }catch(e){if(request===revision)error(e);}
   }
+  // Extension cards call their adapter's actions through this API (status chips, checkboxes, inline replies).
+  const byKey=key=>[...state.items].reverse().find(item=>item.presentationKey===key);
+  window.chatResultsApi={
+    has:(key,actionId)=>!!byKey(key)?.actions.some(a=>a.id===actionId),
+    async perform(key,actionId,args){const item=byKey(key);if(!item)throw Error('Объект больше недоступен. Обновите ответ.');const expected=state.scope;const result=await call('action',expected,item.id,actionId,args);if(result.messages&&state.scope===expected)showDialogueMessages(result.messages);await refresh();return result;},
+    async select(key){const item=byKey(key);if(!item)return;await call('choose',state.scope,item.id);await refresh();},
+    selectedKey:()=>state.items.find(item=>item.id===state.selected)?.presentationKey||null,
+    refresh:()=>refresh()};
   choose.onclick=()=>{restricted=null;paintPicker();picker.hidden=!picker.hidden;};
   clear.onclick=async()=>{if(pending)return;pending=true;try{await call('choose',state.scope,null);picker.hidden=true;await refresh();}catch(e){error(e);}finally{pending=false;}};
   document.addEventListener('petya-topic-changed',()=>{revision++;bar.hidden=picker.hidden=status.hidden=true;state={items:[],selected:null};});
