@@ -109,6 +109,6 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("(()=>{const c=document.querySelector('[data-extension=\"screenshot-task\"]');c.hidden=false;c.querySelector('details')?.setAttribute('open','');})()");
  const settingsShot=await shot(win,'[data-extension="screenshot-task"]','petya-screenshot-task-settings');
  for(const id of ids)for(const f of [id+'.png',id+'-annotated.png',id+'.json'])fs.rmSync(path.join(dir,f),{force:true});
- console.log('Screenshot → task UI: region picker drag, canvas frame/arrow/blur saved as PNG with shapes, draft fields, Jira hand-off and attach to the created task, model download offer passed · '+[first,firstBottom,second,secondBottom,settingsShot].join(' '));
+ console.log('Screenshot → task UI ('+[first,firstBottom,second,secondBottom,settingsShot].join(', ')+'): region picker drag, settings shortcut, canvas frame/arrow/blur saved as PNG with shapes, draft fields, Jira hand-off and attach to the created task, model download offer passed');
 }};
 require('../src/main.cjs');

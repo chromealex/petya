@@ -69,6 +69,6 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("document.getElementById('card-shot').remove()");
  const second=await shot(win,'.conv-card[data-plan-id="plan-run"],.conv-card[data-plan-id="plan-done"]','petya-converter-progress');
  fs.rmSync(dir,{recursive:true,force:true});
- console.log('Converter cards: thumbnails, chips, estimate, ffmpeg download, progress and cancel, results with bars, safe names passed · '+file+' '+second);
+ console.log('Converter cards ('+file+', '+second+'): thumbnails, chips, estimate, ffmpeg download, progress and cancel, results with bars, safe names passed');
 }};
 require('../src/main.cjs');
