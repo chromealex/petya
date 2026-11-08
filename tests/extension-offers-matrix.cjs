@@ -67,6 +67,7 @@ const own={
  kubernetes:['что с подами в кубере','покажи поды в k8s','почему падает под в kubernetes','какие поды в CrashLoopBackOff','статус деплоймента в кубере'],
  'ua-campaigns':['сколько потратили на закупку трафика за неделю','какой CPI по сетям','покажи расходы на рекламные кампании вчера','какой ROAS за неделю','сколько стоит установка по сетям'],
  monitoring:['что с серверами','всё ли живое','какие алерты горят','аптайм за неделю','почему лежит api','инциденты за неделю','что в Grafana','найди все адреса серваков в проекте','какие сервера использует игра'],
+ subscriptions:['за что я плачу каждый месяц','что продлится на этой неделе','сколько уходит на сервисы','какие у меня подписки','когда истекает домен'],
  'time-tracking':['на что ушёл день','сколько я сидел в Unity на этой неделе','время по задачам','куда ушло время на этой неделе','запиши время в Jira'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
@@ -136,6 +137,8 @@ const not={
  zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи'],
  // A plain screenshot is Petya's computer control; store screenshots and bugs in code belong to others.
  'screenshot-task':['сделай скриншот','скриншоты стора','баг в коде','заведи баг в Jira'],
+ // Subscribing to channels, signing, extending a sprint, prices and followers are not paid subscriptions.
+ subscriptions:['подпишись на канал релизов','подпиши договор','отпишись от рассылки','продли спринт','сколько стоит Unity Pro','сколько у меня подписчиков','забронируй переговорку'],
  // The clock, focus sessions, the journal of what was done, build and meeting durations, money are not time tracking.
  'time-tracking':['который час','сколько времени','сколько я сегодня сфокусировался','что я сегодня сделал','сколько времени займёт сборка','время встречи с Олегом','учёт расходов за месяц','сколько я был в отпуске'],
  // Currency, text translation and shortening an answer are not files.
