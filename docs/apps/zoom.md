@@ -9,9 +9,9 @@ with it, Zoom meetings are found, recorded and labelled by themselves.
 
 | Capability | File | What it does |
 |---|---|---|
-| `meeting-source` | `meeting-source.cjs` | `detect()`: a Zoom meeting window on this computer (`window.cjs`: the native helper `assets/native/watch-macos` on macOS, `watch-windows.ps1` on Windows; «Zoom Meeting», «Конференция Zoom», webinars, the visible floating video window). `begin`/`end`/`speakers()`: while Petya records, the names Zoom shows talking are sampled from its window every 2 s (`speakers.cjs`) and each fragment of the meeting sound gets the name heard most during it. `participants()`: names seen in the meeting (kept in `zoom-speakers-sample.json` in the company folder, mode 600) for «Имя на встречах» in «Команда». `recognizeLink`/`joinLinks`: Zoom join links. `summaryMail()`: Zoom's own letter with the transcript or summary (Gmail, `from:(zoom.us)`), used by the meeting summary. |
+| `meeting-source` | `meeting-source.cjs` | `detect()`: a Zoom meeting window on this computer (`window.cjs`: the native helper `assets/native/watch-macos` on macOS, `watch-windows.ps1` on Windows, and on macOS Electron's window list through the neutral `src/desktop-windows.cjs` when the helper cannot read titles; «Zoom Meeting», «Конференция Zoom», webinars, the visible floating video window). `begin`/`end`/`speakers()`: while Petya records, the names Zoom shows talking are sampled from its window every 2 s (`speakers.cjs`) and each fragment of the meeting sound gets the name heard most during it. `participants()`: names seen in the meeting (kept in `zoom-speakers-sample.json` in the company folder, mode 600) for «Имя на встречах» in «Команда». `recognizeLink`/`joinLinks`: Zoom join links. `summaryMail()`: Zoom's own letter with the transcript or summary (Gmail, `from:(zoom.us)`), used by the meeting summary. |
 | `video-meeting` | `video-meeting.cjs` | The personal meeting room for new calendar events (see [cross-integrations.md](cross-integrations.md)); asks for the link once when it is not known. `recognizeLink` lets the calendar's known rooms tell Zoom links apart. |
-| `meeting-recording` | `meeting-recording.cjs` | «Записать Петей» / «Петя запишет встречу» on calendar events with a Zoom link: a scheduled recording starts at the event time as soon as the Zoom meeting source sees the meeting (cancellable notification, `notifications.js`). |
+| `meeting-recording` | `meeting-recording.cjs` | «Записать Петей» / «Петя запишет встречу» on calendar events with a Zoom link: a scheduled recording starts at the event time as soon as the Zoom meeting source sees the meeting (the shared timer `src/meeting-schedule.cjs`; cancellable notification, `notifications.js`, ids `meeting-schedule:zoom:<id>`). |
 | offer | `offer.cjs` | Offered only when Zoom is named («запиши встречу в Zoom», «в зуме»); zooming a picture or the screen («зум фото», «увеличь», «zoom in») is not this app. |
 
 Settings card (`settings.js`, owned by the extension): whether the Zoom app is installed and the personal room link.
@@ -46,6 +46,7 @@ a recording that followed the meeting; a recording started by hand runs until th
 
 `tests/meeting-sources.cjs`, `tests/meeting-migration.cjs`, `tests/local-meeting.cjs`, `tests/zoom-window.cjs`,
 `tests/zoom-speakers.cjs`, `tests/calendar-video.cjs`, `tests/app-links.cjs`, `tests/extension-offers-matrix.cjs`,
-`tests/core-meeting-guard.cjs` (fails if Zoom appears in core files or other extensions).
+`tests/core-meeting-guard.cjs` (fails if Zoom appears in core files or other extensions; the same for Google Meet and
+Teams, see [google-meet.md](google-meet.md) and [teams.md](teams.md)).
 
 Needs live checking: Zoom window detection and speaker names on real macOS/Windows meetings; Zoom's letters in Gmail.
