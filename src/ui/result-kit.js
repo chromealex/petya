@@ -22,8 +22,10 @@
   box.replaceChildren();
   if(!options.length)box.append(el('div','kit-menu-note','Нет вариантов'));
   for(const option of options){
-   const item=el('button','kit-menu-item',option.label);item.type='button';item.setAttribute('role','menuitemradio');item.setAttribute('aria-checked',String(!!option.current));
-   if(option.hint)item.append(el('small',null,option.hint));
+   if(option.note){box.append(el('div','kit-menu-note',option.label));continue;}
+   const item=el('button','kit-menu-item'+(option.who?' with-person':''));item.type='button';item.setAttribute('role','menuitemradio');item.setAttribute('aria-checked',String(!!option.current));
+   const text=el('span','kit-menu-text',option.label);if(option.hint)text.append(el('small',null,option.hint));
+   if(option.who)item.append(avatar(option.who,{size:22}));item.append(text);
    item.onclick=async()=>{closeMenu();anchor.setAttribute('aria-expanded','false');if(!option.current)await pick(option);};
    box.append(item);
   }

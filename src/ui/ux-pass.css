@@ -217,3 +217,25 @@ button.delete-button:hover,button.delete-button:focus-visible{border-color:#ff7b
 button.delete-button:disabled{opacity:.5}
 button.delete-button svg{width:16px;height:16px}
 .material-delete.delete-button.confirm{width:auto;padding:0 10px!important;color:#ffd7ce;background:#402b28;border-color:#8c5349}
+/* Team card: photo */
+.team-photo{display:flex;flex-direction:column;gap:8px}
+.team-photo-head{display:flex;align-items:center;gap:12px}.team-photo-head>div{display:flex;flex-direction:column}
+.team-photo-current{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;overflow:hidden;background:#2b3431;font-weight:600}
+.team-photo-current img{width:100%;height:100%;object-fit:cover}
+.team-photo-tools{display:flex;gap:6px;flex-wrap:wrap}.team-photo-tools button{min-height:28px;padding:3px 10px;font-size:12px}
+.team-photo-choices{display:flex;gap:10px;flex-wrap:wrap}
+.team-photo-choice{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px;border:1px solid #ffffff14;border-radius:10px;background:transparent;font-size:11px;color:var(--muted)}
+.team-photo-choice img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.team-photo-choice[aria-pressed="true"]{border-color:#d0f59699;color:var(--green)}
+/* Team card: projects picker */
+.team-projects{position:relative;margin-top:6px}
+.team-project-field{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:40px;padding:4px 8px;border:1px solid #414847;border-radius:8px;background:#121616}
+.team-project-field:focus-within{border-color:var(--green)}
+.team-project-field input{flex:1;min-width:140px;border:0;background:transparent;padding:6px 2px;outline:none}
+.team-project-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 4px 2px 10px;border-radius:999px;background:#d0f59614;border:1px solid #d0f59640;color:var(--ink);font-size:13px}
+.team-project-chip button{width:20px;height:20px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted);line-height:1}
+.team-project-chip button:hover{color:var(--ink);background:#ffffff14}
+.team-project-options{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 4px);display:flex;flex-direction:column;padding:4px;border:1px solid var(--line);border-radius:10px;background:#232b27;box-shadow:0 12px 28px #0008;max-height:260px;overflow:auto}
+.team-project-options button{text-align:left;min-height:32px;padding:6px 10px;border:0;border-radius:6px;background:transparent;font-size:13px}
+.team-project-options button:hover,.team-project-options button:focus-visible{background:#ffffff10}
+.team-project-free{color:var(--green)}

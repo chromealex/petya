@@ -1,0 +1,8 @@
+{
+  "id": "birthdays",
+  "name": "Дни рождения",
+  "description": "Утром напоминает о днях рождения коллег из «Команды»",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": []
+}

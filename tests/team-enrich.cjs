@@ -23,7 +23,7 @@ const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}
  const again=await fill.fromScreen('Заполни команду');assert.match(again.text,/Добавлено коллег: 0/);
  // Large workspaces: the walk goes on until everyone wanted is found, waits once on a Slack limit, looks up by e-mail
  {let page=0,waited=0;const pages=[[{id:'U9',profile:{real_name:'Кто-то'}}],[{id:'U10',profile:{real_name:'Polina Samarina',title:'Project Manager, Jet Whales'}}],[{id:'U11',profile:{real_name:'Лишний'}}]];
-  const req=async url=>{if(/lookupByEmail/.test(url))return {ok:true,user:{id:'U12',profile:{real_name:'Ivan S',title:'QA',email:'ivan@x.ru'}}};const i=page++;if(i===1&&!waited){waited++;page--;const e=Error('Slack 429');e.status=429;e.retryAfter=1;throw e;}return {ok:true,members:pages[i],response_metadata:{next_cursor:i<2?'c'+i:''}};};
+  const req=async url=>{if(/profile\.get/.test(url))return {ok:false};if(/lookupByEmail/.test(url))return {ok:true,user:{id:'U12',profile:{real_name:'Ivan S',title:'QA',email:'ivan@x.ru'}}};const i=page++;if(i===1&&!waited){waited++;page--;const e=Error('Slack 429');e.status=429;e.retryAfter=1;throw e;}return {ok:true,members:pages[i],response_metadata:{next_cursor:i<2?'c'+i:''}};};
   const r=await slackProfiles({slackToken:'x'},req,[{name:'Polina Samarina'},{name:'Ivan Shapovalov',email:'ivan@x.ru'}],{wait:async()=>{}});
   assert(r.limited);assert(r.complete);assert.equal(page,3,'Ivan is not in the list, so the walk goes to the end');
   assert.equal(r.profiles.find(p=>p.slackId==='U10').title,'Project Manager, Jet Whales');assert(r.profiles.some(p=>p.slackId==='U12'),'found by e-mail');}
@@ -58,11 +58,12 @@ const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}
 // Deactivated accounts are reported apart; an empty title is looked up in the custom «Должность» field.
 (async()=>{const calls=[];const r=await slackProfiles({slackToken:'x'},async url=>{calls.push(url);
   if(url.includes('users.list'))return {ok:true,members:[{id:'U1',profile:{real_name:'Lev Silaev'}},{id:'U9',deleted:true,profile:{real_name:'Old Colleague'}}],response_metadata:{next_cursor:''}};
-  if(url.includes('team.profile.get'))return {ok:true,profile:{fields:[{id:'Xf1',label:'Должность'},{id:'Xf2',label:'Хобби'}]}};
-  if(url.includes('users.profile.get'))return {ok:true,profile:{fields:{Xf2:{value:'Шахматы'},Xf1:{value:'Unity-разработчик'}}}};
+  if(url.includes('team.profile.get'))return {ok:true,profile:{fields:[{id:'Xf1',label:'Должность'},{id:'Xf2',label:'Хобби'},{id:'Xf3',label:'День рождения'},{id:'Xf4',label:'Telegram'}]}};
+  if(url.includes('users.profile.get'))return {ok:true,profile:{fields:{Xf2:{value:'Шахматы'},Xf1:{value:'Unity-разработчик'},Xf3:{value:'12.05'},Xf4:{value:'@lev_s'}}}};
   return {ok:false};},[{name:'Lev Silaev'},{name:'Old Colleague'}],{wait:async()=>{}});
- assert.equal(r.profiles.find(p=>p.slackId==='U1').title,'Unity-разработчик');assert.deepEqual(r.deleted.map(d=>d.slackId),['U9']);assert(!r.profiles.some(p=>p.slackId==='U9'));
- console.log('Team enrich: deactivated Slack accounts apart, role from the custom profile field passed');})().catch(e=>{console.error(e);process.exit(1);});
+ assert.equal(r.profiles.find(p=>p.slackId==='U1').title,'Unity-разработчик');assert.equal(r.profiles.find(p=>p.slackId==='U1').birthday,'--05-12');assert.deepEqual(r.profiles.find(p=>p.slackId==='U1').contacts,{telegram:'@lev_s'});
+ const lev=enrich([{member:{name:'Lev Silaev'},evidence:'x'}],r,new Map())[0].member;assert.equal(lev.birthday,'--05-12');assert.equal(lev.accounts.telegram.handle,'@lev_s');assert.deepEqual(r.deleted.map(d=>d.slackId),['U9']);assert(!r.profiles.some(p=>p.slackId==='U9'));
+ console.log('Team enrich: deactivated Slack accounts apart, role, birthday and Telegram from custom profile fields passed');})().catch(e=>{console.error(e);process.exit(1);});
 // early stop: once everyone wanted is found, no more pages
 (async()=>{let page=0;const r=await slackProfiles({slackToken:'x'},async url=>{if(!url.includes('users.list'))return {ok:false};const i=page++;return {ok:true,members:[{id:'U'+i,profile:{real_name:i===1?'Polina Samarina':'X'+i}}],response_metadata:{next_cursor:'c'+i}};},[{name:'Polina Samarina'}],{wait:async()=>{}});
  assert.equal(page,2);assert(r.complete);console.log('Team enrich: Slack walk stops once everyone is found passed');})().catch(e=>{console.error(e);process.exit(1);});

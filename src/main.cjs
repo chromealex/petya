@@ -633,7 +633,10 @@ function setupHandlers() {
   });
   require('./telegram-setup.cjs')({get app(){return app;},get clientDefaults(){return clientDefaults;},get handle(){return handle;},get memory(){return memory;},get modules(){return modules;},get saveSettings(){return saveSettings;},get settings(){return settings;},get shell(){return shell;},get telegramSource(){return telegramSource;},set telegramSource(v){telegramSource=v;}});
   handle('teamJiraSearch',query=>require('./team-jira.cjs').search(workspace,query));
-  handle('teamList',()=>({members:team.members(settings),notes:settings.teamRoles}));
+  handle('teamPhotoOptions',accounts=>require('./team-photos.cjs').options(require('./team.cjs').accountsOf(accounts),{nativeImage:require('electron').nativeImage}));
+  handle('teamPhotoPick',async()=>{const picked=await require('electron').dialog.showOpenDialog(win,{title:require('./interface-language.cjs').t('Фото участника'),properties:['openFile'],filters:[{name:'Images',extensions:['png','jpg','jpeg','webp']}]});if(picked.canceled||!picked.filePaths[0])return null;return require('./team-photos.cjs').fromFile(require('electron').nativeImage,fs.readFileSync(picked.filePaths[0]));});
+  // aliasHint: how people usually call this person («Полина, Поля»), shown as the field's placeholder.
+  handle('teamList',()=>({members:team.members(settings).map(m=>({...m,aliasHint:require('./name-ru.cjs').hints(m.name).join(', ')})),notes:settings.teamRoles}));
   handle('teamSave',data=>{if(!data||typeof data.notes!=='string'||data.notes.length>2000)throw Error('Заметки о команде: не более 2000 символов.');saveSettings({teamMembers:JSON.stringify(team.validate(data.members)),teamRoles:data.notes});return {saved:true};});
   handle('settings', publicSettings);
   handle('saveSettings', input => saveSettings(input));

@@ -28,15 +28,27 @@ async function perform(action,row,s,check,args){
   const to=transition.to?.name||transition.name;update(row,s,{status:to,category:transition.to?.statusCategory?.key||''});
   return {handled:true,text:item.key+' · статус: '+before.status+' → '+to,status:to,undo:{action:'status',args:{to:before.status}}};
  }
- if(action==='people'){const list=await api('/rest/api/3/user/assignable/search?'+new URLSearchParams({issueKey:item.key,maxResults:'30',...(args.query?{query:text(args.query,100)}:{})}));const now=await current(api,issue);return {options:[{id:'',label:'Не назначен',current:!now.assigneeId},...(list||[]).filter(u=>u.active!==false).map(u=>({id:u.accountId,label:u.displayName,current:u.accountId===now.assigneeId}))]};}
+ // People come from «Команда»: team members linked to Jira (Russian names, photos, roles) who can be assigned
+ // to this issue. Jira's assignable list is cached per project in the plugin's folder (it rarely changes).
+ if(action==='people'){
+  const project=item.key.split('-')[0],cache=require('../../extension-cache.cjs').store(s.dataRoot,'jira');
+  const assignable=await cache.get('assignable:'+item.site+':'+project,async()=>{const out=[];for(let start=0;start<1000;start+=100){const page=await api('/rest/api/3/user/assignable/search?'+new URLSearchParams({project,maxResults:'100',startAt:String(start)}));out.push(...(page||[]).filter(u=>u.active!==false&&u.accountType!=='app').map(u=>({id:u.accountId,name:u.displayName||''})));if(!page||page.length<100)break;}return out;});
+  const now=await current(api,issue),ids=new Set(assignable.map(u=>u.id));
+  const team=require('../../team.cjs').members(s.settings).filter(m=>m.jiraId&&ids.has(m.jiraId));
+  const options=[{id:'',label:'Не назначен',current:!now.assigneeId},...team.map(m=>({id:m.jiraId,label:m.name,who:m.name,hint:m.role||'',current:m.jiraId===now.assigneeId}))];
+  if(now.assigneeId&&!team.some(m=>m.jiraId===now.assigneeId))options.push({id:now.assigneeId,label:now.assignee,who:now.assignee,hint:'не в команде',current:true});
+  // Nobody of the team is linked to Jira yet: show Jira's list, and say how to make it the team's.
+  if(!team.length)options.push(...assignable.filter(u=>u.id!==now.assigneeId).slice(0,30).map(u=>({id:u.id,label:u.name,who:u.name})),{id:'',label:'Связать команду с Jira — «Обнови команду»',note:true,disabled:true});
+  return {options};
+ }
  if(action==='assignee'){
   const before=await current(api,issue),id=args.id?text(args.id,128):null;
-  if(id){const list=await api('/rest/api/3/user/assignable/search?'+new URLSearchParams({issueKey:item.key,accountId:id}));if(!(list||[]).some(u=>u.accountId===id))throw Error('Этого человека нельзя назначить на '+item.key+'.');}
+  if(id){const list=await api('/rest/api/3/user/assignable/search?'+new URLSearchParams({issueKey:item.key,accountId:id}));if(!(list||[]).some(u=>u.accountId===id)){require('../../extension-cache.cjs').store(s.dataRoot,'jira').forget('assignable:'+item.site+':'+item.key.split('-')[0]);throw Error('Этого человека нельзя назначить на '+item.key+'.');}}
   await api(issue+'/assignee',{method:'PUT',body:JSON.stringify({accountId:id})});
   const name=args.label?String(args.label).slice(0,100):id?'выбранный исполнитель':'не назначен';update(row,s,{assignee:id?name:''});
   return {handled:true,text:item.key+' · исполнитель: '+(before.assignee||'не назначен')+' → '+name,undo:{action:'assignee',args:{id:before.assigneeId||'',label:before.assignee||'не назначен'}}};
  }
- if(action==='priorities'){const [list,now]=await Promise.all([api('/rest/api/3/priority'),current(api,issue)]);return {options:(list||[]).map(p=>({id:p.id,label:p.name,current:p.id===now.priorityId}))};}
+ if(action==='priorities'){const cache=require('../../extension-cache.cjs').store(s.dataRoot,'jira');const [list,now]=await Promise.all([cache.get('priorities:'+item.site,()=>api('/rest/api/3/priority'),{ttl:7*86400000}),current(api,issue)]);return {options:(list||[]).map(p=>({id:p.id,label:p.name,current:p.id===now.priorityId}))};}
  if(action==='priority'){
   const before=await current(api,issue),id=text(String(args.id||''),32),list=await api('/rest/api/3/priority'),priority=(list||[]).find(p=>p.id===id);
   if(!priority)throw Error('Приоритет не найден.');
