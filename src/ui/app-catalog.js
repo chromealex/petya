@@ -233,7 +233,7 @@
    if(actions.children.length)details.append(actions);
 
    if(item.examples.length){
-    const box=make('section','','app-details-section app-says');box.append(make('h4','Что можно сказать'));
+    const box=make('section','','app-details-section app-says');box.append(make('h4','Примеры обращений'));
     const list=make('ul');
     for(const phrase of item.examples){
      const li=make('li'),b=button(phrase,'app-say');b.dataset.phrase=phrase;
