@@ -2,6 +2,7 @@
   "id": "google-play",
   "name": "Google Play",
   "description": "Карточка ANR: показатели, порог Google и динамика по дням",
+  "category": "gamedev",
   "settings": false,
   "scripts": [
     ["vitals-cards.js", "message-format.js"]

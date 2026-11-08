@@ -1,6 +1,7 @@
 {
   "name": "Вёрстка Unity",
   "description": "Макеты Figma и Zeplin, изображения и шрифты",
+  "category": "gamedev",
   "setting": "extension_layout",
   "scripts": [
     [

@@ -2,6 +2,7 @@
   "id": "python",
   "name": "Python",
   "description": "Изолированные расчёты, CSV и логи через локальный Docker",
+  "category": "analytics",
   "setting": "extension_python",
   "settings": false,
   "scripts": [

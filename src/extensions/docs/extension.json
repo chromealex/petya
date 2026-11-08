@@ -2,6 +2,7 @@
   "id": "docs",
   "name": "Документы",
   "description": "Поиск по Confluence и Notion в чате: карточки страниц с выдержкой и разделами",
+  "category": "docs",
   "settings": false,
   "feature": "feature.cjs",
   "scripts": [

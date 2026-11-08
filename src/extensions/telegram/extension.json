@@ -1,6 +1,7 @@
 {
   "name": "Telegram",
   "description": "Личный аккаунт и обсуждения",
+  "category": "comms",
   "setting": "module_telegram",
   "service": "telegram",
   "settings": true,

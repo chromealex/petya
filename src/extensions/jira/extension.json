@@ -1,6 +1,7 @@
 {
   "name": "Jira",
   "description": "Задачи, версии и отчёты",
+  "category": "team",
   "setting": "module_jira",
   "service": "jira",
   "settings": true,

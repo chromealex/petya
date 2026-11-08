@@ -1,6 +1,7 @@
 {
   "name": "Blender",
   "description": "Проверка и очистка анимаций",
+  "category": "gamedev",
   "setting": "extension_blender",
   "scripts": [
     [

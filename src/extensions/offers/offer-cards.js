@@ -9,8 +9,10 @@
   let installed=[];try{installed=(await window.petya.feature('extensionUI','catalog')).filter(e=>e.installed).map(e=>e.id);}catch{installed=[];}
   const body=k.el('div','offer-body');
   const list=k.el('ul','offer-list');
-  for(const item of offer.items){const li=k.el('li','offer-item');li.append(k.el('b',null,item.name),k.el('span',null,item.pitch));list.append(li);}
-  body.append(list);
+  const sentence=text=>String(text||'').charAt(0).toUpperCase()+String(text||'').slice(1)+(/[.!?]$/.test(text)?'':'.');
+  // One extension: its name is in the header, the body says what it will do. Several: name and what each does.
+  if(offer.items.length===1)body.append(k.el('p','offer-pitch',sentence(offer.items[0].pitch)));
+  else{for(const item of offer.items){const li=k.el('li','offer-item');li.append(k.el('b',null,item.name),k.el('span',null,sentence(item.pitch)));list.append(li);}body.append(list);}
   const done=offer.items.filter(i=>installed.includes(i.ext));
   const finish=text=>{card.querySelector('.kit-actions')?.remove();body.append(k.el('p','offer-done',text));};
   const actions=[];

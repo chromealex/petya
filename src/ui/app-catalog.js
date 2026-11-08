@@ -12,35 +12,80 @@
  // Turn on a service module and open its settings card; shared by the catalog and the settings quick start.
  window.enableAppModule=async id=>{if(!moduleEnabled(id)){const check=moduleChecks.get(id);if(!check)throw Error('Приложение не найдено.');check.checked=true;await check.onchange();if(!moduleEnabled(id))return false;}view('settings');const card=$('settings').querySelector('[data-service="'+id+'"]');if(card)window.revealSettings(card);return true;};
  window.openAppCatalog=async function(term=''){
- let extensions=await window.petya.feature('extensionUI','catalog');
+  let extensions=await window.petya.feature('extensionUI','catalog');
+  const groups=await window.petya.feature('extensionUI','categories').catch(()=>({categories:[],modules:{}}));
   const previous=document.activeElement,d=document.createElement('dialog');d.className='app-catalog';
   const make=(tag,text)=>Object.assign(document.createElement(tag),{textContent:text||''});
-  const head=make('header'),title=make('h2','Каталог приложений'),close=make('button'),search=make('input'),rows=make('div'),top=make('div');top.className='app-catalog-top';rows.className='app-catalog-rows';
+  const head=make('header'),title=make('h2','Каталог приложений'),close=make('button'),search=make('input'),rows=make('div'),top=make('div'),bar=make('div');top.className='app-catalog-top';rows.className='app-catalog-rows';bar.className='app-catalog-bar';bar.hidden=true;
   close.type='button';close.className='icon-button app-catalog-close';close.innerHTML=cross;close.title='Закрыть';close.setAttribute('aria-label','Закрыть каталог');close.onclick=()=>d.close();
   head.append(title,close);search.type='search';search.placeholder='Найти приложение';search.setAttribute('aria-label',search.placeholder);search.value=term;
-  function draw(){
-    rows.replaceChildren();const q=search.value.trim().toLocaleLowerCase();
-    for(const [id,name] of [...optionalModules,...extensions.filter(e=>!e.service&&e.setting).map(e=>[e.id,e.name])]){
-      const extension=extensions.find(e=>e.id===id),description=extension?.description||descriptions[id];
-      if(!(name+' '+description).toLocaleLowerCase().includes(q))continue;
-      const row=make('div'),icon=(glyph[id]||extension&&!extension.service)?make('span',glyph[id]||'◇'):make('img'),copy=make('div'),enabled=extension&&!extension.service?extension.installed:moduleEnabled(id),action=make('button',enabled?'Настроить':'Включить');
-      row.className='app-catalog-row';icon.className='app-catalog-icon';
-      if(icon.tagName==='IMG'){icon.src=id==='unity'?'../extensions/unity/icon.svg':'catalog-icons/'+id+'.svg';icon.alt='';}
-      else icon.setAttribute('aria-hidden','true');
-      copy.append(make('strong',name),make('small',description));action.type='button';if(extension&&!extension.settings&&enabled){action.textContent='Добавлено';action.disabled=true;}
-      action.onclick=async()=>{action.disabled=true;try{
-        // «Включить» adds the app and keeps the catalogue open; «Настроить» goes to its settings.
-        if(!enabled){if(extension&&!extension.service){await window.extensionHost.open(id,{stay:true});}else{const check=moduleChecks.get(id);check.checked=true;await check.onchange();if(!moduleEnabled(id))return;notice('«'+name+'» добавлено.');}extensions=await window.petya.feature('extensionUI','catalog');draw();return;}
-        if(extension&&!extension.service){await window.extensionHost.open(id);d.close();return;}
-        d.close();view('settings');const card=$('settings').querySelector('[data-service="'+id+'"]');if(card)window.revealSettings(card);
-      }finally{action.disabled=false;}};
-      const controls=make('div');controls.className='actions';controls.append(action);
-      if(enabled){const remove=make('button');remove.type='button';remove.className='icon-button';remove.innerHTML=trash;remove.title='Удалить';remove.setAttribute('aria-label','Удалить '+name);remove.onclick=async()=>{remove.disabled=true;try{await window.removeAddedApp(id);extensions=await window.petya.feature('extensionUI','catalog');draw();}catch(error){notice(error.message,true);remove.disabled=false;}};controls.append(remove);}
-      row.append(icon,copy,controls);rows.append(row);
-    }
-    if(!rows.children.length)rows.append(make('p','Приложение не найдено.'));
+  // Chosen, not yet added apps (kept across searches and redraws until added or cleared).
+  const chosen=new Set();
+  const items=()=>[...optionalModules.map(([id,name])=>({id,name,service:true,extension:extensions.find(e=>e.id===id)})),...extensions.filter(e=>!e.service&&e.setting).map(e=>({id:e.id,name:e.name,service:false,extension:e}))]
+   .map(item=>({...item,description:item.extension?.description||descriptions[item.id]||'',category:(item.service?groups.modules?.[item.id]:null)||item.extension?.category||'other',enabled:item.service?moduleEnabled(item.id):!!item.extension?.installed}));
+  // Adds several apps: extensions in one save, then service modules one by one (each may open its own connection).
+  async function addMany(list){
+   const ext=list.filter(i=>!i.service).map(i=>i.id),services=list.filter(i=>i.service);
+   if(ext.length)await window.extensionHost.openMany(ext);
+   for(const item of services){const check=moduleChecks.get(item.id);if(!check||moduleEnabled(item.id))continue;check.checked=true;await check.onchange();}
+   for(const item of list){chosen.delete(item.id);window.petya.feature('extensionOffers','unmute',item.id).catch(()=>{});}
+   extensions=await window.petya.feature('extensionUI','catalog');
+   const added=list.filter(i=>i.service?moduleEnabled(i.id):extensions.find(e=>e.id===i.id)?.installed);
+   notice(added.length===1?'«'+added[0].name+'» добавлено.':'Добавлено приложений: '+added.length+'.');
+   document.dispatchEvent(new Event('petya-extensions-changed'));draw();
   }
-  search.oninput=draw;top.append(head,search);d.append(top,rows);document.body.append(d);draw();d.showModal();search.focus();
+  function paintBar(){
+   bar.replaceChildren();bar.hidden=!chosen.size;if(!chosen.size)return;
+   const add=make('button','Добавить выбранные ('+chosen.size+')'),clear=make('button','Сбросить');add.type=clear.type='button';add.className='primary';
+   add.onclick=async()=>{add.disabled=true;try{await addMany(items().filter(i=>chosen.has(i.id)&&!i.enabled));}catch(e){notice(e.message,true);}finally{add.disabled=false;}};
+   clear.onclick=()=>{chosen.clear();draw();};
+   bar.append(make('span','Выбрано: '+chosen.size),clear,add);
+  }
+  function row(item){
+   const {id,name,description,extension,enabled}=item;
+   const line=make('div'),icon=(glyph[id]||extension&&!extension.service)?make('span',glyph[id]||'◇'):make('img'),copy=make('div'),action=make('button',enabled?'Настроить':'Включить');
+   line.className='app-catalog-row';icon.className='app-catalog-icon';
+   if(icon.tagName==='IMG'){icon.src=id==='unity'?'../extensions/unity/icon.svg':'catalog-icons/'+id+'.svg';icon.alt='';}
+   else icon.setAttribute('aria-hidden','true');
+   const pick=make('input');pick.type='checkbox';pick.className='app-catalog-pick';
+   if(enabled){pick.checked=true;pick.disabled=true;pick.title='Уже добавлено';pick.setAttribute('aria-label',name+' — уже добавлено');}
+   else{pick.checked=chosen.has(id);pick.setAttribute('aria-label','Выбрать '+name);pick.onchange=()=>{if(pick.checked)chosen.add(id);else chosen.delete(id);draw();};}
+   copy.append(make('strong',name),make('small',description));action.type='button';if(extension&&!extension.service&&!extension.settings&&enabled){action.textContent='Добавлено';action.disabled=true;}
+   action.onclick=async()=>{action.disabled=true;try{
+     // «Включить» adds the app and keeps the catalogue open; «Настроить» goes to its settings.
+     if(!enabled){if(extension&&!extension.service){await window.extensionHost.open(id,{stay:true});window.petya.feature('extensionOffers','unmute',id).catch(()=>{});}else{const check=moduleChecks.get(id);check.checked=true;await check.onchange();if(!moduleEnabled(id))return;notice('«'+name+'» добавлено.');}chosen.delete(id);extensions=await window.petya.feature('extensionUI','catalog');draw();return;}
+     if(extension&&!extension.service){await window.extensionHost.open(id);d.close();return;}
+     d.close();view('settings');const card=$('settings').querySelector('[data-service="'+id+'"]');if(card)window.revealSettings(card);
+   }finally{action.disabled=false;}};
+   const controls=make('div');controls.className='actions';controls.append(action);
+   if(enabled){const remove=make('button');remove.type='button';remove.className='icon-button';remove.innerHTML=trash;remove.title='Удалить';remove.setAttribute('aria-label','Удалить '+name);remove.onclick=async()=>{remove.disabled=true;try{await window.removeAddedApp(id);extensions=await window.petya.feature('extensionUI','catalog');draw();}catch(error){notice(error.message,true);remove.disabled=false;}};controls.append(remove);}
+   line.append(pick,icon,copy,controls);return line;
+  }
+  function draw(){
+   const keep=rows.scrollTop;rows.replaceChildren();const q=search.value.trim().toLocaleLowerCase();
+   const all=items(),order=[...(groups.categories||[]),{id:'other',name:'Другое',description:''}];
+   for(const group of order){
+    const members=all.filter(i=>i.category===group.id),shown=members.filter(i=>(i.name+' '+i.description+' '+group.name).toLocaleLowerCase().includes(q));
+    if(!shown.length)continue;
+    const section=make('section'),header=make('div'),label=make('div'),missing=members.filter(i=>!i.enabled),added=members.length-missing.length;
+    section.className='app-catalog-group';section.dataset.category=group.id;header.className='app-catalog-group-head';
+    // The category checkbox picks all of its missing apps; single rows pick a part.
+    const whole=make('input');whole.type='checkbox';whole.className='app-catalog-pick';
+    const picked=missing.filter(i=>chosen.has(i.id)).length;
+    whole.checked=!missing.length||picked===missing.length;whole.indeterminate=picked>0&&picked<missing.length;whole.disabled=!missing.length;
+    whole.setAttribute('aria-label',missing.length?'Выбрать всю категорию «'+group.name+'»':'Категория «'+group.name+'» добавлена полностью');
+    whole.onchange=()=>{for(const i of missing){if(whole.checked)chosen.add(i.id);else chosen.delete(i.id);}draw();};
+    label.append(make('strong',group.name),make('small',added+' из '+members.length+' добавлено'+(group.description?' · '+group.description:'')));
+    const addAll=make('button',missing.length?(missing.length<members.length?'Добавить остальные ('+missing.length+')':'Добавить всю категорию'):'Всё добавлено');addAll.type='button';addAll.disabled=!missing.length;
+    addAll.onclick=async()=>{addAll.disabled=true;try{await addMany(missing);}catch(e){notice(e.message,true);addAll.disabled=false;}};
+    header.append(whole,label,addAll);section.append(header);
+    for(const item of shown)section.append(row(item));
+    rows.append(section);
+   }
+   if(!rows.children.length)rows.append(make('p','Приложение не найдено.'));
+   rows.scrollTop=keep;paintBar();
+  }
+  search.oninput=draw;top.append(head,search);d.append(top,rows,bar);document.body.append(d);draw();d.showModal();search.focus();
   d.onclose=()=>{d.remove();if(document.activeElement===document.body)previous?.focus();};
  };
 })();
