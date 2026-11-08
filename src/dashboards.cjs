@@ -32,7 +32,7 @@ function widget(value){
 function dashboard(value){
   const widgets=(Array.isArray(value?.widgets)?value.widgets:[]).slice(0,LIMIT.widgets).map(w=>{try{return widget(w);}catch{return null;}}).filter(Boolean);
   return {id:String(value?.id||randomUUID()),title:text(value?.title,LIMIT.title)||'Дашборд',projectId:text(value?.projectId,80)||'general',widgets,
-    ...(value?.fromChat?{fromChat:text(value.fromChat,80),synced:Number(value.synced)||0}:{}),at:Number(value?.at)||Date.now()};
+    ...(value?.fromChat?{fromChat:text(value.fromChat,80),synced:Number(value.synced)||0}:{}),...(value?.demo?{demo:true}:{}),at:Number(value?.at)||Date.now()};
 }
 // Shared file: definitions only. Snapshots carry someone's data, so they stay on this computer.
 function shareable(d){

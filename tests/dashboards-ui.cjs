@@ -5,7 +5,8 @@ process.env.PETYA_SMOKE_TEST='1';
 const assert=require('node:assert/strict');
 const shots=process.env.DASH_SHOTS||'';
 require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
- const js=code=>win.webContents.executeJavaScript(code);
+ let step='';const js=code=>{step=code.slice(0,140);return win.webContents.executeJavaScript(code).catch(e=>{throw Error(e.message+' IN '+step);});};
+ win.webContents.on('console-message',(e)=>{if(e.level==='error'||e.level===3)console.log('RENDERER',e.message);});
  const wait=async(code,label)=>{for(let i=0;i<200;i++){if(await js(code))return;await new Promise(r=>setTimeout(r,60));}throw Error('Timeout: '+(label||code)+' DBG '+await js("JSON.stringify({screen:document.querySelector('.dash-screen')?.hidden,widgets:[...document.querySelectorAll('.dash-widget')].map(w=>w.dataset.kind+':'+w.querySelector('h3').textContent),toasts:[...document.querySelectorAll('.kit-toast,#notice')].map(t=>t.textContent).join('|'),cls:document.querySelector('#home .chat-shell')?.className})"));};
  const shot=async name=>{if(!shots)return;await js("document.getElementById('boot-splash')?.remove();document.querySelectorAll('body>.onb').forEach(n=>n.remove());document.documentElement.classList.remove('boot-landing');document.querySelectorAll('.kit-toast').forEach(n=>n.remove())");if(!win.isVisible())win.show();win.setSize(1440,900);win.webContents.invalidate();await new Promise(r=>setTimeout(r,700));const img=await win.webContents.capturePage();require('node:fs').writeFileSync(require('node:path').join(shots,name+'.png'),img.toPNG());};
  const s=globalThis.petyaTestServices;
@@ -37,7 +38,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("[...document.querySelectorAll('.kit-menu-item')].find(b=>b.textContent==='Во всю ширину').click()");
  await wait("document.querySelector('.dash-widget[data-kind=extension]')?.dataset.size==='w'",'resized');
  // Adder: ready widgets of connected apps.
- await js("[...document.querySelectorAll('.dash-head-tools button')].find(b=>b.textContent==='Добавить виджет').click()");
+ await js("document.querySelector('.dash-head-tools .dash-add').click()");
  await wait("[...document.querySelectorAll('.dash-chip')].some(c=>c.textContent.includes('Новые крэши'))",'catalog chips');
  await shot('dashboard-adder');
  await js("[...document.querySelectorAll('.dash-chip')].find(c=>c.textContent.includes('Новые крэши')).click()");
@@ -46,7 +47,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("document.querySelector('.dash-head-tools .dash-tool').click()");
  await wait("[...document.querySelectorAll('.kit-menu-item')].some(b=>b.textContent.startsWith('Показывать при открытии проекта'))");
  await js("[...document.querySelectorAll('.kit-menu-item')].find(b=>b.textContent.startsWith('Показывать при открытии проекта')).click()");
- await wait("[...document.querySelectorAll('.dash-badge')].some(b=>b.textContent==='Стартовый экран проекта')",'start badge');
+ await wait("document.querySelector('.dash-sub')?.textContent.includes('стартовый экран проекта')",'start screen noted under the title');
  // Back to the chat; a new chat shows the start dashboard under «Чем помочь?».
  await js("document.querySelector('.dash-head-title .dash-tool').click()");
  await wait("document.querySelector('.dash-screen').hidden&&getComputedStyle(document.querySelector('#home .chat-feed')).display!=='none'",'back to chat');
@@ -94,6 +95,14 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("selectDialogueTopic('')");await wait("document.querySelector('.dash-screen').hidden");
  await mjs("window.petyaDashboard.openMain()");await wait("!document.querySelector('.dash-screen').hidden&&document.querySelector('.dash-screen').dataset.id==="+JSON.stringify(dashId),'opened in the main window');
  mini.close();
+ // The analytics example: KPI tiles and line charts, marked as made-up data.
+ await js("window.openDashboardExample('')");
+ await wait("document.querySelector('.dash-head h1')?.textContent==='Пример · аналитика игры'&&document.querySelectorAll('.dash-widget .chart-kpi-tile').length===5&&document.querySelectorAll('.dash-widget .chart-line-svg').length===3",'analytics example');
+ assert(await js("!!document.querySelector('.dash-tag.demo')&&!!document.querySelector('.dash-note')"),'made-up numbers are marked');
+ // Rows are full: every row of six columns adds up to six.
+ assert(await js("(()=>{const rows=new Map();for(const w of document.querySelectorAll('.dash-screen .dash-widget')){const top=Math.round(w.getBoundingClientRect().top);rows.set(top,(rows.get(top)||0)+Number(w.style.getPropertyValue('--span')));}return [...rows.values()].every(v=>v===6);})()"),'no holes in the grid');
+ await shot('example');
+ await js("document.querySelector('.dash-screen').scrollTop=2000");await shot('example-bottom');
  console.log('Dashboards UI: chat → dashboard, refresh, sidebar, widget menu, adder, start screen, pin and compose passed');
 }};
 require('../src/main.cjs');

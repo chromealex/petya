@@ -56,7 +56,7 @@ function setup(s){
   }
   function view(d){
     const c=loadCache();
-    return {id:d.id,title:d.title,projectId:d.projectId,shared:d.shared?{folder:d.shared.folder}:null,fromChat:d.fromChat||'',start:state().dashboardStart[d.projectId]===d.id,
+    return {id:d.id,title:d.title,projectId:d.projectId,shared:d.shared?{folder:d.shared.folder}:null,fromChat:d.fromChat||'',demo:!!d.demo,start:state().dashboardStart[d.projectId]===d.id,
       widgets:d.widgets.map(w=>{const hit=w.source.kind==='snapshot'?{data:w.data,text:w.text,at:w.at}:c.get(cacheKey(d,w))||{};
         return {id:w.id,title:w.title,size:w.size,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,
           data:hit.data||null,text:hit.text||'',at:hit.at||0,error:hit.error||'',count:hit.count??null,loading:running.has(cacheKey(d,w))};})};
@@ -161,7 +161,7 @@ function setup(s){
   // A card added from the chat shows its data at once; its source refreshes it afterwards.
   const seeds=new WeakMap();
   function seed(d,w){const m=seeds.get(w);if(!m||w.source.kind==='snapshot')return;const c=loadCache(),key=cacheKey(d,w);if(c.has(key))return;
-    const data={...(m.extensionData||{})};if(m.jiraItems)data.jiraItems=m.jiraItems;c.set(key,{data,text:String(m.text||'').slice(0,2000),at:m.at||Date.now(),error:''});storeCache();}
+    const data={...(m.extensionData||{})};if(m.jiraItems)data.jiraItems=m.jiraItems;c.set(key,{data,text:String(m.text||'').slice(0,2000),at:m.at||Date.now(),error:'',count:Array.isArray(data.jiraItems)?data.jiraItems.length:null});storeCache();}
   const same=(a,b)=>JSON.stringify(a.source)===JSON.stringify(b.source)&&(a.source.kind!=='snapshot'||a.chat?.index===b.chat?.index);
   function add(d,w){const i=d.widgets.findIndex(x=>same(x,w));if(i>=0){d.widgets[i]={...d.widgets[i],source:w.source,chat:w.chat};seeds.set(d.widgets[i],seeds.get(w));seed(d,d.widgets[i]);}else{if(d.widgets.length>=model.LIMIT.widgets)throw Error('В дашборде уже '+model.LIMIT.widgets+' виджетов.');d.widgets.push(w);seed(d,w);}}
   // A dashboard made from a chat takes the chat's new cards when it is opened.
@@ -275,6 +275,8 @@ function setup(s){
       if(kept)d.widgets=d.widgets.filter(w=>w.source.kind==='snapshot');else state().dashboards=state().dashboards.filter(x=>x.id!==id);
       if(state().dashboardStart[d.projectId]===id)state().dashboardStart[d.projectId]=sharedId;save();changed();
       return {id:sharedId,file:path.join(model.DIR,file),folder:path.basename(dir),kept};},
+    // «Пример: аналитика игры»: made-up numbers, to see analytics on a dashboard before an analytics app is connected.
+    example:projectId=>{const e=require('../dashboard-example.cjs').example();const d=commit(model.dashboard({...e,projectId:projectId||s.dialogue.state.activeProjectId||'general'}));return summary(d);},
     copy:id=>{const d=find(id);const copy=model.dashboard({title:d.title,projectId:d.projectId,widgets:d.widgets.map(w=>({...w,id:undefined}))});return summary(commit(copy));}
   };
   const api={turn,list:all,find,view,refresh,fromChat,compose,onChange:null,

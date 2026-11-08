@@ -20,6 +20,8 @@
  function close(){if(!openId)return;call('watch',openId,false).catch(()=>{});openId='';current=null;screen.hidden=true;shell?.classList.remove('showing-dashboard');markSidebar();}
 
  // --- One widget -------------------------------------------------------------------------------------------------
+ // Loading without data yet: a calm placeholder of the card's shape, not a line of text.
+ const skeleton=()=>{const box=el('div','dash-skeleton');box.setAttribute('aria-label','Загружаю…');for(const width of [72,100,88,56])box.append(Object.assign(el('span'),{style:'width:'+width+'%'}));return box;};
  async function drawBody(body,w){
   body.replaceChildren();
   if(w.data&&Object.keys(w.data).length){
@@ -27,19 +29,23 @@
    try{await window.extensionHost?.render(holder,{role:'assistant',extensionData:w.data,...w.data});}catch{}
    if(!holder.childElementCount&&w.text)holder.append(el('p','dash-widget-text',w.text));
   }else if(w.text)body.append(el('p','dash-widget-text',w.text));
-  else if(!w.error)body.append(el('p','dash-widget-empty',w.loading?'Загружаю…':'Пока нет данных.'));
+  else if(w.loading||!w.at&&!w.error)body.append(skeleton());
+  else if(!w.error)body.append(el('p','dash-widget-empty','Пока нет данных.'));
  }
- function meta(w){
+ function meta(w,d){
   const box=el('div','dash-widget-meta');
-  if(w.loading)box.append(el('span','dash-widget-loading','Обновляю…'));
-  else if(w.at){const t=window.timeElement?window.timeElement(w.at,{prefix:'Обновлено: '}):el('span',null,new Date(w.at).toLocaleString(window.petyaLocale));box.append(w.live?'обновлено ':'снимок · ',t);}
-  if(!w.live)box.classList.add('snapshot');
+  // An example is marked once, in the dashboard's header; its widgets need no «снимок» each.
+  if(d?.demo){box.hidden=true;return box;}
+  if(!w.live)box.append(el('span','dash-tag','снимок'));
+  if(w.loading)box.append(el('span','dash-widget-loading','обновляю…'));
+  else if(w.at){const t=window.timeElement?window.timeElement(w.at,{prefix:'Обновлено: '}):el('span',null,new Date(w.at).toLocaleString(window.petyaLocale));box.append(t);}
   return box;
  }
  function widget(d,w,{compact=false}={}){
   const card=el('article','dash-widget');card.dataset.size=w.size;card.dataset.id=w.id;card.dataset.kind=w.kind;
-  const head=el('header','dash-widget-head'),title=el('h3','dash-widget-title',w.title);title.title=w.describe;
-  head.append(title,meta(w));
+  const head=el('header','dash-widget-head'),names=el('div','dash-widget-names'),title=el('h3','dash-widget-title',w.title);title.title=w.describe;
+  names.append(title,meta(w,d));head.append(names);
+  if(Number.isFinite(w.count)&&w.count!==null)head.append(el('span','dash-count',String(w.count)));
   if(!compact){
    const handle=el('span','dash-widget-drag');handle.innerHTML=icon(ICON.drag);handle.title='Перетащите, чтобы переставить';head.prepend(handle);
    const tools=el('div','dash-widget-tools');
@@ -84,28 +90,44 @@
  function grid(d,{compact=false}={}){
   const box=el('div','dash-grid'+(compact?' compact':''));
   for(const w of d.widgets)box.append(widget(d,w,{compact}));
+  pack(box);
   if(!compact)dragging(box,d);
   return box;
+ }
+ // Six columns; a widget takes 2, 3, 4 or 6 of them. A row is always full: when the next widget does not fit,
+ // the last one in the row grows to the edge — no holes. Widgets of one row share its height.
+ const SPAN={s:2,m:3,l:4,w:6};
+ function pack(box){
+  const cards=[...box.children].filter(n=>n.classList.contains('dash-widget'));let used=0,last=null;
+  const close=()=>{if(last&&used<6)last.style.setProperty('--span',String(Number(last.style.getPropertyValue('--span'))+6-used));used=0;last=null;};
+  for(const card of cards){const span=SPAN[card.dataset.size]||3;if(used+span>6)close();card.style.setProperty('--span',String(span));used+=span;last=card;if(used===6)close();}
+  close();
  }
  function dragging(box,d){
   let moving=null;
   box.addEventListener('dragstart',e=>{moving=e.target.closest('.dash-widget');if(!moving)return;moving.classList.add('moving');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',moving.dataset.id);});
   box.addEventListener('dragover',e=>{if(!moving)return;e.preventDefault();const over=e.target.closest('.dash-widget');if(!over||over===moving)return;const r=over.getBoundingClientRect();const after=e.clientY>r.top+r.height/2||e.clientX>r.left+r.width/2&&e.clientY>r.top;over[after?'after':'before'](moving);});
-  box.addEventListener('dragend',()=>{if(!moving)return;moving.classList.remove('moving');moving=null;call('move',d.id,[...box.children].map(n=>n.dataset.id)).then(paint).catch(fail);});
+  box.addEventListener('dragend',()=>{if(!moving)return;moving.classList.remove('moving');moving=null;pack(box);call('move',d.id,[...box.children].map(n=>n.dataset.id)).then(paint).catch(fail);});
  }
  function header(d){
   const head=el('header','dash-head');
   const left=el('div','dash-head-title');
   if(d.fromChat){const back=button('К чату',ICON.back,()=>openChat(d.fromChat),'dash-tool');left.append(back);}
+  const names=el('div','dash-head-names');
   const h=el('h1',null,d.title);h.title='Нажмите, чтобы переименовать';h.tabIndex=0;h.onclick=async()=>{const v=await ask('Название дашборда',d.title);if(v)call('rename',d.id,v).then(paint).catch(fail);};
-  left.append(h);
-  const badges=el('div','dash-badges');
-  badges.append(el('span','dash-badge'+(d.shared?' shared':''),d.shared?'Общий · '+d.shared.folder+'/.petya':'Личный'));
-  if(d.start)badges.append(el('span','dash-badge','Стартовый экран проекта'));
-  left.append(badges);
+  // One quiet line under the title: whose it is, how many widgets, when it was last refreshed.
+  const sub=el('div','dash-sub');
+  if(d.demo)sub.append(el('span','dash-tag demo','Демо-данные'));
+  sub.append(el('span',null,d.shared?'Общий · '+d.shared.folder+'/.petya':'Личный'));
+  const count=d.widgets.length;sub.append(el('span',null,count+' '+(count%10===1&&count%100!==11?'виджет':count%10>=2&&count%10<=4&&(count%100<10||count%100>=20)?'виджета':'виджетов')));
+  const latest=Math.max(0,...d.widgets.filter(w=>w.live).map(w=>w.at||0));
+  if(latest&&window.timeElement){const s=el('span');s.append('обновлено ',window.timeElement(latest));sub.append(s);}
+  if(d.start)sub.append(el('span',null,'стартовый экран проекта'));
+  names.append(h,sub);left.append(names);
   const tools=el('div','dash-head-tools');
-  tools.append(button('Обновить всё',null,()=>call('refresh',d.id,'').then(paint).catch(fail)),
-   button('Добавить виджет',null,()=>adder.hidden?openAdder(d):(adder.hidden=true),'primary'));
+  const refresh=button('Обновить всё',ICON.refresh,()=>{refresh.classList.add('loading');call('refresh',d.id,'').then(paint).catch(fail).finally(()=>refresh.classList.remove('loading'));},'dash-ghost');refresh.append(' Обновить');
+  const add=button('Добавить виджет',ICON.plus,()=>adder.hidden?openAdder(d):(adder.hidden=true),'primary dash-add');add.append(' Виджет');
+  tools.append(refresh,add);
   const more=button('Действия с дашбордом',ICON.more,()=>kit().menu(more,async()=>dashboardMenu(d),o=>o.run()),'dash-tool');tools.append(more);
   // Delete is the red trash can (AGENTS.md → Interface rules).
   if(window.deleteButton)tools.append(window.deleteButton(d.shared?'Удалить дашборд и его файл в папке проекта':'Удалить дашборд',()=>removeDashboard(d)));
@@ -139,16 +161,20 @@
   const ready=el('div','dash-adder-ready');
   adder.append(form,el('p','small','Готовые виджеты подключённых приложений:'),ready);
   try{const rows=await call('catalog',d.projectId);if(!rows.length)ready.append(el('p','small','Подключите Jira, «Крэши», «Отзывы», «Сборки» или «Календарь» — их данные можно держать на дашборде. Любую карточку из чата можно добавить через «•••» → «В дашборд…».'));
+   const demo=el('button','dash-chip demo');demo.type='button';demo.append(el('b',null,'Пример'),' Аналитика игры');demo.title='Отдельный дашборд с выдуманными числами: DAU, выручка, удержание, воронка';demo.onclick=()=>example(d.projectId);ready.append(demo);
    for(const r of rows){const chip=el('button','dash-chip');chip.type='button';chip.append(el('b',null,r.app),' '+r.title);chip.onclick=()=>call('addSource',d.id,r.source,r.title).then(paint).catch(fail);ready.append(chip);}}catch(e){ready.append(el('p','small',e.message));}
   input.focus();
  }
  function paint(d){
   if(!d||d.id!==openId)return;current=d;
   const focus=document.activeElement?.closest?.('.dash-widget')?.dataset.id;
-  screen.replaceChildren(header(d),adder,d.widgets.length?grid(d):empty(d));
+  screen.replaceChildren(header(d),...(d.demo?[demoNote()]:[]),adder,d.widgets.length?grid(d):empty(d));
   if(focus)screen.querySelector('.dash-widget[data-id="'+focus+'"] .dash-tool')?.focus();
  }
- function empty(d){const box=el('div','dash-empty');box.append(el('h2',null,'Пусто'),el('p',null,'Добавьте виджет сверху или откройте чат и нажмите «•••» → «В дашборд…» у ответа с карточкой.'));const b=button('Добавить виджет',null,()=>openAdder(d),'primary');box.append(b);return box;}
+ function empty(d){const box=el('div','dash-empty');const ic=el('div','dash-empty-icon');ic.innerHTML=icon(ICON.grid);box.append(ic,el('h2',null,'Пока пусто'),el('p',null,'Добавьте виджет или откройте чат и выберите «•••» → «В дашборд…» у ответа с карточкой.'));const row=el('div','dash-empty-actions');row.append(button('Добавить виджет',null,()=>openAdder(d),'primary'),button('Посмотреть пример',null,()=>example(d.projectId)));box.append(row);return box;}
+ function demoNote(){const box=el('div','dash-note');box.append(el('span',null,'Это пример с выдуманными числами. Подключите аналитику игры — и такие виджеты покажут ваши данные; карточки из чата добавляются через «•••» → «В дашборд…».'));return box;}
+ async function example(projectId){try{const d=await call('example',projectId||'');await changed();open(d.id);}catch(e){fail(e);}}
+ window.openDashboardExample=example;
  async function open(id){
   try{
    if(openId&&openId!==id)call('watch',openId,false).catch(()=>{});
@@ -167,7 +193,7 @@
  // Widgets report their refresh; the open screen and the start dashboard repaint.
  let pending=null;
  window.petyaEvents.onDashboards?.(state=>{
-  if(state.id===openId&&current){const w=current.widgets.find(x=>x.id===state.widgetId);if(w&&state.loading){w.loading=true;const node=screen.querySelector('.dash-widget[data-id="'+state.widgetId+'"] .dash-widget-meta');node?.replaceWith(meta(w));}}
+  if(state.id===openId&&current){const w=current.widgets.find(x=>x.id===state.widgetId);if(w&&state.loading){w.loading=true;const node=screen.querySelector('.dash-widget[data-id="'+state.widgetId+'"] .dash-widget-meta');node?.replaceWith(meta(w,current));}}
   clearTimeout(pending);pending=setTimeout(async()=>{if(openId&&state.id===openId)paint(await call('peek',openId).catch(()=>null));if(start?.dataset.id===state.id)drawStart(true);},150);
  });
 
@@ -233,7 +259,13 @@
   if(topic()){start.hidden=true;if(start.dataset.id)call('watch',start.dataset.id,false).catch(()=>{});start.dataset.id='';return;}
   const mine=++startRevision;let d=null;try{d=await call('startOf','');}catch{}
   if(mine!==startRevision)return;
-  if(!d){start.hidden=true;start.dataset.id='';welcome.classList.remove('with-dashboard');return;}
+  if(!d){welcome.classList.remove('with-dashboard');start.dataset.id='';
+   // No dashboards in the project yet: one quiet line that they exist, with the analytics example.
+   await loadLists().catch(()=>{});if(mine!==startRevision)return;
+   const any=[...lists.values()].some(rows=>rows.length);start.hidden=any;if(any)return;
+   const hint=el('p','dash-hint'),ic=el('span','dash-hint-icon');ic.innerHTML=icon(ICON.grid);
+   hint.append(ic,'Дашборды: карточки чата на одном экране, обновляются сами. ',button('Пример аналитики',null,()=>example(''),'dash-link'));
+   start.replaceChildren(hint);return;}
   if(start.dataset.id!==d.id)call('watch',d.id,true).catch(()=>{});
   start.dataset.id=d.id;start.hidden=false;welcome.classList.add('with-dashboard');
   const head=el('div','dash-start-head'),link=button('Открыть «'+d.title+'»',null,()=>open(d.id),'quiet');

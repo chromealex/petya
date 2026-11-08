@@ -13,6 +13,20 @@ meetings, charts. A widget keeps its **source**, not only its data, so it refres
   to the first source that accepts it; phrases without a source are named in the reply.
 - **On the dashboard**: «Добавить виджет» — a phrase, or one of the ready widgets of connected apps.
 
+- **Example**: «Пример аналитики» (on the start screen of a project without dashboards, in «Добавить виджет» and on
+  an empty dashboard) makes «Пример · аналитика игры» with made-up DAU, revenue, ARPDAU, retention, crash-free,
+  platforms, countries and a tutorial funnel (`src/dashboard-example.cjs`), marked «Демо-данные».
+
+## Layout
+Six columns; a widget spans 2, 3, 4 or 6 (`s`, `m`, `l`, `w`). Rows are always full: when the next widget does
+not fit, the last one in the row grows to the edge, and widgets of a row share its height. Cards drawn inside a
+widget lose their own frame. Below 1100 px: two columns.
+
+## Charts for analytics
+The charts extension draws `donut`, `bars`, `line` (`labels` + `series`, hover values, legend toggles) and `kpi`
+(tiles with value, change — green when it moves the good way, `better: 'up'|'down'`, `deltaUnit: '%'|'pp'` — and
+a trend sparkline). An analytics extension answers with `extensionData.charts` in these shapes.
+
 ## Sources (`src/dashboards.cjs`)
 | Kind | What | Refresh |
 |---|---|---|

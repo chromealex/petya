@@ -27,9 +27,10 @@
   const grid=el('div','dash-grid compact');
   for(const w of d.widgets){
    const box=el('article','dash-widget');box.dataset.size=w.size;box.dataset.kind=w.kind;
-   const h=el('header','dash-widget-head'),meta=el('div','dash-widget-meta'+(w.live?'':' snapshot'));
-   if(w.loading)meta.append(el('span','dash-widget-loading','Обновляю…'));else if(w.at&&window.timeElement)meta.append(w.live?'обновлено ':'снимок · ',window.timeElement(w.at,{prefix:'Обновлено: '}));
-   h.append(el('h3','dash-widget-title',w.title),meta);
+   const h=el('header','dash-widget-head'),names=el('div','dash-widget-names'),meta=el('div','dash-widget-meta');
+   if(!w.live)meta.append(el('span','dash-tag','снимок'));
+   if(w.loading)meta.append(el('span','dash-widget-loading','обновляю…'));else if(w.at&&window.timeElement)meta.append(window.timeElement(w.at,{prefix:'Обновлено: '}));
+   names.append(el('h3','dash-widget-title',w.title),meta);h.append(names);
    const body=el('div','dash-widget-body');if(w.error)body.append(el('p','dash-widget-error',w.error));
    const holder=el('div','dash-widget-content');body.append(holder);
    if(w.data&&Object.keys(w.data).length)render(holder,w.data).then(()=>{if(!holder.childElementCount&&w.text)holder.append(el('p','dash-widget-text',w.text));});
