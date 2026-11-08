@@ -140,31 +140,26 @@ let lastDecompose = null;
 function renderDecomposeProgress(state) {
   const box = $('decompose-progress'); lastDecompose = state;
   if (!state) { box.hidden = true; return; }
-  // One line like the chat's steps; the agents open on click and stay open while the run goes on.
+  // The same line as the chat's «Думаю…»: what Petya does now and for how long; the agents open on click.
   if (state.stage === 'starting') box.open = false;
-  box.hidden = false; box.dataset.stage = state.stage;
-  $('decompose-stage').textContent = decomposeStageText(state);
-  // A real percentage once the work is measured; before that, and for a single planning request, the stage only.
-  const measured = Number.isFinite(state.percent) && (state.percent > 0 || state.stage === 'reading' || state.stage === 'merging') && !['starting', 'fetching', 'error'].includes(state.stage);
-  const bar = $('decompose-bar');
-  if (measured) { bar.value = state.percent; $('decompose-percent').textContent = state.percent + '%'; } else { bar.removeAttribute('value'); $('decompose-percent').textContent = ''; }
-  bar.hidden = state.stage === 'error';
-  const list = $('decompose-agents'); list.replaceChildren();
-  for (const agent of state.agents || []) {
-    const item = document.createElement('li'); item.className = 'decompose-agent'; item.dataset.state = agent.state;
-    const head = document.createElement('div'); head.className = 'decompose-agent-head';
-    const name = document.createElement('strong'); name.textContent = 'Агент ' + agent.n;
-    const count = document.createElement('span'); count.textContent = `${agent.done}/${agent.total} · ${AGENT_STATE[agent.state] || agent.state}`;
-    head.append(name, count);
-    const range = document.createElement('span'); range.className = 'small'; range.textContent = agent.current ? 'Сейчас: ' + agent.current : 'Часть: ' + agent.range;
-    const own = document.createElement('progress'); own.max = Math.max(1, agent.total); own.value = agent.done; own.setAttribute('aria-label', 'Агент ' + agent.n + ': ' + agent.done + ' из ' + agent.total);
-    item.append(head, own, range); list.append(item);
-  }
-  list.hidden = !(state.agents || []).length;
-  box.classList.toggle('single', list.hidden); if (list.hidden) box.open = false;
-  // The collapsed line still says what the agents do: how many read now and how many parts are done.
+  box.hidden = false; box.dataset.stage = state.stage; box.classList.toggle('live', !!state.busy);
   const agents = state.agents || [], reading = agents.filter(a => a.state === 'reading').length;
-  if (agents.length && state.busy) $('decompose-stage').textContent += ` · ${agents.reduce((n, a) => n + a.done, 0)} из ${agents.reduce((n, a) => n + a.total, 0)}, агентов: ${reading || agents.length}`;
+  const measured = state.busy && Number.isFinite(state.percent) && (state.percent > 0 || ['reading', 'merging'].includes(state.stage)) && !['starting', 'fetching'].includes(state.stage);
+  let text = decomposeStageText(state);
+  if (agents.length && state.busy) text += ` · ${agents.reduce((n, a) => n + a.done, 0)} из ${agents.reduce((n, a) => n + a.total, 0)}, агентов: ${reading || agents.length}`;
+  if (measured) text += ` · ${state.percent}%`;
+  $('decompose-stage').textContent = text;
+  const time = $('decompose-time'), started = Number(state.startedAt) || Date.now();
+  if (state.busy) { time.dataset.started = String(started); time.textContent = window.formatDuration?.(Date.now() - started) || ''; }
+  else { delete time.dataset.started; time.textContent = state.startedAt ? window.formatDuration?.((Number(state.at) || Date.now()) - started) || '' : ''; }
+  const list = $('decompose-agents'); list.replaceChildren();
+  for (const agent of agents) {
+    const item = document.createElement('li'); item.className = agent.state === 'reading' ? 'current' : 'done'; item.dataset.state = agent.state;
+    item.textContent = `Агент ${agent.n} · ${agent.done} из ${agent.total} · ${agent.current ? 'читает: ' + agent.current : (AGENT_STATE[agent.state] || agent.state) + ' — ' + agent.range}`;
+    list.append(item);
+  }
+  list.hidden = !agents.length;
+  box.classList.toggle('single', list.hidden); if (list.hidden) box.open = false;
 }
 $('decompose-progress').addEventListener('click', event => { if (event.target.closest('summary') && $('decompose-progress').classList.contains('single')) event.preventDefault(); });
 window.petyaEvents.onDecompose(state => { if (!$('workspace-card').hidden || state.busy) renderDecomposeProgress(state); });

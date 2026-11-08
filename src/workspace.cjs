@@ -83,7 +83,7 @@ class Workspace {
     const s = { ...selected };
     if (!s.model) throw new Error('Для декомпозиции укажите установленную модель Ollama в подключениях. Можно также добавить задачи вручную.');
     if (this.decomposing) throw new Error('Декомпозиция уже идёт. Дождитесь её окончания.');
-    const run = { id: require('node:crypto').randomUUID(), title: String(context.title || 'Фича').slice(0, 120), stage: 'starting', busy: true, at: Date.now() };
+    const run = { id: require('node:crypto').randomUUID(), title: String(context.title || 'Фича').slice(0, 120), stage: 'starting', busy: true, at: Date.now(), startedAt: Date.now() };
     const report = state => { Object.assign(run, { done: undefined, total: undefined, label: undefined, agents: undefined }, state, { at: Date.now() }); this.decomposing = run.busy ? run : null; try { this.progress({ ...run }); } catch {} };
     report({ stage: 'starting', percent: 0 });
     try {
