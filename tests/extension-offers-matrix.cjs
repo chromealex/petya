@@ -26,7 +26,8 @@ const own={
  'ab-test':['значим ли тест','посчитай A/B','сколько нужно игроков для теста','есть ли SRM'],
  focus:['фокус на 50 минут над картой уровня','помодоро 4 раза','сколько я сегодня сфокусировался','помоги сосредоточиться'],
  naming:['придумай название для ивента на Хэллоуин','имена для героев-гномов','как назвать фичу с сундуками','название игры про бункер'],
- 'meeting-prep':['подготовь меня к встрече','что обсуждали с Олегом в прошлый раз','о чём следующая встреча','повестка на синк']
+ 'meeting-prep':['подготовь меня к встрече','что обсуждали с Олегом в прошлый раз','о чём следующая встреча','повестка на синк'],
+ 'patch-notes':['напиши патчноут к версии 1.5','что нового для стора','чейнджлог между v1.4 и v1.5','анонс обновления для игроков']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -55,6 +56,9 @@ const not={
  naming:['как назвать переменную','переименуй задачу','назови сумму','как называется игра про бункер','придумай название ветки'],
  // Preparing for a meeting is not its summary, the day's agenda, a new event or recording.
  'meeting-prep':['сводка встречи','что у меня сегодня','поставь встречу с Олегом в четверг в 15:00','запиши встречу','что решили на встрече','запомни повестку следующей встречи: релиз'],
+ // Release notes from sources; changes written in the message go to the skills, meeting notes and Slack news elsewhere.
+ 'patch-notes':['заметки встречи','что нового в Slack','напиши патчноут для игроков: исправили зависание магазина, добавили ивент','переведи эту фразу','сводка встречи'],
+ zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -74,7 +78,8 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
  const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','metrics','ab-test'].filter(id=>ids.has(id));,
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','meeting-prep'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','meeting-prep'].filter(id=>ids.has(id));,
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','meeting-prep','patch-notes'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
