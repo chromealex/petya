@@ -9,7 +9,7 @@ function candidates(command,records,project=''){
 }
 function summarize(row,live,error=''){
  const label=(row.keys||[]).join(', ')||row.command||'Поручение';
- const names={completed:'Исполнитель завершил работу',failed:'Работа завершилась ошибкой',interrupted:'Работа прервана',inProgress:'Исполнитель работает',submitted:'Запрос передан; завершение пока не подтверждено',routing:'Ожидает выбора исполнителя','project-required':'Ожидает выбора проекта',ready:'Готово к передаче',unknown:'Передача не подтверждена',expired:'История удалена по сроку хранения'};
+ const names={completed:'Исполнитель завершил работу',failed:'Работа завершилась ошибкой',interrupted:'Работа прервана',inProgress:'Исполнитель работает',needsAttention:'Исполнитель ждёт твоего решения',submitted:'Запрос передан; завершение пока не подтверждено',routing:'Ожидает выбора исполнителя','project-required':'Ожидает выбора проекта',ready:'Готово к передаче',unknown:'Передача не подтверждена',expired:'История удалена по сроку хранения'};
  const state=row.state==='expired'?'expired':live?.status||row.executionState||row.state;
  const answer=live?.answer||row.resultText||'';
  return {handled:true,text:label+': '+(names[state]||'Состояние: '+state)+'.'+(live?' Проверено сейчас.':' Последняя запись от '+new Date(row.checkedAt||row.at).toLocaleString('ru-RU')+'.')+(answer?'\nОтвет исполнителя: '+answer:'')+(error?'\nСвежий статус недоступен: '+error:''),agentId:row.id};

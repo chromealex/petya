@@ -14,7 +14,7 @@ async function refreshAgents() {
   for (const row of rows) {
     const card = document.createElement('article'); card.className = 'card';
     const title = document.createElement('h2'); title.textContent = agentStatus(row);
-    const meta = document.createElement('p'); meta.textContent = new Date(row.at).toLocaleString(window.petyaLocale||'ru-RU') + ' · ' + (row.keys.join(', ') || 'По обсуждению');
+    const meta = document.createElement('p'); meta.textContent = window.relativeTime(row.at) + ' · ' + (row.keys.join(', ') || 'По обсуждению');
     const details = document.createElement('details'), summary = document.createElement('summary'), body = document.createElement('textarea'); summary.textContent = 'Переданный контекст'; body.readOnly = true; body.rows = 10; body.value = row.prompt; details.append(summary, body); card.append(title, meta, details);
     if(row.state!=='expired'){const check=document.createElement('button');check.textContent='Проверить результат';check.onclick=run(async()=>{check.disabled=true;try{const result=await window.petya.taskProgress(row.id);view('home');await showDialogueReply(result);await refreshAgents();}finally{check.disabled=false;}});card.append(check);}
     if(row.url){const open=document.createElement('button');open.textContent='Открыть чат';open.onclick=run(()=>window.petya.agentChat(row.id));card.append(open);}
@@ -41,6 +41,7 @@ const smartSetting=document.createElement('label');smartSetting.className='check
 const interpretationSettings=document.createElement('div');interpretationSettings.innerHTML='<label class="check"><input type="checkbox" name="interpretationEnabled">Спрашивать Claude/Codex, если Петя не понял</label><label>Помощник для разъяснений<select name="interpretationProvider"><option value="auto">Автоматически</option><option value="claude">Claude</option><option value="codex">Codex</option></select></label><p class="small">Помощник получает неясную фразу и до четырёх последних реплик текущей темы (до 3000 символов). Возвращается только объяснение, без выполнения задач. Требуется CLI с выполненным входом; одного приложения Claude недостаточно.</p>';aiCard.append(interpretationSettings);
 window.petya.settings().then(s=>{interpretationSettings.querySelector('input').checked=s.interpretationEnabled!=='false';interpretationSettings.querySelector('select').value=s.interpretationProvider||'auto';});
 
+if(window.petyaPlatform==='darwin'){const claudeCheck=document.createElement('label');claudeCheck.className='check';claudeCheck.innerHTML='<input type="checkbox" name="claudeStatusCheck">Проверять ход задач в Claude по его чату';const claudeHelp=document.createElement('p');claudeHelp.className='small';claudeHelp.textContent='Петя читает чат через Универсальный доступ раз в 10 минут, только когда Claude не на переднем плане и в нём нет черновика. При этом в Claude может открыться чат задачи.';aiCard.append(claudeCheck,claudeHelp);window.petya.settings().then(s=>claudeCheck.querySelector('input').checked=s.claudeStatusCheck!=='false');}
 if(window.petyaPlatform==='darwin'){const access=document.createElement('button');access.type='button';access.textContent='Разрешить отправку в Claude';access.onclick=run(()=>window.petya.agentAccess());aiCard.append(access);}
 
 for (const target of ['claude', 'codex']) {

@@ -1,4 +1,6 @@
-const assert=require('node:assert/strict');const {WebSearch,queryText,searchCommand}=require('../src/web-search.cjs');const {publicURL,publicIP}=require('../src/public-web.cjs');const {linksFrom}=require('../src/search-browser.cjs');
+const assert=require('node:assert/strict');const {WebSearch,queryText,searchCommand}=require('../src/web-search.cjs');const {publicURL,publicIP}=require('../src/public-web.cjs');const {linksFrom,passed}=require('../src/search-browser.cjs');
+// A Google check shown in the chat's browser is over once the page leaves «sorry», consent and sign-in.
+assert(!passed('https://www.google.com/sorry/index?continue=x'));assert(!passed('https://consent.google.com/m?continue=x'));assert(!passed('https://accounts.google.com/signin'));assert(passed('https://www.google.com/search?q=x'));
 (async()=>{
  assert.equal(searchCommand('обычный вопрос',{}),null);assert.equal(searchCommand('не ищи в интернете пароль',{}),null);assert.equal(searchCommand('Найди в интернете, Electron Tray',{}).query,'Electron Tray');assert.equal(searchCommand('А для Windows?',{}),null);assert.equal(searchCommand('А для Windows?',{webQuery:'Electron Tray'}).query,'Electron Tray А для Windows?');
  assert.throws(()=>queryText('ошибка token=secret'));assert.throws(()=>queryText('письмо a@example.com'));assert.throws(()=>publicURL('https://localhost/'));assert.throws(()=>publicURL('file:///etc/passwd'));assert.equal(publicIP('127.0.0.1'),false);

@@ -28,7 +28,7 @@ What the catalog reads from `extension.json`, besides `name`, `description`, `ca
 
 - `examples` — 2–6 short phrases as users say them; shown under «Примеры обращений», searched, and put into the composer (not sent) when clicked. Service modules without a directory take them from `categories.json` → `moduleExamples`.
 - `icon` — `icon.svg` beside the descriptor: a 24×24 monochrome stroke icon in `currentColor`. It is validated (no scripts, styles, links) and inlined, so the tile tints it by the category `hue` from `categories.json`. No brand logos.
-- `connects` — the service the app needs («Sentry», «GitHub»). Whether it is connected comes from the app's `offer.cjs` `ready(settings)`, or from `connectsKeys` (settings that must be filled); the catalog row carries only the boolean `connected`. Service modules use their saved-credential flags.
+- `connects` — the service the app needs («Sentry», «GitHub»). Whether it is connected comes from the app's `offer.cjs` `connected(settings)` (or `ready(settings)` when it has none), or from `connectsKeys` (settings that must be filled); the catalog row carries only the boolean `connected`. Service modules use their saved-credential flags.
 - `uses` — cross-app kinds (`src/features/app-links.cjs`) its cards call; with `provides` this fills «Работает вместе с».
 
 Run `tests/app-catalog-ui.cjs` (and with `PETYA_INTERFACE_LANGUAGE=en` for the English pass; `tests/apps-ui.sh` runs both); screenshots are saved as `petya-catalog*.png` in the temp folder.

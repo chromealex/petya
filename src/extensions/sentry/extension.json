@@ -1,0 +1,18 @@
+{
+  "id": "sentry",
+  "name": "Sentry",
+  "description": "Источник для «Крэшей»: крэши из Sentry — топ за период, новые после релиза, crash-free релиза и «Решено»",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Что в Sentry за сутки?","Новые крэши в Sentry после релиза 1.4.2","Только Sentry: топ крэшей за неделю"],
+  "connects": "Sentry",
+  "setting": "extension_sentry",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["settings.js", "notifications.js"]
+  ],
+  "provides": {
+    "crash-source": "crash-source.cjs"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "part": "Andromeda D7",
+  "adapter_sha256": "05b363874b5eead8ba33431559c192bd2fae589a0207a7094139d8571bd36b9e",
+  "parent": "D3",
+  "steps": 801,
+  "learning_rate": 5e-07,
+  "generated_holdout": {
+    "D7": 37,
+    "D3": 39,
+    "D1": 24,
+    "total": 54,
+    "exact": 14,
+    "lost_D1_successes": [
+      "d2-hold-code-17",
+      "d2-hold-quote-24",
+      "d2-hold-cancel-one-27",
+      "d2-hold-permission-28",
+      "d2-hold-two-recipients-47"
+    ],
+    "gained": 19,
+    "note": "d2-hold-two-recipients-11 is not counted as lost: D1's draft has the same flaw (the document name is missing) and was passed by a more lenient review."
+  },
+  "v22": {
+    "checks": {
+      "D7": 28,
+      "D1": 27,
+      "total": 30,
+      "lost": []
+    },
+    "drafts": {
+      "D7": 6,
+      "D1": 6,
+      "total": 12,
+      "lost": [
+        "v22-new-cancel-two",
+        "v22-new-code-item",
+        "v22-new-quote"
+      ],
+      "gained": [
+        "v22-new-open-duration",
+        "v22-new-exact-name",
+        "v22-new-recipient-open"
+      ]
+    }
+  },
+  "familiar": {
+    "D7": 795,
+    "D1": 787,
+    "total": 801,
+    "lost": [],
+    "gained": 8
+  },
+  "gate": "not met strictly: five D1 held-out successes and three v22 drafts are lost; every total is above D1 and no familiar case is lost",
+  "reading": "Starting from D3 and rehearsing only the familiar cases keeps most of D3's new corrections (14 exact held-out drafts) and wins back every familiar case D1 had, plus eight more."
+}

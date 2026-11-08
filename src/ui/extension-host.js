@@ -1,7 +1,9 @@
 // Only bundled, validated extension descriptors can supply renderer scripts.
 (()=>{
  const loaded=new Set();let entries=window.petyaExtensionDescriptors;
- const load=src=>new Promise((resolve,reject)=>{if(loaded.has(src))return resolve();const script=document.createElement('script');script.src=src;script.onload=()=>{loaded.add(src);resolve();};script.onerror=()=>reject(Error('Не удалось загрузить '+src));document.body.append(script);});
+ // One load per script even when two cards of the same app render at once (a second script would run the app twice).
+ const pending=new Map();
+ const load=src=>{if(loaded.has(src))return Promise.resolve();if(!pending.has(src))pending.set(src,new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=()=>{loaded.add(src);pending.delete(src);resolve();};script.onerror=()=>{pending.delete(src);reject(Error('Не удалось загрузить '+src));};document.body.append(script);}));return pending.get(src);};
  function fold(card){
   if(card.classList.contains('settings-card'))return;
   const heading=card.querySelector('h2');if(!heading)return;

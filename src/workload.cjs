@@ -69,6 +69,31 @@ class Workload {
     }
     return counts;
   }
+  // One person's open Jira issues, in progress first: key, summary and status.
+  async openIssues(jiraId, limit = 8) {
+    const s = this.settings();
+    const r = await this.workspace().api('/rest/api/3/search/jql', { method: 'POST', body: JSON.stringify({ jql: 'assignee = ' + JSON.stringify(jiraId) + ' AND statusCategory != Done ORDER BY updated DESC', maxResults: 50, fields: ['summary', 'status'] }) }, s);
+    const rows = (r?.issues || []).map(i => ({ key: String(i.key || ''), summary: String(i.fields?.summary || '').slice(0, 160), status: String(i.fields?.status?.name || ''), active: i.fields?.status?.statusCategory?.key === 'indeterminate' }));
+    return { total: rows.length >= 50 && r?.isLast === false ? '50+' : rows.length, inProgress: rows.filter(i => i.active).length, items: [...rows.filter(i => i.active), ...rows.filter(i => !i.active)].slice(0, limit) };
+  }
+}
+
+// «Чем Аня занимается?»: who she is on the team card and what is open on her in Jira.
+async function personAnswer(workload, member, members = []) {
+  const lines = [member.name + (member.role ? ' — ' + member.role : '') + '.'];
+  if (member.responsibilities) lines.push('Отвечает за: ' + member.responsibilities.replace(/\s+/g, ' ').trim().replace(/[.;]$/, '') + '.');
+  if (member.projects) lines.push('Проекты: ' + member.projects.replace(/\s+/g, ' ').trim().replace(/[.;]$/, '') + '.');
+  const on = workload.sources();
+  if (!on.jira) { lines.push('Задачи в Jira не смотрел: Jira не подключена.'); return lines.join('\n'); }
+  const snap = await workload.snapshot();
+  const row = snap.rows?.find(r => r.name === member.name);
+  if (!row?.jiraId) { lines.push('Аккаунт Jira не найден: укажите его в карточке в «Команде».'); return lines.join('\n'); }
+  let open;
+  try { open = await workload.openIssues(row.jiraId); } catch (e) { lines.push('Задачи в Jira прочитать не удалось: ' + e.message); return lines.join('\n'); }
+  if (!open.items.length) { lines.push('Открытых задач в Jira нет.'); return lines.join('\n'); }
+  lines.push('В Jira открыто ' + open.total + ' ' + plural(Number(open.total) || 50, 'задача', 'задачи', 'задач') + (open.inProgress ? ', в работе ' + open.inProgress : '') + ':');
+  for (const i of open.items) lines.push('- ' + i.key + ' ' + i.summary + (i.status ? ' (' + i.status + ')' : ''));
+  return lines.join('\n');
 }
 
 // «загрузка команды», «кто сколько задач», «кто свободен», «сколько задач у Маши», «насколько загружен Иван».
@@ -111,4 +136,4 @@ function answer(snapshot, question, members = []) {
   return (head ? head + '\n' : '') + rows.join('\n') + tail;
 }
 
-module.exports = { Workload, sources, loadQuestion, answer, line };
+module.exports = { Workload, sources, loadQuestion, answer, line, personAnswer };

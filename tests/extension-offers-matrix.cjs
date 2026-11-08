@@ -9,7 +9,11 @@ function offered(text){const d=offers.decide(offers.candidates(text,{offers:all,
 // app → requests that must offer exactly it
 const own={
  'regex-cron':['объясни регулярку /^a+$/','составь крон на каждый будний день в 9','что значит cron */15 * * * *'],
- crashes:['какие крэши за неделю','топ крэшей','новые крэши после релиза 1.4.2','что в Sentry за сутки'],
+ crashes:['какие крэши за неделю','топ крэшей','новые крэши после релиза 1.4.2','сколько падений вчера'],
+ // Crash sources: each by its own name; accepting one also adds «Крэши».
+ sentry:['что в Sentry за сутки','покажи Sentry','топ крэшей в сентри'],
+ crashlytics:['что в Crashlytics за неделю','покажи крашлитикс','крэши в Firebase','топ крэшей в файрбейс'],
+ 'google-play':['крэши в Google Play','крэши в гугл плей за неделю','покажи падения в Google Play'],
  'store-reviews':['что пишут в отзывах','отзывы в App Store за неделю','жалобы игроков в Google Play','плохие отзывы после обновления'],
  calendar:['что у меня сегодня в календаре','найди час с Машей и Олегом на этой неделе','когда я свободен в пятницу','поставь встречу с Олегом в четверг в 15:00'],
  'ci-builds':['статус CI','последние сборки в GitHub Actions','что с билдом на андроид в CI'],
@@ -35,6 +39,10 @@ const own={
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
  crashes:['ANR за неделю','упала сборка','сервер упал','падение продаж за неделю'],
+ // ANR stays the Google Play ANR card (a core reader, no offer); Firebase products other than Crashlytics are not it.
+ sentry:['ANR за неделю','какие крэши за неделю','упала сборка'],
+ crashlytics:['Firebase Analytics за неделю','настрой Firebase Remote Config','Firebase Auth не пускает','ANR в Crashlytics','упала сборка в Firebase App Distribution'],
+ 'google-play':['ANR в Google Play','ANR за неделю','отзывы в Google Play','жалобы игроков в Google Play','зависания в гугл плей','упала сборка'],
  'store-reviews':['сделай код-ревью','ревью PR #42','перфоманс-ревью','отзыв о кандидате','фидбэк по встрече'],
  calendar:['сводка встречи','что решили на встрече','срок задачи','календарь отпусков','дни рождения'],
  'pull-requests':['отзывы в App Store','задачи на ревью в Jira'],

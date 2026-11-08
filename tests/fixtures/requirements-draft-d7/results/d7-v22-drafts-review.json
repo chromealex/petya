@@ -1,0 +1,62 @@
+{
+ "v22-new-cancel-one": {
+  "passed": false,
+  "reason": "Inverted: uses final_key; value clarification lost.",
+  "answer_sha256": "7161e1b5d8178fedbe2e11f40420c40b727e40874ff013809d7c3744eed2cfff"
+ },
+ "v22-new-cancel-two": {
+  "passed": false,
+  "reason": "Inverted renames.",
+  "answer_sha256": "4af1b41b2ad876db12997a85969a38c9bc18ac3afda2c8fc8d17a0a9b02b8994"
+ },
+ "v22-new-two-recipients": {
+  "passed": false,
+  "reason": "Invented «записями о передаче»; «без пояснения» lost.",
+  "answer_sha256": "0fb6352316760da7f80a06bde714e9893d1f70c1ddba462c0a56b146331e93bd"
+ },
+ "v22-new-revoke-send": {
+  "passed": false,
+  "reason": "«Дату не добавлять» lost.",
+  "answer_sha256": "76a5f6760dc619ffe585e55db0ada426dc27a2d3d73e848e6c776f1ccc23aad4"
+ },
+ "v22-new-restore-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "2781b99701ec76ba41b010a3f2cd0100ffcb0fde69d32bfe7d6a8eb78ac400ad"
+ },
+ "v22-new-code-item": {
+  "passed": false,
+  "reason": "Garbled «для получения набора деталей по новому коду».",
+  "answer_sha256": "69de5ee8a69edc9f2dc872e2f75f2ffe56c97d645daba63637211d720bcdcc48"
+ },
+ "v22-new-open-duration": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "28e150e90f90794f8e58a797b2bc529fd7f3271e1bbda32fc6ccb705a77239ff"
+ },
+ "v22-new-exact-name": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "ec79d0e839c31a2e212435926f0f86476ce02607151ec9315e2f60b797000e2f"
+ },
+ "v22-new-screen-only": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "e4d775731ffd7b6df5a26a1d96711383a9853009108ea745210faa899cd7185b"
+ },
+ "v22-new-add-separate": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "ea34b73b7f5426c1b8c131fb7327ba02a9a99795613ddc6c7010b28a292007c7"
+ },
+ "v22-new-quote": {
+  "passed": false,
+  "reason": "Says the «макет» may be sent instead of the методичка.",
+  "answer_sha256": "be476d07e1a5101c513765a175cfe6af6e9ea56c43357ea1fc78fdcb2b484ff9"
+ },
+ "v22-new-recipient-open": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "d6c81ac3f00222de765219202d0ebd0d5e42694f5f01f76ff24a6c7eb1d2d23f"
+ }
+}

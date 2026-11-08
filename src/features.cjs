@@ -10,12 +10,15 @@ module.exports=[
  require('./features/disk-space.cjs'),
  require('./features/action-results.cjs'),
  require('./features/window-state.cjs'),
+ require('./features/chat-browser.cjs'),
+ require('./features/dashboards.cjs'),
  require('./features/clarifications.cjs'),
  require('./features/extension-ui.cjs'),
  ...require('./features/extension-ui.cjs').features,
  require('./features/slack-screen.cjs'),
  require('./features/context-discovery.cjs'),
  require('./features/meeting-sources.cjs'),
+ require('./features/crash-sources.cjs'),
  require('./features/meeting-memory.cjs'),
  require('./features/materials.cjs'),
  require('./features/meeting-summary.cjs'),
@@ -23,6 +26,7 @@ module.exports=[
  require('./features/chat-return.cjs'),
  require('./features/chat-library.cjs'),
  require('./features/agents.cjs'),
+ require('./features/agent-board.cjs'),
  require('./features/highlights.cjs'),
  require('./features/address.cjs'),
  require('./features/chat-tasks.cjs'),
@@ -42,5 +46,6 @@ module.exports=[
  require('./features/chat-changes.cjs'),
  require('./features/model-parts.cjs'),
  require('./features/boot-splash.cjs'),
- require('./features/onboarding.cjs')
+ require('./features/onboarding.cjs'),
+ require('./features/project-share.cjs')
 ];

@@ -10,6 +10,13 @@ const assert=require('node:assert/strict');const feature=require('../src/feature
   answer=intent;calls.length=0;const r=await teamIntent.turn(q);assert.equal(r.text,'ok',q);assert.equal(calls[0][1].force,true);assert.equal(!!calls[0][1].existing,existing,q);}
  answer='workload';calls.length=0;assert.equal(await teamIntent.turn('Что делает команда на этой неделе?'),null);assert.equal(calls.length,0,'workload stays with the Jira reports');
  asked.length=0;for(const q of ['Как сварить гречку?','Какая погода в Москве?','Напиши команду git для отката коммита'])assert.equal(await teamIntent.turn(q),null,q);assert.equal(asked.length,0,'no model call for messages not about the team');
+ // A question about one named colleague is answered from the card and their Jira issues.
+ {const people=[];s.teamLoad={person:async(m,text)=>{people.push([m.name,text]);return {handled:true,text:'card'};}};s.settings.teamMembers=JSON.stringify([{name:'Анна',aliases:'Аня'},{name:'Полина'}]);
+  for(const [q,intent] of [['Чем Аня занимается?','workload'],['над чем работает Полина','workload'],['Кто такая Полина?','other']]){answer=intent;assert.equal((await teamIntent.turn(q))?.text,'card',q);}
+  assert.deepEqual(people.map(p=>p[0]),['Анна','Полина','Полина']);
+  answer='workload';assert.equal(await teamIntent.turn('Полина и Аня, кто чем занят?'),null,'two colleagues: the team report');
+  answer='facts';calls.length=0;await teamIntent.turn('Полина теперь отвечает за релизы');assert.equal(people.length,3,'stated facts are recorded, not answered');
+  delete s.teamLoad;s.settings.teamMembers=JSON.stringify([{name:'Полина'}]);}
  answer='fill';s.request=async()=>({message:{content:JSON.stringify({intent:'fill',confidence:.4})}});assert.equal(await teamIntent.turn('Что там с командой?'),null,'low confidence falls back');
  s.settings.model='';assert.equal(await teamIntent.turn('Заполни команду'),null,'no model: the regex routing handles it');
  console.log('Team intent: fill / existing / facts by meaning, workload and other requests stay with the pipeline, no model call off-topic, low confidence and no model fall back passed');

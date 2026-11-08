@@ -1,4 +1,4 @@
-// Sentry REST API calls of «Крэши» (sentry.io or a self-hosted Sentry): organizations, projects, releases,
+// Sentry REST API calls of the Sentry crash source (sentry.io or a self-hosted Sentry): organizations, projects, releases,
 // the organization issue stream with 14-day per-issue stats, release-health sessions, and resolve/reopen.
 // Auth: an internal-integration or user auth token, `Authorization: Bearer <token>`.
 // Scopes: org:read, project:read, event:read; resolving an issue also needs event:write.
@@ -22,7 +22,7 @@ const connected=s=>{try{const c=config(s);return !!c.token&&!!c.org;}catch{retur
 
 // Errors in words the user can act on; the HTTP status stays on the error.
 function explain(error){
- const map={401:'Sentry не принял токен. Проверьте его в настройках «Крэши».',403:'Токену Sentry не хватает прав (нужны org:read, project:read, event:read; для «Решено» — event:write).',404:'Sentry не нашёл организацию или проект. Проверьте slug в настройках «Крэши».',429:'Sentry ограничил число запросов. Повторите через минуту.'};
+ const map={401:'Sentry не принял токен. Проверьте его в настройках «Sentry».',403:'Токену Sentry не хватает прав (нужны org:read, project:read, event:read; для «Решено» — event:write).',404:'Sentry не нашёл организацию или проект. Проверьте slug в настройках «Sentry».',429:'Sentry ограничил число запросов. Повторите через минуту.'};
  const e=Error(map[error.status]||error.message||'Sentry недоступен.');e.status=error.status;e.cause=error;return e;
 }
 async function api(s,path,{query,method='GET',body}={}){
@@ -35,7 +35,7 @@ async function api(s,path,{query,method='GET',body}={}){
   return await s.request(url,{method,headers:{Authorization:'Bearer '+c.token,Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
  }catch(e){throw explain(e);}
 }
-const org=s=>{const o=config(s).org;if(!SLUG.test(o))throw Error('Укажите slug организации Sentry в настройках «Крэши».');return encodeURIComponent(o);};
+const org=s=>{const o=config(s).org;if(!SLUG.test(o))throw Error('Укажите slug организации Sentry в настройках «Sentry».');return encodeURIComponent(o);};
 
 async function organizations(s){
  const r=await api(s,'/organizations/',{query:{member:1}});

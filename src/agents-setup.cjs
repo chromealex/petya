@@ -48,14 +48,14 @@ module.exports=ctx=>{
     ctx.fs.writeFileSync(agentFile + '.tmp', JSON.stringify({ encrypted: ctx.safeStorage.encryptString(JSON.stringify(records)).toString('base64') }), { mode: 0o600 });
     ctx.fs.renameSync(agentFile + '.tmp', agentFile);
   } });
-  const taskMonitor=new (require('./task-monitor.cjs').TaskMonitor)({records:()=>agents.records,save:()=>agents.persist(),status:row=>agentDelivery.status(row),notify:ctx.notify,enabled:()=>ctx.settings.smartNotifications==='true'&&ctx.modules.enabled(ctx.settings,'ai')});
+  const taskMonitor=new (require('./task-monitor.cjs').TaskMonitor)({records:()=>agents.records,save:()=>agents.persist(),status:row=>agentDelivery.status(row),notify:ctx.notify,enabled:()=>ctx.settings.smartNotifications==='true'&&ctx.modules.enabled(ctx.settings,'ai'),claude:()=>process.platform==='darwin'&&ctx.settings.claudeStatusCheck!=='false'});
   if(!ctx.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){const timer=setInterval(()=>taskMonitor.tick().catch(e=>console.error('Task monitor:',e.message)),60000);timer.unref();ctx.app.on('will-quit',()=>clearInterval(timer));taskMonitor.tick().catch(()=>{});}
   const taskProgress=require('./task-progress.cjs');
   const checkProgress=async id=>{
     const row=agents.records.find(r=>r.id===id);if(!row)throw new Error('Поручение не найдено.');
     if(row.state==='expired')return taskProgress.summarize(row);
     let live,error='';
-    if(row.state==='submitted')try{ctx.modules.assertEnabled(ctx.settings,'ai');live=await agentDelivery.status(row);taskMonitor.update(row,live);}catch(e){error=e.message;}
+    if(row.state==='submitted')try{ctx.modules.assertEnabled(ctx.settings,'ai');live=await agentDelivery.status(row,{background:false});if(live?.status==='skipped'){error=live.reason||'Claude сейчас занят';live=undefined;}else taskMonitor.update(row,live);}catch(e){error=e.message;}
     const result=taskProgress.summarize(row,live,error);
     if(ctx.dialogue){ctx.dialogue.rememberAction('Проверка поручения '+(row.keys.join(', ')||row.command||row.id),result.text);ctx.dialogue.active().taskId=row.id;ctx.dialogue.persist();}
     return result;

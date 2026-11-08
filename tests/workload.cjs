@@ -1,6 +1,6 @@
 // Workload of the team: open tasks per person from Jira and Asana, for the team page, chat and assignment.
 const assert = require('assert').strict;
-const { Workload, loadQuestion, answer, sources } = require('../src/workload.cjs');
+const { Workload, loadQuestion, answer, sources, personAnswer } = require('../src/workload.cjs');
 let count = 0;
 async function test(name, fn) { await fn(); count++; console.log('✓ ' + name); }
 const team = [
@@ -67,6 +67,18 @@ function fixture({ jiraFails = false } = {}) {
     assert.deepEqual(sources(settings), { jira: true, asana: true });
     assert.deepEqual(sources({ ...settings, module_asana: 'false', asanaWorkspace: 'x' }), { jira: true, asana: false });
     assert.deepEqual(sources({ asanaCredential: 'c', asanaWorkspace: '9' }), { jira: false, asana: true });
+  });
+  await test('«чем Маша занимается?»: the card and her open Jira issues, in progress first', async () => {
+    const { w } = fixture();
+    const issues = [{ key: 'PAY-2', fields: { summary: 'Регресс 1.20', status: { name: 'To Do', statusCategory: { key: 'new' } } } }, { key: 'PAY-1', fields: { summary: 'Проверка оплаты', status: { name: 'In Progress', statusCategory: { key: 'indeterminate' } } } }];
+    const api = w.workspace().api; w.workspace().api = async (route, options) => JSON.parse(options.body).fields.includes('summary') ? { issues, isLast: true } : api(route, options);
+    const masha = { ...team[0], responsibilities: 'регресс и релизы' };
+    const text = await personAnswer(w, masha, team);
+    assert.match(text, /^Мария Соколова — QA\.\nОтвечает за: регресс и релизы\./);
+    assert.match(text, /открыто 2 задачи, в работе 1:\n- PAY-1 Проверка оплаты \(In Progress\)\n- PAY-2 Регресс 1\.20 \(To Do\)/);
+    assert.match(await personAnswer(w, team[2], team), /Аккаунт Jira не найден/);
+    const off = new Workload({ settings: () => ({ teamMembers: settings.teamMembers }), workspace: () => null, asana: null, modules: null });
+    assert.match(await personAnswer(off, team[1], team), /Jira не подключена/);
   });
   console.log(`${count} workload tests passed`);
 })().catch(e => { console.error(e); process.exitCode = 1; });
