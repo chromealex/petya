@@ -23,7 +23,9 @@ const own={
  teams:['встреча в Teams','запиши встречу в тимсе','поставь встречу в тимс на завтра','что было на звонке в Microsoft Teams'],
  metrics:['DAU за неделю','ретеншн D1 D7 D30','сколько новых игроков вчера','как выручка после ивента','DAU из AppMetrica'],
  appmetrica:['подключи AppMetrica'],
- 'ab-test':['значим ли тест','посчитай A/B','сколько нужно игроков для теста','есть ли SRM']
+ 'ab-test':['значим ли тест','посчитай A/B','сколько нужно игроков для теста','есть ли SRM'],
+ focus:['фокус на 50 минут над картой уровня','помодоро 4 раза','сколько я сегодня сфокусировался','помоги сосредоточиться'],
+ naming:['придумай название для ивента на Хэллоуин','имена для героев-гномов','как назвать фичу с сундуками','название игры про бункер']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -45,7 +47,11 @@ const not={
  // Team metrics and velocity are Jira's, crashes / reviews / ANR other apps', server metrics nobody's here.
  metrics:['метрики команды','велосити команды','крэши за неделю','отзывы за неделю','ANR за неделю','метрики сервера','подключи AppMetrica'],
  appmetrica:['DAU за неделю','ретеншн D1 D7 D30','крэши в AppMetrica'],
- 'ab-test':['тест упал','напиши тесты','проверь тест на регулярку','упали тесты в CI','запусти тесты']
+ 'ab-test':['тест упал','напиши тесты','проверь тест на регулярку','упали тесты в CI','запусти тесты'],
+ // Camera or input focus and a team planning «to focus on bugs» are not focus sessions.
+ focus:['фокус камеры в Unity','давай сфокусируемся на багах','фокус на задаче','фокус-группа в пятницу','перерыв в работе сервера'],
+ // Code names are the coder's, renaming a task is Jira's, «назови сумму» is arithmetic.
+ naming:['как назвать переменную','переименуй задачу','назови сумму','как называется игра про бункер','придумай название ветки'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
