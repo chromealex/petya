@@ -1,0 +1,24 @@
+.regex-card{width:620px;max-width:100%;margin:12px 0}
+.regex-card .kit-key{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:13px;color:var(--ink);word-break:break-all}
+.regex-body{display:flex;flex-direction:column;gap:12px}
+.regex-summary{margin:0;font-size:14px;line-height:1.45}
+.regex-parts{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.regex-parts li{display:grid;grid-template-columns:minmax(80px,auto) 1fr;gap:10px;font-size:13px;align-items:baseline}
+.regex-parts code,.regex-lines code,.cron-fields code{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:12.5px;background:#ffffff0d;border-radius:5px;padding:1px 5px;word-break:break-all}
+.regex-lines{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.regex-lines li{display:flex;gap:8px;align-items:baseline;font-size:13px;padding:5px 8px;border-radius:8px;background:#ffffff05}
+.regex-lines li .mark{flex:none;width:16px;text-align:center}
+.regex-lines li.ok .mark{color:var(--green)}
+.regex-lines li.bad{background:#f0b4a80f}
+.regex-lines li.bad .mark{color:#f0b4a8}
+.regex-lines li .line{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:12.5px;white-space:pre-wrap;word-break:break-all;flex:1;min-width:0}
+.regex-lines mark{background:#4fb28633;color:inherit;border-radius:3px;outline:1px solid #4fb28666}
+.regex-lines .expect{flex:none;color:var(--muted);font-size:11.5px}
+.regex-warn{margin:0;font-size:13px;color:#e5ce8c}
+.cron-fields{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.cron-field{display:flex;flex-direction:column;gap:3px;align-items:flex-start;padding:6px 8px;border-radius:8px;background:#ffffff05;min-width:0}
+.cron-field small{font-size:11px;color:var(--muted)}
+.cron-runs{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;font-size:13px}
+.cron-runs li{display:flex;gap:10px}
+.cron-runs li span:first-child{color:var(--muted);min-width:96px}
+@media (max-width:520px){.cron-fields{grid-template-columns:repeat(3,minmax(0,1fr))}}
