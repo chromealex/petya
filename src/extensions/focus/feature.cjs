@@ -32,7 +32,7 @@ function create(s,{now=()=>Date.now(),electron=null}={}){
   e.sent=e.sent.concat({title,body}).slice(-20);
   const N=e.electron?.Notification;
   if(s.smoke||!N?.isSupported?.())return;
-  try{const n=new N({title:tr('Петя')+' · '+tr(title),body:String(body).slice(0,250)});n.petyaFocus=true;n.on?.('click',()=>{try{s.win?.show?.();}catch{}});n.show();}catch{/* no notification service */}
+  try{const n=new N({title:tr('Петя')+' · '+tr(title),body:tr(String(body)).slice(0,250)});n.petyaFocus=true;n.on?.('click',()=>{try{s.win?.show?.();}catch{}});n.show();}catch{/* no notification service */}
  };
  e.status=()=>{const at=now();return {active:store.view(at),held:store.held.length,now:at};};
  // The notification center card of the running session, updated in place (one id, version per session).
@@ -86,7 +86,7 @@ function create(s,{now=()=>Date.now(),electron=null}={}){
     const start=Date.parse(m.start),key=m.start+'|'+m.title;
     if(start>at&&start-at<=WARN_BEFORE*MIN&&!a.warned.includes(key)){
      a.warned.push(key);store.save();
-     const text='Через '+Math.max(1,Math.round((start-at)/MIN))+' мин встреча «'+m.title+'» в '+hm(start)+'.';
+     const text='Через '+Math.max(1,Math.round((start-at)/MIN))+' мин встреча «'+m.title+'» ('+hm(start)+').';
      e.notify('Встреча скоро',text);
      send({id:'focus-meeting',title:'Встреча скоро',text,busy:false,version:'meet:'+key,kind:'attention'});
     }

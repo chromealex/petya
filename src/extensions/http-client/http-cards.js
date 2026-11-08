@@ -120,7 +120,7 @@
  function confirmBox(k,d,{label='Отправить',run}){
   const box=k.el('div','hc-confirm');box.setAttribute('role','group');box.setAttribute('aria-label','Подтверждение запроса');
   box.append(k.el('p','hc-confirm-title','Отправить этот запрос?'));
-  if(d.reasons?.length){const ul=k.el('ul','hc-reasons');for(const r of d.reasons)ul.append(raw(k,'li',null,r));box.append(ul);}
+  if(d.reasons?.length){const ul=k.el('ul','hc-reasons');for(const r of d.reasons)ul.append(k.el('li',null,r));box.append(ul);}
   const go=btn(k,'primary',label),cancel=btn(k,null,'Отмена');
   go.onclick=async()=>{go.disabled=cancel.disabled=true;go.setAttribute('aria-busy','true');try{await run();}catch(e){go.disabled=cancel.disabled=false;k.toast(e.message,{error:true});}finally{go.removeAttribute('aria-busy');}};
   cancel.onclick=async()=>{box.remove();call('cancel',d.id).catch(()=>{});};

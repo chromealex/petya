@@ -9,7 +9,9 @@
  const call=(method,...args)=>window.petya.feature('focusApp',method,...args);
  const locale=()=>window.petyaLocale||'ru-RU';
  const hm=t=>new Date(t).toLocaleTimeString(locale(),{hour:'2-digit',minute:'2-digit'});
- const dur=m=>{m=Math.max(0,Math.round(m));const h=Math.floor(m/60),r=m%60;return h?h+' ч'+(r?' '+r+' мин':''):r+' мин';};
+ // Hours and minutes in the interface locale («1 ч 20 мин», «1 hr 20 min»).
+ const unit=(n,u)=>{try{return new Intl.NumberFormat(locale(),{style:'unit',unit:u,unitDisplay:'short'}).format(n).replace(/\u00a0/g,' ');}catch{return n+' '+(u==='hour'?'ч':'мин');}};
+ const dur=m=>{m=Math.max(0,Math.round(m));const h=Math.floor(m/60),r=m%60;return h?unit(h,'hour')+(r?' '+unit(r,'minute'):''):unit(r,'minute');};
  const clock=ms=>{const s=Math.max(0,Math.ceil(ms/1000)),m=Math.floor(s/60);return (m>=60?Math.floor(m/60)+':'+String(m%60).padStart(2,'0'):String(m).padStart(2,'0'))+':'+String(s%60).padStart(2,'0');};
  const svg=(tag,attrs)=>{const n=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,String(v));return n;};
  const safeHttps=v=>{try{const u=new URL(v);return u.protocol==='https:'?u.href.replace(/\/+$/,''):'';}catch{return '';}};
@@ -93,7 +95,9 @@
   let report=d.report,snapshot=d.active,offset=Date.now()-Date.parse(d.now);
   const body=k.el('div','focus-body');
   const top=k.el('div','focus-top'),timer=ring(k),side=k.el('div','focus-side');
-  const series=k.el('div','focus-series'),next=k.el('p','focus-next');next.dataset.noI18n='';
+  const series=k.el('div','focus-series'),next=k.el('p','focus-next');
+  // The meeting title is the user's text; the words around it are translated.
+  const title=text=>{const n=k.el('span',null,text);n.dataset.noI18n='';return n;};
   const controls=k.el('div','kit-actions focus-controls');
   const sections=k.el('div','focus-sections');
   top.append(timer,side);body.append(top,controls,sections);
@@ -123,7 +127,7 @@
    if(active){
     const left=active.state==='paused'?active.remaining:Math.max(0,active.endsAt-now);
     timer.hidden=false;
-    timer.set(left,active.planned,active.kind,active.state,active.state==='paused'?'на паузе':active.kind==='break'?'перерыв':'из '+dur(active.planned/60000));
+    timer.set(left,active.planned,active.kind,active.state,active.state==='paused'?'на паузе':active.kind==='break'?'перерыв':(window.t?window.t('из'):'из')+' '+dur(active.planned/60000));
     statusChip.textContent=active.state==='paused'?'на паузе':active.kind==='break'?'перерыв':'идёт';
     statusChip.className='kit-chip tone-'+(active.state==='paused'?'accent':active.kind==='break'?'progress':'done');
    }else{
@@ -135,7 +139,7 @@
    series.replaceChildren();
    if(active?.series){for(let i=1;i<=active.series.total;i++){const dot=k.el('i',i<active.series.round||i===active.series.round&&active.kind==='break'?'done':i===active.series.round?'now':'');series.append(dot);}series.append(k.el('small',null,'помидор '+Math.max(1,active.series.round)+' из '+active.series.total));side.append(series);}
    const upcoming=meetings.map(m=>({...m,t:Date.parse(m.start)})).filter(m=>m.t>now).sort((a,b)=>a.t-b.t)[0];
-   if(upcoming){next.textContent='Встреча «'+upcoming.title+'» в '+hm(upcoming.t)+' — через '+dur((upcoming.t-now)/60000)+(active&&active.kind==='focus'&&upcoming.t<now+(active.state==='paused'?active.remaining:active.endsAt-now)?' · раньше конца фокуса':'');next.classList.toggle('is-soon',upcoming.t-now<15*60000);side.append(next);}
+   if(upcoming){next.replaceChildren('Встреча «',title(upcoming.title),'» · '+hm(upcoming.t)+' — через '+dur((upcoming.t-now)/60000)+(active&&active.kind==='focus'&&upcoming.t<now+(active.state==='paused'?active.remaining:active.endsAt-now)?' · раньше конца фокуса':''));next.classList.toggle('is-soon',upcoming.t-now<15*60000);side.append(next);}
    controls.replaceChildren();
    if(active){
     if(active.kind==='focus'){

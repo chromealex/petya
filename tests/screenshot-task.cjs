@@ -132,6 +132,9 @@ const PNG=Buffer.concat([Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]),
  assert.deepEqual(capture.cropRect({x:10,y:20,w:100,h:50},{scaleX:2,scaleY:2,width:300,height:200}),{x:20,y:40,width:200,height:100});
  assert.deepEqual(capture.cropRect({x:140,y:90,w:100,h:50},{scaleX:2,scaleY:2,width:300,height:200}),{x:280,y:180,width:20,height:20},'clamped to the image');
  assert.deepEqual(capture.parseAnswer('petya-region:{"x":1,"y":2,"w":3,"h":4}'),{kind:'rect',rect:{x:1,y:2,w:3,h:4}});
+ // The picker window gets its hint through the hash, translated into the interface language.
+ assert.equal(capture.regionHash(),'hint='+encodeURIComponent(capture.HINT)+'&lang=ru','outside Electron the hint stays Russian');
+ assert.equal(new URLSearchParams(capture.regionHash({t:x=>x===capture.HINT?'Select an area · Enter — full screen · Esc — cancel':x,state:()=>({language:'en'})})).get('hint'),'Select an area · Enter — full screen · Esc — cancel');
  assert.deepEqual(capture.parseAnswer('petya-region:full'),{kind:'full'});assert.equal(capture.parseAnswer('Some title'),null);assert.deepEqual(capture.parseAnswer('petya-region:{bad'),{kind:'cancel'});
  // A refused permission opens the macOS pane and says what to do.
  const opened=[];const fakeElectron={systemPreferences:{getMediaAccessStatus:()=>'denied'},desktopCapturer:{getSources:async()=>[]},shell:{openExternal:async u=>opened.push(u)}};

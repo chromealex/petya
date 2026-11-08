@@ -10,7 +10,8 @@
  const signed=(v,d=1)=>(v>0?'+':v<0?'−':'')+num(Math.abs(v)*100,d)+'%';
  const pText=p=>p<0.0001?'p<'+num(0.0001,4):'p='+num(Number(p.toPrecision(2)),6);
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
- const plural=(n,[a,b,c])=>{const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
+ // Russian forms; another interface language takes the singular only for exactly one (the word is translated in the DOM).
+ const plural=(n,[a,b,c])=>{if(window.petyaLanguage&&window.petyaLanguage!=='ru')return Math.abs(n)===1?a:c;const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
  const METHOD={z:'z-тест двух долей',welch:'t-тест Уэлча',bootstrap:'бутстрэп'};
  const copy=async(k,text)=>{try{await navigator.clipboard.writeText(text);k.toast('Отчёт скопирован');}catch{k.toast('Не удалось скопировать',{error:true});}};
 
@@ -118,7 +119,7 @@
   if(c.verdict?.detail||c.verdict?.kind){
    const v=k.el('p','ab-verdict tone-'+(c.verdict.tone||'none'));v.dataset.kind=c.verdict.kind;
    const text=c.mode==='plan'?null:k.el('span','ab-verdict-text',c.summary||'');
-   if(text){raw(text);v.append(text);body.append(v);}
+   if(text){v.append(text);body.append(v);}
   }
   if(c.mode==='plan')body.append(planBody(k,c));
   else if(c.metric==='assignment'){body.append(assignmentBody(k,c));const s=srmLine(k,c);if(s)body.append(s);}

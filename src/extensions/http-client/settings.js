@@ -15,7 +15,7 @@
  const field=(label,input)=>{const l=el('label',{},label);l.append(input);return l;};
  function headerRow(h={}){
   const row=el('div',{className:'hc-header-row'});row.style.cssText='display:grid;grid-template-columns:1fr 1.6fr auto auto;gap:6px;align-items:center;margin-bottom:6px';
-  const name=el('input',{type:'text',value:h.name||'',placeholder:'Заголовок',className:'h-name',spellcheck:false});name.setAttribute('aria-label','Имя заголовка');
+  const name=el('input',{type:'text',value:h.name||'',placeholder:'Имя заголовка',className:'h-name',spellcheck:false});name.setAttribute('aria-label','Имя заголовка');
   const value=el('input',{type:h.secret?'password':'text',value:h.secret?'':h.value||'',placeholder:h.secret&&h.stored?'сохранён — оставьте пустым':'Значение',className:'h-value',autocomplete:'off',spellcheck:false});value.setAttribute('aria-label','Значение заголовка');value.dataset.noI18n='';
   const secret=el('input',{type:'checkbox',checked:!!h.secret,className:'h-secret'});secret.style.width='auto';
   secret.onchange=()=>{value.type=secret.checked?'password':'text';};

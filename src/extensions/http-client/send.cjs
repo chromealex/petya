@@ -52,7 +52,7 @@ function once({method,url,headers,body,timeoutMs,maxBytes,signal}){
    res.on('error',e=>{if(!truncated&&!done){done=true;clearTimeout(timer);reject(explain(e));}});
   });
   req.on('socket',sock=>{sock.once('lookup',()=>{timing.dns=ms();});sock.once('connect',()=>{timing.connect=ms();});sock.once('secureConnect',()=>{timing.tls=ms();});});
-  const timer=setTimeout(()=>{const e=new SendError('timeout','Сервер не ответил за '+Math.round(timeoutMs/1000)+' с.','ETIMEDOUT');req.destroy(e);reject(e);},timeoutMs);
+  const timer=setTimeout(()=>{const e=new SendError('timeout','Сервер не ответил за '+Math.round(timeoutMs/1000)+' сек.','ETIMEDOUT');req.destroy(e);reject(e);},timeoutMs);
   req.on('error',e=>{clearTimeout(timer);reject(e instanceof SendError?e:explain(e));});
   signal?.addEventListener?.('abort',()=>req.destroy(new SendError('aborted','Запрос остановлен.')),{once:true});
   if(payload)req.write(payload);
@@ -67,7 +67,7 @@ async function send({method,url,headers=[],body=''},{timeoutMs=LIMITS.timeoutMs,
  let current={method,url,headers:[...headers],body};
  for(;;){
   const left=timeoutMs-(Date.now()-started);
-  if(left<=0)throw new SendError('timeout','Сервер не ответил за '+Math.round(timeoutMs/1000)+' с.','ETIMEDOUT');
+  if(left<=0)throw new SendError('timeout','Сервер не ответил за '+Math.round(timeoutMs/1000)+' сек.','ETIMEDOUT');
   const res=await once({...current,timeoutMs:left,maxBytes,signal});
   const location=res.headers.find(h=>/^location$/i.test(h.name))?.value;
   const redirect=[301,302,303,307,308].includes(res.status)&&location;

@@ -38,7 +38,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js("document.querySelectorAll('.conv-card').length"),4);
  const card=sel=>`document.querySelector('.conv-card[data-plan-id="${sel}"]')`;
  assert.equal(await js(`${card('plan-img')}.querySelectorAll('.conv-file').length`),8,'eight tiles and a «more» tile');
- assert.equal(await js(`${card('plan-img')}.querySelector('.conv-more').textContent`),'ещё 3');
+ assert.equal(await js(`${card('plan-img')}.querySelector('.conv-more').textContent`),'+3');
  assert.equal(await js(`${card('plan-img')}.querySelectorAll('.conv-thumb img').length`),8,'image thumbnails from the main process');
  assert.equal(await js("document.querySelectorAll('.conv-card img[src=x]').length"),0,'file names are never HTML');
  assert.ok(await js(`[...${card('plan-img')}.querySelectorAll('.conv-name')].some(n=>n.textContent==='<img src=x onerror=alert(1)>.png')`));

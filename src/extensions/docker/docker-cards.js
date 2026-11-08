@@ -262,7 +262,7 @@
   const k=window.resultKit;if(!k||!f||parent.querySelector('.dk-crash-card'))return;
   const body=k.el('div','dk-body');
   const tiles=k.el('div','dk-tiles');
-  const tile=(label,value,tone,note)=>{const t=k.el('div','dk-tile'+(tone?' '+tone:''));t.append(k.el('small',null,label),raw(k,'strong',null,value));if(note)t.append(k.el('span','dk-tile-note',note));tiles.append(t);};
+  const tile=(label,value,tone,note)=>{const t=k.el('div','dk-tile'+(tone?' '+tone:''));t.append(k.el('small',null,label),k.el('strong',null,value));if(note)t.append(k.el('span','dk-tile-note',note));tiles.append(t);};
   const live=f.running&&!f.restarting;
   tile('Код выхода',live?'—':String(f.exitCode??'—'),!live&&f.exitCode&&![0,143].includes(f.exitCode)?'alert':'',live?'работает':f.meaning||'');
   tile('OOMKilled',f.oomKilled?'да':'нет',f.oomKilled?'alert':'',f.memoryLimit?'лимит '+ram(f.memoryLimit):'без лимита памяти');

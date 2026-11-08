@@ -7,7 +7,7 @@
  const call=(method,...args)=>window.petya.feature('patchNotes',method,...args);
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
  const DEST=[['appstore','App Store'],['play','Google Play'],['post','Discord / Telegram'],['internal','Для команды']];
- const GROUP={feature:'Новое',improvement:'Улучшения',fix:'Исправления'};
+ const GROUP={feature:'Новое',improvement:'Улучшения',fix:'Исправления ошибок'};
  const SOURCE={jira:'Jira',commit:'коммит',pr:'PR'};
  const TONES=['дружелюбный','весёлый','официальный','краткий','эпичный'];
  const num=n=>Number(n).toLocaleString(window.petyaLocale||'ru-RU');
@@ -93,7 +93,7 @@
    clearTimeout(timer);timer=setTimeout(async()=>{try{const r=await call('compose',{id:c.id,chosen:c.chosen});c.texts=r.texts;c.internal=r.internal;paint();}catch(e){k.toast(e.message,{error:true});}},150);
   };
   body.append(sourceList(k,c,toggle),hint,area);
-  for(const w of c.warnings||[])body.append(raw(k.el('p','pn-warn',w)));
+  for(const w of c.warnings||[])body.append(k.el('p','pn-warn',w));
   paint();
   const textNow=()=>current()?.text||'';
   const regenerate=async button=>{
@@ -109,7 +109,6 @@
   const used=c.chosen.length;
   const card=k.card({app:'Патчноуты',initial:'✎',color:'#7a5c9a',key:c.title,status:{label:'в тексте: '+used,tone:'accent'},
    subtitle:(c.sources||[]).join(' · '),body,actions,className:'pn-card'});
-  raw(card.querySelector('.kit-subtitle')||k.el('span'));
   parent.append(card);
  };
 })();

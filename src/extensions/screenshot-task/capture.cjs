@@ -5,6 +5,11 @@
 const path=require('node:path');
 
 const PERMISSION_TEXT='Чтобы снять экран, разрешите Пете запись экрана: я открыл «Системные настройки → Конфиденциальность и безопасность → Запись экрана». Включите там Петю и повторите.';
+// region.html has no preload and does not load the DOM translator: its hint arrives translated in the URL hash.
+const HINT='Выделите область · Enter — весь экран · Esc — отмена';
+function regionHash(language=require('../../interface-language.cjs')){
+ return 'hint='+encodeURIComponent(language.t(HINT))+'&lang='+encodeURIComponent(language.state().language);
+}
 
 // Crop rectangle in image pixels from the picker's CSS rectangle (clamped to the image).
 function cropRect(r,{scaleX,scaleY,width,height}){
@@ -43,7 +48,7 @@ function pick(electron,display,imageUrl,{timeout=120000}={}){
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   win.webContents.on('will-navigate',e=>e.preventDefault());
   win.on('closed',()=>finish({kind:'cancel'}));
-  win.loadFile(path.join(__dirname,'region.html')).then(()=>win.webContents.executeJavaScript('window.petyaShot('+JSON.stringify(imageUrl)+')')).then(()=>{win.show();win.focus();}).catch(()=>finish({kind:'cancel'}));
+  win.loadFile(path.join(__dirname,'region.html'),{hash:regionHash()}).then(()=>win.webContents.executeJavaScript('window.petyaShot('+JSON.stringify(imageUrl)+')')).then(()=>{win.show();win.focus();}).catch(()=>finish({kind:'cancel'}));
  });
 }
 
@@ -70,4 +75,4 @@ async function captureRegion({electron=require('electron'),win,platform=process.
   return {png:cropped.toPNG(),width:out.width,height:out.height,window:window||{app:'',title:''}};
  }finally{if(hidden&&!win.isDestroyed()){win.show();win.focus();}}
 }
-module.exports={captureRegion,pick,cropRect,parseAnswer,ensurePermission,PERMISSION_TEXT};
+module.exports={captureRegion,pick,cropRect,parseAnswer,ensurePermission,regionHash,PERMISSION_TEXT,HINT};

@@ -18,7 +18,7 @@
    const st=await call('status');remind.checked=st.remind;
    const parts=[st.calendar?(st.connected?'Календарь подключён':'Календарь добавлен, но нет доступа — откройте его настройки'):'Нужен «Календарь»: добавьте его в каталоге'];
    const trackers=[st.trackers?.jira&&'Jira',st.trackers?.asana&&'Asana'].filter(Boolean);
-   parts.push(trackers.length?'статус задач: '+trackers.join(' и '):'трекер не подключён — задачи без статуса');
+   parts.push(trackers.length?'статус задач: '+trackers.join(', '):'трекер не подключён — задачи без статуса');
    sources.textContent=parts.join(' · ')+'.';
   }catch(e){status.textContent=e.message;}
  }

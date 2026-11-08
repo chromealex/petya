@@ -173,7 +173,7 @@ async function calendarPart(){
  clock=T+34*MIN;e.tick();
  assert.equal(e.sent.filter(n=>n.title==='Встреча скоро').length,0,'6 minutes before is too early');
  clock=T+35.5*MIN;e.tick();
- assert.ok(e.sent.some(n=>n.title==='Встреча скоро'&&/^Через 5 мин встреча «Daily» в 10:40\.$/.test(n.body)),'warned 5 minutes before');
+ assert.ok(e.sent.some(n=>n.title==='Встреча скоро'&&/^Через 5 мин встреча «Daily» \(10:40\)\.$/.test(n.body)),'warned 5 minutes before');
  e.tick();assert.equal(e.sent.filter(n=>n.title==='Встреча скоро').length,1,'once');
  // A meeting too close: start anyway or not now.
  e.store.stop();clock=T+36*MIN;

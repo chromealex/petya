@@ -91,7 +91,7 @@ function analyze(input,{seed=42,rounds=2000}={}){
  if(best&&!powered)warnings.push('Значимость получена до набора выборки ('+ru(minUsers,0)+' из '+ru(required,0)+' на группу). Если смотрите на результат каждый день, шанс ложной победы выше '+ru(alpha*100,0)+'%: дождитесь плана или используйте последовательный тест.');
  else if(input.peeking)warnings.push('Подглядывание: решение «остановить, как только p<'+ru(alpha,2)+'» завышает долю ложных побед. Зафиксируйте размер выборки заранее.');
  if(srm?.flagged)warnings.unshift('Игроки разделились не так, как планировали ('+srm.observed.map(x=>ru(x*100,1)+'%').join(' / ')+' при плане '+srm.expected.map(x=>ru(x*100,0)+'%').join(' / ')+', '+pText(srm.p)+'). Результатам сравнения нельзя верить, пока не найдена причина.');
- if(few)warnings.push('Мало данных: нужно хотя бы '+MIN_USERS+' игроков'+(metric==='conversion'?' и '+MIN_CONVERSIONS+' конверсий':'')+' в каждой группе.');
+ if(few)warnings.push('Мало данных: нужно хотя бы '+MIN_USERS+(metric==='conversion'?' игроков и '+MIN_CONVERSIONS+' конверсий':' игроков')+' в каждой группе.');
 
  // A common axis for the rate bars: all intervals fit.
  const lo=Math.min(...variants.map(v=>v.ci.low)),hi=Math.max(...variants.map(v=>v.ci.high)),pad=(hi-lo)*0.08||Math.abs(hi)*0.1||0.01;

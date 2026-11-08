@@ -25,7 +25,7 @@
    const cap=k.el('figcaption');cap.append(k.el('span','conv-name',f.name),k.el('small','conv-size',human(f.bytes)+(f.width?' · '+f.width+'×'+f.height:'')));
    tile.append(thumb,cap);box.append(tile);
   });
-  if(c.count>8)box.append(k.el('div','conv-more','ещё '+(c.count-8)));
+  if(c.count>8)box.append(k.el('div','conv-more','+'+(c.count-8)));
   return box;
  }
  // Chips of the plan; each edit goes to the main process (validated there) and repaints with the new estimate.
@@ -40,8 +40,8 @@
   if(c.kind==='video'){
    out.push(menu(p.targetBytes?'Вес: до '+human(p.targetBytes):'Вес: без цели',[[null,'Без цели'],[5*1048576,'до 5 МБ'],[10*1048576,'до 10 МБ'],[25*1048576,'до 25 МБ'],[50*1048576,'до 50 МБ']],p.targetBytes??null,v=>({params:{targetBytes:v}})));
    out.push(menu(p.height?'Высота: '+p.height+'p':'Высота: исходная',[[null,'Исходная'],[1080,'1080p'],[720,'720p'],[480,'480p']],p.height??null,v=>({params:{height:v}})));
-   out.push(menu(p.fps?'Кадров: '+p.fps+'/с':'Кадров: '+(c.to==='gif'?'12/с':'как есть'),[[null,c.to==='gif'?'12/с (по умолчанию)':'Как есть'],[10,'10/с'],[15,'15/с'],[24,'24/с'],[30,'30/с']],p.fps??null,v=>({params:{fps:v}})));
-   out.push(k.chip({label:p.trim?'Отрезок: '+p.trim.start+'–'+p.trim.end+' с':'Отрезок: всё видео',onClick:()=>edit(null,'trim'),editable:!busy}));
+   out.push(menu(p.fps?'Кадров: '+p.fps+' к/с':'Кадров: '+(c.to==='gif'?'12/с':'как есть'),[[null,c.to==='gif'?'12/с (по умолчанию)':'Как есть'],[10,'10/с'],[15,'15/с'],[24,'24/с'],[30,'30/с']],p.fps??null,v=>({params:{fps:v}})));
+   out.push(k.chip({label:p.trim?'Отрезок: '+p.trim.start+'–'+p.trim.end+' сек':'Отрезок: всё видео',onClick:()=>edit(null,'trim'),editable:!busy}));
   }
   if(c.kind==='audio'){
    out.push(k.chip({label:p.normalize?'Громкость: выровнять':'Громкость: как есть',onClick:()=>edit({params:{normalize:!p.normalize}}),editable:!busy}));

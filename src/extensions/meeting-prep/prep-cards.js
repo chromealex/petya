@@ -27,7 +27,7 @@
   const box=section(k,'Участники',c.attendees.length),row=k.el('ul','mp-people');
   for(const a of c.attendees.slice(0,12)){
    const li=k.el('li','mp-person'+(a.self?' self':''));li.title=a.email;
-   const text=k.el('div','mp-person-text');text.append(raw(k.el('span','mp-person-name',a.self?'Вы':a.name)));
+   const text=k.el('div','mp-person-text');text.append(a.self?k.el('span','mp-person-name','Вы'):raw(k.el('span','mp-person-name',a.name)));
    text.append(a.role?raw(k.el('small',null,a.role)):k.el('small',null,a.known||a.self?'':'нет в «Команде»'));
    const face=k.avatar(a.self?a.email:a.name,{size:30});if(a.self&&!face.querySelector('img'))face.textContent='Я';li.append(face,text);row.append(li);
   }
@@ -73,7 +73,7 @@
     const chip=k.chip({label:(t.tracker.key?t.tracker.key+' · ':'')+t.tracker.status,tone:TONE[t.tracker.category]||'',title:t.tracker.title});raw(chip);
     const url=k.safeUrl(t.tracker.url);
     if(url){const a=k.el('a','mp-chip-link');a.href=url;a.target='_blank';a.rel='noopener';a.append(chip);chips.append(a);}else chips.append(chip);
-   }else if(c.trackers.length)chips.append(k.chip({label:'нет в трекере',title:'Похожей задачи в '+c.trackers.map(x=>x==='jira'?'Jira':'Asana').join(' и ')+' не нашлось'}));
+   }else if(c.trackers.length)chips.append(k.chip({label:'нет в трекере',title:'Не нашлось похожей задачи в '+c.trackers.map(x=>x==='jira'?'Jira':'Asana').join(', ')}));
    li.append(text,chips);ul.append(li);
   }
   box.append(ul);

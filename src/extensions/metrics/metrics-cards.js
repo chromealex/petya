@@ -13,13 +13,16 @@
  const weekday=d=>new Date(d+'T12:00:00Z').toLocaleDateString(locale(),{weekday:'short'});
  const CUR={'currency:RUB':'₽','currency:USD':'$','currency:EUR':'€'};
  const value=(v,unit,precise)=>v===null||v===undefined?'—':unit==='share'?fmt(v*100,1)+'%':CUR[unit]?(precise?fmt(v,2):compact(v))+' '+CUR[unit]:compact(v);
- const plural=(n,[a,b,c])=>{const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
+ // Russian forms; another interface language takes the singular only for exactly one (the word is translated in the DOM).
+ const plural=(n,[a,b,c])=>{if(window.petyaLanguage&&window.petyaLanguage!=='ru')return Math.abs(n)===1?a:c;const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
  const el=(name,attrs={})=>{const n=document.createElementNS(SVG,name);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
  const PLATFORM={android:'Android',ios:'iOS'};
  const METRIC={dau:'DAU',new:'новые игроки',revenue:'выручка'};
 
  function periodText(days){return days===1?'вчера':'за '+days+' '+plural(days,['день','дня','дней']);}
+ // The same period for display: «за» is too short for the composed-text translator (periodText stays Russian for requests).
+ function periodLabel(days){return days===1?'вчера':(window.t?window.t('за'):'за')+' '+days+' '+plural(days,['день','дня','дней']);}
  function askText(c,{days=c.period.days,platform=c.platform,version=c.version}={}){
   return 'Метрики игры '+periodText(days)+(platform?' на '+PLATFORM[platform]:'')+(version?' версии '+version:'');
  }
@@ -166,7 +169,7 @@
   const b0=c.sources[0];
   const anomalies=c.sources.reduce((n,b)=>n+b.anomalies.length,0),fall=drop(b0);
   const status=anomalies?{label:anomalies+' '+plural(anomalies,['необычный день','необычных дня','необычных дней']),tone:'alert'}:fall?{label:'есть спад',tone:'progress'}:{label:'в норме',tone:'done'};
-  const subtitle=[periodText(c.period.days),c.platform?PLATFORM[c.platform]:'',c.version?'версия '+c.version:''].filter(Boolean).join(' · ');
+  const subtitle=[periodLabel(c.period.days),c.platform?PLATFORM[c.platform]:'',c.version?'версия '+c.version:''].filter(Boolean).join(' · ');
   const actions=[];
   const compareButton={label:state.compare?'Скрыть прошлый период':'Сравнить с прошлым периодом',run:b=>{state.compare=!state.compare;b.textContent=state.compare?'Скрыть прошлый период':'Сравнить с прошлым периодом';b.dataset.state=state.compare?'on':'off';state.redraw();}};
   actions.push(compareButton);

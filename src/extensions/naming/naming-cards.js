@@ -41,7 +41,7 @@
   if(r.meaning)li.append(plain(k,'p','naming-meaning',r.meaning));
   const notes=[...(r.warnings||[]).map(t=>['warn',t]),...(r.notes||[]).map(t=>['note',t])];
   if(r.translit&&!(r.notes||[]).some(n=>n.includes(r.translit)))notes.unshift(['note',(r.script==='latin'?'читается как: ':'латиницей: ')+r.translit]);
-  if(notes.length){const ul=k.el('ul','naming-notes');for(const [kind,text] of notes){const n=plain(k,'li','is-'+kind,text);ul.append(n);}li.append(ul);}
+  if(notes.length){const ul=k.el('ul','naming-notes');for(const [kind,text] of notes){const n=k.el('li','is-'+kind,text);ul.append(n);}li.append(ul);}
   return li;
  }
  window.renderNamingCard=(parent,d)=>{

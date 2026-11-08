@@ -37,7 +37,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js(card+".querySelectorAll('.focus-bar').length"),7);
  assert.equal(await js("document.querySelectorAll('.focus-card b').length"),0,'meeting titles are text, not HTML');
  assert.equal(await js(card+".querySelector('.focus-jira').href"),'https://corp.atlassian.net/browse/BW-123');
- assert.match(await js(card+".querySelector('.focus-next').textContent"),/Планирование спринта <b>x<\/b>» в 12:30 — через 40 мин/);
+ assert.match(await js(card+".querySelector('.focus-next').textContent"),/Планирование спринта <b>x<\/b>» · 12:30 — через 40 мин/);
  const labels=await js("[..."+card+".querySelectorAll('.focus-controls button')].map(b=>b.textContent)");
  assert.deepEqual(labels,['Пауза','Стоп','Ещё 10 минут','Перерыв 5']);
  for(let i=0;i<60;i++){if(await js("document.querySelectorAll('.focus-card')[0].querySelector('.focus-controls').hidden"))break;await new Promise(r=>setTimeout(r,50));}

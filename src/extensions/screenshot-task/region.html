@@ -22,9 +22,11 @@
 // Region picker for «Скриншот → задача». The screen picture is already taken; it is shown under a dim layer and
 // the user drags a rectangle. The answer goes back through the document title (no preload, no Node here):
 // «petya-region:{"x":…,"y":…,"w":…,"h":…}» in CSS pixels of this window, «petya-region:full» or «petya-region:cancel».
+// The hint text and language come in the hash, already translated by the main process (capture.cjs regionHash).
 (()=>{
  const q=new URLSearchParams(location.hash.slice(1));
  const hint=q.get('hint');if(hint)document.getElementById('hint').textContent=hint;
+ const lang=q.get('lang');if(/^[a-z]{2}$/.test(lang||''))document.documentElement.lang=lang;
  const box=document.getElementById('box'),size=document.getElementById('size'),dim=document.getElementById('dim');
  let start=null,done=false;
  const send=v=>{if(done)return;done=true;document.title='petya-region:'+v;};
