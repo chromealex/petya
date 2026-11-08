@@ -77,9 +77,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','metrics','ab-test'].filter(id=>ids.has(id));,
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','meeting-prep'].filter(id=>ids.has(id));,
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','meeting-prep','patch-notes'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','metrics','ab-test','meeting-prep','patch-notes'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

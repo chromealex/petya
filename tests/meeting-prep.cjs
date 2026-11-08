@@ -60,7 +60,7 @@ const scope='https://www.googleapis.com/auth/gmail.readonly '+SCOPES.google.join
  settings.gmailCredential=JSON.stringify({accounts:[{id:'a1',email:'me@corp.ru',tokens:{scope}}]});
  settings.teamMembers=JSON.stringify([{name:'Олег Иванов',aliases:'Олег',role:'Тимлид клиента',email:'oleg@corp.ru',slackId:'U1OLEG'},{name:'Мария Петрова',aliases:'Маша',role:'QA',email:'maria@corp.ru'},{name:'Олег Смирнов',email:'smirnov@corp.ru'}]);
  settings.jiraUrl='https://corp.atlassian.net';settings.jiraEmail='me@corp.ru';settings.jiraToken='x';settings.jiraProjects='REL';
- const g=(id,title,start,end,attendees,extra={})=>({id,summary:title,start:{dateTime:start},end:{dateTime:end},attendees:attendees.map(email=>({email,...email==='me@corp.ru'?{self:true,responseStatus:'accepted'}:{}})),organizer:{email:'me@corp.ru'},htmlLink:'https://calendar.google.com/event?eid='+id,hangoutLink:'https://meet.google.com/abc-defg-hij',...extra});
+ const g=(id,title,start,end,attendees,extra={})=>({id,summary:title,start:{dateTime:start},end:{dateTime:end},attendees:attendees.map(email=>({email,...email==='me@corp.ru'?{self:true,responseStatus:'accepted'}:{}})),organizer:{email:'me@corp.ru'},htmlLink:'https://calendar.google.com/event?eid='+id,conferenceData:{entryPoints:[{entryPointType:'video',uri:'https://meet.google.com/abc-defg-hij'}]},...extra});
  const people3=['me@corp.ru','oleg@corp.ru','maria@corp.ru'];
  const upcoming=[g('e1','Синк по релизу',at(9,15,0),at(9,15,30),people3),g('e2','1:1 с Олегом',at(10,11),at(10,11,30),['me@corp.ru','oleg@corp.ru'])];
  const past=[g('p1','Синк по релизу',at(2,15,0),at(2,15,30),people3),g('p2','Синк по релизу',at(5,15,0),at(5,15,30),people3),g('p3','Обед',at(6,13),at(6,14),['me@corp.ru'])];
