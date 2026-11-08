@@ -1,0 +1,13 @@
+{
+  "id": "charts",
+  "name": "Диаграммы",
+  "description": "Пончик и столбцы в ответах: доли, распределения, сравнения",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["chart-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "charts": "renderCharts"
+  }
+}

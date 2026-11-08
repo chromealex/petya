@@ -1,7 +1,12 @@
 {
   "name": "Файлы",
-  "description": "Результаты работы с файлами",
+  "description": "Превью вложений и результаты работы с файлами",
   "settings": false,
-  "scripts": [],
+  "scripts": [
+    ["file-previews.js", "message-format.js"]
+  ],
+  "results": {
+    "attachments": "renderFilePreviews"
+  },
   "id": "files"
 }

@@ -69,10 +69,10 @@ module.exports={matches:t=>ASK.test(String(t||'')),name:'meetingSummary',default
   // The summary of the last meeting; turn() takes the usual wordings, the semantic router (src/semantic-tools.cjs,
   // tool «meeting») sends any other wording of the same request to answer().
   async function answer(text){
-   const all=s.memory.prune(),m=meetings(all).filter(finished).at(-1);
+   const all=s.memory.prune(),m=meetings(all).filter(finished).at(-1);let card=null;
    const reply=!m?'Записанных встреч пока нет. Встречи Zoom записываются сами, если запись включена в «Подключения → Запись встреч».'
-    :await (async()=>{s.requestProgress?.report('Собираю сводку встречи');const item=await summarize(m,all,{force:/обнови|заново|ещё раз/iu.test(text)});return item?item.title+'\n\n'+item.text+(item.basis==='mail'?'\n\nС учётом письма Zoom с расшифровкой.':''):'Не получилось собрать сводку: нужна локальная модель Ollama.';})();
-   s.dialogue.rememberAction(text,reply);const t=s.dialogue.active();return {handled:true,text:reply,by:'сводка встречи',topicId:t?.id,messages:t?.messages};
+    :await (async()=>{s.requestProgress?.report('Собираю сводку встречи');const item=await summarize(m,all,{force:/обнови|заново|ещё раз/iu.test(text)});if(item?.summary)card={sessionId:item.sessionId,title:item.title,basis:item.basis,at:item.at,...item.summary};return item?item.title+'\n\n'+item.text+(item.basis==='mail'?'\n\nС учётом письма Zoom с расшифровкой.':''):'Не получилось собрать сводку: нужна локальная модель Ollama.';})();
+   s.dialogue.rememberAction(text,reply);const t=s.dialogue.active();return {handled:true,text:reply,by:'сводка встречи',topicId:t?.id,messages:t?.messages,...(card?{extensionData:{meetingSummary:card}}:{})};
   }
   return {meetingSummary:{answer,async turn(text){return ASK.test(String(text||''))?answer(text):null;}},ipc:{summarize:async sessionId=>{const all=s.memory.prune(),m=meetings(all).find(x=>x.ids.includes(sessionId));if(!m)throw Error('Встреча не найдена.');return summarize(m,all,{force:true});}}};
  }

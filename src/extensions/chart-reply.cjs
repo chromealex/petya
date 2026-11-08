@@ -34,6 +34,7 @@ function chartReply({ kind, title, rows, emptyText }) {
       label: 'Остальные категории', count: rows.slice(23).reduce((sum, row) => sum + row.count, 0)
     }];
     content.push(drawing(visible, total, kind));
+    content.push({ type: 'chart', chart: { type: kind, title, rows: visible.map(({ label, count }) => ({ label, value: count })) } });
   }
   return content;
 }

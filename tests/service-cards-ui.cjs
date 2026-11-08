@@ -11,7 +11,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert(await js("document.querySelector('.slack-message-card').textContent.includes('Мария')"));
  assert(await js("!!document.querySelector('.slack-message-card time').dateTime"));
  assert.equal(await js("document.querySelectorAll('.jira-issue-card img,.slack-message-card script').length"),0);
- require('node:fs').writeFileSync('/private/tmp/petya-service-cards.png',(await win.webContents.capturePage()).toPNG());
+ require('node:fs').writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-service-cards.png'),(await win.webContents.capturePage()).toPNG());
  console.log('Extension cards: Jira metadata/link/collapse, Slack author/time, safe text and descriptor dispatch passed');
 }};
 require('../src/main.cjs');

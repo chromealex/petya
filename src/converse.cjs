@@ -39,6 +39,8 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     // A complex request for agents: subtasks run as parallel background chats of this project.
     // Explicit («раздай агентам») runs at once; a request over several areas gets an offer first
     // («Раздать агентам» / «Ответить одним сообщением», the choice can be remembered).
+    // Plugins first: a plugin may own this chat's next message (e.g. corrections to a work plan).
+    if(!choice){const plugin=await ctx.extensionTurn?.(original);if(plugin)return via(plugin.by||'расширение',plugin);}
     let teamChecked=false;
     if(!choice&&!ctx.dialogue.active()?.agentOf){
       const team=require('./agent-team.cjs'),explicit=team.agentRequest(original);
@@ -84,7 +86,7 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
       if(gitRoute.action==='clarify')return require('./input-required.cjs').ask({text:gitRoute.question,label:'Параметры Git',restart:{kind:'git-input',prefix:gitRoute.input?.prefix||'',suffix:gitRoute.input?.suffix||''}},answer=>pipeline((gitRoute.input?.prefix||'')+answer+(gitRoute.input?.suffix||''),undefined,background));
       if(gitRoute.action==='help')return {handled:true,text:'Git: «статус гита», «покажи diff», «история коммитов», «добавь в коммит путь/файл», «сделай коммит: описание», «создай ветку feature/name», «переключись на ветку main», «git fetch», «git pull», «git push». Git автоматически определяется по папкам текущего проекта. Панель открывается кнопкой Git в чате.'};
       ctx.dialogue.rememberAction(original,'Выполняю Git…');const topic=ctx.dialogue.active(),message=topic.messages.at(-1);
-      try{ctx.requestProgress.report('Выполняю Git: '+gitRoute.action);const result=gitRoute.action==='init'?await ctx.gitWorkspace.init(null,(await ctx.gitWorkspace.discover()).projectId):await ctx.gitWorkspace.execute(gitRoute);message.text=result.text;}catch(error){message.text=error.message;message.error=!error.gitDiscovery;if(error.gitDiscovery){message.gitDiscovery=error.gitDiscovery;message.question=true;}}
+      try{ctx.requestProgress.report('Выполняю Git: '+gitRoute.action);const result=gitRoute.action==='init'?await ctx.gitWorkspace.init(null,(await ctx.gitWorkspace.discover()).projectId):await ctx.gitWorkspace.execute(gitRoute);message.text=result.text;const card=require('./features/chat-results.cjs').extract({git:{action:gitRoute.action,...result}});if(card)message.extensionData={...message.extensionData,...card};}catch(error){message.text=error.message;message.error=!error.gitDiscovery;if(error.gitDiscovery){message.gitDiscovery=error.gitDiscovery;message.question=true;}}
       if(!ctx.dialogue.state.topics.includes(topic))return {handled:true,text:message.text,error:!!message.error};
       ctx.dialogue.persist();return {handled:true,text:message.text,error:!!message.error,question:!!message.question,gitDiscovery:message.gitDiscovery,gitCommand:original,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
     }
@@ -301,7 +303,7 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     // A complete answer resolves an older «Нужно уточнение» status of this chat.
     const chat=result?.topicId?ctx.dialogue.state.topics.find(t=>t.id===result.topicId):topic;
     if(!background&&chat&&['attention','cancelled'].includes(chat.chatJob?.state)&&result?.handled&&!result.error&&!require('./chat-jobs.cjs').needsUser(result)&&!ctx.chatJobs.busy(chat.id)){delete chat.lastChatResult;ctx.chatJobs.update(chat,'done','Готово');}
-    if(result?.extensionData&&chat){const message=chat.messages?.at(-1);if(message?.role==='assistant'&&message.text===result.text){message.extensionData=result.extensionData;ctx.dialogue.persist();}}
+    if(result?.extensionData&&chat){const message=chat.messages?.at(-1);if(message?.role==='assistant'&&message.text===result.text){message.extensionData={...message.extensionData,...result.extensionData};ctx.dialogue.persist();}}
     // Keep what Petya did with the answer, so the chat can show the steps later.
     const steps=require('./request-progress.cjs').steps();
     if(steps.length&&result&&typeof result==='object'){result.steps=steps;const last=chat?.messages?.at(-1);if(last?.role==='assistant'&&!last.steps&&result.handled){last.steps=steps;ctx.dialogue.persist();}}

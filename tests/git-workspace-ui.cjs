@@ -8,7 +8,7 @@ const moduleGit=require('../src/git-workspace.cjs'),Real=moduleGit.GitWorkspace;
 moduleGit.GitWorkspace=class extends Real{constructor(options){super({...options,context:()=>({id:'fixture',name:'Git UI fixture',folder:activeFolder})});}async execute(input){if(input.action==='status')gitReads++;return super.execute(input);}};
 require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{try{
  await win.webContents.executeJavaScript(`(async()=>{
-  await submitChatCommand('А сейчас можешь гит посмотреть');if(!dialogueMessages.textContent.includes('example.txt'))throw Error('Natural Git request did not read working tree');
+  await submitChatCommand('А сейчас можешь гит посмотреть');for(let i=0;i<250&&!dialogueMessages.textContent.includes('example.txt');i++)await new Promise(r=>setTimeout(r,40));if(!dialogueMessages.textContent.includes('example.txt'))throw Error('Natural Git request did not read working tree');
   await new Promise(r=>setTimeout(r,400));view('home');const card=document.getElementById('git-card');if(!card)throw Error('Git card missing');const opener=document.getElementById('project-git-open');if(!opener?.getBoundingClientRect().width)throw Error('Git button hidden');await window.openProjectGit();if(document.querySelector('#settings #git-card'))throw Error('Git is still in settings');
   const click=async text=>{const b=[...card.querySelectorAll('button')].find(b=>b.textContent===text);if(!b)throw Error('Missing button '+text);b.click();for(let i=0;i<200&&b.disabled;i++)await new Promise(r=>setTimeout(r,20));if(b.disabled)throw Error('Button stuck '+text);};
   await click('Обновить');const check=card.querySelector('input[type=checkbox]');if(!check||check.value!=='example.txt')throw Error('Working tree missing');check.checked=true;await click('В коммит');if(!card.textContent.includes('в коммите'))throw Error('Stage failed');
@@ -22,6 +22,6 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{try{
   const button=[...dialogueChoices.querySelectorAll('button')].find(b=>b.textContent.startsWith('Создать Git'));if(!button)throw Error('Missing create Git button');button.click();for(let i=0;i<150&&button.disabled;i++)await new Promise(r=>setTimeout(r,20));const state=await window.petya.gitStatus();if(state.head||state.files.some(f=>f.staged))throw Error('Init committed or staged files');
  })()`);
  if(!fs.existsSync(path.join(empty,'.git')))throw Error('Explicit init did not create repository');
- fs.writeFileSync('/tmp/petya-git-panel.png',(await win.webContents.capturePage()).toPNG());console.log('Git Electron UI: real status, file selection, stage, commit, log and chat branch command passed.');
+ fs.writeFileSync(path.join(require('node:os').tmpdir(),'petya-git-panel.png'),(await win.webContents.capturePage()).toPNG());console.log('Git Electron UI: real status, file selection, stage, commit, log and chat branch command passed.');
 }finally{fs.rmSync(root,{recursive:true,force:true});fs.rmSync(empty,{recursive:true,force:true});}}};
 require('../src/main.cjs');

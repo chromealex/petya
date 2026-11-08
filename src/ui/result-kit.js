@@ -1,0 +1,198 @@
+// Result kit: shared building blocks for extension result cards in the chat.
+// Extensions (src/extensions/*) own their data, adapters and renderers; this file only offers the common
+// card anatomy, chip menus, undo toasts, list views and selection, so every app looks and behaves the same.
+(()=>{
+ const style=document.createElement('link');style.rel='stylesheet';style.href='result-kit.css';document.head.append(style);
+ const el=(tag,className,text)=>{const node=document.createElement(tag);if(className)node.className=className;if(text!==undefined&&text!==null)node.textContent=String(text);return node;};
+ const safeUrl=value=>{try{const url=new URL(value);return ['https:','http:','slack:','mailto:'].includes(url.protocol)?url.href:'';}catch{return '';}};
+ const store={get(key,fallback){try{return localStorage.getItem('petya-kit-'+key)||fallback;}catch{return fallback;}},set(key,value){try{localStorage.setItem('petya-kit-'+key,value);}catch{}}};
+
+ // --- Floating menu for chips -------------------------------------------------------------
+ let openMenu=null;
+ function closeMenu(){openMenu?.remove();openMenu=null;}
+ document.addEventListener('pointerdown',event=>{if(openMenu&&!openMenu.contains(event.target)&&!event.target.closest?.('.kit-chip[aria-expanded="true"]'))closeMenu();});
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&openMenu){event.preventDefault();event.stopPropagation();const owner=openMenu.owner;closeMenu();owner?.setAttribute('aria-expanded','false');owner?.focus();}},true);
+ async function menu(anchor,load,pick){
+  closeMenu();
+  const box=el('div','kit-menu');box.setAttribute('role','menu');box.owner=anchor;openMenu=box;document.body.append(box);
+  const place=()=>{const r=anchor.getBoundingClientRect();box.style.left=Math.min(r.left,innerWidth-box.offsetWidth-8)+'px';box.style.top=(r.bottom+6+box.offsetHeight>innerHeight?r.top-box.offsetHeight-6:r.bottom+6)+'px';};
+  box.append(el('div','kit-menu-note','Загружаю…'));place();anchor.setAttribute('aria-expanded','true');
+  let options;try{options=await load();}catch(e){box.replaceChildren(el('div','kit-menu-note error',e.message));place();return;}
+  if(openMenu!==box)return;
+  box.replaceChildren();
+  if(!options.length)box.append(el('div','kit-menu-note','Нет вариантов'));
+  for(const option of options){
+   const item=el('button','kit-menu-item',option.label);item.type='button';item.setAttribute('role','menuitemradio');item.setAttribute('aria-checked',String(!!option.current));
+   if(option.hint)item.append(el('small',null,option.hint));
+   item.onclick=async()=>{closeMenu();anchor.setAttribute('aria-expanded','false');if(!option.current)await pick(option);};
+   box.append(item);
+  }
+  place();box.querySelector('[aria-checked="false"]')?.focus();
+ }
+
+ // --- Toast with undo -----------------------------------------------------------------------
+ const toasts=el('div','kit-toasts');toasts.setAttribute('role','status');toasts.setAttribute('aria-live','polite');document.body.append(toasts);
+ function toast(text,{undo,error=false,timeout=7000}={}){
+  const node=el('div','kit-toast'+(error?' error':''));node.append(el('span',null,text));
+  if(undo){const b=el('button',null,'Отменить');b.type='button';b.onclick=async()=>{b.disabled=true;try{await undo();node.remove();}catch(e){node.replaceChildren(el('span',null,e.message));node.classList.add('error');}};node.append(b);}
+  const close=el('button','kit-toast-close','×');close.type='button';close.setAttribute('aria-label','Закрыть');close.onclick=()=>node.remove();node.append(close);
+  toasts.append(node);setTimeout(()=>node.remove(),timeout);return node;
+ }
+
+ // --- Quick edits through the extension's result adapter ----------------------------------------
+ // perform(key, action, args) → adapter result. A result with `undo: {action, args}` gets an «Отменить» toast.
+ async function quick(key,action,args,{busy}={}){
+  if(!window.chatResultsApi)throw Error('Результаты чата ещё загружаются.');
+  busy?.setAttribute('aria-busy','true');
+  try{
+   const result=await window.chatResultsApi.perform(key,action,args);
+   const undo=result?.undo&&(()=>window.chatResultsApi.perform(key,result.undo.action,result.undo.args).then(r=>{if(r?.text)toast(r.text);return r;}));
+   if(result?.text)toast(result.text,{undo});
+   return result;
+  }catch(e){toast(e.message,{error:true});throw e;}
+  finally{busy?.removeAttribute('aria-busy');}
+ }
+
+ // --- Card ------------------------------------------------------------------------------------
+ function chip({label,title,tone='',menu:load,pick,onClick,editable=!!load||!!onClick,who}){
+  const node=el(editable?'button':'span','kit-chip'+(tone?' tone-'+tone:''),label+(load?' ▾':''));
+  if(who)node.prepend(avatar(who,{size:16}));
+  if(title)node.title=title;
+  if(editable){node.type='button';if(load){node.setAttribute('aria-haspopup','menu');node.setAttribute('aria-expanded','false');node.onclick=event=>{event.stopPropagation();menu(node,load,pick);};}else node.onclick=event=>{event.stopPropagation();onClick();};}
+  return node;
+ }
+ function card({app,initial,color,key,href,status,title,subtitle,meta=[],chips=[],actions=[],side,presentation,body,className=''}){
+  const node=el('section','kit-card '+className);
+  if(presentation){node.dataset.resultPresentation=presentation;node.tabIndex=0;node.onclick=event=>{if(event.target.closest('button,a,input,textarea,select,summary'))return;window.chatResultsApi?.select(presentation);};}
+  const head=el('div','kit-card-head');
+  if(app){const badge=el('span','kit-app',initial||app[0]);badge.style.background=color||'#3a4440';badge.title=app;badge.setAttribute('aria-label',app);head.append(badge);}
+  if(key){const url=safeUrl(href);const link=el(url?'a':'span','kit-key',key);if(url){link.href=url;link.target='_blank';link.rel='noopener';}head.append(link);}
+  if(status)head.append(status instanceof Node?status:chip(status));
+  if(subtitle)head.append(el('span','kit-subtitle',subtitle));
+  node.append(head);
+  if(title)node.append(el('h4','kit-title',title));
+  if(body)node.append(body);
+  const fields=chips.filter(Boolean).map(c=>c instanceof Node?c:chip(c));
+  if(fields.length){const row=el('div','kit-chips');row.append(...fields);node.append(row);}
+  if(meta.length)node.append(el('small','kit-meta',meta.filter(Boolean).join(' · ')));
+  if(actions.length){const row=el('div','kit-actions');for(const a of actions){const b=el('button',a.primary?'primary':'',a.label);b.type='button';if(a.title)b.title=a.title;b.onclick=async event=>{event.stopPropagation();b.disabled=true;try{await a.run(b);}catch(e){toast(e.message,{error:true});}finally{b.disabled=false;}};row.append(b);}node.append(row);}
+  // A main action on the right: icon, verb and a short line saying what will happen.
+  if(side){
+   const main=el('div','kit-card-main');main.append(...node.childNodes);
+   const b=el('button','kit-side'+(side.tone?' tone-'+side.tone:''));b.type='button';if(side.title)b.title=side.title;
+   b.setAttribute('aria-label',side.label+(side.hint?' — '+side.hint:''));
+   const icon=el('span','kit-side-icon');icon.setAttribute('aria-hidden','true');icon.innerHTML=side.icon||'';
+   b.append(icon,el('span','kit-side-label',side.label));if(side.hint)b.append(el('small','kit-side-hint',side.hint));
+   b.onclick=async event=>{event.stopPropagation();b.disabled=true;b.setAttribute('aria-busy','true');try{await side.run(b);}catch(e){toast(e.message,{error:true});}finally{b.disabled=false;b.removeAttribute('aria-busy');}};
+   node.classList.add('has-side');node.append(main,b);
+  }
+  return node;
+ }
+ // Icons for side actions (stroke, currentColor).
+ const icons={
+  run:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5.5v13l11-6.5z"/></svg>',
+  fix:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8V20h3.2l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>'
+ };
+
+ // --- Lists: cards / table / board, remembered per list kind ---------------------------------------
+ function views(parent,{id,label,items,modes,initial='cards',limit=5}){
+  const wrap=el('div','kit-list');const bar=el('div','kit-list-bar');const body=el('div','kit-list-body');
+  const available=Object.keys(modes);let mode=store.get('view-'+id,initial);if(!available.includes(mode))mode=available[0];
+  const names={cards:'Карточки',table:'Таблица',board:'Доска'};
+  if(label)bar.append(el('span','kit-list-label',label));
+  const switcher=el('div','kit-switch');switcher.setAttribute('role','group');switcher.setAttribute('aria-label','Вид списка');
+  const paint=()=>{body.replaceChildren(modes[mode](items));for(const b of switcher.children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));};
+  if(available.length>1)for(const m of available){const b=el('button',null,names[m]||m);b.type='button';b.dataset.mode=m;b.onclick=()=>{mode=m;store.set('view-'+id,m);paint();};switcher.append(b);}
+  bar.append(switcher);wrap.append(bar,body);paint();parent.append(wrap);return wrap;
+ }
+ // Collapse a long list of nodes behind «Показать ещё».
+ function collapse(nodes,limit,label='Показать ещё'){
+  const box=el('div','kit-stack');nodes.slice(0,limit).forEach(n=>box.append(n));
+  if(nodes.length>limit){const more=el('details','kit-more');more.append(el('summary',null,label+' · '+(nodes.length-limit)));nodes.slice(limit).forEach(n=>more.append(n));box.append(more);}
+  return box;
+ }
+ function table(columns,rows){
+  const box=el('div','kit-table-wrap'),t=el('table','kit-table'),head=el('tr');
+  for(const c of columns)head.append(el('th',null,c.label));
+  const thead=el('thead');thead.append(head);const tbody=el('tbody');
+  for(const row of rows){const tr=el('tr');if(row.presentation)tr.dataset.resultPresentation=row.presentation;for(const c of columns){const td=el('td');const v=c.value(row);td.append(v instanceof Node?v:document.createTextNode(String(v??'')));tr.append(td);}tbody.append(tr);}
+  t.append(thead,tbody);box.append(t);return box;
+ }
+ function board(columns,{onDrop}={}){
+  const grid=el('div','kit-board');
+  for(const column of columns){
+   const col=el('div','kit-column');col.append(el('div','kit-column-head',column.label+' · '+column.items.length));
+   for(const item of column.items){const node=item.node;if(onDrop&&item.key){node.draggable=true;node.ondragstart=e=>{e.dataTransfer.setData('text/x-petya-result',item.key);};}col.append(node);}
+   if(onDrop){col.ondragover=e=>{if(e.dataTransfer.types.includes('text/x-petya-result')){e.preventDefault();col.classList.add('drop');}};col.ondragleave=()=>col.classList.remove('drop');col.ondrop=e=>{col.classList.remove('drop');const key=e.dataTransfer.getData('text/x-petya-result');if(key){e.preventDefault();onDrop(key,column);}};}
+   grid.append(col);
+  }
+  return grid;
+ }
+
+ // --- Batch selection: checkboxes on items, one bar with actions for the selected ones ---------------
+ function batch(list,{actions}){
+  const chosen=new Set(),bar=el('div','kit-batch');bar.hidden=true;const count=el('span');bar.append(count);
+  for(const a of actions){const b=el('button',a.primary?'primary':'',a.label);b.type='button';b.onclick=async()=>{b.disabled=true;try{await a.run([...chosen]);}catch(e){toast(e.message,{error:true});}finally{b.disabled=false;}};bar.append(b);}
+  const sync=()=>{bar.hidden=!chosen.size;count.textContent='Выбрано: '+chosen.size;};
+  return {bar,toggle(key,on){on?chosen.add(key):chosen.delete(key);sync();},box(key){const input=el('input','kit-check');input.type='checkbox';input.setAttribute('aria-label','Выбрать');input.onclick=e=>e.stopPropagation();input.onchange=()=>{this.toggle(key,input.checked);};return input;},clear(){chosen.clear();sync();}};
+ }
+
+ // Remove plain-text lines the cards replace (e.g. «KEY — title» lines), keeping explanations.
+ function dropLines(parent,test){for(const node of parent.querySelectorAll(':scope>p,:scope>ul>li,:scope>ol>li'))if(test(node.textContent.trim()))node.remove();for(const list of parent.querySelectorAll(':scope>ul,:scope>ol'))if(!list.children.length)list.remove();}
+
+ // --- Side panel: a full view next to the chat (one at a time), resizable, closes with Esc --------------
+ let side=null;
+ function panel({id,title,subtitle,actions=[],body}){
+  const home=document.getElementById('home');if(!home)return null;
+  if(!side){
+   const box=el('aside','kit-panel');box.setAttribute('role','complementary');box.tabIndex=-1;
+   const grip=el('div','kit-panel-grip');grip.setAttribute('role','separator');grip.setAttribute('aria-orientation','vertical');grip.title='Потяните, чтобы изменить ширину';
+   grip.onpointerdown=e=>{e.preventDefault();grip.setPointerCapture(e.pointerId);const right=box.getBoundingClientRect().right;
+    grip.onpointermove=m=>{const w=Math.round(Math.min(Math.max(320,right-m.clientX),Math.max(360,innerWidth*0.7)));home.style.setProperty('--kit-panel-w',w+'px');};
+    grip.onpointerup=()=>{grip.onpointermove=null;store.set('panel-width',getComputedStyle(home).getPropertyValue('--kit-panel-w').trim());};};
+   const head=el('div','kit-panel-head'),titles=el('div','kit-panel-titles'),name=el('h3','kit-panel-title'),sub=el('small','kit-panel-subtitle'),tools=el('div','kit-panel-tools');
+   const close=el('button','kit-panel-close','×');close.type='button';close.title='Закрыть (Esc)';close.setAttribute('aria-label','Закрыть панель');close.onclick=()=>closePanel();
+   titles.append(name,sub);head.append(titles,tools,close);const content=el('div','kit-panel-body');box.append(grip,head,content);
+   side={box,name,sub,tools,content,id:null,topic:null};
+   const width=store.get('panel-width','');if(width)home.style.setProperty('--kit-panel-w',width);
+  }
+  side.id=id;side.topic=typeof topicSelect!=='undefined'?topicSelect.value:'';
+  side.name.textContent=title||'';side.sub.textContent=subtitle||'';side.sub.hidden=!subtitle;side.box.setAttribute('aria-label',title||'Просмотр');
+  side.tools.replaceChildren(...actions.map(a=>{const b=el('button',null,a.label);b.type='button';if(a.title)b.title=a.title;b.onclick=()=>a.run(b);return b;}));
+  side.content.replaceChildren(body||el('p','kit-meta','Загружаю…'));side.content.scrollTop=0;
+  if(!side.box.isConnected)home.append(side.box);home.classList.add('with-side-panel');
+  document.dispatchEvent(new CustomEvent('petya-panel',{detail:{id,open:true}}));
+  side.box.focus({preventScroll:true});
+  return {set(node){if(side?.id===id)side.content.replaceChildren(node);},get open(){return side?.id===id&&side.box.isConnected;}};
+ }
+ function closePanel(){if(!side?.box.isConnected)return;const id=side.id;side.box.remove();side.id=null;document.getElementById('home')?.classList.remove('with-side-panel');document.dispatchEvent(new CustomEvent('petya-panel',{detail:{id,open:false}}));}
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!openMenu&&side?.box.isConnected&&!document.querySelector('dialog[open]')&&(side.box.contains(document.activeElement)||document.activeElement===document.body)){e.preventDefault();closePanel();}});
+ // A panel belongs to its chat: switching chats closes it.
+ for(const ev of ['petya-dialogue-state','petya-chat-opened'])document.addEventListener(ev,()=>{if(side?.box.isConnected&&typeof topicSelect!=='undefined'&&topicSelect.value!==side.topic)closePanel();});
+ const panelOpen=id=>!!side?.box.isConnected&&side.id===id;
+
+ // --- People: team photos next to names in cards (Slack authors, Jira assignees, meeting tasks, …) -------------
+ let team=null,teamLoad=null;
+ const key=v=>String(v||'').toLocaleLowerCase().replace(/ё/g,'е').replace(/^@/,'').replace(/\s+/g,' ').trim();
+ function loadTeam(force=false){if(force)teamLoad=null;if(!teamLoad)teamLoad=(window.petya?.teamList?.()||Promise.resolve(null)).then(data=>{const index=new Map();
+   for(const m of data?.members||[]){for(const n of [m.name,m.email,...String(m.aliases||'').split(/[,;]/),...Object.values(m.accounts||{}).flatMap(a=>[a.name,a.handle,a.id,a.email])])if(key(n)&&!index.has(key(n)))index.set(key(n),m);if(m.slackId)index.set(key(m.slackId),m);}
+   team=index;document.querySelectorAll('.kit-person[data-person]').forEach(fillPerson);return index;}).catch(()=>{team=new Map();return team;});return teamLoad;}
+ const person=name=>team?.get(key(name))||null;
+ function fillPerson(node){const m=person(node.dataset.person);if(!m)return;node.title=m.name+(m.role?' · '+m.role:'');
+  if(m.photo&&/^data:image\/(png|jpeg);base64,/.test(m.photo)&&!node.querySelector('img')){const img=el('img');img.src=m.photo;img.alt='';node.replaceChildren(img);node.classList.add('has-photo');}}
+ // A round avatar: the team photo when the person is in «Команда», otherwise the initials.
+ function avatar(name,{size=20}={}){
+  const node=el('span','kit-person');node.dataset.person=String(name||'');node.style.setProperty('--size',size+'px');node.setAttribute('aria-hidden','true');
+  node.textContent=String(name||'?').replace(/^@/,'').split(/\s+/).filter(Boolean).slice(0,2).map(w=>Array.from(w)[0]).join('').toLocaleUpperCase()||'?';
+  if(team)fillPerson(node);else loadTeam();return node;
+ }
+ for(const ev of ['petya-team-updated','petya-team-saved'])document.addEventListener(ev,()=>loadTeam(true));
+
+ // Hand a follow-up to the chat: send it right away, or put it into the composer for the user to finish.
+ async function ask(text,{send=false}={}){
+  const box=document.getElementById('command');
+  if(send&&typeof submitChatCommand==='function'){await submitChatCommand(text);return;}
+  if(box){box.value=text;box.dispatchEvent(new Event('input',{bubbles:true}));box.focus();box.setSelectionRange?.(text.length,text.length);}
+ }
+ window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam};
+})();

@@ -1,0 +1,15 @@
+.meeting-card{width:640px;max-width:100%;margin:12px 0}
+.meeting-card .kit-key{color:var(--ink);font-weight:600;font-size:13px}
+.meeting-body{display:flex;flex-direction:column;gap:12px}
+.meeting-section h5{margin:0 0 6px;font-size:12px;font-weight:500;color:var(--muted)}
+.meeting-section ul,.meeting-more ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.meeting-decision{position:relative;padding-left:20px;font-size:14px;line-height:1.45}
+.meeting-decision::before{content:'✓';position:absolute;left:2px;color:var(--green)}
+.meeting-task{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:10px;background:#ffffff05}
+.meeting-task .kit-check{margin-top:3px}
+.meeting-task-text{flex:1;display:flex;flex-direction:column;gap:6px;font-size:14px;line-height:1.45;min-width:0}
+.meeting-task>button{min-height:28px;padding:3px 10px;font-size:12px}
+.meeting-section:not(:has(.meeting-task)) li:not(.meeting-decision){padding-left:20px;position:relative;font-size:14px;line-height:1.45}
+.meeting-section:not(:has(.meeting-task)) li:not(.meeting-decision)::before{content:'?';position:absolute;left:4px;color:#e5ce8c}
+.meeting-more>summary{font-size:12px;color:var(--muted);cursor:pointer}
+.meeting-more ul{margin-top:6px;font-size:13px;color:var(--muted)}

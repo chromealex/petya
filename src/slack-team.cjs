@@ -75,7 +75,7 @@ class SlackTeam {
     const p=user.profile||{},name=String(p.real_name||user.real_name||p.display_name||user.name||'').trim().slice(0,120);
     if(!name)throw Error('Slack не вернул имя участника. Повторите запрос позже.');
     const email=typeof p.email==='string'&&/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(p.email)?p.email.slice(0,254):'';
-    const member=team.validate([{name,aliases:p.display_name&&p.display_name!==name?String(p.display_name).slice(0,240):'',role:String(p.title||'').slice(0,160),email,slackId:user.id}])[0];
+    const member=team.validate([{name,aliases:p.display_name&&p.display_name!==name?String(p.display_name).slice(0,240):'',role:String(p.title||'').slice(0,160),email,slackId:user.id,accounts:{slack:{id:user.id,name,handle:String(p.display_name||''),title:String(p.title||''),email,image:p.is_custom_image===false?'':String(p.image_192||p.image_72||'')}}}])[0];
     members.push({member,source:'Профиль Slack',evidence:JSON.stringify(member)});
     if(members.length>100){const e=Error('В выбранных каналах больше 100 коллег — справочник рассчитан на 100. Уточните канал своей команды.');e.teamChannels=true;throw e;}
    }

@@ -1,3 +1,5 @@
+// Card quick edits (status, assignee, priority, due date) run through quick.cjs; each returns its undo.
+const quick=require('./quick.cjs').actions;
 const reports=require('../report-result.cjs')('jira');
 function capture(result){
   if(!Array.isArray(result.data?.issues))return;
@@ -7,7 +9,7 @@ function capture(result){
   return result.data.issues.filter(item=>/^[A-Z][A-Z0-9_]*-\d+$/u.test(item.key)).map(item=>({
     key:item.key,site,summary:String(item.fields?.summary||item.key).slice(0,300),
     status:item.fields?.status?.name||'',category:item.fields?.status?.statusCategory?.key||'',
-    assignee:item.fields?.assignee?.displayName||'',priority:item.fields?.priority?.name||'',type:item.fields?.issuetype?.name||''
+    assignee:item.fields?.assignee?.displayName||'',priority:item.fields?.priority?.name||'',type:item.fields?.issuetype?.name||'',due:item.fields?.duedate||''
   }));
 }
 module.exports={
@@ -15,10 +17,11 @@ module.exports={
   describe(message,topic,s){
     const tasks=(message.jiraItems||[]).map(item=>({key:[item.site,item.key],item,presentationKey:JSON.stringify([item.site,item.key]),
       title:'Jira · '+item.key,subtitle:item.summary,
-      actions:[{id:'open',label:'Открыть в Jira'},{id:'details',label:'К ответу'},{id:'edit',label:'Изменить'}]}));
+      actions:[{id:'open',label:'Открыть в Jira'},{id:'details',label:'К ответу'},{id:'edit',label:'Изменить'},...quick.map(id=>({id,label:id,hidden:true}))]}));
     return [...reports.describe(message,topic,s),...tasks];
   },
-  async perform(action,row,s,check){
+  async perform(action,row,s,check,args){
+    if(quick.includes(action))return require('./quick.cjs').perform(action,row,s,check,args||{});
     if(action!=='open')throw Error('Неизвестное действие Jira.');
     const item=row.item,scope=require('./desktop-reply.cjs').scope(s,s.dialogue.active());
     const validate=()=>{

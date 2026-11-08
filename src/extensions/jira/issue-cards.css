@@ -6,3 +6,8 @@
 .jira-issue-card .chat-result-inline-actions button[data-action=edit]{display:grid;place-items:center;width:26px;height:26px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--muted,#a7b1ac);font-size:0}
 .jira-issue-card .chat-result-inline-actions button[data-action=edit]::before{content:"";width:15px;height:15px;background:currentColor;mask:url('./edit.svg') center/contain no-repeat}
 .jira-issue-card .chat-result-inline-actions button[data-action=edit]:hover{background:#ffffff0d;color:var(--ink,#f0f2ed)}
+.jira-card .chat-result-inline-actions{margin-top:2px}
+.kit-column .jira-card .kit-chips{gap:4px}
+.jira-issue-card .kit-side small{padding-right:0;display:block;color:var(--muted,#a7b1ac);font-size:11px}
+.jira-issue-card .kit-card-main{position:relative}
+.jira-issue-card.has-side .chat-result-inline-actions{right:0;bottom:-4px}

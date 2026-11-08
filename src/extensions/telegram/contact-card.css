@@ -1,0 +1,3 @@
+.telegram-contact-actions{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}.telegram-contact-actions button{min-height:30px;padding:4px 10px;font-size:13px}
+
+.telegram-contact-avatar.has-photo{overflow:hidden;padding:0}.telegram-contact-avatar img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
