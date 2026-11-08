@@ -1,0 +1,25 @@
+{
+  "id": "file-search",
+  "name": "Поиск файлов по смыслу",
+  "description": "Находит свои файлы по тому, о чём они: код, документы, PDF и презентации в папках проекта и в выбранных папках. Локальный индекс, ничего не отправляется",
+  "category": "computer",
+  "icon": "icon.svg",
+  "setting": "extension_file-search",
+  "settings": true,
+  "feature": "feature.cjs",
+  "examples": ["Где презентация про Китай с графиком LTV?", "Найди скрипт, который сохраняет прогресс", "Документы про монетизацию"],
+  "scripts": [
+    ["file-search-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"],
+    ["search-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "fileSearch": "renderFileSearch"
+  },
+  "downloads": [
+    {"id": "embedding-model", "name": "Модель смысла qwen3-embedding:0.6b (Ollama)", "bytes": 639000000, "approx": true}
+  ],
+  "provides": {
+    "index-collection": "collection.cjs"
+  }
+}
