@@ -20,7 +20,8 @@ module.exports=ctx=>{
   ctx.handle('skillsParse',markdown=>skillModule.parseMarkdown(markdown));
   ctx.handle('skillsExport',id=>{const skill=instructionSkills.list().find(s=>s.id===id);if(!skill)throw Error('Скилл не найден.');return skillModule.markdown(skill);});
   const executeSkill=async(command,ids)=>{const selected=instructionSkills.resolve(command);if(!selected)return null;const files=ids?ctx.attachments.take(ids):undefined;const result=await workSkills.turn(selected,command,files)||await skillModule.runSkill({selected,command,dialogue:ctx.dialogue,settings:{...ctx.settings},request:ctx.request,company:ctx.companies.get(ctx.companyId).name,files,...require('./chat-attribution.cjs').contextExcerpt(ctx.memory.prune().slice(-10))});if(ids)for(const id of ids)ctx.attachments.remove(id);return result;};
-  const inspectAttachments=async(ids,question)=>{
+  // skill: a skill chosen for the question about these files (src/features/skill-choice.cjs).
+  const inspectAttachments=async(ids,question,{skill}={})=>{
     const caption=String(question||'').trim();
     question=caption?ctx.text(caption,4000):require('./attachment-assistant.cjs').briefFileQuestion;
     const files=ctx.attachments.take(ids), dialogue=ctx.dialogue, at=Date.now();
@@ -42,11 +43,11 @@ module.exports=ctx=>{
       let answer,error=false;
       try{
         if(!caption && files.every(f=>f.modelFormat))answer=files.map(f=>f.name+' — '+f.note).join('\n')+'\nОткройте «Показать 3D» под файлом.';
-        else answer=await ctx.analyzeMaterials({...topic,attachments:files},question);
+        else answer=await ctx.analyzeMaterials({...topic,attachments:files},question,{skill});
       }
       catch(e){answer=e.message;error=true;}
       if(!dialogue.state.topics.includes(topic))return {handled:true,text:'Чат удалён.'};
-      topic.messages.push({role:'assistant',text:answer,error,...(error?{retryStep:'files'}:{}),usedMaterials:error?[]:require('./chat-attribution.cjs').fileRefs(files,answer),at:Date.now()});
+      topic.messages.push({role:'assistant',text:answer,error,...(skill&&!error?{by:'навык '+skill.name}:{}),...(error?{retryStep:'files'}:{}),usedMaterials:error?[]:require('./chat-attribution.cjs').fileRefs(files,answer),at:Date.now()});
       dialogue.persist();
       return {handled:true,text:answer,error,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
     }finally{dialogue.running.delete(topic.id);}
@@ -56,7 +57,12 @@ module.exports=ctx=>{
     const request = ctx.text(command,4000);
     const reply = await require('./features/extension-replies.cjs').turnForAttachments(ctx,ids,request);
     if (reply) return reply;
-    return (await executeSkill(request,ids)) || (require('./team-fill.cjs').isTeamFill(command)?ctx.teamFill.turn(request):inspectAttachments(ids,command));
+    const explicit=await executeSkill(request,ids);if(explicit)return explicit;
+    if(require('./team-fill.cjs').isTeamFill(command))return ctx.teamFill.turn(request);
+    // A fitting skill shapes the answer about the files too (a bug report from a log, a test report…).
+    let skill=null;try{skill=await ctx.skillChoice?.choose?.(request);}catch(e){if(e?.name==='AbortError')throw e;}
+    if(skill)require('./request-progress.cjs').report('Беру навык '+skill.name);
+    return inspectAttachments(ids,command,{skill});
   });
   return {instructionSkills,inspectAttachments,executeSkill,taskDuplicates,workSkills};
 };

@@ -17,8 +17,9 @@ const words=text=>String(text||'').toLowerCase().replace(/ё/g,'е').match(/[\p{
 // A rough stem: Russian endings vary, so the first five letters stand for the word.
 const stem=w=>/^[a-z0-9]+$/.test(w)?w.replace(/(?:ing|es|s)$/,'').slice(0,7):w.replace(/[аеиоуыэюяйь]{1,2}$/u,'').padEnd(3,w.slice(-1)).slice(0,5);
 const stems=text=>[...new Set(words(text).filter(w=>w.length>=3&&!STOP.has(w)||/^(?:ab|qa|ui|ux|pr|ci|1:1)$/.test(w)).map(stem))];
+// A skill described in another language is found by its Russian translation too (`ru`, see skill-choice).
 function index(skills){
- const rows=skills.map(s=>({skill:s,name:new Set(stems(s.name.replace(/-/g,' '))),text:new Set(stems(s.description))}));
+ const rows=skills.map(s=>({skill:s,name:new Set(stems(s.name.replace(/-/g,' '))),text:new Set(stems(s.description+' '+(s.ru||'')))}));
  const df=new Map();for(const r of rows)for(const t of new Set([...r.name,...r.text]))df.set(t,(df.get(t)||0)+1);
  const idf=t=>Math.log((rows.length+1)/((df.get(t)||0)+0.5));
  return {rows,idf};
@@ -32,8 +33,8 @@ function library(user=[]){
  return [...own.filter(s=>s.enabled),...BUILTIN.filter(s=>!names.has(s.name))];
 }
 // Best skills for a request by shared words, weighted by how rare each word is across the library.
-function shortlist(command,skills=BUILTIN,limit=8){
- if(!cache||cache.skills!==skills)cache={skills,...index(skills)};
+function shortlist(command,skills=BUILTIN,limit=8,stamp=0){
+ if(!cache||cache.skills!==skills||cache.stamp!==stamp)cache={skills,stamp,...index(skills)};
  const ask=stems(command);if(!ask.length)return [];
  return cache.rows.map(r=>{let score=0;const hits=[];
   for(const t of ask){const inName=r.name.has(t),inText=r.text.has(t);if(!inName&&!inText)continue;score+=cache.idf(t)*(inName?2:1);hits.push(t);}

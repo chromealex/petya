@@ -37,7 +37,10 @@ module.exports={name:'skillPackages',defaults:{},validate(){},matches:t=>ASK.tes
     const {dialog}=require('electron');
     const result=await dialog.showOpenDialog(s.win,{title:'Скилл: папка с SKILL.md или архив',properties:[kind==='archive'?'openFile':'openDirectory'],...kind==='archive'?{filters:[{name:'Скилл',extensions:['zip','skill']}]}:{}});
     if(result.canceled||!result.filePaths[0])return null;
-    return view(installed.install(root(),result.filePaths[0],taken()));
+    const skill=installed.install(root(),result.filePaths[0],taken());
+    // An English description gets its Russian translation in the background (src/features/skill-choice.cjs).
+    s.skillChoice?.skills?.();
+    return view(skill);
    },
    remove:name=>installed.remove(root(),String(name)).map(view)
   }};
