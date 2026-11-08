@@ -1,0 +1,17 @@
+{
+  "id": "glossary",
+  "name": "Глоссарий",
+  "description": "Термины проекта с определениями, переводами по языкам и запрещёнными вариантами; проверка локализации на разнобой в терминах",
+  "category": "docs",
+  "icon": "icon.svg",
+  "examples": ["Что такое мана у нас?","Добавь в глоссарий сундук — награда за уровень","Проверь термины в локализации","Собери глоссарий проекта"],
+  "setting": "extension_glossary",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["glossary-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "glossary": "renderGlossary"
+  }
+}
