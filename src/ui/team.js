@@ -31,7 +31,7 @@
    if(key==='email')input.type='email';
    if(key==='phone'){input.type='tel';input.placeholder='+7 900 000-00-00';}
    // Birthday: shown as ДД.ММ(.ГГГГ); saved as ISO by the main process.
-   if(key==='birthday'){input.placeholder='ДД.ММ или ДД.ММ.ГГГГ';const m=/^(\d{4}|-)-(\d{2})-(\d{2})$/.exec(member.birthday||'');if(m)input.value=m[3]+'.'+m[2]+(m[1]!=='-'?'.'+m[1]:'');input.pattern='\\d{1,2}[.\\/-]\\d{1,2}([.\\/-]\\d{4})?';input.title='ДД.ММ или ДД.ММ.ГГГГ';}
+   if(key==='birthday'){input.type='hidden';wrap.append(birthdayPicker(input));}
    if(key==='aliases')input.placeholder=member.aliasHint?'Например: '+member.aliasHint:'Как вы зовёте человека в разговоре';
    // «Имя в Zoom»: empty means Petya matches the name himself (shown as a hint); a chosen one wins. Names seen
    // in meetings are offered in the list.
@@ -47,6 +47,29 @@
   const actions=document.createElement('div');actions.className='actions team-member-wide';
   const remove=window.deleteButton('Удалить участника');remove.onclick=()=>{setDirty(true);card.remove();status.textContent='Изменения не сохранены.';};
   actions.append(remove);editor.append(actions);details.append(summary,editor);card.append(details);list.append(card);return card;
+ }
+ // Birthday: a date with a calendar; the stored value (ISO, or «--MM-DD» when Slack gave no year) is in the
+ // hidden input, the line under it says the date in words and the age.
+ function birthdayPicker(store){
+  const box=document.createElement('div');box.className='team-birthday';const date=document.createElement('input');date.type='date';date.setAttribute('aria-label','День рождения');
+  const today=new Date(),start=new Date(today.getFullYear(),today.getMonth(),today.getDate()),iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');date.max=iso(today);date.min='1930-01-01';
+  const note=document.createElement('span');note.className='small team-birthday-note';
+  const clear=document.createElement('button');clear.type='button';clear.className='quiet';clear.textContent='Очистить';
+  const locale=window.petyaLocale||'ru-RU';
+  const paint=()=>{const v=store.value,full=/^\d{4}-\d{2}-\d{2}$/.test(v),partial=/^--\d{2}-\d{2}$/.test(v);date.value=full?v:'';clear.hidden=!v;
+   if(full){const d=new Date(v+'T12:00:00'),next=new Date(today.getFullYear(),d.getMonth(),d.getDate());if(next<start)next.setFullYear(today.getFullYear()+1);
+    const age=next.getFullYear()-d.getFullYear(),days=Math.round((next-start)/86400000);
+    note.textContent=d.toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric'})+' · '+(days===0?'сегодня исполняется '+age:'исполнится '+age+(days===1?' завтра':' через '+days+' дн.'));}
+   else if(partial){const [,m,d]=/^--(\d{2})-(\d{2})$/.exec(v);note.textContent=new Date(2000,Number(m)-1,Number(d)).toLocaleDateString(locale,{day:'numeric',month:'long'})+' · год неизвестен — выберите дату в календаре';}
+   else note.textContent='Не указан — нажмите, чтобы выбрать в календаре';};
+  date.addEventListener('change',e=>{e.stopPropagation();if(date.value){store.value=date.value;store.dispatchEvent(new Event('input',{bubbles:true}));}paint();});
+  // A click anywhere in the field opens the calendar.
+  date.addEventListener('click',()=>{try{date.showPicker();}catch{}});
+  // Only day and month known: the calendar opens on that day (the year is to be picked).
+  date.addEventListener('focus',()=>{const m=/^--(\d{2})-(\d{2})$/.exec(store.value);if(m&&!date.value)date.value='1990-'+m[1]+'-'+m[2];});
+  date.addEventListener('blur',()=>{if(/^--/.test(store.value))paint();});
+  clear.onclick=()=>{store.value='';store.dispatchEvent(new Event('input',{bubbles:true}));paint();};
+  const row=document.createElement('div');row.className='team-birthday-row';row.append(date,clear);box.append(row,note);setTimeout(paint,0);return box;
  }
  // Projects: chips chosen from Petya's projects and the Jira projects; typing filters the list.
  let projectChoices=null;
@@ -91,7 +114,7 @@
     try{const list=await window.petya.teamPhotoOptions(read())||[];choices.replaceChildren();if(!list.length){choices.append(node('span','small','В профилях Slack и Jira нет фото. Обновите команду или загрузите своё.'));return;}
      for(const o of list){const b=node('button','team-photo-choice');b.type='button';b.dataset.photo=o.photo;b.title=SERVICES[o.service]||o.service;b.setAttribute('aria-pressed',String(o.photo===photo.value));const img=node('img');img.src=o.photo;img.alt=SERVICES[o.service]||o.service;b.append(img,node('span',null,SERVICES[o.service]||o.service));b.onclick=()=>set(o.photo,o.service);choices.append(b);}
     }catch(e){choices.replaceChildren(node('span','small',e.message));}};
-   choices.hidden=true;tools.append(pick,upload,none);box.append(head,tools,choices);editor.append(box);setTimeout(paint,0);}
+   choices.hidden=true;tools.append(pick,upload,none);head.append(tools);box.append(head,choices);editor.append(box);setTimeout(paint,0);}
   const hidden=node('input');hidden.type='hidden';hidden.dataset.field='accounts';hidden.value=member.accounts&&Object.keys(member.accounts).length?JSON.stringify(member.accounts):'';editor.append(hidden);
   const field=key=>editor.querySelector('[data-field="'+key+'"]');
   const read=()=>{try{return JSON.parse(hidden.value||'{}');}catch{return {};}};
@@ -104,7 +127,7 @@
    const shown=Object.entries(FIELDS).filter(([k])=>entry[k]);
    if(!shown.length)row.list.append(node('dd','team-account-empty',service==='zoom'?(field('zoomName').placeholder&&!/Определю/.test(field('zoomName').placeholder)?field('zoomName').placeholder:'Определю сам по имени'):'Не связан'));
    for(const [key,label] of shown){const dd=node('dd',key==='id'?'mono':'',entry[key]);if(key==='id'){dd.title='Скопировать';dd.tabIndex=0;dd.onclick=()=>navigator.clipboard?.writeText(entry[key]).catch(()=>{});}row.list.append(node('dt',null,label),dd);}
-   row.unlink.hidden=!shown.length;row.link.textContent=shown.length?'Изменить':'Связать';
+   row.unlink.hidden=!shown.length;row.link.textContent=service==='zoom'?(shown.length?'Изменить имя':'Указать имя'):shown.length?'Изменить':'Связать';
   }
   function unlinkService(service){const next=read();delete next[service];write(next);if(service==='jira'){field('jiraId').value='';field('jiraName').value='';}if(service==='slack')field('slackId').value='';mark();paint(service);}
   function addRow(service){
@@ -145,6 +168,7 @@
    const input=node('input');input.setAttribute('list','team-zoom-names');input.placeholder='Как подписан в Zoom';input.setAttribute('aria-label','Имя в Zoom');
    const save=node('button',null,'Готово');save.type='button';const bar=node('div','team-account-search');bar.append(input,save);panel.append(bar,node('p','small','Можно несколько через запятую. Пусто — Петя сопоставит сам по имени.'));
    open.onclick=()=>{panel.hidden=!panel.hidden;if(!panel.hidden){input.value=field('zoomName').value;input.focus();}};
+   rows.get('zoom')?.list.addEventListener('click',()=>{if(panel.hidden)open.click();});
    const apply=()=>{field('zoomName').value=input.value.trim();panel.hidden=true;mark();paint('zoom');};save.onclick=apply;
    input.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();apply();}if(e.key==='Escape')panel.hidden=true;});
    unlink.onclick=()=>{field('zoomName').value='';panel.hidden=true;mark();paint('zoom');};

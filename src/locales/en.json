@@ -4182,6 +4182,14 @@
   "не в команде": "not in the team",
   "нет фото": "no photo",
   "своё фото": "own photo",
-  "🎂 Сегодня день рождения:": "🎂 Birthday today:"
+  "🎂 Сегодня день рождения:": "🎂 Birthday today:",
+  "· год неизвестен — выберите дату в календаре": "· year unknown — pick the date in the calendar",
+  "Изменить имя": "Change name",
+  "Не указан — нажмите, чтобы выбрать в календаре": "Not set — click to pick in the calendar",
+  "Указать имя": "Set name",
+  "дн.": "days",
+  "завтра": "tomorrow",
+  "исполнится": "turns",
+  "сегодня исполняется": "turns today"
  }
 }
