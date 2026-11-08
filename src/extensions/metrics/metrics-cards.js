@@ -175,6 +175,9 @@
   actions.push(compareButton);
   if(fall)actions.push({label:'Почему упало?',run:()=>k.ask('Почему '+fall.text+'? Период '+periodText(c.period.days)+(c.platform?', '+PLATFORM[c.platform]:'')+'. Что проверить в первую очередь?',{send:true})});
   const summary=b0.kpis.map(x=>x.label+' '+value(x.value,x.unit,x.precise)+(x.change!==null&&x.change!==undefined?' ('+(x.change>0?'+':'−')+(x.points?fmt(Math.abs(x.change)*100,1)+' п.п.':fmt(Math.abs(x.change)*100,1)+'%')+')':'')).join(', ');
+  // The chart's daily values of the shown source as a table.
+  actions.push(k.links('spreadsheet-export',()=>{const b=c.sources[current];return {title:'Метрики игры · '+b.name+(b.app?' · '+b.app:'')+' · '+periodText(c.period.days),sheet:'Метрики',app:'Метрики игры',
+   header:['Дата',...b.chart.lines.map(l=>l.label)],rows:b.chart.dates.map((d,i)=>[d,...b.chart.lines.map(l=>l.values[i]??'')])};},{label:'Выгрузить в Google Таблицы'}));
   actions.push(k.links('share-message',{text:'посмотреть метрики игры '+periodText(c.period.days)+' ('+b0.name+(b0.app?' · '+b0.app:'')+'): '+summary+(anomalies?'. Необычных дней: '+anomalies:'')}));
   const card=k.card({app:'Метрики',initial:'M',color:'#3d5a73',key:b0.name+(b0.app?' · '+b0.app:''),status,subtitle,body,actions,className:'metrics-card'});
   const keyNode=card.querySelector('.kit-key');if(keyNode)raw(keyNode);

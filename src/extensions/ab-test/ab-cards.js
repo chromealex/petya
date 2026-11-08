@@ -135,6 +135,9 @@
   const actions=[];
   if(c.mode!=='plan'&&c.metric!=='assignment'&&c.power?.required&&c.verdict?.kind!=='srm')actions.push({label:'Сколько ещё ждать?',primary:c.verdict?.kind==='early',run:()=>k.ask('Сколько ещё ждать A/B-тест?',{send:true})});
   if(c.report)actions.push({label:'Скопировать отчёт',run:()=>copy(k,c.report)});
+  if(c.mode!=='plan'&&c.variants?.length)actions.push(k.links('spreadsheet-export',()=>({title:'A/B-тест · '+key+(c.file?' · '+c.file:''),sheet:'A/B',app:'A/B-тесты',
+   header:['Группа','Игроков',c.metric==='conversion'?'Конверсий':'Среднее',c.metric==='conversion'?'Конверсия':'Среднее на игрока','Интервал от','Интервал до','Рост к контролю','p (поправка Холма)'],
+   rows:c.variants.map((v,i)=>{const x=i?c.comparisons?.find(y=>y.name===v.name):null;return [v.name,v.users,c.metric==='conversion'?v.conversions??'':v.rate??'',v.rate??'',v.ci?.low??'',v.ci?.high??'',x?.lift?.value??'',x?.pAdjusted??''];})}),{label:'Выгрузить в Google Таблицы'}));
   const card=k.card({app:'A/B',initial:'AB',color:'#4a5a8a',key,status:{label:c.verdict?.label||'',tone:c.verdict?.tone||'',title:c.verdict?.detail||''},subtitle,body,actions,className:'ab-card'});
   card.dataset.verdict=c.verdict?.kind||'';
   const sub=card.querySelector('.kit-subtitle');if(sub&&c.file)raw(sub);

@@ -6,7 +6,7 @@
   "icon": "icon.svg",
   "examples": ["Спланируй спринт","Что влезет в следующий спринт?","Какая у нас скорость?","Кто перегружен в спринте?"],
   "connects": "Jira",
-  "uses": ["share-message"],
+  "uses": ["share-message", "spreadsheet-export"],
   "setting": "extension_sprint-planning",
   "settings": false,
   "feature": "feature.cjs",

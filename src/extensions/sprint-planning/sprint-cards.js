@@ -209,6 +209,8 @@
     await k.ask(request(),{send:true});
    }},
    k.links('share-message',()=>({text:planText()}),{label:'Отправить план в Slack'}),
+   k.links('spreadsheet-export',()=>({title:'План спринта «'+c.next.name+'» · '+c.project,sheet:c.next.name,app:'Планирование спринта',header:['Задача','Название','Оценка','Исполнитель','Статус','Откуда'],
+    rows:[...(c.carryOver||[]).map(i=>[i.key,i.summary,i.estimate??'',i.assignee||'',i.status||'','перенос']),...(c.planned||[]).map(i=>[i.key,i.summary,i.estimate??'',i.assignee||'',i.status||'','уже в спринте']),...chosen().map(i=>[i.key,i.summary,i.estimate??'',i.assignee||i.proposed||'',i.status||'','новое'])]}),{label:'Выгрузить в Google Таблицы'}),
    {label:'Пересчитать',run:()=>k.ask('Спланируй спринт',{send:true})}
   ];
   const subtitle=c.next.name+' · '+date(c.next.start)+' – '+date(c.next.end);
