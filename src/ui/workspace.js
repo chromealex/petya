@@ -34,7 +34,7 @@ async function selectJiraRoute(context, resume, project = '', issueType = '') {
   if(automaticVoiceCommand)speakReply(question+' '+labels.map((label,i)=>(i+1)+' — '+label).join('; ')).catch(e=>notice(e.message,true));
   return null;
 }
-let currentIntent = '', activeContext = null, workspaceBusy = false, batchId = '', frozenBatch = null, selectedPeople = [], batchTarget = {};
+let currentIntent = '', currentDecompose = false, activeContext = null, workspaceBusy = false, batchId = '', frozenBatch = null, selectedPeople = [], batchTarget = {};
 const states = { ready: 'Ещё не отправлена', sending: 'Результат создания неизвестен — проверьте Jira', uncertain: 'Результат создания неизвестен — повтор заблокирован', created: 'Создана, ещё не в спринте', scheduling: 'Создана; проверьте спринт', 'schedule-failed': 'Создана, не удалось добавить в спринт', rejected: 'Jira отклонила создание', done: 'Создана и добавлена в спринт' };
 function selectOptions(element, values, selected, placeholder, label = v => v.name) {
   element.replaceChildren(new Option(placeholder, ''));

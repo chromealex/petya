@@ -7,7 +7,7 @@
    if(result?.draftMaterial?.text){try{
     if(currentDraft||draftBusy)throw Error('Сначала заверши текущий черновик.');
     const material=await window.petya.feature('chat-tasks','prepare',result.draftMaterial.title||'Задача из чата',result.draftMaterial.text);
-    currentIntent='jira';automaticVoiceCommand=false;commandSnapshot='Создай задачу по обсуждению в чате';voiceReply=null;
+    currentIntent='jira';currentDecompose=false;automaticVoiceCommand=false;commandSnapshot='Создай задачу по обсуждению в чате';voiceReply=null;
     await makeDraft(material,null,{reviewOnly:true});
    }catch(e){notice(e.message,true);}}
    return out;};

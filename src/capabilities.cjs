@@ -33,6 +33,8 @@ const CATALOG=[
   accepts:t=>!!req('./extensions/unity/intent.cjs').intent(t)},
  {id:'draw',says:'нарисовать или сгенерировать картинку',examples:['нарисуй кота-космонавта на Луне','сгенерируй картинку: закат над морем'],accepts:t=>!!req('./local-images.cjs').imagePrompt(t)},
  {id:'capabilities',says:'что Петя умеет и какие у него возможности',examples:['что ты умеешь','какие у тебя возможности'],accepts:t=>!!req('./capabilities-reply.cjs').reply(t,null,{},[])},
+ {id:'jira-decompose',says:'декомпозировать фичу: разбить обсуждение или документацию на несколько задач Jira',
+  examples:['декомпозируй эту фичу','разбей фичу на задачи'],accepts:t=>req('./core.cjs').decomposeRequest(t)},
  {id:'jira-work',says:'Jira: задачи на пользователе, загрузка команды или человека, статус проекта',
   examples:['мои задачи','какие задачи у Ивана','загрузка команды','статус проекта ABC'],
   accepts:t=>['personal','workload','status'].includes(req('./work-query-route.cjs').classify(t,null)?.kind)},

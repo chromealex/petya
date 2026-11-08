@@ -195,7 +195,7 @@
     const text=selected;
     task.hidden=true;
     const material=await window.petya.feature('chat-tasks','prepare',text.slice(0,100),text);
-    currentIntent='jira';automaticVoiceCommand=false;commandSnapshot='Создай задачу по выделенному тексту';voiceReply=null;
+    currentIntent='jira';currentDecompose=false;automaticVoiceCommand=false;commandSnapshot='Создай задачу по выделенному тексту';voiceReply=null;
     await makeDraft(material, null, {reviewOnly:true});
   });
   const clarify=button('Уточнить',()=>{
