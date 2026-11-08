@@ -1,0 +1,10 @@
+time,event,level,details
+0:00,session_start,,
+0:04,level_start,Уровень 2,
+0:31,death,Уровень 2,fell into pit
+0:52,death,Уровень 2,fell into pit
+0:55,restart,Уровень 2,
+1:14,death,Уровень 2,spikes
+1:40,level_end,Уровень 2,
+1:48,purchase,Магазин,shield 99
+,broken,,
