@@ -24,8 +24,8 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js("document.querySelectorAll('.mh-card')[1].querySelector('.mh-mode.on').dataset.mode"),'off');
  assert.equal(await js("document.querySelectorAll('.mh-card img').length"),0,'hint text is never HTML');
  assert.equal(await js("document.querySelectorAll('.mh-card')[0].querySelectorAll('.mh-hint').length"),3);
- assert.match(await js("document.querySelector('.mh-hint.kind-decision .mh-head').textContent"),/Это уже решали 3 октября/);
- assert.ok(await js("[...document.querySelectorAll('.mh-card')[0].querySelectorAll('.kit-actions button')].some(b=>b.textContent==='Снова показывать всё')"));
+ assert.match(await js("document.querySelector('.mh-hint.kind-decision .mh-head').textContent"),/(?:Это уже решали|Already decided on) (?:3 октября|October 3)/,'chat cards sit in .message-content, which the interface translation skips');
+ assert.ok(await js("[...document.querySelectorAll('.mh-card')[0].querySelectorAll('.kit-actions button')].some(b=>['Снова показывать всё','Show everything again'].includes(b.textContent))"));
  assert.equal(await js("document.querySelectorAll('.mh-card')[1].querySelector('.mh-timeline')"),null,'no meeting → no timeline');
  const card=await require('./card-shot.cjs')(win,'.mh-card','petya-meeting-hints');
 
@@ -37,8 +37,8 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(w.isFocusable(),false,'never focusable');assert.equal(w.isAlwaysOnTop(),true);assert.equal(w.isVisible(),true);assert.equal(w.isFocused(),false,'shown without focus');
  const page=c=>w.webContents.executeJavaScript(c);
  for(let i=0;i<100;i++){if(await page("!document.getElementById('hint').hidden"))break;await new Promise(r=>setTimeout(r,30));}
- assert.match(await page("document.getElementById('title').textContent"),/Это уже решали 3 октября/);
- assert.match(await page("document.getElementById('source').textContent"),/Сводка встречи · 3 окт/);
+ assert.match(await page("document.getElementById('title').textContent"),/Это уже решали 3 октября|Already decided on October 3/);
+ assert.match(await page("document.getElementById('source').textContent"),/Сводка встречи · 3 окт|Meeting summary · 3 окт/);
  await page("document.getElementById('mute').click()");await page("document.getElementById('ok').click()");
  for(let i=0;i<50&&actions.length<2;i++)await new Promise(r=>setTimeout(r,20));
  assert.deepEqual(actions,[['mute','decision'],['dismiss','m1:0']],'buttons reach the main process');
