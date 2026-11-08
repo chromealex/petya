@@ -16,7 +16,7 @@ function renderHistory(records) {
   if (!records.length) { const empty=historyElement('p', 'Здесь появятся созданные задачи и последующие правки.');empty.dataset.empty='true';target.append(empty); return; }
   for (const record of records) {
     const card = historyElement('article', '', 'card history-entry'); card.dataset.id = record.id;card.dataset.at=record.at;card.dataset.project=record.project;card.dataset.result=record.rows.every(r=>['done','deleted'].includes(r.state))?'done':'attention';
-    card.append(historyElement('h2', `${record.project} · ${record.rows.length === 1 ? 'Задача' : 'Пакет задач'}`), historyElement('p', `${new Date(record.at).toLocaleString(window.petyaLocale||'ru-RU')}`, 'small'));
+    card.append(historyElement('h2', `${record.project} · ${record.rows.length === 1 ? 'Задача' : 'Пакет задач'}`), historyElement('p', window.relativeTime(record.at), 'small'));
     const checks = [];
     for (const [index, row] of record.rows.entries()) {
       const label = historyElement('label', '', 'check history-task'), check = document.createElement('input'); check.type = 'checkbox'; check.value = row.key || ''; check.checked = !!row.key && row.state !== 'deleted'; check.disabled = !check.checked; checks.push(check);
@@ -55,7 +55,7 @@ function renderHistory(records) {
     if (record.rows.some(r => r.key && !r.snapshot && r.state !== 'deleted')) card.append(historyElement('p', 'Для части задач нет снимка: откат недоступен. Правку можно подготовить по текущим данным Jira.', 'small'));
     for (const op of [...(record.operations || [])].reverse()) {
       const details = document.createElement('details'); details.className = 'history-operation';
-      const summary = historyElement('summary', `${operationNames[op.kind] || op.kind} · ${new Date(op.at).toLocaleString(window.petyaLocale||'ru-RU')} · ${op.rows.filter(r => r.state === 'done').length}/${op.rows.length}`); details.append(summary, historyElement('p', op.instruction)); historyDiff(details, op.rows);
+      const summary = historyElement('summary', `${operationNames[op.kind] || op.kind} · ${window.relativeTime(op.at)} · ${op.rows.filter(r => r.state === 'done').length}/${op.rows.length}`); details.append(summary, historyElement('p', op.instruction)); historyDiff(details, op.rows);
       if (op.kind === 'edit' && op.rows.some(r => ['done', 'partial'].includes(r.state) && !r.undone)) {
         const revert = historyElement('button', 'Откатить эту правку'); revert.onclick = () => { const keys = selected(); return act(async () => showPreview(await window.petya.previewHistoryUndo(record.id, op.id, keys))); }; details.append(revert);
       }

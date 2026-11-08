@@ -67,10 +67,9 @@
    }
  }
  // Compact last-activity label: «5 мин», «14:20», «вчера», «3 дн», «12.10».
- function activity(at){const date=new Date(Number(at));if(!at||Number.isNaN(date.getTime()))return null;const now=new Date(),ms=now-date,minute=60000,day=86400000;let text;
-  if(ms<minute)text='сейчас';else if(ms<60*minute)text=Math.floor(ms/minute)+' мин';else if(date.toDateString()===now.toDateString())text=date.toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'});
-  else{const midnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),days=Math.ceil((midnight-date.getTime())/day);text=days<=1?'вчера':days<7?days+' дн':date.toLocaleDateString(window.petyaLocale||'ru-RU',{day:'2-digit',month:'2-digit'});}
-  return {text,iso:date.toISOString(),full:'Последняя активность: '+date.toLocaleString(window.petyaLocale||'ru-RU')};}
+ // Compact last-activity label from relative-time.js («5 мин», «3 ч», «вчера», «пн», «12.10»); the full date on hover.
+ function activity(at){const date=new Date(Number(at));if(!at||Number.isNaN(date.getTime()))return null;
+  return {text:window.shortTime(date),iso:date.toISOString(),full:'Последняя активность: '+window.fullTime(date),short:true};}
  function chatMenuItems(t,anchor){return t.archived?[
    ['Восстановить',action(()=>archive('chat',t.id,false))],['Переименовать',()=>renameChat(t)]
   ]:[
@@ -80,7 +79,7 @@
   ];}
  function chatRow(t){const row=node('div',null,'project-chat-row'),b=button('',action(async()=>{if(t.archived||latestState.projects.find(p=>p.id===t.projectId)?.archived)throw Error('Сначала восстановите чат или проект из архива через меню «…».');await selectDialogueTopic(t.id);if(t.job)await window.petya.chatJobAcknowledge(t.id,t.job.at);await refresh();if(t.index>=0)await window.jumpToChatMessage(t.index);if(matchMedia('(max-width:800px)').matches)setCollapsed(true);}));b.className='project-sidebar-chat';b.title=t.title;b.setAttribute('aria-current',String(t.id===latestState.activeId));if(t.pinned)b.prepend(node('span','⌁ ','chat-pin-mark'));
   const label=node('span',t.title,'project-chat-title');b.append(label);titleSizes.observe(label);
-  const when=activity(t.at);if(when){const time=node('time',when.text,'project-chat-time');time.dateTime=when.iso;time.title=when.full;b.append(time);}
+  const when=activity(t.at);if(when){const time=node('time',when.text,'project-chat-time');time.dateTime=when.iso;time.title=when.full;time.dataset.style='short';time.dataset.fullTitle='1';b.append(time);}
   if(t.job){const running=['running','queued'].includes(t.job.state),unread=!t.job.acknowledged&&['done','attention'].includes(t.job.state);if(running||unread){b.dataset.jobState=t.job.state;const description=t.job.state==='running'?'В процессе':t.job.state==='queued'?'В очереди':t.job.state==='attention'?'Нужно внимание':'Работа завершена';b.setAttribute('aria-label',t.title+' — '+description);if(unread){const dot=node('span',null,'chat-job-dot');dot.dataset.state=t.job.state;dot.title=description;dot.setAttribute('aria-hidden','true');row.append(dot);}}}if(t.snippet)b.append(node('small',t.snippet));
   let options;options=more('Действия с чатом «'+t.title+'»',()=>chatMenuItems(t,options));row.append(b,options);row.dataset.chatId=t.id;showDraft(row,b,latestState.drafts?.[t.id]);
   row.draggable=!t.archived&&!['running','queued'].includes(t.job?.state);row.ondragstart=e=>{dragging=t.id;e.dataTransfer.setData('application/x-petya-chat',t.id);e.dataTransfer.effectAllowed='move';};row.ondragend=()=>{dragging='';document.querySelectorAll('.chat-drop-target').forEach(n=>n.classList.remove('chat-drop-target'));};if(!archiveMode)bindDrop(row,t.projectId,t.id);return row;

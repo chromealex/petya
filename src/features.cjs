@@ -10,6 +10,7 @@ module.exports=[
  require('./features/disk-space.cjs'),
  require('./features/action-results.cjs'),
  require('./features/window-state.cjs'),
+ require('./features/chat-browser.cjs'),
  require('./features/clarifications.cjs'),
  require('./features/extension-ui.cjs'),
  ...require('./features/extension-ui.cjs').features,
@@ -42,5 +43,6 @@ module.exports=[
  require('./features/chat-changes.cjs'),
  require('./features/model-parts.cjs'),
  require('./features/boot-splash.cjs'),
- require('./features/onboarding.cjs')
+ require('./features/onboarding.cjs'),
+ require('./features/project-share.cjs')
 ];
