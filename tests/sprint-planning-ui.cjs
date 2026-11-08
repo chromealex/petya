@@ -62,6 +62,6 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("document.querySelectorAll('.sprint-list').forEach(d=>d.open=true);document.getElementById('card-shot').scrollTop=1e5");
  await js('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');await new Promise(r=>setTimeout(r,300));
  require('node:fs').writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-sprint-planning-2.png'),(await win.webContents.capturePage()).toPNG());
- console.log('Sprint planning card: velocity chart, gauge, lanes, absences, live include/exclude totals, overload and the prepared Jira request passed ('+file+')');
+ console.log('Sprint planning card ('+file+'): velocity chart, gauge, lanes, absences, live include/exclude totals, overload and the prepared Jira request passed');
 }};
 require('../src/main.cjs');

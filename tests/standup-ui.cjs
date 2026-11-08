@@ -43,6 +43,6 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("document.getElementById('card-shot').scrollTop=1e5");
  await js('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');await new Promise(r=>setTimeout(r,300));
  require('node:fs').writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-standup-2.png'),(await win.webContents.capturePage()).toPNG());
- console.log('Standup card: tiles, answers bar, people rows, blockers, no answer, safe text and actions passed ('+file+')');
+ console.log('Standup card ('+file+'): tiles, answers bar, people rows, blockers, no answer, safe text and actions passed');
 }};
 require('../src/main.cjs');
