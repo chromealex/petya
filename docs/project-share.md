@@ -8,6 +8,7 @@ colleagues get it with `git pull`; Petya uses it in chats of that project withou
 | `team.json` | Team roster: name, aliases, role, projects, duties, email, Slack ID, Jira ID | «Угадай» on the introduction's team step; «Из проекта» on the Team tab or «Подтянуть из проекта» adds new colleagues (nobody is replaced) |
 | `dictionary.json` | Glossary aliases («бэ-вэ» → «BW»), optionally per Jira key | Applied in the project's chats next to your own rules; your rule wins on the same phrase. «Подтянуть» copies them into your dictionary |
 | `project.json` | Slack channels by purpose (`default`, `dev`, `qa`) and the Jira key | Used when you saved no channels / key of your own for the project (`ProjectMemory.context()` falls back to it) |
+| `dashboards/<name>.json` | Dashboards: titles, sizes, intervals and sources of widgets — no data (docs/dashboards.md) | Shown in the project's sidebar; each colleague refreshes them with their own connections |
 | `skills/<name>/SKILL.md` | Instruction skills in the standard Agent Skills layout | Read by the project skill library (also `.claude/skills`, `.agents/skills`, …), so Claude Code and Codex see them too |
 
 Never shared: tokens and credentials, photos, private service accounts and the Slack account hash, personal

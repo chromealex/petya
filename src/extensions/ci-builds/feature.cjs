@@ -152,7 +152,9 @@ async function turn(s,command){
  try{return await answer(s,command,want,repos);}
  catch(e){if(e instanceof require('../../input-required.cjs').InputRequired)throw e;return kit.failure(s,command,BY,e);}
 }
-module.exports={name:'ciBuilds',defaults:{['extension_'+ID]:'false',ciUnityOrg:'',ciUnityProject:'',ciUnityKey:''},secrets:['ciUnityKey'],
+// Dashboards (src/features/dashboards.cjs): read-only requests refresh there by themselves.
+const dashboard={accepts:text=>{const r=route(String(text||''),null);return !!r&&r.kind!=='rerun';},widgets:[{title:'Последние сборки',command:'как там сборки'}]};
+module.exports={name:'ciBuilds',dashboard,defaults:{['extension_'+ID]:'false',ciUnityOrg:'',ciUnityProject:'',ciUnityKey:''},secrets:['ciUnityKey'],
  validate(next){
   for(const key of ['ciUnityOrg','ciUnityProject'])if(next[key]&&!/^[A-Za-z0-9._-]{1,100}$/.test(String(next[key]).trim()))throw Error('ID организации и проекта Unity — латиница, цифры, точка, дефис или подчёркивание.');
   if(next.ciUnityKey&&!/^[^:\s]{1,200}:[^\s]{1,400}$/.test(next.ciUnityKey))throw Error('Ключ Unity Build Automation: Key ID и Secret сервисного аккаунта.');

@@ -1,0 +1,129 @@
+/* Dashboards (src/ui/dashboards.js). Six columns; a widget spans --span of them (set by pack(): rows are always
+   full, widgets of a row share its height). Cards drawn inside widgets lose their own frame: the widget is it. */
+#home .chat-shell.showing-dashboard>:not(.dash-screen){display:none!important}
+#home .chat-shell.showing-dashboard::after{display:none}
+.dash-screen{--dash-gap:14px;flex:1;min-height:0;overflow:auto;padding:22px 26px 48px;box-sizing:border-box}
+.dash-screen[hidden]{display:none}
+
+/* Header: title, one quiet line under it, actions on the right */
+.dash-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:0 0 18px;padding:0;border:0;letter-spacing:normal;font-size:inherit;color:inherit}
+.dash-head-title{display:flex;align-items:flex-start;gap:6px;min-width:0}
+.dash-head-names{min-width:0}
+.dash-head h1{margin:0;font-size:26px;line-height:1.2;letter-spacing:-.6px;font-weight:700;cursor:text;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-head h1:hover{text-decoration:underline dotted #ffffff40;text-underline-offset:6px}
+.dash-sub{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin-top:5px;font-size:12.5px;color:var(--muted)}
+.dash-sub>span+span::before{content:"·";margin:0 7px;opacity:.6}
+.dash-sub>.dash-tag+span::before{content:none}
+.dash-sub .dash-tag{margin-right:8px}
+.dash-head-tools{display:flex;gap:6px;flex:none;align-items:center}
+.dash-head-tools .dash-ghost,.dash-head-tools .dash-add{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border-radius:9px;font-size:13px}
+.dash-ghost{border:1px solid var(--line);background:transparent;color:var(--ink)}
+.dash-ghost:hover{background:#ffffff0a}
+.dash-ghost.loading svg,.dash-tool.loading svg{animation:dash-spin 1s linear infinite}@keyframes dash-spin{to{transform:rotate(360deg)}}
+.dash-tool{display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--muted)}
+.dash-tool:hover{background:#ffffff10;color:var(--ink)}
+.dash-head-title>.dash-tool{margin-top:1px}
+
+.dash-tag{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.2px;color:var(--muted);background:#ffffff0d}
+.dash-tag.demo{color:#ffd07d;background:#ffd07d1a}
+.dash-note{margin:-6px 0 16px;padding:10px 14px;border-radius:12px;background:#ffd07d0d;border:1px solid #ffd07d26;color:#e9dcc0;font-size:12.5px;line-height:1.45}
+
+/* «Добавить виджет» */
+.dash-adder{border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 var(--dash-gap);background:#ffffff04}
+.dash-adder[hidden]{display:none}
+.dash-adder-form{display:flex;gap:8px}.dash-adder-form input{flex:1;min-width:0}
+.dash-adder .small{margin:12px 0 8px}
+.dash-adder-ready{display:flex;flex-wrap:wrap;gap:6px}
+.dash-chip{font-size:12.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#ffffff05}
+.dash-chip:hover{background:#ffffff0d}
+.dash-chip b{font-weight:600;color:var(--green);margin-right:3px}
+.dash-chip.demo b{color:#ffd07d}
+
+/* The grid */
+.dash-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--dash-gap);align-items:stretch;grid-auto-flow:row}
+.dash-widget{grid-column:span var(--span,3);min-width:0;display:flex;flex-direction:column;border-radius:16px;border:1px solid #ffffff0f;
+  background:linear-gradient(180deg,#1c2221 0%,#171c1b 100%);box-shadow:0 1px 0 #ffffff08 inset,0 8px 24px -16px #0009;transition:border-color .15s,box-shadow .15s}
+.dash-widget:hover{border-color:#ffffff1c}
+.dash-widget.moving{opacity:.4;outline:1px dashed #ffffff40}
+@media (max-width:1100px){.dash-screen .dash-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-screen .dash-widget{grid-column:span 1}.dash-screen .dash-widget[data-size=w],.dash-screen .dash-widget[data-size=l]{grid-column:1/-1}}
+
+.dash-widget-head{display:flex;align-items:flex-start;gap:8px;padding:14px 12px 4px 16px;margin:0;border:0;letter-spacing:normal;font-size:inherit;color:inherit}
+.dash-widget-names{flex:1;min-width:0}
+.dash-widget-title{margin:0;font-size:14px;font-weight:600;letter-spacing:-.1px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:none}
+.dash-widget-meta{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:11.5px;color:var(--muted);letter-spacing:normal;text-transform:none;white-space:nowrap}
+.dash-widget-loading{color:var(--green)}
+.dash-count{flex:none;margin-top:1px;min-width:26px;height:22px;padding:0 8px;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--bg,#111415);background:var(--green);font-variant-numeric:tabular-nums}
+.dash-widget-drag{display:grid;place-items:center;width:14px;margin:2px -4px 0 -8px;color:var(--muted);opacity:0;cursor:grab;transition:opacity .15s}
+.dash-widget-tools{display:flex;gap:0;flex:none;margin:-4px -2px 0 0;opacity:0;transition:opacity .15s}
+.dash-widget-tools .dash-tool{width:28px;height:28px}
+.dash-widget:hover .dash-widget-tools,.dash-widget:focus-within .dash-widget-tools,.dash-widget:hover .dash-widget-drag{opacity:1}
+.dash-widget[draggable=true] .dash-widget-head{cursor:grab}
+
+.dash-widget-body{flex:1;display:flex;flex-direction:column;justify-content:flex-start;min-height:0;padding:8px 16px 16px;max-height:560px;overflow:auto}
+.dash-widget-content{min-width:0}
+.dash-widget-text{margin:0;font-size:13px;line-height:1.5;white-space:pre-wrap;user-select:text;color:#d9dfd9}
+.dash-widget-empty{margin:0;font-size:12.5px;color:var(--muted);text-align:center;padding:14px 0}
+.dash-widget-error{margin:0 0 10px;padding:7px 10px;border-radius:8px;font-size:12px;color:#f6c3b8;background:#ff9daf12}
+
+/* Cards inside a widget: no second frame, full width, no outer margins */
+.dash-widget-content>*{margin-top:0!important;margin-bottom:0!important;max-width:none!important}
+.dash-widget-content .chart-card,.dash-widget-content .crash-card,.dash-widget-content .kit-list,.dash-widget-content>.kit-card{width:auto!important;border:0;background:none;padding:0;box-shadow:none}
+.dash-widget-content .chart-card+.chart-card{margin-top:16px!important}
+.dash-widget-content .chart-title{font-size:12px;font-weight:500;color:var(--muted);margin:0 0 8px}
+.dash-widget-content .chart-donut{justify-content:center}
+.dash-widget-content .jira-issue-list{margin:0}
+.dash-widget-content .kit-card{background:#ffffff05;border-color:#ffffff10}
+
+/* Loading placeholder */
+.dash-skeleton{display:grid;gap:10px;padding:6px 0}
+.dash-skeleton span{display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,#ffffff08 0%,#ffffff14 50%,#ffffff08 100%);background-size:200% 100%;animation:dash-shimmer 1.4s ease-in-out infinite}
+@keyframes dash-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
+@media (prefers-reduced-motion:reduce){.dash-skeleton span{animation:none}}
+
+/* Empty dashboard */
+.dash-empty{display:grid;justify-items:center;gap:6px;border:1px dashed #ffffff1c;border-radius:16px;padding:56px 20px;text-align:center;color:var(--muted)}
+.dash-empty-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#d0f59614;color:var(--green);margin-bottom:6px}
+.dash-empty-icon svg{width:22px;height:22px}
+.dash-empty h2{color:var(--ink);margin:0;font-size:18px}
+.dash-empty p{margin:0 0 10px;max-width:420px}
+.dash-empty-actions{display:flex;gap:8px}
+
+.dash-dialog textarea,.dash-dialog input{width:100%;box-sizing:border-box}
+.dash-open-reply{display:inline-flex;align-items:center;gap:6px;margin:8px 0 0}
+
+/* Sidebar rows */
+.project-dashboards[hidden]{display:none}
+.project-dashboard-row .project-sidebar-chat{display:flex;align-items:center;gap:7px}
+.project-dashboard-icon{display:grid;place-items:center;flex:none;color:var(--green);opacity:.85}
+.project-dashboard-icon svg{width:14px;height:14px}
+.project-dashboard-row .project-chat-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.project-dashboard-shared{font-size:10.5px;color:#a9d3ff;flex:none}
+
+/* Start screen: the project's dashboard under «Чем помочь?» */
+#home .chat-welcome.with-dashboard{max-width:1120px;padding-top:28px}
+.dash-start{margin:26px auto 0;text-align:left}
+.dash-start[hidden]{display:none}
+.dash-start-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.dash-start-head strong{color:var(--ink);font-size:14px}
+.dash-grid.compact{--dash-gap:10px;gap:10px}
+.dash-grid.compact .dash-widget-body{max-height:340px}
+@media (max-width:1100px){.dash-grid.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-grid.compact .dash-widget{grid-column:1/-1}}
+.dash-hint{display:inline-flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:6px;margin:6px 0 0;font-size:12.5px;color:var(--muted)}
+.dash-hint-icon{display:grid;place-items:center;color:var(--green)}.dash-hint-icon svg{width:14px;height:14px}
+.dash-link{padding:0;border:0;background:none;color:var(--green);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+/* A donut in a wide widget: chart and legend together in the middle, not pushed to the edges */
+.dash-widget-content .chart-donut{justify-content:center;gap:28px}
+.dash-widget-content .chart-legend{flex:0 1 380px}
+.dash-widget-content .chart-bars li{grid-template-columns:minmax(90px,28%) minmax(0,1fr) auto}
+/* Content follows the widget's own width, not the window's. */
+.dash-widget-body{container-type:inline-size;container-name:dash}
+@container dash (min-width:640px){
+ .dash-widget-content .jira-issue-list{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+ .dash-widget-content .jira-issue-list>*{min-width:0}
+}
+@container dash (min-width:980px){.dash-widget-content .jira-issue-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@container dash (max-width:440px){
+ .dash-widget-content .chart-donut{flex-direction:column;align-items:stretch;gap:12px}
+ .dash-widget-content .chart-donut svg{align-self:center}
+ .dash-widget-content .chart-legend{flex:1 1 auto}
+}

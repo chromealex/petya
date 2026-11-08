@@ -323,4 +323,6 @@ function validate(next){
  if(next.calendarDuration!==undefined&&next.calendarDuration!==''&&!/^(?:15|30|45|60|90|120)$/.test(String(next.calendarDuration)))throw Error('Длительность встречи: 15, 30, 45, 60, 90 или 120 минут.');
  if(next.calendarAccount!==undefined&&next.calendarAccount!==''&&!/^(?:google|microsoft):[\w-]{1,80}$/.test(next.calendarAccount))throw Error('Некорректный календарь.');
 }
-module.exports={name:'calendarApp',defaults:{['extension_'+ID]:'false',calendarAccount:'',calendarWorkStart:'10:00',calendarWorkEnd:'19:00',calendarDuration:'60'},validate,setup,turn,intent,accounts,connected,title};
+// Dashboards (src/features/dashboards.cjs): read-only requests refresh there by themselves.
+const dashboard={accepts:text=>['agenda','free'].includes(intent(String(text||''))),widgets:[{title:'Встречи сегодня',command:'какие у меня встречи сегодня'},{title:'Встречи на неделе',command:'мои встречи на этой неделе'}]};
+module.exports={name:'calendarApp',dashboard,defaults:{['extension_'+ID]:'false',calendarAccount:'',calendarWorkStart:'10:00',calendarWorkEnd:'19:00',calendarDuration:'60'},validate,setup,turn,intent,accounts,connected,title};

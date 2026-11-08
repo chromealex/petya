@@ -232,6 +232,8 @@ function validate(next){
  if(next.storeReviewsAscKeyId&&!/^[A-Z0-9]{10}$/.test(next.storeReviewsAscKeyId.trim()))throw Error('Key ID App Store Connect — 10 латинских букв и цифр.');
  stores.list(next.storeReviewsAscApps,stores.APP_ID);stores.list(next.storeReviewsPlayPackages,stores.PACKAGE);
 }
-module.exports={name:'storeReviews',
+// Dashboards (src/features/dashboards.cjs): read-only requests refresh there by themselves.
+const dashboard={accepts:text=>wanted(String(text||''))&&!/(?:ответ\p{L}*|напиши)\s+(?:на\s+)?(?:отзыв|review)/iu.test(String(text||'')),widgets:[{title:'Отзывы за неделю',command:'отзывы в сторах за неделю'},{title:'Плохие отзывы',command:'отзывы с низкой оценкой в сторах'}]};
+module.exports={name:'storeReviews',dashboard,
  defaults:{['extension_'+ID]:'false',storeReviewsAscIssuer:'',storeReviewsAscKeyId:'',storeReviewsAscKey:'',storeReviewsAscApps:'',storeReviewsPlayPackages:''},
  secrets:['storeReviewsAscKey'],validate,setup,turn,wanted,requested,games,named,read,locate,connected};
