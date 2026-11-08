@@ -1,0 +1,63 @@
+{
+  "part": "Andromeda D4",
+  "adapter_sha256": "46dcf95b51f19d5d04a46bfdd5581fa51d07810cb0e9479501ceb2e7c39dfe6d",
+  "parent": "D1",
+  "steps": 2322,
+  "learning_rate": 5e-07,
+  "generated_holdout": {
+    "D4": 27,
+    "D3": 39,
+    "D2": 39,
+    "D1": 24,
+    "total": 54,
+    "lost_D1_successes": [
+      "d2-hold-open-recipient-7",
+      "d2-hold-code-8",
+      "d2-hold-two-recipients-11",
+      "d2-hold-code-17",
+      "d2-hold-two-recipients-20",
+      "d2-hold-quote-24",
+      "d2-hold-permission-28",
+      "d2-hold-exact-name-31",
+      "d2-hold-quote-33",
+      "d2-hold-two-recipients-38",
+      "d2-hold-two-recipients-47"
+    ]
+  },
+  "v22": {
+    "checks": {
+      "D4": 27,
+      "D1": 27,
+      "total": 30
+    },
+    "drafts": {
+      "D4": 6,
+      "D1": 6,
+      "total": 12
+    }
+  },
+  "familiar": {
+    "D4": 780,
+    "D3": 783,
+    "D2": 782,
+    "D1": 787,
+    "total": 801,
+    "lost": [
+      "v18-revoke-after-grant",
+      "v18-topic-return",
+      "v18-regrant-limited",
+      "v19-failure-0-0",
+      "v19-sort-direction",
+      "v20-verbatim-name",
+      "v20-restricted-version",
+      "v21-previous-draft-payment",
+      "v21-previous-draft-quote",
+      "v21-previous-draft-display",
+      "fresh-unchanged-field-send",
+      "fresh-negative-order"
+    ],
+    "gained": 5
+  },
+  "gate": "rejected: D1 successes lost and familiar retention below D1 (780 < 787); D1 stays the group’s D",
+  "reading": "Half the learning rate learns less of the new corrections (27 instead of 39 of 54) and keeps no more of the familiar cases (780). The familiar losses do not depend on the step size or on how often the familiar cases are rehearsed."
+}

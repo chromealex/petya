@@ -16,8 +16,15 @@ per part (`andromeda/D1/`) with `model.json` (role, base and revision, hashes, e
 each part with weights is a release tagged `<group>-<part>` (`andromeda-d1`), downloadable without a token since
 the repository is public (`https://github.com/chromealex/petya/releases/download/andromeda-d1/<file>`). D1 is the
 v21 fourth repair adapter. D2 and D3 (new correction dialogues, one and two rehearsals of the familiar cases) were
-rejected for forgetting familiar cases and are published as pre-releases `andromeda-d2` and `andromeda-d3`.
+rejected for forgetting familiar cases and are published as pre-releases `andromeda-d2` and `andromeda-d3`; D4 (D3 data at half the learning rate) learned less and
+forgot as much, pre-release `andromeda-d4`.
 
 Training keeps here what the next stage needs: data, protocols, scripts, evidence, the training environment in
 `~/.petya-train/env` (recreated from `scripts/train-requirements.txt` when missing; `/tmp` does not survive a restart), the base model in the Hugging Face cache and the parent adapter of the next stage.
 Checkpoints and adapters of finished or rejected stages are deleted locally once their part is on GitHub.
+
+## Planned: a code part
+
+A separate part for writing code (a ready open coding model such as Qwen3-Coder-30B-A3B, downloaded from «Модели Пети»
+in the settings like A), with a tool loop: read the project, edit in a git worktree, run the tests, show the diff for
+approval. First measured on tasks built from this repository's own commits; fine-tuning only for gaps that test shows.
