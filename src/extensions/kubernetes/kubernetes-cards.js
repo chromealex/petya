@@ -51,12 +51,12 @@
   if(rows.length>10){const more=k.el('details','k8-more');more.append(k.el('summary',null,'Ещё подов: '+(rows.length-10)),...rows.slice(10));box.append(more);}
   return box;
  }
- // ready / updated / desired as one bar: green ready, yellow updated-not-ready, grey the rest.
+ // One bar over the desired replicas: green ready, yellow updated but not ready yet, grey the rest.
  function rolloutBar(k,d){
   const box=k.el('div','k8-roll');box.setAttribute('role','img');
   const total=Math.max(1,d.replicas,d.updated);
   const seg=(n,cls)=>{const s=k.el('span','k8-roll-seg '+cls);s.style.width=(100*n/total)+'%';return s;};
-  const track=k.el('span','k8-roll-track');track.append(seg(Math.min(d.ready,d.updated),'ready'),seg(Math.max(0,d.updated-d.ready),'updating'));
+  const track=k.el('span','k8-roll-track');track.append(seg(Math.min(d.ready,total),'ready'),seg(Math.max(0,Math.min(d.updated-d.ready,total-d.ready)),'updating'));
   box.setAttribute('aria-label','Готово '+d.ready+' из '+d.replicas+', обновлено '+d.updated);
   box.append(track,raw(k,'span','k8-roll-label',d.ready+' / '+d.replicas));
   return box;
@@ -144,14 +144,16 @@
   const go=k.el('button','primary'+(p.verb==='scale'&&p.replicas===0||p.verb==='restart'?' k8-danger':''),p.verb==='restart'?'Перезапустить':'Масштабировать');go.type='button';
   const cancel=k.el('button',null,'Отмена');cancel.type='button';
   const result=k.el('p','k8-result');result.hidden=true;result.setAttribute('role','status');
-  cancel.onclick=()=>{box.dataset.state='cancelled';go.disabled=cancel.disabled=true;result.hidden=false;result.textContent='Отменено — ничего не выполнялось.';};
+  const bar=k.el('div','k8-confirm-actions');
+  const settle=(state,label,tone)=>{box.dataset.state=state;bar.hidden=true;result.hidden=false;const chip=box.closest('.k8-card')?.querySelector('.kit-card-head .kit-chip');if(chip){chip.textContent=label;chip.className='kit-chip'+(tone?' tone-'+tone:'');}};
+  cancel.onclick=()=>{settle('cancelled','отменено','');result.textContent='Отменено — ничего не выполнялось.';};
   go.onclick=async()=>{
    if(go.disabled)return;go.disabled=cancel.disabled=true;go.setAttribute('aria-busy','true');
-   try{const r=await call('apply',p);box.dataset.state='done';result.hidden=false;result.textContent='Выполнено: '+r.text;result.dataset.noI18n='';k.toast(r.text);}
+   try{const r=await call('apply',p);settle('done','выполнено','done');result.textContent='Выполнено: '+r.text;result.dataset.noI18n='';k.toast(r.text);}
    catch(e){k.toast(e.message,{error:true});go.disabled=cancel.disabled=false;}
    finally{go.removeAttribute('aria-busy');}
   };
-  const bar=k.el('div','k8-confirm-actions');bar.append(go,cancel);box.append(bar,result);
+  bar.append(go,cancel);box.append(bar,result);
   body.append(box);
   return {status:{label:'нужно подтверждение',tone:'progress'},key:'Подтверждение',actions:[]};
  }

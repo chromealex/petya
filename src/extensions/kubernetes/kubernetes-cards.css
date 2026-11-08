@@ -32,7 +32,8 @@
 .k8-describe pre{margin:4px 0 0;max-height:240px;overflow:auto;padding:8px;border-radius:7px;background:#00000033;font-size:11px;white-space:pre-wrap;overflow-wrap:anywhere}
 /* Deployments and the rollout bar */
 .k8-deploys{display:flex;flex-direction:column;gap:2px}
-.k8-deploy{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto auto}
+.k8-deploy{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 136px 78px}
+.k8-deploy>.kit-chip{justify-self:start}
 .k8-roll{display:flex;align-items:center;gap:7px;min-width:0}
 .k8-roll-track{display:flex;flex:1;height:7px;border-radius:4px;background:#ffffff12;overflow:hidden}
 .k8-roll-seg{display:block;height:100%}

@@ -53,7 +53,7 @@
   const meta=k.el('div','lg-meta');
   if(g.services?.length)meta.append(raw(k,'span','lg-svc',g.services.join(', ')));
   if(g.first){const f=k.el('span');f.append('впервые ',moment(g.first));meta.append(f);}
-  if(g.last&&g.last!==g.first){const l=k.el('span');l.append('последний ',moment(g.last));meta.append(l);}
+  if(g.last&&g.last!==g.first){const l=k.el('span');l.append('последний раз ',moment(g.last));meta.append(l);}
   main.append(sig,share,meta);
   const actions=k.el('div','lg-group-actions');
   const answer=k.el('div','lg-why');answer.hidden=true;

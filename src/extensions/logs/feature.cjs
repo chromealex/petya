@@ -140,7 +140,8 @@ async function why(s,group,context=[]){
 function setup(s){
  return {ipc:{
   status:()=>({sources:registry(s).all(),hasLokiToken:!!s.settings.logsLokiToken,hasElasticKey:!!s.settings.logsElasticKey}),
-  why:(group,context)=>why(s,group,context),
+  // Through the module so a UI test can answer for the model.
+  why:(group,context)=>module.exports.why(s,group,context),
   // «Проверить подключение»: the last 15 minutes, one line, from each ready source.
   async check(){
    const out=[];
