@@ -1,0 +1,22 @@
+{
+  "id": "kubernetes",
+  "name": "Kubernetes",
+  "description": "Поды и их проблемы (CrashLoopBackOff, OOMKilled, перезапуски), события, сводка describe и статус выкатки; перезапуск и масштабирование деплоймента — только после подтверждения с точной командой kubectl. Нужен kubectl",
+  "category": "dev",
+  "icon": "icon.svg",
+  "examples": ["Что с подами в кубере?", "Почему падает под api?", "Статус выкатки payments", "Перезапусти деплоймент worker"],
+  "connects": "kubectl и kubeconfig",
+  "provides": {
+    "log-source": "log-source.cjs"
+  },
+  "setting": "extension_kubernetes",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["kubernetes-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "kubernetes": "renderKubernetesCard"
+  }
+}
