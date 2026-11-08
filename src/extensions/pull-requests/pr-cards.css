@@ -45,7 +45,10 @@ a.pr-title:hover{text-decoration:underline}
 .pr-file{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px;align-items:center;font-size:12.5px}
 .pr-file-name{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pr-file.added .pr-file-name{color:#c9ed9d}.pr-file.removed .pr-file-name{color:#f0b4a8;text-decoration:line-through}
-.pr-file .pr-diff-bar{max-width:110px}
+.pr-file .pr-diff-bar{max-width:100px}
+.pr-file .pr-diff-nums{order:-1;min-width:82px;justify-content:flex-end}
+.pr-section-row{display:flex;align-items:center;gap:8px}
+.pr-section-row .kit-chip{min-height:20px;padding:1px 7px;font-size:11px}
 .pr-confirm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid #e5ce8c55;border-radius:10px;background:#e5ce8c0d;font-size:13px}
 .pr-confirm span{flex:1 1 220px}
 .pr-confirm button{min-height:30px;padding:4px 10px;font-size:13px}

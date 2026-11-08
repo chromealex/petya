@@ -82,7 +82,7 @@
    if(p.summary.risk)sum.append(k.el('p','pr-risk',p.summary.risk));body.append(sum);
   }else if(p.description)body.append(raw(k.el('p','pr-description',p.description)));
   if(p.checks?.list?.length){
-   body.append(k.el('div','pr-section','Проверки'));
+   const head=k.el('div','pr-section-row');head.append(k.el('span','pr-section','Проверки'),chip(k,CHECKS,p.checks.state,checksTitle(p.checks)));body.append(head);
    const ul=k.el('ul','pr-checks');for(const c of p.checks.list){const li=k.el('li','pr-check '+c.status);li.append(k.el('span','pr-dot '+c.status));const n=raw(k.el(k.safeUrl(c.url)?'a':'span',null,c.name));if(n.tagName==='A'){n.href=k.safeUrl(c.url);n.target='_blank';n.rel='noopener';}li.append(n);ul.append(li);}
    body.append(ul);
   }
@@ -98,7 +98,7 @@
    if(!c.summarized)actions.push({label:'Резюме',primary:true,run:()=>k.ask('Резюме пулл-реквеста '+c.repo+'#'+c.number,{send:true})});
    actions.push({label:'Оставить комментарий…',run:()=>composer(k,card,c)});
    card=k.card({app:'Pull requests',initial:'⇄',color:'#5b4f8f',key:c.repo+'#'+c.number,href:c.url,status:{label:REVIEW[c.review]?.[0]||REVIEW.none[0],tone:REVIEW[c.review]?.[1]||''},
-    chips:[chip(k,CHECKS,c.checks?.state||'none',checksTitle(c.checks))],title:c.title,body:single(k,c),actions,className:'pr-card'});
+    chips:c.checks?.list?.length?[]:[chip(k,CHECKS,c.checks?.state||'none',checksTitle(c.checks))],title:c.title,body:single(k,c),actions,className:'pr-card'});
    card.querySelector('.kit-title')?.setAttribute('data-no-i18n','');
    card.querySelector('.kit-key')?.setAttribute('data-no-i18n','');
   }else{
