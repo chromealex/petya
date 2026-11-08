@@ -1,9 +1,10 @@
 // Checks of a candidate name done by code: length and character set, transliteration ru↔en, simple
 // pronunciation notes, and how close two names are (exact / similar), also across scripts («Гномгард» = «Gnomgard»).
-const RU2EN={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'yo',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'kh',ц:'ts',ч:'ch',ш:'sh',щ:'shch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
+// Tables are pipe-separated «from=to» pairs (data for the code, not interface text).
+const pairs=text=>text.split('|').map(p=>{const i=p.indexOf('=');return [p.slice(0,i),p.slice(i+1)];});
+const RU2EN=Object.fromEntries(pairs('а=a|б=b|в=v|г=g|д=d|е=e|ё=yo|ж=zh|з=z|и=i|й=y|к=k|л=l|м=m|н=n|о=o|п=p|р=r|с=s|т=t|у=u|ф=f|х=kh|ц=ts|ч=ch|ш=sh|щ=shch|ъ=|ы=y|ь=|э=e|ю=yu|я=ya'));
 // Latin read the way a Russian speaker would say it: digraphs first, then letters.
-const EN2RU=[['sch','ш'],['tch','ч'],['shch','щ'],['sh','ш'],['ch','ч'],['zh','ж'],['kh','х'],['ts','ц'],['th','т'],['ph','ф'],['ck','к'],['qu','кв'],['oo','у'],['ee','и'],['ea','и'],['ou','ау'],['ay','эй'],['ey','эй'],['oy','ой'],['yo','ё'],['yu','ю'],['ya','я'],['ye','е'],
- ['a','а'],['b','б'],['c','к'],['d','д'],['e','е'],['f','ф'],['g','г'],['h','х'],['i','и'],['j','дж'],['k','к'],['l','л'],['m','м'],['n','н'],['o','о'],['p','п'],['q','к'],['r','р'],['s','с'],['t','т'],['u','у'],['v','в'],['w','у'],['x','кс'],['y','и'],['z','з']];
+const EN2RU=pairs('sch=ш|tch=ч|shch=щ|sh=ш|ch=ч|zh=ж|kh=х|ts=ц|th=т|ph=ф|ck=к|qu=кв|oo=у|ee=и|ea=и|ou=ау|ay=эй|ey=эй|oy=ой|yo=ё|yu=ю|ya=я|ye=е|a=а|b=б|c=к|d=д|e=е|f=ф|g=г|h=х|i=и|j=дж|k=к|l=л|m=м|n=н|o=о|p=п|q=к|r=р|s=с|t=т|u=у|v=в|w=у|x=кс|y=и|z=з');
 const CYR=/[а-яё]/i,LAT=/[a-z]/i;
 const letters=s=>[...String(s)];
 
@@ -17,7 +18,7 @@ function toCyrillic(text){
   if(!hit){out+=s[i];i++;continue;}
   // «c» before e/i/y sounds like «с»; a trailing «e» after a consonant is silent (Stone → Стоун is out of reach).
   let ru=hit[1];
-  if(hit[0]==='c'&&/^[eiy]/.test(rest.slice(1)))ru='с';
+  if(hit[0]==='c'&&/^[eiy]/.test(rest.slice(1)))ru=pairs('c=с')[0][1];
   if(hit[0]==='e'&&i===s.length-1&&i>2&&/[^aeiou]/i.test(s[i-1]))ru='';
   const upper=s[i]!==s[i].toLowerCase();
   out+=upper&&ru?ru[0].toUpperCase()+ru.slice(1):ru;i+=hit[0].length;

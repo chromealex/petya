@@ -59,7 +59,8 @@ function wishes(text){
 }
 
 // --- Candidates from the model ------------------------------------------------------------------------------------
-const KIND_RU={hero:'персонаж',item:'предмет',event:'ивент',feature:'фича',place:'локация',game:'игра',other:'другое'};
+// What is named, for the model (pipe-separated pairs: data, not interface text).
+const KIND_RU=Object.fromEntries('hero=персонаж|item=предмет|event=ивент|feature=фича|place=локация|game=игра|other=другое'.split('|').map(p=>p.split('=')));
 async function propose(s,request,kind,w,avoid){
  const schema={type:'object',properties:{candidates:{type:'array',maxItems:12,items:{type:'object',properties:{name:{type:'string'},meaning:{type:'string'},lang:{type:'string',enum:['ru','en']}},required:['name','meaning','lang']}}},required:['candidates']};
  const r=await kit.modelJSON(s,{system:'Ты придумываешь названия для игр и игровых сущностей. Дай '+w.count+' разных вариантов по просьбе. name — само название без кавычек и пояснений; meaning — коротко по-русски, что оно значит и откуда; lang — язык названия (ru или en). Соблюдай стиль, язык и длину из просьбы.',

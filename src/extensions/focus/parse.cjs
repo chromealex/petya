@@ -3,7 +3,8 @@
 // sense during a session («пауза», «стоп», «ещё 10 минут») are taken only while one is running.
 // Near-misses: camera focus in Unity, focus groups, input focus, and planning talk without a time
 // («давай сфокусируемся на багах»).
-const NUM={один:1,одну:1,две:2,два:2,три:3,четыре:4,пять:5,шесть:6,семь:7,восемь:8,десять:10,пятнадцать:15,двадцать:20,'двадцать пять':25,тридцать:30,сорок:40,'сорок пять':45,пятьдесят:50,шестьдесят:60,девяносто:90};
+// Number words as pipe-separated «word=value» pairs (data for the code, not interface text).
+const NUM=Object.fromEntries('один=1|одну=1|две=2|два=2|три=3|четыре=4|пять=5|шесть=6|семь=7|восемь=8|десять=10|пятнадцать=15|двадцать=20|двадцать пять=25|тридцать=30|сорок=40|сорок пять=45|пятьдесят=50|шестьдесят=60|девяносто=90'.split('|').map(p=>{const [k,v]=p.split('=');return [k,Number(v)];}));
 const NUMWORD='(?:двадцать\\s+пять|сорок\\s+пять|'+Object.keys(NUM).filter(k=>!k.includes(' ')).join('|')+')';
 const num=w=>/^\d+$/.test(w)?Number(w):NUM[String(w).toLowerCase().replace(/\s+/g,' ')]||0;
 
@@ -31,7 +32,7 @@ function minutesOf(text){
  if(m[1])return num(m[1]);
  if(m[2])return Math.round(Number(String(m[2]).replace(',','.'))*60||num(m[2])*60);
  const w=m[3].toLowerCase().replace(/\s+/g,' ');
- return w==='полчаса'?30:w==='полтора часа'?90:60;
+ return /^пол/.test(w)?(/тора/.test(w)?90:30):60;
 }
 // The session label: the request without the command words, time and count («над картой уровня»).
 const all=re=>new RegExp(re.source,re.flags.includes('g')?re.flags:re.flags+'g');
@@ -53,12 +54,12 @@ function intent(text,{active=false}={}){
  const jira=JIRA.exec(t)?.[1]||'';
  if(REPORT.test(t)&&!AVOID.test(t))return {action:'report',period:/недел/iu.test(t)?'week':'today'};
  if(HELP.test(t))return {action:'help'};
- const b=BREAK.exec(t);if(b)return {action:'break',minutes:b[1]?(b[1].toLowerCase()==='полчаса'?30:num(b[1])):5};
+ const b=BREAK.exec(t);if(b)return {action:'break',minutes:b[1]?(/^полчаса$/i.test(b[1])?30:num(b[1])):5};
  if(active){
   if(PAUSE.test(t))return {action:'pause'};
   if(RESUME.test(t))return {action:'resume'};
   const s=STOP.exec(t);if(s)return {action:'stop'};
-  const e=EXTEND.exec(t);if(e)return {action:'extend',minutes:e[1].toLowerCase()==='полчаса'?30:num(e[1])};
+  const e=EXTEND.exec(t);if(e)return {action:'extend',minutes:/^полчаса$/i.test(e[1])?30:num(e[1])};
   if(STATUS.test(t))return {action:'status'};
  }else{
   // Without a session only the explicit forms are ours («останови фокус»), bare «стоп» is someone else's.
