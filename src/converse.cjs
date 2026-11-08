@@ -203,7 +203,10 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
         if(rows.length===1)return ctx.checkProgress(rows[0].id);
         return {handled:true,text:rows.length?'Какое поручение проверить?':'Не нашёл переданного поручения в этой теме.',trackingChoices:rows.slice(0,20).map(r=>({id:r.id,label:(r.keys.join(', ')||r.command||r.target)+' · '+new Date(r.at).toLocaleString('ru-RU')}))};
       }
-      const resolved=ctx.dictionary.applyRules(original,ctx.learning.list().dictionary,ctx.dictionaryScope(original));value=resolved.text;applied=resolved.rules;
+      // The project's shared glossary (.petya/dictionary.json) joins your own rules; yours win on the same phrase.
+      const ownRules=ctx.learning.list().dictionary,ownKeys=new Set(ownRules.map(r=>ctx.dictionary.key(r.from)+'|'+ctx.dictionary.key(r.scope||'')));
+      const sharedRules=(ctx.projectShare?.sharedRules()||[]).filter(r=>!ownKeys.has(ctx.dictionary.key(r.from)+'|'+ctx.dictionary.key(r.scope||'')));
+      const resolved=ctx.dictionary.applyRules(original,[...ownRules,...sharedRules],ctx.dictionaryScope(original));value=resolved.text;applied=resolved.rules;
       const {actionRequest}=require('./dialogue.cjs');
       if(applied.length&&((actionRequest(value)&&!actionRequest(original))||(ctx.learning.preview(value).action==='reminder'&&!ctx.learning.preview(original).matched)))return {handled:true,text:'По вашему правилу это означает: «'+value+'». Чтобы выполнить действие, произнесите эту команду целиком.',appliedRules:applied};
       const result=ctx.learning.execute(value);

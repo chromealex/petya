@@ -20,7 +20,7 @@ Shown on a fresh install (no name in settings, no chats) and resumed after a res
 Extensions for the chosen role are not offered yet: the extension catalog is being reworked around roles.
 When it declares roles, read the role list from the catalog and add the step between 4 and 5.
 
-## Shared project data (`.petya/`)
+## Shared project data (`.petya/`, see docs/project-share.md)
 `src/project-share.cjs` keeps Petya's data that a team shares through git in `<repo>/.petya/`. Only shareable
 fields go there (no tokens, photos or private service accounts), as stable pretty JSON for small diffs. The first
 kind is the team (`team.json`: name, aliases, role, projects, responsibilities, email, Slack ID, Jira ID), validated

@@ -1,0 +1,11 @@
+/* «Общее с командой» in the project settings: kinds with what you have and what the project shares. */
+.project-share{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.project-share h3{margin:6px 0 0}
+.project-share-rows{display:flex;flex-direction:column;border:1px solid var(--line,#303637);border-radius:12px;overflow:hidden}
+.project-share-row{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:10px;margin:0;padding:9px 12px;font-size:13px;color:inherit;cursor:pointer}
+.project-share-row+.project-share-row{border-top:1px solid var(--line,#303637)}
+.project-share-row input{width:auto;margin:0}
+.project-share-row span{color:var(--muted,#969e9a);font-size:12px;white-space:nowrap}
+.project-share-row .project-share-there{color:#acc093}
+.project-share-actions{display:flex;gap:8px;flex-wrap:wrap}
+#team-save~button.quiet{margin-left:8px}
