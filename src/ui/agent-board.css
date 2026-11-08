@@ -1,0 +1,45 @@
+/* «Агенты» screen: a board of agents and their tasks (src/ui/agent-board.js). */
+.agent-board{--ab-wait:#f0b45a;--ab-run:var(--green);--ab-sent:#8fb8f0;--ab-fail:#f07a6a;margin:14px 0 26px}
+.agent-board-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-bottom:14px}
+.agent-board-summary{display:flex;flex-wrap:wrap;gap:8px;flex:1;min-width:0}
+.agent-board-calm{color:var(--muted);font-size:13px}
+.agent-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px;color:var(--muted)}
+.agent-chip b{color:var(--ink);font-weight:600}
+.agent-chip-dot,.agent-status::before{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none}
+.agent-board-scope{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.agent-board-scope button{border:0;border-radius:0;background:none;color:var(--muted);font-size:12px;padding:4px 12px;min-height:0;margin:0}
+.agent-board-scope button[aria-pressed=true]{background:var(--panel);color:var(--ink)}
+.agent-board-lanes{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;align-items:start}
+.agent-lane{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:10px;min-width:0}
+.agent-lane-head{display:flex;align-items:center;gap:8px;margin:0 2px 8px}
+.agent-lane-mark{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:700;background:var(--bg);border:1px solid var(--line);color:var(--muted);flex:none}
+.agent-lane[data-busy=true] .agent-lane-mark{border-color:var(--ab-run);color:var(--ab-run)}
+.agent-lane-name{font-size:14px;margin:0;flex:1;min-width:0}
+.agent-lane-count{font-size:12px;min-width:20px;text-align:center;border-radius:999px;padding:0 6px;background:var(--bg);color:var(--ink)}
+.agent-lane-count:empty{display:none}
+.agent-lane-list{display:grid;gap:8px;max-height:min(62vh,640px);overflow-y:auto;padding-right:2px}
+.agent-lane-empty{color:var(--muted);font-size:12px;margin:2px 2px 4px;line-height:1.5}
+.agent-card{border:1px solid var(--line);border-left:3px solid var(--line);border-radius:9px;background:var(--bg);padding:8px 10px;min-width:0}
+.agent-card[data-status=waiting]{border-left-color:var(--ab-wait)}
+.agent-card[data-status=running]{border-left-color:var(--ab-run)}
+.agent-card[data-status=sent]{border-left-color:var(--ab-sent)}
+.agent-card[data-status=failed]{border-left-color:var(--ab-fail)}
+.agent-card[data-status=done],.agent-card[data-status=stopped]{opacity:.72}
+.agent-card-head{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.agent-status{display:inline-flex;align-items:center;gap:6px;font-weight:600;letter-spacing:.02em}
+.agent-status::before{content:""}
+.agent-card-time{margin-left:auto;white-space:nowrap}
+[data-status=waiting]>.agent-chip-dot,.agent-card[data-status=waiting] .agent-status::before{background:var(--ab-wait)}
+[data-status=running]>.agent-chip-dot,.agent-card[data-status=running] .agent-status::before{background:var(--ab-run);animation:step-pulse 1.2s ease-in-out infinite}
+[data-status=sent]>.agent-chip-dot,.agent-card[data-status=sent] .agent-status::before{background:var(--ab-sent)}
+[data-status=failed]>.agent-chip-dot,.agent-card[data-status=failed] .agent-status::before{background:var(--ab-fail)}
+.agent-card[data-status=done] .agent-status::before{background:var(--green)}
+.agent-card[data-status=waiting] .agent-status{color:var(--ab-wait)}
+.agent-card-title{font-size:13px;font-weight:600;margin:4px 0 2px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.agent-card-label{font-size:12px;color:var(--muted);margin:2px 0;overflow-wrap:anywhere}
+.agent-card-meta{font-size:11px;color:var(--muted);margin:4px 0 0;overflow-wrap:anywhere}
+.agent-card-meta>span+span::before{content:" · ";white-space:pre}
+.agent-card-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.agent-card-actions button{font-size:12px;padding:3px 9px;min-height:0;border-radius:6px;margin:0}
+.agent-handoffs-title{font-size:16px;margin:8px 0 4px}
+@media (prefers-reduced-motion:reduce){.agent-board [data-status=running]>.agent-chip-dot,.agent-card[data-status=running] .agent-status::before{animation:none}}
