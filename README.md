@@ -7,6 +7,7 @@ What it does, in short:
 - **Voice and text dialogue** with topics, conversation memory, and spoken replies.
 - **Tasks:** creating and finding Jira issues, project status, team workload, duplicate detection.
 - **Context:** meetings (system audio), Slack channels, Notion/Confluence documents, Gmail/Outlook, Telegram.
+- **Programming:** writes and fixes code in the project's repository itself on a local model, in a separate branch, with tests and a diff to accept ([docs/coder.md](docs/coder.md)).
 - **Actions:** drafting messages and tasks with confirmation, controlling apps on the computer, web search, analysing logs and attachments.
 
 A detailed per-version feature history is in [docs/HISTORY.md](docs/HISTORY.md).

@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('petyaEvents', {
   onModelRuntime: callback => ipcRenderer.on('model-runtime-progress', (_,state) => callback(state)),
   onModelParts: callback => ipcRenderer.on('model-parts-progress', (_,state) => callback(state)),
   onPythonProgress: callback => ipcRenderer.on('python-progress', (_,state) => callback(state)),
+  onCoderProgress: callback => ipcRenderer.on('coder-progress', (_,state) => callback(state)),
   onZoomBot: callback => ipcRenderer.on('zoom-bot-progress', (_,state) => callback(state)),
   onLocalMeeting: callback => ipcRenderer.on('local-meeting-progress', (_,state) => callback(state)),
   onMeetingMemory: callback => ipcRenderer.on('meeting-memory-progress', (_,state) => callback(state)),

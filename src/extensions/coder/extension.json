@@ -1,0 +1,25 @@
+{
+  "id": "coder",
+  "name": "Программист",
+  "description": "Петя сам пишет и правит код проекта в отдельной ветке и показывает дифф",
+  "setting": "extension_coder",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    [
+      "settings.js",
+      "agents.js"
+    ],
+    [
+      "chat.js",
+      "technical-block.js"
+    ],
+    [
+      "notifications.js",
+      "notifications.js"
+    ]
+  ],
+  "results": {
+    "codingRun": "renderCodingRun"
+  }
+}
