@@ -156,7 +156,7 @@ function petya({clock,settings={},jira='ok',git=true}={}){
  assert.equal(wk.week.filter(d=>!d.future).length,5);assert.equal(wk.week[0].totals.commits,2);
 
  // The registry: declared through `provides`; a focus app only adds `focus` items with minutes.
- assert.deepEqual(sources.load().map(x=>x.id),['chats','git','jira','meetings','reminders']);
+ assert.deepEqual(sources.load().map(x=>x.id),['activity','chats','git','jira','meetings','reminders']);
  const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'petya-jsrc-'));fs.mkdirSync(path.join(tmp,'focus'));
  fs.writeFileSync(path.join(tmp,'focus','extension.json'),JSON.stringify({id:'focus',setting:'extension_focus',provides:{'journal-source':'j.cjs'}}));
  fs.writeFileSync(path.join(tmp,'focus','j.cjs'),"module.exports={id:'focus',name:'Фокус',icon:'focus',collect:async(s,{from})=>({items:[{at:from+3600000,kind:'focus',icon:'focus',title:'Фокус-сессия',minutes:50},{at:from-1,kind:'focus',title:'вне периода',minutes:99}]})};");
