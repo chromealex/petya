@@ -9,7 +9,7 @@ const compute=require('./compute.cjs');
 const registry=require('./sources.cjs');
 const ID='metrics',BY='Метрики игры';
 // Sources that can be connected today; listed in the «подключите источник» question.
-const KNOWN=[{id:'appmetrica',name:'AppMetrica',where:'Каталог → «AppMetrica», затем Настройки → «AppMetrica»: OAuth-токен и приложение'}];
+const KNOWN=[{id:'appmetrica',name:'AppMetrica',where:'Каталог → «AppMetrica», затем Настройки → «AppMetrica»: OAuth-токен и приложение'},{id:'grafana',name:'Grafana',where:'Каталог → «Grafana», затем Настройки → «Grafana»: адрес, токен и «Сопоставить панели с метриками»'}];
 
 const ru=(n,d=0)=>Number(n).toLocaleString('ru-RU',{maximumFractionDigits:d});
 const signed=v=>(v>0?'+':v<0?'−':'')+ru(Math.abs(v)*100,1)+'%';
@@ -73,7 +73,7 @@ async function metricsTurn(s,command,now=new Date()){
  if(!ready.length){
   const added=list(s).added();
   const text=added.length?'Источник «'+added.map(x=>x.name).join('», «')+'» добавлен, но не подключён. Откройте Настройки → «'+added[0].name+'» и сохраните доступ — потом повторите вопрос.':
-   'Чтобы показать метрики игры, подключите источник данных: '+KNOWN.map(x=>x.name+' ('+x.where+')').join('; ')+'. GameAnalytics и Firebase Analytics появятся позже.';
+   'Чтобы показать метрики игры, подключите источник данных: '+KNOWN.map(x=>x.name+' ('+x.where+')').join('; ')+'.';
   return kit.reply(s,command,{by:BY,question:true,text});
  }
  const w=compute.window(ask.days,now);
