@@ -14,8 +14,8 @@ Files: `src/extensions/reminders/`.
   Review» (Jira), «когда Олег появится в сети» (Slack presence), «когда начнётся следующая встреча с Машей», «за 10
   минут до встречи с Олегом» (calendar), «когда соберётся билд» (CI builds). The trigger checks the event once when
   the reminder is made (an already closed task is said, not stored).
-- **Location** («когда приду домой / на работу») is not supported — Petya does not know where the user is: the reply
-  says so and offers a time reminder.
+- **Location** («когда приду домой / на работу») is not supported yet — Petya does not know where the user is: the
+  reply says so and offers a time reminder. Planned: Petya's mobile app reports zone events (see «Location triggers»).
 - Chat commands: «какие у меня напоминания», «удали напоминание про банк» (with «Вернуть» in the card),
   «не напоминай про воду», «перенеси напоминание про счёт на 18:30», «отложи на 10 минут» (the last fired one).
 - **Storage**: `<company data>/extensions/reminders/reminders.json` (mode 0600), per company, survives restarts; the
@@ -52,6 +52,20 @@ notification on the third failure in a row. An event reminder gives up after 30 
 `trigger-ci.cjs` belongs to «Сборки» conceptually and can move to `src/extensions/ci-builds/` with a `provides` entry
 there (no code change). Reminders also provide a `journal-source` (`journal-source.cjs`): done/fired reminders for the
 day's timeline, open ones as candidates for tomorrow's plan.
+
+### Location triggers (planned: Petya's mobile app)
+Location reminders («когда приду домой», «когда уйду с работы», «когда буду у офиса») will come from Petya's mobile
+app, as one more `reminder-trigger` provider — the reminders app itself does not change:
+- The phone keeps the zones the user named («Дом», «Работа», «Офис на Тверской») with the OS geofencing API (iOS
+  region monitoring, Android Geofencing) and sends only zone events `{zone, event: enter|exit, at}` to the paired Petya
+  on the desktop; raw coordinates never leave the phone.
+- The provider (an extension, e.g. `mobile`) declares `"provides": {"reminder-trigger": "trigger-location.cjs"}`:
+  `match(text)` → `{zone, event}` from «когда приду/вернусь домой», «когда уйду с работы»; `ready(settings)` = a phone
+  is paired and has at least one zone; `prepare` refuses an unknown zone with `not-found` and the list of zones;
+  `check` reads the latest zone events received from the phone (no polling of the phone itself).
+- Until then the built-in refusal stays: the reply says Petya does not know where the user is and offers a time
+  reminder. When the provider exists, `match` of the refusal must yield to it (the refusal checks that no ready
+  trigger matched).
 
 ## Verified with stubs vs. live
 No real credentials here. Everything is tested with stubs and a fake clock: `node tests/reminders.cjs` (parsing,
