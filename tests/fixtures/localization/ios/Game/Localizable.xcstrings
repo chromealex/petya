@@ -1,0 +1,45 @@
+{
+  "sourceLanguage": "en",
+  "version": "1.0",
+  "strings": {
+    "Play": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spielen"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jouer"
+          }
+        }
+      }
+    },
+    "Level %lld": {
+      "localizations": {
+        "de": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Level %lld"
+          }
+        }
+      }
+    },
+    "Watch an ad to get %@ gems": {
+      "localizations": {
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regardez une pub pour obtenir des gemmes"
+          }
+        }
+      }
+    },
+    "Tower Rush": {
+      "shouldTranslate": false
+    }
+  }
+}
