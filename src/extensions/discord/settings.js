@@ -32,7 +32,8 @@
   for(const c of rows){
    const label=el('label','check'),box=el('input');box.type='checkbox';box.checked=state.channels.some(x=>x.id===c.id);
    box.onchange=async()=>{
-    const next=box.checked?[...state.channels,{id:c.id,name:c.name,type:c.type}]:state.channels.filter(x=>x.id!==c.id);
+    // Names are cut so 25 channels fit the 2000-character limit of a saved setting.
+    const next=box.checked?[...state.channels,{id:c.id,name:String(c.name).slice(0,40),type:c.type}]:state.channels.filter(x=>x.id!==c.id);
     if(next.length>25){box.checked=false;status.textContent='Не больше 25 каналов.';return;}
     state.channels=next;await persist({discordChannels:JSON.stringify(next)},'Каналы сохранены: '+next.length+'.').catch(()=>{box.checked=!box.checked;});
    };
