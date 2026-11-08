@@ -3,7 +3,20 @@
 module.exports=ctx=>{
   require('./chat-workspace.cjs').register(ctx);
   ctx.handle('dialogueTopics',()=>ctx.dialogue.list());
-  ctx.handle('chatNavigation',async query=>{const state=ctx.dialogue.list(),q=String(query||'').trim().toLocaleLowerCase().slice(0,200);const projects=await Promise.all(state.projects.map(async p=>({...p,icon:p.id==='general'?'':await require('./project-icon.cjs').projectIconFrom(require('./project-folders.cjs').projectFolders(p,ctx.projectMemory.get(p.memoryId)),require('electron').nativeImage),path:require('./project-tree.cjs').path(state.projects,p)})));const drafts={};
+  // Project icon: off, a picture the user chose inside the project's folders, or the one found automatically;
+  // the file it came from goes to the sidebar tooltip and the project settings.
+  const iconOf=async p=>{if(p.id==='general')return {icon:'',iconSource:'',iconMode:'none'};const folders=require('./project-folders.cjs').projectFolders(p,ctx.projectMemory.get(p.memoryId));
+   const info=await require('./project-icon.cjs').iconFor(p,folders,require('electron').nativeImage);const base=folders.find(f=>info.file&&info.file.startsWith(f))||'';
+   return {icon:info.value,iconSource:info.file?(base?require('node:path').relative(base,info.file):info.file):'',iconMode:info.mode};};
+  ctx.handle('chatProjectIcon',async(id,mode)=>{const p=ctx.dialogue.state.projects.find(x=>x.id===id);if(!p||id==='general')throw Error('Проект не найден.');
+   if(mode==='none'){p.iconOff=true;delete p.iconFile;}
+   else if(mode==='auto'){delete p.iconOff;delete p.iconFile;require('./project-icon.cjs').forget();}
+   else if(mode==='pick'){const folders=require('./project-folders.cjs').projectFolders(p,ctx.projectMemory.get(p.memoryId));if(!folders.length)throw Error('Сначала подключите папку проекта.');
+    const picked=await require('electron').dialog.showOpenDialog(ctx.win,{title:'Иконка проекта',defaultPath:folders[0],properties:['openFile'],filters:[{name:'Изображения',extensions:['png','jpg','jpeg','webp']}]});if(picked.canceled||!picked.filePaths[0])return iconOf(p);
+    const file=picked.filePaths[0];if(!await require('./project-icon.cjs').chosenIcon(file,folders,require('electron').nativeImage))throw Error('Выберите квадратную картинку PNG, JPG или WebP из папки проекта.');p.iconFile=file;delete p.iconOff;}
+   else throw Error('Неизвестное действие.');
+   ctx.dialogue.persist();return iconOf(p);});
+  ctx.handle('chatNavigation',async query=>{const state=ctx.dialogue.list(),q=String(query||'').trim().toLocaleLowerCase().slice(0,200);const projects=await Promise.all(state.projects.map(async p=>({...p,...await iconOf(p),path:require('./project-tree.cjs').path(state.projects,p)})));const drafts={};
     for(const [owner,text] of Object.entries(ctx.dialogue.state.composerDrafts||{}))if(text.trim())drafts[owner]={line:text.trim().split(/\r?\n/)[0].slice(0,120),files:0};
     for(const file of ctx.attachments.pending.values())(drafts[file.owner] ||= {line:'',files:0}).files++;
     for(const project of projects)project.savedCount=ctx.dialogue.state.topics.reduce((n,t)=>n+(!t.archived&&t.projectId===project.id?(t.savedAnswers?.length||0):0),0);
@@ -12,11 +25,12 @@ module.exports=ctx=>{
   const projectMutation=fn=>fn;const projectBusy=id=>ctx.dialogue.state.topics.some(t=>t.projectId===id&&(ctx.chatJobs.busy(t.id)||ctx.dialogue.running.has(t.id)));
   ctx.handle('chatProjectCreate',projectMutation(name=>ctx.dialogue.projectCreate(name)));
   const pickedProjectFolders=new Set();
-  ctx.handle('chatProjectSettings',id=>{const projects=ctx.dialogue.state.projects,tree=require('./project-tree.cjs'),p=id?projects.find(p=>p.id===id):null;if(id&&!p)throw Error('Проект не найден.');
+  ctx.handle('chatProjectSettings',async id=>{const projects=ctx.dialogue.state.projects,tree=require('./project-tree.cjs'),p=id?projects.find(p=>p.id===id):null;if(id&&!p)throw Error('Проект не найден.');
     const own=p?.parentId?tree.own(p):null,parent=p?.parentId?projects.find(x=>x.id===p.parentId):null;
     const parents=projects.filter(x=>!x.archived&&x.id!=='general'&&x.id!==p?.id&&!(p&&tree.isDescendant(projects,x.id,p.id))&&(()=>{try{tree.assertParent(projects,p?.id||'',x.id);return true;}catch{return false;}})()).map(x=>({id:x.id,name:tree.path(projects,x)}));
     const project=p?{...p,folders:own?own.folders:require('./project-folders.cjs').projectFolders(p,ctx.projectMemory.get(p.memoryId)),folder:p.id==='general'?'':own?own.folders[0]||'':p.folder||ctx.projectMemory.get(p.memoryId)?.localFolder||'',context:own?own.context:p.context||'',disabledServices:own?own.disabledServices:p.disabledServices||[],
       inherited:parent?{name:tree.path(projects,parent),folders:require('./project-folders.cjs').projectFolders(parent,ctx.projectMemory.get(parent.memoryId)),context:parent.context||'',disabledServices:parent.disabledServices||[]}:null}:null;
+    if(project&&p.id!=='general')Object.assign(project,await iconOf(p));
     return {project,parents,services:require('./project-settings.cjs').services(ctx.settings)};});
   ctx.handle('chatProjectPickFolder',async id=>{if(id==='general')throw Error('Общему проекту нельзя назначить папку.');const picked=await require('electron').dialog.showOpenDialog(ctx.win,{title:'Контекст проекта',properties:['openDirectory']});if(picked.canceled)return null;const folder=await require('./local-project.cjs').rootFolder(picked.filePaths[0]);pickedProjectFolders.add(folder);return folder;});
   ctx.handle('chatProjectSave',projectMutation(async input=>{if(input?.id&&projectBusy(input.id))throw Error('Дождитесь ответов в чатах этого проекта, затем измените его настройки.');

@@ -26,7 +26,7 @@
    const state=await window.petya.feature('interfaceLanguage','set',select.value);
    if(state.language===window.petyaLanguage){status.textContent=(window.t||String)('Язык интерфейса сохранён.');return;}
    if(window.petyaAutoMeetingActive){status.textContent=(window.t||String)('Язык сменится после перезапуска Пети: сейчас идёт запись встречи.');return;}
-   location.reload();
+   await window.petya.feature('interfaceLanguage','reload');
   }catch(error){status.textContent=error.message;await render().catch(()=>{});}
   finally{select.disabled=false;}
  };

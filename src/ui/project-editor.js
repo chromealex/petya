@@ -17,12 +17,22 @@
  function error(e){status.textContent=e.message;status.hidden=false;}
  const actions=el('div');actions.className='project-editor-actions';const cancel=button('Отмена',()=>dialog.close()),save=el('button','Создать проект');save.type='submit';save.className='primary';actions.append(cancel,save);
  const label=(text,input)=>{const l=el('label',text);l.append(input);return l;};
- form.append(heading,label('Название',name),parentLabel,inheritedBox,label('Контекст · необязательно',context),folderRow,el('h3','Сервисы проекта'),services,status,actions);dialog.append(form);document.body.append(dialog);
+ // Icon: what Petya found (and from which file), a picture chosen from the project's folder, or none.
+ const iconRow=el('div');iconRow.className='project-icon-row';const iconImg=el('img');iconImg.alt='';iconImg.className='project-icon-preview';const iconText=el('p');iconText.className='small';
+ const iconButtons=el('div');iconButtons.className='actions';const iconBtn=(text,mode)=>{const b=el('button',text);b.type='button';b.onclick=async()=>{b.disabled=true;try{paintIcon(await window.petya.chatProjectIcon(project.id,mode));document.dispatchEvent(new Event('petya-project-settings'));}catch(e){error(e);}finally{b.disabled=false;}};return b;};
+ const pickIcon=iconBtn('Выбрать картинку…','pick'),noIcon=iconBtn('Без иконки','none'),autoIcon=iconBtn('Найти автоматически','auto');iconButtons.append(pickIcon,autoIcon,noIcon);
+ const iconLabel=el('h3','Иконка');iconRow.append(iconImg,iconText);
+ function paintIcon(info){const has=/^data:image\/png;base64,/.test(info?.icon||'');iconImg.hidden=!has;if(has)iconImg.src=info.icon;
+  iconText.textContent=info?.iconMode==='none'?'Без иконки.':!has?'Иконка не найдена: в папке проекта нет иконки приложения.':info.iconMode==='file'?'Выбрана вами: '+info.iconSource:'Найдена автоматически: '+info.iconSource;
+  autoIcon.hidden=info?.iconMode==='auto';noIcon.hidden=info?.iconMode==='none';}
+ const iconBox=el('div');iconBox.className='project-icon-box';iconBox.append(iconLabel,iconRow,iconButtons);
+ form.append(heading,label('Название',name),parentLabel,inheritedBox,label('Контекст · необязательно',context),folderRow,iconBox,el('h3','Сервисы проекта'),services,status,actions);dialog.append(form);document.body.append(dialog);
  window.openProjectSettings=async (id,{parentId=''}={})=>{
   if(dialog.open)return;dialog.showModal();form.setAttribute('aria-busy','true');save.disabled=true;status.hidden=true;
   try{const state=await window.petya.chatProjectSettings(id||'');project=state.project;inherited=project?.inherited||null;parent.replaceChildren(new Option('— верхний уровень —',''),...(state.parents||[]).map(p=>new Option(p.name,p.id)));parent.value=project?project.parentId||'':parentId;if(parent.value!==(project?.parentId||parentId))parent.value='';parentLabel.hidden=project?.id==='general'||!(state.parents||[]).length;parent.onchange=()=>{paintInherited();paintFolder();};folders=project?.folders|| (project?.folder?[project.folder]:[]);disabled=project?.disabledServices||[];name.value=project?.name||'';name.readOnly=project?.id==='general';context.value=project?.context||'';heading.textContent=project?'Настройки проекта':parentId?'Новая подпапка':'Новый проект';save.textContent=project?'Сохранить':'Создать проект';folderRow.hidden=project?.id==='general';paintInherited();paintFolder();services.replaceChildren();
    for(const service of state.services.filter(s=>s.connected)){const input=el('input');input.type='checkbox';input.dataset.projectService=service.id;input.checked=!disabled.includes(service.id);if(inherited?.disabledServices?.includes(service.id)){input.checked=false;input.disabled=true;input.title='Отключено в проекте «'+inherited.name+'»';}const row=el('label');row.className='check';row.append(input,document.createTextNode(service.name));services.append(row);}
    if(!services.children.length)services.append(el('p','Нет подключённых сервисов. Их можно добавить в «Подключениях».'));
+   iconBox.hidden=!project||project.id==='general';if(!iconBox.hidden)paintIcon(project);
    save.disabled=false;name.focus();
   }catch(e){error(e);}finally{form.removeAttribute('aria-busy');}
  };
