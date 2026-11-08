@@ -1,0 +1,17 @@
+{
+  "id": "screenshot-task",
+  "name": "Скриншот → задача",
+  "description": "Сочетание клавиш или «сделай баг из скриншота»: область экрана, пометки и размытие на картинке, черновик бага от модели и задача в вашем трекере с картинкой — только по вашему нажатию",
+  "category": "computer",
+  "setting": "extension_screenshot-task",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["screenshot-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "screenshotTask": "renderScreenshotTask"
+  },
+  "examples": ["сделай баг из скриншота", "скрин в задачу", "заведи баг по этому экрану: кнопка не нажимается"]
+}
