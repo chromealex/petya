@@ -1,0 +1,16 @@
+{
+  "id": "store-reviews",
+  "name": "Отзывы в сторах",
+  "description": "Отзывы App Store и Google Play: оценки по дням, темы жалоб и ответы игрокам после вашего подтверждения",
+  "category": "gamedev",
+  "setting": "extension_store-reviews",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["reviews-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "storeReviews": "renderStoreReviews"
+  }
+}
