@@ -1,10 +1,11 @@
 // «Размер билда», renderer: total with delta, a stacked bar by category (before/after for two builds),
 // a legend with sizes and deltas, the top grown (or largest) files with bars, warnings, and all files on demand.
 (()=>{
+ const U=unit=>' '+(/^ru/i.test(window.petyaLocale||'ru')?unit:({ТБ:'TB',ГБ:'GB',МБ:'MB',КБ:'KB',Б:'B',с:'s',мин:'min',ч:'h'}[unit]||unit));
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('build-cards.css',document.currentScript.src).href;document.head.append(style);
  const MB=1048576;
  const loc=()=>window.petyaLocale||'ru-RU';
- const fmt=n=>{const a=Math.abs(n);return a>=MB*1000?(n/MB/1024).toLocaleString(loc(),{maximumFractionDigits:2})+' ГБ':a>=MB?(n/MB).toLocaleString(loc(),{maximumFractionDigits:1})+' МБ':a>=1024?Math.round(n/1024).toLocaleString(loc())+' КБ':n+' Б';};
+ const fmt=n=>{const a=Math.abs(n);return a>=MB*1000?(n/MB/1024).toLocaleString(loc(),{maximumFractionDigits:2})+U('ГБ'):a>=MB?(n/MB).toLocaleString(loc(),{maximumFractionDigits:1})+U('МБ'):a>=1024?Math.round(n/1024).toLocaleString(loc())+U('КБ'):n+U('Б');};
  const signed=n=>(n>0?'+':n<0?'−':'±')+fmt(Math.abs(n));
  const pct=(d,base)=>base?(d>0?'+':d<0?'−':'')+Math.abs(Math.round(d/base*1000)/10).toLocaleString(loc())+'%':'';
  const COLORS={dex:'#8fb7e8',binary:'#8fb7e8',frameworks:'#b59ce0',unity:'#e5ce8c',addressables:'#e9a970',streaming:'#cfa95a',assets:'#c9ed9d',resources:'#9fd3c7',debug:'#f0b4a8',other:'#7d848c'};

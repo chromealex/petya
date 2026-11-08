@@ -3,11 +3,12 @@
 // «Перезапустить» asks for confirmation inside the card before calling the app; «Отдать Программисту» sends
 // the error to the coding extension as a chat request.
 (()=>{
+ const U=unit=>' '+(/^ru/i.test(window.petyaLocale||'ru')?unit:({ТБ:'TB',ГБ:'GB',МБ:'MB',КБ:'KB',Б:'B',с:'s',мин:'min',ч:'h'}[unit]||unit));
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('ci-cards.css',document.currentScript.src).href;document.head.append(style);
  const STATUS={success:['успешно','done','✓'],failure:['упала','alert','✗'],running:['идёт','progress','◐'],queued:['в очереди','progress','…'],cancelled:['отменена','','⊘'],skipped:['пропущена','','–'],unknown:['неизвестно','','?']};
  const label=s=>(STATUS[s]||STATUS.unknown)[0],tone=s=>(STATUS[s]||STATUS.unknown)[1];
  const ago=iso=>{const m=Math.round((Date.now()-Date.parse(iso))/60000);if(!Number.isFinite(m))return '';if(m<1)return 'только что';if(m<60)return m+' мин назад';const h=Math.round(m/60);if(h<24)return h+' ч назад';const d=Math.round(h/24);return d+' дн назад';};
- const duration=sec=>{if(!Number.isFinite(sec)||sec===null)return '';if(sec<60)return sec+' с';const m=Math.floor(sec/60),s=sec%60;if(m<60)return m+' мин'+(s&&m<10?' '+s+' с':'');return Math.floor(m/60)+' ч '+(m%60)+' мин';};
+ const duration=sec=>{if(!Number.isFinite(sec)||sec===null)return '';if(sec<60)return sec+U('с');const m=Math.floor(sec/60),s=sec%60;if(m<60)return m+U('мин')+(s&&m<10?' '+s+U('с'):'');return Math.floor(m/60)+U('ч')+' '+(m%60)+U('мин');};
  const open=(k,url)=>{const safe=k.safeUrl(url||'');if(safe)window.open(safe,'_blank','noopener');else k.toast('Ссылки на эту сборку нет',{error:true});};
  const sourceName=s=>s==='unity'?'Unity':'GitHub';
  // Service content (commit titles, workflow/job names, branches, logs) is left alone by the interface translator.
@@ -88,7 +89,7 @@
   if(target)actions.push({label:'Открыть',primary:!f,run:()=>open(k,target)});
   if(f?.rerun)actions.push({label:'Перезапустить…',title:f.source==='github'?'Перезапустить упавшие jobs в GitHub Actions':'Поставить новую сборку в Unity Build Automation',run:()=>{
    if(card.querySelector('.ci-confirm'))return;
-   const what=f.source==='github'?'Перезапустить упавшие jobs «'+f.workflow+'» #'+f.number+(f.repo?' в '+f.repo:'')+'?':'Запустить новую сборку «'+f.workflow+'» в Unity Build Automation?';
+   const what=f.source==='github'?'Перезапустить упавшие jobs «'+f.workflow+'» #'+f.number+'?'+(f.repo?' · '+f.repo:''):'Запустить новую сборку «'+f.workflow+'» в Unity Build Automation?';
    card.querySelector('.kit-actions').before(confirmRow(k,what,'Перезапустить',async()=>{const r=await window.petya.feature('ciBuilds','rerun',f.rerun);k.toast(r.text);}));
   }});
   if(f?.handoff)actions.push({label:'Отдать Программисту',primary:true,title:'Петя-программист попробует исправить ошибку в коде проекта',run:()=>k.ask(f.handoff,{send:true})});

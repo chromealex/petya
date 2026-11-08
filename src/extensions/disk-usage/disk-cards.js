@@ -2,13 +2,14 @@
 // a tag and a one-line explanation each, expandable rows with the biggest subfolders, and per-row cleanup that
 // first lists the exact paths and total size and runs only after «Переместить в корзину» is pressed.
 (()=>{
+ const U=unit=>' '+(/^ru/i.test(window.petyaLocale||'ru')?unit:({ТБ:'TB',ГБ:'GB',МБ:'MB',КБ:'KB',Б:'B',с:'s',мин:'min',ч:'h'}[unit]||unit));
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('disk-cards.css',document.currentScript.src).href;document.head.append(style);
  const call=(method,...args)=>window.petya.feature('diskUsage',method,...args);
  const TAGS={safe:{label:'можно удалить безопасно',tone:'done'},regen:{label:'пересоздастся',tone:'progress'},caution:{label:'осторожно',tone:'alert'}};
  function human(bytes){
   const n=Number(bytes)||0;
-  for(const [d,u] of [[1e12,'ТБ'],[1e9,'ГБ'],[1e6,'МБ'],[1e3,'КБ']])if(n>=d)return (n/d).toLocaleString(locale(),{maximumFractionDigits:n/d>=100?0:1})+' '+u;
-  return n+' Б';
+  for(const [d,u] of [[1e12,'ТБ'],[1e9,'ГБ'],[1e6,'МБ'],[1e3,'КБ']])if(n>=d)return (n/d).toLocaleString(locale(),{maximumFractionDigits:n/d>=100?0:1})+U(u);
+  return n+U('Б');
  }
  const locale=()=>window.petyaLocale||'ru-RU';
  const finder=()=>window.petyaPlatform==='win32'?'Показать в Проводнике':'Показать в Finder';
@@ -114,7 +115,7 @@
   for(const c of rows)chart.append(categoryRow(k,scan,c,max));
   if(rows.length)body.append(chart);else body.append(k.el('p','disk-muted','Ничего крупного в известных местах не нашлось.'));
   const meta=[];
-  if(scan.elapsedMs)meta.push('посчитано за '+Math.max(1,Math.round(scan.elapsedMs/1000))+' с');
+  if(scan.elapsedMs)meta.push('посчитано за '+Math.max(1,Math.round(scan.elapsedMs/1000))+U('с'));
   if(scan.skipped)meta.push('закрытых папок пропущено: '+scan.skipped);
   if(!scan.unityRoots?.length)meta.push('проекты Unity не искались');
   meta.push('ничего не удаляется без подтверждения');
