@@ -59,7 +59,7 @@
  const syncActivity=()=>{activity.title=[progressText.textContent,progressTime.textContent,micDiagnostics.textContent].filter(Boolean).join(' · ');activity.classList.toggle('has-command',!progressPanel.hidden);};
  new MutationObserver(syncActivity).observe(activity,{subtree:true,childList:true,attributes:true,attributeFilter:['hidden']});syncActivity();
  const micIcon=document.createElement('span');micIcon.className='chat-mic-icon';icon(micIcon,'M9 5a3 3 0 0 1 6 0v6a3 3 0 0 1-6 0zM5 10v1a7 7 0 0 0 14 0v-1M12 18v4M8 22h8');$('mic').prepend(micIcon);
- const micState=()=>{$('mic').setAttribute('aria-label',$('mic-action').textContent+' · '+$('mic-device-name').textContent);const active=$('mic-action').textContent==='Микрофон включён';$('mic').classList.toggle('is-listening',active);$('mic').setAttribute('aria-pressed',String(active));};
+ const micState=()=>{$('mic').setAttribute('aria-label',$('mic-action').textContent+' · '+$('mic-device-name').textContent);const active=[ 'Микрофон включён',(window.t||String)('Микрофон включён')].includes($('mic-action').textContent);$('mic').classList.toggle('is-listening',active);$('mic').setAttribute('aria-pressed',String(active));};
  new MutationObserver(micState).observe($('mic-action'),{childList:true});micState();
  $('command-help').hidden=true;$('command').setAttribute('aria-label','Сообщение Пете');
  document.addEventListener('click',event=>{if(!menu.contains(event.target))menu.open=false;});

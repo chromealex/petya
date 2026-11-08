@@ -10,7 +10,7 @@
   setBusy(true);
   try{
    // Nothing to save by hand: pending settings are saved now, team edits are saved before the switch.
-   await window.flushSettings?.();if($('team-status').textContent==='Изменения не сохранены.')await window.saveTeamNow?.();
+   await window.flushSettings?.();if([ 'Изменения не сохранены.',(window.t||String)('Изменения не сохранены.')].includes($('team-status').textContent))await window.saveTeamNow?.();
    if(mic.active)throw Error('Выключите микрофон перед переключением компании.');if(meeting.active||window.petyaAutoMeetingActive)throw Error('Остановите запись системного звука перед переключением компании.');if(currentDraft||workspaceBusy)throw Error('Завершите или закройте черновик в Ассистенте.');if(planning||draftBusy||agentBusy)throw Error('Дождитесь завершения текущего запроса; статус показан в верхней панели.');
    const result=await window.petya.companySwitch(target);
    if(result.switching){notice('Переключаю компанию…');document.querySelectorAll('button,input,textarea,select').forEach(e=>e.disabled=true);}

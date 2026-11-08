@@ -19,7 +19,7 @@ function editLearning(skill){const editor=$('learn-form').closest('details');if(
 async function refreshLearning(){const state=await window.petya.learningList();renderGrowth(state.growthSummary);const list=$('learned-list');list.replaceChildren();if(!state.skills.length)list.textContent='Пока нет своих команд.';
  for(const skill of state.skills){const row=document.createElement('p');const label=document.createElement('span');label.textContent=skill.name+(skill.enabled?'':' · выключен')+' ';const edit=document.createElement('button');edit.type='button';edit.textContent='Изменить';edit.onclick=()=>editLearning(skill);const toggle=document.createElement('button');toggle.type='button';toggle.textContent=skill.enabled?'Выключить':'Включить';toggle.onclick=run(async()=>{await window.petya.learningSave({...skill,enabled:!skill.enabled});await refreshLearning();});const remove=document.createElement('button');remove.type='button';remove.textContent='Удалить';remove.onclick=run(async()=>{await window.petya.learningDelete(skill.id);if(editingSkill===skill.id)editLearning();await refreshLearning();});row.append(label,edit,toggle,remove);list.append(row);}
  const reminders=$('learn-reminders');reminders.replaceChildren();const visible=state.reminders.filter(r=>r.state==='pending').sort((a,b)=>a.due-b.due);if(!visible.length)reminders.textContent='Активных напоминаний нет.';
- for(const r of visible){const row=document.createElement('p'),label=document.createElement('span');label.textContent=new Date(r.due).toLocaleString('ru-RU')+' · '+r.text+' ';const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Отменить';cancel.onclick=run(async()=>{await window.petya.reminderCancel(r.id);await refreshLearning();});row.append(label,cancel);reminders.append(row);}
+ for(const r of visible){const row=document.createElement('p'),label=document.createElement('span');label.textContent=new Date(r.due).toLocaleString(window.petyaLocale||'ru-RU')+' · '+r.text+' ';const cancel=document.createElement('button');cancel.type='button';cancel.textContent='Отменить';cancel.onclick=run(async()=>{await window.petya.reminderCancel(r.id);await refreshLearning();});row.append(label,cancel);reminders.append(row);}
 }
 learningNav.onclick=run(async()=>{view('learning');await refreshLearning();});
 $('learn-action').onchange=learningActionHelp;$('learn-new').onclick=()=>editLearning();
@@ -32,7 +32,7 @@ learningActionHelp();
 const undoButton=document.createElement('button');undoButton.type='button';undoButton.textContent='Отменить последнее локальное действие';undoButton.className='never-shown';learningView.prepend(undoButton);
 // Name the action that will be undone and hide the button when there is nothing to undo.
 undoButton.className='never-shown learning-undo quiet';undoButton.hidden=true;
-async function syncUndo(){try{const info=await window.petya.undoInfo();undoButton.hidden=!info;if(info){undoButton.textContent='↶ Отменить: '+info.label;undoButton.title=new Date(info.at).toLocaleString('ru-RU');}}catch{undoButton.hidden=true;}}
+async function syncUndo(){try{const info=await window.petya.undoInfo();undoButton.hidden=!info;if(info){undoButton.textContent='↶ Отменить: '+info.label;undoButton.title=new Date(info.at).toLocaleString(window.petyaLocale||'ru-RU');}}catch{undoButton.hidden=true;}}
 document.addEventListener('petya-view',event=>{if(event.detail==='learning')syncUndo();});undoButton.onclick=run(async()=>{const info=await window.petya.undoInfo();if(!info){notice('Нет действия для отмены.');return;}if(!await window.confirmLocalUndo?.(info))return;const result=await window.petya.undoLast(info.id);await refreshLearning();await refreshDictionary();await syncUndo();await showDialogueReply(result);view('home');});
 
 function renderGrowth(growth){
@@ -48,7 +48,7 @@ function renderGrowth(growth){
  add(root,'h3','Чему я научился');
  if(!growth.events.length)add(root,'p','Пока нет сохранённых знаний. Научите Петю новой фразе или добавьте правило в личный словарь.');
  for(const event of growth.events){const details=add(root,'details','');details.className='growth-event';add(details,'summary',event.title+' · '+(event.active?'+'+event.points+' очков':'не учитывается'));
- add(details,'p',event.at===null?'Добавлено из ранее сохранённых знаний':new Date(event.at).toLocaleString('ru-RU'));
+ add(details,'p',event.at===null?'Добавлено из ранее сохранённых знаний':new Date(event.at).toLocaleString(window.petyaLocale||'ru-RU'));
  add(details,'p','Источник: '+event.source);
  // Petya's words about what he learned; the user can rewrite them, an empty text brings his back.
  const said=add(details,'blockquote',event.learned);said.className='growth-learned';if(event.edited)said.title='Изменено вами';

@@ -1,2 +1,3 @@
 const {contextBridge,ipcRenderer}=require('electron');
+contextBridge.exposeInMainWorld('petyaInterfaceLanguage',(()=>{try{return ipcRenderer.sendSync('petya:interface-language-bootstrap');}catch{return {language:'ru',preference:'system',strings:{}};}})());
 contextBridge.exposeInMainWorld('browserToolbar',{action:name=>{if(['return','back','reload','read'].includes(name))ipcRenderer.send('browser-toolbar-action',name);},onState:fn=>ipcRenderer.on('browser-toolbar-state',(_,state)=>fn(state)),onBusy:fn=>ipcRenderer.on('browser-toolbar-busy',(_,busy)=>fn(busy)),onError:fn=>ipcRenderer.on('browser-toolbar-error',(_,message)=>fn(message))});

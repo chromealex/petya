@@ -6,7 +6,7 @@
  const open=new Set(),chosen=new Map();let signature='',data=null;
  const node=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
  const size=n=>n<1024?n+' Б':n<1048576?(n/1024).toFixed(n<10240?1:0).replace('.',',')+' КБ':(n/1048576).toFixed(1).replace('.',',')+' МБ';
- const when=t=>t?new Date(t).toLocaleString('ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+ const when=t=>t?new Date(t).toLocaleString(window.petyaLocale||'ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
  const minutes=ms=>{const m=Math.round(ms/60000);return m<1?'меньше минуты':m<60?m+' мин':Math.floor(m/60)+' ч '+(m%60?m%60+' мин':'');};
  const words=(n,[one,few,many])=>{const a=n%10,b=n%100;return n+' '+(a===1&&b!==11?one:a>=2&&a<=4&&(b<10||b>=20)?few:many);};
  function remove(button,request,label){
@@ -27,7 +27,7 @@
   if(url&&/^https:\/\//.test(url)){const b=node('button',null,'Открыть');b.type='button';b.onclick=()=>window.open(url,'_blank');actions.append(b);}
   actions.append(deleteButton(request,label));head.append(info,actions);card.append(head);
   if(text){const details=node('details','material-text'),summary=node('summary',null,warning?'Показать текст':'Прочитать запись'),body=node('div','material-body');details.append(summary,body);
-   const fill=()=>{if(!body.childElementCount&&!body.textContent)for(const part of [].concat(text())){if(part.at){const line=node('p');line.append(node('span','material-time',new Date(part.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+' '),...part.who?[node('strong','material-who'+(part.who==='Вы'?' me':''),part.who+': ')]:[],document.createTextNode(part.text));body.append(line);}else body.append(node('p',null,part.text||part));}};
+   const fill=()=>{if(!body.childElementCount&&!body.textContent)for(const part of [].concat(text())){if(part.at){const line=node('p');line.append(node('span','material-time',new Date(part.at).toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'})+' '),...part.who?[node('strong','material-who'+(part.who==='Вы'?' me':''),part.who+': ')]:[],document.createTextNode(part.text));body.append(line);}else body.append(node('p',null,part.text||part));}};
    if(open.has(key)){details.open=true;fill();}
    details.ontoggle=()=>{if(details.open){open.add(key);fill();}else open.delete(key);};card.append(details);}
   return card;

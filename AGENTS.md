@@ -1,7 +1,18 @@
 # Language
 
 - Write commit messages, documentation (README, AGENTS.md, `docs/`), and code comments in English.
-- Petya's user-facing text stays in Russian: UI strings, spoken replies, model prompts, and test scenarios that check Russian answers.
+- Petya's interface is written in Russian (the source language) and localized: see "Interface localization" below. Spoken replies, model prompts, and test scenarios that check Russian answers stay in Russian; the reply language is the separate «Язык ответов» setting (`communicationLanguage`: `auto` answers in the language of the question, or a fixed code), and the speech recognition hint is «Язык речи» (`speechLanguage`); both are resolved in `src/question-language.cjs` — read them through it, not directly.
+
+# Interface localization
+
+- The interface language follows the system language by default; the user can fix it in Settings → «Язык интерфейса» (`system`, `ru`, `en`). The choice is application-wide, stored in `userData/interface-language.json` (`src/interface-language.cjs`, feature `src/features/interface-language.cjs`). Unsupported system languages fall back to English.
+- Every new or changed user-visible string ships with its translation in the same commit: write the text in Russian as before, then add the English entry to `src/locales/en.json` (`strings`, keyed by the exact trimmed Russian text). `node scripts/i18n-strings.cjs --missing en` lists what is missing; `tests/interface-language.cjs` (part of `npm test`) fails until it is empty. Text that must stay as written (Russian name forms) goes to `untranslated`.
+- This applies to renderer markup and scripts (`src/ui`), extensions (`src/extensions/<app>`: cards, settings, `extension.json`), and main-process text that reaches the user: `Error(...)` messages shown as notices, `label`/`title`/`message` of menus, notifications and progress, tray menu, dialogs and notifications (`require('./interface-language.cjs').t(text)`).
+- Renderer text is translated automatically as it enters the DOM (`src/ui/i18n.js`), including text composed from literals: keep each literal a complete phrase or fragment (`'Скачать язык: '+name`), not single letters or word endings, and do not build words from parts. For text that does not pass through the DOM (canvas, clipboard, `document.title`, values compared later), call `window.t('…')`.
+- Never translate user or model content: chat message text (`.message-content`), inputs and editable areas are skipped; mark any other content area with `data-no-i18n` (or `translate="no"`, e.g. for language names that stay in their own language).
+- Code must not depend on the displayed language: do not compare `textContent` or button labels with Russian literals; keep state in variables or `data-*` attributes (where old code compares, accept both `text` and `window.t(text)`). Format dates and numbers with `window.petyaLocale`, not a hard-coded `'ru-RU'`.
+- Requests in other languages are rewritten into Russian by the local model before routing (`src/command-language.cjs`, called from `src/converse.cjs`); the chat keeps the user's own words (`routedText` holds the rewrite). New shortcut handlers match Russian phrasing only — do not add English or other-language patterns next to Russian ones. The wake word is accepted as «Петя» or Latin «Petya».
+- Window-level UI tests run in Russian (`PETYA_SMOKE_TEST`); set `PETYA_INTERFACE_LANGUAGE=en` to check the English interface (`npm run test:interface-language-ui`). Adding a language means a new `src/locales/<code>.json` and its code in `SUPPORTED` in `src/ui/i18n-core.js`.
 
 # Builds
 

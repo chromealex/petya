@@ -5,7 +5,7 @@
   const list=document.createElement('div');list.className='slack-message-list';let more;
   items.forEach((item,index)=>{
    const card=document.createElement('section');card.className='slack-message-card';const header=document.createElement('header'),author=document.createElement('strong'),body=document.createElement('p');author.textContent=item.author;header.append(author);
-   const date=new Date(item.at);if(item.at&&Number.isFinite(date.getTime())){const time=document.createElement('time');time.dateTime=date.toISOString();time.textContent=date.toLocaleString('ru-RU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});time.title=date.toLocaleString('ru-RU');header.append(time);}
+   const date=new Date(item.at);if(item.at&&Number.isFinite(date.getTime())){const time=document.createElement('time');time.dateTime=date.toISOString();time.textContent=date.toLocaleString(window.petyaLocale||'ru-RU',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});time.title=date.toLocaleString(window.petyaLocale||'ru-RU');header.append(time);}
    // «В обсуждение» opens the Slack app on the message; the web link is the fallback.
    const web=(()=>{try{const url=new URL(item.url);return url.protocol==='https:'&&(url.hostname==='slack.com'||url.hostname.endsWith('.slack.com'))?url.href:'';}catch{return '';}})();
    const app=/^slack:\/\/channel\?/.test(item.appUrl||'')?item.appUrl:'';

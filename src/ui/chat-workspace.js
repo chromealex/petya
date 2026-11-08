@@ -165,7 +165,7 @@
     mode.onchange=()=>{localStorage.setItem(voiceKey,mode.value);if(mode.value==='off')stopSpeech.onclick();};
     speed.type='range';speed.min='0.5';speed.max='2';speed.step='0.1';speed.value=String(window.chatSpeechRate());
     const speedText=el('span');
-    function updateSpeed(){const value=Number(speed.value);speedText.textContent='Скорость · '+value.toLocaleString('ru-RU')+'×';localStorage.setItem(speedKey,String(value));for(const audio of [replyAudioSource,streamingAudio])if(audio)audio.playbackRate=value;}
+    function updateSpeed(){const value=Number(speed.value);speedText.textContent='Скорость · '+value.toLocaleString(window.petyaLocale||'ru-RU')+'×';localStorage.setItem(speedKey,String(value));for(const audio of [replyAudioSource,streamingAudio])if(audio)audio.playbackRate=value;}
     speed.oninput=updateSpeed;updateSpeed();label.append(mode);rate.append(speedText,speed);box.append(label,rate);
   },'');
   voice.innerHTML='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M3 9h4l5-4v14l-5-4H3zM16 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></svg>';

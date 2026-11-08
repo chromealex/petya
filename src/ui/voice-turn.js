@@ -11,7 +11,7 @@ class VoiceTurn {
   wait(delay = 1200) { if (this.timer) this.cancel(this.timer); this.timer = this.schedule(() => this.check(), Math.max(1, Math.min(delay, this.hardDeadline ? this.hardDeadline - this.now() : delay))); }
   feed(speech, at, endedAt, direct = false) {
     const value = speech.trim();
-    const match = /(?:^|[\s,.!?])петя(?=$|[\s,:.!?—-])[\s,:.!?—-]*(.*)$/iu.exec(value);
+    const match = /(?:^|[\s,.!?])(?:петя|petya|petia|petja)(?=$|[\s,:.!?—-])[\s,:.!?—-]*(.*)$/iu.exec(value);
     const preceding = match ? value.slice(0, match.index).trim() : '';
     if ((match || (direct && value)) && !this.active) { const activity = this.lastSpeech; this.arm(); this.lastSpeech = activity; this.at = at; }
     if (!this.active) return { consumed: false };
