@@ -30,6 +30,6 @@
    q('.ci-key-secret').value='';q('.ci-clear').checked=false;await refresh();say('Сохранено.','connected');}
   catch(e){say(e.message,'error');}
  };
- document.addEventListener('petya-extensions-changed',refresh);
+ for(const ev of ['petya-extensions-changed','petya-github-changed','petya-settings-displayed'])document.addEventListener(ev,refresh);
  refresh();
 })();

@@ -22,7 +22,7 @@
   }catch(e){say(e.message,'error');}
  }
  q('.github-save').onclick=async()=>{
-  try{await window.petya.saveSettings({githubToken:q('[name=githubToken]').value,githubRepos:q('[name=githubRepos]').value,clear_githubToken:q('.github-clear').checked});q('[name=githubToken]').value='';q('.github-clear').checked=false;await refresh();say('Сохранено.','connected');}
+  try{await window.petya.saveSettings({githubToken:q('[name=githubToken]').value,githubRepos:q('[name=githubRepos]').value,clear_githubToken:q('.github-clear').checked});q('[name=githubToken]').value='';q('.github-clear').checked=false;await refresh();say('Сохранено.','connected');document.dispatchEvent(new Event('petya-github-changed'));}
   catch(e){say(e.message,'error');}
  };
  q('.github-check').onclick=async()=>{

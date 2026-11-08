@@ -13,6 +13,6 @@
   catch{q('.pr-github').textContent='GitHub не подключён: добавьте токен в карточке «GitHub».';}
  }
  q('.pr-open-github').onclick=async()=>{try{await window.extensionHost?.open('github');}catch(e){status.textContent=e.message;status.className='connection-status error';}};
- document.addEventListener('petya-extensions-changed',refresh);
+ for(const ev of ['petya-extensions-changed','petya-github-changed','petya-settings-displayed'])document.addEventListener(ev,refresh);
  refresh();
 })();
