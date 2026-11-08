@@ -21,7 +21,8 @@ function validate(input){
   if(input.metric==='conversion'&&!(Number.isFinite(x.conversions)&&x.conversions>=0&&x.conversions<=x.users))throw Error('В группе «'+x.name+'» конверсий больше, чем игроков, или их нет.');
   if(input.metric==='mean'&&!(Number.isFinite(x.mean)&&Number.isFinite(x.sd)&&x.sd>=0&&x.users>1))throw Error('В группе «'+x.name+'» нужны среднее, стандартное отклонение и число игроков.');
  }
- const names=v.map(x=>String(x.name));if(new Set(names).size!==names.length)throw Error('Группы названы одинаково.');
+ for(const x of v)x.name=String(x.name??'').trim().slice(0,40)||'?';
+ const names=v.map(x=>x.name);if(new Set(names).size!==names.length)throw Error('Группы названы одинаково.');
 }
 
 function analyze(input,{seed=42,rounds=2000}={}){
@@ -100,6 +101,8 @@ function analyze(input,{seed=42,rounds=2000}={}){
  return card;
 }
 
+// The split axis is zoomed around the plan so a small deviation is visible next to the plan marker.
+function assignmentAxis(srm){const d=Math.max(0.01,3*Math.max(...srm.observed.map((o,i)=>Math.abs(o-srm.expected[i]))));return {min:Math.max(0,Math.min(...srm.expected)-d),max:Math.min(1,Math.max(...srm.expected)+d)};}
 // Only assignment counts («A 50000, B 49000 — есть ли SRM?»): the split check alone.
 function assignment(input){
  const counts=input.variants.map(v=>v.users),total=counts.reduce((a,b)=>a+b,0),r=st.srm(counts,input.split);
@@ -107,7 +110,7 @@ function assignment(input){
  const verdict=srm.flagged?{kind:'srm',label:'SRM — проверьте разбиение',tone:'alert'}:{kind:'ok',label:'разбиение в порядке',tone:'done'};
  const variants=input.variants.map((v,i)=>({name:String(v.name),users:v.users,rate:srm.observed[i],expected:srm.expected[i]}));
  const warnings=srm.flagged?['Игроки разделились не так, как планировали: ищите причину (фильтры после разбиения, падения в одной ветке, боты) до того, как читать результат.']:[];
- const card={metric:'assignment',alpha:ALPHA,variants,comparisons:[],srm,power:null,verdict,warnings,axis:{min:0,max:Math.min(1,Math.max(...srm.observed,...srm.expected)*1.15)},source:input.source||'text'};
+ const card={metric:'assignment',alpha:ALPHA,variants,comparisons:[],srm,power:null,verdict,warnings,axis:assignmentAxis(srm),source:input.source||'text'};
  card.summary=srm.flagged?'SRM: группы разделились не по плану (χ²='+ru(srm.chi2,2)+', '+pText(srm.p)+') — проверьте разбиение.':'SRM не видно: '+srm.observed.map(x=>ru(x*100,2)+'%').join(' / ')+' при плане '+srm.expected.map(x=>ru(x*100,0)+'%').join(' / ')+' ('+pText(srm.p)+').';
  card.report='Проверка разбиения (SRM): '+variants.map(v=>v.name+' '+ru(v.users,0)).join(', ')+'\nχ²='+ru(srm.chi2,3)+', '+pText(srm.p)+' — '+verdict.label;
  return card;
