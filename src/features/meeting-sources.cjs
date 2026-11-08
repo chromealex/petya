@@ -14,16 +14,23 @@ const path=require('node:path');
 const KIND='meeting-source';
 
 function load(dir){
- return require('./app-links.cjs').scan(dir).filter(x=>x.kind===KIND).map(({provider:p,...x})=>{
-  if(typeof p.detect!=='function')throw Error('Invalid meeting source '+x.extension+'/'+x.file);
-  for(const hook of ['begin','end','speakers','participants','recognizeLink','summaryMail'])if(p[hook]!==undefined&&typeof p[hook]!=='function')throw Error('Invalid meeting source '+x.extension+'/'+x.file);
-  if(p.joinLinks!==undefined&&(!Array.isArray(p.joinLinks)||p.joinLinks.some(r=>!(r instanceof RegExp))))throw Error('Invalid meeting source '+x.extension+'/'+x.file);
-  return {id:p.id||x.extension,extension:x.extension,setting:x.setting,name:p.name||x.name,source:p};
+ return require('./app-links.cjs').scan(dir).filter(x=>x.kind===KIND).flatMap(({provider:p,...x})=>{
+  const bad=typeof p.detect!=='function'||['begin','end','speakers','participants','recognizeLink','summaryMail'].some(hook=>p[hook]!==undefined&&typeof p[hook]!=='function')||
+   p.joinLinks!==undefined&&(!Array.isArray(p.joinLinks)||p.joinLinks.some(r=>!(r instanceof RegExp)));
+  if(bad){
+   const error=Error('Invalid meeting source '+x.extension+'/'+x.file);
+   // An installed extension's broken source is reported and skipped; a bundled one is a bug.
+   if(x.origin&&x.origin!=='bundled'){const r=require('../extension-registry.cjs');r.report(r.entry(x.extension),error,x.file);return [];}
+   throw error;
+  }
+  return [{id:p.id||x.extension,extension:x.extension,setting:x.setting,name:p.name||x.name,source:p}];
  }).sort((a,b)=>a.id.localeCompare(b.id));
 }
 
 // The registry bound to live services: which extensions are added is read at call time.
-function create(s,{sources=load()}={}){
+function create(s,{sources:fixed}={}){
+ // Without fixed sources (tests), the list follows the extension registry: installed or removed apps count at once.
+ const sources={filter:f=>(fixed||require('../extension-registry.cjs').cached('meeting-sources',()=>load())).filter(f)};
  const added=x=>!x.setting||s.settings?.[x.setting]==='true';
  const context=(extra={})=>({settings:s.settings||{},dataRoot:s.dataRoot||'',...extra});
  const list=()=>sources.filter(added);

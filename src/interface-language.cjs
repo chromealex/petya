@@ -13,7 +13,11 @@ function readPreference(app=electronApp()){try{const value=JSON.parse(fs.readFil
 function systemLanguages(app=electronApp()){if(!app)return [];try{const list=app.getPreferredSystemLanguages?.()||[];return list.length?list:[app.getLocale?.()].filter(Boolean);}catch{return [];}}
 function strings(language){
  if(language==='ru')return {};
- try{return JSON.parse(fs.readFileSync(path.join(__dirname,'locales',language+'.json'),'utf8')).strings||{};}catch{return {};}
+ let own={};try{own=JSON.parse(fs.readFileSync(path.join(__dirname,'locales',language+'.json'),'utf8')).strings||{};}catch{own={};}
+ // Installed and development extensions ship their own locales/<code>.json; Petya's own strings win.
+ const extra={};
+ try{for(const d of require('./extension-registry.cjs').descriptors()){if(d.origin==='bundled')continue;try{Object.assign(extra,JSON.parse(fs.readFileSync(path.join(d.dir,'locales',language+'.json'),'utf8')).strings||{});}catch{}}}catch{}
+ return {...extra,...own};
 }
 function state(){
  if(cached)return cached;
