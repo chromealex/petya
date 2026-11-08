@@ -140,6 +140,9 @@ quiet offer once per chat. Rules:
 - `requests` — what makes a mention a request for data now («покажи», «сколько», «проверь»).
 - `ready(settings)` — added **and** connected; the catalog uses it for «Подключить».
 - `connect` — `'install'` (adding is enough) or `'settings'` (needs a token after adding).
+- `connected?(settings)` — the catalog's «подключено» when it differs from `ready` (a crash source is connected before
+  «Крэши» is added); `also?:[ids]` — extensions added together with this one when the offer is accepted;
+  `service?` — bundled only: connected in Petya's own service settings (Google Play).
 - Ties are never guessed: two apps that fit equally well are both named in the question. Do not raise your score with
   extra topics to win a tie — make the patterns precise instead.
 - Add the app's rows to `tests/extension-offers-matrix.cjs`: `own` (requests that must offer exactly it) and `not`
@@ -204,11 +207,20 @@ One app offers a capability; other apps' cards use it without knowing who provid
 
 When an app can read the same data from several services (crashes: Sentry, Google Play, Crashlytics; meetings: Zoom,
 Meet, Teams), keep the app source-agnostic and let each service plug in as a source declared through `provides`,
-served by a dedicated registry next to app links. The working example is `meeting-source`
-(`src/features/meeting-sources.cjs`, `docs/apps/zoom.md`): `{id?, name?, detect(context), begin?, end?, speakers?,
-participants?, recognizeLink?, joinLinks?, summaryMail?}`; a source counts only while its extension is added.
-A new source kind is a core change: add it to `REGISTRIES` in `app-links.cjs` and write its registry on
-`app-links.scan()` (bundled code). Implement the first source(s) and document the others in `docs/apps/<id>.md`.
+served by a dedicated registry next to app links. Two exist:
+
+- `meeting-source` (`src/features/meeting-sources.cjs`, `docs/apps/zoom.md`): `{id?, name?, detect(context), begin?,
+  end?, speakers?, participants?, recognizeLink?, joinLinks?, summaryMail?}`, polled by the meeting recorder;
+- `crash-source` (`src/features/crash-sources.cjs`, `docs/apps/crashes.md`): `{id?, name?, color?, names?,
+  standalone?, service?, ready(settings), issues(services, query), release?, crashFree?, resolve?, reopen?,
+  issueUrl?}`, read by «Крэши» (`src/extensions/sentry`, `crashlytics`, `google-play` are sources; the crashes app
+  shows them together).
+
+A source counts only while its extension is added; an installed extension may provide one, and a broken installed
+source is skipped and reported. A new source kind is a core change: add it to `REGISTRIES` in `app-links.cjs` and
+write its registry on `app-links.scan()` with `registry.cached()` (bundled code). Implement the first source(s) and
+document the others in `docs/apps/<id>.md`. An app that needs a source the user has not connected asks with
+`services.extensionOffers.propose(command, ids, text, by)` — the same offer card, resumed after connecting.
 
 ## 10. Other hooks
 

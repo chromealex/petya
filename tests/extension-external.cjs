@@ -215,15 +215,19 @@ const writeZip=(name,entries)=>{const file=path.join(tmp,name);fs.writeFileSync(
  // Every scan reads the same registry: an external provider and a broken meeting source.
  const linker=path.join(root,'pinger');copy(fixture,linker);
  const desc=JSON.parse(fs.readFileSync(path.join(fixture,'extension.json'),'utf8'));
- fs.writeFileSync(path.join(linker,'extension.json'),JSON.stringify({...desc,id:'pinger',setting:'extension_pinger',feature:undefined,results:undefined,scripts:[],provides:{'share-message':'share.cjs','meeting-source':'source.cjs'}}));
+ fs.writeFileSync(path.join(linker,'extension.json'),JSON.stringify({...desc,id:'pinger',setting:'extension_pinger',feature:undefined,results:undefined,scripts:[],provides:{'share-message':'share.cjs','meeting-source':'source.cjs','crash-source':'crash.cjs'}}));
  fs.rmSync(path.join(linker,'feature.cjs'));fs.rmSync(path.join(linker,'offer.cjs'));
  fs.writeFileSync(path.join(linker,'share.cjs'),"module.exports={label:'В пинг',ready:()=>true,run:async()=>({text:'ok'})};");
  fs.writeFileSync(path.join(linker,'source.cjs'),"module.exports={name:'нет detect'};");
+ fs.writeFileSync(path.join(linker,'crash.cjs'),"module.exports={name:'Пинг-крэши',ready:()=>true,issues:async()=>({issues:[{id:'1',title:'boom'}]})};");
  registry.invalidate();
  const links=require('../src/features/app-links.cjs').create({settings:{extension_pinger:'true'}});
  assert(links.available('share-message').some(p=>p.id==='pinger'),'external provider is offered');
  const sources=require('../src/features/meeting-sources.cjs').create({settings:{extension_pinger:'true'}});
  assert.deepEqual(await sources.detect(),{active:false},'a broken external source is skipped');
+ const crashes=require('../src/features/crash-sources.cjs').create({settings:{extension_pinger:'true'}});
+ assert(crashes.list().some(x=>x.id==='pinger'),'an installed crash source is read by «Крэши»');
+ assert.equal((await crashes.issues('pinger',{})).issues[0].title,'boom');
  assert(registry.problems().some(p=>p.id==='pinger'&&/meeting source/.test(p.message)));
  fs.rmSync(linker,{recursive:true});registry.invalidate();
  assert(!require('../src/features/app-links.cjs').create({settings:{extension_pinger:'true'}}).available('share-message').some(p=>p.id==='pinger'));
