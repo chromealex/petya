@@ -1,0 +1,16 @@
+{
+  "id": "pull-requests",
+  "name": "Pull requests",
+  "description": "GitHub PR в чате: что ждёт вашего ревью, ваши PR, резюме PR по диффу, статус проверок, комментарий после подтверждения",
+  "category": "dev",
+  "setting": "extension_pull-requests",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["pr-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "prCard": "renderPrCard"
+  }
+}
