@@ -21,6 +21,7 @@ async function connectCloudService(name, status, button, form) {
         const id=await new Promise(resolve=>{apply.onclick=()=>resolve(select.value);cancel.onclick=()=>{cancelled=true;resolve(null);};});select.remove();apply.remove();if(!id)break;site=state.sites.find(s=>s.id===id);
       }
       await window.petya.serviceOAuthClaim(name,site.id);
+      document.dispatchEvent(new CustomEvent('petya-connection-checked',{detail:{service:name,ok:true}}));
       if(form.elements[name+'Token']){form.elements[name+'Token'].value='';form.elements['clear_'+name+'Token'].checked=false;}
       status.textContent='Подключено · '+site.name+(name==='asana'?'. Откройте раздел Asana для работы с задачами.':name==='slack'?'. Укажите каналы или маску jw-* в настройках.':'. Доступны страницы, выбранные при входе.');
       status.className='connection-status connected';return;
@@ -126,6 +127,7 @@ function setupConnections() {
       try {
         const result = await window.petya.connectService(def.id, input);
         if (def.id === 'jira' && result.ready) await refreshJiraChoices();
+        if (!result.reason) document.dispatchEvent(new CustomEvent('petya-connection-checked',{detail:{service:def.id,ok:!!result.ready||def.id==='slack'}}));
         // Do not overwrite unsaved fields from another service.
         for (const key of def.fields) if (key.endsWith('Token')) { form.elements[key].value = ''; form.elements['clear_' + key].checked = false; }
         status.textContent = result.reason ? result.message : (result.ready ? 'Подключено · ' : 'Требуется настройка · ') + result.message;

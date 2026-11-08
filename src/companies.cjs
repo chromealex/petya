@@ -17,6 +17,9 @@ class Companies{
  unique(name,except){if(this.state.companies.some(c=>c.id!==except&&c.name.toLocaleLowerCase()===name.toLocaleLowerCase()))throw Error('Компания с таким названием уже есть.');}
  create(value,settings={}){const name=this.name(value);this.unique(name);if(this.state.companies.length>=50)throw Error('Можно добавить до 50 компаний.');const id=randomUUID();const dir=path.join(this.root,'companies',id);fs.mkdirSync(dir,{recursive:true,mode:0o700});const local=Object.fromEntries(localKeys.filter(k=>typeof settings[k]==='string').map(k=>[k,settings[k]]));fs.writeFileSync(path.join(dir,'settings.json'),JSON.stringify(local),{mode:0o600});this.save({...this.state,companies:[...this.state.companies,{id,name}]});return {id,name};}
  rename(id,value){this.get(id);const name=this.name(value);this.unique(name,id);this.save({...this.state,companies:this.state.companies.map(c=>c.id===id?{...c,name}:c)});}
+ // Workspace icon shown on the company tab; a small PNG data URL from the connected Slack.
+ setIcon(id,{icon='',source='',at=Date.now()}={}){this.get(id);if(icon&&(typeof icon!=='string'||!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(icon)||icon.length>60000))throw Error('Некорректная иконка компании.');
+  this.save({...this.state,companies:this.state.companies.map(c=>{if(c.id!==id)return c;const next={...c,iconAt:at};if(icon){next.icon=icon;next.iconSource=source||'slack';}else{delete next.icon;delete next.iconSource;}return next;})});}
  select(id){this.get(id);this.save({...this.state,activeId:id});}
 }
 module.exports={Companies};
