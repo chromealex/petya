@@ -29,6 +29,7 @@ contextBridge.exposeInMainWorld('petyaEvents', {
   onDecompose: callback => ipcRenderer.on('decompose-progress', (_event, state) => callback(state)),
   onOllamaInstall: callback => ipcRenderer.on('ollama-install-progress', (_event, state) => callback(state)),
   onWindowShown: callback => ipcRenderer.on('window-shown', () => callback()),
+  onOnboardingGuess: callback => ipcRenderer.on('onboarding-guess', (_event, state) => callback(state)),
   onBackground: callback => ipcRenderer.on('background-status', (_event, state) => callback(state)),
   onNavigate: callback => ipcRenderer.on('navigate', (_event, page) => {if(['sources','team','history','settings'].includes(page))callback(page);}),
   onToggle: callback => ipcRenderer.on('toggle-listening', () => callback()),

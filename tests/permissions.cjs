@@ -18,5 +18,26 @@ const { permissions } = require('../src/permissions.cjs');
   await assert.rejects(mac.request('camera'), /Неизвестное/);
   state = 'denied'; await permissions({ platform: 'win32', systemPreferences, shell }).request('microphone');
   assert.equal(opened.pop(), 'ms-settings:privacy-microphone'); assert.equal(asks, 1);
-  console.log('Permissions: read-only status, grants, denied/restricted access and OS settings passed');
+  // Accessibility on macOS: the system prompt first, the Privacy section on the next request.
+  let trusted = false, prompts = 0;
+  const ax = permissions({ platform: 'darwin', shell, systemPreferences: { getMediaAccessStatus: () => 'granted', isTrustedAccessibilityClient: prompt => { if (prompt) prompts++; return trusted; } } });
+  const axItem = () => ax.status().items.find(i => i.id === 'accessibility');
+  assert.equal(axItem().state, 'not-determined'); assert.equal(axItem().needed, true); assert.equal(prompts, 0);
+  await ax.request('accessibility'); assert.equal(prompts, 1); assert.equal(opened.length, 0); assert.equal(axItem().state, 'denied');
+  await ax.request('accessibility'); assert.ok(opened.pop().endsWith('Privacy_Accessibility'));
+  trusted = true; assert.equal(axItem().state, 'granted');
+  assert.equal(ax.status().items.find(i => i.id === 'screen').restart, true, 'macOS applies screen recording after a restart');
+  // Windows gates only the microphone; Linux gates nothing but the screen on Wayland, where the system asks itself.
+  const win = permissions({ platform: 'win32', systemPreferences: { getMediaAccessStatus: () => 'granted' }, shell }).status().items;
+  assert.deepEqual(win.map(i => [i.id, i.needed]), [['microphone', true], ['screen', false], ['accessibility', false]]);
+  const spawned = [];
+  const spawn = (command, args) => { spawned.push(command + ' ' + args.join(' ')); return { on() {}, unref() {} }; };
+  const x11 = permissions({ platform: 'linux', systemPreferences, shell, spawn, env: { XDG_SESSION_TYPE: 'x11' } }).status().items;
+  assert.ok(x11.every(i => i.state === 'granted' && !i.needed));
+  const wayland = permissions({ platform: 'linux', systemPreferences, shell, spawn, env: { XDG_SESSION_TYPE: 'wayland' } });
+  assert.deepEqual(wayland.status().items.find(i => i.id === 'screen'), { id: 'screen', state: 'system', needed: true, restart: false, settings: true });
+  await wayland.request('screen'); assert.equal(spawned.pop(), 'gnome-control-center privacy');
+  const broken = permissions({ platform: 'linux', systemPreferences, shell, spawn: () => { throw Error('missing'); }, env: { WAYLAND_DISPLAY: 'wayland-0' } });
+  await assert.rejects(broken.request('screen'), /настройках системы/);
+  console.log('Permissions: read-only status, grants, denied/restricted access, accessibility, Windows/Linux and OS settings passed');
 })().catch(error => { console.error(error); process.exitCode = 1; });
