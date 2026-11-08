@@ -24,7 +24,17 @@ const own={
  localization:['что не переведено в локализации','проверь локализацию','недостающие ключи на немецкий'],
  zoom:['запиши встречу в Zoom','покажи мои встречи в зуме','что было на созвоне в Zoom'],
  'google-meet':['созвон в Meet','запиши созвон в мите','поставь созвон в гугл мит с Олегом','запиши встречу в Google Meet','подключись к созвону через Meet'],
- teams:['встреча в Teams','запиши встречу в тимсе','поставь встречу в тимс на завтра','что было на звонке в Microsoft Teams']
+ teams:['встреча в Teams','запиши встречу в тимсе','поставь встречу в тимс на завтра','что было на звонке в Microsoft Teams'],
+ discord:['что нового в дискорде','баги из дискорда за неделю','покажи частые вопросы игроков','отправь в Discord: сервер перезапустится в 18:00'],
+ support:['что жалуются в поддержку','тикеты про оплату за неделю','ответь на тикет 1234','покажи тикеты в Zendesk'],
+ 'sprint-planning':['спланируй спринт','что влезет в следующий спринт','какая у нас скорость','кто перегружен в спринте','velocity команды'],
+ standup:['собери стендап','что вчера делала команда','у кого блокеры','настрой стендап на 10:30'],
+ 'ad-revenue':['сколько заработали на рекламе вчера','eCPM по сетям','какой формат приносит больше','упала выручка с rewarded','выручка с рекламы за неделю'],
+ competitors:['что нового у конкурентов','добавь в конкуренты Clash of Clans','у кого вырос рейтинг','какие механики добавили в обновлениях'],
+ 'who-knows':['кто разбирается в сетевом коде','к кому идти по магазину','кто писал PlayerController','кто последний трогал инвентарь','кого спросить про матчмейкинг'],
+ glossary:['собери глоссарий проекта','проверь термины в локализации','добавь в глоссарий сундук','что у нас значит мана','покажи глоссарий'],
+ reminders:['какие у меня напоминания','поставь напоминание на завтра','покажи мои напоминания'],
+ journal:['что я сегодня сделал','итоги недели','план на завтра','запиши в дневник: идея с картой']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -42,11 +52,33 @@ const not={
  'build-size':['размер команды','размер экрана','сборка упала'],
  localization:['переведи эту фразу','перевод денег','перевести задачу в другой статус'],
  'regex-cron':['регулярно созваниваемся','регулярные встречи по понедельникам'],
+ // «Напомни …» is never an offer (Petya's own recurring commands and dialogue answer it); a reminder to a colleague,
+ // birthdays and meetings are neighbours.
+ reminders:['напомни в 16:00 позвонить','напомни Ивану про отчёт','дни рождения','поставь встречу в 16:00','проверяй почту каждые 5 минут','напомни, что мы обсуждали'],
+ // A game devlog, log files and changelogs are not the personal journal; nor are meeting or sprint results.
+ journal:['дневник разработки','журнал логов','журнал изменений','итоги встречи','итоги спринта','план релиза','что я сделал не так'],
  // Zoom by name only: zooming a picture or the screen is not the meeting app, and meetings in general are Petya's.
  zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи','созвон в Meet','встреча в тимсе'],
  // Meet and Teams by name only: «meeting», «митинг», «митап», meetings in general, the calendar and Zoom are not them.
  'google-meet':['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','what is the meeting about','meetup в пятницу','что у меня сегодня в календаре','встреча в Teams','тимлид на встрече'],
- teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке']
+ teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке'],
+ // Discord by name: the user's own client, coding with discord.js, other messengers and support tickets are not it.
+ discord:['дискорд не работает','как подключить discord.js','напиши бота для дискорда','что нового в слаке','что пишут в телеграме','тикеты про оплату','что жалуются в поддержку'],
+ // Player tickets: vendors' support, Petya's help, cheering up, store reviews and tracker tickets are not it.
+ support:['поддержка Unity','техподдержка Пети','отзывы в сторах','поддержи меня','создай тикет в Jira','частые вопросы игроков в дискорде','поддерживает ли Unity webp'],
+ // Sprint planning: running sprints, weekend plans, a task's work plan and team workload right now are not it.
+ 'sprint-planning':['спринт в беге','планы на выходные','план работ по задаче','загрузка команды','кто перегружен','какая скорость интернета'],
+ // Standup: comedy, getting up, meeting summaries and the meeting in the calendar are not it.
+ standup:['стенд-ап комедия','встань','сводка встречи','во сколько стендап','сходим на стендап шоу'],
+ teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке'],
+ // Ad revenue is earnings from ads shown in our games: buying users, turning ads off and purchases are not it.
+ 'ad-revenue':['реклама игры','маркетинговые кампании','запусти рекламу в TikTok','сколько потратили на рекламу','отключи рекламу','покупки в приложении','выручка от покупок в приложении','падение продаж за неделю'],
+ // Competitor games: a contest, a chess opponent, devices and our own store rating are not it.
+ competitors:['конкурс','конкурс рисунков','конкурент в шахматах','сравни iPad и iPhone','отзывы в App Store за неделю','конкурентные преимущества'],
+ // A person search only: factual «кто знает» questions, «кто ты», roles and the team directory are not it.
+ 'who-knows':['кто знает, когда релиз','кто ты','знаешь ли ты, что такое мана','заполни команду из Jira','кто тестировщик в команде','кто написал Войну и мир','кто знает где ключи'],
+ // The project's own words only: general definitions, other products' glossaries and localization files as such are not it.
+ glossary:['что такое REST','глоссарий Unity','проверь локализацию','что не переведено в локализации','купи билет в терминале','термины договора аренды']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -65,7 +97,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','reminders','journal'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

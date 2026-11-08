@@ -1,0 +1,22 @@
+{
+  "id": "reminders",
+  "name": "Напоминания",
+  "description": "Напоминания по времени и по событию: закроют задачу Jira, коллега появится в Slack, начнётся встреча, соберётся билд — уведомлением и сообщением в чате",
+  "category": "personal",
+  "icon": "icon.svg",
+  "examples": ["Напомни в 16:00 позвонить в банк","Напомни каждый понедельник в 10 про планёрку","Напомни, когда закроют BW-123","Какие у меня напоминания?"],
+  "setting": "extension_reminders",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["reminder-cards.js", "message-format.js"],
+    ["reminder-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "reminderCard": "renderReminderCard"
+  },
+  "provides": {
+    "reminder-trigger": ["trigger-jira.cjs", "trigger-slack.cjs", "trigger-calendar.cjs", "trigger-ci.cjs"],
+    "journal-source": "journal-source.cjs"
+  }
+}

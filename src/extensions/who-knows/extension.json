@@ -1,0 +1,18 @@
+{
+  "id": "who-knows",
+  "name": "Кто знает",
+  "description": "Кто в команде разбирается в теме: по истории Git, задачам Jira, переписке Slack и встречам — с основаниями и ссылками",
+  "category": "team",
+  "icon": "icon.svg",
+  "examples": ["Кто разбирается в сетевом коде?","К кому идти по магазину?","Кто писал PlayerController?","Кто последний трогал инвентарь?"],
+  "uses": ["share-message"],
+  "setting": "extension_who-knows",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["who-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "whoKnows": "renderWhoKnows"
+  }
+}

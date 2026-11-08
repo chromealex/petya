@@ -1,0 +1,22 @@
+{
+  "id": "discord",
+  "name": "Discord",
+  "description": "Сообщество игры в Discord: что пишут игроки, частые вопросы с ответами по закрепу, баги — в задачу; сообщения в канал после вашего подтверждения",
+  "category": "comms",
+  "icon": "icon.svg",
+  "examples": ["Что нового в дискорде?","Частые вопросы игроков","Баги из дискорда за неделю","Отправь в Discord в #announcements: сервер перезапустится в 18:00"],
+  "connects": "Discord (бот)",
+  "uses": ["task-tracker"],
+  "provides": {"share-message": "share-message.cjs"},
+  "setting": "extension_discord",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["discord-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "discordDigest": "renderDiscordDigest",
+    "discordCompose": "renderDiscordCompose"
+  }
+}

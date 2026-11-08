@@ -14,10 +14,9 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const KINDS=['video-meeting','task-tracker','share-message','code-fix','meeting-recording'];
-// Capabilities declared the same way but served by their own registry: meeting sources
-// (src/features/meeting-sources.cjs) are polled by the meeting recorder and crash sources
-// (src/features/crash-sources.cjs) are read by «Крэши»; neither is offered as a card button.
-const REGISTRIES=['meeting-source','crash-source'];
+// Capabilities served by their own registries (sources polled or read by their apps), not offered as card buttons:
+// see each registry module (meeting-sources, crash-sources, metrics/support/ad sources in their apps).
+const REGISTRIES=['meeting-source','support-source','ad-source','reminder-trigger','journal-source','crash-source'];
 
 // Every `provides` entry of every extension: {kind, extension, setting, name, file, provider}. Unknown kinds and
 // files outside the extension's own directory are refused. Without `dir`, every live extension of the shared

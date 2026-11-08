@@ -1,0 +1,19 @@
+{
+  "id": "competitors",
+  "name": "Конкуренты",
+  "description": "Игры-конкуренты проекта: новые версии и что в них добавили (цитатами из описаний), рейтинг, размер и цена в App Store, сравнение с нашими играми",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Что нового у конкурентов?","Добавь в конкуренты Clash of Clans","У кого вырос рейтинг?","Какие механики добавили в обновлениях?"],
+  "setting": "extension_competitors",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["competitors-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"],
+    ["competitors-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "competitors": "renderCompetitors"
+  }
+}

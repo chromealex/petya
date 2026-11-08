@@ -1,0 +1,21 @@
+{
+  "id": "journal",
+  "name": "Дневник дня",
+  "description": "Что сделано за день и неделю по данным Пети — чаты, задачи Jira, коммиты, встречи, напоминания — план на завтра и личные заметки; всё остаётся на компьютере",
+  "category": "personal",
+  "icon": "icon.svg",
+  "examples": ["Что я сегодня сделал?","Итоги недели","План на завтра","Запиши в дневник: договорились с дизайнером о новом меню"],
+  "setting": "extension_journal",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["journal-cards.js", "message-format.js"],
+    ["journal-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "journalCard": "renderJournalCard"
+  },
+  "provides": {
+    "journal-source": ["source-chats.cjs", "source-jira.cjs", "source-commits.cjs", "source-meetings.cjs"]
+  }
+}
