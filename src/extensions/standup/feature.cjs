@@ -25,6 +25,8 @@ function kind(text){
  const t=clean(text);if(!t)return null;
  if(NOT.test(t))return null;
  if(/^(?:а\s+)?(?:что такое|зачем нуж|как (?:провести|проводить|вести))/iu.test(t))return null;
+ // The user's own update for the meeting («подготовь реплику на дейли») is the «standup» writing skill, not the team summary.
+ if(/реплик|(?:мой|мою|моё|мое)\s+(?:апдейт|update|стендап|отчет)|за\s+меня|мне\s+(?:на|для)\s+|что\s+(?:мне\s+)?сказать|скилл/iu.test(t))return null;
  if(YESTERDAY.test(t))return 'yesterday';
  if(BLOCKERS.test(t))return 'blockers';
  if(!WORD.test(t))return null;

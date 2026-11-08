@@ -51,6 +51,7 @@ const not={
  'sprint-planning':['спринт в беге','планы на выходные','план работ по задаче','загрузка команды','кто перегружен','какая скорость интернета'],
  // Standup: comedy, getting up, meeting summaries and the meeting in the calendar are not it.
  standup:['стенд-ап комедия','встань','сводка встречи','во сколько стендап','сходим на стендап шоу'],
+ teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
