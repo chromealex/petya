@@ -86,13 +86,13 @@ function askWhat(s,command,time){
  });
 }
 async function createTurn(s,command,{rest,original}){
- // Location is not known to Petya: say so and offer a time instead.
+ const triggers=triggersFor(s),event=triggers.match(rest);
+ if(event)return eventTurn(s,command,rest,event,original);
+ // Location is not known to Petya unless a trigger (e.g. Petya's mobile app) matched above: say so and offer a time.
  if(LOCATION.test(rest)){
   const what=subject(rest.replace(LOCATION,''))||'то, о чём просили';
   return askTime(s,command,what,{text:'Напомнить по месту — «когда приду домой или на работу» — не могу: Петя не знает, где вы находитесь. Могу напомнить в определённое время. Когда?'});
  }
- const triggers=triggersFor(s),event=triggers.match(rest);
- if(event)return eventTurn(s,command,rest,event,original);
  const t=when.parse(rest,now(s));
  if(!t){
   // No time and no event: «напомни купить хлеб» asks when; «напомни, когда у нас релиз» is a question to Petya.
