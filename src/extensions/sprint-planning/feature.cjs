@@ -28,6 +28,8 @@ function kind(text){
  const t=clean(text);
  if(!t)return null;
  if(APPLY.test(String(text||'').trim()))return 'apply';
+ // An explicit writing skill («/sprint-plan …», «скилл sprint-plan …») stays with the skill.
+ if(/^\/|(?:^|\s)скилл/iu.test(t))return null;
  if(/^(?:а\s+)?(?:что такое|зачем нуж|как (?:считать|работает|посчитать))/iu.test(t)&&!/у нас|нашей|наш/iu.test(t))return null;
  if(SPORT.test(t))return null;
  if(VELOCITY.test(t))return 'velocity';

@@ -22,7 +22,7 @@ const TIME=/(?:^|\s)(?:на|в|к)?\s*(\d{1,2})[:.](\d{2})(?=\s|$|[,.!?])|(?:^|\
 const YESTERDAY=/что\s+(?:вчера\s+)?(?:делал[аи]?|сделал[аи]?)\s+(?:вчера\s+)?(?:наша\s+|вся\s+)?команд\p{L}*|что\s+(?:наша\s+)?команда\s+(?:делала|сделала)\s+вчера|чем\s+(?:вчера\s+)?занимал\p{L}*\s+команд\p{L}*/iu;
 const BLOCKERS=/у\s+кого\s+(?:есть\s+|сейчас\s+)?блокер\p{L}*|какие\s+(?:у\s+(?:нас|команды)\s+)?(?:есть\s+)?блокер\p{L}*|блокер\p{L}*\s+(?:у\s+)?команд\p{L}*|кто\s+(?:сейчас\s+)?заблокирован/iu;
 function kind(text){
- const t=clean(text);if(!t)return null;
+ const t=clean(text);if(!t||t.startsWith('/'))return null;
  if(NOT.test(t))return null;
  if(/^(?:а\s+)?(?:что такое|зачем нуж|как (?:провести|проводить|вести))/iu.test(t))return null;
  // The user's own update for the meeting («подготовь реплику на дейли») is the «standup» writing skill, not the team summary.
