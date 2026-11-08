@@ -10,7 +10,7 @@
 .fs-head{display:flex;align-items:baseline;gap:8px;min-width:0}
 .fs-name{color:var(--ink);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .fs-loc{flex:none;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 7px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fs-path{font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;text-align:left}
+.fs-path{font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fs-snippet{margin:2px 0 0;font-size:13px;line-height:1.45;color:var(--ink);opacity:.9;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .fs-snippet mark{background:color-mix(in srgb,#e5ce8c 55%,transparent);color:inherit;border-radius:3px;padding:0 2px}
 .fs-foot{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--muted);margin-top:2px}
@@ -27,7 +27,7 @@
 .fs-intro{margin:0;font-size:13px;line-height:1.45;color:var(--ink)}
 .fs-folders{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
 .fs-folders li{display:flex;gap:8px;align-items:center;font-size:12px;padding:6px 8px;border:1px dashed var(--line);border-radius:8px;min-width:0}
-.fs-folder-path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1;direction:rtl;text-align:left}
+.fs-folder-path{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
 .fs-folder-tag{flex:none;font-size:11px;color:var(--muted)}
 .fs-state{margin:0;font-size:12px;color:var(--muted)}
 .fs-state:empty{display:none}

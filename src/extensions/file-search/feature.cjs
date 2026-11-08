@@ -9,6 +9,8 @@ const kit=require('../app-kit.cjs');
 const route=require('./route.cjs');
 const folders=require('./folders.cjs');
 const ID='file-search',BY='Поиск файлов',COLLECTION='files';
+// Paths in the card start with «~» instead of the home folder.
+const shown=p=>{const home=require('node:os').homedir();return home&&(p===home||p.startsWith(home+path.sep))?'~'+p.slice(home.length):p;};
 
 const deps={
  shell:()=>require('electron').shell,
@@ -32,7 +34,7 @@ function row(hit,kinds){
  const m=hit.meta||{},file=String(m.path||hit.id);
  let exists=true;try{exists=fs.statSync(file).isFile();}catch{exists=false;}
  const s=snippet(hit.text,hit.ranges);
- return {path:file,name:path.basename(file),dir:path.dirname(file),ext:path.extname(file).slice(1).toLowerCase(),kind:String(m.type||'text'),
+ return {path:file,name:path.basename(file),dir:path.dirname(file),shown:shown(path.dirname(file)),ext:path.extname(file).slice(1).toLowerCase(),kind:String(m.type||'text'),
   snippet:s.text,ranges:s.ranges,score:Math.round(Math.max(0,Math.min(1,hit.cosine??hit.score))*1000)/1000,
   boost:kinds.includes(m.type),mtime:Number(m.mtime)||0,size:Number(m.size)||0,loc:hit.loc||{},exists};
 }
@@ -40,7 +42,7 @@ function row(hit,kinds){
 async function setupCard(s,command,want,{status,roots}){
  const model=status.model,bytes=status.modelBytes;
  const card={state:'setup',query:want.query,request:command,model,bytes,modelInstalled:!!status.modelInstalled,ollama:!!status.ollama,
-  folders:roots.map(r=>({path:r.path,project:r.project||'',own:!!r.own})),platform:process.platform};
+  folders:roots.map(r=>({path:r.path,shown:shown(r.path),project:r.project||'',own:!!r.own})),platform:process.platform};
  const text=!roots.length?'Чтобы искать файлы по смыслу, добавьте папку: нажмите «Добавить папку» в карточке или в настройках приложения.'
   :'Поиск по смыслу работает по локальному индексу папок — он ещё не включён. Нажмите «'+(status.modelInstalled?'Включить индекс':'Скачать модель и включить')+'» в карточке: '+(status.modelInstalled?'':'скачаю модель '+model+' ('+Math.round(bytes/1e6)+' МБ), ')+'проиндексирую '+roots.length+' '+kit.plural(roots.length,['папку','папки','папок'])+' на этом компьютере, ничего никуда не отправляя.';
  return kit.reply(s,command,{by:BY,question:true,text,data:{fileSearch:card}});

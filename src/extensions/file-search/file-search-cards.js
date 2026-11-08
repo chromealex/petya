@@ -35,13 +35,23 @@
   box.append(track,k.el('span','fs-score-value',value.toLocaleString(locale(),{minimumFractionDigits:2,maximumFractionDigits:2})));
   return box;
  }
+ // The query in the header is the user's words: never translated.
+ function quiet(node){const sub=node.querySelector('.kit-subtitle');if(sub)sub.dataset.noI18n='';return node;}
+ // A long folder path keeps its start and its end: «~/Projects/…/Scripts/Analytics».
+ function shortPath(p,max=64){
+  const s=String(p||'');if(s.length<=max)return s;
+  const sep=s.includes('\\')&&!s.includes('/')?'\\':'/',parts=s.split(sep);
+  let head=parts.slice(0,2).join(sep),tail=parts.at(-1);
+  for(let i=parts.length-2;i>=2;i--){const next=parts[i]+sep+tail;if(head.length+next.length+3>max)break;tail=next;}
+  return head+sep+'…'+sep+tail;
+ }
  function action(k,label,run,cls=''){const b=k.el('button',cls,label);b.type='button';b.onclick=async e=>{e.stopPropagation();b.disabled=true;try{await run();}catch(err){k.toast(err.message,{error:true});}finally{b.disabled=false;}};return b;}
  function hitRow(k,c,h,top,index){
   const row=k.el('article','fs-hit'+(index===0?' best':''));row.dataset.path=h.path;
   const main=k.el('div','fs-main');
   const head=k.el('div','fs-head');const name=k.el('strong','fs-name',h.name);name.dataset.noI18n='';name.title=h.path;head.append(name);
   const loc=where(h);if(loc){const tag=k.el('span','fs-loc',loc);if(h.loc?.heading)tag.dataset.noI18n='';head.append(tag);}
-  const dir=k.el('div','fs-path selectable',h.dir);dir.dataset.noI18n='';dir.title=h.path;
+  const dir=k.el('div','fs-path selectable',shortPath(h.shown||h.dir));dir.dataset.noI18n='';dir.title=h.path;
   const foot=k.el('div','fs-foot');foot.append(score(k,h,top));
   if(h.mtime){const t=window.timeElement?window.timeElement(new Date(h.mtime)):k.el('time',null,new Date(h.mtime).toLocaleDateString(locale()));t.classList?.add('fs-time');const m=k.el('span','fs-modified','изменён ');m.append(t);foot.append(m);}
   const acts=k.el('div','fs-actions');
@@ -65,9 +75,8 @@
   if(!hits.length)body.append(k.el('p','fs-empty',c.building?'Пока ничего похожего: проиндексирована только часть файлов.':'Ничего похожего в проиндексированных папках. Опишите файл иначе — например, о чём он или что в нём есть.'));
   else body.append(k.collapse(hits.map((h,i)=>hitRow(k,c,h,top,i)),3,'Ещё файлы'));
   const status=c.building?{label:c.building.paused?'Индекс на паузе':'Индекс строится',tone:'progress'}:{label:'В индексе: '+(c.indexed||0).toLocaleString(locale()),tone:'done'};
-  const subtitle=k.el('span','fs-query','«'+c.query+'»');subtitle.dataset.noI18n='';
   const actions=hits.length?[]:[{label:'Повторить поиск',run:()=>k.ask(c.request||c.query,{send:true})}];
-  parent.append(k.card({app:'Поиск файлов',initial:'⌕',color:'#4f6a8a',key:'По смыслу',status,subtitle,body,actions,className:'fs-card'}));
+  parent.append(quiet(k.card({app:'Поиск файлов',initial:'⌕',color:'#4f6a8a',key:'По смыслу',status,subtitle:'«'+c.query+'»',body,actions,className:'fs-card'})));
  }
  // Index off or model missing: what will happen, then the user's explicit «включить».
  function setup(k,c,parent){
@@ -76,7 +85,7 @@
   body.append(intro);
   if(c.state!=='model'){
    const list=k.el('ul','fs-folders');
-   for(const f of c.folders||[]){const li=k.el('li');const p=k.el('span','fs-folder-path',f.path);p.dataset.noI18n='';li.append(p);if(f.project){const t=k.el('span','fs-folder-tag','проект '+f.project);t.dataset.noI18n='';li.append(t);}list.append(li);}
+   for(const f of c.folders||[]){const li=k.el('li');const p=k.el('span','fs-folder-path',shortPath(f.shown||f.path,70));p.title=f.path;p.dataset.noI18n='';li.append(p);if(f.project){const t=k.el('span','fs-folder-tag','проект '+f.project);t.dataset.noI18n='';li.append(t);}list.append(li);}
    if(!(c.folders||[]).length)list.append(k.el('li','fs-empty','Папок пока нет: добавьте папку проекта или любую другую.'));
    body.append(list);
   }
