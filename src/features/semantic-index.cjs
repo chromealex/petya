@@ -54,7 +54,7 @@ function create(s,{providers=load(),fetcher=(...a)=>fetch(...a),root=path.join(s
 
  // The embedding model download, its own notification card (stable id), cancellable.
  let model={phase:'idle',busy:false},controller=null,pending=null;
- const modelNotice=()=>({id:NOTICE+'-model',title:'Модель для поиска по смыслу',text:model.message||'',busy:model.busy,percent:model.total>0?Math.min(100,Math.floor(model.received*100/model.total)):undefined,kind:model.phase==='error'?'error':model.phase==='done'?'success':'model',version:model.phase});
+ const modelNotice=()=>{const percent=model.total>0?Math.min(100,Math.floor(model.received*100/model.total)):undefined;return {id:NOTICE+'-model',title:'Модель для поиска по смыслу',text:(model.message||'')+(model.busy&&Number.isFinite(percent)?' · '+percent+'%':''),busy:model.busy,percent,kind:model.phase==='error'?'error':model.phase==='done'?'success':'model',version:model.phase};};
  const update=(phase,message,extra={})=>{model={phase,message,busy:!['idle','done','error','cancelled'].includes(phase),...extra};send(modelNotice());};
  function prepareModel(){
   if(pending)return {started:false,busy:true};
