@@ -26,5 +26,7 @@ const write=async(root,file,text)=>{await fs.mkdir(path.dirname(path.join(root,f
  const none=path.join(base,'none');await write(none,'src/photo.png','photo');
  assert.equal(await projectIcon(none,native({})),'');
  assert.ok(score('a/AppIcon.appiconset/x.png')>score('favicon.png'));assert.equal(score('img/arrow_icon.png'),0);
- console.log('Project icon search: AppIcon, Android launcher, Unity player icon, skipped dependencies, shape filter passed');
+ // Game and UI art is not the app icon.
+ assert.equal(score('Assets/UI/coin_icon.png'),0);assert.equal(score('Assets/Art/logo_partner.png'),0);assert.equal(score('Assets/Art/UI/icon.png'),0);assert.equal(score('Assets/Icons/icon.png'),75);
+ console.log('Project icon search: game art skipped, AppIcon, Android launcher, Unity player icon, skipped dependencies, shape filter passed');
 }finally{await fs.rm(base,{recursive:true,force:true});}})().catch(e=>{console.error(e);process.exit(1);});

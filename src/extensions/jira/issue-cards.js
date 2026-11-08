@@ -44,7 +44,60 @@
    subtitle:compact?'':item.type,title:item.summary,presentation:key(item),
    chips:compact?[c.assignee]:[c.assignee,c.priority,c.due],side,className:'jira-card jira-issue-card'});
   if(select)node.querySelector('.kit-card-head').prepend(select);
+  if(!compact)expandable(node,item);
   return node;
+ }
+
+ // Expanded card: the whole task right here — description, comments, attachments — and edits in place
+ // (title, description, a new comment). Every change goes to Jira at once with «Отменить».
+ const when=v=>{const d=new Date(v);return Number.isFinite(d.getTime())?d.toLocaleString(window.petyaLocale||'ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';};
+ function paragraphs(k,text,className){const box=k.el('div',className);const parts=String(text||'').split(/\n{2,}/);for(const part of parts){const p=k.el('p');const lines=part.split('\n');lines.forEach((line,i)=>{if(i)p.append(document.createElement('br'));p.append(document.createTextNode(line));});box.append(p);}return box;}
+ function editor(k,{value,multiline,label,save,done}){
+  const box=k.el('div','jira-edit');const input=k.el(multiline?'textarea':'input');input.value=value||'';input.setAttribute('aria-label',label);if(multiline)input.rows=Math.min(18,Math.max(7,String(value||'').split('\n').length+3));
+  const ok=k.el('button','primary','Сохранить');ok.type='button';const cancel=k.el('button',null,'Отмена');cancel.type='button';const row=k.el('div','kit-actions');row.append(ok,cancel);box.append(input,row);
+  const finish=v=>{box.remove();done(v);};
+  ok.onclick=async()=>{if(input.value===value){finish(null);return;}ok.disabled=true;try{const r=await save(input.value);finish(r);}catch{ok.disabled=false;}};
+  cancel.onclick=()=>finish(null);
+  input.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape'){e.preventDefault();finish(null);}if(e.key==='Enter'&&(!multiline||e.metaKey||e.ctrlKey)){e.preventDefault();ok.click();}});
+  setTimeout(()=>{input.focus();if(!multiline)input.select();},0);return box;
+ }
+ function expandable(node,item){
+  const k=kit(),pk=key(item),main=node.querySelector(':scope>.kit-card-main')||node;
+  // Title: edit in place.
+  const title=main.querySelector('.kit-title');
+  if(title&&window.chatResultsApi){const pen=k.el('button','jira-title-edit');pen.type='button';pen.title='Изменить название';pen.setAttribute('aria-label','Изменить название '+item.key);pen.textContent='✎';
+   pen.onclick=e=>{e.stopPropagation();const box=editor(k,{value:item.summary,label:'Название '+item.key,save:v=>k.quick(pk,'summary',{value:v}),done:r=>{title.hidden=false;pen.hidden=false;if(r?.summary){item.summary=r.summary;title.firstChild.textContent=r.summary;}}});title.hidden=true;pen.hidden=true;title.after(box);};
+   title.append(pen);}
+  const toggle=k.el('button','jira-expand','Описание и комментарии');toggle.type='button';toggle.setAttribute('aria-expanded','false');
+  const panel=k.el('div','jira-details');panel.hidden=true;
+  toggle.onclick=async e=>{e.stopPropagation();const open=toggle.getAttribute('aria-expanded')!=='true';toggle.setAttribute('aria-expanded',String(open));panel.hidden=!open;toggle.textContent=open?'Свернуть':'Описание и комментарии';if(open&&!panel.dataset.loaded)await load();};
+  async function load(){
+   panel.replaceChildren(k.el('div','kit-meta','Загружаю из Jira…'));
+   let d;try{d=(await window.chatResultsApi.perform(pk,'full')).details;}catch(e){panel.replaceChildren(k.el('div','kit-meta error',e.message));return;}
+   panel.dataset.loaded='1';panel.replaceChildren();
+   const meta=[d.type,d.reporter&&'автор: '+d.reporter,d.created&&'создана '+when(d.created),d.updated&&'обновлена '+when(d.updated)].filter(Boolean).join(' · ');
+   if(meta)panel.append(k.el('div','kit-meta',meta));
+   if(d.parent)panel.append(k.el('div','kit-meta','Родитель: '+d.parent.key+(d.parent.summary?' · '+d.parent.summary:'')));
+   if(d.labels.length||d.components.length){const tags=k.el('div','kit-chips');for(const t of [...d.components,...d.labels])tags.append(k.chip({label:t}));panel.append(tags);}
+   // Description.
+   const section=k.el('section','jira-section'),head=k.el('div','jira-section-head');head.append(k.el('h5',null,'Описание'));
+   const editDesc=k.el('button','quiet','Изменить');editDesc.type='button';head.append(editDesc);section.append(head);
+   let body=d.description?paragraphs(k,d.description,'jira-description'):k.el('p','kit-meta','Описания нет.');section.append(body);
+   editDesc.onclick=()=>{editDesc.hidden=true;body.hidden=true;section.append(editor(k,{value:d.description,multiline:true,label:'Описание '+item.key,save:v=>k.quick(pk,'description',{value:v}),
+    done:r=>{editDesc.hidden=false;if(r&&'description' in r){d.description=r.description;const next=d.description?paragraphs(k,d.description,'jira-description'):k.el('p','kit-meta','Описания нет.');body.replaceWith(next);body=next;}body.hidden=false;}}));};
+   panel.append(section);
+   if(d.attachments.length){const files=k.el('section','jira-section');files.append(k.el('h5',null,'Вложения · '+d.attachments.length));const ul=k.el('ul','jira-files');for(const a of d.attachments)ul.append(k.el('li',null,a.name));files.append(ul);panel.append(files);}
+   // Comments.
+   const comments=k.el('section','jira-section');comments.append(k.el('h5',null,'Комментарии · '+d.commentTotal));
+   const list=k.el('ul','jira-comments');const add=c=>{const li=k.el('li');li.dataset.comment=c.id;const top=k.el('div','jira-comment-head');top.append(k.avatar(c.author,{size:20}),k.el('strong',null,c.author||'—'),k.el('span','kit-meta',when(c.created)));li.append(top,paragraphs(k,c.text,'jira-comment-text'));list.append(li);};
+   d.comments.forEach(add);if(!d.comments.length)list.append(k.el('li','kit-meta','Комментариев пока нет.'));
+   if(d.commentTotal>d.comments.length)comments.append(k.el('div','kit-meta','Показаны последние '+d.comments.length+'. Остальные — в Jira.'));
+   const write=k.el('textarea');write.rows=2;write.placeholder='Написать комментарий…';write.setAttribute('aria-label','Комментарий к '+item.key);write.addEventListener('keydown',e=>e.stopPropagation());
+   const send=k.el('button','primary','Отправить');send.type='button';send.disabled=true;write.oninput=()=>{send.disabled=!write.value.trim();};
+   send.onclick=async()=>{send.disabled=true;try{const r=await k.quick(pk,'comment',{value:write.value});if(r?.comment){list.querySelector(':scope>.kit-meta')?.remove();add(r.comment);write.value='';}}catch{}finally{send.disabled=!write.value.trim();}};
+   const box=k.el('div','jira-comment-new');box.append(write,send);comments.append(list,box);panel.append(comments);
+  }
+  const row=main.querySelector('.kit-chips');(row||main).after(toggle);toggle.after(panel);
  }
 
  window.renderJiraIssues=(parent,items)=>{

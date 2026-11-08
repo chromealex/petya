@@ -119,7 +119,7 @@ function taskEditor(task = { summary: '', description: '', assigneeId: '', depen
   const reason = document.createElement('p'); reason.className = 'small task-reason'; reason.textContent = task.assignmentReason || 'Выберите человека, который отвечает за эту работу.'; article.append(reason);
   const version = field('Версия (Fix Version)', 'select', 'task-version', ''); version.dataset.value = task.versionId || ''; fillVersion(version); version.onchange = () => { version.dataset.value = version.value; renderAssignSummary(); }; version.closest('label').classList.add('jira-only'); version.closest('label').hidden = planTarget === 'asana';
   field('Зависит от задач № (через запятую)', 'input', 'task-deps', (task.dependsOn || []).map(n => n + 1).join(', '));
-  const remove = document.createElement('button'); remove.textContent = 'Удалить из плана'; remove.className = 'quiet';
+  const remove = window.deleteButton('Удалить из плана');
   remove.onclick = () => {
     const index = [...$('batch-tasks').children].indexOf(article);
     const remaining = readTasks().filter((_, i) => i !== index).map(t => ({ ...t, dependsOn: t.dependsOn.filter(n => n !== index).map(n => n > index ? n - 1 : n) }));

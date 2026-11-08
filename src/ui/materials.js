@@ -15,7 +15,7 @@
    button.disabled=true;await window.petya.feature('materials','remove',request);notice(label+' удалено.');await refreshContexts();
   });
  }
- function deleteButton(request,label){const b=node('button','material-delete');b.type='button';b.title='Удалить';b.setAttribute('aria-label','Удалить');b.innerHTML=window.petyaIcons?.trash||'×';remove(b,request,label);return b;}
+ function deleteButton(request,label){const b=node('button','material-delete delete-button');b.type='button';b.title='Удалить';b.setAttribute('aria-label','Удалить');b.innerHTML=window.petyaIcons?.trash||'×';remove(b,request,label);return b;}
  // A record: heading, details, actions; the text is put in only when it is opened.
  function record({key,title,meta,status,percent,warning,text,ask,url,request,label}){
   const card=node('article','material-item');card.dataset.key=key;

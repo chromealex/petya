@@ -14,7 +14,7 @@
   head.textContent=(item.id==='base'?'':item.id+' · ')+item.role+(item.optional?' · необязательная':'');
   note.textContent=item.needed||(item.busy?'Скачиваю… '+(item.total?Math.min(99,Math.floor(item.received*100/item.total))+'%':''):item.installed?'Скачана и проверена · '+gb(item.bytes):item.error?'Ошибка: '+item.error:'Не скачана · '+gb(item.bytes));
   const actions=document.createElement('div');actions.className='actions';
-  if(!item.needed){if(item.busy)actions.append(button('Остановить',()=>call('cancel',item.id).then(()=>call('status'))));else if(item.installed)actions.append(button('Удалить',()=>call('remove',item.id),true));else actions.append(button('Скачать',()=>call('install',item.id)));}
+  if(!item.needed){if(item.busy)actions.append(button('Остановить',()=>call('cancel',item.id).then(()=>call('status'))));else if(item.installed)actions.append(window.asDeleteButton(button('Удалить',()=>call('remove',item.id),true),'Удалить модель'));else actions.append(button('Скачать',()=>call('install',item.id)));}
   box.append(head,note,actions);return box;
  }
  function draw(state){if(!state)return;title.textContent='Модели Пети · '+state.version;const ready=[state.base,...state.parts].filter(p=>!p.needed&&p.installed).map(p=>p.id==='base'?'база':p.id);status.hidden=true;status.classList.toggle('connected',ready.length>0);status.textContent=ready.length?'Скачано: '+ready.join(', '):'Не скачаны';list.replaceChildren(row(state.base),...state.parts.map(row));}

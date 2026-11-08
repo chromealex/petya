@@ -68,7 +68,7 @@
        for(const item of rows){
          const row=document.createElement('div'),open=document.createElement('button'),chat=document.createElement('small'),remove=document.createElement('button');
          open.textContent=item.title;chat.textContent=item.chat;open.append(chat);open.onclick=()=>{d.close();window.openPetyaAnswer(item.url);};
-         remove.textContent='×';remove.setAttribute('aria-label','Удалить из сохранённых');remove.onclick=async()=>{try{await window.petya.bookmarkAnswer(item.url,false);document.dispatchEvent(new Event('petya-bookmarks-updated'));await draw();}catch(e){notice(e.message,true);}};
+         window.asDeleteButton(remove,'Удалить из сохранённых');remove.onclick=async()=>{try{await window.petya.bookmarkAnswer(item.url,false);document.dispatchEvent(new Event('petya-bookmarks-updated'));await draw();}catch(e){notice(e.message,true);}};
          row.append(open,remove);list.append(row);
        }
      };

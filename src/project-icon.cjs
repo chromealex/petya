@@ -15,11 +15,11 @@ function score(relative){
  if(name==='ic_launcher-playstore.png')return 94;
  if(/^ic_launcher(_round)?\.(png|webp)$/.test(name))return /xxxhdpi/.test(dir)?90:/xxhdpi/.test(dir)?88:80;
  if(/^(app[-_]?icon|appicon)(@\d+x)?\.(png|jpe?g|webp)$/.test(name))return 85;
- if(/^(icon|logo)(@\d+x|[-_]?\d+)?\.(png|jpe?g|webp)$/.test(name))return 75;
+ if(/^(icon|logo)(@\d+x|[-_]?\d+)?\.(png|jpe?g|webp)$/.test(name))return /(^|\/)assets\/(?!icons?(\/|$))/.test(dir+'/')&&dir.split('/').length>2?0:75;
  if(/^(apple-touch-icon|android-chrome-\d+x\d+)\.png$/.test(name))return 70;
  if(/^favicon(-\d+x\d+)?\.png$/.test(name))return 55;
- if(/(^|[-_.])(app[-_]?icon|logo)([-_.]|$)/.test(name))return 45;
- if(/(^|[-_.])icon([-_.]|$)/.test(name)&&!/(arrow|close|menu|check|chevron|button|btn)/.test(name))return 30;
+ // Files that merely contain «icon» or «logo» («coin_icon.png», «logo_partner.png») are game or UI art, not the
+ // app icon: they are no longer used.
  return 0;
 }
 
@@ -38,8 +38,9 @@ async function unityIconGuid(root){
  try{const text=await fs.readFile(path.join(root,'ProjectSettings','ProjectSettings.asset'),'utf8');return text.match(/m_BuildTargetIcons:[\s\S]*?m_Icon:\s*\{fileID:\s*\d+,\s*guid:\s*([0-9a-f]{32})/)?.[1]||'';}catch{return '';}
 }
 
+async function isUnity(root){try{await fs.access(path.join(root,'ProjectSettings','ProjectSettings.asset'));return true;}catch{return false;}}
 async function search(root,nativeImage){
- const unityGuid=await unityIconGuid(root),found=[],queue=[[root,0]];let entries=0;
+ const unityGuid=await unityIconGuid(root),unity=await isUnity(root),found=[],queue=[[root,0]];let entries=0;
  while(queue.length&&entries<MAX_ENTRIES){
   const [dir,depth]=queue.shift();let items;try{items=await fs.readdir(dir,{withFileTypes:true});}catch{continue;}
   for(const item of items){
@@ -49,25 +50,42 @@ async function search(root,nativeImage){
    if(!item.isFile()||!IMAGE.test(item.name))continue;
    const relative=path.relative(root,full);let value=score(relative);
    if(unityGuid&&value<100){try{const meta=await fs.readFile(full+'.meta','utf8');if(meta.includes('guid: '+unityGuid))value=100;}catch{}}
+   // A Unity project: its player icon, or an app icon by its usual name; everything else is game art.
+   if(unity&&value<85)value=0;
    if(value)found.push({full,value,depth});
   }
  }
  found.sort((a,b)=>b.value-a.value||a.depth-b.depth);
- for(const candidate of found.slice(0,12)){const value=await load(candidate.full,root,nativeImage);if(value)return value;}
- return '';
+ for(const candidate of found.slice(0,12)){const value=await load(candidate.full,root,nativeImage);if(value)return {value,file:candidate.full};}
+ return null;
 }
 
-async function projectIcon(folder,nativeImage){
- if(!folder)return '';
- const saved=cache.get(folder);if(saved&&Date.now()-saved.at<TTL)return saved.value;
- let value='';
+// {value, file}: the icon and the file it came from (shown to the user, so a wrong pick is easy to spot).
+async function projectIconInfo(folder,nativeImage){
+ if(!folder)return {value:'',file:''};
+ const saved=cache.get(folder);if(saved&&Date.now()-saved.at<TTL)return saved.info;
+ let info={value:'',file:''};
  try{
   const root=await fs.realpath(folder);
-  quick:for(const dir of QUICK_DIRS)for(const name of QUICK_NAMES){value=await load(path.join(root,dir,name),root,nativeImage);if(value)break quick;}
-  if(!value)value=await search(root,nativeImage);
+  quick:for(const dir of QUICK_DIRS)for(const name of QUICK_NAMES){const file=path.join(root,dir,name),value=await load(file,root,nativeImage);if(value){info={value,file};break quick;}}
+  if(!info.value){const found=await search(root,nativeImage);if(found)info=found;}
  }catch{}
- cache.set(folder,{at:Date.now(),value});if(cache.size>100)cache.delete(cache.keys().next().value);return value;
+ cache.set(folder,{at:Date.now(),info});if(cache.size>100)cache.delete(cache.keys().next().value);return info;
 }
+async function projectIcon(folder,nativeImage){return (await projectIconInfo(folder,nativeImage)).value;}
 // First icon found among the project's context folders (own folders come before inherited ones).
-async function projectIconFrom(folders,nativeImage){for(const folder of folders||[]){const value=await projectIcon(folder,nativeImage);if(value)return value;}return '';}
-module.exports={projectIcon,projectIconFrom,score};
+async function projectIconFromInfo(folders,nativeImage){for(const folder of folders||[]){const info=await projectIconInfo(folder,nativeImage);if(info.value)return info;}return {value:'',file:''};}
+async function projectIconFrom(folders,nativeImage){return (await projectIconFromInfo(folders,nativeImage)).value;}
+// A picture the user chose for the project: any image inside one of its folders.
+async function chosenIcon(file,folders,nativeImage){
+ for(const folder of folders||[]){try{const root=await fs.realpath(folder);const value=await load(file,root,nativeImage);if(value)return value;}catch{}}
+ return '';
+}
+// The project's icon: off, the chosen picture, or the automatic one.
+async function iconFor(project,folders,nativeImage){
+ if(project.iconOff)return {value:'',file:'',mode:'none'};
+ if(project.iconFile){const value=await chosenIcon(project.iconFile,folders,nativeImage);if(value)return {value,file:project.iconFile,mode:'file'};}
+ return {...await projectIconFromInfo(folders,nativeImage),mode:'auto'};
+}
+function forget(){cache.clear();}
+module.exports={projectIcon,projectIconFrom,projectIconInfo,projectIconFromInfo,iconFor,chosenIcon,forget,score};

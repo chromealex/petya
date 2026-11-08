@@ -209,3 +209,43 @@ label.file-label:hover{background:#2e3533}
 .team-account dd.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;cursor:copy}
 .team-account-tools button{min-height:26px;padding:2px 8px;font-size:12px}
 .team-avatar.has-photo{padding:0;overflow:hidden;background:none}.team-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
+.project-icon-row{display:flex;align-items:center;gap:10px}.project-icon-preview{width:32px;height:32px;border-radius:7px;object-fit:cover}.project-icon-row .small{margin:0;overflow-wrap:anywhere}.project-icon-box .actions{margin-top:8px}
+.ux-company-row button.danger{color:#f0b4a8;border-color:#f0b4a840}.ux-company-row button.danger:hover{background:#f0b4a814;border-color:#f0b4a880}
+/* Rule: «Удалить» is a red trash-can icon button everywhere (AGENTS.md → «Interface rules»). */
+button.delete-button,.material-delete.delete-button{--delete:#ff7b6b;display:inline-grid;place-items:center;flex:0 0 auto;width:32px;height:32px;min-height:32px;padding:0!important;border:1px solid #ff7b6b40;border-radius:8px;background:#ff7b6b0d;color:var(--delete)}
+button.delete-button:hover,button.delete-button:focus-visible{border-color:#ff7b6b99;background:#ff7b6b1f;color:#ff9c8f}
+button.delete-button:disabled{opacity:.5}
+button.delete-button svg{width:16px;height:16px}
+.material-delete.delete-button.confirm{width:auto;padding:0 10px!important;color:#ffd7ce;background:#402b28;border-color:#8c5349}
+/* Team card: photo — one block like the service rows: picture, where it came from, actions; choices open below. */
+.team-photo{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid #ffffff12;border-radius:12px;background:#ffffff04}
+.team-photo-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.team-photo-head>div:not(.team-photo-tools){display:flex;flex-direction:column;gap:2px;min-width:120px;flex:1}
+.team-photo-head strong{font-size:14px}
+.team-photo-current{display:grid;place-items:center;flex:0 0 56px;width:56px;height:56px;border-radius:50%;overflow:hidden;background:#2b3431;font-size:18px;font-weight:600;box-shadow:0 0 0 2px #ffffff14}
+.team-photo-current img{width:100%;height:100%;object-fit:cover}
+.team-photo-tools{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}.team-photo-tools button{min-height:30px;padding:4px 12px;font-size:12px}
+.team-photo-choices{display:flex;gap:10px;flex-wrap:wrap;padding-top:10px;border-top:1px solid #ffffff0d}
+.team-photo-choice{display:flex;flex-direction:column;align-items:center;gap:6px;width:84px;padding:10px 6px 8px;border:1px solid #ffffff14;border-radius:12px;background:#ffffff05;font-size:11px;color:var(--muted);cursor:pointer}
+.team-photo-choice:hover{border-color:#ffffff30;color:var(--ink)}
+.team-photo-choice img{width:48px;height:48px;border-radius:50%;object-fit:cover}
+.team-photo-choice[aria-pressed="true"]{border-color:#d0f59699;background:#d0f59610;color:var(--green)}
+/* Team card: projects picker */
+.team-projects{position:relative;margin-top:6px}
+.team-project-field{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:40px;padding:4px 8px;border:1px solid #414847;border-radius:8px;background:#121616}
+.team-project-field:focus-within{border-color:var(--green)}
+.team-project-field input{flex:1;min-width:140px;border:0;background:transparent;padding:6px 2px;outline:none}
+.team-project-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 4px 2px 10px;border-radius:999px;background:#d0f59614;border:1px solid #d0f59640;color:var(--ink);font-size:13px}
+.team-project-chip button{width:20px;height:20px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted);line-height:1}
+.team-project-chip button:hover{color:var(--ink);background:#ffffff14}
+.team-project-options{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 4px);display:flex;flex-direction:column;padding:4px;border:1px solid var(--line);border-radius:10px;background:#232b27;box-shadow:0 12px 28px #0008;max-height:260px;overflow:auto}
+.team-project-options button{text-align:left;min-height:32px;padding:6px 10px;border:0;border-radius:6px;background:transparent;font-size:13px}
+.team-project-options button:hover,.team-project-options button:focus-visible{background:#ffffff10}
+.team-project-free{color:var(--green)}
+/* Team card: birthday */
+.team-birthday{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.team-birthday-row{display:flex;gap:6px;align-items:center}
+.team-birthday-row input[type=date]{flex:1;min-width:0;color-scheme:dark;cursor:pointer}
+.team-birthday-row button{min-height:32px;padding:3px 10px;font-size:12px}
+.team-birthday-note{color:var(--muted)}
+.team-account-main dl{cursor:default}

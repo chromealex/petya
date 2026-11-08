@@ -34,5 +34,11 @@ assert.equal(russian('Konstantin Shishlov'),'Константин Шишлов')
   const n=await photos.fill(ms,{nativeImage,get:async url=>{got.push(url);return Buffer.from('img');}});
   assert.equal(n,2);assert.deepEqual(got,['https://avatars.slack-edge.com/a.png','https://secure.gravatar.com/b.png']);assert.match(ms[0].photo,/^data:image\/png;base64,/);assert.equal(ms[2].photo,'data:image/png;base64,AA==');
   assert.equal(require('../src/team.cjs').validate([{name:'X',photo:ms[0].photo}])[0].photo,ms[0].photo);assert.equal(require('../src/team.cjs').validate([{name:'X',photo:'javascript:1'}])[0].photo,undefined);}
- console.log('Team people: one card across alphabets, Russian names, deactivated accounts dropped, service accounts kept, saved duplicates joined, photos passed');
+ // Birthdays plugin: once a day from 9:00, a note in the «Дни рождения» chat.
+ {const os=require('node:os'),fs=require('node:fs'),path=require('node:path');const root=fs.mkdtempSync(path.join(os.tmpdir(),'petya-bd-'));
+  const st={projects:[{id:'general',name:'Общее'}],topics:[]};const bs={smoke:true,dataRoot:root,settings:{teamMembers:JSON.stringify([{name:'Лев Силаев',birthday:'12.05'},{name:'Полина',birthday:'1995-05-13'}])},dialogue:{state:st,persist(){}}};
+  const {birthdays}=require('../src/extensions/birthdays/feature.cjs').setup(bs);
+  assert.equal(birthdays.run(new Date(2026,4,12,8)),null,'not before 9');const msg=birthdays.run(new Date(2026,4,12,9,5));assert.match(msg,/Сегодня день рождения: Лев Силаев/);assert.match(msg,/Завтра: Полина \(31\)/);
+  assert.equal(birthdays.run(new Date(2026,4,12,15)),null,'once a day');assert.equal(st.topics[0].title,'Дни рождения');fs.rmSync(root,{recursive:true,force:true});}
+ console.log('Team people: one card across alphabets, Russian names, deactivated accounts dropped, service accounts kept, saved duplicates joined, photos, birthdays passed');
 })().catch(e=>{console.error(e);process.exit(1);});

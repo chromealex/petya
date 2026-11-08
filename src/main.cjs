@@ -624,6 +624,11 @@ function setupHandlers() {
   // Company icon: Slack workspace (API, then the open Slack window), then Jira; refreshed daily or after connecting a service.
   handle('companyIconRefresh',async(force=false)=>{await require('./company-icon.cjs').refreshCompanyIcon({companies,companyId,force:!!force,settings,request,nativeImage:require('electron').nativeImage,download:async(url,options={})=>{const response=await fetch(url,{headers:options.headers,redirect:'error',signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('HTTP '+response.status);return new Uint8Array(await response.arrayBuffer());},
     getSources:options=>require('electron').desktopCapturer.getSources(options),screenAllowed:()=>process.platform!=='darwin'||require('electron').systemPreferences.getMediaAccessStatus('screen')==='granted',atlassianToken:credential=>atlassianOAuth.token(credential)});return {...companies.list(),activeId:companyId};});
+  handle('companyRemove',async id=>{const {t}=require('./interface-language.cjs'),c=companies.get(id);
+    const answer=await require('electron').dialog.showMessageBox(win,{type:'warning',buttons:[t('Удалить'),t('Отмена')],defaultId:1,cancelId:1,message:t('Удалить компанию «')+c.name+t('»?'),detail:t('Её чаты, подключения, команда, задачи и обучение переместятся в Корзину. Восстановить можно оттуда.')});
+    if(answer.response!==0)return {...companies.list(),activeId:companyId,cancelled:true};
+    const {dir}=companies.remove(id);try{await require('electron').shell.trashItem(dir);}catch{fs.rmSync(dir,{recursive:true,force:true});}
+    refreshTrayMenu();return {...companies.list(),activeId:companyId};});
   handle('companyRename',(id,name)=>{companies.rename(id,name);win.setTitle('Петя · '+companies.get(companyId).name);refreshTrayMenu();return {...companies.list(),activeId:companyId};});
   handle('companySwitch',async(id,raw)=>{
     if(raw && chatLocation.parse(raw)?.company!==id)throw Error('Некорректная ссылка на компанию.');
@@ -642,7 +647,10 @@ function setupHandlers() {
   });
   require('./telegram-setup.cjs')({get app(){return app;},get clientDefaults(){return clientDefaults;},get handle(){return handle;},get memory(){return memory;},get modules(){return modules;},get saveSettings(){return saveSettings;},get settings(){return settings;},get shell(){return shell;},get telegramSource(){return telegramSource;},set telegramSource(v){telegramSource=v;}});
   handle('teamJiraSearch',query=>require('./team-jira.cjs').search(workspace,query));
-  handle('teamList',()=>({members:team.members(settings),notes:settings.teamRoles}));
+  handle('teamPhotoOptions',accounts=>require('./team-photos.cjs').options(require('./team.cjs').accountsOf(accounts),{nativeImage:require('electron').nativeImage}));
+  handle('teamPhotoPick',async()=>{const picked=await require('electron').dialog.showOpenDialog(win,{title:require('./interface-language.cjs').t('Фото участника'),properties:['openFile'],filters:[{name:'Images',extensions:['png','jpg','jpeg','webp']}]});if(picked.canceled||!picked.filePaths[0])return null;return require('./team-photos.cjs').fromFile(require('electron').nativeImage,fs.readFileSync(picked.filePaths[0]));});
+  // aliasHint: how people usually call this person («Полина, Поля»), shown as the field's placeholder.
+  handle('teamList',()=>({members:team.members(settings).map(m=>({...m,aliasHint:require('./name-ru.cjs').hints(m.name).join(', ')})),notes:settings.teamRoles}));
   handle('teamSave',data=>{if(!data||typeof data.notes!=='string'||data.notes.length>2000)throw Error('Заметки о команде: не более 2000 символов.');saveSettings({teamMembers:JSON.stringify(team.validate(data.members)),teamRoles:data.notes});return {saved:true};});
   handle('settings', publicSettings);
   handle('saveSettings', input => saveSettings(input));
