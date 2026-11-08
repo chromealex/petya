@@ -7,6 +7,7 @@
   "setting": "extension_focus",
   "settings": false,
   "feature": "feature.cjs",
+  "provides": {"notification-policy": "policy.cjs"},
   "examples": ["фокус на 50 минут над картой уровня", "помодоро 4 раза", "перерыв 5", "сколько я сегодня сфокусировался"],
   "scripts": [
     ["focus-cards.js", "message-format.js"],

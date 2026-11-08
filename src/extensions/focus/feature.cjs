@@ -1,6 +1,6 @@
 // «Фокус»: focus sessions and pomodoro in the chat. One persistent timer (survives closing the window and a
 // restart), shown in Petya's top bar and in the notification center with pause / stop. During a focus session
-// Petya's own non-urgent system notifications are held back (hold.cjs) and shown as one summary afterwards;
+// Petya's own non-urgent system notifications are held back (policy.cjs, a notification policy) and shown as one summary afterwards;
 // urgent ones pass. With the «Календарь» app the next meeting is read: a session that would run into it gets a
 // length that fits, and a warning comes 5 minutes before. Everything is computed by code; the model is not used.
 // macOS Focus / Windows Focus assist are not switched: neither has a documented API an app may call without
@@ -94,15 +94,15 @@ function create(s,{now=()=>Date.now(),electron=null}={}){
   }
   if(a&&at-e.lastPublish>=30000)e.publish();
  };
- // Whether a system notification waits until the focus ends.
- e.gate=n=>{
-  const a=store.active;
-  if(!a||a.kind!=='focus'||hold.urgent(n))return false;
+ // Whether a system notification waits until the focus ends (asked by the notification policy core, which
+ // computes `urgent` once for every policy), and keeping one that does.
+ e.holds=n=>{const a=store.active;return !!a&&a.kind==='focus'&&!(typeof n?.urgent==='boolean'?n.urgent:hold.urgent(n));};
+ e.keep=n=>{
   store.held.push({title:String(n.title||'').slice(0,120),body:String(n.body||'').slice(0,250),at:now()});
   store.held=store.held.slice(-50);store.save();
   if(now()-e.lastPublish>1000)e.publish();
-  return true;
  };
+ e.gate=n=>{if(!e.holds(n))return false;e.keep(n);return true;};
  const act=fn=>(...args)=>{const r=fn(...args);e.handle(Array.isArray(r)?r:[]);if(!Array.isArray(r))e.publish();return {...e.status(),report:store.report(now())};};
  e.ipc={
   status:()=>({...e.status(),report:store.report(now()),meetings:e.meetings.list,jiraUrl:String(s.settings?.jiraUrl||'')}),
@@ -198,7 +198,7 @@ function setup(s){
  const electron=(()=>{try{return require('electron');}catch{return null;}})();
  const e=engine(s,{electron});
  e.electron=electron;
- hold.install(electron,n=>engine(s).gate(n));
+ // Holding notifications during a session: policy.cjs, asked by src/features/notification-policy.cjs.
  // A session that ended while Petya was closed is closed at its planned end.
  e.tick();
  if(!s.smoke||process.env.PETYA_FOCUS_TIMER==='1'){const timer=setInterval(()=>{try{engine(s).tick();}catch{/* next second */}},1000);timer.unref?.();}
