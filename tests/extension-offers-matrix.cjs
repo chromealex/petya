@@ -48,6 +48,8 @@ const own={
  reminders:['какие у меня напоминания','поставь напоминание на завтра','покажи мои напоминания'],
  journal:['что я сегодня сделал','итоги недели','план на завтра','запиши в дневник: идея с картой'],
  'code-review':['сделай код-ревью','проверь мои изменения','ревью ветки перед пулл-реквестом','посмотри мой дифф','отревьюй мой код'],
+ profiler:['разбери профайлер','что жрёт кадр','сравни профайл до и после','почему фризы','разбери gfxinfo'],
+ playtest:['разбери плейтест','где игрок застрял','моменты фрустрации в этом видео'],
  mentor:['что мне автоматизировать?','что я делаю руками','где я теряю время','покажи, что мне стоит автоматизировать']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
@@ -117,6 +119,10 @@ const not={
  converter:['конвертер валют','переведи текст','сожми ответ','переведи задачу в другой статус','переведи 100 долларов в рубли'],
  // Code review of my changes: the concept, store reviews, people's reviews, PR lists, Jira tasks on review and showing a diff are not it.
  'code-review':['что такое код-ревью','перфоманс-ревью','отзывы в App Store','какие PR ждут моего ревью','задачи на ревью в Jira','покажи diff','ревью сотрудника','годовое ревью','что в PR 123'],
+ // A user's or Slack profile and browser devtools are not a game capture.
+ profiler:['профиль пользователя','профайлер памяти браузера','профиль в Slack','открой мой профиль','разбери плейтест','тест упал'],
+ // Meeting videos are the meetings app's, GIFs the converter's, failing tests CI's.
+ playtest:['разбери видео созвона','сделай гифку','тест упал','разбери профайлер','почему фризы'],
  // The user's own habits: a mentor for a subject or a junior, the day's plan, the recurring list and automating a build are not it.
  mentor:['наставник по Unity','ментор для джуна','найди наставника','что мне делать сегодня','какие у меня повторы','что можно автоматизировать в сборке Unity','автоматизируй деплой','что у меня сегодня в календаре']
 };
@@ -137,7 +143,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
