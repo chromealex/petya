@@ -26,6 +26,7 @@ module.exports=[
  require('./features/chat-tasks.cjs'),
  require('./features/fresh-data.cjs'),
  require('./features/list-followup.cjs'),
+ require('./features/assignment.cjs'),
  require('./features/team-intent.cjs'),
  require('./features/skill-packages.cjs'),
  require('./features/skill-choice.cjs'),

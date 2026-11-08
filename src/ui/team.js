@@ -16,7 +16,7 @@
   const summary=document.createElement('summary');
   const heading=document.createElement('span');heading.className='team-member-heading';
   const title=document.createElement('strong'),subtitle=document.createElement('span');subtitle.className='team-member-subtitle';
-  const avatar=document.createElement('span');avatar.className='team-avatar';avatar.setAttribute('aria-hidden','true');heading.append(title,subtitle);summary.append(avatar,heading);
+  const avatar=document.createElement('span');avatar.className='team-avatar';avatar.setAttribute('aria-hidden','true');heading.append(title,subtitle);const load=document.createElement('span');load.className='team-load';load.hidden=true;summary.append(avatar,heading,load);
   const editor=document.createElement('div');editor.className='team-member-fields';
   const updateSummary=()=>{const value=key=>editor.querySelector('[data-field="'+key+'"]')?.value.trim()||'';title.textContent=value('name')||'Новый участник';avatar.textContent=(value('name').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('')||'+').toLocaleUpperCase();subtitle.textContent=[value('role'),value('projects')].filter(Boolean).join(' · ')||'Роль и проекты не указаны';};
   for(const [key,label,max] of fields){
@@ -58,12 +58,44 @@
   query.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();event.stopPropagation();find.click();}});
   unlink.onclick=()=>{revision++;id.value='';name.value='';results.replaceChildren();mark();sync();};const actions=document.createElement('div');actions.className='actions';actions.append(find,unlink);box.append(heading,actions,selected,message,results);editor.append(box);
  }
- async function load(force=false){const data=await window.petya.teamList();if(dirty&&!force){status.textContent='Команда обновлена. Обновите список перед сохранением ручных правок.';$('team-save').disabled=true;return;}list.replaceChildren();data.members.forEach(add);$('team-notes').value=data.notes;loaded=true;setDirty(false);$('team-save').disabled=false;$('team-add').disabled=false;status.textContent=data.members.length?'Участников: '+data.members.length:'Добавьте коллег, чтобы Петя знал, кто за что отвечает.';}
- document.querySelector('[data-view="team"]').addEventListener('click',run(async()=>{if(!loaded)await load();}));
+ // Load: open tasks per person from Jira and Asana, next to each name. Refreshed when the page opens.
+ const loadBar=document.createElement('p');loadBar.className='team-load-status small';loadBar.setAttribute('role','status');
+ const loadRefresh=document.createElement('button');loadRefresh.type='button';loadRefresh.className='quiet';loadRefresh.textContent='Обновить загрузку';
+ const loadHead=document.createElement('div');loadHead.className='team-load-head';loadHead.append(loadBar,loadRefresh);list.before(loadHead);
+ let loadData=null,loadBusy=false;
+ const taskWord=n=>n%10===1&&n%100!==11?'задача':n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'задачи':'задач';
+ window.paintTeamLoad=()=>{
+  const people=new Map((loadData?.people||[]).map(p=>[p.name,p])),max=Math.max(1,...(loadData?.people||[]).map(p=>p.total));
+  for(const card of list.children){
+   const badge=card.querySelector('.team-load'),name=card.querySelector('[data-field="name"]')?.value.trim(),p=people.get(name);
+   badge.replaceChildren();badge.hidden=!loadData||!name;if(badge.hidden)continue;
+   if(!p||!p.known){badge.classList.add('unknown');badge.textContent='—';badge.title=p?'Нет данных: не найден аккаунт в Jira или Asana':'Сохраните команду, чтобы увидеть загрузку';continue;}
+   badge.classList.remove('unknown');
+   const value=document.createElement('strong');value.textContent=p.total;const word=document.createElement('span');word.textContent=taskWord(p.total);
+   const bar=document.createElement('span');bar.className='team-load-bar';const fill=document.createElement('span');fill.style.width=Math.round(p.total/max*100)+'%';bar.append(fill);
+   badge.append(value,word,bar);
+   badge.title=[p.jira?'Jira: '+p.jira.open+' открыто'+(p.jira.inProgress?', в работе '+p.jira.inProgress:''):'',p.asana?'Asana: '+(p.asana.open>=100?'100+':p.asana.open)+' открыто':''].filter(Boolean).join('\n');
+   badge.setAttribute('aria-label','Открытых задач: '+p.total+(badge.title?'. '+badge.title.replace(/\n/g,'. '):''));
+  }
+ };
+ async function refreshLoad(force=false){
+  if(loadBusy)return;loadBusy=true;loadRefresh.disabled=true;loadBar.textContent='Считаю открытые задачи…';
+  try{
+   loadData=await window.petya.feature('assignment','workload',force);
+   const from=[loadData.sources.jira?'Jira':'',loadData.sources.asana?'Asana':''].filter(Boolean).join(' и ');
+   loadBar.textContent=!from?'Загрузка появится, когда подключите Jira или Asana.':!loadData.hasTeam?'Добавьте людей, чтобы видеть их загрузку.':'Загрузка по открытым задачам в '+from+' · '+new Date(loadData.at).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+(loadData.warnings.length?' · не всё прочитано: '+loadData.warnings.join('; '):'');
+   window.paintTeamLoad();
+  }catch(error){loadBar.textContent='Загрузку не удалось посчитать: '+error.message;}
+  finally{loadBusy=false;loadRefresh.disabled=false;}
+ }
+ loadRefresh.onclick=()=>refreshLoad(true);
+ document.addEventListener('petya-view',e=>{if(e.detail==='team')refreshLoad().catch(()=>{});});
+ async function load(force=false){const data=await window.petya.teamList();if(dirty&&!force){status.textContent='Команда обновлена. Обновите список перед сохранением ручных правок.';$('team-save').disabled=true;return;}list.replaceChildren();data.members.forEach(add);window.paintTeamLoad?.();$('team-notes').value=data.notes;loaded=true;setDirty(false);$('team-save').disabled=false;$('team-add').disabled=false;status.textContent=data.members.length?'Участников: '+data.members.length:'Добавьте коллег, чтобы Петя знал, кто за что отвечает.';}
+ document.querySelector('[data-view="team"]').addEventListener('click',run(async()=>{if(!loaded)await load();refreshLoad().catch(()=>{});}));
  $('team-add').onclick=()=>{if(list.children.length>=100){notice('Можно добавить до 100 участников.',true);return;}setDirty(true);add().querySelector('input').focus();status.textContent='Изменения не сохранены.';};
  form.addEventListener('input',()=>{setDirty(true);status.textContent='Изменения не сохранены.';});
  document.addEventListener('petya-team-updated',()=>{if(dirty){status.textContent='Петя обновил команду. У вас есть несохранённые правки — обновите список перед сохранением.';$('team-save').disabled=true;return;}load().catch(e=>notice(e.message,true));});
  const reload=document.createElement('button');reload.type='button';reload.textContent='Обновить список';reload.onclick=run(()=>load(true));$('team-add').after(reload);
  window.saveTeamNow=()=>new Promise(resolve=>{const done=()=>{document.removeEventListener('petya-team-saved',done);resolve();};document.addEventListener('petya-team-saved',done);form.requestSubmit();setTimeout(done,5000);});
- form.onsubmit=run(async()=>{const members=[...list.children].map(card=>Object.fromEntries([...card.querySelectorAll('[data-field]')].map(e=>[e.dataset.field,e.value])));$('team-save').disabled=true;try{await window.petya.teamSave({members,notes:$('team-notes').value});setDirty(false);status.textContent='Команда сохранена. Петя учитывает её в диалоге и при подготовке задач.';}finally{$('team-save').disabled=false;document.dispatchEvent(new Event('petya-team-saved'));}});
+ form.onsubmit=run(async()=>{const members=[...list.children].map(card=>Object.fromEntries([...card.querySelectorAll('[data-field]')].map(e=>[e.dataset.field,e.value])));$('team-save').disabled=true;try{await window.petya.teamSave({members,notes:$('team-notes').value});setDirty(false);refreshLoad(true).catch(()=>{});status.textContent='Команда сохранена. Петя учитывает её в диалоге и при подготовке задач.';}finally{$('team-save').disabled=false;document.dispatchEvent(new Event('petya-team-saved'));}});
 })();

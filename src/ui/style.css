@@ -123,6 +123,9 @@ footer{flex-wrap:wrap}
 .team-member details[open]>summary::before{transform:rotate(90deg)}
 .team-member summary:hover{background:#252d28}
 .team-member-heading{display:grid;gap:2px;min-width:0}
+.team-load{margin-left:auto;display:grid;grid-template-columns:auto auto;align-items:baseline;column-gap:4px;row-gap:4px;font-size:12px;color:var(--muted);min-width:72px;justify-items:end}.team-load strong{font-size:15px;font-weight:600;color:var(--text,#e1e6df);font-variant-numeric:tabular-nums}.team-load.unknown{display:block;opacity:.6}
+.team-load-bar{grid-column:1/-1;width:72px;height:3px;border-radius:3px;background:var(--line);overflow:hidden}.team-load-bar>span{display:block;height:100%;background:var(--green);border-radius:3px}
+.team-load-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 10px}.team-load-status{margin:0}
 .team-member-heading strong{font-size:14px;font-weight:600;overflow-wrap:anywhere}
 .team-member-subtitle{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .team-member-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;padding:16px;border-top:1px solid var(--line)}
