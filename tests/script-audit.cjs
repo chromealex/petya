@@ -38,6 +38,9 @@ assert.deepEqual(rules('os.remove(tmp)\n','x.py'),['info:remove:1']);
 // Large and malformed files: linear time, no hang on an unclosed quote (it used to take exponential time).
 for(const [text,file] of [['x = """'+'a\\n '.repeat(20000),'x.py'],['DELETE FROM t;\nSELECT * FROM a, b;\n'.repeat(50000),'m.sql'],['cur.execute("DELETE FROM t")\n'.repeat(60000),'x.py']]){
  const t=Date.now();const out=auditText(text,file);assert(Date.now()-t<3000,file+' took '+(Date.now()-t)+' ms');assert(out.length<=310,'findings per file are capped');}
+// Comments run nothing.
+assert.deepEqual(rules('// a link `summary.json -> ~/.ssh/id_rsa` must not be read\n# rm -rf /\n','x.js'),[]);
+assert.deepEqual(rules('# rm -rf $HOME\necho ok\n','x.sh'),[]);
 // Ordinary code raises nothing.
 for(const [text,file] of [['import json, sys\nprint(json.dumps({"ok": True}))\n','ok.py'],['echo "Готово"\nmkdir -p out\ncp report.md out/\n','ok.sh'],['SELECT id, name FROM users WHERE active = TRUE ORDER BY name LIMIT 50;\nDELETE FROM sessions WHERE expires_at < now();\nUPDATE users SET seen_at = now() WHERE id = 7;\n','ok.sql'],['const x = items.filter(i => i.ok);\nconsole.log(x.length);\n','ok.js']])
  assert.deepEqual(rules(text,file),[],file+' should be clean');

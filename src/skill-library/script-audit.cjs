@@ -53,6 +53,7 @@ const RULES={
 const kind=file=>/\.(?:sh|bash|zsh|bat|cmd|ps1)$/i.test(file)?'shell':/\.py$/i.test(file)?'python':/\.(?:js|mjs|cjs|ts)$/i.test(file)?'js':null;
 // Line numbers by binary search over precomputed line starts: linear in the file, not per finding.
 let lastText=null,lastStarts=null;
+const lineStart=(text,line)=>{lineOf(text,0);return lastStarts[line-1]||0;};
 function lineOf(text,index){
  let s=text===lastText?lastStarts:null;
  if(!s){s=[0];for(let i=text.indexOf('\n');i>=0;i=text.indexOf('\n',i+1))s.push(i+1);lastText=text;lastStarts=s;}
@@ -134,7 +135,10 @@ function auditText(text,file){
   while((m=g.exec(text))&&seen<5){seen++;const line=lineOf(text,m.index);
    // A softer rule does not repeat a stronger one on the same line.
    if(findings.some(f=>f.line===line&&f.file===file&&f.rule.split('-')[0]===rule.split('-')[0]))continue;
-   findings.push({file,line,severity,rule,text:why,snippet:text.split('\n')[line-1].trim().slice(0,140)});if(!m[0].length)g.lastIndex++;}
+   const source=text.slice(lineStart(text,line),text.indexOf('\n',m.index)<0?text.length:text.indexOf('\n',m.index)).trim();
+   // A comment runs nothing: «// защищает от ~/.ssh/id_rsa» is not a finding.
+   if(/^(?:\/\/|#(?!!)|\*|\/\*|--|REM\b|::)/i.test(source)){if(!m[0].length)g.lastIndex++;continue;}
+   findings.push({file,line,severity,rule,text:why,snippet:source.slice(0,140)});if(!m[0].length)g.lastIndex++;}
  }
  const statements=SQL.test(file)?sqlStatements(text,file):type?embeddedSql(text,file):[];
  for(const st of statements){findings.push(...sqlFindings(st));if(findings.length>300)break;}
