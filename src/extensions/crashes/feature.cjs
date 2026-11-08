@@ -78,10 +78,10 @@ async function crashesTurn(s,command,now=new Date()){
   rel={name:ask.release,versions:found.map(r=>r.version).slice(0,10),date:dates.length?new Date(Math.min(...dates)).toISOString():null};
   if(!period){
    const since=rel.date?Date.parse(rel.date):now.getTime()-30*DAY,days=Math.max(1,Math.ceil((now.getTime()-since)/DAY));
-   period=days<=90&&rel.date?{label:'после релиза '+ask.release,start:rel.date,end:now.toISOString(),days}:{label:'за 30 дней',statsPeriod:'30d',days:30};
+   period=days<=90&&rel.date?{label:'после релиза '+ask.release,start:rel.date,end:now.toISOString(),days,kind:'release'}:{label:'за 30 дней',statsPeriod:'30d',days:30,kind:'month'};
   }
  }
- period=period||{label:'за неделю',statsPeriod:'7d',days:7};
+ period=period||{label:'за неделю',statsPeriod:'7d',days:7,kind:'week'};
  const search=['is:unresolved',c.query,ask.platform?'os.name:'+ask.platform:'',rel?'release:['+rel.versions.map(v=>JSON.stringify(v)).join(',')+']':''].filter(Boolean).join(' ');
  const span={statsPeriod:period.statsPeriod,start:period.start,end:period.end};
  const raw=await sentry.issues(s,{projectIds,query:search,environment:ask.environment,...span});
@@ -103,7 +103,7 @@ async function crashesTurn(s,command,now=new Date()){
  const line=await common(s,top);
  const text=summary({rows,totals,label:period.label,release:rel?.name,platform:ask.platform,onlyNew:ask.onlyNew});
  const card={org:c.org,projects:picked.map(p=>p.slug),url:sentry.issuesUrl(s,{projectIds,query:search,environment:ask.environment,...span}),
-  period:{label:period.label,from:new Date(since).toISOString(),to:period.end||now.toISOString()},release:rel,platform:ask.platform,environment:ask.environment||'',onlyNew:ask.onlyNew,
+  period:{label:period.label,kind:period.kind,from:new Date(since).toISOString(),to:period.end||now.toISOString()},release:rel,platform:ask.platform,environment:ask.environment||'',onlyNew:ask.onlyNew,
   totals,crashFree:health,chart:{days,series:stack,from:dayKey(period.calendar?since+DAY/2:since),to:period.calendar?dayKey(Date.parse(period.end)-DAY/2):dayKey(now.getTime())},issues:top,common:line};
  return kit.reply(s,command,{by:BY,text,data:{crashCard:card},sources:[{title:'Sentry · '+c.org,url:card.url}]});
 }

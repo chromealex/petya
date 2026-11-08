@@ -34,17 +34,17 @@ const DAY=86400000;
 function period(text,now=new Date()){
  const t=String(text||'').toLowerCase();
  const n=t.match(/за\s+(?:последние\s+)?(\d{1,3})\s*(дн|день|дня|сут|час|недел|месяц)/u);
- if(/вчера/u.test(t)){const end=new Date(now);end.setHours(0,0,0,0);const start=new Date(end.getTime()-DAY);return {label:'вчера',start:start.toISOString(),end:end.toISOString(),days:1,calendar:true};}
+ if(/вчера/u.test(t)){const end=new Date(now);end.setHours(0,0,0,0);const start=new Date(end.getTime()-DAY);return {label:'вчера',start:start.toISOString(),end:end.toISOString(),days:1,calendar:true,kind:'yesterday'};}
  if(n){
   const v=Math.max(1,Number(n[1])),unit=n[2];
-  if(unit==='час')return {label:'за '+v+' ч',statsPeriod:Math.min(v,2160)+'h',days:Math.max(1,v/24)};
+  if(unit==='час')return {label:'за '+v+' ч',statsPeriod:Math.min(v,2160)+'h',days:Math.max(1,v/24),kind:'hours'};
   const days=Math.min(90,unit==='недел'?v*7:unit==='месяц'?v*30:v);
-  return {label:'за '+days+' '+require('../app-kit.cjs').plural(days,['день','дня','дней']),statsPeriod:days+'d',days};
+  return {label:'за '+days+' '+require('../app-kit.cjs').plural(days,['день','дня','дней']),statsPeriod:days+'d',days,kind:'days'};
  }
- if(/сегодня|за\s+сутки|за\s+день|за\s+24/u.test(t))return {label:'за сутки',statsPeriod:'24h',days:1};
- if(/(?:две|2)\s+недел/u.test(t))return {label:'за 14 дней',statsPeriod:'14d',days:14};
- if(/месяц/u.test(t))return {label:'за 30 дней',statsPeriod:'30d',days:30};
- if(/недел/u.test(t))return {label:'за неделю',statsPeriod:'7d',days:7};
+ if(/сегодня|за\s+сутки|за\s+день|за\s+24/u.test(t))return {label:'за сутки',statsPeriod:'24h',days:1,kind:'day'};
+ if(/(?:две|2)\s+недел/u.test(t))return {label:'за 14 дней',statsPeriod:'14d',days:14,kind:'days'};
+ if(/месяц/u.test(t))return {label:'за 30 дней',statsPeriod:'30d',days:30,kind:'month'};
+ if(/недел/u.test(t))return {label:'за неделю',statsPeriod:'7d',days:7,kind:'week'};
  return null;
 }
 const RELEASE=/(?:релиз\p{L}*|верси\p{L}*|release|апдейт\p{L}*|обновлени\p{L}*|билд\p{L}*|сборк\p{L}*)\s+(?:№\s*)?v?([\p{L}\p{N}_.@+-]*\d[\p{L}\p{N}_.@+-]*)/iu;

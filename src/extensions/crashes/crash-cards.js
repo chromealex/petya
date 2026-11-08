@@ -6,17 +6,21 @@
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('crash-cards.css',document.currentScript.src).href;document.head.append(style);
  const COLORS=['#f0b4a8','#e5ce8c','#86c2ff','#c9a8f0','#9dd9c9'],REST='#5d6863';
  const SVG='http://www.w3.org/2000/svg';
- const fmt=n=>Number(n||0).toLocaleString('ru-RU');
- const short=n=>n>=10000?(n/1000).toLocaleString('ru-RU',{maximumFractionDigits:0})+' тыс.':n>=1000?(n/1000).toLocaleString('ru-RU',{maximumFractionDigits:1})+' тыс.':fmt(n);
- const day=d=>new Date(d+'T12:00:00Z').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
- const date=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});};
- const pct=v=>(v*100).toLocaleString('ru-RU',{maximumFractionDigits:2})+'%';
+ // Numbers and dates follow the interface language.
+ const locale=()=>window.petyaLocale||'ru-RU';
+ const fmt=n=>Number(n||0).toLocaleString(locale());
+ const short=n=>n>=1000?new Intl.NumberFormat(locale(),{notation:'compact',maximumFractionDigits:n>=10000?0:1}).format(n):fmt(n);
+ const day=d=>new Date(d+'T12:00:00Z').toLocaleDateString(locale(),{day:'numeric',month:'short'});
+ const date=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleDateString(locale(),{day:'numeric',month:'short'});};
+ const pct=v=>(v*100).toLocaleString(locale(),{maximumFractionDigits:2})+'%';
+ // Service, user and model text (crash titles, culprits, slugs) is never machine-translated.
+ const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
  const plural=(n,[a,b,c])=>{const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
  const LEVEL={fatal:{label:'fatal',tone:'alert'},error:{label:'error',tone:'alert'},warning:{label:'warning',tone:'progress'},info:{label:'info',tone:''},debug:{label:'debug',tone:''}};
  const feature=(method,...args)=>window.petya.feature('crashes',method,...args);
  const open=url=>{const safe=window.resultKit.safeUrl(url);if(safe)window.open(safe,'_blank','noopener');};
 
- function tile(k,value,label,{alert=false,title}={}){const box=k.el('div','crash-tile'+(alert?' alert':''));box.append(k.el('span','crash-value',value),k.el('span','crash-label',label));if(title)box.title=title;return box;}
+ function tile(k,value,label,{alert=false,title,note}={}){const box=k.el('div','crash-tile'+(alert?' alert':''));box.append(k.el('span','crash-value',value),k.el('span','crash-label',label));if(note)box.append(k.el('span','crash-note',note));if(title)box.title=title;return box;}
 
  function sparkline(values){
   const w=96,h=26,max=Math.max(1,...values),step=values.length>1?w/(values.length-1):w;
@@ -48,7 +52,7 @@
   });
   const axis=k.el('div','crash-axis');axis.append(k.el('span',null,day(c.days[0])),k.el('span',null,day(c.days.at(-1))));
   const legend=k.el('ul','crash-legend');
-  for(const s of c.series){const li=k.el('li');const dot=k.el('i');dot.style.background=colorOf(s.id);li.append(dot,k.el('span',null,s.label));li.title=s.label;legend.append(li);}
+  for(const s of c.series){const li=k.el('li');const dot=k.el('i');dot.style.background=colorOf(s.id);li.append(dot,s.id==='rest'?k.el('span',null,'остальные'):raw(k.el('span',null,s.label)));li.title=s.label;legend.append(li);}
   box.append(head,bars,axis,tip,legend);return box;
  }
 
@@ -58,12 +62,17 @@
   const top=k.el('div','crash-line');
   const level=LEVEL[r.level]||{label:r.level||'error',tone:'alert'};
   top.append(k.chip({label:level.label,tone:level.tone,title:'Уровень в Sentry'}));
-  if(r.isNew)top.append(k.chip({label:'новый',tone:'progress',title:'Впервые '+date(r.firstSeen)+(ctx.release?' — после релиза '+ctx.release.name:' — в этом периоде')}));
-  const title=k.el(r.url?'a':'span','crash-title',r.title);if(r.url){title.href=k.safeUrl(r.url);title.target='_blank';title.rel='noopener';}title.title=r.title;top.append(title);
+  if(r.isNew){const fresh=k.chip({label:'новый',title:'Впервые '+date(r.firstSeen)+(ctx.release?' — после релиза '+ctx.release.name:' — в этом периоде')});fresh.classList.add('crash-new');top.append(fresh);}
+  const title=raw(k.el(r.url?'a':'span','crash-title',r.title));if(r.url){title.href=k.safeUrl(r.url);title.target='_blank';title.rel='noopener';}title.title=r.title;top.append(title);
   const meta=k.el('div','crash-meta');
-  if(r.culprit)meta.append(k.el('code','crash-culprit',r.culprit));
-  meta.append(k.el('span',null,[r.shortId,r.project!==ctx.single?r.project:'',r.unhandled?'необработан':'','впервые '+date(r.firstSeen),'последний '+date(r.lastSeen)].filter(Boolean).join(' · ')));
-  main.append(top,meta);
+  if(r.culprit)meta.append(raw(k.el('code','crash-culprit',r.culprit)));
+  const seen=k.el('span','crash-seen');
+  const ids=[r.shortId,r.project!==ctx.single?r.project:''].filter(Boolean).join(' · ');
+  if(ids)seen.append(raw(k.el('span',null,ids)),' · ');
+  if(r.unhandled)seen.append(k.el('span',null,'необработан'),' · ');
+  seen.append(date(r.firstSeen)+' — '+date(r.lastSeen));
+  seen.title='Впервые '+date(r.firstSeen)+', последний раз '+date(r.lastSeen);meta.append(seen);
+  main.append(meta);
   const numbers=k.el('div','crash-numbers');
   const ev=k.el('div','crash-count');ev.append(k.el('strong',null,short(r.events)),k.el('small',null,plural(r.events,['событие','события','событий'])));
   const us=k.el('div','crash-count users');us.append(k.el('strong',null,short(r.users)),k.el('small',null,plural(r.users,['польз.','польз.','польз.'])));
@@ -75,13 +84,15 @@
   const facts=fmt(r.events)+' '+plural(r.events,['событие','события','событий'])+', '+fmt(r.users)+' '+plural(r.users,['пользователь','пользователя','пользователей'])+' '+ctx.period;
   button('В задачу Jira',()=>k.ask('Создай задачу в Jira: Крэш '+(r.shortId?r.shortId+' ':'')+'— '+r.title+(r.culprit?' в '+r.culprit:'')+'. Sentry: '+(r.url||'')+' ('+facts+').',{send:true}));
   button('Отдать Программисту',()=>k.ask('Исправь баг в коде — крэш из Sentry: '+r.title+(r.culprit?' в '+r.culprit:'')+'. Ссылка: '+(r.url||'')+'. Это '+facts+(r.platform?', платформа '+r.platform:'')+'.',{send:true}));
+  // State lives in data-state, not in the button's text.
   const resolve=button('Решено',async b=>{
-   const result=await feature('resolve',r.id);
-   li.classList.add('resolved');b.textContent='Решено ✓';b.dataset.keep='1';
-   k.toast((result?.text||'Отмечено решённым')+': '+(r.title.length>50?r.title.slice(0,49)+'…':r.title),{timeout:10000,undo:async()=>{await feature('reopen',r.id);li.classList.remove('resolved');resolve.textContent='Решено';delete resolve.dataset.keep;resolve.disabled=false;k.toast('Снова открыто в Sentry');}});
+   await feature('resolve',r.id);
+   li.classList.add('resolved');b.dataset.state='resolved';b.textContent='Решено ✓';b.dataset.keep='1';
+   k.toast('Отмечено решённым в Sentry',{timeout:10000,undo:async()=>{await feature('reopen',r.id);li.classList.remove('resolved');resolve.dataset.state='open';resolve.textContent='Решено';delete resolve.dataset.keep;resolve.disabled=false;k.toast('Снова открыто в Sentry');}});
   },'resolve');
+  resolve.dataset.state='open';
   resolve.title='Отметить решённым в Sentry (можно отменить)';
-  li.append(main,numbers,actions);return li;
+  li.append(top,main,numbers,actions);return li;
  }
 
  window.renderCrashCard=(parent,c)=>{
@@ -90,23 +101,25 @@
   const body=k.el('div','crash-body');
   const t=c.totals||{issues:0,events:0,users:0};
   const tiles=k.el('div','crash-tiles');
-  tiles.append(tile(k,fmt(t.issues)+(t.more?'+':''),plural(t.issues,c.onlyNew?['новый крэш','новых крэша','новых крэшей']:['крэш','крэша','крэшей'])+(t.fresh&&!c.onlyNew?' · новых '+t.fresh:''),{alert:!!t.fresh}),
+  tiles.append(tile(k,fmt(t.issues)+(t.more?'+':''),plural(t.issues,c.onlyNew?['новый крэш','новых крэша','новых крэшей']:['крэш','крэша','крэшей']),{alert:!!t.fresh,note:t.fresh&&!c.onlyNew?'новых: '+t.fresh:''}),
    tile(k,short(t.events),plural(t.events,['событие','события','событий'])),
    tile(k,short(t.users),'затронуто пользователей',{title:'Сумма по крэшам: один человек может попасть в несколько'}));
-  if(c.crashFree?.sessions!=null)tiles.append(tile(k,pct(c.crashFree.sessions),'crash-free сессий'+(c.crashFree.users!=null?' · польз. '+pct(c.crashFree.users):''),{alert:c.crashFree.sessions<0.99,title:'Release health за период, сессий: '+fmt(c.crashFree.total)}));
+  if(c.crashFree?.sessions!=null)tiles.append(tile(k,pct(c.crashFree.sessions),'crash-free сессий',{alert:c.crashFree.sessions<0.99,note:c.crashFree.users!=null?'пользователей: '+pct(c.crashFree.users):'',title:'Release health за период, сессий: '+fmt(c.crashFree.total)}));
   body.append(tiles);
   if(c.chart?.days?.length&&t.events)body.append(chart(k,c.chart,colorOf));
-  if(c.common){const p=k.el('p','crash-common');p.append(k.el('span',null,'Общее: '),document.createTextNode(c.common));p.title='Вывод локальной модели по названиям крэшей';body.append(p);}
+  if(c.common){const p=k.el('p','crash-common');p.append(k.el('span',null,'Общее: '),raw(k.el('span','crash-common-text',c.common)));p.title='Вывод локальной модели по названиям крэшей';body.append(p);}
   if(c.issues?.length){
    const ctx={release:c.release,single:c.projects?.length===1?c.projects[0]:'',period:c.period?.label||''};
    body.append(k.collapse(c.issues.map(r=>issueRow(k,r,ids.includes(r.id)?colorOf(r.id):'',ctx)),5,'Ещё крэши'));
   }else body.append(k.el('p','crash-empty',c.onlyNew?'Новых крэшей нет.':'Крэшей нет — Sentry ничего не прислал за этот период.'));
   const status=!t.issues?{label:'чисто',tone:'done'}:t.fresh?{label:t.fresh+' '+plural(t.fresh,['новый','новых','новых']),tone:'alert'}:{label:'без новых',tone:'done'};
-  const subtitle=[c.period?.label,c.platform,c.environment,c.release&&!/релиз/.test(c.period?.label||'')?'релиз '+c.release.name:''].filter(Boolean).join(' · ');
+  const subtitle=[c.period?.label,c.platform,c.environment,c.release&&c.period?.kind!=='release'?'релиз '+c.release.name:''].filter(Boolean).join(' · ');
   const actions=[];
   if(c.url)actions.push({label:'Открыть список в Sentry',run:()=>open(c.url)});
   if(!c.onlyNew&&t.fresh)actions.push({label:'Только новые',run:()=>k.ask('Новые крэши '+(c.release?'после релиза '+c.release.name:c.period?.label||'за неделю')+(c.platform?' на '+c.platform:''),{send:true})});
-  if(c.period?.label!=='вчера')actions.push({label:'За вчера',run:()=>k.ask('Сколько крэшей вчера'+(c.platform?' на '+c.platform:''),{send:true})});
-  parent.append(k.card({app:'Sentry',initial:'S',color:'#362d59',key:c.org+(c.projects?.length?' / '+c.projects.join(', '):''),href:c.url,status,subtitle,body,actions,className:'crash-card'}));
+  if(c.period?.kind!=='yesterday')actions.push({label:'За вчера',run:()=>k.ask('Сколько крэшей вчера'+(c.platform?' на '+c.platform:''),{send:true})});
+  const card=k.card({app:'Sentry',initial:'S',color:'#362d59',key:c.org+(c.projects?.length?' / '+c.projects.join(', '):''),href:c.url,status,subtitle,body,actions,className:'crash-card'});
+  const key=card.querySelector('.kit-key');if(key)raw(key);
+  parent.append(card);
  };
 })();

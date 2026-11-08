@@ -29,7 +29,7 @@
   for(const p of rows){
    const label=el('label','check'),box=el('input');box.type='checkbox';box.checked=chosen().includes(p.slug);
    box.onchange=async()=>{const next=new Set(chosen());box.checked?next.add(p.slug):next.delete(p.slug);projects.value=[...next].join(',');await persist({sentryProjects:projects.value},'Проекты сохранены.');};
-   label.append(box,document.createTextNode(p.name===p.slug?p.slug:p.name+' ('+p.slug+')'+(p.platform?' · '+p.platform:'')));list.append(label);
+   const name=document.createElement('span');name.setAttribute('data-no-i18n','');name.textContent=(p.name===p.slug?p.slug:p.name+' ('+p.slug+')'+(p.platform?' · '+p.platform:''));label.append(box,name);list.append(label);
   }
  }
  async function persist(data,done){
@@ -38,17 +38,19 @@
  }
  async function load(){
   const state=await call('status');
+  // Saved values are the truth: the form may not have been refreshed since they changed.
+  projects.value=state.projects.join(',');if(state.org)org.value=state.org;if(state.url)url.value=state.url;
   if(!state.hasToken){available=[];renderProjects();status.textContent='Вставьте токен Sentry и сохраните.';return;}
   if(!state.org){
    const items=await call('organizations');orgs.replaceChildren();
    if(items.length===1){org.value=items[0].slug;await persist({sentryOrg:org.value},'Организация: '+items[0].name+'.');}
    else{status.textContent=items.length?'Выберите организацию.':'Токен не видит ни одной организации (нужно право org:read).';
-    for(const o of items){const b=el('button',null,o.name+' ('+o.slug+')');b.type='button';b.onclick=async()=>{org.value=o.slug;orgs.replaceChildren();await persist({sentryOrg:o.slug},'Организация сохранена.');await load().catch(e=>{status.textContent=e.message;});};orgs.append(b);}
+    for(const o of items){const b=el('button',null,o.name+' ('+o.slug+')');b.setAttribute('data-no-i18n','');b.type='button';b.onclick=async()=>{org.value=o.slug;orgs.replaceChildren();await persist({sentryOrg:o.slug},'Организация сохранена.');await load().catch(e=>{status.textContent=e.message;});};orgs.append(b);}
     return;}
   }
   status.textContent='Загружаю проекты Sentry…';
   available=await call('projects');renderProjects();
-  status.textContent='Sentry подключён: '+available.length+' '+(available.length%10===1&&available.length%100!==11?'проект':'проектов')+'. '+(chosen().length?'Отмечено: '+chosen().length+'.':'Отметьте проекты или оставьте все.');
+  status.textContent='Sentry подключён. Проектов: '+available.length+'. '+(chosen().length?'Отмечено: '+chosen().length+'.':'Отметьте проекты или оставьте все.');
  }
  save.onclick=async()=>{
   if(busy)return;busy=true;save.disabled=true;
