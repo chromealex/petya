@@ -77,7 +77,7 @@ const links=require('../src/features/app-links.cjs');
  const real=links.load();
  const ids=kind=>real.filter(p=>p.kind===kind).map(p=>p.id);
  assert.deepEqual(ids('task-tracker'),['jira','asana']);
- assert.deepEqual(ids('share-message'),['slack']);
+ assert.deepEqual(ids('share-message'),['discord','slack']);
  assert.deepEqual(ids('code-fix'),['coder']);
  const live={settings:{}};const reg=links.create(live,{providers:real});
  for(const kind of ['task-tracker','share-message','code-fix'])assert.deepEqual(reg.available(kind),[],'nothing connected → nothing listed: '+kind);
