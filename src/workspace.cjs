@@ -8,6 +8,15 @@ function chooseVersion(versions, preferred = '') {
   const open = versions.filter(v => !v.released && !v.archived);
   return open.some(v => String(v.id) === preferred) ? preferred : open.length === 1 ? String(open[0].id) : '';
 }
+// An open version the discussion or the request names («в 1.19.3», «к релизу 1.20»): only one, by its exact name.
+function namedVersion(versions, text) {
+  const t = ' ' + String(text || '').toLocaleLowerCase('ru') + ' ';
+  const hits = versions.filter(v => !v.released && !v.archived && String(v.name || '').trim().length >= 2).filter(v => {
+    const name = String(v.name).toLocaleLowerCase('ru').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return new RegExp('(?:^|[^\\p{L}\\p{N}.])v?' + name + '(?![\\p{L}\\p{N}]|\\.\\d)', 'u').test(t);
+  });
+  return hits.length === 1 ? String(hits[0].id) : '';
+}
 function plain(html) { return String(html || '').replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim(); }
 function queryTerms(context, query) { return [...new Set(words(query || context.title + ' ' + context.text.slice(0, 1200)))].slice(0, 8); }
 class Workspace {
@@ -96,6 +105,8 @@ class Workspace {
     // Jira is optional: with only Asana connected the plan is made without boards and Jira users.
     const jira = !!(s.jiraProject && s.jiraUrl && (s.atlassianCredential || (s.jiraEmail && s.jiraToken)) && s.module_jira !== 'false');
     const [metadata, everyone] = jira ? await Promise.all([this.metadata(boardId, s), this.people('', s)]) : [null, []];
+    // A version the discussion names wins over guessing; with several open versions and none named, the user picks.
+    if (metadata) { const named = namedVersion(metadata.versions, command + '\n' + (context.title || '') + '\n' + String(context.text || '').slice(0, 20000)); if (named) { metadata.versionId = named; metadata.versionNamed = true; } }
     const chosen = documentIds.map(id => { const d = this.docs.get(id); if (!d) throw new Error('Повторите поиск документации.'); return d; }).slice(0, 5);
     const docs = [];
     for (const d of chosen) docs.push(await this.fullDocument(d, s, report));
@@ -157,9 +168,56 @@ class Workspace {
     const loss = coverage.failed.length > 0 || coverage.dropped.length > 0 || coverage.uncovered.length > 0 || coverage.sources.some(x => x.truncated) || extra.length > 0;
     return { tasks, questions, metadata, people: everyone, coverage: { ...coverage, loss, dropped: coverage.dropped.map(n => n.ref) } };
   }
+  // «Blocks» links between the created issues of a batch: the task a row depends on blocks it. Links that already
+  // exist are read first, so a retry adds only the missing ones; a failed link is reported on its row and does not
+  // undo anything.
+  async link(batch) {
+    const pending = batch.rows.filter(r => r.key && (r.task.dependsOn || []).some(n => batch.rows[n]?.key && !(r.linked || []).includes(n)));
+    if (!pending.length) return;
+    let type = batch.linkType;
+    if (!type) {
+      try {
+        const types = (await this.api('/rest/api/3/issueLinkType', {}, batch.settings))?.issueLinkTypes || [];
+        type = types.find(t => t.name === 'Blocks') || types.find(t => /block|блок/i.test(String(t.outward || '') + ' ' + t.name));
+      } catch (error) { for (const r of pending) r.linkError = 'Связи не проставлены: ' + error.message; this.checkpoint(batch); return; }
+      if (!type) { for (const r of pending) r.linkError = 'В Jira нет типа связи «Blocks». Зависимости остались в описании задач.'; this.checkpoint(batch); return; }
+      batch.linkType = { id: String(type.id), name: type.name };
+    }
+    for (const row of pending) {
+      row.linked = row.linked || []; row.linkError = '';
+      let existing = [];
+      try { existing = ((await this.api('/rest/api/3/issue/' + encodeURIComponent(row.key) + '?fields=issuelinks', {}, batch.settings))?.fields?.issuelinks || []).filter(l => String(l.type?.id) === batch.linkType.id && l.outwardIssue === undefined && l.inwardIssue?.key).map(l => l.inwardIssue.key); }
+      catch (error) { row.linkError = 'Связи не проверены: ' + error.message; this.checkpoint(batch); continue; }
+      for (const n of row.task.dependsOn) {
+        const blocker = batch.rows[n];
+        if (!blocker?.key || row.linked.includes(n)) continue;
+        if (!existing.includes(blocker.key)) {
+          try { await this.createBlock(batch, blocker.key, row.key); }
+          catch (error) { row.linkError = `Связь с ${blocker.key} не проставлена: ${error.message}`; continue; }
+        }
+        row.linked.push(n);
+      }
+      this.checkpoint(batch);
+    }
+  }
+  // Which side of POST /issueLink becomes «blocks» is not defined by the API docs, so the first link of a batch is read
+  // back from the blocked issue (where «is blocked by X» is an entry with inwardIssue X) and recreated the other way
+  // round if it came out reversed; the rest of the batch uses the side that worked.
+  async createBlock(batch, blocker, blocked) {
+    const post = swapped => this.api('/rest/api/3/issueLink', { method: 'POST', body: JSON.stringify({ type: { id: batch.linkType.id }, ...(swapped ? { inwardIssue: { key: blocker }, outwardIssue: { key: blocked } } : { outwardIssue: { key: blocker }, inwardIssue: { key: blocked } }) }) }, batch.settings);
+    await post(!!batch.linkSwapped);
+    if (batch.linkChecked) return;
+    const links = (await this.api('/rest/api/3/issue/' + encodeURIComponent(blocked) + '?fields=issuelinks', {}, batch.settings))?.fields?.issuelinks || [];
+    const ours = links.filter(l => String(l.type?.id) === batch.linkType.id);
+    if (ours.some(l => l.inwardIssue?.key === blocker)) { batch.linkChecked = true; return; }
+    const reversed = ours.find(l => l.outwardIssue?.key === blocker);
+    if (!reversed) return;
+    await this.api('/rest/api/3/issueLink/' + encodeURIComponent(reversed.id), { method: 'DELETE' }, batch.settings);
+    batch.linkSwapped = !batch.linkSwapped; await post(batch.linkSwapped); batch.linkChecked = true;
+  }
   checkpoint(batch) {
     const previous = this.history.find(h => h.id === batch.id) || {};
-    const entry = { ...previous, schema: 2, id: batch.id, kind: 'create', at: batch.at, project: batch.settings.jiraProject, url: batch.settings.jiraUrl, boardId: batch.boardId || '', rows: batch.rows.map(r => ({ title: r.task.summary, key: r.key || '', state: r.state, error: r.error || '', snapshot: r.snapshot || null, canDelete: !!r.canDelete, snapshotError: r.snapshotError || '' })) };
+    const entry = { ...previous, schema: 2, id: batch.id, kind: 'create', at: batch.at, project: batch.settings.jiraProject, url: batch.settings.jiraUrl, boardId: batch.boardId || '', rows: batch.rows.map(r => ({ title: r.task.summary, key: r.key || '', state: r.state, error: r.error || '', snapshot: r.snapshot || null, canDelete: !!r.canDelete, snapshotError: r.snapshotError || '', blockedBy: (r.task.dependsOn || []).map(n => batch.rows[n]?.key).filter(Boolean), linked: (r.linked || []).map(n => batch.rows[n]?.key).filter(Boolean), linkError: r.linkError || '' })) };
     this.history = [entry, ...this.history.filter(h => h.id !== entry.id)].slice(0, 100);
     this.save(this.history);
   }
@@ -221,6 +279,7 @@ class Workspace {
       if (!metadata.versions.some(x => String(x.id) === String(input.versionId))) throw new Error('Выберите актуальную невыпущенную версию проекта.');
       if (!s.jiraIssueType) throw new Error('Выберите тип задачи в настройках Jira.');
       const rawTasks = validateTasks(input.tasks, null, true);
+      for (const t of rawTasks) if (t.versionId && !metadata.versions.some(x => String(x.id) === t.versionId)) throw new Error(`Версия задачи «${t.summary}» выпущена или недоступна. Выберите актуальную версию.`);
       for (const id of new Set(rawTasks.map(t => t.assigneeId))) {
         const users = await this.api('/rest/api/3/user/assignable/search?' + new URLSearchParams({ project: s.jiraProject, accountId: id, maxResults: 50 }), {}, s);
         if (!users.some(u => u.accountId === id && u.active)) throw new Error('Исполнитель недоступен для назначения в этом проекте: ' + id);
@@ -246,7 +305,7 @@ class Workspace {
             if(this.beforeCreate)this.beforeCreate(batch.id);
             row.state = 'sending'; this.checkpoint(batch);
             const dependencyText = row.task.dependsOn.length ? '\n\nЗависимости внутри плана: ' + row.task.dependsOn.map(n => `${n + 1}. ${batch.rows[n].task.summary}`).join('; ') : '';
-            const issue = await this.api('/rest/api/3/issue', { method: 'POST', body: JSON.stringify({ fields: { project: { key: batch.settings.jiraProject }, issuetype: { id: batch.settings.jiraIssueType }, summary: row.task.summary, description: adf(row.task.description + dependencyText), assignee: { accountId: row.task.assigneeId }, fixVersions: [{ id: batch.versionId }], labels: ['petya-' + batch.id] } }) }, batch.settings);
+            const issue = await this.api('/rest/api/3/issue', { method: 'POST', body: JSON.stringify({ fields: { project: { key: batch.settings.jiraProject }, issuetype: { id: batch.settings.jiraIssueType }, summary: row.task.summary, description: adf(row.task.description + dependencyText), assignee: { accountId: row.task.assigneeId }, fixVersions: [{ id: row.task.versionId || batch.versionId }], labels: ['petya-' + batch.id] } }) }, batch.settings);
             if (!issue?.key) throw new Error('Jira не вернула ключ задачи.');
             row.key = issue.key; row.state = 'created'; this.checkpoint(batch);
           }
@@ -260,6 +319,7 @@ class Workspace {
           this.checkpoint(batch); break;
         }
       }
+      await this.link(batch);
       return this.history.find(h => h.id === batch.id);
     } finally { batch.busy = false; }
   }
@@ -289,9 +349,10 @@ function validateTasks(tasks, people, requireAssignee) {
     if (people && assigneeId && !people.some(p => p.id === assigneeId)) throw new Error('Модель предложила неизвестного исполнителя.');
     const dependsOn = t.dependsOn || [];
     if (!Array.isArray(dependsOn) || dependsOn.some(n => !Number.isInteger(n) || n < 0 || n >= tasks.length || n === i)) throw new Error('Некорректные зависимости задач.');
-    return { summary: required(t.summary, 200), description: required(t.description, 50000), assigneeId, assignmentReason: String(t.assignmentReason || '').slice(0, 1000), dependsOn: [...new Set(dependsOn)] };
+    const versionId = typeof t.versionId === 'string' && /^\d{1,20}$/.test(t.versionId) ? t.versionId : '';
+    return { summary: required(t.summary, 200), description: required(t.description, 50000), assigneeId, assignmentReason: String(t.assignmentReason || '').slice(0, 1000), dependsOn: [...new Set(dependsOn)], ...(versionId ? { versionId } : {}) };
   });
   const visit = (i, stack = new Set()) => { if (stack.has(i)) throw new Error('В плане обнаружен цикл зависимостей.'); const next = new Set(stack).add(i); result[i].dependsOn.forEach(j => visit(j, next)); };
   result.forEach((_, i) => visit(i)); return result;
 }
-module.exports = { Workspace, chooseVersion, validateTasks, queryTerms, plain };
+module.exports = { Workspace, chooseVersion, namedVersion, validateTasks, queryTerms, plain };

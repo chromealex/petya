@@ -59,7 +59,8 @@ function renderMetadata(data, preserve = false) {
   selectOptions($('batch-board'), data.boards, data.boardId, 'Выберите доску');
   selectOptions($('batch-sprint'), data.sprints, data.sprintId, 'Выберите спринт', v => `${v.name} (${v.state === 'active' ? 'активный' : 'будущий'})`);
   selectOptions($('batch-version'), data.versions, data.versionId, 'Уточните текущую версию');
-  $('metadata-status').textContent = `Проект ${data.project} · ${data.siteUrl}. ${activeJiraRoute?.reason || ''}. Если текущая версия или спринт неоднозначны, выберите их вручную.`;
+  jiraVersions = data.versions; document.querySelectorAll('.task-version').forEach(fillVersion);
+  $('metadata-status').textContent = `Проект ${data.project} · ${data.siteUrl}. ${activeJiraRoute?.reason || ''}. ${data.versionNamed ? 'Версию взял из обсуждения: ' + (data.versions.find(v => String(v.id) === String(data.versionId))?.name || '') + '.' : 'Если текущая версия или спринт неоднозначны, выберите их вручную.'}`;
 }
 async function refreshMetadata() {
   if (!activeJiraRoute) {
@@ -116,6 +117,7 @@ function taskEditor(task = { summary: '', description: '', assigneeId: '', depen
   const assignee = field('Исполнитель', 'select', 'task-assignee', ''); selectOptions(assignee, selectedPeople, task.assigneeId, 'Уточните исполнителя', personLabel);
   assignee.onchange = run(async () => { renderAssignSummary(); await continueAutomaticBatch(); });
   const reason = document.createElement('p'); reason.className = 'small task-reason'; reason.textContent = task.assignmentReason || 'Выберите человека, который отвечает за эту работу.'; article.append(reason);
+  const version = field('Версия (Fix Version)', 'select', 'task-version', ''); version.dataset.value = task.versionId || ''; fillVersion(version); version.onchange = () => { version.dataset.value = version.value; renderAssignSummary(); }; version.closest('label').classList.add('jira-only'); version.closest('label').hidden = planTarget === 'asana';
   field('Зависит от задач № (через запятую)', 'input', 'task-deps', (task.dependsOn || []).map(n => n + 1).join(', '));
   const remove = document.createElement('button'); remove.textContent = 'Удалить из плана'; remove.className = 'quiet';
   remove.onclick = () => {
@@ -126,7 +128,15 @@ function taskEditor(task = { summary: '', description: '', assigneeId: '', depen
   article.append(remove);
   $('batch-tasks').append(article);
 }
-function readTasks() { return [...document.querySelectorAll('.task-editor')].map(article => ({ summary: article.querySelector('.task-summary').value, description: article.querySelector('.task-description').value, assigneeId: article.querySelector('.task-assignee').value, dependsOn: article.querySelector('.task-deps').value.split(',').map(v => v.trim()).filter(Boolean).map(v => Number(v) - 1) })); }
+function readTasks() { return [...document.querySelectorAll('.task-editor')].map(article => { const versionId = planTarget === 'asana' ? '' : article.querySelector('.task-version')?.value || ''; return { summary: article.querySelector('.task-summary').value, description: article.querySelector('.task-description').value, assigneeId: article.querySelector('.task-assignee').value, dependsOn: article.querySelector('.task-deps').value.split(',').map(v => v.trim()).filter(Boolean).map(v => Number(v) - 1), ...(versionId ? { versionId } : {}) }; }); }
+// A task's version: «как у пакета» (the batch version) or one of the open versions of the project.
+let jiraVersions = [];
+function fillVersion(select) {
+  const batch = $('batch-version').selectedOptions[0], keep = select.dataset.value || '';
+  select.replaceChildren(new Option(batch?.value ? 'Как у пакета: ' + batch.text : 'Как у пакета', ''));
+  for (const v of jiraVersions) select.add(new Option(v.name, String(v.id)));
+  select.value = jiraVersions.some(v => String(v.id) === keep) ? keep : '';
+}
 // Decomposition progress: the overall bar and one line per agent with the part of the material it reads.
 function decomposeStageText(state) {
   const count = state.total ? ` (${state.done} из ${state.total})` : '';
@@ -226,7 +236,7 @@ function renderResult(target, record) {
   const card=document.createElement('div');card.className='context-item';
   const completed=record.rows.filter(row=>row.state==='done'),pending=record.rows.filter(row=>row.state!=='done');
   const heading=document.createElement('strong');heading.textContent=record.project+' · Создано: '+completed.length+' из '+record.rows.length;card.append(heading);
-  for(const [title,rows]of [['Созданные задачи',completed],['Требуют внимания',pending]]){if(!rows.length)continue;const h=document.createElement('h3');h.textContent=title;card.append(h);for(const row of rows){const p=document.createElement('p');p.textContent=(row.key||'Без ключа')+' — '+row.title+': '+(states[row.state]||row.state)+(row.error?'. '+row.error:'');if(row.key){const a=document.createElement('a');a.textContent='Открыть задачу';a.href=record.url+'/browse/'+row.key;a.target='_blank';a.rel='noopener';p.append(document.createTextNode(' · '),a);}card.append(p);}}
+  for(const [title,rows]of [['Созданные задачи',completed],['Требуют внимания',pending]]){if(!rows.length)continue;const h=document.createElement('h3');h.textContent=title;card.append(h);for(const row of rows){const p=document.createElement('p');p.textContent=(row.key||'Без ключа')+' — '+row.title+': '+(states[row.state]||row.state)+(row.error?'. '+row.error:'')+(row.blockedBy?.length?(row.linkError?'. '+row.linkError:row.linked?.length===row.blockedBy.length?'. Блокируется: '+row.blockedBy.join(', '):'. Связи ещё не проставлены'):'');if(row.key){const a=document.createElement('a');a.textContent='Открыть задачу';a.href=record.url+'/browse/'+row.key;a.target='_blank';a.rel='noopener';p.append(document.createTextNode(' · '),a);}card.append(p);}}
   target.append(card);
 }
 async function refreshHistory() { renderHistory(await window.petya.batchHistory()); }
@@ -264,7 +274,7 @@ function chooseTarget() {
 }
 // Boards, sprints, versions and the Jira people search matter only when the plan goes to Jira.
 const jiraControls = [$('load-metadata'), $('metadata-status'), $('batch-board').closest('.row'), $('people-query').closest('label'), $('find-people'), $('load-metadata').previousElementSibling].filter(Boolean);
-function showTargetControls() { jiraControls.forEach(e => { e.hidden = planTarget === 'asana' || !planTargets.jira; }); $('assign-asana').hidden = planTarget !== 'asana'; }
+function showTargetControls() { jiraControls.forEach(e => { e.hidden = planTarget === 'asana' || !planTargets.jira; }); document.querySelectorAll('#batch-tasks .jira-only').forEach(e => { e.hidden = planTarget === 'asana'; }); $('assign-asana').hidden = planTarget !== 'asana'; }
 function renderTargets() {
   const box = $('assign-target'); box.replaceChildren();
   const available = ['jira', 'asana'].filter(t => planTargets[t]);
@@ -345,8 +355,10 @@ function renderAssignSummary() {
   let where = '';
   if (planTarget === 'jira') {
     const sprint = $('batch-sprint').selectedOptions[0], version = $('batch-version').selectedOptions[0];
-    where = `Jira · ${batchTarget.project || 'проект не выбран'} · ${sprint?.value ? sprint.text : 'спринт не выбран'} · ${version?.value ? 'версия ' + version.text : 'версия не выбрана'}`;
-    if (!batchTarget.project) missing.push('проект Jira'); if (!sprint?.value) missing.push('спринт'); if (!version?.value) missing.push('версию');
+    const own = new Map(); for (const t of tasks) { const name = t.versionId ? jiraVersions.find(v => String(v.id) === t.versionId)?.name : version?.value ? version.text : ''; if (name) own.set(name, (own.get(name) || 0) + 1); }
+    const versions = own.size > 1 ? 'версии ' + [...own].map(([n, c]) => `${n} (${c})`).join(', ') : version?.value || own.size ? 'версия ' + ([...own.keys()][0] || version.text) : 'версия не выбрана';
+    where = `Jira · ${batchTarget.project || 'проект не выбран'} · ${sprint?.value ? sprint.text : 'спринт не выбран'} · ${versions} · связи «блокирует» по зависимостям`;
+    if (!batchTarget.project) missing.push('проект Jira'); if (!sprint?.value) missing.push('спринт'); if (!version?.value && tasks.some(t => !t.versionId)) missing.push('версию');
   } else {
     const project = $('asana-project').selectedOptions[0];
     where = `Asana · ${project?.value ? project.text : 'проект не выбран'}`; if (!project?.value) missing.push('проект Asana');
@@ -377,7 +389,7 @@ async function sendAsana() {
 }
 $('reassign').onclick = run(() => assignPeople(true));
 $('asana-project').onchange = () => renderAssignSummary();
-$('batch-sprint').addEventListener('change', () => renderAssignSummary()); $('batch-version').addEventListener('change', () => renderAssignSummary());
+$('batch-sprint').addEventListener('change', () => renderAssignSummary()); $('batch-version').addEventListener('change', () => { document.querySelectorAll('.task-version').forEach(fillVersion); renderAssignSummary(); });
 $('batch-tasks').addEventListener('input', () => { clearTimeout(window.assignSummaryTimer); window.assignSummaryTimer = setTimeout(renderAssignSummary, 200); });
 $('find-docs').onclick = run(findDocs); $('load-metadata').onclick = run(refreshMetadata); $('batch-board').onchange = run(refreshMetadata);
 $('find-people').onclick = run(async () => { const people = await window.petya.jiraPeople($('people-query').value, activeJiraRoute?.id); mergePeople(people); notice(`Найдено исполнителей: ${people.length}. Выберите их в задачах.`); });
