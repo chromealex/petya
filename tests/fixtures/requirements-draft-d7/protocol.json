@@ -1,0 +1,24 @@
+{
+  "part": "D7",
+  "group": "Andromeda",
+  "parent": "/Users/aleksandrfeer/.petya-train/inputs/andromeda-D3",
+  "parent_sha256": "e3df18e0a6aed26d20517a6c9149916889869511fc0f5d095da7266cd74e24ff",
+  "training_file": "train.jsonl",
+  "steps": 801,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 5e-07,
+  "hashes": {
+    "train.jsonl": "246201ced7d97426682c1e010d83e93151313ad9d683b6863fed955a99c60fdc",
+    "../requirements-draft-d2/holdout.jsonl": "5b51097323c8f46ee79ccfcb7df061edf46baa1bddc8c492191268625dc1c03f"
+  },
+  "sources": {
+    "tests/fixtures/requirements-draft-v21/train_checkpointed.py": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+    "tests/fixtures/requirements-draft-v21/checkpoint.py": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549"
+  },
+  "recipe": "Start from D3 (which learned the new corrections, 22 exact held-out drafts) and rehearse only the 801 familiar cases once at half the learning rate, to win back what D3 forgot.",
+  "why": "D6 showed the familiar cases come back when D3 is pulled toward D1, but the new skill goes with it. D7 pulls D3 toward the familiar data instead of toward D1’s weights.",
+  "gate": "D7 replaces D1 only if the 54 generated held-out drafts improve with no D1 success lost, the 42 v22 cases are not worse than D1, and familiar retention is not below D1 (787/801).",
+  "limits": "The familiar set is both training data and the retention check, as for every D stage; the generated held-out drafts and the v22 cases are not trained."
+}
