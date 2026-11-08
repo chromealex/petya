@@ -1,7 +1,0 @@
-MCP: 31 tools verified via authenticated HTTP client
-Python MCP: real HTTP client, shared runtime, saved result, read/drafts denial, version/project/access checks passed
-Generic extension agent: schema checks, evidence, scoped reads and unexecuted proposals verified
-Layout assets: downloads, credential isolation, source exports, scoped transfers and confirmation passed
-Layout MCP: passed
-Unity discovery, native calls, resources, prefabs and access checks verified through two MCP endpoints
-Blender animation routing, MCP access and confirmation verified

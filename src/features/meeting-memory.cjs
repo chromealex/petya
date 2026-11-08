@@ -29,7 +29,7 @@ module.exports = {
   const timer=setInterval(()=>{if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1')local.tick().catch(()=>{});},5000);timer.unref();
   app.once('before-quit',async()=>{clearInterval(timer);await local.stop(false);});
   const ipc={captureStatus:()=>local.snapshot(),startCapture:()=>local.start(),stopCapture:()=>local.stop(true),read:args=>read(s.memory,args),begin:()=>recording.begin(),append:(...args)=>recording.append(...args),finish:id=>recording.finish(id),retry:id=>recording.retry(id),status:()=>recording.status()};
-  return {ipc,meetingSessions:{status:()=>recording.status(),remove:id=>recording.remove(id),settings:()=>({mode:s.settings.zoomBotMode||'auto',capture:s.settings.zoomCaptureMode||'local'})},meetingRecording:(method,...args)=>{if(!['status','retry','captureStatus','startCapture','stopCapture'].includes(method))throw Error('Операция доступна только в приложении.');return ipc[method](...args);}};
+  return {ipc,meetingSessions:{status:()=>recording.status(),remove:id=>recording.remove(id),settings:()=>({mode:s.settings.zoomBotMode||'auto',capture:'local'})},meetingRecording:(method,...args)=>{if(!['status','retry','captureStatus','startCapture','stopCapture'].includes(method))throw Error('Операция доступна только в приложении.');return ipc[method](...args);}};
  },
  register(server,z,ctx) {
   for(const method of ['status','retry'])server.registerTool(method==='status'?'meeting_recording_status':'retry_meeting_processing',{

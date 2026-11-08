@@ -59,7 +59,7 @@ async function backgroundTick() {
     if (!smoke) await buildRepair?.tick();
     if (modules.enabled(settings, 'slack') && settings.slackAutoSync === 'true' && Date.now() - lastSlackRound >= Number(settings.slackInterval) * 60000) { lastSlackRound = Date.now(); slackSync.start().catch(e => { slackSync.status.message = e.message; }); }
     else if (modules.enabled(settings, 'slack') && slackSync.queue.length) slackSync.tick().catch(e => { slackSync.status.message = e.message; });
-    try { const state = await meetingMonitor.tick(settings.zoomLocalService !== '1' && settings.zoomCaptureMode === 'local' && settings.zoomAutoRecord === 'true'); if (state) monitorStatus = state; }
+    try { const state = await meetingMonitor.tick(settings.zoomLocalService !== '1' && settings.zoomAutoRecord === 'true'); if (state) monitorStatus = state; }
     catch (e) { monitorStatus = { message: e.message }; }
     win.webContents.send('background-status', { zoom: monitorStatus, slack: slackSync.status });
   } catch (e) { win.webContents.send('background-status', { error: e.message }); }
@@ -565,7 +565,6 @@ function setupHandlers() {
     meetingRecording: (...args)=>services.meetingRecording(...args),
     modelRuntime: method=>services.modelRuntime.invoke(method),
     chatModels: (method,...args)=>services.chatModels[method](...args),
-    zoomBot: (...args)=>services.zoomBot(...args),
     generatePainting: (args, check) => services.artist.generate(args, check),
     check() { if (switchingCompany || quitting) throw Error('Компания закрывается.'); },
     async run(work) { activeOperations++; try { return await work(); } finally { activeOperations--; } },
@@ -616,7 +615,7 @@ function setupHandlers() {
     companies.get(id);if(id===companyId)return {unchanged:true};
     if(chatJobs.any()||dialogue.running.size)throw Error('Дождитесь завершения запросов в чатах перед сменой компании.');
     if(ollamaReady.state.busy||visionReady.state.busy||imageInstaller.state?.busy)throw Error('Дождитесь завершения загрузки модели.');
-    if(backgroundBusy||slackSync?.running||telegramSource?.busy||services.zoomBot?.('status')?.busy)throw Error('Обновляются материалы компании. Дождитесь завершения синхронизации.');
+    if(backgroundBusy||slackSync?.running||telegramSource?.busy||services.meetingRecording?.('captureStatus')?.busy)throw Error('Обновляются материалы компании. Дождитесь завершения синхронизации.');
     if(activeOperations>1)throw Error('Петя завершает текущую операцию. Переключите компанию после завершения.');
     if(trayListening||trayMeeting)throw Error('Остановите запись перед переключением компании.');
     if(smoke && process.env.PETYA_COMPANY_SWITCH_TEST!=='1')return {testOnly:true};

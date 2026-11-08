@@ -1,7 +1,7 @@
 {
   "id": "zoom-bot",
   "name": "Петя в Zoom",
-  "description": "Отдельный участник встречи и общая память",
+  "description": "Локальная запись встреч и общая память",
   "category": "meetings",
   "service": "zoom",
   "settings": true,
