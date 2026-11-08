@@ -93,7 +93,9 @@ class Workspace {
     } catch (error) { report({ stage: 'error', busy: false, error: error.message }); throw error; }
   }
   async decompose(command, context, documentIds, boardId, s, report) {
-    const [metadata, everyone] = await Promise.all([this.metadata(boardId, s), this.people('', s)]);
+    // Jira is optional: with only Asana connected the plan is made without boards and Jira users.
+    const jira = !!(s.jiraProject && s.jiraUrl && (s.atlassianCredential || (s.jiraEmail && s.jiraToken)) && s.module_jira !== 'false');
+    const [metadata, everyone] = jira ? await Promise.all([this.metadata(boardId, s), this.people('', s)]) : [null, []];
     const chosen = documentIds.map(id => { const d = this.docs.get(id); if (!d) throw new Error('Повторите поиск документации.'); return d; }).slice(0, 5);
     const docs = [];
     for (const d of chosen) docs.push(await this.fullDocument(d, s, report));

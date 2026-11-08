@@ -8,6 +8,8 @@ module.exports=ctx=>{
     target.lastRouting={project:result.project||'',name:result.name||'',reason:result.reason,source:context.source+' · '+context.title,at:Date.now()};ctx.dialogue.persist();return result;
   });
   const routed = id => id ? routing.settings(id) : (() => { throw new Error('Сначала определите проект по контексту задачи.'); })();
+  // Planning without a Jira project is fine when Jira is not connected (the plan goes to Asana).
+  const planSettings = id => { const live = ctx.workspace.settings(); return id || require('./workload.cjs').sources(live, ctx.modules).jira ? routed(id) : { ...live, jiraProject: '' }; };
   // The running decomposition, so a reopened window shows its progress.
   ctx.handle('decomposeStatus', () => ctx.workspace.decomposing);
   ctx.handle('searchDocs', (id, query) => ctx.workspace.searchDocs(ctx.contextFor(id), query));
@@ -19,7 +21,7 @@ module.exports=ctx=>{
     command = ctx.text(command, 4000);
     if (ctx.delegation(command)?.mine) { const me = await ctx.workspace.api('/rest/api/3/myself'); if (!me?.accountId) throw new Error('Не удалось определить ваш аккаунт Jira.'); command += '\nТекущий пользователь («я»): ' + me.displayName + ', accountId=' + me.accountId; }
     const context=ctx.contextFor(id);if(context.skillDraftId){const selected=routed(routeId),prepared=await ctx.workSkills.prepare(context.skillDraftId,boardId,selected);return ctx.taskDuplicates.prepare(context.skillDraftId,prepared,selected);}
-    return ctx.workspace.prepare(command, context, docs, boardId, routed(routeId));
+    return ctx.workspace.prepare(command, context, docs, boardId, planSettings(routeId));
   });
   ctx.handle('submitBatch', async input => {const selected=routed(input.routeId),checked=await ctx.taskDuplicates.guard(input,selected);return ctx.workspace.submit(checked,selected);});
   ctx.handle('batchHistory', () => ctx.workspace.history);

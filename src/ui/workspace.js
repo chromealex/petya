@@ -35,6 +35,8 @@ async function selectJiraRoute(context, resume, project = '', issueType = '') {
   return null;
 }
 let automaticCoverage = null, coverageConfirmed = false;
+let planTargets = { jira: false, asana: false }, planTarget = '', assignment = null, assignBusy = false, jiraPeople = [];
+const personLabel = p => p.name + (p.open != null ? ` · открыто ${p.open}` : '');
 let currentIntent = '', currentDecompose = false, activeContext = null, workspaceBusy = false, batchId = '', frozenBatch = null, selectedPeople = [], batchTarget = {};
 const states = { ready: 'Ещё не отправлена', sending: 'Результат создания неизвестен — проверьте Jira', uncertain: 'Результат создания неизвестен — повтор заблокирован', created: 'Создана, ещё не в спринте', scheduling: 'Создана; проверьте спринт', 'schedule-failed': 'Создана, не удалось добавить в спринт', rejected: 'Jira отклонила создание', done: 'Создана и добавлена в спринт' };
 function selectOptions(element, values, selected, placeholder, label = v => v.name) {
@@ -45,6 +47,7 @@ function selectOptions(element, values, selected, placeholder, label = v => v.na
 function lockPlan(locked) {
   $('workspace-controls').querySelectorAll('input,select,button').forEach(e => e.disabled = locked);
   $('batch-tasks').querySelectorAll('input,select,textarea,button').forEach(e => e.disabled = locked);
+  $('assign-summary').querySelectorAll('select,#reassign,#assign-target button').forEach(e => e.disabled = locked || (e.closest('#assign-target') && $('assign-target').children.length < 2));
 }
 function renderMetadata(data, preserve = false) {
   batchTarget = { project: data.project, siteUrl: data.siteUrl, routeId: activeJiraRoute?.id };
@@ -69,8 +72,10 @@ async function refreshMetadata() {
   renderMetadata(meta); mergePeople(people);
 }
 function mergePeople(people) {
+  jiraPeople = [...new Map([...jiraPeople, ...people].map(p => [p.id, p])).values()];
+  if (planTarget === 'asana') return;
   selectedPeople = [...new Map([...selectedPeople, ...people].map(p => [p.id, p])).values()];
-  document.querySelectorAll('.task-assignee').forEach(select => selectOptions(select, selectedPeople, select.value, 'Выберите исполнителя', p => `${p.name} · ${p.id}`));
+  document.querySelectorAll('.task-assignee').forEach(select => selectOptions(select, selectedPeople, select.value, 'Выберите исполнителя', personLabel));
 }
 async function findDocs() {
   if (!activeContext) throw new Error('Сначала выберите обсуждение.');
@@ -90,15 +95,16 @@ async function findDocs() {
 }
 async function openWorkspace(context, route = activeJiraRoute) {
   activeJiraRoute = route;
-  activeContext = context; currentDraft = null; frozenBatch = null; batchId = context.skillDraftId || crypto.randomUUID(); selectedPeople = [];
+  activeContext = context; currentDraft = null; frozenBatch = null; batchId = context.skillDraftId || crypto.randomUUID(); selectedPeople = []; jiraPeople = []; assignment = null;
+  await loadTargets(); planTarget = chooseTarget(); renderAssignSummary(); showTargetControls();
   $('draft-card').hidden = true; $('resolution').hidden = true; $('workspace-card').hidden = false;
   $('workspace-title').textContent = context.title + (currentIntent === 'jira-agent' ? ' · Jira → агент (отправка в приложении)' : ''); $('batch-tasks').replaceChildren(); $('batch-results').replaceChildren(); $('docs-list').replaceChildren(); $('plan-questions').textContent = ''; automaticCoverage = null; coverageConfirmed = false; renderCoverage(null); window.petya.decomposeStatus().then(state => renderDecomposeProgress(state?.busy ? state : null)).catch(() => renderDecomposeProgress(null)); $('docs-query').value = '';
   for (const name of ['board', 'sprint', 'version']) selectOptions($('batch-' + name), [], '', 'Выберите значение');
-  lockPlan(false); $('submit-batch').disabled = false; $('submit-batch').textContent = 'Создать задачи и добавить в спринт';
-  const outcomes = await Promise.allSettled([context.skillDraftId?Promise.resolve():findDocs(), currentIntent === 'docs' && !activeJiraRoute ? Promise.resolve() : refreshMetadata()]);
+  lockPlan(false); $('submit-batch').disabled = false;
+  const outcomes = await Promise.allSettled([context.skillDraftId?Promise.resolve():findDocs(), currentIntent === 'docs' && !activeJiraRoute || !planTargets.jira ? Promise.resolve() : refreshMetadata()]);
   outcomes.forEach((result, i) => { if (result.status === 'rejected') $(i === 0 ? 'docs-status' : 'metadata-status').textContent = result.reason.message; });
   $('workspace-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  if ((automaticVoiceCommand || context.skillDraftId) && currentIntent !== 'docs' && activeJiraRoute) await decompose();
+  if ((automaticVoiceCommand || context.skillDraftId) && currentIntent !== 'docs' && (activeJiraRoute || !planTargets.jira)) await decompose();
 }
 function taskEditor(task = { summary: '', description: '', assigneeId: '', dependsOn: [] }) {
   const article = document.createElement('article'); article.className = 'card task-editor';
@@ -107,9 +113,9 @@ function taskEditor(task = { summary: '', description: '', assigneeId: '', depen
   article.append(heading);
   field('Название', 'input', 'task-summary', task.summary).maxLength = 200;
   field('Описание и критерии приёмки', 'textarea', 'task-description', task.description).rows = 5;
-  const assignee = field('Исполнитель', 'select', 'task-assignee', ''); selectOptions(assignee, selectedPeople, task.assigneeId, 'Уточните исполнителя', p => `${p.name} · ${p.id}`);
-  assignee.onchange = run(continueAutomaticBatch);
-  const reason = document.createElement('p'); reason.className = 'small'; reason.textContent = task.assignmentReason || 'Выберите человека, который отвечает за эту работу.'; article.append(reason);
+  const assignee = field('Исполнитель', 'select', 'task-assignee', ''); selectOptions(assignee, selectedPeople, task.assigneeId, 'Уточните исполнителя', personLabel);
+  assignee.onchange = run(async () => { renderAssignSummary(); await continueAutomaticBatch(); });
+  const reason = document.createElement('p'); reason.className = 'small task-reason'; reason.textContent = task.assignmentReason || 'Выберите человека, который отвечает за эту работу.'; article.append(reason);
   field('Зависит от задач № (через запятую)', 'input', 'task-deps', (task.dependsOn || []).map(n => n + 1).join(', '));
   const remove = document.createElement('button'); remove.textContent = 'Удалить из плана'; remove.className = 'quiet';
   remove.onclick = () => {
@@ -130,6 +136,7 @@ function decomposeStageText(state) {
     reading: 'Читаю материал по частям',
     merging: 'Сжимаю требования, чтобы они уместились в модель' + count,
     planning: 'Составляю задачи',
+    assigning: 'Подбираю исполнителей по ролям и загрузке',
     done: 'План готов' + (state.warnings ? ' — есть предупреждения' : ''),
     error: 'Декомпозиция остановилась: ' + (state.error || 'ошибка')
   })[state.stage] || 'Декомпозиция';
@@ -191,7 +198,7 @@ function renderCoverage(coverage) {
   for (const warning of warnings) { const p = document.createElement('p'); p.textContent = warning; box.append(p); }
 }
 async function decompose() {
-  if (!activeJiraRoute) {
+  if (!activeJiraRoute && planTargets.jira) {
     const route = await selectJiraRoute(activeContext, async selected => { activeJiraRoute = selected; await decompose(); });
     if (!route) return;
     activeJiraRoute = route;
@@ -202,15 +209,17 @@ async function decompose() {
     if (docs.length > 5) throw new Error('Выберите не больше пяти документов.');
     notice('Разбиваю обсуждение на задачи. Это может занять некоторое время…');
     renderCoverage(null); renderDecomposeProgress({ stage: 'starting', busy: true });
-    const result = await window.petya.prepareBatch(commandSnapshot, activeContext.id, docs, $('batch-board').value, activeJiraRoute.id);
+    const result = await window.petya.prepareBatch(commandSnapshot, activeContext.id, docs, $('batch-board').value, activeJiraRoute?.id || '');
     automaticBatchQuestions = result.questions; automaticCoverage = result.coverage || null; coverageConfirmed = false; renderCoverage(result.coverage);
     // The finished state, whether or not the last progress event arrived before the answer.
     renderDecomposeProgress({ ...(lastDecompose || {}), stage: 'done', busy: false, percent: 100, warnings: result.coverage?.warnings?.length || 0 });
-    renderMetadata(result.metadata, true); mergePeople(result.people); $('batch-tasks').replaceChildren(); result.tasks.forEach(taskEditor);
+    if (result.metadata) renderMetadata(result.metadata, true); mergePeople(result.people || []); $('batch-tasks').replaceChildren(); result.tasks.forEach(taskEditor);
     $('plan-questions').textContent = result.questions.length ? 'Уточнить: ' + result.questions.join(' • ') : 'Проверьте объём задач и назначения перед отправкой.';
     notice(`Подготовлено задач: ${result.tasks.length}. ${result.coverage?.loss ? 'Часть материала не вошла в план — смотрите предупреждения.' : 'Проверьте спринт, версию и исполнителей.'}`, !!result.coverage?.loss);
   } catch (error) { if (lastDecompose?.busy) renderDecomposeProgress({ ...lastDecompose, stage: 'error', busy: false, error: error.message }); throw error; }
   finally { workspaceBusy = false; lockPlan(false); }
+  // Who takes what: suggested at once, shown in the summary before anything is sent.
+  await assignPeople().catch(error => notice('Исполнителей не удалось подобрать: ' + error.message, true));
   if (automaticVoiceCommand) await continueAutomaticBatch();
 }
 function renderResult(target, record) {
@@ -237,12 +246,143 @@ async function sendBatch() {
     const record = (await window.petya.batchHistory()).find(r => r.id === batchId);
     if (record) { frozenBatch = payload; $('batch-results').replaceChildren(); renderResult($('batch-results'), record); }
     notice(error.message, true);
-  } finally { workspaceBusy = false; lockPlan(!!frozenBatch); $('submit-batch').disabled = false; $('submit-batch').textContent = frozenBatch ? 'Повторить только незавершённые действия' : 'Создать задачи и добавить в спринт'; $('close-workspace').disabled = false; await refreshHistory(); }
+  } finally { workspaceBusy = false; lockPlan(!!frozenBatch); $('submit-batch').disabled = false; renderAssignSummary(); $('close-workspace').disabled = false; await refreshHistory(); }
 }
+// Where the plan goes (Jira or Asana, whichever is connected; a choice when both are) and who takes what.
+const TARGET_NAME = { jira: 'Jira', asana: 'Asana' };
+const taskWord = n => n % 10 === 1 && n % 100 !== 11 ? 'задачу' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'задачи' : 'задач';
+const tasksWord = n => n % 10 === 1 && n % 100 !== 11 ? 'задача' : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20) ? 'задачи' : 'задач';
+async function loadTargets() {
+  try { planTargets = await window.petya.feature('assignment', 'targets'); } catch { planTargets = { jira: false, asana: false }; }
+  window.plannerTargets = planTargets; return planTargets;
+}
+loadTargets();
+function chooseTarget() {
+  if (planTargets[planTarget]) return planTarget;
+  let saved = ''; try { saved = localStorage.getItem('petya-plan-target') || ''; } catch {}
+  return planTargets[saved] ? saved : planTargets.jira ? 'jira' : planTargets.asana ? 'asana' : '';
+}
+// Boards, sprints, versions and the Jira people search matter only when the plan goes to Jira.
+const jiraControls = [$('load-metadata'), $('metadata-status'), $('batch-board').closest('.row'), $('people-query').closest('label'), $('find-people'), $('load-metadata').previousElementSibling].filter(Boolean);
+function showTargetControls() { jiraControls.forEach(e => { e.hidden = planTarget === 'asana' || !planTargets.jira; }); $('assign-asana').hidden = planTarget !== 'asana'; }
+function renderTargets() {
+  const box = $('assign-target'); box.replaceChildren();
+  const available = ['jira', 'asana'].filter(t => planTargets[t]);
+  for (const t of available) {
+    const b = document.createElement('button'); b.type = 'button'; b.textContent = TARGET_NAME[t]; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', String(t === planTarget));
+    b.disabled = available.length < 2 || !!frozenBatch || workspaceBusy || assignBusy;
+    b.onclick = run(async () => {
+      if (t === planTarget) return;
+      planTarget = t; try { localStorage.setItem('petya-plan-target', t); } catch {}
+      showTargetControls(); if (t === 'asana') await loadAsanaProjects(); else if (activeJiraRoute && !$('batch-board').options.length) await refreshMetadata();
+      await assignPeople();
+    });
+    box.append(b);
+  }
+}
+async function loadAsanaProjects() {
+  const select = $('asana-project'); if (select.options.length > 1) return;
+  const projects = await window.petya.feature('assignment', 'asanaProjects');
+  let saved = ''; try { saved = localStorage.getItem('petya-asana-project') || ''; } catch {}
+  selectOptions(select, projects, projects.some(p => p.id === saved) ? saved : projects.length === 1 ? projects[0].id : '', 'Выберите проект');
+}
+async function assignPeople(force = false) {
+  const tasks = readTasks();
+  if (!tasks.length || !planTarget) { renderAssignSummary(); return; }
+  if (assignBusy) return; assignBusy = true;
+  const finished = lastDecompose && !lastDecompose.busy ? lastDecompose : null, started = Date.now();
+  renderDecomposeProgress({ stage: 'assigning', busy: true, startedAt: started });
+  try {
+    if (planTarget === 'asana') await loadAsanaProjects();
+    const result = await window.petya.feature('assignment', 'assign', { planId: batchId, command: commandSnapshot, tasks, target: planTarget, force });
+    assignment = result;
+    selectedPeople = [...new Map([...result.candidates, ...(planTarget === 'jira' ? jiraPeople.filter(p => !result.candidates.some(c => c.id === p.id)) : [])].map(p => [p.id, p])).values()];
+    [...document.querySelectorAll('.task-editor')].forEach((article, i) => {
+      const own = result.tasks[i] || {}, select = article.querySelector('.task-assignee');
+      selectOptions(select, selectedPeople, own.assigneeId || tasks[i].assigneeId || '', 'Выберите исполнителя', personLabel);
+      article.querySelector('.task-reason').textContent = own.assigneeId ? 'Почему ' + own.name.split(' ')[0] + ': ' + own.reason + (own.effort ? ` · размер ${own.effort}` : '') : own.reason || 'Выберите исполнителя.';
+    });
+  } finally {
+    assignBusy = false;
+    renderDecomposeProgress(finished || null);
+    renderAssignSummary();
+  }
+}
+// The summary is read from the task editors, so a hand change of an assignee shows at once.
+function renderAssignSummary() {
+  const box = $('assign-summary'), tasks = readTasks();
+  box.hidden = !tasks.length || !planTarget;
+  const button = $('submit-batch');
+  if (box.hidden) return;
+  renderTargets(); showTargetControls();
+  const byId = new Map(selectedPeople.map(p => [p.id, p])), groups = new Map(), unassigned = [];
+  tasks.forEach((t, i) => { if (!t.assigneeId) { unassigned.push(i); return; } if (!groups.has(t.assigneeId)) groups.set(t.assigneeId, []); groups.get(t.assigneeId).push(i); });
+  $('assign-overview').textContent = `${tasks.length} ${tasksWord(tasks.length)} · ${groups.size} ${groups.size % 10 === 1 && groups.size % 100 !== 11 ? 'человек' : groups.size % 10 >= 2 && groups.size % 10 <= 4 && (groups.size % 100 < 10 || groups.size % 100 >= 20) ? 'человека' : 'человек'}` + (unassigned.length ? ` · без исполнителя: ${unassigned.length}` : '') + (assignBusy ? ' · подбираю исполнителей…' : '');
+  const list = $('assign-people'); list.replaceChildren();
+  for (const [id, own] of [...groups].sort((a, b) => b[1].length - a[1].length)) {
+    const person = byId.get(id) || { name: id }, [name, role] = String(person.name).split(' · ');
+    const item = document.createElement('li'); item.className = 'assign-person';
+    const head = document.createElement('div'); head.className = 'assign-person-head';
+    const who = document.createElement('strong'); who.textContent = name;
+    const what = document.createElement('span'); what.className = 'small'; what.textContent = role || '';
+    const load = document.createElement('span'); load.className = 'assign-load';
+    load.textContent = person.open != null ? `открыто ${person.open} → ${person.open + own.length}` : `+${own.length}`;
+    load.title = person.open != null ? 'Открытых задач сейчас и после этого плана' : 'Текущая загрузка неизвестна';
+    head.append(who, what, load);
+    const names = document.createElement('ol'); for (const i of own) { const li = document.createElement('li'); li.value = i + 1; li.textContent = tasks[i].summary || 'Без названия'; names.append(li); }
+    item.append(head, names); list.append(item);
+  }
+  const open = $('assign-unassigned'); open.replaceChildren(); open.hidden = !unassigned.length;
+  if (unassigned.length) {
+    const title = document.createElement('strong'); title.textContent = 'Без исполнителя — выберите в задаче ниже:';
+    const rows = document.createElement('ol'); for (const i of unassigned) { const li = document.createElement('li'); li.value = i + 1; li.textContent = (tasks[i].summary || 'Без названия') + (assignment?.tasks[i]?.reason ? ' — ' + assignment.tasks[i].reason.replace(/ — выберите вручную$/, '') : ''); rows.append(li); }
+    open.append(title, rows);
+  }
+  const warnings = $('assign-warnings'); warnings.replaceChildren();
+  for (const w of assignment?.target === planTarget ? assignment.warnings : []) { const p = document.createElement('p'); p.textContent = w; warnings.append(p); }
+  // Where it goes and what is still missing before the single send.
+  const missing = [];
+  let where = '';
+  if (planTarget === 'jira') {
+    const sprint = $('batch-sprint').selectedOptions[0], version = $('batch-version').selectedOptions[0];
+    where = `Jira · ${batchTarget.project || 'проект не выбран'} · ${sprint?.value ? sprint.text : 'спринт не выбран'} · ${version?.value ? 'версия ' + version.text : 'версия не выбрана'}`;
+    if (!batchTarget.project) missing.push('проект Jira'); if (!sprint?.value) missing.push('спринт'); if (!version?.value) missing.push('версию');
+  } else {
+    const project = $('asana-project').selectedOptions[0];
+    where = `Asana · ${project?.value ? project.text : 'проект не выбран'}`; if (!project?.value) missing.push('проект Asana');
+  }
+  if (unassigned.length) missing.push('исполнителей для ' + unassigned.length + ' ' + taskWord(unassigned.length).replace('задачу', 'задачи'));
+  $('assign-where').textContent = where + (missing.length && !frozenBatch ? ' · выберите ' + missing.join(', ') : '');
+  button.textContent = frozenBatch ? 'Повторить только незавершённые действия' : `Отправить ${tasks.length} ${taskWord(tasks.length)} в ${TARGET_NAME[planTarget]}`;
+  button.disabled = workspaceBusy || assignBusy || (!frozenBatch && missing.length > 0);
+}
+async function sendPlan() { return planTarget === 'asana' ? sendAsana() : sendBatch(); }
+const ASANA_STATES = { ready: 'Ещё не отправлена', sending: 'Результат неизвестен — проверьте Asana', uncertain: 'Результат неизвестен — повтор заблокирован', created: 'Создана, зависимости не проставлены', rejected: 'Asana отклонила создание', done: 'Создана' };
+async function sendAsana() {
+  if (workspaceBusy) return;
+  workspaceBusy = true; lockPlan(true); $('submit-batch').disabled = true; $('close-workspace').disabled = true;
+  const payload = frozenBatch || { id: batchId, project: $('asana-project').value, tasks: readTasks() };
+  try {
+    try { localStorage.setItem('petya-asana-project', payload.project); } catch {}
+    const result = await window.petya.feature('assignment', 'asanaSend', payload); frozenBatch = payload;
+    const card = document.createElement('div'); card.className = 'context-item';
+    const done = result.rows.filter(r => r.state === 'done' || r.state === 'created').length;
+    const heading = document.createElement('strong'); heading.textContent = `Asana · ${result.project} · создано ${done} из ${result.rows.length}`; card.append(heading);
+    for (const row of result.rows) { const p = document.createElement('p'); p.className = 'small'; p.append(document.createTextNode(`${row.title} — ${ASANA_STATES[row.state] || row.state}${row.error ? ': ' + row.error : ''} `)); if (row.url) { const a = document.createElement('a'); a.href = row.url; a.textContent = 'открыть'; a.target = '_blank'; a.rel = 'noreferrer'; p.append(a); } card.append(p); }
+    $('batch-results').replaceChildren(card);
+    notice(`Asana: создано ${done} из ${result.rows.length}.`);
+    await window.petya.notify(`Asana: создано ${done} из ${result.rows.length} задач.`);
+  } catch (error) { notice(error.message, true); }
+  finally { workspaceBusy = false; lockPlan(!!frozenBatch); $('close-workspace').disabled = false; renderAssignSummary(); }
+}
+$('reassign').onclick = run(() => assignPeople(true));
+$('asana-project').onchange = () => renderAssignSummary();
+$('batch-sprint').addEventListener('change', () => renderAssignSummary()); $('batch-version').addEventListener('change', () => renderAssignSummary());
+$('batch-tasks').addEventListener('input', () => { clearTimeout(window.assignSummaryTimer); window.assignSummaryTimer = setTimeout(renderAssignSummary, 200); });
 $('find-docs').onclick = run(findDocs); $('load-metadata').onclick = run(refreshMetadata); $('batch-board').onchange = run(refreshMetadata);
 $('find-people').onclick = run(async () => { const people = await window.petya.jiraPeople($('people-query').value, activeJiraRoute?.id); mergePeople(people); notice(`Найдено исполнителей: ${people.length}. Выберите их в задачах.`); });
 $('decompose').onclick = run(decompose); $('add-task').onclick = () => { if ($('batch-tasks').children.length < 12) taskEditor(); else notice('Максимум 12 задач в пакете.'); };
-$('submit-batch').onclick = run(sendBatch); $('refresh-history').onclick = run(refreshHistory);
+$('submit-batch').onclick = run(sendPlan); $('refresh-history').onclick = run(refreshHistory);
 // History refreshes itself when opened; the manual button stays only as a fallback in the help section.
 document.addEventListener('petya-view', event => { if (event.detail === 'history') refreshHistory().catch(error => notice(error.message, true)); });
 $('refresh-history').hidden = true;
@@ -255,7 +395,12 @@ async function continueAutomaticBatch() {
   if (automaticBatchQuestions.length) {
     askVoiceQuestion(automaticBatchQuestions.join(' '), async answer => { commandSnapshot += '\nУточнение пользователя: ' + answer; await decompose(); }); return;
   }
-  for (const [id, title] of [['batch-board','доску'], ['batch-sprint','спринт'], ['batch-version','версию']]) {
+  if (planTarget === 'asana' && !$('asana-project').value) {
+    const options = [...$('asana-project').options].filter(o => o.value);
+    if (!options.length) { notice('В Asana нет доступных проектов.', true); await window.petya.requestAttention(); return; }
+    askVoiceChoices('В какой проект Asana отправить задачи? ' + options.map((o, i) => (i + 1) + '. ' + o.text).join('; '), options.map(o => ({ label: o.text, names: [o.text], run: async () => { $('asana-project').value = o.value; renderAssignSummary(); await continueAutomaticBatch(); } }))); return;
+  }
+  for (const [id, title] of planTarget === 'asana' ? [] : [['batch-board','доску'], ['batch-sprint','спринт'], ['batch-version','версию']]) {
     const select = $(id);
     if (!select.value) {
       const options = [...select.options].filter(o=>o.value);
@@ -278,7 +423,7 @@ async function continueAutomaticBatch() {
     ]); return;
   }
   voiceReply = null; automaticVoiceCommand = false;
-  await sendBatch();
+  await sendPlan();
 }
 
 for (const id of ['batch-sprint', 'batch-version']) $(id).addEventListener('change', run(continueAutomaticBatch));

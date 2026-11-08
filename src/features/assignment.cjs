@@ -9,20 +9,22 @@ const { Asana } = require('../asana.cjs');
 module.exports = {
   name: 'assignment',
   setup(s) {
-    const asana = new Asana({ settings: () => s.settings, request: s.request });
-    const workload = new Workload({ settings: () => s.settings, workspace: () => s.workspace, asana, modules: s.modules });
+    // The workspace's settings: the same as the app's, and the ones the planner's Jira calls use.
+    const live = () => s.workspace?.settings?.() || s.settings;
+    const asana = new Asana({ settings: live, request: s.request });
+    const workload = new Workload({ settings: live, workspace: () => s.workspace, asana, modules: s.modules });
     const suggested = new Map();
-    const members = () => { try { return require('../team.cjs').members(s.settings); } catch { return []; } };
+    const members = () => { try { return require('../team.cjs').members(live()); } catch { return []; } };
     async function suggest(planId, command, tasks, rows) {
       const key = JSON.stringify([planId, command, tasks.map(t => t.summary + '\n' + t.description), rows.map(r => r.key + r.name + r.role + r.responsibilities)]);
       if (suggested.get(planId)?.key === key) return suggested.get(planId);
       const empty = { key, suggestions: tasks.map(() => ({ effort: 'M', candidates: [] })), dropped: 0, model: false };
-      if (!s.settings.model || !rows.some(r => r.team)) return empty;
+      if (!live().model || !rows.some(r => r.team)) return empty;
       const { cards, dropped } = assign.cards(rows, tasks);
-      const body = assign.suggestRequest(s.settings.model, { command, tasks, team: cards });
+      const body = assign.suggestRequest(live().model, { command, tasks, team: cards });
       let result = empty;
       try {
-        const response = await s.request(s.core.localEndpoint(s.settings.ollamaUrl), { method: 'POST', headers: { 'Content-Type': 'application/json' }, timeoutMs: 10 * 60000, body: JSON.stringify(body) });
+        const response = await (s.workspace?.request || s.request)(s.core.localEndpoint(live().ollamaUrl), { method: 'POST', headers: { 'Content-Type': 'application/json' }, timeoutMs: 10 * 60000, body: JSON.stringify(body) });
         result = { key, suggestions: assign.parseSuggestions(response?.message?.content, tasks.length, rows), dropped, model: true };
       } catch (error) { result = { ...empty, error: error.message }; }
       suggested.set(planId, result); if (suggested.size > 20) suggested.delete(suggested.keys().next().value);
@@ -54,7 +56,7 @@ module.exports = {
         target,
         tasks: result.assignments.map(a => ({ assigneeId: a.key ? idOf(byKey.get(a.key)) : '', name: a.key ? byKey.get(a.key).name : '', reason: a.reason, effort: a.effort || '', named: !!a.named })),
         summary: { ...result.summary, people: result.summary.people.map(p => ({ ...p, id: idOf(byKey.get(p.key)) })) },
-        candidates: rows.filter(idOf).map(r => ({ id: idOf(r), name: r.name + (r.role ? ' · ' + r.role : '') })),
+        candidates: rows.filter(idOf).map(r => ({ id: idOf(r), name: r.name + (r.role ? ' · ' + r.role : ''), open: load.has(r.key) ? load.get(r.key) : null })),
         warnings
       };
     }

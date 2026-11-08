@@ -196,6 +196,7 @@ module.exports = async (win, workspace) => {
     await new Promise(resolve => setTimeout(resolve, 300)); // the stage change fades in
     if ($('decompose-progress').hidden || $('decompose-progress').classList.contains('live') || !$('decompose-stage').textContent.startsWith('План готов')) throw new Error('Decomposition progress missing');
     if (!$('batch-version').value || !$('batch-sprint').value) throw new Error('Missing planning metadata');
+    if ($('assign-summary').hidden || !$('submit-batch').textContent.startsWith('Отправить 2 задачи в Jira') || !$('assign-where').textContent.startsWith('Jira · TEST')) throw new Error('Plan summary missing: ' + $('submit-batch').textContent);
     await sendBatch();
     const history = await window.petya.batchHistory();
     if (!history[0].rows.every(r => r.state === 'done')) throw new Error('Batch did not complete');

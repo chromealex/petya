@@ -95,7 +95,7 @@ function balance(tasks, suggestions, rows, { ids = r => r.jiraId, load = new Map
       if (pick) {
         reason = pick.why || 'Подходит по роли';
         const best = [...scored].sort((a, b) => b.fit - a.fit)[0];
-        if (best.key !== pick.key) reason += ` · свободнее, чем ${rows.find(r => r.key === best.key).name}: ${load.get(pick.key) ?? '?'} открытых против ${load.get(best.key) ?? '?'}`;
+        if (best.key !== pick.key) reason += ` · свободнее, чем ${rows.find(r => r.key === best.key).name}: открыто ${load.get(pick.key) ?? "?"} против ${load.get(best.key) ?? "?"}`;
       }
     }
     if (!pick) { assignments[i] = { key: null, fit: 0, reason: s.candidates.some(c => c.fit >= MIN_FIT) ? 'У подходящих людей нет доступа к этой системе — выберите вручную' : 'Никто в команде не подходит — выберите вручную', alternatives: [] }; continue; }
