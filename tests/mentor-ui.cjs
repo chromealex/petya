@@ -21,7 +21,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.match(await js("document.querySelector('.mentor-row[data-type=skill] .mentor-pre').textContent"),/^---\nname: /);
  assert.match(await js("document.querySelector('.mentor-row[data-type=extension] .mentor-pre').textContent"),/"setting": "extension_my-/);
  assert.match(await js("document.querySelector('.mentor-row[data-type=schedule] .mentor-phrase').textContent"),/каждый день в 09:30$/);
- assert.match(await js("document.querySelector('.mentor-weekly').textContent"),/Еженедельный разбор выключен\.Присылать по пятницам в 17:00/);
+ assert.match(await js("document.querySelector('.mentor-weekly').textContent"),/Еженедельный разбор выключен\.Присылать по пятницам, 17:00/);
  assert.equal(await js("document.querySelectorAll('.mentor-card [data-no-i18n].mentor-title').length"),6,'the user\'s own words are not translated');
  // Open the first evidence and draft for the screenshot.
  await js("document.querySelector('.mentor-row .mentor-evidence').open=true;document.querySelector('.mentor-row[data-type=skill] .mentor-draft').open=true;document.querySelector('.mentor-how').open=true");

@@ -88,11 +88,11 @@
   how.append(ul);body.append(how);
   const w=c.weekly||{};
   const weekly=k.el('div','mentor-weekly');
-  if(w.enabled)weekly.append(k.el('span',null,'Еженедельный разбор: '+DAYS[w.day]+' в '+w.time+'.'));
+  if(w.enabled)weekly.append(k.el('span',null,'Еженедельный разбор: '+DAYS[w.day]+', '+w.time));
   else{
    weekly.append(k.el('span',null,'Еженедельный разбор выключен.'));
-   const on=k.el('button',null,'Присылать '+DAYS[w.day??5]+' в '+(w.time||'17:00'));on.type='button';
-   on.onclick=async()=>{on.disabled=true;try{await window.petya.saveSettings({mentorWeekly:'true'});weekly.replaceChildren(k.el('span',null,'Еженедельный разбор: '+DAYS[w.day??5]+' в '+(w.time||'17:00')+'.'));}catch(e){k.toast(e.message,{error:true});on.disabled=false;}};
+   const on=k.el('button',null,'Присылать '+DAYS[w.day??5]+', '+(w.time||'17:00'));on.type='button';
+   on.onclick=async()=>{on.disabled=true;try{await window.petya.saveSettings({mentorWeekly:'true'});weekly.replaceChildren(k.el('span',null,'Еженедельный разбор: '+DAYS[w.day??5]+', '+(w.time||'17:00')));}catch(e){k.toast(e.message,{error:true});on.disabled=false;}};
    weekly.append(on);
   }
   body.append(weekly);
