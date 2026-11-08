@@ -176,6 +176,7 @@ const dsCalls=calls=>calls.filter(c=>c.url.endsWith('/api/ds/query')).map(c=>JSO
   card=r.extensionData.grafanaCard;assert.equal(card.kind,'list');assert.equal(card.items.length,4);assert.equal(card.items[0].folder,'Infra','default folder first');
   assert.equal(card.items.find(i=>i.title==='Leagues').url,server.url+'/d/'+fake.UID+'/leagues','search url with the sub-path');
   assert.match(r.text,/^В Grafana 4 дашборда: /);
+  assert.equal((await app.turn(s,'покажи графану')).extensionData.grafanaCard.kind,'list','nothing named → the list');
   r=await app.turn(s,'найди дашборд про ретеншн');
   assert.equal(r.extensionData.grafanaCard.title,'Retention & Revenue','one hit opens it');
   r=await app.turn(s,'найди дашборд про котиков');assert.equal(r.question,true);assert.match(r.text,/нет дашборда про «котиков»/);

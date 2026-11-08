@@ -92,14 +92,14 @@ async function grafanaTurn(s,command,ask){
  }
  s.requestProgress?.report('Ищу дашборды Grafana');
  const list=await dashboards(s);
- if(ask.intent==='list'||!ask.words.length&&ask.intent!=='show'){
+ // Nothing named («открой графану», «какие дашборды есть»): the list.
+ if(ask.intent==='list'||!ask.words.length){
   const f=find.norm(c.folder);
   const sorted=[...list].sort((a,b)=>(f&&(find.norm(b.folder)===f||b.folderUid===c.folder))-(f&&(find.norm(a.folder)===f||a.folderUid===c.folder))||a.folder.localeCompare(b.folder)||a.title.localeCompare(b.title));
   const card=listCard(c,sorted,{total:list.length});
   const text=list.length?'В Grafana '+list.length+' '+kit.plural(list.length,['дашборд','дашборда','дашбордов'])+': '+sorted.slice(0,6).map(d=>'«'+d.title+'»').join(', ')+(list.length>6?' и другие':'')+'.':'Сервисный аккаунт Grafana не видит ни одного дашборда. Дайте ему доступ (роль Viewer) к нужным папкам.';
   return kit.reply(s,command,{by:BY,text,data:list.length?{grafanaCard:card}:undefined});
  }
- if(!ask.words.length)return kit.reply(s,command,{by:BY,question:true,text:'Какой дашборд открыть? Назовите его или пришлите ссылку из Grafana.'});
  const ranked=find.rank(list,ask.words,{folder:c.folder,strict:false});
  const choice=find.pick(ranked);
  const words=ask.words.join(' ');
