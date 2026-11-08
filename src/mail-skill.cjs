@@ -15,8 +15,9 @@ function cards(parts){
   from:String(m.from||'').slice(0,300),subject:String(m.subject||'').slice(0,300),date:String(m.date||'').slice(0,100),priority:!!m.priority,excerpt:String(m.text||'').replace(/\s+/g,' ').trim().slice(0,400)})));
  return mailItems.length?{extensionData:{mailItems}}:{};
 }
+const ADD='Добавить и проверить',BROWSER='Открыть почту в браузере';
 class MailSkill{
- constructor({learning,gmail,model}){Object.assign(this,{learning,gmail,model});}
+ constructor({learning,gmail,model,browse}){Object.assign(this,{learning,gmail,model,browse});}
  list(){return this.learning.list().recipes||[];}
  draft(){return this.learning.list().mailDraft;}
  setDraft(value){const state=this.learning.list();state.mailDraft=value;this.learning.commit(state);}
@@ -58,7 +59,13 @@ class MailSkill{
   if(!matched.length&&likely&&skills.length){try{const route=await this.model('Определи, просит ли пользователь СЕЙЧАС проверить почту одним из навыков. Вопросы о настройке, рассуждения, цитаты, отрицания и просьбы что-либо отправить не запускают навык. Верни id только при однозначном совпадении смысла, иначе пустую строку.',{command:c,skills:skills.map(r=>({id:r.id,phrases:r.phrases,name:r.name}))},{type:'object',properties:{id:{type:'string'}},required:['id'],additionalProperties:false});matched=skills.filter(r=>r.id===route.id);}catch{}}
   if(matched.length>1)return {handled:true,text:'Подходит несколько почтовых навыков. Уточните фразу или измените их в «Обучении».'};
   if(matched.length===1){try{return await this.run(matched[0]);}catch(e){return {handled:true,text:e.message};}}
-  if(likely&&/^(?:проверь|посмотри|прочитай|что там|есть ли|мне кто)/iu.test(c)&&!skills.length)return {handled:true,text:'Почтовый навык ещё не настроен. Скажите «научись проверять почту».'};return null;
+  // No mail skill yet: offer the standard one with a button and run it; declining opens the mail in Petya's browser.
+  const asks=likely&&/^(?:проверь|посмотри|прочитай|что там|есть ли|мне кто)/iu.test(c);
+  if(asks&&!skills.length&&this.list().length)return {handled:true,text:'Проверка почты выключена. Включите её в «Обучении → Почтовые навыки».'};
+  if(asks&&!skills.length)return require('./input-required.cjs').ask({text:'Проверку почты ещё не настроили. Добавить стандартную: непрочитанные входящие за 7 дней, без рассылок? Правила потом можно поменять в «Обучении → Почтовые навыки». Или открою почту в браузере Пети.',label:'Проверка почты',options:[ADD,BROWSER],strictChoices:true},async answer=>{
+   if(answer===ADD){const saved=this.put({...defaults,id:undefined});try{return await this.run(saved);}catch(e){return {handled:true,error:true,text:'Проверку почты добавил. '+e.message};}}
+   const browse=this.browse||(c=>require('./service-access.cjs').ServiceAccess.current?.browse('gmail',c));const opened=await browse(command);return opened||{handled:true,text:'Запрос отменён.'};});
+  return null;
  }
 }
 module.exports={MailSkill,validate,defaults};

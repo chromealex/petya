@@ -32,5 +32,11 @@ const {Gmail,clientConfig}=require('../src/gmail.cjs');
  enabled=false;await assert.rejects(()=>gmail.read(defaults),/Включите/);enabled=true;
  state.tokens.expiresAt=0;await gmail.access();assert.equal(state.tokens.access_token,'test');
  gmail.disconnect();assert.equal(state.tokens,undefined);await assert.rejects(()=>gmail.read(defaults),/Подключите/);
+ // «Проверь почту» without a skill offers the standard one with buttons; declining opens the mail in the browser.
+ {const {MailSkill:M}=require('../src/mail-skill.cjs');let st={};const learning={list:()=>st,commit:s=>{st=s;},commitUser:s=>{st=s;}};const browsed=[];
+  const m=new M({learning,gmail:{accounts:()=>[],read:async()=>({messages:[],at:Date.now()})},model:async()=>({}),browse:async c=>{browsed.push(c);return {handled:true,serviceBrowser:{}};}});
+  const ask=await m.turn('Проверь почту').then(()=>null,e=>e);assert.equal(ask?.name,'InputRequired');assert.deepEqual(ask.spec.options,['Добавить и проверить','Открыть почту в браузере']);
+  assert.match((await ask.resume('Добавить и проверить')).text,/Проверено/);assert.equal(st.recipes.length,1);
+  st={};const again=await m.turn('Проверь почту').then(()=>null,e=>e);assert.ok((await again.resume('Открыть почту в браузере')).serviceBrowser);assert.deepEqual(browsed,['Проверь почту']);assert.equal(st.recipes,undefined);}
  console.log('Mail skills: teaching, persistence, undo, trial, read-only Gmail, OAuth state/PKCE, refresh and disconnect passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});
