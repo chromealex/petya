@@ -110,7 +110,7 @@ const data=r=>r.extensionData||r.messages?.at(-1)?.extensionData;
  const all={monitoringPrometheusUrl:base+'/prom',monitoringAlertmanagerUrl:base+'/am',monitoringGrafanaUrl:base+'/grafana',monitoringGrafanaToken:grafanaToken};
 
  // --- Routing and near-misses ---
- const own=['что с серверами','всё ли живое','какие алерты горят','аптайм за неделю','почему лежит api','заглуши алерт на час','инциденты за неделю','что в Grafana','лежит прод?','живы ли сервера','найди все адреса серваков в проекте','какие сервера использует игра','собери адреса серверов из кода игры'];
+ const own=['что с серверами','всё ли живое','какие алерты горят','аптайм за неделю','почему лежит api','заглуши алерт на час','инциденты за неделю','что в Prometheus','лежит прод?','живы ли сервера','найди все адреса серваков в проекте','какие сервера использует игра','собери адреса серверов из кода игры'];
  for(const p of own)assert.ok(Q.about(p),'«'+p+'» is monitoring');
  const near=['мониторинг конкурентов','мониторинг упоминаний бренда','второй монитор не работает','настрой яркость монитора','аптайм компьютера','сколько аптайм у компа','поставь алерт в календаре','логи сервиса api за последний час','что с подами в kubernetes','почему падает контейнер postgres','что запущено в докере','адрес офиса','IP моего компьютера','какие эндпоинты в openapi проекта','проверь, отвечает ли staging','крэши за неделю','привет','что такое мониторинг'];
  for(const p of near)assert.ok(!Q.about(p),'«'+p+'» is not monitoring');
@@ -211,7 +211,7 @@ const data=r=>r.extensionData||r.messages?.at(-1)?.extensionData;
  assert.ok(card.incidents.some(e=>e.kind==='uptime'&&e.service==='payments'),'incidents from failed probes');
  assert.equal(card.uptime.length,2);assert.equal(card.uptime.find(u=>u.service==='web').percent,1);
  assert.equal(card.uptime.find(u=>u.service==='web').strip.length,30);
- assert.equal(card.canSilence,true);assert.equal(card.logs,'');
+ assert.equal(card.canSilence,true);assert.ok(['','offer'].includes(card.logs),'logs action: offer when «Логи сервера» exists but is not added');
  assert.match(reply.text,/Не работает: .*payments/);
  assert.ok(!seen.some(x=>x.method==='POST'),'reading never writes');
  // Grafana's token is sent as Bearer; without it the source is not ready.

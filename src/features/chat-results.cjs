@@ -1,20 +1,18 @@
-const fs=require('node:fs');
-const path=require('node:path');
 const {createHash}=require('node:crypto');
-const root=path.join(__dirname,'../extensions');
-const adapters=fs.readdirSync(root,{withFileTypes:true}).filter(row=>row.isDirectory())
-  .map(row=>path.join(root,row.name,'result.cjs')).filter(file=>fs.existsSync(file)).map(file=>require(file));
+// result.cjs of every live extension (src/extension-registry.cjs), re-read when extensions change.
+const registry=require('../extension-registry.cjs');
+const adapterList=()=>registry.cached('result-adapters',()=>registry.files('result.cjs').map(e=>registry.load(e,e.file)).filter(Boolean));
 
 // Plugins turn a service result (e.g. Google Play rows) into card data with `extract(result)` → {dataKey: value};
 // the host only stores it on the message as extensionData, the plugin's renderer draws it.
 function extract(result){
   const data={};
-  for(const adapter of adapters){if(typeof adapter.extract!=='function')continue;try{Object.assign(data,adapter.extract(result)||{});}catch{}}
+  for(const adapter of adapterList()){if(typeof adapter.extract!=='function')continue;try{Object.assign(data,adapter.extract(result)||{});}catch{}}
   return Object.keys(data).length?data:undefined;
 }
 function collect(topic,services){
-  return (topic?.messages||[]).flatMap((message,index)=>adapters.flatMap(adapter=>
-    (adapter.describe(message,topic,services)||[]).map(result=>({
+  return (topic?.messages||[]).flatMap((message,index)=>adapterList().flatMap(adapter=>
+    (typeof adapter.describe==='function'&&adapter.describe(message,topic,services)||[]).map(result=>({
       ...result,adapter,message,index,
       objectId:createHash('sha256').update(JSON.stringify([adapter.id,result.key])).digest('hex'),
       id:createHash('sha256').update(JSON.stringify([index,message.at||0,adapter.id,result.key])).digest('hex')

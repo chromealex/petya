@@ -1,0 +1,62 @@
+{
+ "v22-new-cancel-one": {
+  "passed": false,
+  "reason": "Inverted: uses final_key; value clarification lost.",
+  "answer_sha256": "7161e1b5d8178fedbe2e11f40420c40b727e40874ff013809d7c3744eed2cfff"
+ },
+ "v22-new-cancel-two": {
+  "passed": false,
+  "reason": "Inverted.",
+  "answer_sha256": "8c37b7389a4352e2231eaa8f3b1586fb535d08a5edea41f792d3d3b204536a75"
+ },
+ "v22-new-two-recipients": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "9cb6130219651111a539abbd5e3bf6a1ead364dcba87799ff7b6464375b76148"
+ },
+ "v22-new-revoke-send": {
+  "passed": false,
+  "reason": "«Дату не добавлять» lost.",
+  "answer_sha256": "76a5f6760dc619ffe585e55db0ada426dc27a2d3d73e848e6c776f1ccc23aad4"
+ },
+ "v22-new-restore-send": {
+  "passed": false,
+  "reason": "Object «талон» missing.",
+  "answer_sha256": "c91793ad20e24b270979ceeb58fdb45eddc2c67f1c95e985afaad7feb200564b"
+ },
+ "v22-new-code-item": {
+  "passed": false,
+  "reason": "Another set by a new code lost.",
+  "answer_sha256": "53bae1726719424066d96650861b670c1e2be55a88cde176b38a696ac8671324"
+ },
+ "v22-new-open-duration": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "84f2155caf46f0266d312d28da849a98d4af85a8752fcc4e6b99c5932d02ce5d"
+ },
+ "v22-new-exact-name": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "ec79d0e839c31a2e212435926f0f86476ce02607151ec9315e2f60b797000e2f"
+ },
+ "v22-new-screen-only": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "e4d775731ffd7b6df5a26a1d96711383a9853009108ea745210faa899cd7185b"
+ },
+ "v22-new-add-separate": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "ea34b73b7f5426c1b8c131fb7327ba02a9a99795613ddc6c7010b28a292007c7"
+ },
+ "v22-new-quote": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1143a06b3045c946fbe66ce308cc1b1ca20ee848788a7b27e6f737cd742e8396"
+ },
+ "v22-new-recipient-open": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "d6c81ac3f00222de765219202d0ebd0d5e42694f5f01f76ff24a6c7eb1d2d23f"
+ }
+}

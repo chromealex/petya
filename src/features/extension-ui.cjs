@@ -1,35 +1,17 @@
+// The extension catalog and renderer host data. Descriptors come from src/extension-registry.cjs (bundled
+// src/extensions/<id>, installed <userData>/extensions/<id>, and the development folder), validated there;
+// live installation, removal and development reloads are src/extension-runtime.cjs.
 const fs=require('node:fs');
 const path=require('node:path');
-const directory=path.join(__dirname,'../extensions');
+const registry=require('../extension-registry.cjs');
+const runtime=require('../extension-runtime.cjs');
 // Catalog categories: ordered groups, and the category of service modules that have no extension directory.
-const groups=JSON.parse(fs.readFileSync(path.join(directory,'categories.json'),'utf8'));
-const categoryIds=new Set(groups.categories.map(c=>c.id));
-const {KINDS}=require('./app-links.cjs');
+const groups=registry.categories();
 for(const [id,list] of Object.entries(groups.moduleExamples||{}))if(!groups.modules?.[id]||!Array.isArray(list)||!list.every(e=>typeof e==='string'&&e.trim()))throw Error('Invalid module examples '+id);
-const descriptors=fs.readdirSync(directory,{withFileTypes:true}).filter(e=>e.isDirectory()).map(e=>path.join(directory,e.name,'extension.json')).filter(fs.existsSync).map(file=>{
- const d=JSON.parse(fs.readFileSync(file,'utf8'));
- if(d.id!==path.basename(path.dirname(file))||!/^[a-z][a-z0-9-]*$/.test(d.id))throw Error('Invalid extension identity');
- for(const [script] of d.scripts){if(!/^[a-z][a-z0-9-]*\.js$/.test(script)||!fs.existsSync(path.join(path.dirname(file),script)))throw Error('Invalid extension renderer');}
- if(d.feature&&!/^[a-z][a-z0-9-]*\.cjs$/.test(d.feature))throw Error('Invalid extension feature');
- if(d.category!==undefined&&!categoryIds.has(d.category))throw Error('Unknown extension category '+d.category);
- // What the app downloads: [{id,name,bytes|{platform:bytes},approx?,optional?,requires?}].
- for(const item of d.downloads||[]){const sizes=typeof item.bytes==='object'?Object.values(item.bytes):[item.bytes];if(!/^[a-z][a-z0-9-]*$/.test(item.id||'')||!item.name||!sizes.every(n=>Number.isSafeInteger(n)&&n>0))throw Error('Invalid extension download '+d.id);}
- // Catalog presentation: what to say (examples), a monochrome stroke icon (inlined so it takes currentColor),
- // the service it connects to and the cross-app kinds its cards use.
- if(d.examples!==undefined&&!(Array.isArray(d.examples)&&d.examples.length&&d.examples.length<=6&&d.examples.every(e=>typeof e==='string'&&e.trim()&&e.length<=120)))throw Error('Invalid extension examples '+d.id);
- if(d.icon!==undefined){
-  if(!/^[a-z][a-z0-9-]*\.svg$/.test(d.icon))throw Error('Invalid extension icon '+d.id);
-  const svg=fs.readFileSync(path.join(path.dirname(file),d.icon),'utf8').trim();
-  if(!/^<svg[\s>]/.test(svg)||!svg.endsWith('</svg>')||/<script|<style|foreignObject|\son[a-z]+\s*=|href|url\(/i.test(svg))throw Error('Unsafe extension icon '+d.id);
-  d.iconSvg=svg;
- }
- if(d.uses!==undefined&&!(Array.isArray(d.uses)&&d.uses.every(k=>KINDS.includes(k))))throw Error('Invalid extension uses '+d.id);
- if(d.connects!==undefined&&!(typeof d.connects==='string'&&d.connects.trim()))throw Error('Invalid extension connects '+d.id);
- if(d.connectsKeys!==undefined&&!(Array.isArray(d.connectsKeys)&&d.connectsKeys.every(k=>/^[A-Za-z][\w-]*$/.test(k))))throw Error('Invalid extension connectsKeys '+d.id);
- if(d.markup){if(!/^[a-z][a-z0-9-]*\.html$/.test(d.markup))throw Error('Invalid settings template');d.template=fs.readFileSync(path.join(path.dirname(file),d.markup),'utf8');}
- return d;
-});
-const offers=new Map(descriptors.map(d=>[d.id,path.join(directory,d.id,'offer.cjs')]).filter(([,f])=>fs.existsSync(f)).map(([id,f])=>[id,require(f)]));
+const descriptors=()=>registry.descriptors();
+// Bundled features (and external ones present at startup) for src/features.cjs; later ones are added live.
+const features=[...descriptors().filter(d=>d.feature&&d.origin==='bundled').map(d=>require(path.join(d.dir,d.feature))),...runtime.startup()];
+const offerOf=d=>registry.cached('offer:'+d.id,()=>{const f=path.join(d.dir,'offer.cjs');return fs.existsSync(f)?registry.load(registry.entry(d.id)||{id:d.id,dir:d.dir,origin:d.origin},f):null;});
 let snapshot=()=>[];
 require('electron').ipcMain?.on('petya:extension-ui-bootstrap',event=>{event.returnValue=snapshot();});
 // Download sizes for this platform: what adding the app downloads (minus what is already here) and what it may
@@ -37,33 +19,61 @@ require('electron').ipcMain?.on('petya:extension-ui-bootstrap',event=>{event.ret
 const bytesOf=(item,platform=process.platform)=>typeof item.bytes==='object'?(item.bytes[platform]??Math.max(...Object.values(item.bytes))):item.bytes;
 async function sizes(services,{platform=process.platform,timeout=4000,free}={}){
  const out={};
- await Promise.all(descriptors.filter(d=>d.downloads?.length).map(async d=>{
-  let present=[];const file=path.join(directory,d.id,'downloads.cjs');
-  if(fs.existsSync(file))present=await Promise.race([require(file).present(services).catch(()=>[]),new Promise(r=>setTimeout(()=>r([]),timeout))]);
+ await Promise.all(descriptors().filter(d=>d.downloads?.length).map(async d=>{
+  let present=[];const file=path.join(d.dir,'downloads.cjs');
+  const module=fs.existsSync(file)?registry.load(registry.entry(d.id),file):null;
+  if(module)present=await Promise.race([Promise.resolve().then(()=>module.present(services)).catch(()=>[]),new Promise(r=>setTimeout(()=>r([]),timeout))]);
   const items=d.downloads.map(item=>({id:item.id,name:item.name,bytes:bytesOf(item,platform),approx:!!item.approx,optional:!!item.optional,requires:item.requires||'',present:present.includes(item.id)}));
   out[d.id]={items,install:items.filter(i=>!i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),optional:items.filter(i=>i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),approx:items.some(i=>i.approx)};
  }));
  let available=null;try{available=(free||(()=>require('../disk-space.cjs').inspectSpace(require('node:os').homedir(),0).available))();}catch{available=null;}
  return {apps:out,available,reserve:512*1024**2};
 }
-module.exports={name:'extensionUI',descriptors,groups,sizes,bytesOf,features:descriptors.filter(d=>d.feature).map(d=>require(path.join(directory,d.id,d.feature))),setup(s){
- // `connected` (only for apps that declare `connects`): the app's offer says it is connected (or ready), or one of its
- // `connectsKeys` settings is filled. Secrets themselves never leave the main process.
- const connected=d=>{
-  if(!d.connects)return null;
-  const offer=offers.get(d.id);
-  try{if(offer)return !!(offer.connected||offer.ready)(s.settings||{});}catch{return false;}
-  return (d.connectsKeys||[]).some(k=>!!String(s.settings?.[k]||'').trim());
- };
- const catalog=()=>descriptors.map(d=>({...d,installed:!d.setting||s.settings[d.setting]==='true',connected:connected(d)}));
+// `connected` (only for apps that declare `connects`): the app's offer says it is connected (or ready), or one of its
+// `connectsKeys` settings is filled. Secrets themselves never leave the main process.
+function connected(s,d){
+ if(!d.connects)return null;
+ const offer=offerOf(d);
+ try{if(offer)return !!(offer.connected||offer.ready)(s.settings||{});}catch{return false;}
+ return (d.connectsKeys||[]).some(k=>!!String(s.settings?.[k]||'').trim());
+}
+// Catalog rows: the descriptor, whether it is added and connected, and for external ones whether Petya must
+// restart to finish a removal or update.
+const rows=s=>descriptors().map(d=>({...d,installed:!d.setting||s.settings[d.setting]==='true',connected:connected(s,d),...d.origin!=='bundled'?{restart:runtime.needsRestart(d.id)}:{}}));
+const smokeOnly=s=>{if(!s.smoke)throw Error('Неизвестная функция.');};
+module.exports={name:'extensionUI',get descriptors(){return descriptors();},groups,sizes,bytesOf,features,rows,setup(s){
+ const catalog=()=>rows(s);
  snapshot=catalog;
- // Plugins may claim a chat turn (e.g. corrections to an open plan) through `turn(services, command)`.
- const pluginFeatures=module.exports.features.filter(f=>typeof f.turn==='function');
+ // Plugins may claim a chat turn (e.g. corrections to an open plan) through `turn(services, command)`;
+ // external ones only while they are loaded (a removed one stops answering at once).
+ const bundledTurns=features.filter(f=>!f.external&&typeof f.turn==='function');
  // A feature whose `claims(command)` is true goes first: its request quotes text that may name other apps' subjects
  // («как это звучит: кто сломал билд?» is about tone, not CI).
- const extensionTurn=async command=>{const first=pluginFeatures.filter(f=>{try{return typeof f.claims==='function'&&!!f.claims(command);}catch{return false;}});for(const f of [...first,...pluginFeatures.filter(f=>!first.includes(f))]){const reply=await f.turn(s,command);if(reply)return reply;}return null;};
- return {extensionTurn,ipc:{catalog,uninstall(id){const d=descriptors.find(d=>d.id===id);if(!d?.setting)throw Error('Это расширение нельзя удалить отдельно.');s.saveSettings({[d.setting]:'false'});return catalog();},install(id){const d=descriptors.find(d=>d.id===id);if(!d)throw Error('Расширение не найдено.');if(d.setting)s.saveSettings({[d.setting]:'true'});return catalog();},
+ const extensionTurn=async command=>{const all=[...bundledTurns,...runtime.active().filter(w=>w.turn)];const first=all.filter(f=>{try{return typeof f.claims==='function'&&!!f.claims(command);}catch{return false;}});for(const f of [...first,...all.filter(f=>!first.includes(f))]){const reply=await f.turn(s,command);if(reply)return reply;}return null;};
+ const find=id=>descriptors().find(d=>d.id===id);
+ const dialog=()=>require('electron').dialog;
+ return {extensionTurn,ipc:{catalog,uninstall(id){const d=find(id);if(!d?.setting)throw Error('Это расширение нельзя удалить отдельно.');s.saveSettings({[d.setting]:'false'});return catalog();},install(id){const d=find(id);if(!d)throw Error('Расширение не найдено.');if(d.setting)s.saveSettings({[d.setting]:'true'});return catalog();},
   // A whole category or the chosen part of it is added in one save.
-  installMany(ids){if(!Array.isArray(ids)||ids.length>100)throw Error('Неверный список расширений.');const patch={};for(const id of ids){const d=descriptors.find(d=>d.id===id);if(!d)throw Error('Расширение не найдено: '+id);if(d.setting)patch[d.setting]='true';}if(Object.keys(patch).length)s.saveSettings(patch);return catalog();},
-  categories:()=>groups,sizes:options=>sizes(s,options)}};
+  installMany(ids){if(!Array.isArray(ids)||ids.length>100)throw Error('Неверный список расширений.');const patch={};for(const id of ids){const d=find(id);if(!d)throw Error('Расширение не найдено: '+id);if(d.setting)patch[d.setting]='true';}if(Object.keys(patch).length)s.saveSettings(patch);return catalog();},
+  categories:()=>groups,sizes:options=>sizes(s,options),
+  // External extensions. The path always comes from the system dialog, never from the page; the review it
+  // returns must be confirmed before anything is installed.
+  async choosePackage(kind){
+   const folder=kind==='folder';
+   const result=await dialog().showOpenDialog(s.win,{title:require('../interface-language.cjs').t(folder?'Папка расширения':'Архив расширения'),properties:[folder?'openDirectory':'openFile'],...folder?{}:{filters:[{name:'Zip',extensions:['zip']}]}});
+   if(result.canceled||!result.filePaths[0])return null;
+   return runtime.inspect(result.filePaths[0]);
+  },
+  inspectPath(file){smokeOnly(s);return runtime.inspect(String(file));},
+  cancelReview:token=>runtime.cancel(String(token||'')),
+  installReviewed:(token,confirmed)=>runtime.install(String(token||''),confirmed),
+  removeExternal:id=>runtime.remove(String(id||'')),
+  openFolder(id){const d=find(id);if(!d||d.origin==='bundled')throw Error('Расширение не найдено.');return require('electron').shell.openPath(d.dir);},
+  problems:()=>registry.problems().filter(p=>p.origin!=='bundled').map(p=>({id:p.id||'',origin:p.origin,message:p.message,where:p.where||''})),
+  devStatus:()=>runtime.devStatus(),
+  async chooseDevFolder(){const result=await dialog().showOpenDialog(s.win,{title:require('../interface-language.cjs').t('Папка разработки расширения'),properties:['openDirectory','createDirectory']});if(result.canceled||!result.filePaths[0])return runtime.devStatus();return runtime.setDev(result.filePaths[0]);},
+  setDevFolderPath(folder){smokeOnly(s);return runtime.setDev(folder?String(folder):null);},
+  clearDevFolder:()=>runtime.setDev(null),
+  reloadDev:()=>runtime.reload(),
+  restart(){if(s.smoke)return false;const {app}=require('electron');app.relaunch({args:process.argv.slice(1).filter(a=>a!=='--hidden')});app.quit();return true;}}};
 }};

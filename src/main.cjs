@@ -112,6 +112,20 @@ function loadSettings() {
   for (const feature of features) feature.migrate?.(settings, saved, { dataRoot });
   useBundledSpeech(settings);
 }
+// A feature added while Petya runs (an installed extension): its defaults and secrets join the settings, and
+// values saved earlier (an extension removed and installed again) are read back.
+function adoptFeatureSettings(feature) {
+  for (const key of feature.secrets || []) if (!secrets.includes(key)) secrets.push(key);
+  let saved = {};
+  try { saved = JSON.parse(fs.readFileSync(file(), 'utf8')); } catch { saved = {}; }
+  for (const [key, value] of Object.entries(feature.defaults || {})) {
+    if (!Object.hasOwn(defaults, key)) defaults[key] = value;
+    if (Object.hasOwn(settings, key)) continue;
+    try { settings[key] = typeof saved[key] === 'string' ? (secrets.includes(key) && saved[key] ? safeStorage.decryptString(Buffer.from(saved[key], 'base64')) : saved[key]) : defaults[key]; }
+    catch { settings[key] = defaults[key]; }
+  }
+  feature.migrate?.(settings, saved, { dataRoot });
+}
 function useBundledSpeech(target) {
   target.whisperModel = upgradeBundledModel(target.whisperModel, defaults.whisperModel, runtimeCandidates);
   for (const key of ['whisperBinary', 'whisperModel']) {
@@ -670,7 +684,9 @@ function setupHandlers() {
   // A feature returns services (added to `services`) and optionally `ipc` methods, reachable from the UI as
   // window.petya.feature(name, method, ...args) — so features need no preload or main.cjs edits either.
   const featureIpc = new Map();
-  for (const feature of features) { const { ipc, ...provided } = feature.setup(services) || {}; if (ipc) featureIpc.set(feature.name, ipc); for (const [key, value] of Object.entries(provided)) Object.defineProperty(services, key, { value, enumerable: true, configurable: true }); }
+  for (const feature of features) { if (feature.external) continue; const { ipc, ...provided } = feature.setup(services) || {}; if (ipc) featureIpc.set(feature.name, ipc); for (const [key, value] of Object.entries(provided)) Object.defineProperty(services, key, { value, enumerable: true, configurable: true }); }
+  // Installed and development extensions (outside the app bundle) are set up, added and removed live by the runtime.
+  require('./extension-runtime.cjs').bind({ services, featureIpc, features, adopt: adoptFeatureSettings });
   routeModelRequest=services.modelRuntime.routeRequest;
   if(smoke)globalThis.petyaTestServices=services; // tests reach feature services in smoke mode only
   if(services.dashboards){trayDashboards=()=>services.dashboards.menu();services.dashboards.onChange=refreshTrayMenu;refreshTrayMenu();}

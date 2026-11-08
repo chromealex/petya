@@ -1,8 +1,8 @@
 # Extension UI ownership
 
-Every bundled extension directory declares `extension.json`. The generic host discovers these descriptors; application HTML does not list extension scripts. Descriptors declare the setting that activates the extension, renderer scripts and their startup dependency, optional backend feature, settings markup and chat result renderers.
+Every extension directory declares `extension.json`. The generic host discovers these descriptors through `src/extension-registry.cjs` (bundled `src/extensions/<id>`, installed `<userData>/extensions/<id>`, the development folder); application HTML does not list extension scripts. Descriptors declare the setting that activates the extension, renderer scripts and their startup dependency, optional backend feature, settings markup and chat result renderers. The full specification is [extensions.md](extensions.md).
 
-Settings controls, labels, model choices and handlers belong to the extension. The host provides the catalog, loading, disclosure container and navigation. Bundled renderers run with the existing renderer bridge; this is not a sandbox for arbitrary downloaded JavaScript.
+Settings controls, labels, model choices and handlers belong to the extension. The host provides the catalog, loading, disclosure container and navigation. Renderers run with the existing renderer bridge; this is not a sandbox: installed extensions are trusted on install after a review dialog (see extensions.md §14), and their renderer files load only through `petya-ext://<id>/`.
 
 Audit:
 
@@ -22,7 +22,7 @@ Service connection forms remain mounted for compatibility with the shared settin
 
 ## App catalog
 
-`src/ui/app-catalog.js` (`window.openAppCatalog(term)`) lists service modules and every extension with an activation setting. It is a large dialog: a rail («Все», «Добавленные», «Требуют настройки», categories with added/total), search over name, description, category and example phrases («/» focuses it), category sections of tiles and a details panel (Esc closes it before the catalog). A tile shows one action: «Добавить», «Подключить» (added but not connected) or «Открыть» (details). Several apps are added through «Выбрать несколько» or the tile checkboxes that appear on hover/focus, with the bar showing the download size and a free-space warning.
+`src/ui/app-catalog.js` (`window.openAppCatalog(term)`) lists service modules and every extension with an activation setting. It is a large dialog: a rail («Все», «Добавленные», «Требуют настройки», «Сторонние» when installed or development extensions exist, categories with added/total), «Установить из файла…» (a folder or .zip, then a review dialog; see extensions.md §14), search over name, description, category and example phrases («/» focuses it), category sections of tiles and a details panel (Esc closes it before the catalog). A tile shows one action: «Добавить», «Подключить» (added but not connected) or «Открыть» (details). Several apps are added through «Выбрать несколько» or the tile checkboxes that appear on hover/focus, with the bar showing the download size and a free-space warning.
 
 What the catalog reads from `extension.json`, besides `name`, `description`, `category` and `downloads`:
 

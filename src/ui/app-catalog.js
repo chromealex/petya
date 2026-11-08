@@ -24,6 +24,60 @@
  const search='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>';
  // Cross-app capability kinds (src/features/app-links.cjs) as the catalog names them.
  const KIND_NAMES={'video-meeting':'Видеозвонок','task-tracker':'Задача в трекер','share-message':'Сообщение в канал','code-fix':'Починка кода','meeting-recording':'Запись встречи','reminder-trigger':'Напоминание по событию','journal-source':'Дневник дня','meeting-source':'Распознавание встреч','metrics-source':'Источник метрик','crash-source':'Источник крэшей','support-source':'Источник тикетов','ad-source':'Источник рекламы','spreadsheet-export':'Выгрузка в таблицу','release-check':'Пункт релизного чек-листа'};
+ const ORIGIN_NAMES={external:'Стороннее',dev:'Разработка'};
+
+ // Review before installing an extension from a folder or .zip: everything it declares, and a clear warning that
+ // it runs with full access. Nothing is installed until «Установить» is pressed with the box checked.
+ // Resolves to the install result, or null when cancelled.
+ window.reviewExtension=review=>new Promise(resolve=>{
+  const make=(tag,text,cls)=>{const n=document.createElement(tag);if(text)n.textContent=text;if(cls)n.className=cls;return n;};
+  const d=make('dialog','','extension-review');d.setAttribute('aria-labelledby','extension-review-title');
+  const top=make('div','','extension-review-top'),icon=make('span','','app-icon app-icon-large');icon.setAttribute('aria-hidden','true');icon.style.setProperty('--hue',review.hue??200);
+  if(review.iconSvg)icon.innerHTML=review.iconSvg;else icon.textContent=review.name.slice(0,1);
+  const title=make('div');const h=make('h2',review.name);h.id='extension-review-title';h.dataset.noI18n='';
+  const sub=make('p','','extension-review-id');const code=make('code',review.id);sub.append(code);if(review.version){const v=make('span',' · '+review.version);v.dataset.noI18n='';sub.append(v);}
+  title.append(h,sub);top.append(icon,title);
+  const lead=make('p',review.update?(review.update.order>0?'Обновление установленного расширения: ':review.update.order<0?'Это более старая версия, чем установленная: ':'Эта версия уже установлена. Установить заново?'):'Установить стороннее расширение?','extension-review-lead');
+  if(review.update&&review.update.order!==0){const v=make('strong',(review.update.from||'—')+' → '+(review.update.to||'—'));v.dataset.noI18n='';lead.append(v);}
+  const description=make('p',review.description,'extension-review-description');description.dataset.noI18n='';
+  const warn=make('div','','extension-review-warning');warn.setAttribute('role','alert');
+  warn.append(make('strong','Полный доступ к компьютеру и данным'),make('p','Расширение работает внутри Пети без изоляции: оно может читать и менять ваши файлы, переписку, задачи и подключения, запускать программы и отправлять данные в интернет. Устанавливайте только расширения авторов, которым доверяете.'));
+  const facts=make('dl','','extension-review-facts');
+  const row=(label,value,raw)=>{if(!value)return;const dd=make('dd',value);if(raw)dd.dataset.noI18n='';facts.append(make('dt',label),dd);};
+  const size=n=>n>=1e6?(n/1e6).toLocaleString(window.petyaLocale||'ru-RU',{maximumFractionDigits:1})+' МБ':Math.max(1,Math.round(n/1e3)).toLocaleString(window.petyaLocale||'ru-RU')+' КБ';
+  row('Автор',review.author||'не указан',!!review.author);
+  row('Категория',review.category);
+  row('Подключается к',review.connects,true);
+  row('Даёт другим приложениям',review.provides.map(k=>KIND_NAMES[k]||k).join(', '));
+  row('Использует',review.uses.map(k=>KIND_NAMES[k]||k).join(', '));
+  row('Загрузки',review.downloads.map(i=>i.name+' · '+size(i.bytes)+(i.optional?' (по желанию)':'')).join('; '),true);
+  row('Код',[review.feature?'в основном процессе Пети (feature.cjs)':'',review.scripts?'скрипты в окне Пети: '+review.scripts:''].filter(Boolean).join('; ')||'только описание');
+  row('Файлы',review.files+' · '+size(review.bytes));
+  const consent=make('label','','check extension-review-consent'),box=make('input');box.type='checkbox';box.id='extension-review-consent';
+  consent.append(box,make('span','Я доверяю автору и понимаю, что расширение получит полный доступ'));
+  const status=make('p','','extension-review-status');status.setAttribute('role','status');
+  const actions=make('div','','extension-review-actions'),no=make('button','Отмена'),yes=make('button',review.update?(review.update.order>0?'Обновить':'Установить заново'):'Установить','primary');
+  no.type=yes.type='button';yes.disabled=true;yes.dataset.action='install';no.dataset.action='cancel';
+  box.onchange=()=>{yes.disabled=!box.checked;};
+  let done=false;
+  const finish=value=>{if(done)return;done=true;d.close();d.remove();resolve(value);};
+  no.onclick=()=>{window.petya.feature('extensionUI','cancelReview',review.token).catch(()=>{});finish(null);};
+  d.addEventListener('cancel',event=>{event.preventDefault();if(!no.disabled)no.click();});
+  yes.onclick=async()=>{
+   if(!box.checked)return;yes.disabled=no.disabled=true;status.textContent='Устанавливаю…';
+   try{
+    const result=await window.petya.feature('extensionUI','installReviewed',review.token,true);
+    if(!result.restart)await window.extensionHost?.installed(review.id);
+    notice(result.restart?'«'+review.name+'» установлено. Перезапустите Петю, чтобы загрузить новую версию.':result.loaded===false?'«'+review.name+'» установлено, но не загрузилось: подробности в уведомлениях.':'«'+review.name+'» установлено.',result.loaded===false);
+    finish(result);
+   }catch(error){status.textContent=error.message;no.disabled=false;}
+  };
+  actions.append(no,yes);
+  d.append(top,lead,description,warn,facts,consent,status,actions);
+  document.body.append(d);d.showModal();no.focus();
+ });
+ // Picks a folder or a .zip with the system dialog (the path never comes from the page) and opens the review.
+ window.installExtensionFrom=async kind=>{const review=await window.petya.feature('extensionUI','choosePackage',kind);return review?window.reviewExtension(review):null;};
  // Saved credentials of service modules (flags from settings, never the secrets themselves).
  const SERVICE_FLAGS={slack:['hasSlackToken','hasSlackOAuth'],notion:['hasNotionToken','hasNotionOAuth'],jira:['hasJiraToken','hasAtlassianOAuth'],confluence:['hasJiraToken','hasAtlassianOAuth'],asana:['hasAsanaOAuth'],telegram:['hasTelegram'],googleplay:['hasGooglePlay'],gmail:['hasGmail','hasMicrosoft']};
 
@@ -40,7 +94,7 @@
   const categoryOf=id=>categories.find(c=>c.id===id)||categories.at(-1);
 
   // State: the rail filter, the opened app, the chosen (not yet added) apps and whether checkboxes are shown.
-  let filter='all',openId=null,selecting=false;const chosen=new Set();
+  let filter='all',openId=null,selecting=false,confirmRemove=null;const chosen=new Set();
   let weights={apps:{},available:null,reserve:0};
   const unit=u=>/^ru/i.test(window.petyaLocale||'ru')?u:({ГБ:'GB',МБ:'MB',КБ:'KB'}[u]||u);
   const size=n=>{const gb=n/1e9;return gb>=1?gb.toLocaleString(window.petyaLocale||'ru-RU',{maximumFractionDigits:1})+' '+unit('ГБ'):Math.max(1,Math.round(n/1e6)).toLocaleString(window.petyaLocale||'ru-RU')+' '+unit('МБ');};
@@ -55,7 +109,7 @@
     const serviceFlags=item.service?SERVICE_FLAGS[item.id]:null;
     const connected=serviceFlags?serviceFlags.some(k=>!!flags?.[k]):(e?.connects?!!e.connected:null);
     const connects=serviceFlags?item.name:(e?.connects||'');
-    return {...item,category,enabled,connects,connected,needsConnection:enabled&&connected===false,
+    return {...item,category,enabled,connects,connected,needsConnection:enabled&&connected===false,origin:e?.origin||'bundled',version:e?.version||'',author:e?.author||'',restart:e?.restart||'',
      description:e?.description||descriptions[item.id]||'',examples:e?.examples||groups.moduleExamples?.[item.id]||[],
      settings:item.service||!!e?.settings};
    });
@@ -68,7 +122,17 @@
   find.innerHTML=search;input.type='search';input.placeholder='Название, задача или фраза';input.setAttribute('aria-label','Найти приложение');input.value=term;input.setAttribute('aria-keyshortcuts','/');find.append(input,make('kbd','/'));
   close.innerHTML=cross;close.title='Закрыть';close.setAttribute('aria-label','Закрыть каталог');
   pickMode.setAttribute('aria-pressed','false');
-  head.append(title,find,pickMode,close);
+  // Installing from a file: a small menu, since one system dialog cannot pick both a folder and a file everywhere.
+  const fromFile=make('div','','app-catalog-file'),fromButton=button('Установить из файла…','app-catalog-install'),fromMenu=make('div','','app-catalog-file-menu');
+  // Icon and text; narrow windows keep only the icon (the label stays as the name and the tooltip).
+  fromButton.replaceChildren();fromButton.insertAdjacentHTML('afterbegin','<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19h14"/></svg>');
+  fromButton.append(make('span','Установить из файла…','app-catalog-install-text'));fromButton.title='Установить из файла…';fromButton.setAttribute('aria-label','Установить из файла…');
+  fromButton.setAttribute('aria-haspopup','menu');fromButton.setAttribute('aria-expanded','false');fromMenu.hidden=true;fromMenu.setAttribute('role','menu');
+  const fromKind=(label,kind)=>{const b=button(label,'',()=>busy(b,async()=>{fromMenu.hidden=true;fromButton.setAttribute('aria-expanded','false');const result=await window.installExtensionFrom(kind);if(result?.id){filter='external';input.value='';await refresh();showDetails(result.id);}}));b.setAttribute('role','menuitem');b.dataset.kind=kind;return b;};
+  fromMenu.append(fromKind('Архив .zip…','zip'),fromKind('Папка…','folder'));
+  fromButton.onclick=()=>{fromMenu.hidden=!fromMenu.hidden;fromButton.setAttribute('aria-expanded',String(!fromMenu.hidden));};
+  fromFile.append(fromButton,fromMenu);
+  head.append(title,find,fromFile,pickMode,close);
   const rail=make('nav','','app-catalog-rail'),body=make('div','','app-catalog-body'),content=make('div','','app-catalog-content'),details=make('aside','','app-catalog-details'),bar=make('div','','app-catalog-bar');
   rail.setAttribute('aria-label','Разделы каталога');details.hidden=true;details.tabIndex=-1;details.setAttribute('aria-label','Подробнее о приложении');bar.hidden=true;
   body.append(content,details);
@@ -127,6 +191,7 @@
    const text=make('span','','app-tile-text');text.append(make('strong',item.name),make('span',item.description,'app-tile-description'));
    main.append(icon(item),text);main.setAttribute('aria-label',item.name);main.setAttribute('aria-description',item.description);
    const foot=make('div','','app-tile-foot'),s=status(item);if(s)foot.append(s);
+   if(item.origin!=='bundled'){const o=make('span',ORIGIN_NAMES[item.origin],'app-origin');o.dataset.origin=item.origin;foot.append(o);}
    const bytes=!item.enabled&&weights.apps[item.id]?.install;
    if(bytes){const w=make('span','≈ '+size(bytes),'app-weight');w.title='Вес загрузки: ≈ '+size(bytes);foot.append(w);}
    const action=state==='connect'?button('Подключить','app-tile-action',()=>busy(action,()=>openSettings(item)))
@@ -168,6 +233,8 @@
    entry('all','Все',String(all.length));
    entry('added','Добавленные',String(added));
    if(connect)entry('connect','Требуют настройки',String(connect),'app-rail-warn');
+   const external=all.filter(i=>i.origin!=='bundled').length;
+   if(external)entry('external','Сторонние',String(external));
    rail.append(make('hr'));
    for(const group of categories){const members=all.filter(i=>i.category===group.id);if(!members.length)continue;
     const b=entry(group.id,group.name,members.filter(i=>i.enabled).length+'/'+members.length);b.style.setProperty('--hue',group.hue??200);b.prepend(make('span','','app-rail-swatch'));}
@@ -175,15 +242,15 @@
 
   function draw(){
    const keep=content.scrollTop,all=items(),q=lower(input.value.trim());
-   if(filter==='connect'&&!all.some(i=>i.needsConnection))filter='all';
+   if(filter==='connect'&&!all.some(i=>i.needsConnection)||filter==='external'&&!all.some(i=>i.origin!=='bundled'))filter='all';
    paintRail(all);content.replaceChildren();
    const match=q?all.filter(i=>haystack(i).includes(q)):all;
    const scope=q?'all':filter;
    if(q){const n=make('p','','app-catalog-found');n.textContent=match.length?'Найдено: '+match.length:'';content.append(n);}
    for(const group of categories){
-    if(!['all','added','connect'].includes(scope)&&scope!==group.id)continue;
+    if(!['all','added','connect','external'].includes(scope)&&scope!==group.id)continue;
     const members=all.filter(i=>i.category===group.id);
-    const shown=match.filter(i=>i.category===group.id&&(scope==='added'?i.enabled:scope==='connect'?i.needsConnection:true));
+    const shown=match.filter(i=>i.category===group.id&&(scope==='added'?i.enabled:scope==='connect'?i.needsConnection:scope==='external'?i.origin!=='bundled':true));
     if(!shown.length)continue;
     content.append(section(group,members,shown,{addAll:!q&&(scope==='all'||scope===group.id)}));
    }
@@ -215,7 +282,7 @@
   }
 
   // Details: what the app does, what to say, its connection, downloads, neighbours and removal.
-  function showDetails(id){openId=id;draw();details.focus({preventScroll:true});}
+  function showDetails(id){if(openId!==id)confirmRemove=null;openId=id;draw();details.focus({preventScroll:true});}
   function hideDetails(){const id=openId;openId=null;details.hidden=true;d.classList.remove('with-details');content.querySelector('.app-tile[data-app="'+id+'"] .app-tile-main')?.focus();}
   function paintDetails(item){
    if(!item){hideDetails();return;}
@@ -279,7 +346,34 @@
     }
     box.append(list);details.append(box);
    }
-   if(item.enabled){
+   if(item.origin!=='bundled'){
+    // Installed or development extension: where it came from, its folder, a restart when its code waits to unload,
+    // and removal from the computer (asked first: the files are deleted).
+    const box=make('section','','app-details-section app-details-external');box.append(make('h4',item.origin==='dev'?'Расширение в разработке':'Стороннее расширение'));
+    const meta=[item.version?'Версия '+item.version:'',item.author?'Автор: '+item.author:''].filter(Boolean);
+    if(meta.length){const p=make('p',meta.join(' · '),'app-details-note');p.dataset.noI18n='';box.append(p);}
+    box.append(make('p',item.origin==='dev'?'Загружено из папки разработки и перезагружается при сохранении файлов.':'Установлено из файла. Работает с полным доступом к компьютеру и данным.','app-details-note'));
+    if(item.restart){box.append(make('p','Перезапустите Петю, чтобы выгрузить прежний код расширения.','app-details-restart'));box.append(button('Перезапустить','app-details-link',function(){busy(this,()=>window.petya.feature('extensionUI','restart'));}));}
+    const row=make('div','','app-details-actions');
+    row.append(button('Открыть папку','app-details-link',function(){busy(this,()=>window.petya.feature('extensionUI','openFolder',item.id));}));
+    if(item.origin==='external'){
+     const remove=window.deleteButton('Удалить «'+item.name+'» с компьютера');remove.classList.add('app-details-remove');
+     // The question survives redraws of the panel (sizes arriving, refreshes) until answered.
+     remove.onclick=()=>{confirmRemove=item.id;draw();details.querySelector('.app-details-confirm [data-action=cancel-remove]')?.focus();};
+     row.append(remove);
+    }
+    box.append(row);
+    if(confirmRemove===item.id){
+     const ask=make('div','','app-details-confirm');ask.setAttribute('role','alert');
+     ask.append(make('p','Удалить «'+item.name+'» с компьютера? Файлы расширения будут удалены, его настройки останутся.'));
+     const yes=button('Удалить','danger',()=>busy(yes,async()=>{const result=await window.petya.feature('extensionUI','removeExternal',item.id);confirmRemove=null;await window.extensionHost?.refresh();document.dispatchEvent(new Event('petya-extensions-changed'));notice(result.restart?'«'+item.name+'» удалено. Перезапустите Петю, чтобы выгрузить его код.':'«'+item.name+'» удалено.');openId=null;await refresh();}));
+     yes.dataset.action='confirm-remove';
+     const no=button('Отмена','',()=>{confirmRemove=null;draw();});no.dataset.action='cancel-remove';
+     const actions=make('div','','app-details-actions');actions.append(yes,no);ask.append(actions);box.append(ask);
+    }
+    details.append(box);
+   }
+   if(item.enabled&&item.origin==='bundled'){
     const remove=window.asDeleteButton?window.asDeleteButton(button('','app-details-remove'),'Удалить '+item.name):button('','app-details-remove');if(!window.asDeleteButton){remove.innerHTML=trash;remove.setAttribute('aria-label','Удалить '+item.name);}
     remove.onclick=()=>busy(remove,async()=>{await window.removeAddedApp(item.id);await refresh();});
     details.append(remove);
@@ -290,6 +384,7 @@
   input.oninput=()=>{openId=null;draw();content.scrollTop=0;};
   // Esc closes the details first, then the catalog; «/» jumps to search.
   d.addEventListener('keydown',event=>{
+   if(event.key==='Escape'&&!fromMenu.hidden){event.preventDefault();event.stopPropagation();fromMenu.hidden=true;fromButton.setAttribute('aria-expanded','false');fromButton.focus();return;}
    if(event.key==='Escape'&&openId){event.preventDefault();event.stopPropagation();hideDetails();return;}
    if(event.key==='/'&&!event.target.closest('input,textarea,[contenteditable]')){event.preventDefault();input.focus();input.select();}
   },true);

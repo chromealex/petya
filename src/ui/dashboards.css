@@ -40,12 +40,24 @@
 .dash-chip.demo b{color:#ffd07d}
 
 /* The grid */
-.dash-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:var(--dash-gap);align-items:stretch;grid-auto-flow:row}
-.dash-widget{grid-column:span var(--span,3);min-width:0;display:flex;flex-direction:column;border-radius:16px;border:1px solid #ffffff0f;
+.dash-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:20px;gap:12px;position:relative}
+.dash-widget{position:relative;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;border-radius:16px;border:1px solid #ffffff0f;
   background:linear-gradient(180deg,#1c2221 0%,#171c1b 100%);box-shadow:0 1px 0 #ffffff08 inset,0 8px 24px -16px #0009;transition:border-color .15s,box-shadow .15s}
 .dash-widget:hover{border-color:#ffffff1c}
-.dash-widget.moving{opacity:.4;outline:1px dashed #ffffff40}
-@media (max-width:1100px){.dash-screen .dash-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-screen .dash-widget{grid-column:span 1}.dash-screen .dash-widget[data-size=w],.dash-screen .dash-widget[data-size=l]{grid-column:1/-1}}
+/* Narrow: widgets stack in reading order, at their natural height */
+.dash-grid.stacked{grid-template-columns:minmax(0,1fr);grid-auto-rows:auto}
+.dash-grid.stacked>.dash-widget{grid-column:auto!important;grid-row:auto!important;overflow:visible}
+.dash-grid.stacked .dash-resize,.dash-grid.stacked .dash-widget-drag{display:none}
+/* Arranging: column guides, the target cell, the widget in hand */
+.dash-grid.editing{user-select:none;background-image:repeating-linear-gradient(90deg,#ffffff06 0 calc((100% - 132px)/12),transparent calc((100% - 132px)/12) calc((100% - 132px)/12 + 12px));border-radius:16px}
+.dash-ghost-cell{border:2px dashed #d0f59666;border-radius:16px;background:#d0f5960c;pointer-events:none;z-index:0}
+.dash-ghost-cell[hidden]{display:none}
+.dash-widget.dragging{z-index:5;cursor:grabbing;box-shadow:0 24px 48px -12px #000c,0 0 0 1px #d0f59655;opacity:.96}
+.dash-widget.dragging .dash-widget-head{cursor:grabbing}
+.dash-widget.resizing{z-index:4;box-shadow:0 0 0 1px #d0f59666}
+.dash-resize{position:absolute;right:3px;bottom:3px;width:16px;height:16px;cursor:nwse-resize;opacity:0;transition:opacity .15s;border-radius:0 0 12px 0;
+  background:linear-gradient(135deg,transparent 0 55%,#ffffff40 55% 62%,transparent 62% 72%,#ffffff40 72% 79%,transparent 79%)}
+.dash-widget:hover .dash-resize,.dash-widget.resizing .dash-resize{opacity:1}
 
 .dash-widget-head{display:flex;align-items:flex-start;gap:8px;padding:14px 12px 4px 16px;margin:0;border:0;letter-spacing:normal;font-size:inherit;color:inherit}
 .dash-widget-names{flex:1;min-width:0}
@@ -57,9 +69,9 @@
 .dash-widget-tools{display:flex;gap:0;flex:none;margin:-4px -2px 0 0;opacity:0;transition:opacity .15s}
 .dash-widget-tools .dash-tool{width:28px;height:28px}
 .dash-widget:hover .dash-widget-tools,.dash-widget:focus-within .dash-widget-tools,.dash-widget:hover .dash-widget-drag{opacity:1}
-.dash-widget[draggable=true] .dash-widget-head{cursor:grab}
+.dash-grid:not(.compact):not(.stacked) .dash-widget-head{cursor:grab;touch-action:none}
 
-.dash-widget-body{flex:1;display:flex;flex-direction:column;justify-content:flex-start;min-height:0;padding:8px 16px 16px;max-height:560px;overflow:auto}
+.dash-widget-body{flex:1;display:flex;flex-direction:column;justify-content:flex-start;min-height:0;padding:8px 16px 16px;overflow:auto}
 .dash-widget-content{min-width:0}
 .dash-widget-text{margin:0;font-size:13px;line-height:1.5;white-space:pre-wrap;user-select:text;color:#d9dfd9}
 .dash-widget-empty{margin:0;font-size:12.5px;color:var(--muted);text-align:center;padding:14px 0}
@@ -105,9 +117,7 @@
 .dash-start[hidden]{display:none}
 .dash-start-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .dash-start-head strong{color:var(--ink);font-size:14px}
-.dash-grid.compact{--dash-gap:10px;gap:10px}
-.dash-grid.compact .dash-widget-body{max-height:340px}
-@media (max-width:1100px){.dash-grid.compact{grid-template-columns:repeat(2,minmax(0,1fr))}.dash-grid.compact .dash-widget{grid-column:1/-1}}
+.dash-grid.stacked .dash-widget-body{max-height:520px}
 .dash-hint{display:inline-flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:6px;margin:6px 0 0;font-size:12.5px;color:var(--muted)}
 .dash-hint-icon{display:grid;place-items:center;color:var(--green)}.dash-hint-icon svg{width:14px;height:14px}
 .dash-link{padding:0;border:0;background:none;color:var(--green);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}

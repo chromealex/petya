@@ -57,8 +57,9 @@ function setup(s){
   function view(d){
     const c=loadCache();
     return {id:d.id,title:d.title,projectId:d.projectId,shared:d.shared?{folder:d.shared.folder}:null,fromChat:d.fromChat||'',demo:!!d.demo,start:state().dashboardStart[d.projectId]===d.id,
-      widgets:d.widgets.map(w=>{const hit=w.source.kind==='snapshot'?{data:w.data,text:w.text,at:w.at}:c.get(cacheKey(d,w))||{};
-        return {id:w.id,title:w.title,size:w.size,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,
+      // Reading order (the small window, screen readers): top to bottom, left to right.
+      widgets:[...d.widgets].sort((a,b)=>(a.pos?a.pos.y:1e9)-(b.pos?b.pos.y:1e9)||(a.pos?.x||0)-(b.pos?.x||0)).map(w=>{const hit=w.source.kind==='snapshot'?{data:w.data,text:w.text,at:w.at}:c.get(cacheKey(d,w))||{};
+        return {id:w.id,title:w.title,size:w.size,pos:w.pos||null,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,
           data:hit.data||null,text:hit.text||'',at:hit.at||0,error:hit.error||'',count:hit.count??null,loading:running.has(cacheKey(d,w))};})};
   }
   const describe=src=>src.kind==='extension'?(plugins.get(src.extension)?.d.name||src.extension)+' · «'+src.command+'»':src.kind==='provider'?(providers.find(p=>p.type===src.provider)?.name||src.provider)+' · «'+src.query+'»':src.kind==='jira'?'Jira · '+src.jql:'Снимок карточки, не обновляется';
@@ -255,6 +256,10 @@ function setup(s){
       commit(d);if(patch.jql!==undefined)refresh(d.id,w.id,true).catch(()=>{});return view(find(id));},
     removeWidget:(id,widgetId)=>{const d=own(id),i=d.widgets.findIndex(x=>x.id===widgetId);if(i<0)throw Error('Виджет не найден.');const [w]=d.widgets.splice(i,1);commit(d);return {view:view(find(id)),undo:{widget:w,index:i}};},
     restoreWidget:(id,widget,index)=>{const d=own(id),w=model.widget(widget);d.widgets.splice(Math.max(0,Math.min(Number(index)||0,d.widgets.length)),0,w);commit(d);return view(find(id));},
+    // The person's arrangement: positions and sizes on the 12-column grid, all widgets at once.
+    layout:(id,items)=>{const d=own(id);if(!Array.isArray(items)||items.length>model.LIMIT.widgets)throw Error('Неверная раскладка.');
+      for(const row of items){const w=d.widgets.find(x=>x.id===row?.id);if(!w)continue;const pos=model.position(row);if(pos)w.pos=pos;else delete w.pos;}
+      commit(d);return view(find(id));},
     move:(id,order)=>{const d=own(id);if(!Array.isArray(order))throw Error('Неверный порядок.');const rank=new Map(order.map((wid,i)=>[wid,i]));d.widgets.sort((a,b)=>(rank.get(a.id)??999)-(rank.get(b.id)??999));commit(d);return view(find(id));},
     remove:id=>{const d=find(id);
       if(d.shared){const dir=folders(d.projectId)[d.shared.index];if(dir)try{fs.unlinkSync(path.join(dir,model.DIR,d.shared.file));}catch{}}

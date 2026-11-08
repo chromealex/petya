@@ -5,7 +5,7 @@ const DAY=86400000,HOUR=3600000,MIN=60000;
 
 const W=(body,flags='iu')=>new RegExp('(?:^|[^\\p{L}\\d])(?:'+body+')(?=$|[^\\p{L}\\d])',flags);
 const SERVERS=W('сервер\\p{L}*|серв[ао]к\\p{L}*|сервис\\p{L}*|бэкенд\\p{L}*|бекенд\\p{L}*|backend|прод|прода|проде|проду|продакшн\\p{L}*|production|инфр\\p{L}*|хост\\p{L}*|api|апи|эндпоинт\\p{L}*|сайт\\p{L}*|стейджинг\\p{L}*|staging|балансер\\p{L}*|база|базы|бд|nginx|redis|postgres\\p{L}*|постгрес\\p{L}*');
-const MONITOR=W('мониторинг\\p{L}*|grafana|графан\\p{L}*|prometheus|прометеус\\p{L}*|alertmanager|алертменеджер\\p{L}*|promql');
+const MONITOR=W('мониторинг\\p{L}*|prometheus|прометеус\\p{L}*|alertmanager|алертменеджер\\p{L}*|promql');
 const ALERT=W('алерт\\p{L}*|alerts?|аларм\\p{L}*|инцидент\\p{L}*|incident\\p{L}*');
 const UPTIME=W('аптайм\\p{L}*|uptime|доступност\\p{L}*|sla');
 const HEALTH=/(?:что (?:с|там с|по)\s|как (?:там |себя чувству\p{L}* )?|вс[её] ли |живо|живы|жив\s|жив\?|лежит|лежат|леж\p{L}*|упал\p{L}*|ляг\p{L}*|недоступ\p{L}*|не отвечает|не отвечают|тормоз\p{L}*|медленн\p{L}*|статус|здоров\p{L}*|health|состояни\p{L}*|горит|горят|красн\p{L}*|работает ли|работают ли|в порядке)/iu;

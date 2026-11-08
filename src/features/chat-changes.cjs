@@ -1,7 +1,9 @@
 const {randomUUID}=require('node:crypto');
 const {scope}=require('./chat-results.cjs');
-const fs=require('node:fs'),path=require('node:path'),root=path.join(__dirname,'../extensions');
-const adapters=Object.fromEntries(fs.readdirSync(root,{withFileTypes:true}).filter(r=>r.isDirectory()&&fs.existsSync(path.join(root,r.name,'change.cjs'))).map(r=>[r.name,require(path.join(root,r.name,'change.cjs'))]));
+// change.cjs of every live extension (src/extension-registry.cjs), keyed by extension id and re-read when
+// extensions change.
+const registry=require('../extension-registry.cjs');
+const adapters=new Proxy({},{get:(_,id)=>registry.cached('change-adapters',()=>Object.fromEntries(registry.files('change.cjs').map(e=>[e.id,registry.load(e,e.file)]).filter(([,a])=>a)))[id]});
 function setup(s){
   const running=new Set(),resources=new Set(),preparations=new Map();
   function topicFor(expected){
