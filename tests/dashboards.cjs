@@ -14,6 +14,8 @@ const snap=model.widget({title:'x',source:{kind:'snapshot'},data:{charts:[1]},ev
 assert.equal(model.widget({size:'huge',source:{kind:'jira',jql:'a'}}).size,'auto','the layout chooses unless a size is set');
 const shared=model.shareable(model.dashboard({title:'T',widgets:[snap,{title:'J',source:{kind:'jira',jql:'project = BW'}}]}));
 assert.equal(shared.widgets.length,1,'snapshots are not shared');assert(!('data' in shared.widgets[0]));
+assert.deepEqual(model.position({x:11,y:2,w:6,h:5}),{x:6,y:2,w:6,h:5},'a widget stays inside the 12 columns');assert.equal(model.position({x:'a'}),null);
+assert.deepEqual(model.shareable(model.dashboard({widgets:[{source:{kind:'jira',jql:'a'},pos:{x:0,y:0,w:4,h:6}}]})).widgets[0].pos,{x:0,y:0,w:4,h:6},'the arrangement is shared');
 assert.equal(model.slug('Релиз 2.4 — Android'),'reliz-2-4-android');
 
 // --- Jira phrases → JQL -------------------------------------------------------------------------------------------
@@ -66,6 +68,9 @@ assert.equal(jira.jqlFor('JQL: project = X ORDER BY rank',[]),'project = X ORDER
   v=ipc.move(d.id,[d.widgets[2].id,d.widgets[0].id]);assert.equal(v.widgets[0].id,d.widgets[2].id);
   const removed=ipc.removeWidget(d.id,d.widgets[2].id);assert.equal(removed.view.widgets.length,3);
   assert.equal(ipc.restoreWidget(d.id,removed.undo.widget,removed.undo.index).widgets.length,4);
+  // The person's arrangement is saved as it was placed.
+  let laid=ipc.layout(d.id,ipc.peek(d.id).widgets.map((w,i)=>({id:w.id,x:i%2*6,y:Math.floor(i/2)*8,w:6,h:8})));
+  assert(laid.widgets.every(w=>w.pos&&w.pos.w===6&&w.pos.h===8));assert.throws(()=>ipc.layout(d.id,'x'),/раскладка/);
   // Pin a single card into another dashboard.
   const pinned=ipc.pin('','t1',1);assert.equal(pinned.live,true);assert.notEqual(pinned.dashboard.id,d.id);
   assert.equal(ipc.pin(pinned.dashboard.id,'t1',1).dashboard.widgets,1,'the same source is not added twice');
