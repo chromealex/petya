@@ -111,6 +111,31 @@ class CalendarClient{
   const e=await this.call(GOOGLE+'/calendars/primary/events?'+new URLSearchParams(event.query),{method:'POST',body:event.body});
   return {id:String(e.id||''),url:safe(e.htmlLink),link:link||safe(conferenceLink(e))};
  }
+
+ // Appends text to an existing event's description (attendees get the update). Called only from a card button
+ // the user confirmed (e.g. «Подготовка к встрече» adding an agenda). The current description is read first and
+ // kept; text already present is not added twice. Returns {id,url,already}.
+ async appendDescription(id,text){
+  const add=String(text||'').trim().slice(0,4000);
+  if(!id||!add)throw new CalendarError('Нет события или текста для описания.');
+  const ref=encodeURIComponent(String(id));
+  if(this.provider==='microsoft'){
+   const e=await this.call(GRAPH+'/me/events/'+ref+'?$select=body,webLink');
+   const html=e.body?.contentType==='html',old=String(e.body?.content||'');
+   const plain=html?old.replace(/<[^>]*>/g,' ').replace(/&nbsp;/g,' '):old;
+   if(plain.replace(/\s+/g,' ').includes(add.replace(/\s+/g,' ')))return {id:String(id),url:safe(e.webLink),already:true};
+   const esc=v=>v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+   const content=html?old+'<p>'+esc(add).replace(/\n/g,'<br>')+'</p>':(old?old+'\n\n':'')+add;
+   const r=await this.call(GRAPH+'/me/events/'+ref,{method:'PATCH',body:{body:{contentType:html?'html':'text',content}}});
+   return {id:String(r.id||id),url:safe(r.webLink||e.webLink),already:false};
+  }
+  const url=GOOGLE+'/calendars/primary/events/'+ref;
+  const e=await this.call(url);
+  const old=String(e.description||'');
+  if(old.replace(/\s+/g,' ').includes(add.replace(/\s+/g,' ')))return {id:String(id),url:safe(e.htmlLink),already:true};
+  const r=await this.call(url+'?sendUpdates=all',{method:'PATCH',body:{description:(old?old+'\n\n':'')+add}});
+  return {id:String(r.id||id),url:safe(r.htmlLink||e.htmlLink),already:false};
+ }
 }
 // The video entry point of a Google event's conference (whatever service created it).
 const conferenceLink=e=>(e.conferenceData?.entryPoints||[]).find(p=>p.entryPointType==='video')?.uri;
