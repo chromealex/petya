@@ -1,0 +1,9 @@
+// Capability «task-tracker» of Asana: a chat request to Petya's Asana flow (project choice, preview, «Создать»).
+// Nothing is written here.
+const modules=require('../../modules.cjs');
+const {taskBody}=require('../link-text.cjs');
+module.exports={
+ label:'В задачу Asana',
+ ready:s=>modules.enabled(s,'asana')&&!!s.asanaCredential&&/^\d+$/.test(String(s.asanaWorkspace||'')),
+ async run(services,payload){return {ask:'Создай задачу в Asana: '+(payload.type==='bug'?'Баг. ':'')+taskBody(payload),send:true};}
+};

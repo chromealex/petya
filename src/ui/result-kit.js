@@ -32,8 +32,9 @@
 
  // --- Toast with undo -----------------------------------------------------------------------
  const toasts=el('div','kit-toasts');toasts.setAttribute('role','status');toasts.setAttribute('aria-live','polite');document.body.append(toasts);
- function toast(text,{undo,error=false,timeout=7000}={}){
+ function toast(text,{undo,action,error=false,timeout=7000}={}){
   const node=el('div','kit-toast'+(error?' error':''));node.append(el('span',null,text));
+  if(action){const b=el('button',null,action.label);b.type='button';b.onclick=()=>{node.remove();action.run();};node.append(b);}
   if(undo){const b=el('button',null,'Отменить');b.type='button';b.onclick=async()=>{b.disabled=true;try{await undo();node.remove();}catch(e){node.replaceChildren(el('span',null,e.message));node.classList.add('error');}};node.append(b);}
   const close=el('button','kit-toast-close','×');close.type='button';close.setAttribute('aria-label','Закрыть');close.onclick=()=>node.remove();node.append(close);
   toasts.append(node);setTimeout(()=>node.remove(),timeout);return node;
@@ -75,7 +76,8 @@
   const fields=chips.filter(Boolean).map(c=>c instanceof Node?c:chip(c));
   if(fields.length){const row=el('div','kit-chips');row.append(...fields);node.append(row);}
   if(meta.length)node.append(el('small','kit-meta',meta.filter(Boolean).join(' · ')));
-  if(actions.length){const row=el('div','kit-actions');for(const a of actions){const b=el('button',a.primary?'primary':'',a.label);b.type='button';if(a.title)b.title=a.title;b.onclick=async event=>{event.stopPropagation();b.disabled=true;try{await a.run(b);}catch(e){toast(e.message,{error:true});}finally{b.disabled=false;}};row.append(b);}node.append(row);}
+  // Ready-made nodes (e.g. k.links) go into the same row as the action buttons.
+  if(actions.length){const row=el('div','kit-actions');for(const a of actions){if(a instanceof Node){row.append(a);continue;}const b=el('button',a.primary?'primary':'',a.label);b.type='button';if(a.title)b.title=a.title;b.onclick=async event=>{event.stopPropagation();b.disabled=true;try{await a.run(b);}catch(e){toast(e.message,{error:true});}finally{b.disabled=false;}};row.append(b);}node.append(row);}
   // A main action on the right: icon, verb and a short line saying what will happen.
   if(side){
    const main=el('div','kit-card-main');main.append(...node.childNodes);
@@ -194,5 +196,47 @@
   if(send&&typeof submitChatCommand==='function'){await submitChatCommand(text);return;}
   if(box){box.value=text;box.dispatchEvent(new Event('input',{bubbles:true}));box.focus();box.setSelectionRange?.(text.length,text.length);}
  }
- window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam};
+ // --- Cross-app links (src/features/app-links.cjs) ------------------------------------------------------------
+ // links(kind, payload, {context, label, onDone}) → a node for an actions row: nothing when no app provides the
+ // kind, one button for one provider, a button plus a small «▾» menu for several (the last choice per kind is
+ // remembered). `payload` may be a function, read at the press. A provider answering with a prepared chat request
+ // ({ask}) hands it to the chat, where that app's own flow previews and confirms it.
+ const linkCache=new Map();
+ function availableLinks(kind,context){
+  const key=kind+'\n'+JSON.stringify(context||{}),hit=linkCache.get(key);
+  if(hit&&Date.now()-hit.at<15000)return hit.promise;
+  const promise=(window.petya?.feature?window.petya.feature('appLinks','available',kind,context||{}):Promise.resolve([])).catch(()=>[]);
+  linkCache.set(key,{at:Date.now(),promise});return promise;
+ }
+ function openSettings(id){if(typeof view==='function')view('settings');const card=document.querySelector('[data-extension="'+id+'"],[data-service="'+id+'"]');if(card)window.revealSettings?.(card);}
+ async function runLink(kind,provider,payload,onDone){
+  const result=await window.petya.feature('appLinks','run',kind,provider.id,typeof payload==='function'?payload():payload);
+  if(result?.settings)toast(result.text||'Нужна настройка приложения',{error:true,action:{label:'Открыть настройки',run:()=>openSettings(result.settings)}});
+  else if(result?.ask)await ask(result.ask,{send:result.send!==false});
+  else if(result?.text)toast(result.text);
+  onDone?.(result,provider);
+  return result;
+ }
+ function links(kind,payload,{context,label,onDone,className=''}={}){
+  const box=el('span','kit-links'+(className?' '+className:''));box.dataset.kind=kind;
+  availableLinks(kind,context).then(list=>{
+   if(!Array.isArray(list)||!list.length)return;
+   const memory='link-'+kind;
+   let current=list.find(p=>p.id===store.get(memory,''))||list[0];
+   const main=el('button','kit-link',label&&list.length===1?label:current.label);main.type='button';main.dataset.provider=current.id;
+   if(current.hint)main.title=current.hint;
+   const press=async provider=>{main.disabled=true;main.setAttribute('aria-busy','true');try{await runLink(kind,provider,payload,onDone);}catch(e){toast(e.message,{error:true});}finally{main.disabled=false;main.removeAttribute('aria-busy');}};
+   main.onclick=event=>{event.stopPropagation();press(current);};
+   box.append(main);
+   if(list.length>1){
+    const more=el('button','kit-link-more','▾');more.type='button';more.setAttribute('aria-label','Выбрать приложение');more.setAttribute('aria-haspopup','menu');more.setAttribute('aria-expanded','false');
+    more.onclick=event=>{event.stopPropagation();menu(more,async()=>list.map(p=>({label:p.label,id:p.id,hint:p.hint||''})),async option=>{
+     current=list.find(p=>p.id===option.id)||current;store.set(memory,current.id);main.textContent=current.label;main.dataset.provider=current.id;await press(current);
+    });};
+    box.classList.add('several');box.append(more);
+   }
+  });
+  return box;
+ }
+ window.resultKit={el,safeUrl,links,availableLinks,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam};
 })();

@@ -19,5 +19,8 @@
   "markup": "settings.html",
   "results": {
     "jiraItems": "renderJiraIssues"
+  },
+  "provides": {
+    "task-tracker": "task-tracker.cjs"
   }
 }

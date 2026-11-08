@@ -36,6 +36,7 @@ module.exports=[
  require('./features/optional-models.cjs'),
  require('./features/extension-replies.cjs'),
  require('./features/extension-offers.cjs'),
+ require('./features/app-links.cjs'),
  require('./features/chat-results.cjs'),
  require('./features/chat-changes.cjs'),
  require('./features/model-parts.cjs')

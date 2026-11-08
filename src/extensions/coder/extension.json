@@ -22,5 +22,8 @@
   ],
   "results": {
     "codingRun": "renderCodingRun"
+  },
+  "provides": {
+    "code-fix": "code-fix.cjs"
   }
 }

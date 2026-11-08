@@ -6,9 +6,15 @@
   "settings": false,
   "feature": "feature.cjs",
   "scripts": [
-    ["task-cards.js", "message-format.js"]
+    [
+      "task-cards.js",
+      "message-format.js"
+    ]
   ],
   "results": {
     "asanaItems": "renderAsanaTasks"
+  },
+  "provides": {
+    "task-tracker": "task-tracker.cjs"
   }
 }
