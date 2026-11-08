@@ -2,7 +2,6 @@
 const SLACK_SCOPES = 'channels:read,groups:read,channels:history,groups:history,im:history,mpim:history,files:read,chat:write,im:write,users:read,team:read';
 function adapter(name, config) {
  const basic='Basic '+Buffer.from(config.clientId+':'+config.clientSecret).toString('base64');
- if(name==='zoom') return require('./zoom-provider.cjs').zoomAdapter(config);
  if(name==='asana') return require('./asana-provider.cjs').asanaAdapter(config);
  if(!['slack','notion'].includes(name)) throw new Error('Unknown provider');
  return {

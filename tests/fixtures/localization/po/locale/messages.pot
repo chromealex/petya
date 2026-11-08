@@ -1,0 +1,17 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+
+#: ui/menu.py:10
+msgid "New game"
+msgstr ""
+
+msgid "Load game"
+msgstr ""
+
+msgctxt "button"
+msgid "Back"
+msgstr ""
+
+msgid "You found %(count)s keys"
+msgstr ""

@@ -2,6 +2,7 @@
   "id": "mail",
   "name": "Почта",
   "description": "Письма карточками: важные сверху, черновик ответа, письмо в задачу",
+  "category": "comms",
   "settings": false,
   "scripts": [
     ["mail-cards.js", "message-format.js"]

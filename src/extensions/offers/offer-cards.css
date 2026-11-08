@@ -1,0 +1,10 @@
+.offer-card{width:560px;max-width:100%;margin:10px 0}
+.offer-card.quiet{opacity:.92}
+.offer-card .kit-key{color:var(--ink);font-weight:600;font-size:13px}
+.offer-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.offer-item{display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:1.45}
+.offer-item b{font-weight:600}
+.offer-item span{color:var(--muted);font-size:13px}
+.offer-done{font-size:13px;color:var(--muted)}
+.offer-pitch{margin:0;font-size:14px;line-height:1.45}
+.offer-card.quiet .offer-pitch{color:var(--muted);font-size:13px}

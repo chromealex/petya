@@ -8,7 +8,7 @@ module.exports=ctx=>{
     const agent = ctx.delegation(command);
     if (!doIt && !agent && !ctx.core.isJiraCommand(command) && !ctx.core.isDocsCommand(command)) return { kind: 'unsupported', options: [] };
     const conversation=ctx.dialogue?.actionContext();
-    const dialogueOnly=conversation && (ctx.core.isDoCommand(command)||/(?:этой|это|обсужд|по контексту)/iu.test(command)) && !/(?:slack|слак|встреч|zoom|зум|вчера)/iu.test(command);
+    const dialogueOnly=conversation && (ctx.core.isDoCommand(command)||/(?:этой|это|обсужд|по контексту)/iu.test(command)) && !/(?:slack|слак|встреч|созвон|вчера)/iu.test(command);
     const result = ctx.core.resolve(command, dialogueOnly?[conversation]:ctx.memory.prune(), Math.min(Number(before) || Date.now(), Date.now()), Number(ctx.settings.contextDays), typeof sessionId === 'string' ? sessionId : '');
     if (result.kind === 'missing' && ctx.core.isJiraCommand(command)) {
       const standalone = ctx.core.standaloneContext(command, Date.now(), ctx.randomUUID());

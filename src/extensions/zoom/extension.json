@@ -1,0 +1,24 @@
+{
+  "id": "zoom",
+  "name": "Zoom",
+  "description": "Петя сам записывает встречи Zoom, подписывает, кто говорит, и предлагает вашу личную комнату в календаре",
+  "category": "meetings",
+  "setting": "extension_zoom",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    [
+      "settings.js",
+      "background.js"
+    ],
+    [
+      "notifications.js",
+      "notifications.js"
+    ]
+  ],
+  "provides": {
+    "meeting-source": "meeting-source.cjs",
+    "video-meeting": "video-meeting.cjs",
+    "meeting-recording": "meeting-recording.cjs"
+  }
+}

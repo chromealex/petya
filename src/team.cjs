@@ -1,4 +1,4 @@
-const limits={name:120,aliases:240,role:160,projects:400,responsibilities:1600,email:254,phone:40,birthday:10,slackId:80,jiraId:160,jiraName:200,zoomName:240};
+const limits={name:120,aliases:240,role:160,projects:400,responsibilities:1600,email:254,phone:40,birthday:10,slackId:80,jiraId:160,jiraName:200,meetingName:240};
 function validate(rows){
  if(!Array.isArray(rows)||rows.length>100)throw Error('В команде может быть не больше 100 участников.');
  return rows.map(row=>{

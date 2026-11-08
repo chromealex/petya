@@ -2,7 +2,7 @@ const assert=require('node:assert/strict');
 const feature=require('../src/features/context-discovery.cjs');
 const {isContextReference}=require('../src/context-reference.cjs');
 const now=Date.now(),project={id:'general',name:'Общее'};
-const zoom=(id,sessionId,at,text)=>({id,sessionId,at,text,source:'Zoom',title:'Встреча'});
+const zoom=(id,sessionId,at,text)=>({id,sessionId,at,text,source:'Встреча',title:'Встреча'});
 const slack=(id,channel,text,user='alex')=>({id,channel,text,user,at:now,source:'Slack',title:text,url:'https://app.slack.com/archives/'+channel+'/p123',messages:[{user,text,at:now}]});
 (async()=>{
  for(const text of ['посмотри что не так','Петя, глянь, что там не так?','разберись в чём проблема','можешь проверить что случилось','проверь почему не работает'])assert(isContextReference(text),text);
@@ -39,5 +39,5 @@ const slack=(id,channel,text,user='alex')=>({id,channel,text,user,at:now,source:
  s.modules.enabled=()=>false;
  s.memory.prune=()=>[slack('disabled','C1','Проверь ошибку входа')];
  assert.equal((await service.turn('посмотри что не так')).question,true);
- console.log('Context discovery: phrasing, Zoom sessions, Slack requests, project isolation, exclusions, retention and persisted follow-ups passed');
+ console.log('Context discovery: phrasing, meeting sessions, Slack requests, project isolation, exclusions, retention and persisted follow-ups passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});

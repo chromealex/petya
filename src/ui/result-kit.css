@@ -95,3 +95,8 @@ button.kit-chip{cursor:pointer}button.kit-chip:hover{color:var(--ink);border-col
 .kit-chip .kit-person{margin-left:-5px}
 .kit-menu-item.with-person{display:flex;align-items:center;gap:8px}
 .kit-menu-text{min-width:0}
+/* Cross-app links: nothing when no app provides the action; a split button when several do. */
+.kit-links{display:contents}
+.kit-links.several{display:inline-flex;align-items:stretch}
+.kit-links.several .kit-link{border-top-right-radius:0;border-bottom-right-radius:0}
+.kit-links .kit-link-more{min-width:26px;padding:4px 6px;border-top-left-radius:0;border-bottom-left-radius:0;border-left:1px solid #ffffff1f}

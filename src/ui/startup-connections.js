@@ -5,7 +5,7 @@ async function checkConnectionsOnOpen() {
   try {
     await connectionsReady;
     await modulesReady;
-    await Promise.allSettled(['whisper', 'ollama', 'slack', 'notion', 'asana', 'jira', 'confluence', 'zoom', 'claude', 'codex'].map(async service => {
+    await Promise.allSettled(['whisper', 'ollama', 'slack', 'notion', 'asana', 'jira', 'confluence', 'meetings', 'claude', 'codex'].map(async service => {
       if (!moduleEnabled(service)) return;
       const card = document.querySelector(['claude', 'codex'].includes(service) ? `[data-ai-provider="${service}"]` : `[data-service="${service}"]`);
       const status = card?.querySelector('.connection-status');

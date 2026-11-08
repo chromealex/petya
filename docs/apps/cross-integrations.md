@@ -1,0 +1,107 @@
+# Cross-app links
+
+One app offers a capability, other apps' cards use it without knowing who provides it. A card never shows a
+button for an app that is not added and connected, and nothing is written until the user presses a button.
+
+## Registry
+
+`src/features/app-links.cjs` (feature `appLinks`). An extension declares in its `extension.json`:
+
+```json
+"provides": { "task-tracker": "task-tracker.cjs" }
+```
+
+(a list of files is allowed: the calendar provides Meet and Teams). Each file exports
+`{ id?, name?, label, order?, ready(settings), fits?(context, settings), hint?(settings, context), async run(services, payload, check), recognizeLink?(url) }`.
+
+- `available(kind, context)` → `[{id, name, label, hint?}]`: only providers whose app is added (its catalog switch)
+  and `ready` (connected), filtered by `fits(context)`, in a stable order: the provider's own `order` (lower first),
+  then by id. The registry names no app.
+- `recognize(url)` → `{kind, key, url, name}` or null: which service a meeting link belongs to, asked of the
+  providers of added apps that export `recognizeLink`. The calendar uses it for known rooms; nothing else in Petya
+  knows any service's link format.
+- `run(kind, id, payload)` refuses unknown kinds, unknown providers and providers that are not ready; `check()`
+  lets a provider re-check readiness right before a write.
+- IPC: `window.petya.feature('appLinks', 'available' | 'run', …)`; main-process code uses `services.appLinks`.
+- The same `provides` map also declares **meeting sources** (`"meeting-source"`), which have their own registry
+  (`src/features/meeting-sources.cjs`, see [zoom.md](zoom.md) and the README): they are polled by the meeting
+  recorder and never shown as card buttons. `scan()` in `app-links.cjs` reads both.
+
+Renderer: `k.links(kind, payload, {context, label, title, primary, onDone, className})` in `src/ui/result-kit.js`
+returns a node for an actions row: nothing without providers, one button for one provider, a button with a «▾» menu
+for several (the last choice per kind is kept in `k.store`). A provider answering `{ask}` hands a prepared request
+to the chat (`k.ask(…, {send:true})`), `{text}` shows a toast, `{settings: '<extension>'}` offers to open settings.
+`k.card` accepts such nodes among its `actions`.
+
+## Kinds and providers
+
+| Kind | Provider (extension) | What `run` does |
+|---|---|---|
+| `video-meeting` | `zoom` (Zoom extension, order 10) | The user's Zoom **personal meeting room** link: the saved `zoomPersonalLink`, a personal-room link found in plain-text Zoom data on the computer, or `{needLink, text, placeholder, field}` so the card asks to paste it once (validated `https://…zoom.us/j/<digits>[?pwd=…]`, then remembered). Ready when the Zoom desktop app is installed (`/Applications/zoom.us.app`, `%APPDATA%\Zoom\bin\Zoom.exe`) or a link is saved. No Zoom API, no OAuth. The same room serves every meeting; the choice says so. `recognizeLink` tells Zoom links apart. Only while «Zoom» is added. |
+| | `google-meet`, `teams` (calendar) | The event patch (`conferenceData.createRequest` / `isOnlineMeeting`); fits only an event of a Google / Outlook calendar. |
+| `task-tracker` | `jira`, `asana` | A chat request «Создай задачу в Jira/Asana: …» (or «Создай задачи … по встрече «…»:» with a list); those flows choose the project, preview and create only after confirmation. |
+| `share-message` | `slack` | «Попроси команду …» for the team request flow: a channel only from the project's confirmed bindings, otherwise a question with concrete channels, then a preview with «Отправить». Never a guessed channel. |
+| `code-fix` | `coder` | The problem as a coding request for «Программист» (own branch, diff for review). |
+| `meeting-recording` | `zoom` (Zoom extension) | Petya's local recording (system audio, optional microphone) of a **Zoom** meeting: `when:'now'` starts it during the meeting, `when:'schedule'` stores a timer (`meetingRecordingSchedule`, at most 8) that, from the event time, starts the recording as soon as the Zoom meeting source sees the meeting, and reports in a cancellable notification. Fits Zoom links only. Ready unless `meetingAutoRecord` is `off`. |
+
+Not provided: **Telegram** `share-message` — Petya reads Telegram but has no confirmed sending flow; adding one needs
+its own chat selection and preview. «Программист» has no offer file, so a missing `code-fix` shows nothing (no
+offer). Meet/Teams meetings in a browser have no meeting source: they are recorded only with «Слушать встречу».
+
+## Which cards use what
+
+| Card | task-tracker | code-fix | share-message | video-meeting | meeting-recording |
+|---|---|---|---|---|---|
+| Crashes (Sentry), per issue | ✓ (bug) | ✓ | card: new crashes | | |
+| Store reviews, per complaint theme | ✓ | ✓ | ✓ | | |
+| Store reviews, per review | ✓ | | | | |
+| CI builds, failed run | ✓ (bug) | ✓ (the existing hand-off text) | ✓ | | |
+| Dependencies | vulnerable packages | safe updates in a branch | | | |
+| Pull request with failing checks | ✓ | ✓ | waiting for review | | |
+| Meeting summary | per task and «Создать все» | | summary | | |
+| Calendar, confirm step | | | | ✓ + known rooms, typed link | |
+| Calendar, created meeting / timeline | | | | | «Петя запишет встречу» / «Записать Петей» |
+
+The meeting summary also gets «Назначить следующую встречу» when «Календарь» is added: a calendar request with the
+people from the tasks is put into the composer.
+
+## Calendar «Видеозвонок»
+
+Choices: available providers (other apps' rooms such as the Zoom personal room, Meet or Teams of this calendar), then
+**known rooms** ranked for the new meeting, then «Своя ссылка…» (any https link) and «Без звонка». Default: a known room
+that clearly fits (same people, or a similar title with some of them), else the last choice, else the first provider
+(providers come in their own order), else none. A provider that needs its link once answers `{needLink}` and the card
+asks for it in place (placeholder and label from the provider). A link goes to the event's location and description
+(Graph: location and text body, no `isOnlineMeeting`).
+
+Known rooms (`src/extensions/calendar/rooms.cjs`): meeting links in the user's events (conference link, location,
+description) seen on **two or more different days**, learned from the events the calendar reads anyway and from one
+60-day look-back at most once a day (when a confirm step opens). Links of services with an app are recognised by that
+app's provider (`appLinks.recognize`: Zoom's keeps `pwd` and dedups one meeting id on any Zoom host); the calendar
+itself knows Meet, Teams (`context` kept), Webex, Jitsi and Telemost. Tracking parameters are dropped; rooms are named
+by the most common event title and the service («Дейли · Zoom»), ranked by same attendees > similar title > frequency
+> recency with the reason shown. Without the Zoom extension, Zoom links in events are not learned as rooms.
+Links typed in the confirm step are known at once. Stored per company in `calendar-rooms.json` in the company data
+folder (mode 600, never sent anywhere); calendar settings list them with rename and forget (a forgotten room is not
+learned again).
+
+## Removed: the Zoom Marketplace app
+
+The Zoom OAuth sign-in and the separate Meeting SDK participant were removed (the app will not be published). Old
+`zoomCredential`, `zoomBotCredential`, `zoomBotUrl` and `zoomCaptureMode` values are no longer loaded and disappear
+from the settings file on the next save; recording is always local.
+
+## Verified with stubs vs. live
+
+Tests: `node tests/app-links.cjs`, `node tests/calendar-video.cjs`, `node tests/calendar.cjs`, `node tests/meeting-sources.cjs`; UI:
+`tests/app-links-ui.cjs`, `tests/calendar-ui.cjs`, `tests/crashes-ui.cjs`, `tests/ci-builds-ui.cjs`,
+`tests/dependencies-ui.cjs` (Electron, `PETYA_SMOKE_TEST=1`). Everything ran with stubbed services.
+
+Needs live checking:
+- that «Создай задачу в Asana: …» and «Создай задачи в Jira/Asana по встрече …» are routed to the Asana / batch flows
+  by the live intent planner;
+- Zoom personal-room discovery from local data (no plain-text location is documented by Zoom; on most installations
+  the user will paste the link once);
+- Graph events with a link in `location` + text body, and Google events with `location`/`description`, as invitees see them;
+- the scheduled local recording at a real meeting start (Zoom window detection on macOS/Windows);
+- the 60-day look-back on a large calendar (one request of up to 250 events).

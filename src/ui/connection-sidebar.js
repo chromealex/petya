@@ -18,7 +18,7 @@ function connectionBadge(message, classes, service, phase) {
     const reasons=[['Нет сети','Нет сети'],['Нужно войти','Нужен вход'],['Сервис ограничил','Лимит запросов'],['Сервис недоступен','Недоступен']];
     return {state:'error',label:reasons.find(([prefix])=>message.startsWith(prefix))?.[1]||'Ошибка'};
   }
-  if (classes.includes('connected')) return { state: 'connected', label: service === 'zoom' ? 'Доступ есть' : 'Подключено' };
+  if (classes.includes('connected')) return { state: 'connected', label: service === 'meetings' ? 'Доступ есть' : 'Подключено' };
   if (/Не подключено/.test(message)) return { state: 'disconnected', label: 'Не подключено' };
   if (/изменены|Требуется настройка|Сначала укажите/.test(message)) return { state: 'setup', label: 'Настроить' };
   return { state: 'unknown', label: 'Не проверено' };
@@ -31,7 +31,7 @@ function setupConnectionSidebar() {
   disclosure.addEventListener('toggle', () => {
     try { localStorage.setItem(preferenceKey, String(disclosure.open)); } catch {}
   });
-  const services = [ ['images','Картинки'], ['telegram','Telegram'], ['whisper', 'Whisper'], ['ollama', 'Ollama'], ['slack', 'Slack'], ['notion', 'Notion'], ['asana', 'Asana'], ['jira', 'Jira'], ['confluence', 'Confluence'], ['zoom', 'Звук встреч'], ['ai', 'ИИ'], ['googleplay', 'Google Play'], ['gmail','Почта'], ['web','Интернет'] ];
+  const services = [ ['images','Картинки'], ['telegram','Telegram'], ['whisper', 'Whisper'], ['ollama', 'Ollama'], ['slack', 'Slack'], ['notion', 'Notion'], ['asana', 'Asana'], ['jira', 'Jira'], ['confluence', 'Confluence'], ['meetings', 'Запись встреч'], ['ai', 'ИИ'], ['googleplay', 'Google Play'], ['gmail','Почта'], ['web','Интернет'] ];
   for (const [id, title] of services) {
     const card = document.querySelector(`[data-service="${id}"]`);
     const status = card?.querySelector('.connection-status');

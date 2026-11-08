@@ -10,7 +10,7 @@ module.exports=ctx=>{
   const workSkills=new (require('./work-skills.cjs').WorkSkills)({skills:instructionSkills,dialogue:ctx.dialogue,workspace:ctx.workspace,settings:()=>ctx.settings,request:ctx.request,
    connection:()=>JSON.stringify([ctx.settings.jiraUrl,ctx.settings.jiraProjects,ctx.settings.jiraProject,ctx.settings.module_jira,ctx.settings.atlassianCredential,ctx.settings.jiraToken,ctx.settings.jiraEmail]),
    read:(command,scope)=>ctx.jiraInsights.read(command,scope,'','tasks',{wholeProject:true,reportRows:true}),
-   meetings:()=>ctx.memory.prune().filter(c=>/встреч|meeting|zoom/iu.test(c.source||'')).slice(-20).map(c=>({name:c.title+' · '+new Date(c.at).toLocaleString('ru-RU'),text:c.text})),
+   meetings:()=>ctx.memory.prune().filter(c=>require('./meeting-talk.cjs').isMeeting(c)||/встреч|meeting/iu.test(c.source||'')).slice(-20).map(c=>({name:c.title+' · '+new Date(c.at).toLocaleString('ru-RU'),text:c.text})),
    answer:args=>skillModule.runSkill({...args,dialogue:ctx.dialogue,settings:{...ctx.settings},request:ctx.request,company:ctx.companies.get(ctx.companyId).name})});
   const taskDuplicates=new (require('./task-duplicates.cjs').TaskDuplicates)({workspace:ctx.workspace,state:ctx.reviewState,save:ctx.saveReview,context:()=>({id:ctx.dialogue.active()?.id,jiraProject:ctx.dialogue.active()?.jiraProject,projectMemoryId:ctx.dialogue.active()?.projectMemoryId})});
   ctx.workspace.beforeCreate=id=>taskDuplicates.assertSubmission(id);

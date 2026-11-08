@@ -1,0 +1,56 @@
+.pr-card{width:620px;max-width:100%;margin:12px 0}
+.pr-body{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pr-muted{margin:0;color:var(--muted);font-size:12px}
+.pr-section{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
+.pr-draft{font-size:11px;padding:0 6px;border-radius:5px;border:1px dashed #ffffff30;color:var(--muted)}
+.pr-branch{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:11.5px;padding:1px 6px;border-radius:5px;background:#ffffff0d;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+/* List */
+.pr-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
+.pr-row{display:grid;grid-template-columns:26px minmax(0,1fr) 150px;grid-template-areas:"who main side" "who actions side";column-gap:10px;row-gap:4px;padding:9px 0;border-top:1px solid #ffffff0d}
+.pr-row:first-child{border-top:0}
+.pr-avatar{grid-area:who;align-self:start;margin-top:1px}
+.pr-main{grid-area:main;display:flex;flex-direction:column;gap:3px;min-width:0}
+.pr-title{font-size:13.5px;color:var(--ink);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+a.pr-title:hover{text-decoration:underline}
+.pr-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted);min-width:0}
+.pr-ref{color:var(--green)}
+.pr-side{grid-area:side;display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0}
+.pr-chips{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.pr-chips .kit-chip{min-height:20px;padding:1px 7px;font-size:11px}
+.pr-row-actions{grid-area:actions;display:flex;gap:6px}
+.pr-row-actions button{min-height:24px;padding:2px 9px;font-size:12px}
+/* +/- bar */
+.pr-diff{display:flex;align-items:center;gap:8px;min-width:0}
+.pr-diff-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:#ffffff10;flex:none}
+.pr-diff-bar.empty{background:#ffffff10}
+.pr-add{background:#c9ed9d;min-width:0}.pr-del{background:#f0b4a8;min-width:0}
+.pr-diff-nums{display:flex;gap:6px;font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.pr-plus{color:#c9ed9d}.pr-minus{color:#f0b4a8}
+.pr-side .pr-diff{justify-content:flex-end}
+.pr-side .pr-diff-bar{max-width:70px}
+/* Single PR */
+.pr-totals{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pr-totals .pr-diff{flex:1}
+.pr-totals .pr-diff-bar{max-width:240px;height:8px;border-radius:4px}
+.pr-summary{padding:10px 12px;border-radius:10px;background:#ffffff06;font-size:13.5px;line-height:1.5}
+.pr-summary ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:3px}
+.pr-risk{margin:8px 0 0;font-size:12.5px;color:#e5ce8c}
+.pr-description{margin:0;font-size:13px;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere;max-height:90px;overflow:hidden}
+.pr-checks{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px}
+.pr-check{display:inline-flex;align-items:center;gap:6px;min-width:0}
+.pr-check a{color:inherit;text-decoration:none}.pr-check a:hover{text-decoration:underline}
+.pr-check.failure{color:#f0b4a8}
+.pr-dot{width:8px;height:8px;border-radius:50%;background:#8a948f;flex:none}
+.pr-dot.success{background:#c9ed9d}.pr-dot.failure{background:#f0b4a8}.pr-dot.pending{background:#e5ce8c}
+.pr-file{display:grid;grid-template-columns:minmax(0,1fr) 190px;gap:10px;align-items:center;font-size:12.5px}
+.pr-file-name{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr-file.added .pr-file-name{color:#c9ed9d}.pr-file.removed .pr-file-name{color:#f0b4a8;text-decoration:line-through}
+.pr-file .pr-diff-bar{max-width:100px}
+.pr-file .pr-diff-nums{order:-1;min-width:82px;justify-content:flex-end}
+.pr-section-row{display:flex;align-items:center;gap:8px}
+.pr-section-row .kit-chip{min-height:20px;padding:1px 7px;font-size:11px}
+.pr-confirm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid #e5ce8c55;border-radius:10px;background:#e5ce8c0d;font-size:13px}
+.pr-confirm span{flex:1 1 220px}
+.pr-confirm button{min-height:30px;padding:4px 10px;font-size:13px}
+.pr-link{font-size:12.5px;color:var(--green)}
+@media(max-width:520px){.pr-row{grid-template-columns:26px minmax(0,1fr);grid-template-areas:"who main" "who side" "who actions"}.pr-chips{justify-content:flex-start}.pr-side .pr-diff{justify-content:flex-start}.pr-file{grid-template-columns:minmax(0,1fr)}}

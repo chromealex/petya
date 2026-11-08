@@ -3,10 +3,10 @@ const {app,BrowserWindow,ipcMain}=require('electron'),path=require('node:path'),
 app.commandLine.appendSwitch('autoplay-policy','no-user-gesture-required');
 app.whenReady().then(async()=>{
  const channel='petya-meeting-11111111-1111-1111-1111-111111111111';let parts=0;
- ipcMain.handle(channel,async(e,method,source,item)=>{if(method==='permission')return true;if(method==='error')throw Error(source);assert.equal(method,'append');assert(['Zoom','Микрофон'].includes(source));assert(item.wav.byteLength>44);parts++;});
- const win=new BrowserWindow({show:false,webPreferences:{preload:path.resolve('src/extensions/zoom-bot/capture-preload.cjs'),additionalArguments:[channel],sandbox:true,contextIsolation:true,backgroundThrottling:false,autoplayPolicy:'no-user-gesture-required'}});
+ ipcMain.handle(channel,async(e,method,source,item)=>{if(method==='permission')return true;if(method==='error')throw Error(source);assert.equal(method,'append');assert(['Встреча','Микрофон'].includes(source));assert(item.wav.byteLength>44);parts++;});
+ const win=new BrowserWindow({show:false,webPreferences:{preload:path.resolve('src/meeting-capture-preload.cjs'),additionalArguments:[channel],sandbox:true,contextIsolation:true,backgroundThrottling:false,autoplayPolicy:'no-user-gesture-required'}});
  try{
-  await win.loadFile(path.resolve('src/extensions/zoom-bot/capture.html'));
+  await win.loadFile(path.resolve('src/ui/meeting-capture.html'));
   const result=await win.webContents.executeJavaScript(`(async()=>{
    const contexts=[];
    function fake(){const c=new AudioContext(),o=c.createOscillator(),d=c.createMediaStreamDestination();o.frequency.value=220;o.connect(d);o.start();contexts.push(c);return d.stream;}

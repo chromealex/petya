@@ -35,8 +35,8 @@
  function meetings(items,sessions){
   const by=new Map();for(const item of items){const id=item.sessionId||item.id;if(!by.has(id))by.set(id,{id,parts:[],extra:[],session:null});(item.kind?by.get(id).extra:by.get(id).parts).push(item);}
   for(const s of sessions){if(!by.has(s.id))by.set(s.id,{id:s.id,parts:[],extra:[],session:s});else by.get(s.id).session=s;}
-  // One meeting is one record: recordings that follow each other within 15 minutes (Zoom detection dropped
-  // for a moment, the recording restarted) are joined.
+  // One meeting is one record: recordings that follow each other within 15 minutes (the meeting app
+  // lost the meeting for a moment, the recording restarted) are joined.
   const sorted=[...by.values()].map(m=>{m.parts.sort((a,b)=>a.at-b.at);m.at=m.session?.startedAt||m.parts[0]?.at||m.extra[0]?.at||0;m.end=Math.max(m.at+(m.session?.duration||0),m.parts.at(-1)?.at||0);m.ids=[m.id];return m;}).sort((a,b)=>a.at-b.at);
   const joined=[];for(const m of sorted){const last=joined.at(-1);if(last&&m.at-last.end<=15*60000){last.parts.push(...m.parts);last.extra.push(...m.extra);last.ids.push(m.id);last.end=Math.max(last.end,m.end);if(m.session&&(!last.session||['recording','processing','error'].includes(m.session.phase)))last.session={...m.session,startedAt:last.at,duration:Math.max(0,last.end-last.at)};else if(last.session)last.session={...last.session,duration:Math.max(0,last.end-last.at)};}else joined.push(m);}
   return joined.sort((a,b)=>b.at-a.at).map(m=>{
@@ -50,8 +50,8 @@
     status,percent:s?.phase==='processing'?s.percent:s?.phase==='recording'&&s.segments?s.completed/s.segments*100:undefined,warning,
     text:m.parts.length?()=>{const good=m.parts.filter(p=>!p.suspect);return (good.length?good:m.parts).map(p=>({at:p.at,text:p.text,who:p.source==='Микрофон'?'Вы':p.speaker||'Собеседники'}));}:null,ask:m.parts.length>0,request:{sessionIds:m.ids,ids:m.parts.map(p=>p.id)},label:'Встреча'});
    // The summary of the meeting (what was discussed, decided, who does what, what was not discussed) and
-   // Zoom's own letter, when it came.
-   const summary=m.extra.filter(x=>x.kind==='summary').sort((a,b)=>b.at-a.at)[0],letter=m.extra.find(x=>x.kind==='zoom-mail');
+   // the meeting service's own letter, when one came.
+   const summary=m.extra.filter(x=>x.kind==='summary').sort((a,b)=>b.at-a.at)[0],letter=m.extra.find(x=>x.kind==='meeting-mail');
    if(summary){const box=node('div','material-summary');for(const block of summary.text.split(/\n\n+/)){const [head,...rows]=block.split('\n');const h=node('p','material-summary-head',head.replace(/\*\*/g,''));box.append(h);const ul=node('ul');for(const r of rows)ul.append(node('li',null,r.replace(/^-\s*/,'')));if(rows.length)box.append(ul);}card.querySelector('.material-head').after(box);}
    else if(m.parts.length&&!['recording','processing'].includes(s?.phase)){const b=node('button',null,'Сделать сводку');b.type='button';b.onclick=run(async()=>{b.disabled=true;b.textContent='Собираю сводку…';try{await window.petya.feature('meetingSummary','summarize',m.ids[0]);await refreshContexts();}finally{b.disabled=false;}});card.querySelector('.material-actions').prepend(b);}
    if(letter){const d=node('details','material-text');d.append(node('summary',null,letter.title));const body=node('div','material-body');d.ontoggle=()=>{if(d.open&&!body.textContent)body.append(node('p',null,letter.text));};d.append(body);card.append(d);}
@@ -61,8 +61,8 @@
  function plain(items){return [...items].sort((a,b)=>b.at-a.at).map(item=>record({key:item.id,title:item.title||item.source,meta:[item.source,when(item.at),item.messages!==undefined?words(item.messages,['сообщение','сообщения','сообщений']):'',size(item.bytes)],
   text:()=>item.text,ask:true,url:item.url,request:{ids:[item.id]},label:'Материал'}));}
  function recordingLine(settings){if(!settings)return null;const line=node('p','material-recording');
-  line.textContent=settings.mode==='off'?'Запись встреч выключена.':settings.mode==='ask'?'Перед записью встречи Петя спросит.':'Встречи Zoom записываются автоматически и расшифровываются по ходу.';
-  const b=node('button',null,'Настроить');b.type='button';b.onclick=()=>{view('settings');setTimeout(()=>document.querySelector('[data-service="zoom"]')?.scrollIntoView({block:'center'}),100);};line.append(' ',b);return line;}
+  line.textContent=!settings.sources?.length||settings.mode==='off'?'Встречи записываются по кнопке «Слушать встречу».':settings.mode==='ask'?'Перед записью встречи Петя спросит.':'Встречи в '+settings.sources.join(', ')+' записываются автоматически и расшифровываются по ходу.';
+  const b=node('button',null,'Настроить');b.type='button';b.onclick=()=>{view('settings');setTimeout(()=>document.querySelector('[data-service="meetings"]')?.scrollIntoView({block:'center'}),100);};line.append(' ',b);return line;}
  function render(value){
   data=value;const sig=JSON.stringify([value.items.map(i=>[i.id,i.bytes,i.suspect]),value.meetings.map(m=>[m.id,m.phase,m.completed,m.segments,m.percent]),value.recording]);if(sig===signature)return;signature=sig;
   const list=$('context-list');if(!list)return;

@@ -1,0 +1,16 @@
+{
+  "id": "regex-cron",
+  "name": "Регулярки и cron",
+  "description": "Объяснить, проверить на строках и составить регулярку или cron-расписание с ближайшими запусками",
+  "category": "dev",
+  "setting": "extension_regex-cron",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["regex-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "regexCard": "renderRegexCard",
+    "cronCard": "renderCronCard"
+  }
+}

@@ -20,7 +20,7 @@ module.exports=async(win,app)=>{
  }
  try{
   await delay(500);
-  await run(`window.petya.saveSettings({userName:'Первая',zoomBotMode:'off'})`);
+  await run(`window.petya.saveSettings({userName:'Первая',meetingAutoRecord:'off'})`);
   await run(`window.petya.addContext({source:'Заметка',title:'Only first',text:'Private first company'})`);
   await run(`window.petya.chatDraftSet('draft:general','Черновик первой компании')`);
   const second=await run(`window.petya.companyCreate('Вторая')`);
@@ -34,7 +34,7 @@ module.exports=async(win,app)=>{
   assert(!(await run(`window.petya.contexts()`)).some(c=>c.title==='Only first'));
   assert.equal((await run(`window.petya.mcpStatus()`)).enabled,false);
   await assert.rejects(fetch(endpoint.url,{method:'POST'}));
-  await run(`window.petya.saveSettings({userName:'Вторая',zoomBotMode:'off'})`);
+  await run(`window.petya.saveSettings({userName:'Вторая',meetingAutoRecord:'off'})`);
   await run(`window.petya.addContext({source:'Заметка',title:'Only second',text:'Private second company'})`);
   await switchTo('default');
   assert.equal((await run(`window.petya.settings()`)).userName,'Первая');

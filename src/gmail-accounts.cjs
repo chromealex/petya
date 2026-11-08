@@ -8,7 +8,7 @@ class GmailAccounts{
  status(){return {configured:!!this.load().client,connected:!!this.accounts().length,accounts:this.accounts(),pending:!!this.login.pending,error:this.login.lastError||''};}
  accept(value){const state=this.load(),accounts=state.accounts||[];const existing=accounts.find(a=>a.email.toLowerCase()===value.email.toLowerCase());if(!existing&&accounts.length>=20)throw Error('Можно подключить до 20 аккаунтов Gmail.');if(existing){this.clients.get(existing.id)?.stop();Object.assign(existing,value);}else accounts.push({id:randomUUID(),label:'',...value});this.save({...state,accounts});}
  importClient(client){this.login.stop();this.login.lastError='';this.save({...this.load(),client});}
- start(){return this.login.start();}
+ start(options){return this.login.start(options);}
  stop(){this.login.stop();for(const client of this.clients.values())client.stop();}
  disconnect(id){const state=this.load();if(!state.accounts?.some(a=>a.id===id))throw Error('Выберите подключённый аккаунт.');this.login.stop();this.clients.get(id)?.stop();this.clients.delete(id);this.save({...state,accounts:state.accounts.filter(a=>a.id!==id)});}
  rename(id,label){if(typeof label!=='string'||label.length>80)throw Error('Название аккаунта — до 80 символов.');const state=this.load(),row=state.accounts?.find(a=>a.id===id);if(!row)throw Error('Аккаунт отключён.');row.label=label.trim();this.save(state);}

@@ -170,12 +170,14 @@ module.exports = async (win, workspace) => {
     if (!document.querySelector('[data-service=ai]') || document.querySelectorAll('[data-ai-provider]').length !== 2) throw new Error('Missing unified AI connection');
     if (document.querySelector('[data-service=slack] .connection-status').textContent.includes('проверка не выполнена')) throw new Error('Startup check not run');
     const preferences = await window.petya.settings();
-    if (preferences.contextDays !== '7' || preferences.zoomAutoRecord !== 'false') throw new Error('Unsafe monitoring defaults');
+    // No meeting app is added for a new user: nothing starts recording by itself.
+    if (preferences.contextDays !== '7' || preferences.extension_zoom !== 'false' || (await window.petya.feature('meetingMemory', 'options')).sources.length) throw new Error('Unsafe monitoring defaults');
     displaySettings(preferences);
-    if ($('settings-form').elements.contextDays.value !== '7' || !$('settings-form').elements.zoomCaptureMic.checked) throw new Error('Monitoring preferences not rendered');
-    await window.petya.saveSettings({ contextDays: '3', slackAutoSync: 'false', zoomAutoRecord: 'false' });
+    for (let i = 0; i < 50 && !$('meeting-record-mic')?.checked; i++) await new Promise(r => setTimeout(r, 50));
+    if ($('settings-form').elements.contextDays.value !== '7' || !$('meeting-record-mic').checked) throw new Error('Monitoring preferences not rendered');
+    await window.petya.saveSettings({ contextDays: '3', slackAutoSync: 'false', meetingAutoRecord: 'ask' });
     if ((await window.petya.settings()).contextDays !== '3') throw new Error('Retention not saved');
-    await window.petya.addContext({ source: 'Zoom', title: 'Вход по одноразовому коду', text: 'Обсудили вход по email. Код действует 10 минут. Нужна защита от повторной отправки.' });
+    await window.petya.addContext({ source: 'Встреча', title: 'Вход по одноразовому коду', text: 'Обсудили вход по email. Код действует 10 минут. Нужна защита от повторной отправки.' });
     await window.petya.addContext({ source: 'Slack', title: 'Поиск в списке проектов', text: 'Добавить поиск по названию и фильтрацию архивных проектов.' });
     await refreshContexts();
     await processCommand('Петя, заведи таску в Jira для реализации этой фичи');
@@ -201,7 +203,7 @@ module.exports = async (win, workspace) => {
     const history = await window.petya.batchHistory();
     if (!history[0].rows.every(r => r.state === 'done')) throw new Error('Batch did not complete');
     view('settings');
-    for(const service of [...optionalModules.map(([id])=>id),'zoom','localproject'])if(!document.querySelector('[data-service="'+service+'"]'))throw new Error('Missing connection card: '+service);
+    for(const service of [...optionalModules.map(([id])=>id),'meetings','localproject'])if(!document.querySelector('[data-service="'+service+'"]'))throw new Error('Missing connection card: '+service);
     if (document.querySelector('aside nav [data-view=asana]') || !$('asana')) throw new Error('Unexpected Asana navigation or missing workspace');
     const notionCard = document.querySelector('[data-service="notion"]');
     if (notionCard.querySelector('.actions .primary').textContent !== 'Подключить Notion') throw new Error('Missing browser sign-in');

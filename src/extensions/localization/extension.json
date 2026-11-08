@@ -1,0 +1,16 @@
+{
+  "id": "localization",
+  "name": "Локализация",
+  "description": "Проверка файлов локализации: недостающие и пустые строки, плейсхолдеры, длина; перевод недостающих локальной моделью в новые файлы",
+  "category": "gamedev",
+  "setting": "extension_localization",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["loc-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "localization": "renderLocalization"
+  }
+}

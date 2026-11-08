@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_Name: UI_es
+  m_EditorClassIdentifier:
+  m_LocaleId:
+    m_Code: es
+  m_SharedData: {fileID: 11400000, guid: 4f2c9b1e7d3a4e5f8a6b0c1d2e3f4a5b, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 1001
+    m_Localized: Jugar
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1002
+    m_Localized: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1003
+    m_Localized: Monedas: {0}
+    m_Metadata:
+      m_Items: []

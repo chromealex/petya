@@ -1,0 +1,13 @@
+{
+  "menu": {
+    "play": "Play",
+    "continue": "Continue"
+  },
+  "hud": {
+    "hp": "HP {{value}}",
+    "gold": "Gold: {{amount}}"
+  },
+  "errors": {
+    "network": "No connection. Try again later."
+  }
+}

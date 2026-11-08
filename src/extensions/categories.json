@@ -1,0 +1,21 @@
+{
+  "categories": [
+    {"id": "gamedev", "name": "Геймдев и сборки", "description": "Unity, Blender, сборки, крэши, сторы, локализация"},
+    {"id": "analytics", "name": "Аналитика и метрики", "description": "Диаграммы, расчёты, метрики игры"},
+    {"id": "team", "name": "Команда и процессы", "description": "Задачи, планы работ, процессы команды"},
+    {"id": "meetings", "name": "Встречи и календарь", "description": "Календарь, приложения встреч, сводки встреч"},
+    {"id": "docs", "name": "Документы и знания", "description": "Confluence, Notion, поиск по знаниям"},
+    {"id": "dev", "name": "Разработка", "description": "Код, Git, pull requests, зависимости"},
+    {"id": "comms", "name": "Коммуникации", "description": "Slack, Telegram, почта"},
+    {"id": "computer", "name": "Компьютер и файлы", "description": "Файлы, место на диске"},
+    {"id": "personal", "name": "Личная продуктивность", "description": "Фокус, напоминания, личные дела"},
+    {"id": "creative", "name": "Креатив", "description": "Изображения, идеи, сторителлинг"}
+  ],
+  "modules": {
+    "unity": "gamedev", "googleplay": "gamedev",
+    "jira": "team", "asana": "team",
+    "notion": "docs", "confluence": "docs", "web": "docs",
+    "ai": "dev",
+    "slack": "comms", "telegram": "comms", "gmail": "comms"
+  }
+}

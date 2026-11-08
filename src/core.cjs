@@ -46,7 +46,7 @@ function candidates(command, contexts, before = Date.now(), days = 7) {
   for (const item of eligible) {
     if (!item.sessionId) { grouped.push({ ...item }); continue; }
     let group = meetings.get(item.sessionId);
-    if (!group || group.text.length + item.text.length > 44000) { group = { ...item, source: 'Zoom', title: 'Встреча · ' + new Date(item.at).toLocaleString('ru-RU'), text: '' }; meetings.set(item.sessionId, group); grouped.push(group); }
+    if (!group || group.text.length + item.text.length > 44000) { group = { ...item, source: require('./meeting-talk.cjs').SOUND, title: 'Встреча · ' + new Date(item.at).toLocaleString('ru-RU'), text: '' }; meetings.set(item.sessionId, group); grouped.push(group); }
     group.text = (group.text + `\n[${item.source}] ` + item.text).trim(); group.at = item.at;
   }
   return grouped.map(c => {

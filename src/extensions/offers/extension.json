@@ -1,0 +1,12 @@
+{
+  "id": "offers",
+  "name": "Предложения расширений",
+  "description": "Петя предлагает добавить расширение, когда разговор касается его темы",
+  "settings": false,
+  "scripts": [
+    ["offer-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "extensionOffer": "renderExtensionOffer"
+  }
+}
