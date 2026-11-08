@@ -1,0 +1,27 @@
+{
+  "id": "google-meet",
+  "name": "Google Meet",
+  "description": "Петя сам записывает созвоны Google Meet из браузера и добавляет ссылку Meet во встречи Google Календаря",
+  "category": "meetings",
+  "icon": "icon.svg",
+  "examples": ["Поставь созвон в Meet с Олегом завтра в 11","Запиши созвон в гугл мит","Петя, запиши встречу в мите","Назначь синк с командой в Google Meet на пятницу"],
+  "connects": "Google Календарь через «Календарь» — для ссылок на встречи",
+  "setting": "extension_google-meet",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    [
+      "settings.js",
+      "background.js"
+    ],
+    [
+      "notifications.js",
+      "notifications.js"
+    ]
+  ],
+  "provides": {
+    "meeting-source": "meeting-source.cjs",
+    "video-meeting": "video-meeting.cjs",
+    "meeting-recording": "meeting-recording.cjs"
+  }
+}

@@ -51,6 +51,21 @@ const links=require('../src/features/app-links.cjs');
  const p=providers.find(x=>x.id==='jira');const original=p.provider.run;
  p.provider.run=async(svc,payload,check)=>{svc.settings.jira='0';check();return {};};
  await assert.rejects(late.run('task-tracker','jira',{title:'x'}),/изменилось/);p.provider.run=original;
+ // prepare(): only providers with prepareEvent, the event's calendar kept.
+ {const dir2=fs.mkdtempSync(path.join(os.tmpdir(),'petya-links-prep-'));fs.mkdirSync(path.join(dir2,'v'));
+  fs.writeFileSync(path.join(dir2,'v','extension.json'),JSON.stringify({id:'v',setting:'extension_v',provides:{'video-meeting':['a.cjs','b.cjs']}}));
+  fs.writeFileSync(path.join(dir2,'v','a.cjs'),"module.exports={id:'a',label:'A',ready:()=>true,run:async()=>({native:true}),prepareEvent:e=>({...e,body:{...e.body,a:1}})};");
+  fs.writeFileSync(path.join(dir2,'v','b.cjs'),"module.exports={id:'b',label:'B',ready:()=>true,run:async()=>({native:true}),prepareEvent:e=>({...e,calendar:'other'})};");
+  const st={settings:{extension_v:'true'}},rr=links.create(st,{providers:links.load(dir2)});
+  const before={calendar:'google',body:{x:1},query:{q:'1'}};
+  assert.deepEqual(await rr.prepare('video-meeting','a',before),{calendar:'google',body:{x:1,a:1},query:{q:'1'}});
+  assert.deepEqual(before.body,{x:1},'the caller\'s event is not changed in place');
+  await assert.rejects(rr.prepare('video-meeting','b',before),/не подготовило/);
+  st.settings.extension_v='false';await assert.rejects(rr.prepare('video-meeting','a',before),/не добавлено/);
+  fs.writeFileSync(path.join(dir2,'v','b.cjs'),"module.exports={id:'b',label:'B',ready:()=>true,run:async()=>({}),prepareEvent:'x'};");
+  delete require.cache[path.join(dir2,'v','b.cjs')];
+  assert.throws(()=>links.load(dir2),/Invalid capability provider/,'prepareEvent must be a function');
+  fs.rmSync(dir2,{recursive:true,force:true});}
  // Invalid declarations are refused.
  const bad=fs.mkdtempSync(path.join(os.tmpdir(),'petya-links-bad-'));fs.mkdirSync(path.join(bad,'x'));
  fs.writeFileSync(path.join(bad,'x','extension.json'),JSON.stringify({id:'x',provides:{'teleport':'a.cjs'}}));
@@ -76,7 +91,42 @@ const links=require('../src/features/app-links.cjs');
  assert.deepEqual(reg.recognize('https://us02web.zoom.us/j/1234567890?pwd=x'),{kind:'zoom',key:'zoom:1234567890',url:'https://us02web.zoom.us/j/1234567890?pwd=x',name:'Zoom'});
  live.settings.extension_zoom='false';assert.equal(reg.recognize('https://us02web.zoom.us/j/1234567890'),null,'nobody else knows Zoom links');
  assert.deepEqual(ids('video-meeting'),['zoom','google-meet','teams']);
- assert.deepEqual(ids('meeting-recording'),['zoom']);
+ assert.deepEqual(ids('meeting-recording'),['zoom','google-meet','teams']);
+ // Meet and Teams are their own extensions: their links, recordings and video calls only while each is added.
+ assert.equal(reg.recognize('https://meet.google.com/abc-defg-hij'),null,'nobody knows Meet links without «Google Meet»');
+ live.settings['extension_google-meet']='true';
+ assert.deepEqual(reg.recognize('https://meet.google.com/ABC-defg-hij/?authuser=0'),{kind:'meet',key:'meet:abc-defg-hij',url:'https://meet.google.com/abc-defg-hij',name:'Google Meet'});
+ assert.deepEqual(reg.available('meeting-recording',{url:'https://meet.google.com/abc-defg-hij'}).map(p=>p.id),['google-meet']);
+ assert.deepEqual(reg.available('meeting-recording',{url:'https://teams.microsoft.com/l/meetup-join/19%3ameeting_X%40thread.v2/0'}),[],'Teams not added');
+ live.settings.extension_teams='true';
+ assert.deepEqual(reg.available('meeting-recording',{url:'https://teams.microsoft.com/l/meetup-join/19%3ameeting_X%40thread.v2/0'}).map(p=>p.id),['teams']);
+ assert.deepEqual(reg.available('meeting-recording',{url:'https://us02web.zoom.us/j/1234567890'}),[],'Zoom not added: nobody records Zoom links');
+ assert.equal(reg.recognize('https://teams.live.com/meet/9387162534?p=abcd').name,'Microsoft Teams');
+ // Their video calls need a calendar account of the right kind, and the calendar extension.
+ assert.deepEqual(reg.available('video-meeting',{calendar:'google'}),[],'no Google calendar account');
+ live.settings.extension_calendar='true';
+ live.settings.gmailCredential=JSON.stringify({accounts:[{id:'g1',email:'me@corp.ru',tokens:{scope:'https://www.googleapis.com/auth/calendar'}}]});
+ live.settings.microsoftCredential=JSON.stringify({accounts:[{id:'m1',email:'me@outlook.com',tokens:{scope:'Calendars.ReadWrite'}}]});
+ assert.deepEqual(reg.available('video-meeting',{calendar:'google'}).map(p=>p.id),['google-meet']);
+ assert.deepEqual(reg.available('video-meeting',{calendar:'microsoft'}),[],'a personal Microsoft account: no Teams');
+ live.settings.microsoftCredential=JSON.stringify({accounts:[{id:'m1',email:'me@outlook.com',tokens:{scope:'Calendars.ReadWrite'}},{id:'m2',email:'me@corp.com',tokens:{scope:'Calendars.ReadWrite'}}]});
+ assert.deepEqual(reg.available('video-meeting',{calendar:'microsoft',account:{kind:'work'}}).map(p=>p.id),['teams']);
+ assert.deepEqual(reg.available('video-meeting',{calendar:'microsoft',account:{kind:'personal'}}),[],'not for the personal account\'s events');
+ live.settings.extension_calendar='false';assert.deepEqual(reg.available('video-meeting',{calendar:'google'}),[],'the calendar removed: no Meet');live.settings.extension_calendar='true';
+ // prepareEvent: the provider adds its fields to the calendar's request; the calendar names no service.
+ const g=await reg.prepare('video-meeting','google-meet',{calendar:'google',body:{summary:'Синк'},query:{sendUpdates:'all'}},{account:{provider:'google'}});
+ assert.equal(g.body.summary,'Синк');assert.equal(g.body.conferenceData.createRequest.conferenceSolutionKey.type,'hangoutsMeet');assert.match(g.body.conferenceData.createRequest.requestId,/^[0-9a-f-]{36}$/);
+ assert.deepEqual(g.query,{sendUpdates:'all',conferenceDataVersion:'1'});
+ const m=await reg.prepare('video-meeting','teams',{calendar:'microsoft',body:{subject:'Синк'},query:{}},{account:{provider:'microsoft',kind:'work'}});
+ assert.deepEqual(m.body,{subject:'Синк',isOnlineMeeting:true,onlineMeetingProvider:'teamsForBusiness'});
+ await assert.rejects(reg.prepare('video-meeting','teams',{calendar:'microsoft',body:{},query:{}},{account:{kind:'personal'}}),/рабочем или учебном/);
+ await assert.rejects(reg.prepare('video-meeting','google-meet',{calendar:'microsoft',body:{},query:{}}),/Google Календаря/);
+ await assert.rejects(reg.prepare('video-meeting','zoom',{calendar:'google',body:{},query:{}}),/Такого приложения/,'Zoom has no prepareEvent');
+ assert.deepEqual(await reg.run('video-meeting','google-meet',{calendar:'google'}),{provider:'google-meet',native:true});
+ await assert.rejects(reg.run('video-meeting','teams',{calendar:'microsoft',account:{kind:'personal'}}),/рабочем или учебном/);
+ live.settings['extension_google-meet']='false';
+ await assert.rejects(reg.prepare('video-meeting','google-meet',{calendar:'google',body:{},query:{}}),/не добавлено/,'removed meanwhile: nothing is added to the event');
+ for(const k of ['extension_teams','extension_calendar','gmailCredential','microsoftCredential'])delete live.settings[k];
  Object.assign(live.settings,{module_jira:'true',jiraUrl:'https://acme.atlassian.net',atlassianCredential:'c',module_asana:'true',asanaCredential:'a',asanaWorkspace:'123',module_slack:'true',slackCredential:'s',extension_coder:'true'});
  assert.deepEqual(reg.available('task-tracker').map(p=>p.id),['jira','asana']);
  const task={title:'Крэш PROJ-1 — NullReferenceException',description:'120 событий за неделю',link:'https://sentry.io/i/1',type:'bug'};

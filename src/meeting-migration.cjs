@@ -8,12 +8,21 @@
 //     or meeting transcripts in memory — so nothing they relied on disappears. New users do not get it.
 //   memory: transcript rows labelled with the old source name become «Встреча»; the service letter kind is renamed.
 // Runs once per company (`meetingMigration` = '1' in the saved settings); the rows check is cheap and idempotent.
+//
+// Video meeting apps (`videoAppsMigration`, once per company): Google Meet and Microsoft Teams used to be choices of
+// «Календарь» itself and are extensions now (src/extensions/google-meet, src/extensions/teams). So that the choice
+// does not disappear, «Google Meet» is added for users with a Google account that has calendar access, «Microsoft
+// Teams» for users with a Microsoft work or school account that has calendar access (the only accounts that could
+// create Teams meetings). Users who never connected a calendar get neither; an explicit decision about either
+// switch (the key present in the saved file) is kept.
 const fs=require('node:fs');
 const path=require('node:path');
 const {SOUND}=require('./meeting-talk.cjs');
 const MODES=['auto','ask','off'];
 const OLD_SOUND='Zoom',OLD_MAIL='zoom-mail',OLD_MAIL_ID='zoommail:',OLD_EXTENSION='zoom-bot',EXTENSION='zoom',SWITCH='extension_zoom';
-const state=new WeakMap();
+const state=new WeakMap(),unsaved=new WeakSet();
+// The calendar's accounts with calendar access and the extension each kind of account keeps.
+const VIDEO_APPS=[['google-meet',a=>a.provider==='google'],['teams',a=>a.provider==='microsoft'&&a.kind==='work']];
 
 function parse(value,fallback){try{const v=JSON.parse(value||'');return v??fallback;}catch{return fallback;}}
 function recordingsOnDisk(dataRoot){
@@ -40,6 +49,15 @@ function migrateSettings(settings,saved,{dataRoot=''}={}){
  state.set(settings,{decided});
  return true;
 }
+// `settings` hold the decrypted account credentials; `saved` tells what the user already decided. True when it ran.
+function migrateVideoApps(settings,saved){
+ if(!saved||saved.videoAppsMigration==='1')return false;
+ let list=[];try{list=require('./extensions/calendar/accounts.cjs').accounts(settings).filter(a=>a.calendar);}catch{list=[];}
+ for(const [id,fits] of VIDEO_APPS){const key='extension_'+id;if(!(key in saved)&&list.some(fits))settings[key]='true';}
+ settings.videoAppsMigration='1';
+ unsaved.add(settings);
+ return true;
+}
 // Rows of the company memory, renamed in place. Returns how many changed. When this load migrated the settings and
 // the memory holds old meeting transcripts, the Zoom extension is added too (unless the user already decided).
 function migrateRows(items,settings=null){
@@ -57,5 +75,5 @@ function migrateRows(items,settings=null){
  return changed;
 }
 // True once after a migration: the caller saves the settings so the file holds the new keys.
-function pending(settings){if(!state.has(settings))return false;state.delete(settings);return true;}
-module.exports={migrateSettings,migrateRows,pending,MODES};
+function pending(settings){if(!state.has(settings)&&!unsaved.has(settings))return false;state.delete(settings);unsaved.delete(settings);return true;}
+module.exports={migrateSettings,migrateVideoApps,migrateRows,pending,MODES};

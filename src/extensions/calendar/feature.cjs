@@ -222,24 +222,30 @@ function setup(s,{fetcher=globalThis.fetch,now=()=>new Date(),poll=1000}={}){
   for(const topic of s.dialogue.state?.topics||[])for(const message of topic.messages||[]){const card=message.extensionData?.calendarCard;if(card?.draftId===draftId)return {topic,message,card};}
   return null;
  }
- // The video call of a new event. `video`: true (the calendar's own Meet/Teams, the old default), false or 'none',
- // a provider id ('google-meet', 'teams' or another app's), {room:key} (a known room) or {url} (a link the user
- // typed). `link` is what the user pasted when a provider asked for its link ({needLink}).
+ // The calendar account as video-meeting providers see it (readiness by account type, prepareEvent).
+ const accountContext=account=>({key:account.key,provider:account.provider,email:account.email,kind:account.kind||''});
+ // The video call of a new event. `video`: a provider id (another app's: a personal room, or a call the calendar
+ // service creates with the event), {room:key} (a known room), {url} (a link the user typed), false or 'none';
+ // true or nothing means the first provider available for this calendar, if any. `link` is what the user pasted
+ // when a provider asked for its link ({needLink}).
  async function videoFor(video,{account,summary,card,link}){
   if(video===false||video==='none'||video?.kind==='none')return null;
-  const links=linksFor(s);
-  const id=video===true||video===undefined?(account.provider==='microsoft'?'teams':'google-meet'):typeof video==='string'?video:video?.kind==='provider'?String(video.id||''):'';
+  const links=linksFor(s),context={calendar:account.provider,account:accountContext(account)};
+  const id=video===true||video===undefined?(links.available('video-meeting',context)[0]?.id||''):typeof video==='string'?video:video?.kind==='provider'?String(video.id||''):'';
+  if(!id&&(video===true||video===undefined))return null;
   if(id){
-   const r=await links.run('video-meeting',id,{calendar:account.provider,title:summary,attendees:(card.attendees||[]).map(a=>a.email),link});
+   const r=await links.run('video-meeting',id,{calendar:account.provider,account:context.account,title:summary,attendees:(card.attendees||[]).map(a=>a.email),link});
    if(r?.needLink)return {needLink:true,text:r.text,placeholder:r.placeholder||'https://…',field:r.field||'Ссылка на встречу'};
-   return r?.native?{patch:r.patch,query:r.query,provider:r.provider}:{url:r.url,provider:r.provider||id};
+   // A call created by the calendar service with the event: the app adds its fields to the request itself.
+   if(r?.native)return {provider:r.provider||id,prepareEvent:event=>links.prepare('video-meeting',id,event,context)};
+   return {url:r.url,provider:r.provider||id};
   }
   if(video?.room!==undefined||video?.kind==='room'){const room=roomsFor(s).get(String(video.room??video.key));if(!room)throw Error('Эта комната больше не в списке. Выберите другую.');return {url:room.url,provider:room.kind,room:room.key};}
   if(video?.url!==undefined||video?.kind==='custom'){const n=normalize(String(video.url||''),{any:true,recognize:recognizer(s)});if(!n)throw Error('Нужна ссылка https:// на встречу.');return {url:n.url,provider:n.kind,custom:true};}
   throw Error('Выберите видеозвонок.');
  }
- // Choices for «Видеозвонок» in the confirm step: providers (other apps' rooms, Meet/Teams of this calendar) and
- // known rooms ranked for this meeting. A due 60-day look-back of the calendar refreshes the rooms first.
+ // Choices for «Видеозвонок» in the confirm step: the video-meeting providers of added apps that fit this calendar
+ // account, and known rooms ranked for this meeting. A due 60-day look-back of the calendar refreshes the rooms first.
  async function videoChoices(draftId){
   const found=locate(String(draftId||''));if(!found)throw Error('Подбор устарел или удалён. Повторите запрос в чате.');
   const card=found.card,rooms=roomsFor(s);
@@ -247,7 +253,7 @@ function setup(s,{fetcher=globalThis.fetch,now=()=>new Date(),poll=1000}={}){
   if(account?.calendar&&rooms.due()){
    try{const to=now(),from=new Date(+to-require('./rooms.cjs').LOOKBACK*86400000);learned(s,await clientFor(s,account,fetcher).events(from,to),account);rooms.refreshed();}catch{/* the known rooms stay as they are */}
   }
-  const providers=linksFor(s).available('video-meeting',{calendar:card.provider});
+  const providers=linksFor(s).available('video-meeting',{calendar:card.provider,...account?{account:accountContext(account)}:{}});
   const ranked=rooms.rank({title:card.title,attendees:(card.attendees||[]).map(a=>a.email)});
   return {providers,rooms:ranked,strong:ranked[0]?.strong?ranked[0].key:''};
  }

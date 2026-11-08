@@ -4,7 +4,7 @@
  const put=detail=>document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail}));
  // The main process publishes schedule items without functions: the cancel action is added here.
  function scheduled(item){
-  if(!item||!String(item.id||'').startsWith('meeting-schedule:'))return;
+  if(!item||!String(item.id||'').startsWith('meeting-schedule:zoom:'))return;
   const {cancellable,...rest}=item;
   put({...rest,actions:cancellable?[['Отменить',()=>window.petya.feature('zoom','cancelSchedule',cancellable).then(list=>list.forEach(scheduled))]]:[]});
  }

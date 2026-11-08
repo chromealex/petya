@@ -78,7 +78,7 @@ const GOOGLE_SCOPE='https://www.googleapis.com/auth/gmail.readonly '+SCOPES.goog
 
  // Agenda (Google): today's events with meeting link, declined and cancelled left out of the summary.
  routes=[[u=>u.startsWith('https://www.googleapis.com/calendar/v3/calendars/primary/events?'),json({items:[
-  {id:'e1',summary:'Стендап',start:{dateTime:at(9,10)},end:{dateTime:at(9,10,15)},hangoutLink:'https://meet.google.com/abc-defg-hij',htmlLink:'https://calendar.google.com/event?eid=1'},
+  {id:'e1',summary:'Стендап',start:{dateTime:at(9,10)},end:{dateTime:at(9,10,15)},conferenceData:{entryPoints:[{entryPointType:'phone',uri:'tel:+1-555'},{entryPointType:'video',uri:'https://meet.google.com/abc-defg-hij'}]},htmlLink:'https://calendar.google.com/event?eid=1'},
   {id:'e2',summary:'Ревью дизайна',location:'Переговорная 3',start:{dateTime:at(9,14)},end:{dateTime:at(9,15)},attendees:[{email:'me@corp.ru',self:true,responseStatus:'accepted'}]},
   {id:'e3',summary:'Обед с партнёром',start:{dateTime:at(9,13)},end:{dateTime:at(9,14)},attendees:[{email:'me@corp.ru',self:true,responseStatus:'declined'}]},
   {id:'e4',summary:'Отменено',status:'cancelled',start:{dateTime:at(9,16)},end:{dateTime:at(9,17)}},
@@ -131,8 +131,10 @@ const GOOGLE_SCOPE='https://www.googleapis.com/auth/gmail.readonly '+SCOPES.goog
  assert.deepEqual(without.extensionData.calendarCard.attendees,[]);
 
  // --- Confirm in the card → the event (Google) ---
+ // The default video call is the first video-meeting provider of an added app (here «Google Meet»).
+ s.settings['extension_google-meet']='true';s.settings.extension_teams='true';
  const ui=app.setup(s,{fetcher,now:()=>NOW}).ipc;
- routes=[[u=>u.startsWith('https://www.googleapis.com/calendar/v3/calendars/primary/events?'),(u,o)=>json({id:'new1',htmlLink:'https://calendar.google.com/event?eid=new1',hangoutLink:'https://meet.google.com/new-link'})]];
+ routes=[[u=>u.startsWith('https://www.googleapis.com/calendar/v3/calendars/primary/events?'),(u,o)=>json({id:'new1',htmlLink:'https://calendar.google.com/event?eid=new1',conferenceData:{entryPoints:[{entryPointType:'video',uri:'https://meet.google.com/new-link'}]}})]];
  calls=[];
  const [first,second]=await Promise.allSettled([ui.create({draftId:draft.draftId,slot:0,title:'  Синк по релизу v2 '}),ui.create({draftId:draft.draftId,slot:0})]);
  assert.equal(first.status,'fulfilled');assert.equal(second.status,'rejected');assert.match(second.reason.message,/Уже создаю/,'duplicate click is refused');
@@ -141,7 +143,7 @@ const GOOGLE_SCOPE='https://www.googleapis.com/auth/gmail.readonly '+SCOPES.goog
  assert.equal(post.method,'POST');assert.equal(pq.get('sendUpdates'),'all');assert.equal(pq.get('conferenceDataVersion'),'1');
  assert.equal(post.body.summary,'Синк по релизу v2');assert.equal(post.body.start.dateTime,at(12,15));assert.equal(post.body.start.timeZone,'Europe/Moscow');assert.deepEqual(post.body.attendees.map(a=>a.email),['maria@corp.ru']);
  assert.equal(post.body.conferenceData.createRequest.conferenceSolutionKey.type,'hangoutsMeet');
- assert.equal(first.value.created.url,'https://calendar.google.com/event?eid=new1');
+ assert.equal(first.value.created.url,'https://calendar.google.com/event?eid=new1');assert.equal(first.value.created.link,'https://meet.google.com/new-link');assert.equal(first.value.created.video,'google-meet');
  const again=await ui.create({draftId:draft.draftId,slot:0});assert.equal(again.already,true);assert.equal(calls.length,1,'a created event is never created twice');
  // No answer from the service: the outcome is unknown and is not repeated.
  routes=[[u=>u.includes('/calendars/primary/events?'),()=>{throw Error('socket hang up');}]];

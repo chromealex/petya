@@ -1,8 +1,10 @@
 // Zoom's meeting window on this computer: the native helper (assets/native/watch-macos on macOS, watch-windows.ps1
 // on Windows) lists Zoom's windows; a «Zoom Meeting» / «Конференция Zoom» window or the floating video window
 // means a meeting is going on. On macOS, when the helper cannot read titles, Electron's own window list (screen
-// recording permission) is used for Zoom's window ids only; permission is never requested from here.
+// recording permission, through the neutral src/desktop-windows.cjs) is used for Zoom's window ids only; permission
+// is never requested from here.
 const { execFile } = require('node:child_process');
+const desktopWindows = require('../../desktop-windows.cjs');
 const path = require('node:path');
 const { promisify } = require('node:util');
 const exec = promisify(execFile);
@@ -42,11 +44,11 @@ function inspect(explicit = false, { platform = process.platform, readNative = d
   running = (async () => {
     let timer;
     try {
-      const { systemPreferences, desktopCapturer } = platform === 'darwin' ? electron() : {};
+      const { systemPreferences } = platform === 'darwin' ? electron() : {};
       const result = await Promise.race([
         inspectDesktop({ platform, readNative, explicit,
           screenStatus: () => verified ? 'granted' : systemPreferences.getMediaAccessStatus('screen'),
-          getSources: options => desktopCapturer.getSources(options) }),
+          getSources: () => desktopWindows.sources({ electron }) }),
         new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('macOS не вернула список окон за 15 секунд. Проверьте, нет ли открытого системного диалога доступа.')), 15000); })
       ]);
       if (result.permission === true) verified = true;

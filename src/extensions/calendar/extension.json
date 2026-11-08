@@ -22,11 +22,5 @@
   ],
   "results": {
     "calendarCard": "renderCalendarCard"
-  },
-  "provides": {
-    "video-meeting": [
-      "video-meet.cjs",
-      "video-teams.cjs"
-    ]
   }
 }

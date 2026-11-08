@@ -1,0 +1,27 @@
+{
+  "id": "teams",
+  "name": "Microsoft Teams",
+  "description": "Петя сам записывает встречи и звонки Teams и создаёт встречу Teams вместе с событием Outlook рабочего аккаунта",
+  "category": "meetings",
+  "icon": "icon.svg",
+  "examples": ["Поставь встречу в Teams с Марией в среду в 16:00","Запиши встречу в тимсе","Петя, запиши звонок в Teams","Назначь ретро в тимс на пятницу"],
+  "connects": "Рабочий аккаунт Microsoft через «Календарь» — для встреч Teams",
+  "setting": "extension_teams",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    [
+      "settings.js",
+      "background.js"
+    ],
+    [
+      "notifications.js",
+      "notifications.js"
+    ]
+  ],
+  "provides": {
+    "meeting-source": "meeting-source.cjs",
+    "video-meeting": "video-meeting.cjs",
+    "meeting-recording": "meeting-recording.cjs"
+  }
+}
