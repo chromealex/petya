@@ -1,0 +1,46 @@
+/* First-run introduction: Petya on top, his line and one question below. Sits under the startup splash. */
+.onb{position:fixed;inset:0;z-index:2147482000;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;-webkit-app-region:no-drag}
+.onb-backdrop{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,#29452f 0,transparent 58%),radial-gradient(ellipse at 15% 0%,#24382c 0,transparent 55%),#111415}
+.onb-stage{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;width:min(560px,100%);margin:auto}
+.onb-card{width:100%;display:flex;flex-direction:column;gap:16px}
+/* Petya's lines: a comic speech bubble with its tail up to him; a thought cloud while he guesses or waits. */
+.onb-say{position:relative;align-self:center;max-width:100%;margin:6px 0 0;padding:13px 22px;border-radius:22px;background:#f0f2ed;color:#172216;text-align:center;font-size:19px;line-height:1.35;font-weight:600;letter-spacing:-.3px;box-shadow:0 8px 22px #0007;transform-origin:50% 0}
+.onb-say::before{content:"";position:absolute;left:50%;top:-11px;margin-left:-11px;border:solid transparent;border-width:0 11px 12px;border-bottom-color:#f0f2ed}
+.onb-say.think{background:#dfe8d6;color:#2f3d2c;font-weight:500;font-style:italic;border-radius:28px}
+.onb-say.think::before{top:-15px;margin-left:-6px;width:12px;height:12px;border:0;border-radius:50%;background:#dfe8d6}
+.onb-say.think::after{content:"";position:absolute;left:50%;top:-25px;margin-left:2px;width:7px;height:7px;border-radius:50%;background:#dfe8d6}
+.onb-say.pop{animation:onb-pop .32s cubic-bezier(.34,1.56,.64,1)}
+@keyframes onb-pop{from{transform:scale(.85);opacity:.3}}
+.onb-content{display:flex;flex-direction:column;gap:12px}
+.onb-content.onb-enter{animation:onb-enter .35s ease both}
+.onb-row{display:flex;gap:10px}
+.onb-input{flex:1;min-width:0;font-size:16px;padding:12px 14px;border-radius:11px}
+.onb-guess{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;border-color:#647f4e;color:#d0f596;background:#22301f}
+.onb-guess::before{content:"";width:15px;height:15px;border:2px solid currentColor;border-radius:50%;box-shadow:5px 5px 0 -4px currentColor;transform:translate(-1px,-1px)}
+.onb-guess:hover{background:#2c3d27}
+.onb-status{margin:0;min-height:22px;color:#abb4af;font-size:13px}
+.onb-status.found{color:#d0f596}.onb-status.found .onb-detail{color:#abb4af}
+.onb-status.miss{color:#ffcfb8}
+.onb-alternatives{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.onb-alternatives:empty{display:none}
+.onb-or{color:#abb4af;font-size:12px}
+.onb-chip{padding:7px 13px;border-radius:999px;font-size:13px}
+.onb-roles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.onb-role{padding:9px 15px}
+.onb-role.on{background:#d0f596;border-color:#d0f596;color:#172216;font-weight:650}
+.onb-permission{background:#1b1f20;border:1px solid #303637;border-radius:15px;padding:18px 20px}
+.onb-permission strong{display:block;font-size:16px;color:#f0f2ed}
+.onb-permission p{margin:6px 0 0;font-size:13px}
+.onb-how{color:#c9d3cd}
+.onb-summary{list-style:none;margin:0 auto;padding:0;color:#c9d3cd;text-align:center}
+.onb-summary li{padding:2px 0}
+.onb-actions{display:flex;align-items:center;gap:10px;margin-top:8px}
+.onb-dots{display:flex;gap:6px;margin-right:auto}
+.onb-back+.onb-dots{margin-left:4px}
+.onb-dots i{width:7px;height:7px;border-radius:50%;background:#414847;transition:background .2s,width .2s}
+.onb-dots i.done{background:#647f4e}.onb-dots i.on{width:20px;border-radius:4px;background:#d0f596}
+.onb-next{min-width:120px}
+.pa-flying .pa-glow,.pa-flying .pa-shadow,.pa-flying .pa-bubble,.pa-flying .pa-orbit{opacity:0!important;transition:opacity .2s}
+@keyframes onb-enter{from{opacity:0;transform:translateY(8px)}}
+@media (max-height:640px){.onb-stage{gap:10px}.onb .pa{--pa-size:110px!important}.onb-say{font-size:17px}}
+@media (prefers-reduced-motion:reduce){.onb-content.onb-enter,.onb-say.pop{animation:none}}
+.onb .pa-bubble{display:none}
