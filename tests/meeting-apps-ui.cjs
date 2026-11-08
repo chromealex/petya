@@ -16,14 +16,15 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  // --- Catalog: both apps in «Встречи и календарь», not added yet ---
  await js('window.openAppCatalog()');await wait("document.querySelectorAll('.app-catalog-group').length>3");
  const meetings="document.querySelector('[data-category=meetings]')";
- const names=await js(`[...${meetings}.querySelectorAll('.app-catalog-row strong')].map(n=>n.textContent)`);
+ const names=await js(`[...${meetings}.querySelectorAll('.app-tile strong')].map(n=>n.textContent)`);
  for(const n of ['Google Meet','Microsoft Teams','Zoom','Календарь'])assert.ok(names.includes(n),n+' in «Встречи»: '+names.join(', '));
- assert.match(await js(`[...${meetings}.querySelectorAll('.app-catalog-row')].find(r=>r.querySelector('strong').textContent==='Google Meet').textContent`),/браузер/);
+ assert.match(await js(`${meetings}.querySelector('.app-tile[data-app="google-meet"]').textContent`),/браузер/);
  await js(`${meetings}.scrollIntoView({block:'start'})`);
  const catalogShot=await shot('petya-meeting-apps-catalog');
- // Add both from the catalog (the row's pick, then «Добавить выбранные»).
- for(const n of ['Google Meet','Microsoft Teams'])await js(`[...${meetings}.querySelectorAll('.app-catalog-row')].find(r=>r.querySelector('strong').textContent===${JSON.stringify(n)}).querySelector('.app-catalog-pick').click()`);
- await wait("document.querySelector('.app-catalog-bar span')?.textContent==='Выбрано: 2'");
+ // Add both from the catalog («Выбрать несколько», both tiles, then «Добавить выбранные»).
+ await js("document.querySelector('.app-catalog-select').click()");await wait("document.querySelector('.app-catalog').classList.contains('selecting')");
+ for(const id of ['google-meet','teams'])await js(`${meetings}.querySelector('.app-tile[data-app="${id}"] .app-tile-main').click()`);
+ await wait("document.querySelector('.app-catalog-bar-note')?.textContent.startsWith('Выбрано: 2')");
  await js("document.querySelector('.app-catalog-bar .primary').click()");
  await wait("(async()=>{const c=await window.petya.feature('extensionUI','catalog');return c.find(e=>e.id==='google-meet').installed&&c.find(e=>e.id==='teams').installed;})()",'both added');
  await js("document.querySelector('dialog.app-catalog')?.close()");
