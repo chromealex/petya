@@ -240,6 +240,7 @@ function signature(message){
  let m=String(message||'');
  const json=/^\s*\{/.test(m)&&(()=>{try{return JSON.parse(m);}catch{return null;}})();
  if(json&&typeof json==='object'){const v=json.msg??json.message??json.error??json.err;if(v)m=typeof v==='string'?v:JSON.stringify(v);}
+ else{const f=/(?:^|\s)(?:msg|message)=(?:"((?:[^"\\]|\\.)*)"|(\S+))/.exec(m);if(f)m=(f[1]??f[2]).replace(/\\"/g,'"');}
  return m
   .replace(/^\s*\[?\d{4}-\d{2}-\d{2}[T ][\d:.,]+(?:Z|[+-]\d{2}:?\d{2})?\]?\s*/,'')
   .replace(/\b\d{4}-\d{2}-\d{2}(?:[T ][\d:.,]+(?:Z|[+-]\d{2}:?\d{2})?)?/g,'<time>')
@@ -249,7 +250,6 @@ function signature(message){
   .replace(/\b(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?\b/g,'<ip>')
   .replace(/\b(?:0x)?[0-9a-f]{8,}\b/gi,w=>/\d/.test(w)?'<hex>':w)
   .replace(/\b[A-Za-z]*\d[A-Za-z\d_-]{9,}\b/g,'<id>')
-  .replace(/(["'])(?:(?!\1).)*\d(?:(?!\1).)*\1/g,'<str>')
   .replace(/(?<![A-Za-z<])\d+(?:[.,]\d+)?(?:ms|s|m|h|kb|mb|gb|b|%)?(?![A-Za-z])/gi,'<n>')
   .replace(/(?:<n>[\s,./:-]*){2,}/g,'<n> ')
   .replace(/\s+/g,' ').trim().slice(0,200);

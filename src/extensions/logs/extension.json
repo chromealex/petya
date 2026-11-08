@@ -1,0 +1,23 @@
+{
+  "id": "logs",
+  "name": "Логи сервера",
+  "description": "Поиск по логам серверов в Loki, Elasticsearch/OpenSearch и подах Kubernetes: строки по уровням, график по времени, группы ошибок с числом повторов, «Почему?» по строкам и задача из ошибки",
+  "category": "dev",
+  "icon": "icon.svg",
+  "examples": ["Логи сервера за последний час", "Ошибки оплаты в логах за час", "Логи сервиса payments за 15 минут", "Что в Loki по api за сутки?"],
+  "connects": "Loki, Elasticsearch/OpenSearch или Kubernetes",
+  "uses": ["task-tracker"],
+  "provides": {
+    "log-source": ["loki-source.cjs", "elasticsearch-source.cjs"]
+  },
+  "setting": "extension_logs",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["logs-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "logs": "renderLogsCard"
+  }
+}
