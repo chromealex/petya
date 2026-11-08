@@ -16,8 +16,9 @@ const path=require('node:path');
 const directory=path.join(__dirname,'../extensions');
 const KINDS=['video-meeting','task-tracker','share-message','code-fix','meeting-recording'];
 // Capabilities declared the same way but served by their own registry: meeting sources
-// (src/features/meeting-sources.cjs) are polled by the meeting recorder, not offered as card buttons.
-const REGISTRIES=['meeting-source'];
+// (src/features/meeting-sources.cjs) are polled by the meeting recorder, not offered as card buttons; metrics
+// sources (src/extensions/metrics/sources.cjs) are read and merged by the «Метрики игры» card.
+const REGISTRIES=['meeting-source','metrics-source'];
 
 // Every `provides` entry of every extension: {kind, extension, setting, name, file, provider}. Unknown kinds and
 // files outside the extension's own directory are refused.

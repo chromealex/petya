@@ -101,7 +101,7 @@ function analyze(input,{seed=42,rounds=2000}={}){
  return card;
 }
 
-// The split axis is zoomed around the plan so a small deviation is visible next to the plan marker.
+// The split axis is narrowed around the plan so a small deviation is visible next to the plan marker.
 function assignmentAxis(srm){const d=Math.max(0.01,3*Math.max(...srm.observed.map((o,i)=>Math.abs(o-srm.expected[i]))));return {min:Math.max(0,Math.min(...srm.expected)-d),max:Math.min(1,Math.max(...srm.expected)+d)};}
 // Only assignment counts («A 50000, B 49000 — есть ли SRM?»): the split check alone.
 function assignment(input){

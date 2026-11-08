@@ -1,0 +1,16 @@
+{
+  "id": "metrics",
+  "name": "Метрики игры",
+  "description": "DAU, новые игроки, ретеншн D1/D7/D30, выручка и ARPDAU за период с изменением к прошлому, необычные дни на графике; данные из подключённых источников (AppMetrica)",
+  "category": "analytics",
+  "setting": "extension_metrics",
+  "settings": false,
+  "feature": "feature.cjs",
+  "examples": ["DAU за неделю", "Ретеншн D1 D7 D30", "Сколько новых игроков вчера", "Сравни эту неделю с прошлой"],
+  "scripts": [
+    ["metrics-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "metricsCard": "renderMetricsCard"
+  }
+}
