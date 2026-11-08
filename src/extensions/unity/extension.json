@@ -2,6 +2,7 @@
   "name": "Unity Editor",
   "description": "Префабы и инструменты открытого редактора",
   "category": "gamedev",
+  "icon": "icon.svg",
   "examples": ["Найди префаб главного меню","Какие префабы используют этот материал?","Открой префаб окна магазина"],
   "setting": "module_unity",
   "scripts": [
