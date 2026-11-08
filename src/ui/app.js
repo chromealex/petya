@@ -179,7 +179,7 @@ async function makeDraft(context, route = null, { reviewOnly = false } = {}) {
   }
   activeJiraRoute = route;
   if (currentIntent === 'jira-agent') { await openWorkspace(context, route); return; }
-  if (currentIntent !== 'do' && (currentIntent === 'docs' || /(декомпоз|разбей|несколько|задачи|таски|найди.*док|найди.*спек|покажи.*док)/iu.test(commandSnapshot))) { await openWorkspace(context, route); return; }
+  if (currentIntent !== 'do' && (currentIntent === 'docs' || currentDecompose || /(декомпоз|разбей|несколько|задачи|таски|найди.*док|найди.*спек|покажи.*док)/iu.test(commandSnapshot))) { await openWorkspace(context, route); return; }
   if (draftBusy) return; draftBusy = true;
   document.querySelectorAll('.choice').forEach(b => b.disabled = true);
   try { commandProgress.update('working', 'Готовлю черновик'); notice('Готовлю черновик по выбранному обсуждению…'); currentDraft = await window.petya.draft(commandSnapshot, context.id, route.id); $('draft-summary').value = currentDraft.summary; $('draft-description').value = currentDraft.description; $('draft-card').hidden = false; $('resolution').hidden = true; $('send').disabled = false; $('send').textContent = 'Создать задачу в '+currentDraft.project; $('issue-result').textContent = [currentDraft.project,currentDraft.issueType,'Исполнитель — по умолчанию в Jira'].filter(Boolean).join(' · '); notice(`Контекст: ${context.source} — ${context.title}. Проверьте задачу перед отправкой.`); await window.petya.notify('Черновик Jira готов. Откройте Петю для проверки.'); commandProgress.update('waiting', 'Черновик готов'); }
@@ -221,7 +221,7 @@ async function executeCommand(command, at = Date.now(), automatic = false) {
   if(reply.handled){automaticVoiceCommand=false;await showDialogueReply(reply,automatic);if(reply.error)commandProgress.update('error',reply.text);else if(voiceReply||reply.question)commandProgress.update('waiting','Жду уточнения');return;}
   if(reply.resolvedCommand){commandSnapshot=reply.resolvedCommand;}
   if(currentDraft){notice('Сначала завершите или закройте текущий черновик.');return;}
-  const result = await commandProgress.step('plan', 'Выбираю контекст и действие', () => window.petya.plan(commandSnapshot, commandAt, meeting.active ? meetingId : ''), true); currentIntent = result.intent; if (currentIntent === 'do') automaticVoiceCommand = true;
+  const result = await commandProgress.step('plan', 'Выбираю контекст и действие', () => window.petya.plan(commandSnapshot, commandAt, meeting.active ? meetingId : ''), true); currentIntent = result.intent; currentDecompose = !!result.decompose; if (currentIntent === 'do') automaticVoiceCommand = true;
   $('draft-card').hidden = true; $('resolution').hidden = true; $('choices').replaceChildren(); $('workspace-card').hidden = true;
   if (result.kind === 'unsupported') { notice('Можно создать задачи Jira, найти документацию или передать работу Claude / Codex.'); return; }
   if (result.kind === 'selected') { await makeDraft(result.context); return; }

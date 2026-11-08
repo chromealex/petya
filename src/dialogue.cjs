@@ -10,7 +10,7 @@ function aboutShownList(text,topic){
 function actionRequest(text){
  const s=text.trim();
  if(/^(?:[«"“]|не\s|если\s|что\s|почему\s|зачем\s|как\s|объясни\s|дума[юешь])/iu.test(s))return false;
- return core.isDoCommand(s)||/^(?:(?:пожалуйста|можешь|можете)\s*[, ]*)?(?:создай|заведи|оформи|добавь|разбей|декомпозируй|передай|отдай|поручи|найди|покажи|поищи)(?=$|[\s,.!?])/iu.test(s) && (core.isJiraCommand(s)||core.isDocsCommand(s)||/(?:claude|клод|кодекс|codex)/iu.test(s));
+ return core.isDoCommand(s)||core.decomposeRequest(s)||/^(?:(?:пожалуйста|можешь|можете)\s*[, ]*)?(?:создай|заведи|оформи|добавь|разбей|декомпозируй|передай|отдай|поручи|найди|покажи|поищи)(?=$|[\s,.!?])/iu.test(s) && (core.isJiraCommand(s)||core.isDocsCommand(s)||/(?:claude|клод|кодекс|codex)/iu.test(s));
 }
 function discussionOnly(text){return /^(?:а\s+)?(?:не\s|не надо\s|что такое|объясни|почему|как думаешь|что думаешь|как лучше|я думаю|мне кажется|давай обсудим|[«"“])/iu.test(text)||/^(?:\d+|первый|первая|первое|второй|вторая|второе|третий|третья|третье)[.!?]*$/iu.test(text.trim());}
 // Speech recognition often hears «Jira» as «жизни», «жиры», «джире». Only next to a task word.

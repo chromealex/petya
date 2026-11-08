@@ -52,6 +52,15 @@
   const percent=state.total>0?Math.min(100,Math.floor(state.received*100/state.total)):undefined;
   put('voice-language:'+state.code,{title:state.label+' · язык',text:state.message+(Number.isFinite(percent)?' '+percent+'%':''),busy:state.busy,percent,version:state.phase,kind:state.phase==='error'?'error':state.phase==='done'?'success':'info',actions:state.phase==='error'?[['Повторить',()=>window.petya.voiceLanguageInstall(state.code)]]:state.busy?[]:[['Языки',()=>{setOpen(false);view('settings');window.revealSettings?.($('voice-languages'));}]]});
  }
+ // Decomposition: one card per run, updated in place with the overall percentage.
+ function decomposeProgress(state){
+  if(!state?.id)return;
+  const busy=!!state.busy,percent=busy&&state.percent>0&&!['starting','fetching'].includes(state.stage)?state.percent:undefined;
+  const agents=(state.agents||[]).filter(a=>a.state==='reading').length;
+  put('decompose',{title:'Декомпозиция · '+state.title,text:(window.decomposeStageText?.(state)||'Декомпозиция')+(agents>1?' · агентов: '+agents:'')+(Number.isFinite(percent)?' '+percent+'%':''),busy,percent,version:busy?'running:'+state.id:state.stage+':'+state.id,kind:state.stage==='error'?'error':state.stage==='done'?(state.warnings?'attention':'success'):'info',actions:busy?[]:[['Открыть план',()=>{setOpen(false);view('home');$('workspace-card').scrollIntoView({behavior:'smooth',block:'start'});}]]});
+ }
+ window.petyaEvents.onDecompose(decomposeProgress);
+ window.petya.decomposeStatus().then(decomposeProgress).catch(()=>{});
  window.petyaEvents.onVoiceLanguageProgress(languageProgress);
  window.petya.voiceLanguageStatus().then(states=>states.forEach(languageProgress)).catch(()=>{});
  const installProgress = item => put(item.id,item);

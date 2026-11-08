@@ -163,14 +163,16 @@ async function directRequest(url, options = {}) {
   const cancelSignal=require('./answer-cancel.cjs').signal();
   if(cancelSignal)options={...options,signal:options.signal?AbortSignal.any([options.signal,cancelSignal]):cancelSignal};
   if(typeof options.body==='string')options={...options,body:require('./model-context.cjs').normalize(url,options.body)};
-  const {onAnswerChunk,...fetchOptions}=options;
+  const {onAnswerChunk,timeoutMs,...fetchOptions}=options;
   // At most a few local-model generations at once (agents, background chats); the rest wait their turn.
   const modelContext=require('./model-context.cjs');
   if(modelContext.isModelRequest(url,options.body))return modelContext.slot(options.signal,()=>sendRequest(url,options,onAnswerChunk,fetchOptions));
   return sendRequest(url,options,onAnswerChunk,fetchOptions);
 }
 async function sendRequest(url,options,onAnswerChunk,fetchOptions){
-  const response = await fetch(url, { ...fetchOptions, redirect: 'error', signal: options.signal ? AbortSignal.any([options.signal,AbortSignal.timeout(90000)]) : AbortSignal.timeout(90000) });
+  // 90 s unless the caller knows a request is long (a local model reading a large document part).
+  const limit=Math.min(Math.max(Number(options.timeoutMs)||90000,1000),30*60000);
+  const response = await fetch(url, { ...fetchOptions, redirect: 'error', signal: options.signal ? AbortSignal.any([options.signal,AbortSignal.timeout(limit)]) : AbortSignal.timeout(limit) });
   if (!response.ok) { let detail='';if(!/slack\.com$/.test(new URL(url).hostname))try{detail=(await response.text()).slice(0,500);}catch{} const retryAfter = Math.max(1, Number(response.headers.get('retry-after')) || 60); const slack = new URL(url).hostname === 'slack.com'; const error = new Error(slack && response.status === 429 ? `Slack временно ограничил запросы (HTTP 429). Повторите через ${Math.ceil(retryAfter)} с. Это ограничение Slack, а не голоса или обычного диалога Пети.` : `Сервис вернул HTTP ${response.status}${response.status === 429 ? '. Достигнут лимит запросов; повторите позже.' : ''}`); error.status = response.status; error.retryAfter = retryAfter; if(detail)error.detail=detail; throw error; }
   if (response.status === 204) return null;
   if(onAnswerChunk)return require('./answer-stream.cjs').consume(response,onAnswerChunk);
@@ -270,7 +272,7 @@ function setupHandlers() {
     try { history = JSON.parse(fs.readFileSync(historyFile, 'utf8')); if (history.encrypted) history = JSON.parse(safeStorage.decryptString(Buffer.from(history.encrypted, 'base64'))); if (!Array.isArray(history)) throw new Error('Invalid history'); }
     catch { throw new Error('Не удалось прочитать журнал задач. Сохраните файл batch-history.json и восстановите его перед отправкой новых пакетов.'); }
   }
-  workspace = new Workspace({ settings: () => settings, request, history, save: data => { if (!safeStorage.isEncryptionAvailable()) throw new Error('Хранилище ОС недоступно: нельзя сохранить историю для отката.'); const stored = { version: 2, encrypted: safeStorage.encryptString(JSON.stringify(data)).toString('base64') }; fs.writeFileSync(historyFile + '.tmp', JSON.stringify(stored), { mode: 0o600 }); fs.renameSync(historyFile + '.tmp', historyFile); } });
+  workspace = new Workspace({ settings: () => settings, request, history, progress: state => { if (win && !win.isDestroyed()) win.webContents.send('decompose-progress', state); }, save: data => { if (!safeStorage.isEncryptionAvailable()) throw new Error('Хранилище ОС недоступно: нельзя сохранить историю для отката.'); const stored = { version: 2, encrypted: safeStorage.encryptString(JSON.stringify(data)).toString('base64') }; fs.writeFileSync(historyFile + '.tmp', JSON.stringify(stored), { mode: 0o600 }); fs.renameSync(historyFile + '.tmp', historyFile); } });
   const {agentBatches,agents,shell,checkProgress,taskProgress,available}=require('./agents-setup.cjs')({get Agents(){return Agents;},get app(){return app;},get batchTasks(){return batchTasks;},get contextFor(){return contextFor;},get core(){return core;},get dataRoot(){return dataRoot;},get delegation(){return delegation;},get dialogue(){return dialogue;},get fs(){return fs;},get handle(){return handle;},get modules(){return modules;},get notify(){return notify;},get path(){return path;},get projectMemory(){return projectMemory;},get promptFor(){return promptFor;},get request(){return request;},get safeStorage(){return safeStorage;},get settings(){return settings;},get smoke(){return smoke;},get systemPreferences(){return systemPreferences;},get text(){return text;},get workspace(){return workspace;}});
   maintenance = () => {
     dialogue?.prune();

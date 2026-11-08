@@ -17,6 +17,8 @@ module.exports=ctx=>{
     if (doIt && result.kind === 'selected' && !ctx.core.actionableContext(result.context)) { result.kind='missing';result.options=[];delete result.context; }
     result.intent = doIt ? 'do' : asanaCommand ? 'asana' : agent ? (agent.jira ? 'jira-agent' : 'agent') : ctx.core.isDocsCommand(command) ? 'docs' : 'work';
     result.agent = agent;
+    // The planner, not a single draft, for a decomposition in any wording («декомпозь давай»).
+    result.decompose = ctx.core.decomposeRequest(command);
     ctx.snapshots.clear();
     for (const context of result.options) ctx.snapshots.set(context.id, { ...context });
     return result;

@@ -16,7 +16,25 @@ function doCommand(text) {
 }
 function isDoCommand(text) { return Boolean(doCommand(text)); }
 
-function isJiraCommand(text) { return /(?:декомпоз|разбей.*(?:фич|функц|задач))/iu.test(text) || /(?:созда|заве|добав|оформ|декомпоз|разбей|разби)/iu.test(text) && /(?:таск|задач|jira|жир)/iu.test(text); }
+// A request to split a feature into several issues, in any everyday wording: «декомпозируй эту фичу»,
+// «декомпозь давай», «разложи фичу на задачи», «нарежь тасков по спеке», «раскидай это по задачам».
+// Questions about decomposition («что такое декомпозиция», «как декомпозировать?») and negations are not requests.
+function decomposeRequest(text) {
+  const s = String(text || '').split('\nУточнение пользователя:')[0].toLowerCase().replace(/ё/g, 'е').replace(/^\s*петя[\s,:.!?—-]*/u, '').trim();
+  if (!s || /[«"“]/u.test(s)) return false;
+  if (/^(?:а\s+)?(?:что\s+(?:такое|значит|означает)|как(?:ая|ой|ие)?\s|зачем|почему|объясни|расскажи|чем\s|когда\s|кто\s)/u.test(s)) return false;
+  if (/(?:^|\s)не\s+(?:надо\s+|нужно\s+|стоит\s+|будем\s+|пока\s+)?(?:раз|де|дек|на|по|рас)\p{L}*/u.test(s)) return false;
+  if (/(?:^|\s|раз)д[еи]к[оа]мпо[зу]/u.test(s)) return true;
+  const target = /(?:^|[\s,])(?:на|по)\s+(?:\p{L}+\s+){0,2}(?:под)?(?:задач|таск|тикет|сабтаск|issue|кусочк|кусочек|кусок|куск|этап|шаг|част)\p{L}*/u;
+  const work = /(?:^|[\s,])(?:фич|функционал|функци|спек|док[уиа]|доку|требован|тз(?!\p{L})|эпик|задач|таск)\p{L}*/u;
+  // «разбей фичу», «распили эпик»: the thing being split is named.
+  if (/(?:^|\s)(?:разбей|разбить|разбейте|разбивай|распили|распилить|разложи|разложить|раздели|разделить|порежь|порезать|нарежь|нарезать|раскидай|раскидать|раскрои|покроши)(?=$|[\s,.!?])/u.test(s) && (target.test(s) || work.test(s))) return true;
+  // «накидай задач по фиче», «нарежь тасков», «наплоди тикетов по спеке»: several issues are made from the feature.
+  if (/(?:^|\s)(?:накидай|накидать|набросай|набросать|нарежь|нарезать|наплоди|настругай|сделай|составь|подготовь|заведи|создай)\s+(?:\p{L}+\s+){0,2}(?:список\s+|план\s+|набор\s+|пачку\s+|несколько\s+)?(?:под)?(?:задач|тасок|тасков|таск[иа]|тикет)\p{L}*\s+(?:по|для|из|под)\s/u.test(s)) return true;
+  if (/(?:^|\s)распиши\s+(?:\p{L}+\s+){0,3}(?:на|по)\s+(?:под)?(?:задач|таск|тикет)/u.test(s)) return true;
+  return false;
+}
+function isJiraCommand(text) { return decomposeRequest(text) || /(?:созда|заве|добав|оформ|декомпоз|разбей|разби)/iu.test(text) && /(?:таск|задач|jira|жир)/iu.test(text); }
 function candidates(command, contexts, before = Date.now(), days = 7) {
   const terms = words(command);
   const eligible = contexts.map(c => {
@@ -65,4 +83,4 @@ function localEndpoint(value) {
   return url.href;
 }
 function isDocsCommand(text) { return /(?:найди|найти|покажи|ищи|поищи)/iu.test(text) && /(?:док|спек|описан|confluence|конфлю)/iu.test(text); }
-module.exports = { doCommand, actionableContext, isDoCommand, standaloneContext, words, isDocsCommand, wake, isJiraCommand, candidates, resolve, fallbackDraft, adf, localEndpoint };
+module.exports = { decomposeRequest, doCommand, actionableContext, isDoCommand, standaloneContext, words, isDocsCommand, wake, isJiraCommand, candidates, resolve, fallbackDraft, adf, localEndpoint };

@@ -7,21 +7,25 @@ class Notion {
       return this.request('https://api.notion.com/v1' + route, { method: body ? 'POST' : 'GET', headers: { Authorization: 'Bearer ' + token, 'Notion-Version': '2025-09-03', 'Content-Type': 'application/json' }, ...(body ? { body: JSON.stringify(body) } : {}) });
     }); this.queue = job; return job;
   }
-  async content(id, token) {
+  // A preview for the search list, or the whole page (`full`) for a page chosen for decomposition.
+  async content(id, token, { full = false } = {}) {
+    const limit = full ? { calls: 400, chars: 1500000, depth: 8 } : { calls: 8, chars: 18000, depth: 4 };
     let calls = 0, text = '', truncated = false; const seen = new Set();
     const walk = async (blockId, depth) => {
       if (seen.has(blockId)) return; seen.add(blockId);
       let cursor; const cursors = new Set();
       do {
-        if (calls >= 8 || depth > 4 || text.length >= 18000) { truncated = true; return; }
+        if (calls >= limit.calls || depth > limit.depth || text.length >= limit.chars) { truncated = true; return; }
         calls++;
         const data = await this.api('/blocks/' + encodeURIComponent(blockId) + '/children?' + new URLSearchParams({ page_size: 100, ...(cursor ? { start_cursor: cursor } : {}) }), token);
         for (const block of data.results || []) {
           if (block.archived || block.in_trash) continue;
           const value = block[block.type] || {};
           const line = rich(value.rich_text || value.caption) || (value.cells ? value.cells.map(rich).join(' | ') : value.title || value.expression || '');
-          if (line) text += line + '\n';
-          if (text.length >= 18000) { truncated = true; return; }
+          // Headings keep the page's structure: the planner splits a long page by them.
+          const mark = /^heading_([1-3])$/.exec(block.type)?.[1], prefix = mark ? '#'.repeat(Number(mark)) + ' ' : /list_item$/.test(block.type) ? '- ' : '';
+          if (line) text += prefix + line + '\n';
+          if (text.length >= limit.chars) { truncated = true; return; }
           if (block.has_children && !['child_page', 'child_database'].includes(block.type)) await walk(block.id, depth + 1);
         }
         cursor = data.has_more ? data.next_cursor : null;
@@ -29,7 +33,7 @@ class Notion {
         cursors.add(cursor);
       } while (cursor);
     };
-    await walk(id, 0); return { text: text.slice(0, 18000), truncated };
+    await walk(id, 0); return { text: text.slice(0, limit.chars), truncated };
   }
   async search(terms, token) {
     const pages = new Map(), warnings = [];
@@ -49,8 +53,8 @@ class Notion {
     for (const { page, title, score } of candidates.slice(0, 10)) {
       try {
         const content = await this.content(page.id, token);
-        docs.push({ id: 'notion:' + page.id, source: 'Notion', title, ...content, url: 'https://www.notion.so/' + encodeURIComponent(page.id.replace(/-/g, '')), updated: page.last_edited_time || '', score });
-        if (content.truncated) warnings.push(`Notion: «${title}» прочитана частично.`);
+        // The list shows the start of a long page; the planner reads the whole page if it is chosen (`more`).
+        docs.push({ id: 'notion:' + page.id, source: 'Notion', title, text: content.text, more: content.truncated, truncated: false, url: 'https://www.notion.so/' + encodeURIComponent(page.id.replace(/-/g, '')), updated: page.last_edited_time || '', score });
       } catch (e) {
         warnings.push(`Notion: не удалось прочитать «${title}»: ${e.message}`);
         if ([401, 403, 429].includes(e.status)) break;
