@@ -265,8 +265,8 @@ function setupConnections() {
   const micLabel = connectionNode('label', '', 'check'); const mic = document.createElement('input'); mic.type = 'checkbox'; mic.id = 'meeting-record-mic'; micLabel.append(mic, 'Записывать мой микрофон вместе с собеседниками');
   const sources = connectionNode('p', '', 'small'); sources.id = 'meeting-sources';
   const save = connectionNode('button', 'Сохранить'); save.type = 'button';
-  const state = connectionNode('p', '', 'connection-status'); state.id = 'meeting-record-status'; state.setAttribute('role', 'status');
-  const actions = connectionNode('div'); actions.id = 'meeting-record-actions';
+  const state = connectionNode('p', '', 'small meeting-record-state'); state.id = 'meeting-record-status'; state.setAttribute('role', 'status');
+  const actions = connectionNode('div', '', 'actions'); actions.id = 'meeting-record-actions';
   const renderSources = list => { sources.textContent = list.length ? 'Приложения встреч: ' + list.join(', ') + '. Запись начинается, когда они показывают встречу, и подписывает, кто говорит.' : 'Приложения встреч не добавлены: запись — по кнопке «Слушать встречу» на главной. Добавьте приложение встреч в каталоге, чтобы запись начиналась сама.'; modeLabel.hidden = !list.length; };
   const renderCapture = value => {
     state.textContent = value.message; actions.replaceChildren();

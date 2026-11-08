@@ -209,8 +209,9 @@
   linkCache.set(key,{at:Date.now(),promise});return promise;
  }
  availableLinks.clear=()=>linkCache.clear();
- // Connections change in settings: the next card asks again.
+ // Connections change in settings, or an app is added or removed: the next card asks again.
  document.addEventListener('petya-settings-displayed',availableLinks.clear);
+ document.addEventListener('petya-extensions-changed',availableLinks.clear);
  function openSettings(id){if(typeof view==='function')view('settings');const card=document.querySelector('[data-extension="'+id+'"],[data-service="'+id+'"]');if(card)window.revealSettings?.(card);}
  async function runLink(kind,provider,payload,onDone){
   const result=await window.petya.feature('appLinks','run',kind,provider.id,typeof payload==='function'?payload():payload);

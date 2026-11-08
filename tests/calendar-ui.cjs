@@ -1,7 +1,7 @@
 // «Календарь» cards in the real chat: day timeline with events, free gaps and the «сейчас» line, week strip,
-// slot search with lanes and the chosen slot, the confirm step (editable title, «Видеозвонок» with Zoom personal room,
-// Meet, known rooms and a typed link) and the created state with «Петя запишет встречу»; a running Zoom event offers
-// «Записать Петей».
+// slot search with lanes and the chosen slot, the confirm step (editable title, «Видеозвонок» with the providers —
+// here the Zoom extension's personal room and Meet —, known rooms and a typed link) and the created state with «Петя
+// запишет встречу»; a running Zoom event offers «Записать Петей» only once the Zoom extension is added.
 process.env.PETYA_SMOKE_TEST='1';
 const assert=require('node:assert/strict');
 require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
@@ -26,6 +26,12 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
   slots:[{start:t(1,11),end:t(1,12),busy:[],note:'свободны все доступные, без встреч впритык'},{start:t(2,11),end:t(2,12),busy:[],note:'свободны все доступные, без встреч впритык'},{start:t(1,15,30),end:t(1,16,30),busy:[],note:'свободны все доступные'},{start:t(1,12),end:t(1,13),busy:['maria@corp.ru'],note:'заняты: Мария Петрова'}]};
  const created={...slots,draftId:'draft-done',chosen:1,created:{title:'Синк по релизу',start:t(2,11),end:t(2,12),url:'https://calendar.google.com/event?eid=new',link:'https://us05web.zoom.us/j/9876543210',attendees:['maria@corp.ru'],video:'zoom'}};
  const msg=(text,card)=>({role:'assistant',text,by:'Календарь',extensionData:{calendarCard:card}});
+ // Without the Zoom extension the calendar offers no recording for a Zoom event: it knows no Zoom itself.
+ await js(`view('home');showDialogueMessages([${JSON.stringify(msg('Сегодня 4 встречи.',day))}],'Календарь')`);
+ for(let i=0;i<150;i++){if(await js("document.querySelectorAll('.cal-card').length===1"))break;await new Promise(r=>setTimeout(r,30));}
+ await new Promise(r=>setTimeout(r,600));
+ assert.equal(await js("document.querySelectorAll('.cal-record .kit-link').length"),0,'no meeting-recording provider without the Zoom extension');
+ await js("window.extensionHost.open('zoom',{stay:true})");
  // The video choices come from the main process for a real card; here a fixture of what it returns.
  await js(`window.petyaCalendar={...window.petyaCalendar,videoChoices:async()=>({providers:[{id:'zoom',label:'Zoom (личная комната)',hint:'Одна и та же комната для всех встреч'},{id:'google-meet',label:'Google Meet'}],
   rooms:[{key:'zoom:1112223334',name:'Синк по релизу · Zoom',reason:'те же участники · похожее название · использовалась 12 раз',url:'https://us02web.zoom.us/j/1112223334',strong:true},{key:'meet:abc-defg-hij',name:'Стендап команды · Meet',reason:'использовалась 31 раз',url:'https://meet.google.com/abc-defg-hij',strong:false}],strong:'zoom:1112223334'})};0`);
