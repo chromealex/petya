@@ -50,7 +50,9 @@ const own={
  'code-review':['сделай код-ревью','проверь мои изменения','ревью ветки перед пулл-реквестом','посмотри мой дифф','отревьюй мой код'],
  profiler:['разбери профайлер','что жрёт кадр','сравни профайл до и после','почему фризы','разбери gfxinfo'],
  playtest:['разбери плейтест','где игрок застрял','моменты фрустрации в этом видео'],
- mentor:['что мне автоматизировать?','что я делаю руками','где я теряю время','покажи, что мне стоит автоматизировать']
+ mentor:['что мне автоматизировать?','что я делаю руками','где я теряю время','покажи, что мне стоит автоматизировать'],
+ 'release-checklist':['готов ли релиз 1.5','чек-лист релиза','что мешает выпустить версию 2.0','можно ли выпускать 1.5','релизный чек-лист'],
+ anomalies:['что необычного вчера','есть аномалии за неделю?','покажи аномалии','что необычного в метриках','какие аномалии вчера']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -62,7 +64,7 @@ const not={
  'store-reviews':['сделай код-ревью','ревью PR #42','перфоманс-ревью','отзыв о кандидате','фидбэк по встрече'],
  calendar:['сводка встречи','что решили на встрече','срок задачи','календарь отпусков','дни рождения'],
  'pull-requests':['отзывы в App Store','задачи на ревью в Jira'],
- 'ci-builds':['почини билд','размер сборки','сколько весит билд'],
+ 'ci-builds':['готов ли релиз 1.5','почини билд','размер сборки','сколько весит билд'],
  'disk-usage':['место встречи','свободное место в спринте','диск в Google Drive'],
  dependencies:['зависимости между задачами','эмоциональная зависимость','от чего зависит дедлайн'],
  'build-size':['размер команды','размер экрана','сборка упала'],
@@ -88,7 +90,7 @@ const not={
  standup:['стенд-ап комедия','встань','сводка встречи','во сколько стендап','сходим на стендап шоу'],
  teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке'],
  // Ad revenue is earnings from ads shown in our games: buying users, turning ads off and purchases are not it.
- 'ad-revenue':['реклама игры','маркетинговые кампании','запусти рекламу в TikTok','сколько потратили на рекламу','отключи рекламу','покупки в приложении','выручка от покупок в приложении','падение продаж за неделю'],
+ 'ad-revenue':['что необычного вчера','есть аномалии за неделю?','реклама игры','маркетинговые кампании','запусти рекламу в TikTok','сколько потратили на рекламу','отключи рекламу','покупки в приложении','выручка от покупок в приложении','падение продаж за неделю'],
  // Competitor games: a contest, a chess opponent, devices and our own store rating are not it.
  competitors:['конкурс','конкурс рисунков','конкурент в шахматах','сравни iPad и iPhone','отзывы в App Store за неделю','конкурентные преимущества'],
  // A person search only: factual «кто знает» questions, «кто ты», roles and the team directory are not it.
@@ -96,7 +98,7 @@ const not={
  // The project's own words only: general definitions, other products' glossaries and localization files as such are not it.
  glossary:['что такое REST','глоссарий Unity','проверь локализацию','что не переведено в локализации','купи билет в терминале','термины договора аренды'],
  // Team metrics and velocity are Jira's, crashes / reviews / ANR other apps', server metrics nobody's here.
- metrics:['метрики команды','велосити команды','крэши за неделю','отзывы за неделю','ANR за неделю','метрики сервера','подключи AppMetrica','что на дашборде лиг','DAU в графане'],
+ metrics:['что необычного вчера','есть аномалии за неделю?','метрики команды','велосити команды','крэши за неделю','отзывы за неделю','ANR за неделю','метрики сервера','подключи AppMetrica','что на дашборде лиг','DAU в графане'],
  // Grafana by name, a dashboard link or dashboards as the subject: not game metrics words (those stay «Метрики игры»'s
  // until panels are mapped), not Grafana being down, not «нарисуй график» (charts) and not PromQL without Grafana.
  grafana:['DAU за неделю','ретеншн D1 D7 D30','метрики игры за месяц','графана не открывается','не могу войти в графану','нарисуй график продаж','rate(http_requests_total[5m]) в prometheus','покажи лиги за неделю'],
@@ -109,7 +111,7 @@ const not={
  // Preparing for a meeting is not its summary, the day's agenda, a new event or recording.
  'meeting-prep':['сводка встречи','что у меня сегодня','поставь встречу с Олегом в четверг в 15:00','запиши встречу','что решили на встрече','запомни повестку следующей встречи: релиз'],
  // Release notes from sources; changes written in the message go to the skills, meeting notes and Slack news elsewhere.
- 'patch-notes':['заметки встречи','что нового в Slack','напиши патчноут для игроков: исправили зависание магазина, добавили ивент','переведи эту фразу','сводка встречи'],
+ 'patch-notes':['готов ли релиз 1.5','чек-лист релиза','заметки встречи','что нового в Slack','напиши патчноут для игроков: исправили зависание магазина, добавили ивент','переведи эту фразу','сводка встречи'],
  'http-client':['API Jira','как работает REST','запрос в поддержку','отправь запрос в поддержку','отвечает ли Маша на письма','статус задачи в Jira'],
  docker:['docker-образ для Python','место на диске','контейнер в Unity UI','перезапусти компьютер','контейнер с грузом пришёл'],
  zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи'],
@@ -124,7 +126,11 @@ const not={
  // Meeting videos are the meetings app's, GIFs the converter's, failing tests CI's.
  playtest:['разбери видео созвона','сделай гифку','тест упал','разбери профайлер','почему фризы'],
  // The user's own habits: a mentor for a subject or a junior, the day's plan, the recurring list and automating a build are not it.
- mentor:['наставник по Unity','ментор для джуна','найди наставника','что мне делать сегодня','какие у меня повторы','что можно автоматизировать в сборке Unity','автоматизируй деплой','что у меня сегодня в календаре']
+ mentor:['наставник по Unity','ментор для джуна','найди наставника','что мне делать сегодня','какие у меня повторы','что можно автоматизировать в сборке Unity','автоматизируй деплой','что у меня сегодня в календаре'],
+ // Readiness of a release as a whole: its notes, crashes or reviews after it, its date and other checklists are not it.
+ 'release-checklist':['напиши патчноут к версии 1.5','новые крэши после релиза 1.4.2','плохие отзывы после обновления','когда релиз?','чек-лист переезда','статус CI','готов ли отчёт'],
+ // Unusual days in the data: weather, gifts, ad revenue drops (the ad app's view) and plain metrics are not it.
+ anomalies:['аномальная жара','необычный подарок','придумай необычное имя','упала выручка с рекламы','аномалии eCPM','DAU за неделю','какие крэши за неделю','странный сон']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -143,7 +149,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
