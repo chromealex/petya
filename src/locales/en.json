@@ -5654,6 +5654,9 @@
   "Что написано в спецификации магазина?": "What does the shop spec say?",
   "Что обсуждали в канале разработки сегодня?": "What was discussed in the dev channel today?",
   "Что писали в Telegram-чате команды?": "What was written in the team's Telegram chat?",
-  "по желанию": "optional"
+  "по желанию": "optional",
+  "запиши встречу в Zoom": "record the Zoom meeting",
+  "поставь встречу в моей комнате Zoom": "schedule a meeting in my Zoom room",
+  "что обсуждали на созвоне в Zoom": "what was discussed on the Zoom call"
  }
 }
