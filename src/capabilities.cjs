@@ -17,7 +17,7 @@ const CATALOG=[
   examples:['сделай скилл: как оформлять релиз-ноты','создай новый скилл для ревью кода'],accepts:t=>req('./features/skill-packages.cjs').matches(t)},
  {id:'highlights',says:'отметить что-то как важное (для этого чата или всего проекта) или показать отмеченное важное',
   examples:['запомни как важное: релиз 20 ноября','запомни как важное для проекта: тестирует Полина','покажи важное'],accepts:t=>req('./features/highlights.cjs').matches(t)},
- {id:'context-look',says:'посмотреть, что не так, по последнему разговору в Zoom или треду Slack, когда предмет не назван',
+ {id:'context-look',says:'посмотреть, что не так, по последней записанной встрече или треду Slack, когда предмет не назван',
   examples:['посмотри, что не так','разберись, в чём проблема','проверь этот тред'],accepts:t=>req('./context-reference.cjs').isContextReference(t)},
  {id:'address',says:'в каком роде обращаться к пользователю',examples:['обращайся ко мне в женском роде','обращайся ко мне в мужском роде'],accepts:t=>req('./features/address.cjs').matches(t)},
  {id:'morning-brief',says:'включить по будням утреннюю сводку в заданное время или выключить её',
@@ -53,7 +53,7 @@ const byId=new Map(CATALOG.map(c=>[c.id,c]));
 const norm=w=>w.toLocaleLowerCase('ru').replace(/ё/g,'е');
 const WORDS={1:/один|одну|одна|раз(?!\p{L})/u,2:/два|две|пару/u,3:/три(?!\p{L}*дцат)/u,4:/четыр/u,5:/пят(?!\p{L}*надцат|\p{L}*десят)|пять/u,6:/шест/u,7:/сем(?!\p{L}*надцат)/u,8:/восем/u,9:/девят/u,10:/десят/u,12:/полдень|двенадцат/u,15:/пятнадцат|четверть/u,20:/двадцат/u,30:/тридцат|полчаса|пол\s*часа|половин/u,40:/сорок/u,45:/сорок\s*пят/u,60:/шестьдесят|час(?!\p{L}*[2-9])/u};
 // Services and words of Petya himself may be named in the canonical form whatever the user called them.
-const SERVICES=/^(?:slack|jira|unity|zoom|telegram|git|diff|python|confluence|notion|gmail|outlook|google|play|anr|петя|пете|петю|проект[а-я]*|задач[а-я]*)$/u;
+const SERVICES=/^(?:slack|jira|unity|telegram|git|diff|python|confluence|notion|gmail|outlook|google|play|anr|петя|пете|петю|проект[а-я]*|задач[а-я]*)$/u;
 const said=(n,own)=>own.includes(n)||!!WORDS[Number(n)]?.test(own);
 function grounded(canonical,original,examples=[]){
  const own=norm(original);

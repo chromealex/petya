@@ -1,6 +1,6 @@
 // People's names in Russian: «Konstantin Shishlov» → «Константин Шишлов». Only names that are clearly Russian
 // names written in Latin are converted (the first name is a known Russian name); «John Smith» stays as is.
-// The Latin spelling is kept by the caller as an alias, so Slack, Jira and Zoom still match the person.
+// The Latin spelling is kept by the caller as an alias, so Slack, Jira and meeting apps still match the person.
 const FIRST={
  aleksandr:'Александр',alexander:'Александр',alexandr:'Александр',aleksandra:'Александра',alexandra:'Александра',alexey:'Алексей',aleksey:'Алексей',alexei:'Алексей',aleksei:'Алексей',
  alina:'Алина',alisa:'Алиса',alla:'Алла',anastasia:'Анастасия',anastasiya:'Анастасия',anatoly:'Анатолий',anatoliy:'Анатолий',andrey:'Андрей',andrei:'Андрей',angelina:'Ангелина',

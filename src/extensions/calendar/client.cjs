@@ -88,7 +88,7 @@ class CalendarClient{
 
  // One event with attendees (they get invitations). Returns {id,url,link}. `meeting` is the video call:
  // {patch, query} from a calendar-native provider (Meet, Teams), {url, note} for a link put into the event
- // (Zoom personal room, a known room, a typed link), or null for none.
+ // (another app's room, a known room, a typed link), or null for none.
  async create({title,start,end,attendees=[],meeting=null}){
   const link=meeting?.url?safe(meeting.url):'';
   const text=link?(meeting.note?meeting.note+'\n':'')+'Ссылка на видеозвонок: '+link:'';

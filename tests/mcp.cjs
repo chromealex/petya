@@ -63,7 +63,7 @@ const {Dialogue}=require('../src/dialogue.cjs');
     await call('set_chat_model',{chatId:'one',model:'',previous:''},true);ctx.run=beforeSelection;delete ctx.access;
     assert.equal((await call('check_model_disk_space')).status,'space_only');
     assert.deepEqual(await call('get_company_context'),{id:'default',name:'Компания 1',switching:false,switchInAppOnly:true});
-    notes.push({id:'meeting-context-test',source:'Zoom',title:'Встреча',text:'После обновления не работает вход',at:Date.now(),sessionId:'test-call'});
+    notes.push({id:'meeting-context-test',source:'Встреча',title:'Встреча',text:'После обновления не работает вход',at:Date.now(),sessionId:'test-call'});
     assert.equal((await call('resolve_work_context',{chatId:'one'})).rows[0].id,'meeting-context-test');
     await call('resolve_work_context',{chatId:'hidden'},true);
     topic.excludedMaterials=['meeting-context-test'];
@@ -160,7 +160,7 @@ const {Dialogue}=require('../src/dialogue.cjs');
     try{
       await peer.connect(new StreamableHTTPClientTransport(new URL(limited.url),{requestInit:{headers:{Authorization:'Bearer '+limited.token}}}));
       const tools=(await peer.listTools()).tools.map(t=>t.name);
-      notes.push({id:'private-meeting-test',source:'Zoom',title:'Private',text:'private-project-secret',at:Date.now()});
+      notes.push({id:'private-meeting-test',source:'Встреча',title:'Private',text:'private-project-secret',at:Date.now()});
       const contextResult=await peer.callTool({name:'resolve_work_context',arguments:{chatId:'one'}});
       assert.ok(!contextResult.isError);
       assert.ok(!JSON.stringify(contextResult).includes('private-project-secret'));

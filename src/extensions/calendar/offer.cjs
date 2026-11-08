@@ -9,7 +9,7 @@ module.exports={
   /(?:найди|подбери)\s+(?:\p{L}+\s+)?(?:час|время|слот)\s+(?:для\s+встреч\p{L}*\s+)?(?:с|со)\s+\p{L}/iu,
   /(?:поставь|запланируй|назначь|создай)\s+(?:\p{L}+\s+)?(?:встреч|созвон)\p{L}*/iu,
   /(?:в|по|мо[йеё]м?)\s+календар\p{L}*/iu],
- // Meeting summaries and the Zoom listener (meetings), Jira due dates, vacation calendar, birthdays, cron.
+ // Meeting summaries and meeting recording (meetings), Jira due dates, vacation calendar, birthdays, cron.
  avoid:[/сводк|итог\p{L}*\s+встреч|протокол|что\s+(?:решили|обсуждали|обсудили)|договорил|расшифров|транскрип|(?:по|при|про)?слушай|подключись|запиши\s+встреч|срок\p{L}*\s+задач|дедлайн|отпуск|рождени|cron|крон/iu],
  requests:[/(?:покажи|найди|подбери|поставь|запланируй|назначь|создай|когда|что\s+у\s+меня|какие)/iu],
  connect:'settings',

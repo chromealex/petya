@@ -34,7 +34,7 @@ class Gmail{
   if(!this.refreshing)this.refreshing=(async()=>{const result=await this.token({grant_type:'refresh_token',refresh_token:stored.tokens.refresh_token});if(generation!==this.generation)throw Error('Подключение Gmail изменилось. Повторите запрос.');this.check();if(!result.access_token)throw Error('Google не вернул токен доступа.');const tokens={...stored.tokens,access_token:result.access_token,refresh_token:result.refresh_token||stored.tokens.refresh_token,expiresAt:Date.now()+Number(result.expires_in||3600)*1000,...result.scope?{scope:String(result.scope)}:{}};this.save({...stored,tokens});return tokens.access_token;})().finally(()=>{this.refreshing=null;});return this.refreshing;
  }
  // Messages for a Gmail query with their whole text and small text attachments (.vtt / .txt transcripts):
- // used to find the transcript Zoom mails after a meeting.
+ // used to find the letter a meeting service mails after a meeting.
  async search(q,max=5){const generation=this.generation,access=await this.access(),headers={Authorization:'Bearer '+access};
   const list=await this.json('https://gmail.googleapis.com/gmail/v1/users/me/messages?'+new URLSearchParams({q,maxResults:String(Math.min(10,max))}),{headers});const out=[];
   for(const item of list.messages||[]){if(generation!==this.generation)throw Error('Подключение Gmail изменилось.');if(!/^[a-f0-9]+$/i.test(item.id))continue;

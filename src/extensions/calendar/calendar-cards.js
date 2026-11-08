@@ -1,8 +1,9 @@
 // «Календарь», renderer: a day timeline (hours, event blocks, free gaps, the «сейчас» line), a compact week strip,
 // and for a slot search the ranked candidates with everyone's busy time as lanes and the chosen slot highlighted.
-// «Поставить встречу» opens a confirm step (editable title, time, attendees, «Видеозвонок»: Zoom personal room,
-// Meet/Teams, known rooms ranked for this meeting, a typed link or none); only «Создать в календаре» writes.
-// Zoom events get «Записать Петей» (now, during the meeting) or «Петя запишет встречу» (scheduled local capture).
+// «Поставить встречу» opens a confirm step (editable title, time, attendees, «Видеозвонок»: the video-meeting
+// providers of added apps, Meet/Teams, known rooms ranked for this meeting, a typed link or none); only «Создать в
+// календаре» writes. Events with a link that a meeting-recording provider fits get «Записать Петей» (now, during the
+// meeting) or «Петя запишет встречу» (scheduled local recording).
 (()=>{
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('calendar-cards.css',document.currentScript.src).href;document.head.append(style);
  const locale=()=>window.petyaLocale||'ru-RU';
@@ -73,7 +74,7 @@
   return wrap;
  }
 
- // Local recording of a Zoom event: «Записать Петей» while it runs, «Петя запишет встречу» before it starts.
+ // Local recording of an event: «Записать Петей» while it runs, «Петя запишет встречу» before it starts.
  function recordLink(k,e,link){
   const start=Date.parse(e.start),end=Date.parse(e.end),now=Date.now();
   if(e.declined||!(end>now))return k.el('span');
@@ -130,14 +131,16 @@
  }
 
  // «Видеозвонок» of the confirm step: providers, known rooms with the reason they fit, a typed link, none.
- // The default is a room that clearly fits this meeting, else the last choice, else Zoom, else the calendar's own.
+ // The default is a room that clearly fits this meeting, else the last choice, else the first provider (providers
+ // come in their own order), else none.
  function videoChoice(k,c){
   const box=k.el('fieldset','cal-video');box.append(k.el('legend',null,'Видеозвонок'));
   const list=k.el('div','cal-video-list');list.setAttribute('role','radiogroup');list.setAttribute('aria-label','Видеозвонок');
   const custom=k.el('input','cal-video-url');custom.type='url';custom.placeholder='https://…';custom.hidden=true;custom.setAttribute('aria-label','Ссылка на встречу');
-  const zoomBox=k.el('div','cal-video-zoom');zoomBox.hidden=true;
-  const zoomNote=k.el('p','cal-warn');const zoomInput=k.el('input','cal-video-url');zoomInput.type='url';zoomInput.placeholder='https://…zoom.us/j/1234567890';zoomInput.setAttribute('aria-label','Ссылка на личную комнату Zoom');zoomBox.append(zoomNote,zoomInput);
-  box.append(list,custom,zoomBox);
+  // A provider that needs its link once (a personal room) asks for it here.
+  const linkBox=k.el('div','cal-video-ask');linkBox.hidden=true;let asking='';
+  const linkNote=k.el('p','cal-warn');const linkInput=k.el('input','cal-video-url');linkInput.type='url';linkInput.placeholder='https://…';linkInput.setAttribute('aria-label','Ссылка на встречу');linkBox.append(linkNote,linkInput);
+  box.append(list,custom,linkBox);
   const name='cal-video-'+c.draftId;let current='none';
   const option=(value,title,hint,{raw:own=false}={})=>{
    const row=k.el('label','cal-video-option');row.dataset.value=value;
@@ -145,16 +148,15 @@
    const text=k.el('span','cal-video-text');const head=own?raw(k,'span','cal-video-title',title):k.el('span','cal-video-title',title);text.append(head);if(hint)text.append(k.el('small',null,hint));
    row.append(radio,text);radio.onchange=()=>pick(value);list.append(row);return row;
   };
-  const pick=value=>{current=value;for(const r of list.querySelectorAll('input'))r.checked=r.value===value;custom.hidden=value!=='custom';if(value!=='p:zoom')zoomBox.hidden=true;if(value==='custom')custom.focus();};
+  const pick=value=>{current=value;for(const r of list.querySelectorAll('input'))r.checked=r.value===value;custom.hidden=value!=='custom';if(value!==asking)linkBox.hidden=true;if(value==='custom')custom.focus();};
   const fill=({providers=[],rooms=[],strong=''}={})=>{
    list.replaceChildren();
    for(const p of providers)option('p:'+p.id,p.label,p.hint||'');
    for(const r of rooms)option('r:'+r.key,r.name,r.reason,{raw:true});
-   option('custom','Своя ссылка…','Zoom, Meet, Teams, Webex, Jitsi, Телемост или любая https-ссылка');
+   option('custom','Своя ссылка…','Ссылка на любую видеовстречу, начиная с https://');
    option('none','Без звонка','');
    const values=[...list.querySelectorAll('input')].map(i=>i.value),last=k.store.get('calendar-video','');
-   const native=c.provider==='microsoft'?'p:teams':'p:google-meet';
-   pick(strong&&values.includes('r:'+strong)?'r:'+strong:values.includes(last)?last:values.includes('p:zoom')?'p:zoom':values.includes(native)?native:'none');
+   pick(strong&&values.includes('r:'+strong)?'r:'+strong:values.includes(last)?last:values.find(v=>v.startsWith('p:'))||'none');
   };
   list.append(k.el('small','kit-meta','Загружаю варианты…'));
   window.petyaCalendar.videoChoices(c.draftId).then(fill).catch(()=>fill({providers:[{id:c.provider==='microsoft'?'teams':'google-meet',label:c.provider==='microsoft'?'Teams':'Google Meet'}]}));
@@ -163,9 +165,9 @@
     if(current==='none')return {video:'none'};
     if(current==='custom'){const url=custom.value.trim();if(!/^https:\/\/\S+$/i.test(url)){custom.focus();throw Error('Вставьте ссылку на встречу, начиная с https://');}return {video:{url}};}
     if(current.startsWith('r:'))return {video:{room:current.slice(2)}};
-    return {video:current.slice(2),...current==='p:zoom'&&zoomInput.value.trim()?{zoomLink:zoomInput.value.trim()}:{}};
+    return {video:current.slice(2),...current===asking&&linkInput.value.trim()?{link:linkInput.value.trim()}:{}};
    },
-   askZoom(text){zoomNote.textContent=text;zoomBox.hidden=false;zoomInput.focus();},
+   askLink(r){asking=current;linkNote.textContent=r.text;if(r.placeholder)linkInput.placeholder=r.placeholder;linkInput.setAttribute('aria-label',r.field||'Ссылка на встречу');linkBox.hidden=false;linkInput.focus();},
    remember(){if(current!=='custom')k.store.set('calendar-video',current);}};
  }
 
@@ -197,7 +199,7 @@
    const url=k.safeUrl(created.url);if(url){const a=k.el('a',null,'Открыть в календаре');a.href=url;a.target='_blank';a.rel='noopener';links.append(a);}
    const join=k.safeUrl(created.link);if(join){const a=k.el('a',null,'Ссылка на видеозвонок');a.href=join;a.target='_blank';a.rel='noopener';links.append(a);}
    if(links.childNodes.length)box.append(links);
-   // Petya records the meeting locally when it starts (Zoom links only; offered only when recording is on).
+   // Petya records the meeting locally when it starts (offered only by a meeting-recording provider that fits the link).
    if(join){
     const record=k.links('meeting-recording',{when:'schedule',title:created.title,start:created.start,end:created.end},{context:{url:join},label:'Петя запишет встречу',className:'cal-record',
      onDone:r=>{if(r?.scheduled)record.replaceChildren(k.el('span','cal-tag','запись запланирована'));}});
@@ -229,8 +231,8 @@
     const again=()=>{ok.disabled=cancel.disabled=false;busy=false;ok.removeAttribute('aria-busy');};
     try{
      const r=await window.petya.feature('calendarApp','create',{draftId:c.draftId,slot:chosen,title:input.value,...video.value()});
-     // The Zoom personal room is not known yet: ask for it right here, nothing was created.
-     if(r.needLink){video.askZoom(r.text);again();return;}
+     // A provider's link (a personal room) is not known yet: ask for it right here, nothing was created.
+     if(r.needLink){video.askLink(r);again();return;}
      video.remember();c.created=r.created;c.chosen=chosen;done(r.created);k.toast(r.already?'Эта встреча уже создана':'Встреча создана, приглашения отправлены');
     }
     catch(e){k.toast(e.message,{error:true});again();}

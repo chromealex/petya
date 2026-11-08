@@ -3,7 +3,7 @@
 const modules=require('../../modules.cjs');
 const {taskBody,taskList}=require('../link-text.cjs');
 module.exports={
- label:'В задачу Asana',
+ label:'В задачу Asana',order:20,
  ready:s=>modules.enabled(s,'asana')&&!!s.asanaCredential&&/^\d+$/.test(String(s.asanaWorkspace||'')),
  async run(services,payload){
   if(Array.isArray(payload.tasks))return {ask:'Создай задачи в Asana'+taskList(payload),send:true};

@@ -1,4 +1,4 @@
-// A name as Zoom shows it («Sergey Ivanov», «Сергей И.», «sivanov») matched to a member of the team (Команда):
+// A name as a meeting app shows it («Sergey Ivanov», «Сергей И.», «sivanov») matched to a member of the team (Команда):
 // by name in either alphabet, aliases, the Jira name or the email's local part. Only a single clear match counts.
 const RU={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'ts',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
 // Spellings that differ between transliterations: «Sergey/Sergei», «Aleksandr/Alexander», «Yulia/Julia».
@@ -22,9 +22,9 @@ function score(shown,candidate){
  if(a.length===1&&b.length>=2&&a[0]===b[0][0]+b.at(-1))return 2;
  return 0;
 }
-// Names chosen by hand in «Команда» («Имя в Zoom», several through a comma) win over the automatic match.
+// Names chosen by hand in «Команда» («Имя на встречах», several through a comma) win over the automatic match.
 const same=(a,b)=>tokens(a).join(' ')===tokens(b).join(' ')&&tokens(a).length>0;
-const chosen=member=>String(member.zoomName||'').split(/[,;]/).map(v=>v.trim()).filter(Boolean);
+const chosen=member=>String(member.meetingName||'').split(/[,;]/).map(v=>v.trim()).filter(Boolean);
 function match(shown,members=[]){
  const own=members.filter(m=>chosen(m).some(n=>same(n,shown)));if(own.length===1)return own[0];if(own.length>1)return null;
  return auto(shown,members);
@@ -37,6 +37,6 @@ function auto(shown,members=[]){
  if(!rows.length)return null;if(rows[1]&&rows[1].s===rows[0].s)return null;if(rows[0].s<2&&rows.length>1)return null;
  return rows[0].m;
 }
-// «Сергей Иванов, QA» for a Zoom name, or the Zoom name itself when nobody in the team fits.
+// «Сергей Иванов, QA» for a name shown in a meeting, or that name itself when nobody in the team fits.
 function label(shown,members){const m=shown?match(shown,members):null;return m?{name:m.name,role:m.role||'',member:true}:{name:shown||'',role:'',member:false};}
 module.exports={match,label,latin,score,chosen};

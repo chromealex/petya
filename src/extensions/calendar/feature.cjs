@@ -16,7 +16,7 @@ const path=require('node:path');
 const ID='calendar',BY='Календарь';
 
 // --- Routing -------------------------------------------------------------------------------------------------
-// Neighbours: meeting summaries («сводка встречи», «что решили»), the Zoom listener, Jira due dates, vacations
+// Neighbours: meeting summaries («сводка встречи», «что решили»), meeting recording, Jira due dates, vacations
 // and birthdays, cron schedules.
 const AVOID=/сводк|итог\p{L}*\s+встреч|протокол|что\s+(?:решили|обсуждали|говорили|обсудили)|о\s+ч[её]м\s+(?:говорили|договорились)|договорил|расшифров|транскрип|стенограм|(?:^|[^\p{L}])(?:по|при|про)?слушай|подключись|присоединись|запиши\s+встреч|срок\p{L}*\s+(?:задач|тикет|issue)|дедлайн|due\s*date|просроч|отпуск|больничн|рождени|днюх|cron|крон/iu;
 const DAYWORD='(?:сегодня|завтра|послезавтра|вчера|понедельник\\p{L}*|вторник\\p{L}*|сред[ауеы]|четверг\\p{L}*|пятниц[ауеы]|суббот[ауеы]|воскресень[еяю]|(?:эт\\p{L}*|следующ\\p{L}*)\\s+недел\\p{L}*|неделю|\\d{1,2}(?:\\.\\d{1,2}|\\s+[а-я]+))';
@@ -41,12 +41,15 @@ function intent(text){
 
 // --- Known meeting rooms (per company data folder) and cross-app links ---------------------------------------
 const roomStores=new Map();
+const linksFor=s=>s.appLinks||require('../../features/app-links.cjs').create(s);
+// Which meeting service a link belongs to is asked of the providers of added apps (`recognizeLink`).
+const recognizer=s=>url=>linksFor(s).recognize?.(url)||null;
 function roomsFor(s){
  const file=s.dataRoot?path.join(s.dataRoot,'calendar-rooms.json'):'';
  if(!roomStores.has(file))roomStores.set(file,new Rooms({file}));
- return roomStores.get(file);
+ const rooms=roomStores.get(file);rooms.recognize=recognizer(s);
+ return rooms;
 }
-const linksFor=s=>s.appLinks||require('../../features/app-links.cjs').create(s);
 // Events read for a card: meeting links are learned from them, the private details stay out of the chat.
 function learned(s,events,account){
  try{roomsFor(s).learn(events.map(e=>({...e,...e.meta})),{self:account.email.toLowerCase()});}catch{/* learning never blocks the answer */}
@@ -220,21 +223,22 @@ function setup(s,{fetcher=globalThis.fetch,now=()=>new Date(),poll=1000}={}){
   return null;
  }
  // The video call of a new event. `video`: true (the calendar's own Meet/Teams, the old default), false or 'none',
- // a provider id ('zoom', 'google-meet', 'teams'), {room:key} (a known room) or {url} (a link the user typed).
- async function videoFor(video,{account,summary,card,zoomLink}){
+ // a provider id ('google-meet', 'teams' or another app's), {room:key} (a known room) or {url} (a link the user
+ // typed). `link` is what the user pasted when a provider asked for its link ({needLink}).
+ async function videoFor(video,{account,summary,card,link}){
   if(video===false||video==='none'||video?.kind==='none')return null;
   const links=linksFor(s);
   const id=video===true||video===undefined?(account.provider==='microsoft'?'teams':'google-meet'):typeof video==='string'?video:video?.kind==='provider'?String(video.id||''):'';
   if(id){
-   const r=await links.run('video-meeting',id,{calendar:account.provider,title:summary,attendees:(card.attendees||[]).map(a=>a.email),link:zoomLink});
-   if(r?.needLink)return {needLink:true,text:r.text};
+   const r=await links.run('video-meeting',id,{calendar:account.provider,title:summary,attendees:(card.attendees||[]).map(a=>a.email),link});
+   if(r?.needLink)return {needLink:true,text:r.text,placeholder:r.placeholder||'https://…',field:r.field||'Ссылка на встречу'};
    return r?.native?{patch:r.patch,query:r.query,provider:r.provider}:{url:r.url,provider:r.provider||id};
   }
   if(video?.room!==undefined||video?.kind==='room'){const room=roomsFor(s).get(String(video.room??video.key));if(!room)throw Error('Эта комната больше не в списке. Выберите другую.');return {url:room.url,provider:room.kind,room:room.key};}
-  if(video?.url!==undefined||video?.kind==='custom'){const n=normalize(String(video.url||''),{any:true});if(!n)throw Error('Нужна ссылка https:// на встречу.');return {url:n.url,provider:n.kind,custom:true};}
+  if(video?.url!==undefined||video?.kind==='custom'){const n=normalize(String(video.url||''),{any:true,recognize:recognizer(s)});if(!n)throw Error('Нужна ссылка https:// на встречу.');return {url:n.url,provider:n.kind,custom:true};}
   throw Error('Выберите видеозвонок.');
  }
- // Choices for «Видеозвонок» in the confirm step: providers (Zoom personal room, Meet/Teams of this calendar) and
+ // Choices for «Видеозвонок» in the confirm step: providers (other apps' rooms, Meet/Teams of this calendar) and
  // known rooms ranked for this meeting. A due 60-day look-back of the calendar refreshes the rooms first.
  async function videoChoices(draftId){
   const found=locate(String(draftId||''));if(!found)throw Error('Подбор устарел или удалён. Повторите запрос в чате.');
@@ -247,7 +251,7 @@ function setup(s,{fetcher=globalThis.fetch,now=()=>new Date(),poll=1000}={}){
   const ranked=rooms.rank({title:card.title,attendees:(card.attendees||[]).map(a=>a.email)});
   return {providers,rooms:ranked,strong:ranked[0]?.strong?ranked[0].key:''};
  }
- async function create({draftId,slot=0,title:name,video=true,zoomLink}={}){
+ async function create({draftId,slot=0,title:name,video=true,link}={}){
   if(typeof draftId!=='string'||!draftId)throw Error('Нет данных встречи.');
   const found=locate(draftId);if(!found)throw Error('Подбор устарел или удалён. Повторите запрос в чате.');
   const card=found.card;
@@ -261,9 +265,9 @@ function setup(s,{fetcher=globalThis.fetch,now=()=>new Date(),poll=1000}={}){
   const summary=String(name??card.title).replace(/\s+/g,' ').trim().slice(0,200)||card.title;
   creating.add(draftId);
   try{
-   // The link is resolved before anything is written: a missing Zoom link is a question, not a failure.
-   const meeting=await videoFor(video,{account,summary,card,zoomLink});
-   if(meeting?.needLink)return {needLink:true,text:meeting.text};
+   // The link is resolved before anything is written: a provider's missing link is a question, not a failure.
+   const meeting=await videoFor(video,{account,summary,card,link});
+   if(meeting?.needLink)return {needLink:true,text:meeting.text,placeholder:meeting.placeholder,field:meeting.field};
    const people=(card.attendees||[]).map(a=>a.email);
    const result=await clientFor(s,account,fetcher).create({title:summary,start:choice.start,end:choice.end,attendees:card.attendees||[],meeting});
    card.created={...result,title:summary,start:choice.start,end:choice.end,attendees:people,video:meeting?.provider||'',at:now().toISOString()};card.chosen=Number(slot);

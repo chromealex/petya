@@ -7,13 +7,24 @@ const links=require('../src/features/app-links.cjs');
  // A fake extensions folder.
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'petya-links-'));
  const ext=(id,json,files)=>{fs.mkdirSync(path.join(dir,id));fs.writeFileSync(path.join(dir,id,'extension.json'),JSON.stringify({id,name:id.toUpperCase(),...json}));for(const [f,src] of Object.entries(files))fs.writeFileSync(path.join(dir,id,f),src);};
- ext('asana',{provides:{'task-tracker':'t.cjs'}},{'t.cjs':"let n=0;module.exports={label:'В задачу Asana',ready:s=>s.asana==='1',async run(s,p){n++;s.calls.push(['asana',p]);return {ask:'A '+p.title,send:true};},get runs(){return n;}};"});
- ext('jira',{setting:'module_jira',provides:{'task-tracker':'t.cjs'}},{'t.cjs':"module.exports={label:'В задачу Jira',ready:s=>s.jira==='1',async run(s,p,check){check();s.calls.push(['jira',p]);return {ask:'J '+p.title,send:true};}};"});
+ ext('asana',{provides:{'task-tracker':'t.cjs'}},{'t.cjs':"let n=0;module.exports={label:'В задачу Asana',order:20,ready:s=>s.asana==='1',async run(s,p){n++;s.calls.push(['asana',p]);return {ask:'A '+p.title,send:true};},get runs(){return n;}};"});
+ ext('jira',{setting:'module_jira',provides:{'task-tracker':'t.cjs'}},{'t.cjs':"module.exports={label:'В задачу Jira',order:10,ready:s=>s.jira==='1',async run(s,p,check){check();s.calls.push(['jira',p]);return {ask:'J '+p.title,send:true};}};"});
  ext('aaa',{provides:{'task-tracker':'t.cjs'}},{'t.cjs':"module.exports={label:'В задачу AAA',ready:()=>true,run:async()=>({})};"});
- ext('cal',{provides:{'video-meeting':['meet.cjs','teams.cjs']}},{'meet.cjs':"module.exports={id:'google-meet',name:'Google Meet',label:'Google Meet',ready:()=>true,fits:c=>c.calendar==='google',run:async()=>({patch:{x:1}})};",'teams.cjs':"module.exports={id:'teams',label:'Teams',ready:()=>true,fits:c=>c.calendar==='microsoft',run:async()=>({})};"});
+ ext('cal',{provides:{'video-meeting':['meet.cjs','teams.cjs']}},{'meet.cjs':"module.exports={id:'google-meet',name:'Google Meet',label:'Google Meet',order:20,ready:()=>true,fits:c=>c.calendar==='google',run:async()=>({patch:{x:1}})};",'teams.cjs':"module.exports={id:'teams',label:'Teams',order:30,ready:()=>true,fits:c=>c.calendar==='microsoft',run:async()=>({})};"});
  ext('broken',{},{});
  const providers=links.load(dir);
- assert.deepEqual(providers.map(p=>p.kind+'/'+p.id),['video-meeting/google-meet','video-meeting/teams','task-tracker/jira','task-tracker/asana','task-tracker/aaa'],'known order first, others alphabetically');
+ assert.deepEqual(providers.map(p=>p.kind+'/'+p.id),['video-meeting/google-meet','video-meeting/teams','task-tracker/jira','task-tracker/asana','task-tracker/aaa'],'providers\' own order first, others alphabetically');
+ // A meeting source is declared the same way but served by its own registry, never as a card button.
+ ext('meet-app',{setting:'extension_meet_app',provides:{'meeting-source':'source.cjs','video-meeting':'room.cjs'}},{'source.cjs':"module.exports={detect:()=>({active:false})};",'room.cjs':"module.exports={id:'meet-app',label:'Комната',order:5,ready:()=>true,run:async()=>({}),recognizeLink:u=>u.startsWith('https://meetapp.example/r/')?{key:'meet-app:'+u.split('/r/')[1],url:u}:null};"});
+ assert.deepEqual(links.load(dir).filter(p=>p.kind==='video-meeting').map(p=>p.id),['meet-app','google-meet','teams']);
+ assert.deepEqual(links.scan(dir).filter(x=>x.kind==='meeting-source').map(x=>x.extension),['meet-app']);
+ {const st={settings:{}},reg=links.create(st,{providers:links.load(dir)});
+  // Which service a link belongs to: only providers of added apps are asked.
+  assert.equal(reg.recognize('https://meetapp.example/r/42'),null,'app not added');
+  st.settings.extension_meet_app='true';
+  assert.deepEqual(reg.recognize('https://meetapp.example/r/42'),{kind:'meet-app',key:'meet-app:42',url:'https://meetapp.example/r/42',name:'MEET-APP'});
+  assert.equal(reg.recognize('https://other.example/r/42'),null);}
+ fs.rmSync(path.join(dir,'meet-app'),{recursive:true});
  const settings={asana:'1',jira:'1',module_jira:'false'},calls=[];
  const s={settings,calls};
  const r=links.create(s,{providers});
@@ -55,12 +66,17 @@ const links=require('../src/features/app-links.cjs');
  assert.deepEqual(ids('code-fix'),['coder']);
  const live={settings:{}};const reg=links.create(live,{providers:real});
  for(const kind of ['task-tracker','share-message','code-fix'])assert.deepEqual(reg.available(kind),[],'nothing connected → nothing listed: '+kind);
- // Local recording needs no connection: listed while recording is not switched off, for Zoom links only.
- assert.deepEqual(reg.available('meeting-recording').map(p=>[p.id,p.label]),[['zoom-bot','Записать Петей']]);
+ // Scheduled recording of Zoom events comes with the Zoom extension: nothing until it is added, then listed while
+ // recording is not switched to manual, for Zoom links only.
+ assert.deepEqual(reg.available('meeting-recording'),[],'Zoom not added');
+ live.settings.extension_zoom='true';
+ assert.deepEqual(reg.available('meeting-recording').map(p=>[p.id,p.label]),[['zoom','Записать Петей']]);
  assert.deepEqual(reg.available('meeting-recording',{url:'https://meet.google.com/abc-defg-hij'}),[]);
- live.settings.zoomBotMode='off';assert.deepEqual(reg.available('meeting-recording'),[]);delete live.settings.zoomBotMode;
+ live.settings.meetingAutoRecord='off';assert.deepEqual(reg.available('meeting-recording'),[]);delete live.settings.meetingAutoRecord;
+ assert.deepEqual(reg.recognize('https://us02web.zoom.us/j/1234567890?pwd=x'),{kind:'zoom',key:'zoom:1234567890',url:'https://us02web.zoom.us/j/1234567890?pwd=x',name:'Zoom'});
+ live.settings.extension_zoom='false';assert.equal(reg.recognize('https://us02web.zoom.us/j/1234567890'),null,'nobody else knows Zoom links');
  assert.deepEqual(ids('video-meeting'),['zoom','google-meet','teams']);
- assert.deepEqual(ids('meeting-recording'),['zoom-bot']);
+ assert.deepEqual(ids('meeting-recording'),['zoom']);
  Object.assign(live.settings,{module_jira:'true',jiraUrl:'https://acme.atlassian.net',atlassianCredential:'c',module_asana:'true',asanaCredential:'a',asanaWorkspace:'123',module_slack:'true',slackCredential:'s',extension_coder:'true'});
  assert.deepEqual(reg.available('task-tracker').map(p=>p.id),['jira','asana']);
  const task={title:'Крэш PROJ-1 — NullReferenceException',description:'120 событий за неделю',link:'https://sentry.io/i/1',type:'bug'};

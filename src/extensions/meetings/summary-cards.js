@@ -33,7 +33,7 @@
   // The next meeting through «Календарь»: the request is put into the composer with the people from the tasks.
   const next=k.el('span','kit-links');actions.push(next);
   actions.push({label:'Обновить',title:'Пересобрать сводку',run:()=>k.ask('Обнови сводку встречи',{send:true})});
-  const card=k.card({app:'Встреча',initial:'◎',color:'#2d8cff',key:m.title,subtitle:m.basis==='mail'?'с письмом Zoom':'по записи',body,actions,className:'meeting-card'});
+  const card=k.card({app:'Встреча',initial:'◎',color:'#2d8cff',key:m.title,subtitle:m.basis==='mail'?(m.mailFrom?'с письмом '+m.mailFrom:'с письмом сервиса встреч'):'по записи',body,actions,className:'meeting-card'});
   calendarAdded().then(added=>{
    if(!added)return;
    const people=[...new Set((m.tasks||[]).map(t=>String(t.who||'').trim()).filter(Boolean))].slice(0,8);

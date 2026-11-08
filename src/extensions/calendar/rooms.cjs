@@ -1,28 +1,26 @@
-// Known meeting rooms: video links Petya saw in the user's own calendar on different days (a daily stand-up's Zoom,
+// Known meeting rooms: video links Petya saw in the user's own calendar on different days (a daily stand-up's call,
 // a weekly sync's Meet) plus links the user typed in the confirm step. Learned from the events the calendar already
-// reads (and one 60-day look-back a day at most), normalized (tracking parameters dropped, the Zoom passcode kept),
-// named by the most common event title. Stored per company in a small private JSON file; never sent anywhere.
+// reads (and one 60-day look-back a day at most), normalized (tracking parameters dropped), named by the most common
+// event title. Stored per company in a small private JSON file; never sent anywhere.
+// Links of meeting services that have their own app (extension) are recognised by that app's provider
+// (`recognizeLink`, passed in as `recognize`); the calendar itself knows only Meet, Teams and a few services
+// without an app.
 const fs=require('node:fs');
 const path=require('node:path');
 const DAY=86400000,LOOKBACK=60;
-const KIND={zoom:'Zoom',meet:'Meet',teams:'Teams',webex:'Webex',jitsi:'Jitsi',telemost:'Телемост'};
+const KIND={meet:'Meet',teams:'Teams',webex:'Webex',jitsi:'Jitsi',telemost:'Телемост'};
 const URLS=/https:\/\/[^\s<>"'\])}]+/g;
 const TRACKING=/^(?:utm_\w+|fbclid|gclid|mc_eid|mc_cid|_ga|ref|source)$/i;
 const ymd=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
 const plural=(n,[one,few,many])=>{const a=Math.abs(n)%100,b=a%10;return a>10&&a<20?many:b===1?one:b>=2&&b<=4?few:many;};
 
-// A meeting link → {kind,key,url}; `any` also accepts other https links (typed by the user), null otherwise.
-function normalize(raw,{any=false}={}){
+// A meeting link → {kind,key,url,app?}; `any` also accepts other https links (typed by the user), null otherwise.
+// `recognize(url)` → {kind,key,url,name} from the providers of added apps comes first.
+function normalize(raw,{any=false,recognize=null}={}){
  let u;try{u=new URL(String(raw||'').trim().replace(/[.,;:!?)»]+$/,''));}catch{return null;}
  if(u.protocol!=='https:'||u.username||u.password||u.port||String(raw).length>2000)return null;
  const host=u.hostname.toLowerCase().replace(/\.$/,'');u.hash='';
- if(/(?:^|\.)zoom\.(?:us|com)$/.test(host)){
-  const m=/^\/(?:j|wc\/join|w|s)\/(\d{9,12})\/?$/.exec(u.pathname),my=/^\/my\/([\w.-]{2,60})\/?$/.exec(u.pathname);
-  if(!m&&!my)return any?plain(u,host):null;
-  const id=m?m[1]:my[1].toLowerCase(),pwd=u.searchParams.get('pwd');
-  const url='https://'+host+(m?'/j/'+id:'/my/'+id)+(pwd?'?pwd='+encodeURIComponent(pwd):'');
-  return {kind:'zoom',key:'zoom:'+id,url};
- }
+ if(typeof recognize==='function'){let known=null;try{known=recognize(u.href);}catch{known=null;}if(known&&typeof known.key==='string'&&typeof known.url==='string')return {kind:String(known.kind||'link'),key:known.key,url:known.url,...known.name?{app:String(known.name)}:{}};}
  if(host==='meet.google.com'){const m=/^\/([a-z]{3}-[a-z]{4}-[a-z]{3})\/?$/i.exec(u.pathname);if(!m)return any?plain(u,host):null;const code=m[1].toLowerCase();return {kind:'meet',key:'meet:'+code,url:'https://meet.google.com/'+code};}
  // Teams join links carry the meeting in the path and the tenant in `context`: kept whole.
  if(host==='teams.microsoft.com'&&/^\/l\/meetup-join\//.test(u.pathname)||host==='teams.live.com'&&/^\/meet\//.test(u.pathname)){
@@ -40,10 +38,10 @@ function plain(u,host){
  return {kind:'link',key:host+u.pathname.replace(/\/$/,'')+(u.search?'?'+u.searchParams:''),url};
 }
 // Meeting links of one event: the conference link, the location and the description.
-function linksOf(event){
+function linksOf(event,recognize=null){
  const seen=new Map();
  for(const text of [event.link,event.location,event.description,...(event.urls||[])])
-  for(const raw of String(text||'').match(URLS)||[]){const n=normalize(raw);if(n&&!seen.has(n.key))seen.set(n.key,n);}
+  for(const raw of String(text||'').match(URLS)||[]){const n=normalize(raw,{recognize});if(n&&!seen.has(n.key))seen.set(n.key,n);}
  return [...seen.values()];
 }
 const tokens=t=>new Set(String(t||'').toLocaleLowerCase().replace(/ё/g,'е').match(/[\p{L}\p{N}]{3,}/gu)||[]);
@@ -51,8 +49,8 @@ const jaccard=(a,b)=>{if(!a.size||!b.size)return 0;let n=0;for(const x of a)if(b
 const top=counts=>Object.entries(counts||{}).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]))[0]?.[0]||'';
 
 class Rooms{
- constructor({file='',now=()=>Date.now()}={}){
-  this.file=file;this.now=now;this.data={version:1,rooms:{},forgotten:[],refreshed:0};
+ constructor({file='',now=()=>Date.now(),recognize=null}={}){
+  this.file=file;this.now=now;this.recognize=recognize;this.data={version:1,rooms:{},forgotten:[],refreshed:0};
   try{if(file&&fs.existsSync(file)){const d=JSON.parse(fs.readFileSync(file,'utf8'));if(d?.version===1&&d.rooms&&typeof d.rooms==='object')this.data={...this.data,...d};}}catch{/* a damaged file is started over */}
  }
  save(){
@@ -62,14 +60,14 @@ class Rooms{
  }
  room(n){
   const r=this.data.rooms[n.key]||(this.data.rooms[n.key]={key:n.key,kind:n.kind,url:n.url,events:{},titles:{},people:{},manual:false,name:'',last:0});
-  r.url=n.url;return r;
+  r.url=n.url;if(n.app)r.app=n.app;return r;
  }
  // Events the calendar read: [{id,title,start,attendees:[emails],organizer,link,location,description}].
  learn(events,{self=''}={}){
   let changed=false;const forgotten=new Set(this.data.forgotten);
   for(const e of events||[]){
    if(!e||e.declined||!e.start||Number.isNaN(Date.parse(e.start)))continue;
-   for(const n of linksOf(e)){
+   for(const n of linksOf(e,this.recognize)){
     if(forgotten.has(n.key))continue;
     const r=this.room(n),id=String(e.id||e.start);
     if(r.events[id])continue;
@@ -89,7 +87,7 @@ class Rooms{
  }
  // A link the user typed in the confirm step: known at once.
  remember(raw,{title='',attendees=[],at=this.now()}={}){
-  const n=normalize(raw,{any:true});if(!n)throw Error('Нужна ссылка https:// на встречу.');
+  const n=normalize(raw,{any:true,recognize:this.recognize});if(!n)throw Error('Нужна ссылка https:// на встречу.');
   this.data.forgotten=this.data.forgotten.filter(k=>k!==n.key);
   const r=this.room(n);r.manual=true;r.last=Math.max(r.last||0,at);
   r.events['manual:'+at]=ymd(at);if(title)r.titles[title]=(r.titles[title]||0)+1;
@@ -106,7 +104,7 @@ class Rooms{
  days(r){return new Set(Object.values(r.events)).size;}
  count(r){return Object.keys(r.events).length;}
  isKnown(r){return !this.data.forgotten.includes(r.key)&&(r.manual||this.days(r)>=2);}
- label(r){const kind=KIND[r.kind]||(()=>{try{return new URL(r.url).hostname;}catch{return 'ссылка';}})();return r.name||(top(r.titles)?top(r.titles)+' · '+kind:kind);}
+ label(r){const kind=r.app||KIND[r.kind]||(()=>{try{return new URL(r.url).hostname;}catch{return 'ссылка';}})();return r.name||(top(r.titles)?top(r.titles)+' · '+kind:kind);}
  view(r){return {key:r.key,kind:r.kind,url:r.url,name:this.label(r),custom:!!r.name,manual:!!r.manual,count:this.count(r),days:this.days(r),last:r.last?new Date(r.last).toISOString():''};}
  list(){return Object.values(this.data.rooms).filter(r=>this.isKnown(r)).sort((a,b)=>this.count(b)-this.count(a)||(b.last||0)-(a.last||0)).map(r=>this.view(r));}
  get(key){const r=this.data.rooms[key];return r&&this.isKnown(r)?this.view(r):null;}

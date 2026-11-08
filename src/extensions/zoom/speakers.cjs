@@ -1,11 +1,11 @@
-// Who is talking in a Zoom meeting, from the texts of Zoom's own window (tile labels, the active speaker, the
+// «Zoom» extension: who is talking in a Zoom meeting, from the texts of Zoom's own window (tile labels, the active speaker, the
 // participant list) read by `watch-macos --speakers`. During a recording the names are sampled every few seconds
 // and each fragment of the meeting sound gets the name heard most during it.
 const {execFile}=require('node:child_process'),path=require('node:path');
 function unpacked(file){return file.replace(/app\.asar([/\\])/u,'app.asar.unpacked$1');}
 function read(){
  if(process.platform!=='darwin')return Promise.resolve({texts:[]});
- return new Promise(resolve=>execFile(unpacked(path.join(__dirname,'../assets/native/watch-macos')),['--speakers'],{timeout:4000,maxBuffer:1024*1024},(error,stdout)=>{
+ return new Promise(resolve=>execFile(unpacked(path.join(__dirname,'../../../assets/native/watch-macos')),['--speakers'],{timeout:4000,maxBuffer:1024*1024},(error,stdout)=>{
   if(error)return resolve({texts:[],error:error.message});try{resolve(JSON.parse(stdout));}catch{resolve({texts:[]});}
  }));
 }
@@ -33,5 +33,8 @@ class SpeakerTimeline{
  // The name heard most often between `from` and `to` (a little slack on both sides for Zoom's delay).
  label(from,to){const counts=new Map();for(const s of this.samples)if(s.at>=from-1500&&s.at<=to+1500)for(const n of s.talking)counts.set(n,(counts.get(n)||0)+1);
   return [...counts].sort((a,b)=>b[1]-a[1])[0]?.[0]||'';}
+ // The samples between `from` and `to` as speaking intervals for the meeting source interface: one per name
+ // heard in a sample (the recorder picks the name with the most overlap).
+ intervals(from,to){const out=[];for(const s of this.samples)if(s.at>=from-1500&&s.at<=to+1500)for(const name of s.talking)out.push({name,start:s.at,end:s.at});return out;}
 }
 module.exports={read,parse,SpeakerTimeline};

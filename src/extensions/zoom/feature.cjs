@@ -1,14 +1,14 @@
-// «Петя в Zoom»: settings of the local meeting capture (system audio and, optionally, the microphone), the user's
-// Zoom personal room link, and scheduled recordings («Петя запишет встречу» from the calendar).
-// The capture itself runs in src/features/meeting-memory.cjs (LocalMeeting); there is no meeting bot and no Zoom
-// sign-in. Profiles saved with the removed bot mode keep their start mode and are recorded locally.
+// «Zoom»: plugs Zoom into Petya's generic meetings. It provides a meeting source (meeting-source.cjs: Zoom's
+// meeting window starts the recording and names the speakers), the user's personal room for the calendar
+// (video-meeting.cjs) and scheduled recordings of Zoom events («Петя запишет встречу», meeting-recording.cjs).
+// The recording itself, its start mode and the microphone setting are Petya's own (src/features/meeting-memory.cjs);
+// there is no meeting bot and no Zoom sign-in.
 const {randomUUID}=require('node:crypto');
 const room=require('./personal-room.cjs');
-const MODES=['off','ask','auto'];
-const MAX=8,EARLY=60000;
+const source=require('./meeting-source.cjs');
+const ID='zoom',MAX=8,EARLY=60000;
 function parseSchedule(value){try{const list=JSON.parse(value||'[]');return Array.isArray(list)?list.filter(x=>x&&typeof x.id==='string'):[];}catch{return [];}}
 function validate(next){
- if(!MODES.includes(next.zoomBotMode))throw Error('Проверьте режим записи встреч.');
  if(next.zoomPersonalLink){const link=room.valid(next.zoomPersonalLink);if(!link)throw Error('Ссылка на личную комнату Zoom — вида https://…zoom.us/j/1234567890.');next.zoomPersonalLink=link;}
  const list=parseSchedule(next.meetingRecordingSchedule);
  if(list.length>MAX)throw Error('Слишком много запланированных записей.');
@@ -16,9 +16,9 @@ function validate(next){
 }
 const hm=iso=>{const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
 
-// Scheduled recordings: at the start the local capture is started (and retried while the meeting has not yet
-// appeared in Zoom); each one has a stable notification that can be cancelled.
-function scheduler(s,{now=()=>Date.now(),publish=()=>{}}={}){
+// Scheduled recordings: from the start time Petya waits for the Zoom meeting source to see the meeting and then
+// starts the recording; each one has a stable notification that can be cancelled.
+function scheduler(s,{now=()=>Date.now(),publish=()=>{},detect=()=>source.detect({settings:s.settings,dataRoot:s.dataRoot})}={}){
  const list=()=>parseSchedule(s.settings.meetingRecordingSchedule);
  const save=items=>s.saveSettings({meetingRecordingSchedule:JSON.stringify(items)},true);
  const note=(item,text,{busy=false,kind='info',cancellable=true}={})=>publish({id:'meeting-schedule:'+item.id,title:'Запись встречи',text,busy,kind,version:kind+':'+text.slice(0,60),cancellable:cancellable?item.id:''});
@@ -44,7 +44,7 @@ function scheduler(s,{now=()=>Date.now(),publish=()=>{}}={}){
  }
  let busy=false;
  async function tick(){
-  if(busy)return;busy=true;
+  if(busy||s.settings.extension_zoom!=='true')return;busy=true;
   try{
    const items=list();let changed=false;
    for(const item of items){
@@ -55,8 +55,10 @@ function scheduler(s,{now=()=>Date.now(),publish=()=>{}}={}){
      continue;
     }
     if(t<a-EARLY||item.started)continue;
-    if(s.settings.zoomBotMode==='off'){changed=true;item.done=true;note(item,'Запись встреч выключена в настройках — встреча «'+item.title+'» не записана.',{kind:'error',cancellable:false});continue;}
+    if(s.settings.meetingAutoRecord==='off'){changed=true;item.done=true;note(item,'Запись встреч выключена в настройках — встреча «'+item.title+'» не записана.',{kind:'error',cancellable:false});continue;}
     try{
+     const seen=await detect();
+     if(!seen?.active)throw Error('not yet');
      await s.meetingRecording('startCapture');
      item.started=true;changed=true;
      note(item,'Петя записывает встречу «'+item.title+'».',{kind:'success',cancellable:false});
@@ -70,19 +72,15 @@ function scheduler(s,{now=()=>Date.now(),publish=()=>{}}={}){
  return {add,cancel,list,tick};
 }
 
-module.exports={name:'zoomBot',defaults:{zoomBotMode:'auto',zoomPersonalLink:'',meetingRecordingSchedule:'[]'},validate,scheduler,
+module.exports={name:'zoom',defaults:{['extension_'+ID]:'false',zoomPersonalLink:'',zoomWindowTitle:'',meetingRecordingSchedule:'[]'},validate,scheduler,
  setup(s){
   const publish=item=>{if(s.win&&!s.win.isDestroyed?.())s.win.webContents.send('extension-install-progress',item);};
   const schedule=scheduler(s,{publish});
   if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){const timer=setInterval(()=>schedule.tick().catch(()=>{}),20000);timer.unref?.();}
-  const status=()=>({mode:s.settings.zoomBotMode,microphone:s.settings.zoomCaptureMic!=='false',personalLink:room.valid(s.settings.zoomPersonalLink),zoomInstalled:room.installed()});
+  const status=()=>({personalLink:room.valid(s.settings.zoomPersonalLink),zoomInstalled:room.installed()});
   const configure=input=>{
-   if(s.meetingRecording?.('captureStatus')?.busy&&input?.mode!==undefined&&input.mode!==s.settings.zoomBotMode)throw Error('Сначала завершите текущую запись встречи.');
-   const values={};
-   if(input?.mode!==undefined)values.zoomBotMode=input.mode;
-   if(typeof input?.microphone==='boolean')values.zoomCaptureMic=String(input.microphone);
-   if(typeof input?.personalLink==='string')values.zoomPersonalLink=input.personalLink.trim();
-   s.saveSettings(values,true);return status();
+   if(typeof input?.personalLink==='string')s.saveSettings({zoomPersonalLink:input.personalLink.trim()},true);
+   return status();
   };
   // Pending schedules for the notification center after a window reload.
   const schedules=()=>schedule.list().map(x=>({id:'meeting-schedule:'+x.id,title:'Запись встречи',text:x.started?'Петя записывает встречу «'+x.title+'».':'Петя запишет встречу «'+x.title+'» в '+hm(x.start)+'.',busy:!!x.waiting&&!x.started,kind:'info',version:'restore',cancellable:x.started?'':x.id}));

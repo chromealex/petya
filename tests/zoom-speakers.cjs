@@ -1,5 +1,5 @@
 // Names of Zoom speakers from the window texts, and a fragment labelled with whoever talked most during it.
-const assert=require('node:assert/strict');const {parse,SpeakerTimeline}=require('../src/zoom-speakers.cjs');
+const assert=require('node:assert/strict');const {parse,SpeakerTimeline}=require('../src/extensions/zoom/speakers.cjs');
 const r=parse(['Zoom Meeting','Talking: Сергей Иванов','Анна Петрова, Audio muted, Video off','Alex Silaev (Host, me), Computer audio unmuted','Mute','Participants','Мария говорит']);
 assert.deepEqual(r.talking.sort(),['Мария','Сергей Иванов'].sort());assert.deepEqual(r.people.sort(),['Alex Silaev','Анна Петрова'].sort());
 assert.deepEqual(parse(['Participants (3)','Share Screen','Zoom']).talking,[]);

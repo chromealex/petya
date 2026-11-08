@@ -1,14 +1,15 @@
 const path=require('node:path'),{pathToFileURL}=require('node:url'),{randomUUID}=require('node:crypto');
-// A separate sandboxed renderer owns audio; chat renderers have no audio buffers.
+// Meeting capture: a separate sandboxed renderer (src/ui/meeting-capture.html) owns the system audio and the
+// microphone; chat renderers have no audio buffers.
 class LocalCapture {
  constructor({append,onError}){Object.assign(this,{append,onError});this.win=null;}
  async start(config){
   const {BrowserWindow,session,ipcMain,systemPreferences,desktopCapturer}=require('electron');
-  const channel='petya-meeting-'+randomUUID(),file=path.join(__dirname,'capture.html'),entry=pathToFileURL(file).href;
+  const channel='petya-meeting-'+randomUUID(),file=path.join(__dirname,'ui','meeting-capture.html'),entry=pathToFileURL(file).href;
   const isolated=session.fromPartition(channel);
-  this.win=new BrowserWindow({show:false,webPreferences:{session:isolated,preload:path.join(__dirname,'capture-preload.cjs'),additionalArguments:[channel],sandbox:true,contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,autoplayPolicy:'no-user-gesture-required'}});
+  this.win=new BrowserWindow({show:false,webPreferences:{session:isolated,preload:path.join(__dirname,'meeting-capture-preload.cjs'),additionalArguments:[channel],sandbox:true,contextIsolation:true,nodeIntegration:false,backgroundThrottling:false,autoplayPolicy:'no-user-gesture-required'}});
   const win=this.win;
-  require('../../capture.cjs').installCapture({session:isolated,win,entry,desktopCapturer,platform:process.platform});
+  require('./capture.cjs').installCapture({session:isolated,win,entry,desktopCapturer,platform:process.platform});
   win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());
   ipcMain.handle(channel,async(event,method,...args)=>{
    if(event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||win.webContents.getURL()!==entry)throw Error('Untrusted capture sender');

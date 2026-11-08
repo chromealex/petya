@@ -255,16 +255,38 @@ function setupConnections() {
     connectionCards.set(def.id, { card, status, content });
     card.querySelectorAll('input,textarea,select').forEach(e => { const invalidate = () => { status.textContent = 'Настройки изменены · сохраните и проверьте'; status.className = 'connection-status'; }; e.addEventListener('input', invalidate); e.addEventListener('change', invalidate); });
   }
-  const zoom = connectionNode('article', '', 'card'); zoom.dataset.service = 'zoom';
+  // «Запись встреч»: the core recorder. Meeting apps (extensions that provide a meeting source) add automatic start
+  // and speaker names; without one a meeting is recorded with «Слушать встречу».
+  const meetings = connectionNode('article', '', 'card'); meetings.dataset.service = 'meetings';
+  const modeLabel = connectionNode('label', 'Когда приложение встреч показывает встречу');
+  const mode = document.createElement('select'); mode.id = 'meeting-record-mode';
+  for (const [value, text] of [['auto', 'Записывать автоматически'], ['ask', 'Спрашивать'], ['off', 'Только вручную']]) { const o = connectionNode('option', text); o.value = value; mode.append(o); }
+  modeLabel.append(mode);
+  const micLabel = connectionNode('label', '', 'check'); const mic = document.createElement('input'); mic.type = 'checkbox'; mic.id = 'meeting-record-mic'; micLabel.append(mic, 'Записывать мой микрофон вместе с собеседниками');
+  const sources = connectionNode('p', '', 'small'); sources.id = 'meeting-sources';
+  const save = connectionNode('button', 'Сохранить'); save.type = 'button';
+  const state = connectionNode('p', '', 'connection-status'); state.id = 'meeting-record-status'; state.setAttribute('role', 'status');
+  const actions = connectionNode('div'); actions.id = 'meeting-record-actions';
+  const renderSources = list => { sources.textContent = list.length ? 'Приложения встреч: ' + list.join(', ') + '. Запись начинается, когда они показывают встречу, и подписывает, кто говорит.' : 'Приложения встреч не добавлены: запись — по кнопке «Слушать встречу» на главной. Добавьте приложение встреч в каталоге, чтобы запись начиналась сама.'; modeLabel.hidden = !list.length; };
+  const renderCapture = value => {
+    state.textContent = value.message; actions.replaceChildren();
+    for (const [label, method] of value.busy ? [['Остановить и обработать', 'stopCapture']] : [['Записать встречу', 'startCapture']]) { const b = connectionNode('button', label); b.type = 'button'; b.onclick = run(async () => renderCapture(await window.petya.feature('meetingMemory', method))); actions.append(b); }
+  };
+  renderSources([]);
+  window.petya.feature('meetingMemory', 'options').then(options => { mode.value = options.mode; mic.checked = options.microphone; renderSources(options.sources); }).catch(() => {});
+  save.onclick = run(async () => { const r = await window.petya.feature('meetingMemory', 'configure', { mode: mode.value, microphone: mic.checked }); renderSources(r.sources); notice('Настройки записи встреч сохранены.'); });
+  window.petya.feature('meetingMemory', 'captureStatus').then(renderCapture).catch(() => {});
+  window.petyaEvents.onLocalMeeting(renderCapture);
+  document.addEventListener('petya-extensions-changed', () => window.petya.feature('meetingMemory', 'options').then(r => renderSources(r.sources)).catch(() => {}));
   const zs = connectionNode('p', 'Захват не проверен', 'connection-status'); zs.setAttribute('role', 'status');
-  const zb = connectionNode('button', 'Проверить доступ к звуку', 'primary'); zb.type = 'button';
+  const zb = connectionNode('button', 'Проверить доступ к звуку'); zb.type = 'button';
   zb.onclick = run(async () => {
     zb.disabled = true; zs.textContent = 'Проверяю захват звука…'; zs.className = 'connection-status'; let stream;
-    try { stream = await captureMeetingAudio(); zs.textContent = 'Доступ к системному звуку проверен. Встречи Zoom подхватываются автоматически, если автозапись включена.'; zs.className = 'connection-status connected'; }
+    try { stream = await captureMeetingAudio(); zs.textContent = 'Доступ к системному звуку проверен.'; zs.className = 'connection-status connected'; }
     catch (e) { zs.textContent = 'Подключение не подтверждено · ' + meetingCaptureError(e).message; zs.className = 'connection-status error'; }
     finally { stream?.getTracks().forEach(t => t.stop()); zb.disabled = false; }
   });
-  zoom.append(connectionNode('h2', 'Zoom · звук встречи'), connectionNode('p', 'Петя получает контекст через системный звук. Выберите источник в системном диалоге, если он появится. Кнопка проверит доступ к звуковой дорожке и сразу остановит захват. Вход в аккаунт Zoom не требуется.'), zs, zb, connectionNode('p', 'Захватывается весь системный звук, не только Zoom. Встречи Zoom подхватываются автоматически. Расшифровка сохраняется в общую память текущей компании и доступна в любом чате в течение срока хранения.', 'small')); form.prepend(zoom);
+  meetings.append(connectionNode('h2', 'Запись встреч'), connectionNode('p', 'Петя записывает системный звук встречи и, если разрешено, ваш микрофон — отдельно от чатов. После встречи он расшифровывает разговор и сохраняет его в общую память компании для любого чата. Аудио хранится зашифрованным до обработки, видео не сохраняется.'), sources, modeLabel, micLabel, save, state, actions, zs, zb, connectionNode('p', 'Записывается весь системный звук, а не одно приложение. Потребуются разрешения ОС. Остановка из трея приостанавливает автозапуск до следующей встречи.', 'small')); form.prepend(meetings);
   return window.petya.settings().then(settings => connectionDefinitions.forEach(def => connectionStatus(def, settings))).catch(e => notice(e.message, true));
 }
 const connectionsReady = setupConnections();

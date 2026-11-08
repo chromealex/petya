@@ -12,29 +12,9 @@ const { installCapture, configureCapture } = require('./capture.cjs');
 configureCapture({ app, platform: process.platform, electronVersion: process.versions.electron });
 const { ContextStore, retention, DAY } = require('./context-store.cjs');
 const { SlackContext } = require('./slack-context.cjs');
-const { inspectDesktop, desktopState, MeetingMonitor } = require('./meeting-monitor.cjs');
-let zoomAccessVerified = false, zoomInspection;
-function inspectZoomWindows(explicit = false) {
-  if (zoomInspection) return explicit ? zoomInspection.catch(() => {}).then(() => inspectZoomWindows(true)) : zoomInspection;
-  zoomInspection = (async () => {
-    let timer;
-    try {
-      const result = await Promise.race([
-        inspectDesktop({ platform: process.platform, readNative: desktopState, explicit,
-          screenStatus: () => zoomAccessVerified ? 'granted' : systemPreferences.getMediaAccessStatus('screen'),
-          getSources: options => desktopCapturer.getSources(options) }),
-        new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('macOS не вернула список окон за 15 секунд. Проверьте, нет ли открытого системного диалога доступа.')), 15000); })
-      ]);
-      if (result.permission === true) zoomAccessVerified = true;
-      return result;
-    } catch (error) { zoomAccessVerified = false; throw error; }
-    finally { clearTimeout(timer); }
-  })().finally(() => { zoomInspection = null; });
-  return zoomInspection;
-}
 let telegramSource,serviceAccess,serviceBrowser;
 let slackLogs, buildWatch, reviewAssistant, buildQuestion, buildRepair;
-let memory, slackSync, meetingMonitor, backgroundTimer, backgroundBusy = false, lastSlackRound = 0, monitorStatus = {}, maintenance = () => {};
+let memory, slackSync, backgroundTimer, backgroundBusy = false, lastSlackRound = 0, maintenance = () => {};
 function saveMemory(items, root = dataRoot) {
   if (!safeStorage.isEncryptionAvailable()) throw new Error('Хранилище ОС недоступно: контекст не сохранён.');
   const file = path.join(root, 'context-memory.json');
@@ -44,6 +24,7 @@ function loadMemory() {
   const file = path.join(dataRoot, 'context-memory.json');
   const items = fs.existsSync(file) ? JSON.parse(safeStorage.decryptString(Buffer.from(JSON.parse(fs.readFileSync(file, 'utf8')).encrypted, 'base64'))) : [];
   if (!Array.isArray(items)) throw new Error('Не удалось прочитать сохранённый контекст.');
+  if (require('./meeting-migration.cjs').migrateRows(items, settings)) saveMemory(items);
   const root = dataRoot, profileSettings = settings, profileId = companyId;
   memory = new ContextStore({ items, days: () => companyId === profileId ? settings.contextDays : profileSettings.contextDays, save: items => saveMemory(items, root) });
 }
@@ -59,9 +40,7 @@ async function backgroundTick() {
     if (!smoke) await buildRepair?.tick();
     if (modules.enabled(settings, 'slack') && settings.slackAutoSync === 'true' && Date.now() - lastSlackRound >= Number(settings.slackInterval) * 60000) { lastSlackRound = Date.now(); slackSync.start().catch(e => { slackSync.status.message = e.message; }); }
     else if (modules.enabled(settings, 'slack') && slackSync.queue.length) slackSync.tick().catch(e => { slackSync.status.message = e.message; });
-    try { const state = await meetingMonitor.tick(settings.zoomLocalService !== '1' && settings.zoomAutoRecord === 'true'); if (state) monitorStatus = state; }
-    catch (e) { monitorStatus = { message: e.message }; }
-    win.webContents.send('background-status', { zoom: monitorStatus, slack: slackSync.status });
+    win.webContents.send('background-status', { slack: slackSync.status });
   } catch (e) { win.webContents.send('background-status', { error: e.message }); }
   finally { backgroundBusy = false; }
 }
@@ -83,7 +62,7 @@ const { ServiceOAuth } = require('./service-oauth.cjs');
 const serviceOAuth = { asana: new ServiceOAuth('asana', directRequest), slack: new ServiceOAuth('slack', directRequest), notion: new ServiceOAuth('notion', directRequest) };
 const modules = require('./modules.cjs');
 const team = require('./team.cjs');
-const defaults = { ...modules.defaults, speechStyle:'0', userName:'', userNameVariants:'', userNameExcluded:'', communicationLanguage:'auto', speechLanguage:'', semanticTools:'true', teamMembers:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', gmailCredential:'', microsoftCredential:'', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto',googlePlayCredential:'', asanaCredential: '', asanaWorkspace: '', slackCredential: '', notionCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', notionToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'true', slackInterval: '5', zoomAutoRecord: 'false', zoomWindowTitle: '', zoomCaptureMic: 'true' };
+const defaults = { ...modules.defaults, speechStyle:'0', userName:'', userNameVariants:'', userNameExcluded:'', communicationLanguage:'auto', speechLanguage:'', semanticTools:'true', teamMembers:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', gmailCredential:'', microsoftCredential:'', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto',googlePlayCredential:'', asanaCredential: '', asanaWorkspace: '', slackCredential: '', notionCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', notionToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'true', slackInterval: '5' };
 // Feature modules (src/features.cjs) bring their own setting defaults and validation.
 const features = require('./features.cjs');
 for (const feature of features) Object.assign(defaults, feature.defaults || {});
@@ -116,6 +95,7 @@ function loadSettings() {
     if (typeof saved[key] === 'string') settings[key] = secrets.includes(key) && saved[key] ? safeStorage.decryptString(Buffer.from(saved[key], 'base64')) : saved[key];
   }
   modules.migrate(settings, saved);
+  for (const feature of features) feature.migrate?.(settings, saved, { dataRoot });
   useBundledSpeech(settings);
 }
 function useBundledSpeech(target) {
@@ -142,7 +122,7 @@ function show() { if (process.env.PETYA_VERIFY_BUILD === '1') console.log('show(
 function notify(body) { if (!smoke && Notification.isSupported()) { const {t} = require('./interface-language.cjs'); const n = new Notification({ icon: appIconPath, title: t('Петя')+' · '+companies.get(companyId).name, body: t(String(body)).slice(0, 250) }); n.on('click', show); n.show(); } }
 function text(value, max = 50000) { if (typeof value !== 'string' || !value.trim() || value.length > max) throw new Error('Некорректный или слишком длинный текст.'); return value.trim(); }
 function addContext(data) {
-  const item = { id: randomUUID(), title: text(data.title, 200), source: ['Zoom', 'Slack', 'Asana', 'Микрофон', 'Заметка'].includes(data.source) ? data.source : 'Заметка', text: text(data.text), at: Date.now(), url: '' };
+  const item = { id: randomUUID(), title: text(data.title, 200), source: ['Встреча', 'Slack', 'Asana', 'Микрофон', 'Заметка'].includes(data.source) ? data.source : 'Заметка', text: text(data.text), at: Date.now(), url: '' };
   if (Number.isFinite(data.at)) item.at = Math.max(Date.now() - Number(settings.contextDays) * DAY, Math.min(data.at, Date.now()));
   if (typeof data.sessionId === 'string' && /^[a-z0-9-]{36}$/i.test(data.sessionId)) item.sessionId = data.sessionId;
   memory.put([item]); return item;
@@ -211,7 +191,7 @@ function saveSettings(input, internal = false, profile = profileState()) {
     for (const feature of features) feature.validate?.(next);
     next.contextDays = String(retention(next.contextDays));
     if (!['1', '5', '15'].includes(next.slackInterval)) throw new Error('Интервал Slack: 1, 5 или 15 минут.');
-    for (const key of ['telegramAutoSync','smartNotifications', 'interpretationEnabled', 'slackAutoSync', 'zoomAutoRecord', 'zoomCaptureMic', ...Object.keys(modules.defaults)]) if (!['true', 'false'].includes(next[key])) throw new Error('Некорректная настройка ' + key);
+    for (const key of ['telegramAutoSync','smartNotifications', 'interpretationEnabled', 'slackAutoSync', ...Object.keys(modules.defaults)]) if (!['true', 'false'].includes(next[key])) throw new Error('Некорректная настройка ' + key);
     if(!['auto','claude','codex'].includes(next.interpretationProvider))throw new Error('Некорректный помощник для разъяснения.');
     useBundledSpeech(next);
     core.localEndpoint(next.whisperUrl); core.localEndpoint(next.ollamaUrl);
@@ -225,7 +205,6 @@ function saveSettings(input, internal = false, profile = profileState()) {
     settings = next; workspace.docs.clear(); memory?.prune(); maintenance();
     if (resetSlack) { buildRepair?.reset(); buildQuestion?.reset(); buildWatch?.reset(); slackLogs?.reset(); slackSync?.reset(); lastSlackRound = 0; }
     if (settings.module_web === 'false') stopWebSearch();
-    if (settings.zoomAutoRecord === 'false') meetingMonitor?.pause();
     return publicSettings();
 }
 const chatLocation=require('./chat-location.cjs');
@@ -644,10 +623,7 @@ function setupHandlers() {
   handle('addContext', addContext);
   handle('clearContexts', () => { taskDuplicates.reset(); reportShare.clear(); workSkills.reset(); teamFill.reset(); serviceAccess?.clear();serviceBrowser?.stop();formatReader?.clear();require('./format-sandbox.cjs').stopFormats();telegramSource?.stop(); buildRepair?.reset();reviewState.repairs=[];buildQuestion?.reset();reviewState.buildQuestions=[];buildWatch?.reset();reviewState.watches=[];saveReview();reviewAssistant.pending=null;slackLogs?.reset(); slackSync.reset(); memory.clear(); dialogue?.clear(); pending.clear(); snapshots.clear(); workspace.docs.clear(); });
   handle('syncSlack', () => { modules.assertEnabled(settings, 'slack'); return slackSync.start(); });
-  handle('backgroundStatus', () => ({ zoom: monitorStatus, slack: slackSync.status }));
-  // Window discovery uses CoreGraphics; it must not depend on screen-stream enumeration.
-  handle('inspectZoom', () => inspectZoomWindows(true));
-  handle('pauseAutoMeeting', () => meetingMonitor?.pause());
+  handle('backgroundStatus', () => ({ slack: slackSync.status }));
   require('./voice-setup.cjs')({get core(){return core;},get handle(){return handle;},get languagePacks(){return languagePacks;},get localVoice(){return localVoice;},get qwenSpeech(){return qwenSpeech;},get request(){return request;},get settings(){return settings;},get speech(){return speech;},get speechError(){return speechError;}});
   const {composeDraft}=require('./dictation-setup.cjs')({get agents(){return agents;},get companies(){return companies;},get companyId(){return companyId;},get contextFor(){return contextFor;},get core(){return core;},get delegation(){return delegation;},get dialogue(){return dialogue;},get handle(){return handle;},get memory(){return memory;},get notify(){return notify;},get pending(){return pending;},get promptFor(){return promptFor;},get randomUUID(){return randomUUID;},get request(){return request;},get routed(){return routed;},get settings(){return settings;},get snapshots(){return snapshots;},get team(){return team;},get text(){return text;},get workspace(){return workspace;}});
   const permissionChecklist = require('./permissions.cjs').permissions({ platform: process.platform, systemPreferences, shell, desktopCapturer });
@@ -669,13 +645,13 @@ function setupHandlers() {
 async function switchCompanyRuntime(id,raw) {
  const previous=companyId;
  try {
-  clearInterval(backgroundTimer);meetingMonitor?.pause();
+  clearInterval(backgroundTimer);
   serviceAccess?.clear();serviceBrowser?.stop();stopWebSearch();
   buildRepair?.reset();buildQuestion?.reset();buildWatch?.reset();slackLogs?.reset();slackSync?.reset();
   await companyScope.close();
   companyId=id;dataRoot=companies.directory(id);pending=new Map();snapshots=new Map();
   loadSettings();loadMemory();setupHandlers();companies.select(id);
-  pendingMessageLink=raw||'';monitorStatus={};lastSlackRound=0;trayListening=false;trayMeeting=false;
+  pendingMessageLink=raw||'';lastSlackRound=0;trayListening=false;trayMeeting=false;
   win.setTitle('Петя · '+companies.get(id).name);refreshTrayMenu();
  } catch(error) {
   console.error('Company switch:',error);
@@ -715,13 +691,9 @@ else {
     win.on('show', () => { if (!win.webContents.isLoading()) win.webContents.send('window-shown'); });
     win.on('minimize', event => { event.preventDefault(); win.hide(); });
     win.on('close', event => { if (!quitting) { event.preventDefault(); win.hide(); } });
-    powerMonitor.on('suspend', () => { meetingMonitor?.pause(); win.webContents.send('pause-all'); });
-    powerMonitor.on('lock-screen', () => { meetingMonitor?.pause(); win.webContents.send('pause-all'); });
+    powerMonitor.on('suspend', () => { win.webContents.send('pause-all'); });
+    powerMonitor.on('lock-screen', () => { win.webContents.send('pause-all'); });
     setupHandlers();
-    meetingMonitor = new MeetingMonitor({ inspect: () => inspectZoomWindows(),
-      start: () => win.webContents.executeJavaScript('window.petyaStartAutomaticMeeting()', true),
-      stop: () => win.webContents.executeJavaScript('window.petyaStopAutomaticMeeting(true)', true)
-    });
     win.webContents.once('did-finish-load', () => { // The window opens at start; closing or minimising it keeps Petya in the tray. «--hidden» starts in the tray.
       if(!smoke&&!process.argv.includes('--hidden')||pendingMessageLink||process.argv.includes('--petya-company-open'))show(); if (!smoke && process.env.PETYA_VERIFY_BUILD !== '1') { backgroundTimer = setInterval(backgroundTick, 5000); backgroundTick(); } });
     if (process.env.PETYA_VERIFY_BUILD === '1') {
@@ -744,7 +716,7 @@ else {
         win.close();
         valid = valid && startedInTray && openedFromTray && closedToTray && reopenedFromTray && !win.isVisible();
         console.log('Tray lifecycle: ' + JSON.stringify({ startedOpen: startedInTray, openedFromTray, closedToTray, reopenedFromTray }));
-        try { if (process.env.PETYA_VERIFY_ZOOM === '1') { const state = await inspectZoomWindows(true); console.log('Zoom diagnostic: ' + JSON.stringify({ permission: state.permission, zoomOpen: state.zoomOpen, windows: state.windows.length, electronPermission: systemPreferences.getMediaAccessStatus('screen') })); } if (process.env.PETYA_VERIFY_SPEECH === '1') { await win.webContents.executeJavaScript('window.petya.ensureSpeech()'); console.log('Packaged speech startup verified'); } console.log(valid ? 'Packaged app verified' : 'Packaged app failed'); speech.stop(); qwenSpeech.stop(); app.exit(valid ? 0 : 1); } catch (error) { console.error(error); speech.stop(); qwenSpeech.stop(); app.exit(1); }
+        try { if (process.env.PETYA_VERIFY_SPEECH === '1') { await win.webContents.executeJavaScript('window.petya.ensureSpeech()'); console.log('Packaged speech startup verified'); } console.log(valid ? 'Packaged app verified' : 'Packaged app failed'); speech.stop(); qwenSpeech.stop(); app.exit(valid ? 0 : 1); } catch (error) { console.error(error); speech.stop(); qwenSpeech.stop(); app.exit(1); }
       });
     }
     // Live self-check (read-only questions in a separate project), also in the packaged app: PETYA_LIVE_CHECK=<report.json>

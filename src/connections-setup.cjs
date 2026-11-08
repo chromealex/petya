@@ -16,9 +16,9 @@ module.exports=ctx=>{
     if (connectionChecks.has(service)) return connectionChecks.get(service);
     const snapshot = { ...ctx.settings };
     const check = (async () => {
-      if (service === 'zoom') {
+      if (service === 'meetings') {
         const screen = process.platform === 'darwin' ? ctx.systemPreferences.getMediaAccessStatus('screen') : 'unknown';
-        return { ready: false, state: 'unknown', message: screen === 'granted' ? 'Разрешение экрана есть. Для проверки звуковой дорожки нажмите «Подключить звук встречи».' : 'Захват звука требует отдельной проверки кнопкой подключения. Автопроверка не включает запись.' };
+        return { ready: false, state: 'unknown', message: screen === 'granted' ? 'Разрешение экрана есть. Для проверки звуковой дорожки нажмите «Проверить доступ к звуку».' : 'Захват звука требует отдельной проверки кнопкой подключения. Автопроверка не включает запись.' };
       }
       if (['claude', 'codex'].includes(service)) { const ready = await ctx.available(service); return { ready, state: ready ? 'connected' : 'disconnected', message: ready ? 'Приложение найдено. Вход и выполнение проверяются в самом приложении.' : 'Приложение не найдено. Установите его и выполните вход.' }; }
       if (!Object.hasOwn(ctx.guides, service) || !['slack', 'notion', 'asana', 'jira', 'confluence', 'ollama', 'whisper'].includes(service)) throw new Error('Неизвестный сервис.');

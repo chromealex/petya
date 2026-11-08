@@ -3,7 +3,7 @@ const assert=require('node:assert/strict');
 const feature=require('../src/features/materials.cjs');
 const {ContextStore}=require('../src/context-store.cjs');
 const now=Date.now();
-const rows=[{id:'z1',source:'Zoom',sessionId:'m',title:'Встреча',text:'Обсудили релиз 19.3',at:now-3000},{id:'z2',source:'Zoom',sessionId:'m',title:'Встреча',text:'谢谢大家观看我们的节目',at:now-2000},
+const rows=[{id:'z1',source:'Встреча',sessionId:'m',title:'Встреча',text:'Обсудили релиз 19.3',at:now-3000},{id:'z2',source:'Встреча',sessionId:'m',title:'Встреча',text:'谢谢大家观看我们的节目',at:now-2000},
  {id:'s1',source:'Slack',title:'#dev',text:'Сборка упала',messages:[{at:now-1500,user:'U',text:'a'},{at:now-1000,user:'U',text:'b'}],at:now-1000},{id:'n1',source:'Заметка',title:'Итоги',text:'Вход по коду',at:now}];
 const memory=new ContextStore({items:structuredClone(rows),save:()=>{},now:()=>now});
 let removedSession='';

@@ -1,6 +1,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
+const {SOUND,MIC}=require('./meeting-talk.cjs');
 // Persist encrypted segments immediately; recognition runs in the background while the meeting goes on
 // and finishes after the recording stops.
 class MeetingRecording {
@@ -20,10 +21,11 @@ class MeetingRecording {
  public(s){const at=s.segments[0]?.at,end=s.segments.at(-1)?.endedAt;return {id:s.id,phase:s.phase,message:s.message,percent:s.phase==='processing'&&s.segments.length?Math.floor(s.completed/s.segments.length*100):undefined,
   segments:s.segments.length,completed:s.completed,bytes:s.segments.reduce((n,p)=>n+(p.bytes||0),0),startedAt:at||s.startedAt||null,duration:at&&end?Math.max(0,end-at):0};}
  status(){return [...this.sessions.values()].map(s=>this.public(s));}
- begin(){this.cleanup();const s={id:randomUUID(),phase:'recording',message:'Записываю встречу и расшифровываю по ходу.',segments:[],completed:0,startedAt:Date.now()};this.sessions.set(s.id,s);this.persist(s);return s.id;}
+ // `title` and `app` come from the meeting source that saw the meeting, if any.
+ begin({title='',app=''}={}){this.cleanup();const s={id:randomUUID(),phase:'recording',message:'Записываю встречу и расшифровываю по ходу.',segments:[],completed:0,startedAt:Date.now(),title:String(title||'').replace(/\s+/g,' ').trim().slice(0,120),app:String(app||'').trim().slice(0,40)};this.sessions.set(s.id,s);this.persist(s);return s.id;}
  append(id,source,item){
   const s=this.state(id);if(s.phase!=='recording')throw Error('Запись встречи уже завершена.');
-  if(!['Zoom','Микрофон'].includes(source)||!(item?.wav instanceof ArrayBuffer)||item.wav.byteLength<44||item.wav.byteLength>4e6||![item.at,item.endedAt].every(Number.isFinite))throw Error('Некорректный фрагмент встречи.');
+  if(![SOUND,MIC].includes(source)||!(item?.wav instanceof ArrayBuffer)||item.wav.byteLength<44||item.wav.byteLength>4e6||![item.at,item.endedAt].every(Number.isFinite))throw Error('Некорректный фрагмент встречи.');
   const key=s.segments.length,filename=id+'-'+key+'.audio';
   fs.writeFileSync(path.join(this.directory,filename),this.encrypt(Buffer.from(item.wav).toString('base64')),{mode:0o600});
   s.segments.push({filename,source,at:item.at,endedAt:item.endedAt,overlap:!!item.overlap,bytes:item.wav.byteLength,...typeof item.speaker==='string'&&item.speaker&&item.speaker.length<=80?{speaker:item.speaker}:{}});this.persist(s);void this.process(s);
@@ -38,7 +40,7 @@ class MeetingRecording {
     const result=await this.transcribe(bytes.buffer.slice(bytes.byteOffset,bytes.byteOffset+bytes.byteLength));
     s.previous ||= {};
     const text=part.overlap?stitch(s.previous[part.source]||'',result||''):result;
-    if(text)await this.save({id:s.id+'-'+s.completed,sessionId:s.id,source:part.source,...part.speaker?{speaker:part.speaker}:{},title:'Встреча Zoom · '+new Date(part.at).toLocaleString('ru-RU'),text,at:part.endedAt,url:''});
+    if(text)await this.save({id:s.id+'-'+s.completed,sessionId:s.id,source:part.source,...part.speaker?{speaker:part.speaker}:{},title:(s.title||'Встреча'+(s.app?' '+s.app:''))+' · '+new Date(part.at).toLocaleString('ru-RU'),text,at:part.endedAt,url:''});
     // A deterministic context ID makes recovery idempotent if persistence fails after saving.
     if(result)s.previous[part.source]=result;
     s.completed++;s.message=s.phase==='recording'?`Записываю встречу · расшифровано ${s.completed} из ${s.segments.length} фрагментов`:`Расшифровываю встречу: ${s.completed} из ${s.segments.length} фрагментов`;this.persist(s);

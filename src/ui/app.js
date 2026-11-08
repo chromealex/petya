@@ -47,10 +47,10 @@ function updateAudio() {
   $('mic').disabled = micStarting || !!window.petyaAutoMeetingActive;
   $('mic-action').textContent = window.petyaAutoMeetingActive ? 'Микрофон занят записью встречи' : mic.active ? 'Микрофон включён' : 'Микрофон выключен';
   renderMicrophoneChoices();
-  $('meeting').textContent = !!window.petyaAutoMeetingActive ? '■  Остановить встречу' : 'Записывать системный звук';
+  $('meeting').textContent = !!window.petyaAutoMeetingActive ? '■  Остановить встречу' : 'Слушать встречу';
   $('status').textContent = mic.active ? (mic.deviceLabel || 'Микрофон включён') + ' · в активном окне — без обращения, в фоне — «Петя»' : !!window.petyaAutoMeetingActive ? 'Записываю встречу' : 'Микрофон выключен';
   $('status').classList.toggle('live', mic.active || !!window.petyaAutoMeetingActive);
-  $('meeting-status').textContent = !!window.petyaAutoMeetingActive ? 'Записываю встречу · обработка после завершения' : 'Встреча выключена · захват всего системного звука, не только Zoom';
+  $('meeting-status').textContent = !!window.petyaAutoMeetingActive ? 'Записываю встречу · обработка после завершения' : 'Встреча не записывается · записывается весь системный звук и микрофон';
   updateChromeStatus();
   window.petya.listening(mic.active,!!window.petyaAutoMeetingActive||!!window.petyaAutoMeetingActive).catch(e => notice(e.message, true));
 }
@@ -136,8 +136,8 @@ const mic = new AudioListener(async (speech, at, endedAt, direct) => {
   if (turn.cancelled) { window.petya.prepareVoice(null).catch(()=>{}); voiceReply = null; automaticVoiceCommand = false; }
 }, audioError, { segmentSeconds:2.5, allowDirect:()=>document.hasFocus()&&document.visibilityState==='visible', onLevel:level=>{if(Date.now()-micLevelAt>150){micLevelAt=Date.now();micLevel.value=Math.min(1,level*20);}},onState:state=>{const label=state+' · '+(mic.engine||'Whisper');if(micState.textContent!==label)micState.textContent=label;}, onUnrecognized: () => { $('heard').textContent='Не удалось распознать фразу. Повтори её или напиши запрос.'; if(voiceTurn.active){voiceTurn.reset();notice('Не расслышал слова. Повторите фразу или напишите её.');speakReply('Не расслышал. Пожалуйста, повторите фразу.');} }, onSpeech: at => voiceTurn.activity(at), onStop: () => { window.petya.prepareVoice(null).catch(()=>{}); micLevel.value=0;micState.textContent='Микрофон выключен';voiceTurn.reset(); voiceReply = null; automaticVoiceCommand = false; } });
 const recordMeetingSegment = source => async item => { await window.petya.feature('meetingMemory','append',meetingId,source,item); return null; };
-const meetingCaptureFailed = error => { audioError(error); window.petyaStopAutomaticMeeting(true).catch(audioError); window.petya.pauseAutoMeeting().catch(audioError); };
-const meeting = new AudioListener(()=>{}, meetingCaptureFailed, {recordSegment:recordMeetingSegment('Zoom')});
+const meetingCaptureFailed = error => { audioError(error); window.petyaStopAutomaticMeeting(true).catch(audioError); };
+const meeting = new AudioListener(()=>{}, meetingCaptureFailed, {recordSegment:recordMeetingSegment('Встреча')});
 const meetingMic = new AudioListener(()=>{}, meetingCaptureFailed, {recordSegment:recordMeetingSegment('Микрофон')});
 async function startSelectedMicrophone(){
  if(voiceInputLocks.size)throw Error('Во время встречи голосовой ввод в чаты приостановлен. Можно писать текстом.');
@@ -160,10 +160,10 @@ document.addEventListener('petya-microphone-changed',run(async()=>{
  finally{micStarting=false;$('mic').disabled=false;microphoneSelect.disabled=false;updateAudio();}
 }));
 $('mic').onclick = run(toggleMic);
-$('meeting').onclick = run(async () => { $('meeting').disabled = true; try { if (window.petyaAutoMeetingActive) { await window.petyaStopAutomaticMeeting(true); await window.petya.pauseAutoMeeting(); } else { await window.petyaStartMeetingRecording(); } } finally { $('meeting').disabled = false; updateAudio(); } });
+$('meeting').onclick = run(async () => { $('meeting').disabled = true; try { if (window.petyaAutoMeetingActive) { await window.petyaStopAutomaticMeeting(true); } else { await window.petyaStartMeetingRecording(); } } finally { $('meeting').disabled = false; updateAudio(); } });
 window.petyaEvents.onNavigate(page => [...document.querySelectorAll('.nav')].find(button => button.dataset.view === page)?.click());
 window.petyaEvents.onToggle(run(toggleMic));
-window.petyaEvents.onPause(run(async () => { await window.petya.pauseAutoMeeting(); mic.stop(); await window.petyaStopAutomaticMeeting(true); updateAudio(); }));
+window.petyaEvents.onPause(run(async () => { mic.stop(); await window.petyaStopAutomaticMeeting(true); updateAudio(); }));
 // The materials page is drawn by materials.js from the grouped list; until it is loaded the data waits for it.
 async function refreshContexts() {
   const value = await window.petya.feature('materials', 'list');
@@ -257,7 +257,7 @@ $('import').onchange = run(async event => { const file = event.target.files[0]; 
 $('clear-contexts').onclick = run(async () => { if (workspaceBusy) throw new Error('Дождитесь завершения работы с планом.'); $('workspace-card').hidden = true; $('batch-tasks').replaceChildren(); $('docs-list').replaceChildren(); activeContext = null; await window.petya.clearContexts(); if(typeof selectDialogueTopic==='function')await selectDialogueTopic(''); currentDraft = null; $('draft-card').hidden = true; $('resolution').hidden = true; await refreshContexts(); notice('Память и черновики очищены.'); });
 $('sync-slack').onclick = run(async () => { $('sync-slack').disabled = true; try { const count = await window.petya.syncSlack(); await refreshContexts(); notice(count.message); } finally { $('sync-slack').disabled = false; } });
 function displaySettings(settings) { for (const element of $('settings-form').elements) { if (element.name in settings && element.type !== 'checkbox') { if (element.tagName === 'SELECT' && settings[element.name] && ![...element.options].some(o => o.value === settings[element.name])) element.add(new Option('Сохранённый выбор · ' + settings[element.name], settings[element.name])); element.value = settings[element.name]; } if (element.type === 'checkbox' && element.name) element.checked = settings[element.name] === 'true'; } $('connection-state').textContent = `Slack: ${settings.hasSlackToken ? 'настроен' : 'не подключён'} · Jira: ${settings.hasJiraToken ? 'настроен' : 'не подключён'} · Notion: ${settings.hasNotionToken ? 'настроен' : 'не подключён'}`; document.dispatchEvent(new Event('petya-settings-displayed')); }
-function collectSettings(){const form=$('settings-form');const data=Object.fromEntries(new FormData(form));for(const key of ['semanticTools','smartNotifications','interpretationEnabled','slackAutoSync','zoomAutoRecord','zoomCaptureMic'])if(form.elements[key])data[key]=String(form.elements[key].checked);for(const key of ['clear_slackToken','clear_jiraToken','clear_notionToken'])if(form.elements[key])data[key]=form.elements[key].checked;return data;}
+function collectSettings(){const form=$('settings-form');const data=Object.fromEntries(new FormData(form));for(const key of ['semanticTools','smartNotifications','interpretationEnabled','slackAutoSync'])if(form.elements[key])data[key]=String(form.elements[key].checked);for(const key of ['clear_slackToken','clear_jiraToken','clear_notionToken'])if(form.elements[key])data[key]=form.elements[key].checked;return data;}
 // Settings save themselves: a change of a named field is saved shortly after, and a toast offers «Откатить».
 (()=>{const form=$('settings-form');let timer=null,saving=Promise.resolve(),shown=null;
  document.addEventListener('petya-settings-displayed',()=>{try{shown=collectSettings();}catch{}});

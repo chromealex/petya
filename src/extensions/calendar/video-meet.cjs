@@ -4,7 +4,7 @@
 const {randomUUID}=require('node:crypto');
 const {accounts}=require('./accounts.cjs');
 module.exports={
- id:'google-meet',name:'Google Meet',label:'Google Meet',
+ id:'google-meet',name:'Google Meet',label:'Google Meet',order:20,
  ready:s=>s.extension_calendar==='true'&&accounts(s).some(a=>a.calendar&&a.provider==='google'),
  fits:c=>c.calendar==='google',
  async run(services,payload){

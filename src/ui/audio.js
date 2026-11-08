@@ -96,7 +96,7 @@ class AudioListener {
       if (!this.active || generation !== this.generation) { stream.getTracks().forEach(t => t.stop()); return; }
       this.stream = stream;
       const track = stream.getAudioTracks()[0];
-      if (!track || track.readyState === 'ended') throw new Error('Системный звук недоступен. Проверьте разрешение записи звука ОС или импортируйте расшифровку Zoom.');
+      if (!track || track.readyState === 'ended') throw new Error('Системный звук недоступен. Проверьте разрешение записи звука ОС или добавьте расшифровку встречи текстом.');
       // Video frames are never read or stored; track remains alive for the display session.
       track.onended = () => { this.stop(); this.onError(new Error('Захват звука остановлен системой.')); };
       this.context = new AudioContext(); await this.context.audioWorklet.addModule('pcm-worklet.js');

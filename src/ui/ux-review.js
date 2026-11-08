@@ -37,7 +37,7 @@
  const category=card=>{
    if(card.dataset.extension||serviceIds.has(card.dataset.service))return 'services';
    const name=card.querySelector('h2')?.textContent||card.querySelector(':scope>summary')?.textContent||'';
-   if(card.dataset.service==='images'||/Whisper|Ollama|Zoom|Манера|модел|Распознавание|Звук встречи|Запись системного/i.test(name))return 'voice';
+   if(card.dataset.service==='images'||card.dataset.service==='meetings'||/Whisper|Ollama|Манера|модел|Распознавание|Звук встречи|Запись системного/i.test(name))return 'voice';
    return 'app';
  };
  const settingsEmpty=el('p',null,'small');controls.after(settingsEmpty);
@@ -65,7 +65,7 @@
  const settingsTabs=segmented(controls,[['services','Сервисы'],['voice','Голос и модели'],['app','Приложение']],id=>{group=id;filterSettings();});
  const filterRow=el('div',null,'ux-filters');filterRow.append(find,statusFilter,catalogButton);controls.append(filterRow);find.oninput=filterSettings;statusFilter.onchange=()=>{state=statusFilter.value;filterSettings();};
  window.revealSettings=card=>{find.value='';state='all';statusFilter.value='all';settingsTabs.select(category(card));const d=card.querySelector('.settings-disclosure');if(d)d.open=true;card.scrollIntoView({block:'nearest'});};
- for(const card of cards()){const heading=card.querySelector('h2');if(heading){heading.textContent=heading.textContent.replace(/whisper\.cpp/i,'Распознавание речи · Whisper').replace(/^Ollama$/,'Локальная модель · Ollama').replace('Zoom · звук встречи','Запись системного звука');}
+ for(const card of cards()){const heading=card.querySelector('h2');if(heading){heading.textContent=heading.textContent.replace(/whisper\.cpp/i,'Распознавание речи · Whisper').replace(/^Ollama$/,'Локальная модель · Ollama');}
  const toggle=card.querySelector('.settings-disclosure>summary');
  if(toggle&&serviceIds.has(card.dataset.service)){
    const label='Настройки '+heading.textContent;

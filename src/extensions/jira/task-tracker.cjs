@@ -4,7 +4,7 @@
 const modules=require('../../modules.cjs');
 const {taskBody,taskList}=require('../link-text.cjs');
 module.exports={
- label:'В задачу Jira',
+ label:'В задачу Jira',order:10,
  ready:s=>modules.enabled(s,'jira')&&!!s.jiraUrl&&!!(s.atlassianCredential||s.jiraEmail&&s.jiraToken),
  async run(services,payload){
   if(Array.isArray(payload.tasks))return {ask:'Создай задачи в Jira'+taskList(payload),send:true};

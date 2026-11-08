@@ -93,6 +93,6 @@
 .cal-video-title{overflow-wrap:anywhere}
 .cal-video-text small{font-size:11.5px;color:var(--muted)}
 .cal-confirm input.cal-video-url{font:inherit;font-size:13px;color:var(--ink);background:#ffffff0a;border:1px solid var(--line);border-radius:8px;padding:6px 10px}
-.cal-video-zoom{display:flex;flex-direction:column;gap:6px}
+.cal-video-ask{display:flex;flex-direction:column;gap:6px}
 .cal-record button{min-height:22px;padding:0 8px;font-size:11.5px;border-radius:6px}
 .cal-created .cal-record button{min-height:28px;font-size:12.5px}

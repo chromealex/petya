@@ -155,7 +155,7 @@ class TeamFill {
      else if(!conflicts.some(c=>c.index===i&&c.key===key&&c.value===member[key]))conflicts.push({index:i,key,value:member[key],evidence,source});
     }
    }
-   // Names in Russian; the Latin spelling stays as an alias so Slack, Jira and Zoom still find the person.
+   // Names in Russian; the Latin spelling stays as an alias so Slack, Jira and meeting apps still find the person.
    for(const m of members){const ru=russian(m.name);if(ru&&ru!==m.name){const old=m.name;m.name=ru;addAlias(m,old);renamed++;}}
    // Profile photos from Slack / Jira for cards that have none yet.
    let photos=0;if(this.photos){try{photos=await this.photos(members);}catch(e){console.error('Team photos:',e.message);}}
