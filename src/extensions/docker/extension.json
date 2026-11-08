@@ -3,6 +3,7 @@
   "name": "Docker",
   "description": "Контейнеры, compose-проекты, образы и логи локального Docker; почему контейнер падает; запуск, остановка и очистка — после подтверждения. Нужен установленный Docker Desktop",
   "category": "dev",
+  "icon": "icon.svg",
   "setting": "extension_docker",
   "settings": true,
   "feature": "feature.cjs",

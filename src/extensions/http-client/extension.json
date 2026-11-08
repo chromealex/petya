@@ -3,6 +3,7 @@
   "name": "API-клиент",
   "description": "HTTP-запросы из чата: статус, время, заголовки и JSON-ответ; окружения с секретами, импорт curl и OpenAPI. Изменяющие запросы — после подтверждения",
   "category": "dev",
+  "icon": "icon.svg",
   "setting": "extension_http-client",
   "settings": true,
   "feature": "feature.cjs",

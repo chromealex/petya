@@ -1,14 +1,19 @@
 // Only bundled, validated extension descriptors can supply renderer scripts.
 (()=>{
  const loaded=new Set();let entries=window.petyaExtensionDescriptors;
- const load=src=>new Promise((resolve,reject)=>{if(loaded.has(src))return resolve();const script=document.createElement('script');script.src=src;script.onload=()=>{loaded.add(src);resolve();};script.onerror=()=>reject(Error('Не удалось загрузить '+src));document.body.append(script);});
+ // A script that is still loading is shared by every caller, so cards rendered together load it once.
+ const pending=new Map();
+ const load=src=>{if(loaded.has(src))return Promise.resolve();if(pending.has(src))return pending.get(src);const p=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=()=>{loaded.add(src);pending.delete(src);resolve();};script.onerror=()=>{pending.delete(src);reject(Error('Не удалось загрузить '+src));};document.body.append(script);});pending.set(src,p);return p;};
  function fold(card){
   if(card.classList.contains('settings-card'))return;
   const heading=card.querySelector('h2');if(!heading)return;
   const disclosure=document.createElement('details'),summary=document.createElement('summary'),body=document.createElement('div');
   disclosure.className='settings-disclosure';body.className='settings-disclosure-body';summary.append(heading);body.append(...card.childNodes);disclosure.append(summary,body);card.append(disclosure);card.classList.add('settings-card');
  }
- async function mount(entry){
+ // Concurrent mounts of one extension share one run (several cards rendering at once).
+ const mounting=new Map();
+ function mount(entry){if(!mounting.has(entry.id))mounting.set(entry.id,mountOnce(entry).finally(()=>mounting.delete(entry.id)));return mounting.get(entry.id);}
+ async function mountOnce(entry){
   for(const [file] of entry.scripts)await load('../extensions/'+entry.id+'/'+file);
   let card=document.querySelector('[data-extension="'+entry.id+'"]');
   // An installed extension without its own settings still gets a card, so everything added is visible in settings.
