@@ -1,0 +1,20 @@
+{
+  "id": "tone-check",
+  "name": "Проверка тона",
+  "description": "Перед отправкой от вашего имени показывает, что может прозвучать резко, как упрёк, ультиматум или крик, и предлагает мягче — на том же языке и с теми же фактами",
+  "category": "comms",
+  "icon": "icon.svg",
+  "examples": ["Как это звучит: если до вечера не почините, будем откатывать", "Смягчи сообщение: КТО ОПЯТЬ СЛОМАЛ БИЛД?!", "Не слишком резко: как я уже писал, ревью нужно до пятницы", "Проверь тон ответа игроку"],
+  "setting": "extension_tone-check",
+  "settings": true,
+  "feature": "feature.cjs",
+  "provides": {"outgoing-check": "check.cjs"},
+  "uses": ["share-message"],
+  "scripts": [
+    ["tone-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "toneCard": "renderToneCard"
+  }
+}

@@ -59,6 +59,7 @@ const own={
  mentor:['что мне автоматизировать?','что я делаю руками','где я теряю время','покажи, что мне стоит автоматизировать'],
  'google-sheets':['что в гугл таблице баланса','открой Google Sheets','найди лучника в гугл таблице','покажи https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/edit#gid=0'],
  'config-balance':['сверь баланс с конфигами','что поменялось в балансе с прошлой версии','проверь конфиги юнитов','почему урон лучника в игре не как в таблице'],
+ 'tone-check':['как это звучит: КТО СЛОМАЛ БИЛД?!','смягчи сообщение: опять забыли обновить доку','проверь тон ответа игроку','не слишком резко: ревью нужно до пятницы, без вариантов','перепиши помягче: опять забыли обновить доку']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -145,6 +146,8 @@ const not={
  'google-sheets':['таблица умножения','сделай таблицу сравнения тарифов','открой csv с продажами','сверь баланс в гугл таблице с конфигами','что не переведено в локализации','что в таблице'],
  // Game balance against configs only: CI/server configs, Petya's settings and money balance are not it.
  'config-balance':['конфиг CI','настройки Пети','баланс на карте','конфиг nginx','какой у меня баланс на карте','проверь конфиг nginx','баланс работы и жизни','сверь бюджет с планом'],
+ // Petya's own voice, spelling, «тонкий клиент», the mood of reviews or of the community and sending itself are not it.
+ 'tone-check':['тон голоса Пети','поменяй тон голоса','проверь орфографию в письме','тонкий клиент','какая тональность отзывов','настроение игроков в дискорде','смягчи свет в сцене','отправь в Discord: сервер перезапустится в 18:00','попроси команду проверить билд','как звучит мой голос']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -163,12 +166,14 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-sheets','config-balance','meeting-hints'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-sheets','config-balance','meeting-hints','tone-check'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
   const claimed=[];
-  for(const [other,f] of Object.entries(features)){
+  // As in src/features/extension-ui.cjs: an app whose `claims(command)` holds is asked first and alone.
+  const first=Object.entries(features).filter(([,f])=>typeof f.claims==='function'&&f.claims(phrase));
+  for(const [other,f] of first.length?first:Object.entries(features)){
    const topic={id:'t',title:'Чат',messages:[]};
    const s={settings:Object.fromEntries(apps.map(a=>['extension_'+a,'true'])),requestProgress:{report(){}},modules:{enabled:()=>true},
     dialogue:{active:()=>topic,persist(){},rememberAction(c,text){topic.messages.push({role:'user',text:c},{role:'assistant',text});},state:{topics:[topic],projects:[],activeProjectId:'general'}},

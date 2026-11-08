@@ -59,7 +59,9 @@ module.exports={name:'extensionUI',descriptors,groups,sizes,bytesOf,features:des
  snapshot=catalog;
  // Plugins may claim a chat turn (e.g. corrections to an open plan) through `turn(services, command)`.
  const pluginFeatures=module.exports.features.filter(f=>typeof f.turn==='function');
- const extensionTurn=async command=>{for(const f of pluginFeatures){const reply=await f.turn(s,command);if(reply)return reply;}return null;};
+ // A feature whose `claims(command)` is true goes first: its request quotes text that may name other apps' subjects
+ // («как это звучит: кто сломал билд?» is about tone, not CI).
+ const extensionTurn=async command=>{const first=pluginFeatures.filter(f=>{try{return typeof f.claims==='function'&&!!f.claims(command);}catch{return false;}});for(const f of [...first,...pluginFeatures.filter(f=>!first.includes(f))]){const reply=await f.turn(s,command);if(reply)return reply;}return null;};
  return {extensionTurn,ipc:{catalog,uninstall(id){const d=descriptors.find(d=>d.id===id);if(!d?.setting)throw Error('Это расширение нельзя удалить отдельно.');s.saveSettings({[d.setting]:'false'});return catalog();},install(id){const d=descriptors.find(d=>d.id===id);if(!d)throw Error('Расширение не найдено.');if(d.setting)s.saveSettings({[d.setting]:'true'});return catalog();},
   // A whole category or the chosen part of it is added in one save.
   installMany(ids){if(!Array.isArray(ids)||ids.length>100)throw Error('Неверный список расширений.');const patch={};for(const id of ids){const d=descriptors.find(d=>d.id===id);if(!d)throw Error('Расширение не найдено: '+id);if(d.setting)patch[d.setting]='true';}if(Object.keys(patch).length)s.saveSettings(patch);return catalog();},
