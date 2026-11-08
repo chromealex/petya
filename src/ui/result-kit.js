@@ -146,7 +146,7 @@
 
  // --- Side panel: a full view next to the chat (one at a time), resizable, closes with Esc --------------
  let side=null;
- function panel({id,title,subtitle,actions=[],body}){
+ function panel({id,title,subtitle,actions=[],body,className=''}){
   const home=document.getElementById('home');if(!home)return null;
   if(!side){
    const box=el('aside','kit-panel');box.setAttribute('role','complementary');box.tabIndex=-1;
@@ -163,16 +163,17 @@
   side.id=id;side.topic=typeof topicSelect!=='undefined'?topicSelect.value:'';
   side.name.textContent=title||'';side.sub.textContent=subtitle||'';side.sub.hidden=!subtitle;side.box.setAttribute('aria-label',title||'Просмотр');
   side.tools.replaceChildren(...actions.map(a=>{const b=el('button',null,a.label);b.type='button';if(a.title)b.title=a.title;b.onclick=()=>a.run(b);return b;}));
-  side.content.replaceChildren(body||el('p','kit-meta','Загружаю…'));side.content.scrollTop=0;
+  side.box.className='kit-panel'+(className?' '+className:'');side.content.replaceChildren(body||el('p','kit-meta','Загружаю…'));side.content.scrollTop=0;
   if(!side.box.isConnected)home.append(side.box);home.classList.add('with-side-panel');
   document.dispatchEvent(new CustomEvent('petya-panel',{detail:{id,open:true}}));
   side.box.focus({preventScroll:true});
   return {set(node){if(side?.id===id)side.content.replaceChildren(node);},get open(){return side?.id===id&&side.box.isConnected;}};
  }
- function closePanel(){if(!side?.box.isConnected)return;const id=side.id;side.box.remove();side.id=null;document.getElementById('home')?.classList.remove('with-side-panel');document.dispatchEvent(new CustomEvent('petya-panel',{detail:{id,open:false}}));}
+ // reason: 'user' (×, Esc) or 'chat' (another chat was opened) — a per-chat panel (the browser) keeps its state on 'chat'.
+ function closePanel(reason='user'){if(!side?.box.isConnected)return;const id=side.id;side.box.remove();side.id=null;document.getElementById('home')?.classList.remove('with-side-panel');document.dispatchEvent(new CustomEvent('petya-panel',{detail:{id,open:false,reason}}));}
  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!openMenu&&side?.box.isConnected&&!document.querySelector('dialog[open]')&&(side.box.contains(document.activeElement)||document.activeElement===document.body)){e.preventDefault();closePanel();}});
  // A panel belongs to its chat: switching chats closes it.
- for(const ev of ['petya-dialogue-state','petya-chat-opened'])document.addEventListener(ev,()=>{if(side?.box.isConnected&&typeof topicSelect!=='undefined'&&topicSelect.value!==side.topic)closePanel();});
+ for(const ev of ['petya-dialogue-state','petya-chat-opened'])document.addEventListener(ev,()=>{if(side?.box.isConnected&&typeof topicSelect!=='undefined'&&topicSelect.value!==side.topic)closePanel('chat');});
  const panelOpen=id=>!!side?.box.isConnected&&side.id===id;
 
  // --- People: team photos next to names in cards (Slack authors, Jira assignees, meeting tasks, …) -------------
@@ -246,5 +247,5 @@
   });
   return box;
  }
- window.resultKit={el,safeUrl,links,availableLinks,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam};
+ window.resultKit={panelBox:()=>side?.box||null,el,safeUrl,links,availableLinks,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam};
 })();

@@ -6,7 +6,7 @@
  const open=new Set(),chosen=new Map();let signature='',data=null;
  const node=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
  const size=n=>n<1024?n+' Б':n<1048576?(n/1024).toFixed(n<10240?1:0).replace('.',',')+' КБ':(n/1048576).toFixed(1).replace('.',',')+' МБ';
- const when=t=>t?new Date(t).toLocaleString(window.petyaLocale||'ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+ const when=t=>t?window.relativeTime(t):'';
  const minutes=ms=>{const m=Math.round(ms/60000);return m<1?'меньше минуты':m<60?m+' мин':Math.floor(m/60)+' ч '+(m%60?m%60+' мин':'');};
  const words=(n,[one,few,many])=>{const a=n%10,b=n%100;return n+' '+(a===1&&b!==11?one:a>=2&&a<=4&&(b<10||b>=20)?few:many);};
  function remove(button,request,label){

@@ -15,7 +15,7 @@
  function draw(items){rows=items||[];list.replaceChildren();
   if(!rows.length){list.append(node('p','small','Пока нет. Петя будет делать такие команды сам и писать ответ в чат «По расписанию».'));return;}
   for(const r of rows){const row=node('div','recurring-row'+(r.enabled?'':' paused')),info=node('div','recurring-info');
-   info.append(node('strong',null,r.command),node('p','material-meta',r.schedule+(r.lastRun?' · последний раз '+new Date(r.lastRun).toLocaleString(window.petyaLocale||'ru-RU',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+(r.lastState?' — '+r.lastState:''):'')));
+   info.append(node('strong',null,r.command),node('p','material-meta',r.schedule+(r.lastRun?' · последний раз '+window.relativeTime(r.lastRun)+(r.lastState?' — '+r.lastState:''):'')));
    const timer=node('span','recurring-timer',r.enabled?left(r.next):'на паузе');timer.dataset.next=r.enabled?r.next:'';info.append(timer);
    const actions=node('div','material-actions');
    actions.append(button('Открыть чат',async()=>{view('home');await selectDialogueTopic(r.topicId);}),button(r.enabled?'Пауза':'Продолжить',async()=>draw(await window.petya.feature('recurring','toggle',r.id,!r.enabled))),button('Сейчас',async()=>{draw(await window.petya.feature('recurring','runNow',r.id));notice('Запустил «'+r.command+'».');}),trash(async()=>{draw(await window.petya.feature('recurring','remove',r.id));notice('Повтор «'+r.command+'» удалён.');}));
