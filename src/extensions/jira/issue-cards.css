@@ -8,3 +8,6 @@
 .jira-issue-card .chat-result-inline-actions button[data-action=edit]:hover{background:#ffffff0d;color:var(--ink,#f0f2ed)}
 .jira-card .chat-result-inline-actions{margin-top:2px}
 .kit-column .jira-card .kit-chips{gap:4px}
+.jira-issue-card .kit-side small{padding-right:0;display:block;color:var(--muted,#a7b1ac);font-size:11px}
+.jira-issue-card .kit-card-main{position:relative}
+.jira-issue-card.has-side .chat-result-inline-actions{right:0;bottom:-4px}

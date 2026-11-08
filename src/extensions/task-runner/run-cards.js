@@ -30,7 +30,7 @@
    if(step.details)li.append(el('p','run-step-details',step.details));
    if(step.check)li.append(el('p','run-step-check','Проверка: '+step.check));
    if(latest&&step.note)li.append(el('p','run-step-note',step.note));
-   if(latest&&step.result)li.append(el('p','run-step-result',step.result));
+   if(latest&&step.result){if(run.agent==='local'){const d=el('details','run-step-diff');d.append(el('summary',null,'Правка от локальной модели'),el('pre',null,step.result));li.append(d);}else li.append(el('p','run-step-result',step.result));}
    if(latest&&run.state==='running'){
     const row=el('div','kit-actions');
     if(step.hasChat)row.append(button('Чат агента','',()=>call('openStep',run.id,step.id)));
@@ -45,7 +45,12 @@
   if(!latest)return;
   const actions=el('div','kit-actions run-actions');
   if(run.state==='proposed'){
-   const agent=el('select','run-agent');agent.setAttribute('aria-label','Кому отдать шаги');for(const [v,t] of [['auto','Агент: выбрать автоматически'],['codex','Агент: Codex'],['claude','Агент: Claude']])agent.append(new Option(t,v));agent.value=run.agent||'auto';
+   // Petya plans and tracks the work; code is written by Claude Code or Codex (GPT), or by a local coding model if one is installed.
+   const agent=el('select','run-agent');agent.setAttribute('aria-label','Кто пишет код');
+   const options=[...(run.localCoder?[['local','Код пишет: локальная модель · '+run.localCoder]]:[]),['auto','Код пишет: Claude или Codex — кто доступен'],['codex','Код пишет: Codex (GPT)'],['claude','Код пишет: Claude Code']];
+   for(const [v,t] of options)agent.append(new Option(t,v));agent.value=options.some(o=>o[0]===run.agent)?run.agent:options[0][0];
+   const hint=el('p','run-agent-hint',run.localCoder?'Локальная модель готовит правку в виде diff — применяете вы. Claude и Codex сами меняют код в репозитории.':'Петя составляет план и следит за шагами, а код пишут Claude Code или Codex (GPT) в репозитории проекта.');
+   box.append(hint);
    actions.append(button('Утвердить','primary',async()=>refresh(await call('approve',run.id,agent.value))),
     button('Внести правки','',()=>{const c=document.getElementById('command');if(!c)return;c.placeholder='Что поменять в плане? Например: «сначала тест, потом фикс»';c.focus();}),agent);
   }else if(run.state==='running')actions.append(button('Остановить','',async()=>refresh(await call('stop',run.id))));

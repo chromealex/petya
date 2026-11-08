@@ -57,7 +57,7 @@
         dialogueMessages.querySelector('[data-message-index="'+item.index+'"]');
       if(!message)continue;
       const presented=item.presentationKey&&[...message.querySelectorAll('[data-result-presentation]')].find(node=>node.dataset.resultPresentation===item.presentationKey);
-      if(presented){const actions=document.createElement('div');actions.className='chat-result-inline-actions';for(const action of item.actions.filter(a=>a.id!=='open'&&a.id!=='details'&&!a.hidden)){const control=button(action.label,()=>act(item,action));control.dataset.action=action.id;control.title=action.label;control.setAttribute('aria-label',action.label);actions.append(control);}presented.append(actions);continue;}
+      if(presented){const actions=document.createElement('div');actions.className='chat-result-inline-actions';for(const action of item.actions.filter(a=>a.id!=='open'&&a.id!=='details'&&!a.hidden)){const control=button(action.label,()=>act(item,action));control.dataset.action=action.id;control.title=action.label;control.setAttribute('aria-label',action.label);actions.append(control);}(presented.querySelector(':scope>.kit-card-main')||presented).append(actions);continue;}
       const card=document.createElement('section');card.className='chat-result-card';
       card.classList.toggle('selected',item.id===state.selected);
       const title=button(item.title,async()=>{await call('choose',state.scope,item.id);await refresh();});

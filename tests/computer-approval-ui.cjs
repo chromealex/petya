@@ -18,7 +18,7 @@ const key=load.resolve('./tests/smoke.cjs');require.cache[key]={id:key,filename:
  await js("(async()=>{const state=await window.petya.chatJobState(topicSelect.value);if(!state.result.question)throw Error('Approval not waiting');await showDialogueReply({...state.result,messages:state.messages});await showDialogueReply({...state.result,messages:state.messages});})()");
  if(await js("document.querySelectorAll('.computer-approval .primary').length")!==1)throw Error('Approval lost or duplicated after redraw');
  if(!await js("!!document.querySelector('.chat-composer .computer-approval.choices-only') && !dialogueMessages.querySelector('.computer-approval')"))throw Error('Permission choices must be in composer');
- await sleep(350);fs.writeFileSync('/private/tmp/petya-approval-composer.png',(await win.webContents.capturePage()).toPNG());
+ await sleep(350);fs.writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-approval-composer.png'),(await win.webContents.capturePage()).toPNG());
  await js("document.querySelector('.computer-approval .primary').click()");await wait("dialogueMessages.textContent.includes('Источник: открытое окно Slack')");if(reads!==1)throw Error('Duplicate read');
  await wait("!window.chatStartPending && !commandProgress.busy");
  if(await js("!!document.querySelector('.chat-composer .computer-approval')"))throw Error('Completed permission choices remain');
@@ -28,7 +28,7 @@ const key=load.resolve('./tests/smoke.cjs');require.cache[key]={id:key,filename:
  await js("document.querySelector('.computer-approval .primary').click()");await wait("!document.querySelector('.computer-approval') && dialogueMessages.textContent.includes('Разрешение больше не действует')");if(reads!==1)throw Error('Expired approval executed an action');
  await js(`window.clarificationAnswers=[];voiceReply=async text=>{window.clarificationAnswers.push(text);await showDialogueReply({handled:true,text:'Ответ принят'});};dialogueChoices.replaceChildren();renderClarification({question:true,text:'Назовите коллег и обязанности.',clarificationInput:{placeholder:'Напишите ответ…'}},null,false)`);
  if(await js("!!document.querySelector('.chat-composer input')"))throw Error('Duplicate clarification input');
- await js("$('command').value='Полина — тестирование';document.querySelector('.text-clarification .primary').click()");await wait("window.clarificationAnswers.length===1 && !document.querySelector('.text-clarification')");
+ await js("$('command').value='Полина — тестирование';$('command').dispatchEvent(new Event('input'));document.querySelector('.text-clarification .primary').click()");await wait("window.clarificationAnswers.length===1 && !document.querySelector('.text-clarification')");
  if(!await js("window.clarificationAnswers[0]==='Полина — тестирование' && !$('command').value"))throw Error('Composer answer not consumed');
  await js(`voiceReply=async text=>{window.clarificationAnswers.push(text);await showDialogueReply({handled:true,text:'Запрос отменён'});};dialogueChoices.replaceChildren();renderClarification({question:true,text:'Уточните команду',clarificationInput:{}},null,false);document.querySelector('.text-clarification .approval-buttons button:last-child').click()`);await wait("window.clarificationAnswers[1]==='отмена' && !document.querySelector('.text-clarification')");
  access=false;

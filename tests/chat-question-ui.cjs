@@ -35,7 +35,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js(`dialogueChoices.replaceChildren();voiceReply=async text=>answers.push('stale');renderClarification({question:true,text:'Уточните',clarificationOptions:['Да','Нет'],clarificationInput:{choicesOnly:true}},null,false);window.staleButton=document.querySelector('.chat-question button');document.dispatchEvent(new Event('petya-topic-changed'));staleButton.click()`);
  assert.notEqual(await js('answers.at(-1)'),'stale');
  await js(`dialogueChoices.replaceChildren();voiceReply=async()=>{};renderClarification({question:true,text:'Выберите канал команды',clarificationOptions:['jw-bw-dev','jw-mw-dev'],clarificationInput:{choicesOnly:true}},null,false)`);
- await sleep(300);fs.writeFileSync('/private/tmp/petya-question-unified.png',(await win.webContents.capturePage()).toPNG());
+ await sleep(300);fs.writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-question-unified.png'),(await win.webContents.capturePage()).toPNG());
  const bounds=await js(`(()=>{const q=document.querySelector('.chat-question').getBoundingClientRect(),c=document.querySelector('.chat-composer').getBoundingClientRect();return {left:q.left-c.left,right:c.right-q.right};})()`);assert(bounds.left<2&&bounds.right<2);
  console.log('Chat questions: 13 adapters, strict choices, immediate dismissal, duplicates, follow-up, failure and chat switch passed');
 }};

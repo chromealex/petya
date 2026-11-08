@@ -144,8 +144,39 @@ label.file-label:hover{background:#2e3533}
 #home .chat-sticky-header>.chat-project-context{flex:1 1 0;max-width:max-content}
 
 /* --- Subprojects: nested groups under their parent, with a guide line. --- */
+/* Tree: one dashed line runs down from the folder icon; each chat, subfolder and button gets a dashed
+   connector that starts a little off the line (no corner) and ends exactly at its field. The last child masks the line below its connector. */
+.project-sidebar-tree{--tree-line:#535c59;--tree-x:12px;--tree-indent:24px;--tree-mid:17px;--tree-gap:3px;--tree-bg:#161b19}
 .project-subfolders:empty{display:none}
-.project-subfolders{margin:2px 0 4px 12px;padding-left:4px;border-left:1px solid var(--line)}
+.project-subfolders{margin:0;padding:0;border:0}
+.project-sidebar-group{position:relative}
+.project-sidebar-group::before{content:'';position:absolute;left:var(--tree-x);top:31px;bottom:0;width:1px;pointer-events:none;
+ background:repeating-linear-gradient(to bottom,var(--tree-line) 0 2px,transparent 2px 4.5px)}
+.project-sidebar-group:not(:has(>.project-chat-row,>.project-view-all,>.agent-chat-toggle,>small,>.project-subfolders>.project-sidebar-subgroup))::before{display:none}
+.project-sidebar-group>:is(.project-chat-row,.project-view-all,.agent-chat-toggle,.agent-chat-list,small),
+.project-subfolders>.project-sidebar-subgroup{position:relative;margin-left:var(--tree-indent)}
+.project-subfolders>.project-sidebar-subgroup{margin-bottom:0}
+.project-sidebar-group>:is(.project-chat-row,.project-view-all,.agent-chat-toggle,small)::after,
+.project-subfolders>.project-sidebar-subgroup::after{content:'';position:absolute;top:var(--tree-mid);left:calc(var(--tree-x) + var(--tree-gap) + 1px - var(--tree-indent));width:calc(var(--tree-indent) - var(--tree-x) - var(--tree-gap) - 1px);height:1px;pointer-events:none;
+ background:repeating-linear-gradient(to left,var(--tree-line) 0 2px,transparent 2px 4.5px)}
+.project-sidebar-group>:is(.project-view-all,.agent-chat-toggle,small){--tree-mid:50%}
+/* The line stops at the last child's connector. */
+.project-sidebar-group>:is(.project-chat-row,.project-view-all,.agent-chat-toggle,small):last-child::before,
+.project-sidebar-group>.agent-chat-toggle:has(+.agent-chat-list:last-child)::before,
+.project-sidebar-group:not(:has(>.project-chat-row,>.project-view-all,>.agent-chat-toggle,>small))>.project-subfolders>.project-sidebar-subgroup:last-child::before{
+ content:'';position:absolute;left:calc(var(--tree-x) - var(--tree-indent));top:calc(var(--tree-mid) + 1px);bottom:-1px;width:1px;background:var(--tree-bg);pointer-events:none}
+.project-sidebar-group>.agent-chat-list:last-child::before{content:'';position:absolute;left:calc(var(--tree-x) - var(--tree-indent));top:0;bottom:-1px;width:1px;background:var(--tree-bg)}
+/* Fields: the whole row is the field the connector reaches. */
+.project-sidebar-tree .project-chat-row{margin-left:var(--tree-indent);border-left:0;border-radius:7px}
+.project-sidebar-tree .project-chat-row .project-sidebar-chat{padding-left:8px}
+.project-sidebar-group>.project-view-all,.project-sidebar-group>.agent-chat-toggle{width:calc(100% - var(--tree-indent));text-align:left;padding:4px 8px;border-radius:7px}
+.project-sidebar-group>small{display:block;padding:6px 8px}
+/* Agent chats hang from their «Агенты» toggle on a line of their own. */
+.project-sidebar-group>.agent-chat-list::after{content:'';position:absolute;left:calc(var(--tree-x) - 1px);top:-6px;bottom:var(--tree-mid);width:1px;pointer-events:none;
+ background:repeating-linear-gradient(to bottom,var(--tree-line) 0 2px,transparent 2px 4.5px)}
+.project-sidebar-group>.agent-chat-list>.project-chat-row.agent-chat-row{position:relative;margin-left:var(--tree-indent)}
+.project-sidebar-group>.agent-chat-list>.agent-chat-row::after{content:'';position:absolute;top:var(--tree-mid);left:calc(var(--tree-x) + var(--tree-gap) - var(--tree-indent));width:calc(var(--tree-indent) - var(--tree-x) - var(--tree-gap));height:1px;pointer-events:none;
+ background:repeating-linear-gradient(to left,var(--tree-line) 0 2px,transparent 2px 4.5px)}
 .project-sidebar-subgroup>.project-sidebar-project .project-chat-title{font-weight:500}
 .project-sidebar-subgroup .project-folder-icon{opacity:.85}
 /* Project settings: what a subproject inherits. */

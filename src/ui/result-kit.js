@@ -60,7 +60,7 @@
   if(editable){node.type='button';if(load){node.setAttribute('aria-haspopup','menu');node.setAttribute('aria-expanded','false');node.onclick=event=>{event.stopPropagation();menu(node,load,pick);};}else node.onclick=event=>{event.stopPropagation();onClick();};}
   return node;
  }
- function card({app,initial,color,key,href,status,title,subtitle,meta=[],chips=[],actions=[],presentation,body,className=''}){
+ function card({app,initial,color,key,href,status,title,subtitle,meta=[],chips=[],actions=[],side,presentation,body,className=''}){
   const node=el('section','kit-card '+className);
   if(presentation){node.dataset.resultPresentation=presentation;node.tabIndex=0;node.onclick=event=>{if(event.target.closest('button,a,input,textarea,select,summary'))return;window.chatResultsApi?.select(presentation);};}
   const head=el('div','kit-card-head');
@@ -75,13 +75,28 @@
   if(fields.length){const row=el('div','kit-chips');row.append(...fields);node.append(row);}
   if(meta.length)node.append(el('small','kit-meta',meta.filter(Boolean).join(' · ')));
   if(actions.length){const row=el('div','kit-actions');for(const a of actions){const b=el('button',a.primary?'primary':'',a.label);b.type='button';if(a.title)b.title=a.title;b.onclick=async event=>{event.stopPropagation();b.disabled=true;try{await a.run(b);}catch(e){toast(e.message,{error:true});}finally{b.disabled=false;}};row.append(b);}node.append(row);}
+  // A main action on the right: icon, verb and a short line saying what will happen.
+  if(side){
+   const main=el('div','kit-card-main');main.append(...node.childNodes);
+   const b=el('button','kit-side'+(side.tone?' tone-'+side.tone:''));b.type='button';if(side.title)b.title=side.title;
+   b.setAttribute('aria-label',side.label+(side.hint?' — '+side.hint:''));
+   const icon=el('span','kit-side-icon');icon.setAttribute('aria-hidden','true');icon.innerHTML=side.icon||'';
+   b.append(icon,el('span','kit-side-label',side.label));if(side.hint)b.append(el('small','kit-side-hint',side.hint));
+   b.onclick=async event=>{event.stopPropagation();b.disabled=true;b.setAttribute('aria-busy','true');try{await side.run(b);}catch(e){toast(e.message,{error:true});}finally{b.disabled=false;b.removeAttribute('aria-busy');}};
+   node.classList.add('has-side');node.append(main,b);
+  }
   return node;
  }
+ // Icons for side actions (stroke, currentColor).
+ const icons={
+  run:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5.5v13l11-6.5z"/></svg>',
+  fix:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8V20h3.2l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>'
+ };
 
  // --- Lists: cards / table / board, remembered per list kind ---------------------------------------
  function views(parent,{id,label,items,modes,initial='cards',limit=5}){
   const wrap=el('div','kit-list');const bar=el('div','kit-list-bar');const body=el('div','kit-list-body');
-  const available=Object.keys(modes);let mode=store.get('view-'+id,items.length>limit&&available.includes('board')?'board':initial);if(!available.includes(mode))mode=available[0];
+  const available=Object.keys(modes);let mode=store.get('view-'+id,initial);if(!available.includes(mode))mode=available[0];
   const names={cards:'Карточки',table:'Таблица',board:'Доска'};
   if(label)bar.append(el('span','kit-list-label',label));
   const switcher=el('div','kit-switch');switcher.setAttribute('role','group');switcher.setAttribute('aria-label','Вид списка');
@@ -130,5 +145,5 @@
   if(send&&typeof submitChatCommand==='function'){await submitChatCommand(text);return;}
   if(box){box.value=text;box.dispatchEvent(new Event('input',{bubbles:true}));box.focus();box.setSelectionRange?.(text.length,text.length);}
  }
- window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask};
+ window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons};
 })();

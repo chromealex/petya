@@ -12,13 +12,15 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const wait=async code=>{for(let i=0;i<100;i++){if(await js(code))return;await new Promise(r=>setTimeout(r,50));}throw Error('Timeout: '+code);};
  await js('window.chatNavigationReady');
  await js("view('home');$('command').value='Заполни команду';window.sendChatNow()");
- await wait("!!document.querySelector('.clarification-input input')");
+ await wait("!!document.querySelector('.clarification-input.text-clarification')");
  assert(await js("document.querySelector('.chat-composer').contains(document.querySelector('.clarification-input'))"));
  assert.equal(calls.length,1);
- await js("const channelInput=document.querySelector('.clarification-input input');channelInput.value='https://example.slack.com/archives/CTEST';channelInput.form.requestSubmit()");
+ // The answer is typed in the composer; «Продолжить» stays disabled until there is text.
+ assert.equal(await js("document.querySelector('.clarification-input .primary').disabled"),true);
+ await js("$('command').value='https://example.slack.com/archives/CTEST';$('command').dispatchEvent(new Event('input'));document.querySelector('.clarification-input .primary').click()");
  await wait("dialogueMessages.textContent.includes('Добавлено коллег: 1')");
  assert.equal(calls.length,2);assert.match(calls[1],/Заполни команду из Slack https:/);
- assert.equal(await js("!!document.querySelector('.clarification-input')"),false);
+ await wait("!document.querySelector('.clarification-input')");
  console.log('Team channel UI: inline address, single-submit continuation and successful dismissal passed');
 }};
 require('../src/main.cjs');

@@ -51,5 +51,17 @@ const results=require('../src/features/chat-results.cjs');
  skill.summarize=async()=>({handled:true,text:'Полина спрашивает про релиз.'});
  const mail=await skill.run({enabled:true,days:3,unread:true,skipPromotions:true,priority:[],instructions:'',allAccounts:true,accounts:[],name:'Почта'});
  assert.equal(mail.extensionData.mailItems[0].provider,'google');assert.equal(mail.extensionData.mailItems[0].excerpt,'Можно в четверг?');
- console.log('App cards: Google Play extract, git stage/commit tokens, Asana cards/undo/execute, docs search, mail items passed');
+ // Task runner with a local coding model: the plan defaults to it and each step returns a diff to apply.
+ {
+  const runner=require('../src/extensions/task-runner/feature.cjs');
+  const st={topics:[{id:'a',projectId:'p',title:'x',messages:[],at:1}],activeId:'a',activeProjectId:'p'};
+  const rs={dialogue:{state:st,active:()=>st.topics.find(t=>t.id===st.activeId),persist(){}},smoke:true,settings:{model:'qwen3:8b',ollamaUrl:'http://127.0.0.1:11434'},core:{localEndpoint:u=>u+'/api/chat'},
+   modules:{assertEnabled(){throw Error('cloud agents are not needed');}},requestProgress:{report(){}},agents:{create(){throw Error('no cloud agent');}},
+   async directRequest(url){assert.equal(url,'http://127.0.0.1:11434/api/tags');return {models:[{name:'qwen3:8b'},{name:'qwen2.5-coder:7b'}]};},
+   async request(url,o){const b=JSON.parse(o.body);if(b.format==='json')return {message:{content:JSON.stringify({summary:'s',steps:[{title:'Починить'}]})}};assert.equal(b.model,'qwen2.5-coder:7b');return {message:{content:'--- a/x\n+++ b/x\n@@\n-1\n+2'}};}};
+  const {taskRunner,ipc}=runner.setup(rs);const r=await taskRunner.start({app:'jira',key:'MOB-1',title:'Баг',type:'Bug'});
+  const run=st.topics.find(t=>t.id===r.topicId).taskRun;assert.equal(run.agent,'local');assert.equal(run.localCoder,'qwen2.5-coder:7b');
+  const v=await ipc.approve(run.id,'local');assert.equal(v.plan.steps[0].state,'sent');assert.match(v.plan.steps[0].result,/\+\+\+ b\/x/);
+ }
+ console.log('App cards: Google Play extract, git stage/commit tokens, Asana cards/undo/execute, docs search, mail items, local coding model passed');
 })().catch(e=>{console.error(e);process.exit(1);});

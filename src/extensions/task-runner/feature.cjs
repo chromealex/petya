@@ -5,6 +5,8 @@
 const {randomUUID}=require('node:crypto');
 const plans=require('./plan.cjs');
 const FINAL=new Set(['done','stopped']);
+// Local models that can write code; without one, code goes to Claude Code or Codex (GPT).
+const CODER=/coder|codestral|devstral|codellama|starcoder|codegemma|deepseek-coder|granite-code/i;
 let instance=null;
 
 function setup(s){
@@ -15,8 +17,16 @@ function setup(s){
   const response=await s.request(s.core.localEndpoint(s.settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:s.settings.model,stream:false,think:false,format:'json',options:{temperature:0.2,num_predict:1400},messages:[{role:'system',content:system},{role:'user',content:JSON.stringify(data)}]})});
   return JSON.parse(response?.message?.content||'null');
  };
- const view=run=>({id:run.id,state:run.state,version:run.version,agent:run.agent,task:{key:run.task.key,title:run.task.title,url:run.task.url,kind:run.task.kind,app:run.task.app},
-  plan:{summary:run.plan.summary,questions:run.plan.questions||[],steps:run.plan.steps.map(({id,title,details,check,state,note,url,result})=>({id,title,details,check,state:state||'waiting',note:note||'',hasChat:!!url,result:result?String(result).slice(0,600):''}))}});
+ let coderCache={at:0,name:''};
+ async function codingModel(){
+  if(Date.now()-coderCache.at<60000)return coderCache.name;
+  let name='';
+  try{const base=s.core.localEndpoint(s.settings.ollamaUrl).replace(/\/api\/chat$/,'');const tags=await (s.directRequest||s.request)(base+'/api/tags',{signal:AbortSignal.timeout(3000)});
+   name=(Array.isArray(tags?.models)?tags.models:[]).map(m=>m?.name).find(n=>typeof n==='string'&&CODER.test(n)&&!/cloud/i.test(n))||'';}catch{}
+  coderCache={at:Date.now(),name};return name;
+ }
+ const view=run=>({id:run.id,state:run.state,version:run.version,agent:run.agent,localCoder:run.localCoder||'',task:{key:run.task.key,title:run.task.title,url:run.task.url,kind:run.task.kind,app:run.task.app},
+  plan:{summary:run.plan.summary,questions:run.plan.questions||[],steps:run.plan.steps.map(({id,title,details,check,state,note,url,result})=>({id,title,details,check,state:state||'waiting',note:note||'',hasChat:!!url,result:result?String(result).slice(0,run.agent==='local'?20000:600):''}))}});
  const text=run=>['План работ · '+run.task.key+' · вариант '+run.version,run.plan.summary,...run.plan.steps.map((st,i)=>(i+1)+'. '+st.title),...(run.plan.questions?.length?['Вопросы: '+run.plan.questions.join('; ')]:[])].filter(Boolean).join('\n');
  function push(topic,run){
   // Each plan version is its own message; older versions stay in the history but lose their buttons.
@@ -36,7 +46,8 @@ function setup(s){
   topic.messages.push({role:'user',text:(clean.kind==='bug'?'Исправь ':'Выполни ')+clean.key+': '+clean.title,at:Date.now()});
   s.requestProgress?.report('Составляю план работ по '+clean.key);
   const plan=await plans.propose(model,clean);
-  topic.taskRun={id:randomUUID(),task:clean,state:'proposed',version:1,feedback:[],agent:'auto',plan,startedAt:Date.now()};
+  const localCoder=await codingModel();
+  topic.taskRun={id:randomUUID(),task:clean,state:'proposed',version:1,feedback:[],agent:localCoder?'local':'auto',localCoder,plan,startedAt:Date.now()};
   topics().push(topic);s.dialogue.state.activeId=topic.id;push(topic,topic.taskRun);
   return {handled:true,text:'Составил план работ по '+clean.key+' в отдельном чате.',topicId:topic.id};
  }
@@ -46,7 +57,7 @@ function setup(s){
   const run=topic.taskRun;
   run.feedback.push(String(command).slice(0,1000));
   s.requestProgress?.report('Переделываю план с учётом поправки');
-  run.plan=await plans.propose(model,run.task,run.feedback,run.plan);run.version++;
+  run.plan=await plans.propose(model,run.task,run.feedback,run.plan);run.version++;run.localCoder=await codingModel();
   topic.messages.push({role:'user',text:command,at:Date.now()});push(topic,run);
   return {handled:true,text:text(run),topicId:topic.id,messages:topic.messages,by:'план работ'};
  }
@@ -54,8 +65,9 @@ function setup(s){
  async function approve(id,agent='auto'){
   const {topic,run}=find(id);
   if(run.state!=='proposed')throw Error('План уже утверждён.');
-  if(!['auto','codex','claude'].includes(agent))throw Error('Неизвестный агент.');
-  s.modules.assertEnabled(s.settings,'ai');
+  if(!['auto','codex','claude','local'].includes(agent))throw Error('Неизвестный агент.');
+  if(agent==='local'){run.localCoder=await codingModel();if(!run.localCoder)throw Error('Локальная модель для кода не найдена в Ollama. Выберите Claude или Codex.');}
+  else s.modules.assertEnabled(s.settings,'ai');
   run.agent=agent;run.state='running';run.approvedAt=Date.now();
   for(const step of run.plan.steps)step.state='waiting';
   topic.messages.push({role:'user',text:'Утверждаю план',at:Date.now()});s.dialogue.persist();
@@ -68,6 +80,7 @@ function setup(s){
   const step=run.plan.steps.find(st=>st.state==='waiting');
   if(!step){run.state='done';run.doneAt=Date.now();topic.messages.push({role:'assistant',text:'Все шаги плана по '+run.task.key+' выполнены. Проверьте изменения в репозитории и задачу '+run.task.key+'.',at:Date.now(),by:'план работ'});s.dialogue.persist();return;}
   step.state='running';s.dialogue.persist();
+  if(run.agent==='local'){await local(topic,run,step);return;}
   try{
    const record=s.agents.create(run.agent,plans.prompt(run,step));
    Object.assign(record,{originTopicId:topic.id,command:'Выполнение '+run.task.key+': '+step.title,contextText:run.task.title+'\n'+run.task.description.slice(0,2000),projectMemoryId:topic.projectMemoryId||''});s.agents.persist();
@@ -77,6 +90,18 @@ function setup(s){
    if(!routed.ready){step.state='attention';step.note=routed.reason||row.error||'Нужно выбрать агента или проект.';}
    else if(row.state==='project-required'){step.state='attention';step.note=row.error||'Уточните проект в разделе «Claude и Codex».';}
    else{step.url=row.url||'';step.state=row.target==='codex'&&row.state==='submitted'?'running':'sent';step.note=step.state==='sent'?'Отправлено в '+(row.target==='claude'?'Claude':'Codex')+'. Отметьте шаг, когда он готов.':'';}
+  }catch(e){step.state='failed';step.note=e.message;}
+  s.dialogue.persist();
+ }
+ // A local coding model cannot touch the repository: it prepares the change as a diff, the user applies it.
+ async function local(topic,run,step){
+  try{
+   const response=await s.request(s.core.localEndpoint(s.settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:run.localCoder,stream:false,think:false,options:{temperature:0.2,num_predict:2400},messages:[
+    {role:'system',content:'Ты программист. У тебя нет доступа к файлам: верни изменения как unified diff по путям из описания, затем коротко — как проверить. Не выдумывай файлы, которых нет в задаче; если не хватает кода, перечисли, какие файлы нужны.'},
+    {role:'user',content:plans.prompt(run,step)}]})});
+   const text=String(response?.message?.content||'').replace(/<think>[\s\S]*?<\/think>/g,'').trim();
+   if(!text)throw Error('Локальная модель не вернула правку.');
+   step.result=text.slice(0,20000);step.state='sent';step.note='Правку подготовила локальная модель '+run.localCoder+'. Примените её и отметьте «Шаг готов».';
   }catch(e){step.state='failed';step.note=e.message;}
   s.dialogue.persist();
  }

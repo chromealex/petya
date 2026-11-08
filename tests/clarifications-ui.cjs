@@ -8,7 +8,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js('window.chatNavigationReady');
  await js("view('home');$('command').value='создай ветку';window.sendChatNow()");
  await wait("!!document.querySelector('.text-clarification')");assert.equal(runs.length,0);
- await js("$('command').value='feature/test';document.querySelector('.text-clarification .primary').click()");
+ await js("$('command').value='feature/test';$('command').dispatchEvent(new Event('input'));document.querySelector('.text-clarification .primary').click()");
  await wait("dialogueMessages.textContent.includes('Ветка создана: feature/test')");assert.equal(runs.length,1);assert.equal(runs[0].branch,'feature/test');
  await js("$('command').value='Нарисуй';window.sendChatNow()");await wait("!!document.querySelector('.text-clarification')");
  await js("const f=document.querySelector('.clarification-input');[...f.querySelectorAll('button')].find(b=>b.textContent==='Отмена').click()");await wait("dialogueMessages.textContent.includes('Запрос отменён')");assert.equal(runs.length,1);

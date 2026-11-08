@@ -696,6 +696,8 @@ else {
   app.on('second-instance', (_event,args) => {const raw=args.find(s=>chatLocation.parse(s));if(raw)receiveMessageLink(raw);else if(win)show();});
   try { companies=new (require('./companies.cjs').Companies)(app.getPath('userData'));companyId=companies.state.activeId;dataRoot=companies.directory(companyId);fs.mkdirSync(dataRoot,{recursive:true});app.setPath('sessionData',dataRoot); }catch(error){require('electron').dialog.showErrorBox('Петя: компании недоступны',error.message);app.exit(1);}
   app.whenReady().then(() => {
+    // Linux CI and containers have no OS keyring; tests only use a plain-text store there.
+    if(process.env.PETYA_SMOKE_TEST==='1'&&process.platform==='linux'&&!safeStorage.isEncryptionAvailable())safeStorage.setUsePlainTextEncryption?.(true);
     if(app.isPackaged && process.platform==='win32')app.setAsDefaultProtocolClient('petya');
     try { loadSettings(); loadMemory(); } catch (error) { console.error(error); require('electron').dialog.showErrorBox('Петя: память недоступна', 'Не удалось прочитать настройки или контекст. Файлы не перезаписаны. ' + error.message); app.quit(); return; }
     win = new BrowserWindow({ show: false, skipTaskbar: true, ...(process.platform==='darwin'?{titleBarStyle:'hidden',trafficLightPosition:{x:16,y:24}}:process.platform==='win32'?{titleBarStyle:'hidden',titleBarOverlay:{color:'#18231f',symbolColor:'#eef4e9',height:64}}:{}), width: 1180, height: 840, minWidth: 880, minHeight: 640, backgroundColor: '#111415', title: 'Петя · '+companies.get(companyId).name, icon: appIconPath, webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false, autoplayPolicy:'no-user-gesture-required' } });
