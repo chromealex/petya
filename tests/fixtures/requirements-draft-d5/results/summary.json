@@ -1,0 +1,55 @@
+{
+  "part": "Andromeda D5",
+  "adapter_sha256": "b8b4c3f916a4c9c005acc5bd5fe4519cc0fa625f29051d58228e746940588d65",
+  "parent": "D1",
+  "steps": 921,
+  "learning_rate": 1e-06,
+  "generated_holdout": {
+    "D5": 21,
+    "D1": 24,
+    "total": 54,
+    "lost_D1_successes": [
+      "d2-hold-open-recipient-7",
+      "d2-hold-code-8",
+      "d2-hold-cancel-one-9",
+      "d2-hold-two-recipients-11",
+      "d2-hold-add-field-12",
+      "d2-hold-code-17",
+      "d2-hold-two-recipients-20",
+      "d2-hold-cancel-one-27",
+      "d2-hold-exact-name-31",
+      "d2-hold-quote-33",
+      "d2-hold-cancel-one-36",
+      "d2-hold-two-recipients-38",
+      "d2-hold-permission-46"
+    ],
+    "gained": 10
+  },
+  "v22": {
+    "checks": {
+      "D5": 27,
+      "D1": 27,
+      "total": 30
+    },
+    "drafts": {
+      "D5": 3,
+      "D1": 6,
+      "total": 12
+    }
+  },
+  "familiar": {
+    "D5": 789,
+    "D1": 787,
+    "total": 801,
+    "lost": [
+      "v20-verbatim-name",
+      "v21-previous-draft-quote",
+      "v21-previous-draft-display",
+      "fresh-display-only",
+      "fresh-negative-order"
+    ],
+    "gained": 7
+  },
+  "gate": "rejected: fewer generated held-out drafts than D1 (21 < 24) and v22 drafts below D1 (3 < 6); familiar retention passes (789 ≥ 787)",
+  "reading": "With 120 new dialogues instead of 720 the familiar cases are kept, but the new corrections are not learned. Across D2–D5 the adapter either learns the new correction families (39/54) and loses familiar cases, or keeps the familiar cases and does not learn the new families."
+}

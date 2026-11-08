@@ -1,0 +1,272 @@
+{
+ "d2-hold-cancel-one-0": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "9fcc699e332ea5e96240658319ee7b229d9fe151b726dff782edff12b28dccfc"
+ },
+ "d2-hold-permission-1": {
+  "passed": false,
+  "reason": "Permission turned into an order («Отправка нотариусу.»).",
+  "answer_sha256": "caa3e1b21f2d94edab9315a4e5e5e34aa9ef8c9ff3dd12a2f7aeaa7e50024a97"
+ },
+ "d2-hold-two-recipients-2": {
+  "passed": false,
+  "reason": "«Без пояснения» lost.",
+  "answer_sha256": "e81a2c12a1729bc19103918ac6460bd96c5b880120eaef353d47ed25213a5571"
+ },
+ "d2-hold-add-field-3": {
+  "passed": false,
+  "reason": "Field name inflected: «Стойку».",
+  "answer_sha256": "0074d53788026df1033d51af21e5c65c7d6bf992202375e1c462556f98609880"
+ },
+ "d2-hold-exact-name-4": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "c4a5369bcc8c8f15030fc7f3b27f107eb8b5f6522a5f6a9a7b02609ff4495070"
+ },
+ "d2-hold-screen-only-5": {
+  "passed": false,
+  "reason": "«Старое скрыть» lost.",
+  "answer_sha256": "1ec7c5c38f87000aca7a33ecc785fa293ac5c9a6d755f0f7d812f1d3082b6dac"
+ },
+ "d2-hold-quote-6": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "cb5d6b9a9bf47be0abb8ec0459adee338b93f215232340ea7ca62e8d285c7985"
+ },
+ "d2-hold-open-recipient-7": {
+  "passed": false,
+  "reason": "«в зал 3» changes the meaning (moved to hall 3).",
+  "answer_sha256": "29021cc7ac0237492f7fece391464e1ddeffe774941b416ef8331750027731ef"
+ },
+ "d2-hold-code-8": {
+  "passed": false,
+  "reason": "Not-for-login lost; grammar «не позволяет повторной выдаче».",
+  "answer_sha256": "509e17387a386f155d916c1d9694d7ee5c53e4529bd3cb9056b1fcdd84acdf99"
+ },
+ "d2-hold-cancel-one-9": {
+  "passed": false,
+  "reason": "«Назначение dock_slot сохранить» changes the meaning.",
+  "answer_sha256": "68249a24a64a6d1559ee219de72a66c5450338d9898d231138ac8511a45d7275"
+ },
+ "d2-hold-permission-10": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "b7b66e0222dfa6b4ab250716bb88e275afcd5747f6be611075b04d8d9c878e8f"
+ },
+ "d2-hold-two-recipients-11": {
+  "passed": false,
+  "reason": "Document «опись» lost.",
+  "answer_sha256": "0e08dd8df3145f81a9101c8c67a73abe459f0568cd640c18fb3faa43b795b95b"
+ },
+ "d2-hold-add-field-12": {
+  "passed": false,
+  "reason": "Field name inflected: «Стойку».",
+  "answer_sha256": "9dcfa11b6e1ed8742f3582852205490fd23284aa8dce1dc6042139a202fc73d4"
+ },
+ "d2-hold-exact-name-13": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "0223210cf5d4804a8b0a9c1aa98756c7f7a538d0f003ecd39e3f3dd2e08a4dce"
+ },
+ "d2-hold-screen-only-14": {
+  "passed": false,
+  "reason": "Grammar «Название интерфейса показывать».",
+  "answer_sha256": "5a28d99b90432189180f9963c78be7ffbdb5a681d6d92d8d4d185b8b5380d1f6"
+ },
+ "d2-hold-quote-15": {
+  "passed": false,
+  "reason": "Permission lost; invented «не цитата от клиента».",
+  "answer_sha256": "413d468de604aa81cb77c688687c30daae0be81ca35fae6599a4c51a5d1c7035"
+ },
+ "d2-hold-open-recipient-16": {
+  "passed": false,
+  "reason": "«в зал 23» changes the meaning.",
+  "answer_sha256": "53ac2e91cff4576a335494c481a94a6b2cbf176adcae72ab5bbcd0a4948f3ca6"
+ },
+ "d2-hold-code-17": {
+  "passed": false,
+  "reason": "Not-for-login and new code lost.",
+  "answer_sha256": "bdb8f45cfef2e70c68573605d6a41b6527a23dca8d34dbb8ba1f89d87317164e"
+ },
+ "d2-hold-cancel-one-18": {
+  "passed": false,
+  "reason": "Garbled.",
+  "answer_sha256": "4b21a03fe2f8b18c4f4a989f0877386a5998bdd5d5b9b2a2727e95038c90db60"
+ },
+ "d2-hold-permission-19": {
+  "passed": false,
+  "reason": "Invented ban for others; grammar «Дата не добавлять».",
+  "answer_sha256": "90a4e49eeb23274a9064b60ba0973a54accf4a7302f255febe118d27bf41ef56"
+ },
+ "d2-hold-two-recipients-20": {
+  "passed": false,
+  "reason": "Document «опись» lost.",
+  "answer_sha256": "992d660a7ebcc05705f842d7a359af296e967d51534248fc1399a8bd42cdea0a"
+ },
+ "d2-hold-add-field-21": {
+  "passed": true,
+  "reason": "Addition kept, not shortened.",
+  "answer_sha256": "f4fb5c4009ea3fd5885ded3d360c35376a7eec97b570abe2c74c77b76bf02abd"
+ },
+ "d2-hold-exact-name-22": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "80076bbb1700fe85ba1eb0f82578913470665a8438a5c1981a40d48047dff59a"
+ },
+ "d2-hold-screen-only-23": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "36d9fe2a4328c179ed1cf58e6c9b07190b6cb5d67b5096aea1da9346e9092ce1"
+ },
+ "d2-hold-quote-24": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "48ec80f3fccd5ad57d89e17183f5233fa5f7ba6f5aa39a0a827caa3ce701304b"
+ },
+ "d2-hold-open-recipient-25": {
+  "passed": false,
+  "reason": "«в зал 24» changes the meaning.",
+  "answer_sha256": "51f4251394fbd5a31decaae6727f7ab25ec521cf5c0c72b1c24dcf4f7bd5a10a"
+ },
+ "d2-hold-code-26": {
+  "passed": false,
+  "reason": "Not-for-login lost; «открывает».",
+  "answer_sha256": "257ea8717193b67ddb534c172535d6a62b2a0638bd2e2dcff5d10a6363c46a32"
+ },
+ "d2-hold-cancel-one-27": {
+  "passed": false,
+  "reason": "Wrong rename.",
+  "answer_sha256": "bbe65dad7ac6485827a78124e916cc6c58dee3548d67993bfc8c1c8b10cb82a0"
+ },
+ "d2-hold-permission-28": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "aff0e633d7fbd514b81065eb9841a4c19b76b627fc482c89c099b12198dc4241"
+ },
+ "d2-hold-two-recipients-29": {
+  "passed": false,
+  "reason": "«без пояснения» attached to the ban.",
+  "answer_sha256": "7c2f0318ca769ddc9efdaab84ac0cf80c4ec75a20579f1827603e04c7fd271d1"
+ },
+ "d2-hold-add-field-30": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "0b5df85e50c2d1f1b627be094fede249ddf9e2079e446d0f9150c86825717549"
+ },
+ "d2-hold-exact-name-31": {
+  "passed": false,
+  "reason": "Bans renaming other files, which the user declined.",
+  "answer_sha256": "fc6179ac6a52b61043d9b8444441c7f26ca4b7df0d00cfa8b4ff3ee1db9c272f"
+ },
+ "d2-hold-screen-only-32": {
+  "passed": false,
+  "reason": "Inverted rename.",
+  "answer_sha256": "dd8f977c03b89c96023bcd2fd3e665821715446508d0d100edbef894ac6655fc"
+ },
+ "d2-hold-quote-33": {
+  "passed": false,
+  "reason": "Permission lost; summary «Канбан».",
+  "answer_sha256": "c7538743d9be91b021079aae49f56b313f4b373b2fd8ee8f68a480dd941cff42"
+ },
+ "d2-hold-open-recipient-34": {
+  "passed": false,
+  "reason": "Invented recipient «смену»; broken question.",
+  "answer_sha256": "87b79743371a6942b6d3809eac145ad6d691eeac7895c981b49dea4ca6b215c9"
+ },
+ "d2-hold-code-35": {
+  "passed": false,
+  "reason": "Open question lost; «использовать без значения».",
+  "answer_sha256": "de15486990467d123dde212b7e9ce1ab555ae4c2ccc71e0c1f5e11efe6267fe7"
+ },
+ "d2-hold-cancel-one-36": {
+  "passed": false,
+  "reason": "Truncated.",
+  "answer_sha256": "cb9f60b472ebcd11f6fd0b84ebcffcb3d73feb2b954a5602250dde52cc471502"
+ },
+ "d2-hold-permission-37": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "4210bb196410512336d77b2d5f52a048224abedea53021422dc3416ca4c57c89"
+ },
+ "d2-hold-two-recipients-38": {
+  "passed": false,
+  "reason": "Garbled: «разрешено сохранить», invented approval.",
+  "answer_sha256": "f825e1fbe63ea2d367cfeb254e4a10b7aa5bf49389fded697bc71cb49d15c428"
+ },
+ "d2-hold-add-field-39": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "467f7b5bab0283df346c11ffd63eece92718ab9201aa8ed984eb2151683f73af"
+ },
+ "d2-hold-exact-name-40": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "896d31d3fd6b9c077895d47f09e61829139be9781614be75828641b9726832fe"
+ },
+ "d2-hold-screen-only-41": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "5edafcd827732a3ee16d7314f57cefe561ee0dc23d2f541dc8f6726bb96e3a73"
+ },
+ "d2-hold-quote-42": {
+  "passed": false,
+  "reason": "Permission turned into an order.",
+  "answer_sha256": "0f90a8998028b1a57ef050c52f0c5df0cf73b6a8f2e368ee87f631e60bbaa4ae"
+ },
+ "d2-hold-open-recipient-43": {
+  "passed": false,
+  "reason": "«в зал 17» changes the meaning.",
+  "answer_sha256": "1549ef31ffdcbbc05db6cfcf5f8ebf6445596000cf531a9dbfa6d83073c730b5"
+ },
+ "d2-hold-code-44": {
+  "passed": false,
+  "reason": "Next issue by a new code lost.",
+  "answer_sha256": "fb19a4bc81849a82fd084170c516719d6256b81685925e40f809c747cd51c007"
+ },
+ "d2-hold-cancel-one-45": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "8065c4735c75522db0d88e24a7226526f154eb45da8489afa8d03a8daf04eaec"
+ },
+ "d2-hold-permission-46": {
+  "passed": false,
+  "reason": "Inverted: keeps the version number.",
+  "answer_sha256": "0c2894194503cfa67af2959ba922aa8c96bfa1204695d32f33e56965473acdce"
+ },
+ "d2-hold-two-recipients-47": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "0dd155f8c9a66b18f6272d2b320172fc589ac16f9cf981fabb151a2cc72e73ef"
+ },
+ "d2-hold-add-field-48": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "120634d38a50eba05de5710e9091cda3487f70ef097fb48e145ed355f3b389c4"
+ },
+ "d2-hold-exact-name-49": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "70389527ab259d375afab8b7bfd49d5e1af5a1d29266f578a907fe66a88afd04"
+ },
+ "d2-hold-screen-only-50": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "ee8b6d782cfe0e08faf8351d5c6e045b75580c1e2a2da11b69a2c925a0044791"
+ },
+ "d2-hold-quote-51": {
+  "passed": false,
+  "reason": "Permission turned into an order.",
+  "answer_sha256": "42965fe39fa7be1c5e418b898242aaf7bbd8406a0c82e72329e4f264042ccc0e"
+ },
+ "d2-hold-open-recipient-52": {
+  "passed": false,
+  "reason": "Open recipient question lost.",
+  "answer_sha256": "29331191b1ee422b0f2e93f845c9af5a33678f593621a54c255b461788427449"
+ },
+ "d2-hold-code-53": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "e6e9058e32e449573e36d8563e7c2535c2a9f24e5a809c28421fc847e9d2fd19"
+ }
+}

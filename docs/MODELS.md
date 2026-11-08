@@ -17,7 +17,8 @@ each part with weights is a release tagged `<group>-<part>` (`andromeda-d1`), do
 the repository is public (`https://github.com/chromealex/petya/releases/download/andromeda-d1/<file>`). D1 is the
 v21 fourth repair adapter. D2 and D3 (new correction dialogues, one and two rehearsals of the familiar cases) were
 rejected for forgetting familiar cases and are published as pre-releases `andromeda-d2` and `andromeda-d3`; D4 (D3 data at half the learning rate) learned less and
-forgot as much, pre-release `andromeda-d4`.
+forgot as much, pre-release `andromeda-d4`. D5 (familiar cases plus only 120 dialogues of the six weak families) kept the
+familiar cases (789) but learned none of the new corrections, pre-release `andromeda-d5`.
 
 Training keeps here what the next stage needs: data, protocols, scripts, evidence, the training environment in
 `~/.petya-train/env` (recreated from `scripts/train-requirements.txt` when missing; `/tmp` does not survive a restart), the base model in the Hugging Face cache and the parent adapter of the next stage.

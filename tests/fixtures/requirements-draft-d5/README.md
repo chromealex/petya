@@ -8,3 +8,14 @@ pushes the old skills out. `prepare.py` freezes `train.jsonl` and `protocol.json
 
 The families were chosen from D1's results on the 54 generated held-out drafts, so that set is not blind to the
 choice; the v22 cases and the familiar set are.
+
+## Result: rejected
+
+| | D1 | D3 | D4 | D5 |
+|---|---|---|---|---|
+| 54 generated held-out drafts | 24 | 39 | 27 | 21 |
+| 42 v22 cases (30 checks + 12 drafts) | 27 + 6 | 27 + 6 | 27 + 6 | 27 + 3 |
+| 801 familiar cases | 787 | 783 | 780 | **789** |
+
+D5 is the first stage that keeps the familiar cases, but it learns none of the new corrections. Across D2–D5 the
+adapter trades one for the other. D1 stays the group's D; D5 is the pre-release `andromeda-d5`.

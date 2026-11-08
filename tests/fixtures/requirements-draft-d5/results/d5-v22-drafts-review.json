@@ -1,0 +1,62 @@
+{
+ "v22-new-cancel-one": {
+  "passed": false,
+  "reason": "Clarification that values may change lost.",
+  "answer_sha256": "f941f23b762b4ae219bf644a8876e17e7016e0c645e2e20175df0ed205674722"
+ },
+ "v22-new-cancel-two": {
+  "passed": false,
+  "reason": "Inverted.",
+  "answer_sha256": "a568c6bb728a7440894d5be15d01349587a590a6b95548126a1aed994fd1bfb5"
+ },
+ "v22-new-two-recipients": {
+  "passed": false,
+  "reason": "«Без пояснения» lost.",
+  "answer_sha256": "e700aaf67a5a6949745e17b325ce9369bb475dff4a90cdec2943ae8ff7e98358"
+ },
+ "v22-new-revoke-send": {
+  "passed": false,
+  "reason": "«Дату не добавлять» lost.",
+  "answer_sha256": "56264135f2bdbe51e4acfe514d0fc0dff3614ac4900da19983021b3ad90950fc"
+ },
+ "v22-new-restore-send": {
+  "passed": false,
+  "reason": "Object «талон» missing; invented storage.",
+  "answer_sha256": "54df65cd5aacae514c5122ffb614c6d7d81c05e8fd483a500e62b1a845f30536"
+ },
+ "v22-new-code-item": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "b0bcfb518ad9a254b10dd36257ffbcdeae3842e6a1839ba33c7e6a8c2b729f8d"
+ },
+ "v22-new-open-duration": {
+  "passed": false,
+  "reason": "Not-for-login lost; invented reuse ban.",
+  "answer_sha256": "6d7802ee49ffbfa87488417a08b80a8d259e5185d66e34681cf6b711eb27d468"
+ },
+ "v22-new-exact-name": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "64fc4af79194013b9a46a1a6e6cdd68fc3b55575e80325120bd6fce6256caf1b"
+ },
+ "v22-new-screen-only": {
+  "passed": false,
+  "reason": "«Старое скрыть» lost.",
+  "answer_sha256": "42e12fb7b925e30ba8e0e4a514d21e2fa8ac81b14b8864c26900821e8a476888"
+ },
+ "v22-new-add-separate": {
+  "passed": false,
+  "reason": "Grammar «Существует «Секция» и «Ярус»».",
+  "answer_sha256": "0aafda2da2ff29b48d35096453f933fc5a1f0b9edd037fb8607068d832a4551f"
+ },
+ "v22-new-quote": {
+  "passed": false,
+  "reason": "Says the «макет» may be sent instead of the методичка.",
+  "answer_sha256": "f996dfc1931327751719ad1584c882fbf5c8915892f9ec97d67513a7b6cc22a7"
+ },
+ "v22-new-recipient-open": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "839628ed1a5dd615242ab21b6fe68079f53ce98d1fef1fe59cc3228800a6927e"
+ }
+}

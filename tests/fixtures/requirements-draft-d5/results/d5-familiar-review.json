@@ -1,0 +1,172 @@
+{
+ "original-explicit-trigger": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "94a9633c20748c290064c58770912ed44368d2523d336104058367fbe9809664"
+ },
+ "v14-repeat": {
+  "passed": true,
+  "reason": "Requirements exact; summary says «записей» for «заявок».",
+  "answer_sha256": "01621e9825e1cea8b77cc959303a872c2a4526098b4d8908d3c097c1c49e2152"
+ },
+ "v18-code-lifetime": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1a08d44a791e81a73a8da58539354faf9585f890c8882bc6423eb601b751049d"
+ },
+ "v18-partial-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "10cbe33010dcc440537a45953e05038853f9504fbd4558f41433f0241dcb66ec"
+ },
+ "v18-revoke-after-grant": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1d938912a6bcadfc99d65395a033bcdb8ec9af10e56e3fbba96d4a5c601a134d"
+ },
+ "v18-numeric-range-draft": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "02deb3796f665a9aff5c6f70379a6763c50a8b0ea924da91a5985b5ca8654bb2"
+ },
+ "v19-exact-identifier": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "0263d1f797df7953ed73071422f069ab0601fdd9b69e1f97287e5ed64e673d9b"
+ },
+ "v19-quoted-permission": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "5967506bed60f69df114b1a0b729dcb59aa77ed9b1ef26aa9f0699ca3ce898f3"
+ },
+ "v20-repeat": {
+  "passed": false,
+  "reason": "Grammar «293 секунд».",
+  "answer_sha256": "ae3219c4acdfd8b388b8260224e65c538b8c0432be30b41f5616f5ee9effb7ea"
+ },
+ "v20-verbatim-name": {
+  "passed": false,
+  "reason": "Invented «Разрешить несоответствие».",
+  "answer_sha256": "6ccff92c5d9740ae84e6fa4cde473b90f6c240579193e82feb5b44475a9210cd"
+ },
+ "v20-destination-not-guessed": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "573aeb360aec41d7a9a7f9aa3f823e270b02553de70a74a7654d7cb39f73210f"
+ },
+ "v21-previous-draft-payment": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "b27228faca44d4d8179ed0e8cb39c9d97624db3036e952fe8083220a0080ca28"
+ },
+ "v21-previous-draft-quote": {
+  "passed": false,
+  "reason": "Garbled «не передавать её не запрещено».",
+  "answer_sha256": "bcc681e3cd7002ea1468cb4164c002de835b9dcc97ba343cd59362fce2cff932"
+ },
+ "v21-previous-draft-display": {
+  "passed": false,
+  "reason": "Grammar «На строку интерфейса».",
+  "answer_sha256": "28735c6c56fd0fb532ac4c9a234c1836651abb3831016a96a25fd63b6f239ed0"
+ },
+ "v21-previous-draft-versions": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "b64f4838520bba1c77711423b923c71806716ec312cd91f980b07bc6897bfdef"
+ },
+ "v21-previous-draft-return": {
+  "passed": true,
+  "reason": "«Количество» for «число».",
+  "answer_sha256": "528499ac58492149bf70a3a8a8fccc81b20897efc9ee21324b4d4e3b30ad223c"
+ },
+ "v21-previous-draft-unset-lifetime": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1d70342ed0de7e9c910821878e504ce085a14e76d6a30c5e26c9284dd1e36b09"
+ },
+ "fresh-sort-3-1-1": {
+  "passed": false,
+  "reason": "Drops an element.",
+  "answer_sha256": "ef5107eac928901fee79972b80e719ad4eca02ae95f676c7c826bd4b982b163e"
+ },
+ "fresh-cancel-first": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "c5fc10e99190875d7c836652b0fcab1933e731265441a0338017f046c7143c1b"
+ },
+ "fresh-cancel-second": {
+  "passed": false,
+  "reason": "Wrong fields.",
+  "answer_sha256": "a48c75220d3d4c433314d12d709a7e7b6722640264a9a44cf009a70abaccfcb0"
+ },
+ "fresh-revoke-transmit": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "0d66d58bd225d7892da069ea65ea71b78f1a3b3284a7134df65ee8135357400d"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "9f2c65c7b0a14cfb31aec4359f4b49d9080bb629e9c3bcec9a9a6e7d0d2c1184"
+ },
+ "fresh-copy-scope": {
+  "passed": false,
+  "reason": "Contradiction «без пересылки» and permission.",
+  "answer_sha256": "2533e5cd8b6c1f98109a4f7082d633da643fd973ebda681955dca464b2a7471e"
+ },
+ "fresh-undo-ban": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "2c2f8b74f2eeb75a6fdb51ae4bcc4177119e84d0691929168b720ff5785a4c9b"
+ },
+ "fresh-add-not-replace": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "9b60357bdf0a48459eb4730af16b315a91bd8243b18aa5db2df9b435870b5606"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Allows reuse of the code.",
+  "answer_sha256": "15e280e78f673adfc44bf2a541d80512b4984dab592fc267ac5d50ce23e8ba42"
+ },
+ "fresh-duration-open": {
+  "passed": false,
+  "reason": "Not-for-login lost.",
+  "answer_sha256": "a5ab327ed9fbed8052d2a964b9f6f8ed2a25ae60eb84e53ab0b710598c952e4f"
+ },
+ "fresh-exact-caption": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "68297164c63a9b08a27318cd4a540d32f33efb8d6148752c96422f3dbc8ee288"
+ },
+ "fresh-display-only": {
+  "passed": false,
+  "reason": "Grammar «Структуру хранилища и миграцию не выполнять».",
+  "answer_sha256": "3267413590d523b7a8aafae72139b135be7ab361e6ffaa30122b3f10340a5dad"
+ },
+ "fresh-quoted-instruction": {
+  "passed": false,
+  "reason": "Broken quote; invented «добавить в качестве примера».",
+  "answer_sha256": "23c7fa5449e5a44a9324910355f847e3f8294bf730b8da4d6d0349d6ce0c9565"
+ },
+ "fresh-negative-order": {
+  "passed": false,
+  "reason": "Sorted result lost.",
+  "answer_sha256": "02ce2e198e83f64f51a8ee4711bd523db6ae78706bf61f4205a9edee93d86d86"
+ },
+ "fresh-interval-prose": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "384fbc8cb652b4389d6425b0aad513c46e6ad4b702dc55739cd84c1cb20ecaf4"
+ },
+ "fresh-recipient-pending": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "89f96110bc6f589981e8e714a71f378599df3d28ef96439f3e139add1a71b932"
+ },
+ "fresh-rename-withdrawn": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "d09c99741c05b1efc2b2bc0fdb6c6341008f00e34704e697e1b4fabd22d04170"
+ }
+}
