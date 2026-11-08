@@ -1,6 +1,7 @@
 // «Крэши», renderer: totals for the period, a stacked daily events chart (top five issues and the rest),
 // and the top Sentry issues with level, «новый» mark, events/users and a 14-day sparkline.
-// Per issue: open in Sentry, a Jira task and a Programmer request through the chat (their own flows confirm),
+// Per issue: open in Sentry, a task in the connected tracker and a Programmer request (cross-app links: their own
+// flows confirm),
 // and «Решено», which changes Sentry only when pressed and can be undone from the toast.
 (()=>{
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('crash-cards.css',document.currentScript.src).href;document.head.append(style);
@@ -82,8 +83,8 @@
   const button=(label,run,cls='')=>{const b=k.el('button',cls,label);b.type='button';b.onclick=async e=>{e.stopPropagation();if(b.disabled)return;b.disabled=true;try{await run(b);}catch(err){k.toast(err.message,{error:true});}finally{if(!b.dataset.keep)b.disabled=false;}};actions.append(b);return b;};
   if(r.url)button('Открыть в Sentry',()=>open(r.url));
   const facts=fmt(r.events)+' '+plural(r.events,['событие','события','событий'])+', '+fmt(r.users)+' '+plural(r.users,['пользователь','пользователя','пользователей'])+' '+ctx.period;
-  button('В задачу Jira',()=>k.ask('Создай задачу в Jira: Крэш '+(r.shortId?r.shortId+' ':'')+'— '+r.title+(r.culprit?' в '+r.culprit:'')+'. Sentry: '+(r.url||'')+' ('+facts+').',{send:true}));
-  button('Отдать Программисту',()=>k.ask('Исправь баг в коде — крэш из Sentry: '+r.title+(r.culprit?' в '+r.culprit:'')+'. Ссылка: '+(r.url||'')+'. Это '+facts+(r.platform?', платформа '+r.platform:'')+'.',{send:true}));
+  actions.append(k.links('task-tracker',{title:'Крэш '+(r.shortId?r.shortId+' ':'')+'— '+r.title+(r.culprit?' в '+r.culprit:''),description:facts,link:r.url||'',type:'bug'}),
+   k.links('code-fix',{text:'Исправь баг в коде — крэш из Sentry: '+r.title+(r.culprit?' в '+r.culprit:'')+'. Ссылка: '+(r.url||'')+'. Это '+facts+(r.platform?', платформа '+r.platform:'')+'.'}));
   // State lives in data-state, not in the button's text.
   const resolve=button('Решено',async b=>{
    await feature('resolve',r.id);
@@ -117,6 +118,8 @@
   const actions=[];
   if(c.url)actions.push({label:'Открыть список в Sentry',run:()=>open(c.url)});
   if(!c.onlyNew&&t.fresh)actions.push({label:'Только новые',run:()=>k.ask('Новые крэши '+(c.release?'после релиза '+c.release.name:c.period?.label||'за неделю')+(c.platform?' на '+c.platform:''),{send:true})});
+  // A spike of new crashes is worth telling the team; the Slack flow asks for the channel and confirms.
+  if(t.fresh&&c.issues?.length){const top=c.issues.find(r=>r.isNew)||c.issues[0];actions.push(k.links('share-message',{text:'посмотреть новые крэши в Sentry ('+t.fresh+' '+plural(t.fresh,['новый','новых','новых'])+', '+(c.period?.label||'')+'), самый частый: '+top.title+' — '+fmt(top.events)+' '+plural(top.events,['событие','события','событий'])+'. '+(c.url||top.url||'')}));}
   if(c.period?.kind!=='yesterday')actions.push({label:'За вчера',run:()=>k.ask('Сколько крэшей вчера'+(c.platform?' на '+c.platform:''),{send:true})});
   const card=k.card({app:'Sentry',initial:'S',color:'#362d59',key:c.org+(c.projects?.length?' / '+c.projects.join(', '):''),href:c.url,status,subtitle,body,actions,className:'crash-card'});
   const key=card.querySelector('.kit-key');if(key)raw(key);

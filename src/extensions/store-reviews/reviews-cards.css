@@ -55,3 +55,4 @@
 .rv-counter.over{color:#f0b4a8}
 .rv-footnote{font-size:11.5px}
 @media(max-width:560px){.rv-top{grid-template-columns:1fr}.rv-cluster-head{grid-template-columns:minmax(0,1fr) 70px}.rv-cluster-bar{display:none}}
+.rv-cluster-actions{margin-top:2px}.rv-cluster-actions:not(:has(button)){display:none}.rv-cluster-actions button{min-height:26px;padding:2px 9px;font-size:12px}

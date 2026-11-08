@@ -16,8 +16,10 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const runs=[r(413,'running',2,{title:'Merge pull request #88 from acme/feature/very-long-branch-name-for-layout-check',branch:'feature/very-long-branch-name-for-layout-check'}),r(412,'failure',30,{title:failure.title}),{...r(82,'running',4),workflow:'Android release build',branch:'release/1.2',number:82},{key:'unity:default-ios:24',source:'unity',repo:'',workflow:'iOS',number:24,title:'Speed tweak',branch:'main',status:'queued',duration:12,at:iso(5),url:''},r(411,'success',90),r(410,'success',200)];
  const red={runs,history,failure,repos:['acme/game'],errors:[],filter:{kind:'why',platform:'',branch:''},note:''};
  const green={runs:[r(420,'success',3),r(419,'success',60)],history:[{...history[0],runs:history[0].runs.map(x=>({...x,status:'success'}))}],failure:null,repos:['acme/game'],errors:[{source:'Unity Build Automation',text:'Unity Build Automation: не найдено. Проверьте ID организации и проекта.'}],filter:{kind:'status',platform:'android',branch:''},note:''};
+ // Only «Программист» is connected: the failed run offers it and no tracker or Slack link.
+ await js("window.petya.saveSettings({extension_coder:'true'})");
  await js(`view('home');showDialogueMessages([{role:'user',text:'почему упала сборка?'},{role:'assistant',text:'Упал «CI» #412 на main.',by:'Сборки',extensionData:{ciCard:${JSON.stringify(red)}}},{role:'assistant',text:'Последние сборки: 2 успешно.',by:'Сборки',extensionData:{ciCard:${JSON.stringify(green)}}}],'Сборки')`);
- for(let i=0;i<150;i++){if(await js("document.querySelectorAll('.ci-card').length===2"))break;await new Promise(r=>setTimeout(r,30));}
+ for(let i=0;i<150;i++){if(await js("document.querySelectorAll('.ci-card').length===2&&!!document.querySelector('.ci-card .kit-link[data-provider=coder]')"))break;await new Promise(r=>setTimeout(r,30));}
  assert.equal(await js("document.querySelectorAll('.ci-card').length"),2);
  assert.equal(await js("document.querySelectorAll('.ci-card')[0].querySelectorAll('.ci-log-line').length"),4);
  assert.equal(await js("document.querySelector('.ci-step').textContent"),'Run tests');

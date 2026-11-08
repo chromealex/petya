@@ -208,30 +208,35 @@
   const promise=(window.petya?.feature?window.petya.feature('appLinks','available',kind,context||{}):Promise.resolve([])).catch(()=>[]);
   linkCache.set(key,{at:Date.now(),promise});return promise;
  }
+ availableLinks.clear=()=>linkCache.clear();
+ // Connections change in settings: the next card asks again.
+ document.addEventListener('petya-settings-displayed',availableLinks.clear);
  function openSettings(id){if(typeof view==='function')view('settings');const card=document.querySelector('[data-extension="'+id+'"],[data-service="'+id+'"]');if(card)window.revealSettings?.(card);}
  async function runLink(kind,provider,payload,onDone){
   const result=await window.petya.feature('appLinks','run',kind,provider.id,typeof payload==='function'?payload():payload);
   if(result?.settings)toast(result.text||'Нужна настройка приложения',{error:true,action:{label:'Открыть настройки',run:()=>openSettings(result.settings)}});
-  else if(result?.ask)await ask(result.ask,{send:result.send!==false});
+  else if(result?.ask)await (window.resultKit?.ask||ask)(result.ask,{send:result.send!==false});
   else if(result?.text)toast(result.text);
   onDone?.(result,provider);
   return result;
  }
- function links(kind,payload,{context,label,onDone,className=''}={}){
+ function links(kind,payload,{context,label,title,primary=false,onDone,className=''}={}){
   const box=el('span','kit-links'+(className?' '+className:''));box.dataset.kind=kind;
-  availableLinks(kind,context).then(list=>{
+  (window.resultKit?.availableLinks||availableLinks)(kind,context).then(list=>{
    if(!Array.isArray(list)||!list.length)return;
    const memory='link-'+kind;
    let current=list.find(p=>p.id===store.get(memory,''))||list[0];
-   const main=el('button','kit-link',label&&list.length===1?label:current.label);main.type='button';main.dataset.provider=current.id;
-   if(current.hint)main.title=current.hint;
+   // `label` is a fixed text for a single provider, or a function of the provider for any number of them.
+   const named=p=>typeof label==='function'?label(p):label&&list.length===1?label:p.label;
+   const main=el('button','kit-link'+(primary?' primary':''),named(current));main.type='button';main.dataset.provider=current.id;
+   if(title||current.hint)main.title=title||current.hint;
    const press=async provider=>{main.disabled=true;main.setAttribute('aria-busy','true');try{await runLink(kind,provider,payload,onDone);}catch(e){toast(e.message,{error:true});}finally{main.disabled=false;main.removeAttribute('aria-busy');}};
    main.onclick=event=>{event.stopPropagation();press(current);};
    box.append(main);
    if(list.length>1){
     const more=el('button','kit-link-more','▾');more.type='button';more.setAttribute('aria-label','Выбрать приложение');more.setAttribute('aria-haspopup','menu');more.setAttribute('aria-expanded','false');
-    more.onclick=event=>{event.stopPropagation();menu(more,async()=>list.map(p=>({label:p.label,id:p.id,hint:p.hint||''})),async option=>{
-     current=list.find(p=>p.id===option.id)||current;store.set(memory,current.id);main.textContent=current.label;main.dataset.provider=current.id;await press(current);
+    more.onclick=event=>{event.stopPropagation();menu(more,async()=>list.map(p=>({label:named(p),id:p.id,hint:p.hint||''})),async option=>{
+     current=list.find(p=>p.id===option.id)||current;store.set(memory,current.id);main.textContent=named(current);main.dataset.provider=current.id;await press(current);
     });};
     box.classList.add('several');box.append(more);
    }

@@ -97,6 +97,13 @@
    const actions=[{label:'Открыть',run:()=>open(k,c.url)}];
    if(!c.summarized)actions.push({label:'Резюме',primary:true,run:()=>k.ask('Резюме пулл-реквеста '+c.repo+'#'+c.number,{send:true})});
    actions.push({label:'Оставить комментарий…',run:()=>composer(k,card,c)});
+   // Cross-app links: failing checks go to the Programmer or the tracker; a PR waiting for review to the team.
+   const ref=c.repo+'#'+c.number,failed=(c.checks?.list||[]).filter(x=>x.status==='failure').map(x=>x.name);
+   if(c.checks?.state==='failure'){
+    actions.push(k.links('code-fix',{text:'Исправь код проекта, чтобы прошли проверки пулл-реквеста '+ref+(c.head?' (ветка '+c.head+')':'')+(failed.length?'. Упали: '+failed.slice(0,6).join(', '):'')+'. '+(c.url||'')}),
+     k.links('task-tracker',{title:'Упали проверки в '+ref+': '+c.title,description:failed.length?'Упали: '+failed.slice(0,6).join(', '):'',link:c.url||'',type:'bug'}));
+   }
+   if(c.review==='pending'&&!c.draft)actions.push(k.links('share-message',{text:'посмотреть пулл-реквест '+ref+' «'+c.title+'»'+(c.author?' от '+c.author:'')+': '+(c.url||'')}));
    card=k.card({app:'Pull requests',initial:'⇄',color:'#5b4f8f',key:c.repo+'#'+c.number,href:c.url,status:{label:REVIEW[c.review]?.[0]||REVIEW.none[0],tone:REVIEW[c.review]?.[1]||''},
     chips:c.checks?.list?.length?[]:[chip(k,CHECKS,c.checks?.state||'none',checksTitle(c.checks))],title:c.title,body:single(k,c),actions,className:'pr-card'});
    card.querySelector('.kit-title')?.setAttribute('data-no-i18n','');

@@ -24,8 +24,11 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const deps={project:'BunkerWars',at:Date.parse('2026-11-08T10:40:00Z'),filter:null,showVulns:false,packages,notes:['pip: 1 пакет без точной версии (==) — уязвимости для него не проверить.'],
   ecosystems:[{id:'npm',label:'npm · web',status:'ok',note:'',vulnSource:'npm audit'},{id:'pip',label:'pip · requirements.txt',status:'ok',note:'',vulnSource:'OSV'},{id:'unity',label:'Unity · BunkerWars (2022.3.40f1)',status:'listed',note:'Последние версии пакетов Unity без редактора не узнать — показаны текущие версии, git/file-пакеты и preview.'}],
   summary:{outdated:7,patch:3,minor:2,major:2,vulns:{critical:1,high:1,moderate:1,low:0,unknown:0},vulnerable:3,flagged:2,total:12}};
+ // «Программист» is added: the safe update is offered through the cross-app link «code-fix».
+ await js("window.petya.saveSettings({extension_coder:'true'})");
  await js(`view('home');showDialogueMessages([{role:'user',text:'какие пакеты устарели'},{role:'assistant',text:'BunkerWars: устарело 7 пакетов.',by:'Зависимости',extensionData:{dependencies:${JSON.stringify(deps)}}}],'Зависимости')`);
- for(let i=0;i<150;i++){if(await js("document.querySelectorAll('.deps-card').length===1"))break;await new Promise(r=>setTimeout(r,30));}
+ for(let i=0;i<150;i++){if(await js("document.querySelectorAll('.deps-card').length===1&&!!document.querySelector('.deps-card .kit-link[data-provider=coder]')"))break;await new Promise(r=>setTimeout(r,30));}
+ assert.equal(await js("document.querySelectorAll('.deps-card .kit-link[data-provider=jira],.deps-card .kit-link[data-provider=asana]').length"),0,'no tracker connected: no task link');
  assert.equal(await js("document.querySelectorAll('.deps-card').length"),1);
  assert.equal(await js("document.querySelectorAll('.deps-seg').length"),3);
  assert.equal(await js("document.querySelectorAll('.deps-card tbody tr').length"),11,'up-to-date npm package is hidden');

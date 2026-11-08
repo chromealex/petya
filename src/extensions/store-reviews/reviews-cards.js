@@ -76,6 +76,14 @@
    head.append(raw(k.el('span','rv-cluster-title',c.title)),bar,k.el('span','rv-cluster-count',c.count+' '+plural(c.count,['отзыв','отзыва','отзывов'])));
    item.append(head);
    for(const q of c.quotes||[])item.append(raw(k.el('blockquote','rv-quote','«'+q.text+'»')));
+   // Cross-app links: a task in the connected tracker, the Programmer and the team chat (their own flows confirm).
+   const where=d.app+' ('+d.stores.map(x=>STORE[x]).join(', ')+')';
+   const quotes=(c.quotes||[]).slice(0,2).map(q=>'«'+q.text+'»').join(' ');
+   const links=k.el('div','kit-actions rv-cluster-actions');
+   links.append(k.links('task-tracker',{title:'Жалобы в отзывах '+where+': '+c.title,description:c.count+' '+plural(c.count,['отзыв','отзыва','отзывов'])+' за '+d.days+' '+plural(d.days,['день','дня','дней'])+(quotes?'. '+quotes:''),type:'bug'}),
+    k.links('code-fix',{text:'Исправь баг в коде по жалобам пользователей '+where+': '+c.title+'. Примеры: '+(quotes||'—')}),
+    k.links('share-message',{text:'посмотреть жалобы в отзывах '+where+': '+c.title+' — '+c.count+' '+plural(c.count,['отзыв','отзыва','отзывов'])+' за '+d.days+' '+plural(d.days,['день','дня','дней'])+'.'+(quotes?' '+quotes:'')}));
+   item.append(links);
    box.append(item);
   }
   return box;
@@ -139,7 +147,7 @@
    catch(e){k.toast(e.message,{error:true});editor(k,d,r,item,chips,'');}
    finally{draft.disabled=false;draft.removeAttribute('aria-busy');draft.textContent=label;}
   };
-  actions.append(draft);item.append(actions);
+  actions.append(draft,k.links('task-tracker',{title:'Отзыв '+r.rating+'★ '+d.app+' ('+STORE[r.store]+(r.version?', v'+r.version:'')+')'+(r.title?': '+r.title:''),description:(r.text||'').slice(0,800),type:r.rating<=2?'bug':'task'}));item.append(actions);
   return item;
  }
 

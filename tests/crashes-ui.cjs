@@ -1,5 +1,6 @@
 // «Крэши» card in the real chat: totals, stacked daily chart, issue rows with sparklines and «новый», safe text,
-// «Решено» with undo through the feature ipc (real main process, fake local Sentry), and Jira / Programmer follow-ups to the chat.
+// «Решено» with undo through the feature ipc (real main process, fake local Sentry), and the tracker / Programmer / Slack
+// cross-app links (connected in settings) handing their requests to the chat.
 process.env.PETYA_SMOKE_TEST='1';
 const assert=require('node:assert/strict');
 require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
@@ -33,6 +34,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const release={...card,period:{label:'после релиза 1.4.2',kind:'release',from:'2026-11-04T08:00:00Z',to:'2026-11-08T10:00:00Z'},release:{name:'1.4.2',versions:['com.studio.game@1.4.2+102'],date:'2026-11-04T08:00:00Z'},platform:null,environment:'',onlyNew:true,
   totals:{issues:2,more:false,events:1510,users:470,fresh:2},crashFree:{sessions:0.9871,users:0.9712,total:52000},issues:[issues[1],issues[3]],common:'',
   chart:{days,series:[series[1],series[3]],from:'2026-11-04',to:'2026-11-08'}};
+ await js("window.petya.saveSettings({module_jira:'true',jiraUrl:'https://acme.atlassian.net',jiraEmail:'qa@acme.dev',jiraToken:'jira-token',extension_coder:'true',module_slack:'true',slackToken:'xoxp-ui'})");
  await js(`window.__asked=[];window.resultKit&&(window.resultKit.ask=async(t,o)=>{window.__asked.push([t,!!o?.send]);});
   view('home');showDialogueMessages([{role:'user',text:'какие крэши за неделю на андроиде'},{role:'assistant',text:'За неделю на Android: 7 крэшей.',by:'Крэши',extensionData:{crashCard:${JSON.stringify(card)}}},
    {role:'user',text:'новые крэши после релиза 1.4.2'},{role:'assistant',text:'После релиза 1.4.2: 2 новых крэша.',by:'Крэши',extensionData:{crashCard:${JSON.stringify(release)}}}],'Крэши')`);
@@ -55,11 +57,18 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js(first+".querySelector('.kit-more summary').textContent"),'Ещё крэши · 2');
  // Second card: crash-free tile, only new issues.
  assert.match(await js("document.querySelectorAll('.crash-card')[1].querySelectorAll('.crash-tile')[3].textContent"),/98,71%crash-free сессийпользователей: 97,12%/);
- // Follow-ups go to the chat as requests for the Jira and Programmer flows.
- await js(first+".querySelector('.crash-row .crash-actions button:nth-child(2)').click()");
- await js(first+".querySelector('.crash-row .crash-actions button:nth-child(3)').click()");
+ // Cross-app links: the connected tracker and the Programmer get the crash as chat requests for their own flows.
+ for(let i=0;i<150;i++){if(await js(first+".querySelector('.crash-row .kit-link[data-provider=coder]')"))break;await new Promise(r=>setTimeout(r,30));}
+ assert.equal(await js(first+".querySelector('.crash-row .kit-link[data-provider=jira]').textContent"),'В задачу Jira');
+ assert.equal(await js(first+".querySelectorAll('.crash-row .kit-link-more').length"),0,'one tracker: a plain button');
+ await js(first+".querySelector('.crash-row .kit-link[data-provider=jira]').click()");
+ for(let i=0;i<100;i++){if((await js('window.__asked.length'))===1)break;await new Promise(r=>setTimeout(r,30));}
+ await js(first+".querySelector('.crash-row .kit-link[data-provider=coder]').click()");
+ for(let i=0;i<100;i++){if((await js('window.__asked.length'))===2)break;await new Promise(r=>setTimeout(r,30));}
  const asked=await js('window.__asked');
- assert.match(asked[0][0],/^Создай задачу в Jira: Крэш GAME-101 — NullReferenceException.*Sentry: https:\/\/my-studio\.sentry\.io\/issues\/101\//);assert.equal(asked[0][1],true);
+ assert.match(asked[0][0],/^Создай задачу в Jira: Баг\. Крэш GAME-101 — NullReferenceException.*Ссылка: https:\/\/my-studio\.sentry\.io\/issues\/101\//);assert.equal(asked[0][1],true);
+ // New crashes this week: «Отправить в Slack» in the card actions.
+ assert.equal(await js(first+".querySelector(':scope>.kit-actions .kit-link[data-provider=slack]').textContent"),'Отправить в Slack');
  assert.match(asked[1][0],/^Исправь баг в коде — крэш из Sentry: NullReferenceException.* в PlayerController\.Update/);
  const file=await require('./card-shot.cjs')(win,'.crash-card','petya-crashes',{width:700});
  // The second card and the collapsed rows are below the fold: a second picture of the scrolled overlay.

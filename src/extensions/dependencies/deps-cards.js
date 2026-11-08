@@ -94,12 +94,16 @@
   paint();
   const safe=packages.map(p=>({p,to:safeTarget(p)})).filter(x=>x.to);
   const actions=[];
-  if(safe.length)actions.push({label:'Обновить безопасные (patch/minor) в ветке',primary:true,title:'Петя-программист обновит их в отдельной ветке и прогонит тесты',
-   run:()=>k.ask('Как программист, обнови зависимости '+safe.slice(0,40).map(x=>x.p.name+' до '+x.to+' ('+x.p.ecosystem+')').join(', ')+' в отдельной ветке и прогони тесты',{send:true})});
+  // Updating is a code change: offered only when «Программист» is added (cross-app link «code-fix»).
+  if(safe.length)actions.push(k.links('code-fix',{text:'Как программист, обнови зависимости '+safe.slice(0,40).map(x=>x.p.name+' до '+x.to+' ('+x.p.ecosystem+')').join(', ')+' в отдельной ветке и прогони тесты'},
+   {label:'Обновить безопасные (patch/minor) в ветке',primary:true,title:'Петя-программист обновит их в отдельной ветке и прогонит тесты'}));
   if(nv){
    const toggle={label:onlyVulns?'Показать все пакеты':'Показать уязвимости',run:b=>{onlyVulns=!onlyVulns;b.textContent=onlyVulns?'Показать все пакеты':'Показать уязвимости';paint();}};
    actions.push(toggle);
    const top=packages.flatMap(p=>p.vulns).filter(v=>k.safeUrl(v.url)).sort((a,b)=>RANK[b.severity]-RANK[a.severity])[0];
+   const vulnerable=packages.filter(p=>p.vulns.length).sort((a,b)=>Math.max(...b.vulns.map(v=>RANK[v.severity]))-Math.max(...a.vulns.map(v=>RANK[v.severity])));
+   actions.push(k.links('task-tracker',{title:'Уязвимые зависимости в '+d.project+': '+vulnerable.length,type:'bug',
+    description:vulnerable.slice(0,10).map(p=>p.name+' '+(p.current||p.spec||'')+' ('+p.ecosystem+'): '+p.vulns.slice(0,3).map(v=>v.id+(v.fixed?' → '+v.fixed:'')).join(', ')).join('; '),link:top?.url||''}));
    if(top)actions.push({label:'Открыть advisory',title:top.id+(top.summary?' · '+top.summary:''),run:()=>{const a=document.createElement('a');a.href=k.safeUrl(top.url);a.target='_blank';a.rel='noopener';a.click();}});
   }
   actions.push({label:'Проверить снова',run:()=>k.ask('проверь зависимости'+(d.filter==='unity'?' юнити':''),{send:true})});

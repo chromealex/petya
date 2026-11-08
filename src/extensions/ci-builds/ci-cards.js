@@ -1,7 +1,7 @@
 // «Сборки», renderer: the failed run (job, step, first error lines), a history strip per workflow (last runs as
 // coloured squares) and the recent runs with status, branch, commit title, duration and age.
-// «Перезапустить» asks for confirmation inside the card before calling the app; «Отдать Программисту» sends
-// the error to the coding extension as a chat request.
+// «Перезапустить» asks for confirmation inside the card before calling the app. A failed run gets cross-app links:
+// the Programmer (the error as a chat request), a task in the connected tracker and a message to the team.
 (()=>{
  const U=unit=>' '+(/^ru/i.test(window.petyaLocale||'ru')?unit:({ТБ:'TB',ГБ:'GB',МБ:'MB',КБ:'KB',Б:'B',с:'s',мин:'min',ч:'h'}[unit]||unit));
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('ci-cards.css',document.currentScript.src).href;document.head.append(style);
@@ -92,7 +92,13 @@
    const what=f.source==='github'?'Перезапустить упавшие jobs «'+f.workflow+'» #'+f.number+'?'+(f.repo?' · '+f.repo:''):'Запустить новую сборку «'+f.workflow+'» в Unity Build Automation?';
    card.querySelector('.kit-actions').before(confirmRow(k,what,'Перезапустить',async()=>{const r=await window.petya.feature('ciBuilds','rerun',f.rerun);k.toast(r.text);}));
   }});
-  if(f?.handoff)actions.push({label:'Отдать Программисту',primary:true,title:'Петя-программист попробует исправить ошибку в коде проекта',run:()=>k.ask(f.handoff,{send:true})});
+  if(f){
+   const run=f.workflow+(f.number!==undefined?' #'+f.number:'')+(f.repo?' в '+f.repo:'')+(f.branch?' (ветка '+f.branch+')':'');
+   const where=[f.job,f.step].filter(Boolean).join(' → ');
+   if(f.handoff)actions.push(k.links('code-fix',{text:f.handoff}));
+   actions.push(k.links('task-tracker',{title:'Упала сборка '+run,description:(where?where+': ':'')+(f.lines||[]).slice(0,3).join(' / '),link:f.url||'',type:'bug'}),
+    k.links('share-message',{text:'посмотреть упавшую сборку '+run+(where?', '+where:'')+'. '+(f.url||'')}));
+  }
   if(!f)actions.push({label:'Обновить',run:()=>k.ask('Статус CI',{send:true})});
   const key=(c.repos||[]).join(', ')||(c.runs?.[0]?.source==='unity'?'Unity Build Automation':'CI');
   const card=k.card({app:'Сборки',initial:'▶',color:'#3d6b55',key,status,subtitle:c.filter?.platform||c.filter?.branch?[PLATFORM[c.filter.platform]||c.filter.platform,c.filter.branch].filter(Boolean).join(' · '):'',body,actions,className:'ci-card'});
