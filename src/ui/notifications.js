@@ -50,7 +50,7 @@
  document.addEventListener('petya-image-install',event=>{const state=event.detail;if(!state.busy&&!items.has('image-install'))return;put('image-install',{title:'Модель изображений',text:state.message||(state.ready?'Готова к работе':'Подготовка…'),busy:state.busy,version:state.phase,kind:state.phase==='error'?'error':'model',actions:state.busy?[['Отменить',()=>window.petya.imageInstallCancel()]]:[]});});
  function languageProgress(state){
   const percent=state.total>0?Math.min(100,Math.floor(state.received*100/state.total)):undefined;
-  put('voice-language:'+state.code,{title:state.label+' · язык',text:state.message+(Number.isFinite(percent)?' '+percent+'%':''),busy:state.busy,percent,version:state.phase,kind:state.phase==='error'?'error':state.phase==='done'?'success':'info',actions:state.phase==='error'?[['Повторить',()=>window.petya.voiceLanguageInstall(state.code)]]:state.busy?[]:[['Языки',()=>{setOpen(false);view('settings');window.revealSettings?.($('voice-languages'));}]]});
+  put('voice-language:'+state.code,{title:state.title||state.label+' · язык',text:state.message+(Number.isFinite(percent)?' '+percent+'%':''),busy:state.busy,percent,version:state.phase,kind:state.phase==='error'?'error':state.phase==='done'?'success':'info',actions:state.phase==='error'?[['Повторить',()=>window.petya.voiceLanguageInstall(state.code)]]:state.busy||state.code==='speech-model'?[]:[['Языки',()=>{setOpen(false);view('settings');window.revealSettings?.($('voice-languages'));}]]});
  }
  // Decomposition: one card per run, updated in place with the overall percentage.
  function decomposeProgress(state){

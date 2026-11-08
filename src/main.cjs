@@ -89,10 +89,24 @@ const features = require('./features.cjs');
 for (const feature of features) Object.assign(defaults, feature.defaults || {});
 const runtimeCandidates = [path.resolve(__dirname, '..'), process.platform === 'darwin' ? path.resolve(process.resourcesPath, '../../..') : path.dirname(process.resourcesPath)];
 const { bundledModel, upgradeBundledModel } = require('./speech-model.cjs');
-const localModel = bundledModel(runtimeCandidates);
-const runtimeRoot = localModel ? path.resolve(path.dirname(localModel), '../..') : runtimeCandidates[0];
+// The app ships the base model; the small one is downloaded once into userData/speech (speech-model-download.cjs).
+const speechDownloadRoot = path.join(app.getPath('userData'), 'speech');
+const shippedModel = bundledModel(runtimeCandidates);
+const localModel = bundledModel([speechDownloadRoot, ...runtimeCandidates]);
+const runtimeRoot = shippedModel ? path.resolve(path.dirname(shippedModel), '../..') : runtimeCandidates[0];
 const localBinary = path.join(runtimeRoot, 'runtime/whisper-build/bin', process.platform === 'win32' ? 'whisper-server.exe' : 'whisper-server');
 const languagePacks = new (require('./language-packs.cjs').LanguagePacks)({directory:path.join(app.getPath('userData'),'voice-languages'),roots:runtimeCandidates,emit:state=>{if(win&&!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('voice-language-progress',state);}});
+const speechModelDownload = new (require('./speech-model-download.cjs').SpeechModelDownload)({root:speechDownloadRoot,emit:state=>{if(win&&!win.isDestroyed()&&!win.webContents.isDestroyed())win.webContents.send('voice-language-progress',state);}});
+// A downloaded model replaces the bundled one only while the microphone and meeting capture are off,
+// so a running recognition is never cut off; otherwise the swap waits for the microphone to turn off.
+let speechModelSwap = false;
+function useDownloadedSpeech() {
+  if (!speechModelDownload.installed()) return;
+  defaults.whisperModel = speechModelDownload.file;
+  const next = upgradeBundledModel(settings.whisperModel, speechModelDownload.file, runtimeCandidates);
+  if (next !== settings.whisperModel) { settings.whisperModel = next; speechModelSwap = true; }
+  if (speechModelSwap && !trayListening && !trayMeeting) { speechModelSwap = false; speech.stop(); }
+}
 const localVoice = new (require('./local-voice.cjs').LocalVoice)({ roots: runtimeCandidates, languageDir:languagePacks.directory });
 const imageInstallRoot=path.join(app.getPath('userData'),'image-generator');
 const localImages = new (require('./local-images.cjs').LocalImages)({roots:[imageInstallRoot,...runtimeCandidates]});
@@ -649,14 +663,14 @@ function setupHandlers() {
   // Window discovery uses CoreGraphics; it must not depend on screen-stream enumeration.
   handle('inspectZoom', () => inspectZoomWindows(true));
   handle('pauseAutoMeeting', () => meetingMonitor?.pause());
-  require('./voice-setup.cjs')({get core(){return core;},get handle(){return handle;},get languagePacks(){return languagePacks;},get localVoice(){return localVoice;},get qwenSpeech(){return qwenSpeech;},get request(){return request;},get settings(){return settings;},get speech(){return speech;},get speechError(){return speechError;}});
+  require('./voice-setup.cjs')({get core(){return core;},get handle(){return handle;},get languagePacks(){return languagePacks;},get speechModelDownload(){return speechModelDownload;},get useDownloadedSpeech(){return useDownloadedSpeech;},get localVoice(){return localVoice;},get qwenSpeech(){return qwenSpeech;},get request(){return request;},get settings(){return settings;},get speech(){return speech;},get speechError(){return speechError;}});
   const {composeDraft}=require('./dictation-setup.cjs')({get agents(){return agents;},get companies(){return companies;},get companyId(){return companyId;},get contextFor(){return contextFor;},get core(){return core;},get delegation(){return delegation;},get dialogue(){return dialogue;},get handle(){return handle;},get memory(){return memory;},get notify(){return notify;},get pending(){return pending;},get promptFor(){return promptFor;},get randomUUID(){return randomUUID;},get request(){return request;},get routed(){return routed;},get settings(){return settings;},get snapshots(){return snapshots;},get team(){return team;},get text(){return text;},get workspace(){return workspace;}});
   const permissionChecklist = require('./permissions.cjs').permissions({ platform: process.platform, systemPreferences, shell, desktopCapturer });
   handle('permissionStatus', permissionChecklist.status);
   handle('requestPermission', permissionChecklist.request);
   handle('permission', async () => process.platform !== 'darwin' || await systemPreferences.askForMediaAccess('microphone'));
   handle('notify', body => notify(text(body, 250)));
-  handle('listening', (enabled,meeting) => { trayListening=enabled===true;trayMeeting=meeting===true;refreshTrayMenu(); });
+  handle('listening', (enabled,meeting) => { trayListening=enabled===true;trayMeeting=meeting===true;refreshTrayMenu();if(speechModelSwap)useDownloadedSpeech(); });
   // Features last: everything they may need is set up by now.
   // A feature returns services (added to `services`) and optionally `ipc` methods, reachable from the UI as
   // window.petya.feature(name, method, ...args) — so features need no preload or main.cjs edits either.
@@ -711,6 +725,9 @@ else {
     tray = new Tray(icon); tray.setToolTip('Петя · '+companies.get(companyId).name+' · микрофон выключен');
     refreshTrayMenu();
     win.webContents.on('did-finish-load', () => {trayReady=true;refreshTrayMenu();});
+    // Download the better speech model once, in the background, when the app shipped only the base one.
+    if (process.env.PETYA_SMOKE_TEST !== '1' && process.env.PETYA_VERIFY_BUILD !== '1' && path.basename(shippedModel) === 'ggml-base.bin' && !speechModelDownload.installed())
+      setTimeout(() => speechModelDownload.start().then(useDownloadedSpeech).catch(error => console.error('Speech model download: ' + error.message)), 20000).unref?.();
     win.webContents.on('render-process-gone', () => {trayReady=false;trayListening=false;refreshTrayMenu();});
     tray.on('click', show);
     win.on('show', () => { if (!win.webContents.isLoading()) win.webContents.send('window-shown'); });

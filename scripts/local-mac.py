@@ -61,11 +61,10 @@ subprocess.run([sys.executable, str(root / 'scripts/verify-package.py'), str(roo
 voice = app_dir / 'runtime'
 shutil.copytree(root / 'runtime/whisper-build/bin', voice / 'whisper-build/bin', symlinks=True)
 (voice / 'models').mkdir()
-shutil.copy2(root / 'runtime/models/ggml-base.bin', voice / 'models/ggml-base.bin')
+# Only the base speech model ships (142 MB); the app downloads «small» (466 MB) on first start
+# (src/speech-model-download.cjs) and switches to it once it is verified.
 speech_model = 'ggml-base.bin'
-if (root / 'runtime/models/ggml-small.bin').exists():
-    speech_model = 'ggml-small.bin'
-    shutil.copy2(root / 'runtime/models' / speech_model, voice / 'models' / speech_model)
+shutil.copy2(root / 'runtime/models' / speech_model, voice / 'models' / speech_model)
 # Build-tree rpaths must not point to the developer's computer.
 for binary in (voice / 'whisper-build/bin').iterdir():
     if binary.is_symlink() or not (binary.name == 'whisper-server' or binary.suffix == '.dylib'):

@@ -1,9 +1,9 @@
 // Voice: language packs, speech synthesis and transcription IPC.
 // Extracted from main.cjs: shared state comes through ctx (live getters/setters).
 module.exports=ctx=>{
-  ctx.handle('voiceLanguageStatus',()=>ctx.languagePacks.statuses());
+  ctx.handle('voiceLanguageStatus',()=>[...ctx.languagePacks.statuses(),...ctx.speechModelDownload.statuses()]);
   ctx.handle('voiceLanguages',()=>({languages:ctx.languagePacks.list(),selected:ctx.settings.communicationLanguage,speech:ctx.settings.speechLanguage||''}));
-  ctx.handle('voiceLanguageInstall',async code=>{await ctx.languagePacks.install(code);ctx.localVoice.stop();return {languages:ctx.languagePacks.list(),selected:ctx.settings.communicationLanguage,speech:ctx.settings.speechLanguage||''};});
+  ctx.handle('voiceLanguageInstall',async code=>{if(code==='speech-model'){await ctx.speechModelDownload.start();ctx.useDownloadedSpeech();return {languages:ctx.languagePacks.list(),selected:ctx.settings.communicationLanguage,speech:ctx.settings.speechLanguage||''};}await ctx.languagePacks.install(code);ctx.localVoice.stop();return {languages:ctx.languagePacks.list(),selected:ctx.settings.communicationLanguage,speech:ctx.settings.speechLanguage||''};});
   ctx.handle('voiceLanguageCheck',value=>ctx.languagePacks.check(require('./spoken-text.cjs').spokenText(value),require('./question-language.cjs').voiceLanguage(ctx.settings.communicationLanguage,value)));
   ctx.handle('synthesizeVoice', async value => {const check=await ctx.languagePacks.check(require('./spoken-text.cjs').spokenText(value),require('./question-language.cjs').voiceLanguage(ctx.settings.communicationLanguage,value));if(check.missing.length)return {languageRequired:check.missing};return ctx.localVoice.speak(value,require('./question-language.cjs').voiceLanguage(ctx.settings.communicationLanguage,value));});
   ctx.handle('stopVoice', () => ctx.localVoice.stop());

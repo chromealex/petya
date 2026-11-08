@@ -4105,6 +4105,14 @@
   "…и ещё": "…and more",
   "Протираю глаза": "Rubbing my eyes",
   "Поправляю фуражку": "Straightening my cap",
-  "Вспоминаю, о чём говорили": "Recalling what we talked about"
+  "Вспоминаю, о чём говорили": "Recalling what we talked about",
+  "Модель распознавания не прошла проверку.": "The speech recognition model failed verification.",
+  "Не удалось скачать модель распознавания. Пока работает базовая модель.": "Could not download the speech recognition model. The basic model is in use for now.",
+  "Не хватает места для улучшенной модели распознавания (нужно около 700 МБ). Пока работает базовая модель.": "Not enough disk space for the improved speech recognition model (about 700 MB needed). The basic model is in use for now.",
+  "Распознавание речи": "Speech recognition",
+  "Распознавание речи · модель": "Speech recognition · model",
+  "Загрузка улучшенной модели распознавания…": "Downloading the improved speech recognition model…",
+  "Проверка модели…": "Checking the model…",
+  "Улучшенная модель распознавания установлена.": "The improved speech recognition model is installed."
  }
 }

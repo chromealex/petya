@@ -12,7 +12,7 @@ def check_build_space(root, platform):
     temp = pathlib.Path(tempfile.gettempdir())
     if platform == 'mac':
         size = sum(tree_size(root / p) for p in ('node_modules/electron/dist/Electron.app', 'assets', 'src', 'runtime/whisper-build/bin'))
-        size += sum(p.stat().st_size for p in (root / 'runtime/models/ggml-base.bin', root / 'runtime/models/ggml-small.bin') if p.exists())
+        size += (root / 'runtime/models/ggml-base.bin').stat().st_size
         size = max(size, tree_size(root / 'Petya.app'))
     else:
         size = max(tree_size(root / 'Petya.app'), 1024 ** 3) * 3
