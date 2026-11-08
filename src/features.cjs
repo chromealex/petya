@@ -20,6 +20,7 @@ module.exports=[
  require('./features/meeting-sources.cjs'),
  require('./features/crash-sources.cjs'),
  require('./features/meeting-stream.cjs'),
+ require('./features/activity.cjs'),
  require('./features/meeting-memory.cjs'),
  require('./features/materials.cjs'),
  require('./features/meeting-summary.cjs'),
