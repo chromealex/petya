@@ -10,17 +10,20 @@
  const duration=sec=>{if(!Number.isFinite(sec)||sec===null)return '';if(sec<60)return sec+' с';const m=Math.floor(sec/60),s=sec%60;if(m<60)return m+' мин'+(s&&m<10?' '+s+' с':'');return Math.floor(m/60)+' ч '+(m%60)+' мин';};
  const open=(k,url)=>{const safe=k.safeUrl(url||'');if(safe)window.open(safe,'_blank','noopener');else k.toast('Ссылки на эту сборку нет',{error:true});};
  const sourceName=s=>s==='unity'?'Unity':'GitHub';
+ // Service content (commit titles, workflow/job names, branches, logs) is left alone by the interface translator.
+ const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
+ const PLATFORM={android:'Android',ios:'iOS',webgl:'WebGL',windows:'Windows',mac:'macOS',linux:'Linux'};
 
  function failureBlock(k,f){
   const box=k.el('div','ci-failure');
   const head=k.el('div','ci-failure-head');
-  head.append(k.el('span','ci-dot failure'),k.el('strong',null,f.workflow+(f.number!==undefined?' #'+f.number:'')));
-  if(f.branch)head.append(k.el('code','ci-branch',f.branch));
+  head.append(k.el('span','ci-dot failure'),raw(k.el('strong',null,f.workflow+(f.number!==undefined?' #'+f.number:''))));
+  if(f.branch)head.append(raw(k.el('code','ci-branch',f.branch)));
   if(f.at)head.append(k.el('span','ci-muted',ago(f.at)));
   box.append(head);
-  if(f.title)box.append(k.el('div','ci-commit',f.title));
-  if(f.job||f.step){const path=k.el('div','ci-path');if(f.job)path.append(k.el('span','ci-job',f.job));if(f.job&&f.step)path.append(k.el('span','ci-arrow','→'));if(f.step)path.append(k.el('span','ci-step',f.step));box.append(path);}
-  if(f.lines?.length){const pre=k.el('div','ci-log');pre.setAttribute('role','log');pre.setAttribute('aria-label','Первые строки ошибки');for(const line of f.lines)pre.append(k.el('div','ci-log-line',line));box.append(pre);}
+  if(f.title)box.append(raw(k.el('div','ci-commit',f.title)));
+  if(f.job||f.step){const path=raw(k.el('div','ci-path'));if(f.job)path.append(k.el('span','ci-job',f.job));if(f.job&&f.step)path.append(k.el('span','ci-arrow','→'));if(f.step)path.append(k.el('span','ci-step',f.step));box.append(path);}
+  if(f.lines?.length){const pre=raw(k.el('div','ci-log'));pre.setAttribute('role','log');pre.setAttribute('aria-label','Первые строки ошибки');for(const line of f.lines)pre.append(k.el('div','ci-log-line',line));box.append(pre);}
   if(f.error)box.append(k.el('p','ci-warn',f.error));
   return box;
  }
@@ -36,7 +39,7 @@
   const box=k.el('div','ci-history');
   for(const g of groups){
    const row=k.el('div','ci-history-row');
-   const name=k.el('span','ci-history-name');name.append(k.el('span','ci-source '+g.source,sourceName(g.source)),k.el('span','ci-history-title',g.name));name.title=(g.repo?g.repo+' · ':'')+g.name;
+   const name=k.el('span','ci-history-name');name.append(k.el('span','ci-source '+g.source,sourceName(g.source)),raw(k.el('span','ci-history-title',g.name)));name.title=(g.repo?g.repo+' · ':'')+g.name;
    const strip=k.el('div','ci-strip');strip.setAttribute('role','list');strip.setAttribute('aria-label','История: '+g.name);
    for(let i=0;i<10-g.runs.length;i++)strip.append(k.el('span','ci-cell empty'));
    for(const r of g.runs){
@@ -57,9 +60,9 @@
    const li=k.el('li','ci-run');
    const status=k.el('span','ci-run-status '+r.status);status.append(k.el('span','ci-dot '+r.status),k.el('span',null,label(r.status)));
    const main=k.el('div','ci-run-main');
-   const title=k.safeUrl(r.url||'')?k.el('a','ci-run-title',r.title||r.workflow):k.el('span','ci-run-title',r.title||r.workflow);
+   const title=raw(k.safeUrl(r.url||'')?k.el('a','ci-run-title',r.title||r.workflow):k.el('span','ci-run-title',r.title||r.workflow));
    if(title.tagName==='A'){title.href=k.safeUrl(r.url);title.target='_blank';title.rel='noopener';}
-   const sub=k.el('div','ci-run-sub');sub.append(k.el('span',null,r.workflow+' #'+r.number));if(r.branch)sub.append(k.el('code','ci-branch',r.branch));if(r.repo)sub.append(k.el('span','ci-muted',r.repo));
+   const sub=k.el('div','ci-run-sub');sub.append(raw(k.el('span',null,r.workflow+' #'+r.number)));if(r.branch)sub.append(raw(k.el('code','ci-branch',r.branch)));if(r.repo)sub.append(raw(k.el('span','ci-muted',r.repo)));
    main.append(title,sub);
    const side=k.el('div','ci-run-side');side.append(k.el('span',null,duration(r.duration)),k.el('span','ci-muted',ago(r.at)));
    li.append(status,main,side);li.setAttribute('aria-label',label(r.status)+': '+(r.title||r.workflow)+', '+r.workflow+' #'+r.number+(r.branch?', ветка '+r.branch:''));
@@ -77,7 +80,7 @@
   if(c.history?.length){body.append(k.el('div','ci-section',f?'История по workflow':'История по workflow · последние 10'));body.append(history(k,c.history));}
   if(c.runs?.length){body.append(k.el('div','ci-section','Последние запуски'));body.append(runs(k,c.runs));}
   else body.append(k.el('p','ci-muted','Запусков нет.'));
-  for(const e of c.errors||[])body.append(k.el('p','ci-warn',e.source+': '+e.text));
+  for(const e of c.errors||[])body.append(k.el('p','ci-warn',e.text.startsWith(e.source)?e.text:e.source+': '+e.text));
   const running=(c.runs||[]).some(r=>r.status==='running'||r.status==='queued');
   const status=f?{label:'упала сборка',tone:'alert'}:running?{label:'идут сборки',tone:'progress'}:c.runs?.length?{label:'всё зелёное',tone:'done'}:null;
   const actions=[];
@@ -91,7 +94,8 @@
   if(f?.handoff)actions.push({label:'Отдать Программисту',primary:true,title:'Петя-программист попробует исправить ошибку в коде проекта',run:()=>k.ask(f.handoff,{send:true})});
   if(!f)actions.push({label:'Обновить',run:()=>k.ask('Статус CI',{send:true})});
   const key=(c.repos||[]).join(', ')||(c.runs?.[0]?.source==='unity'?'Unity Build Automation':'CI');
-  const card=k.card({app:'Сборки',initial:'▶',color:'#3d6b55',key,status,subtitle:c.filter?.platform||c.filter?.branch?[c.filter.platform,c.filter.branch].filter(Boolean).join(' · '):'',body,actions,className:'ci-card'});
+  const card=k.card({app:'Сборки',initial:'▶',color:'#3d6b55',key,status,subtitle:c.filter?.platform||c.filter?.branch?[PLATFORM[c.filter.platform]||c.filter.platform,c.filter.branch].filter(Boolean).join(' · '):'',body,actions,className:'ci-card'});
+  card.querySelector('.kit-key')?.setAttribute('data-no-i18n','');
   parent.append(card);
  };
 })();
