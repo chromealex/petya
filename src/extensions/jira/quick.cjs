@@ -1,6 +1,6 @@
 // Jira quick edits from the chat card: one field at a time, applied at once, each with an undo.
 // Options (statuses, people, priorities) are read live from Jira for the selected issue.
-const actions=['transitions','status','people','assignee','priorities','priority','due'];
+const actions=['transitions','status','people','assignee','priorities','priority','due','execute'];
 function connection(row,s,check){
  check();s.modules.assertEnabled(s.settings,'jira');
  const item=row.item,scope=require('./desktop-reply.cjs').scope(s,s.dialogue.active());
@@ -49,6 +49,13 @@ async function perform(action,row,s,check,args){
   await api(issue,{method:'PUT',body:JSON.stringify({fields:{duedate:value||null}})});update(row,s,{due:value});
   const show=v=>v?new Date(v+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'}):'без срока';
   return {handled:true,text:item.key+' · срок: '+show(before.due)+' → '+show(value),undo:{action:'due',args:{date:before.due}}};
+ }
+ if(action==='execute'){
+  // «Выполнить» / «Исправить»: the task runner plugin opens a work chat with a plan for approval.
+  if(!s.taskRunner)throw Error('Расширение «Выполнение задач» недоступно.');
+  const data=await api(issue+'?fields=summary,description,issuetype');
+  const {adfText}=require('../../history.cjs');
+  return s.taskRunner.start({app:'jira',key:item.key,title:data.fields?.summary||item.summary,type:data.fields?.issuetype?.name||item.type,description:adfText(data.fields?.description)||'',url:item.site+'/browse/'+encodeURIComponent(item.key)});
  }
  throw Error('Неизвестное действие Jira.');
 }

@@ -1,0 +1,13 @@
+{
+  "id": "task-runner",
+  "name": "Выполнение задач",
+  "description": "«Выполнить» и «Исправить» у задач: план, согласование и работа агентов",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["run-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "taskRun": "renderTaskRun"
+  }
+}

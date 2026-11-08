@@ -14,5 +14,8 @@ require('electron').ipcMain?.on('petya:extension-ui-bootstrap',event=>{event.ret
 module.exports={name:'extensionUI',descriptors,features:descriptors.filter(d=>d.feature).map(d=>require(path.join(directory,d.id,d.feature))),setup(s){
  const catalog=()=>descriptors.map(d=>({...d,installed:!d.setting||s.settings[d.setting]==='true'}));
  snapshot=catalog;
- return {ipc:{catalog,uninstall(id){const d=descriptors.find(d=>d.id===id);if(!d?.setting)throw Error('Это расширение нельзя удалить отдельно.');s.saveSettings({[d.setting]:'false'});return catalog();},install(id){const d=descriptors.find(d=>d.id===id);if(!d)throw Error('Расширение не найдено.');if(d.setting)s.saveSettings({[d.setting]:'true'});return catalog();}}};
+ // Plugins may claim a chat turn (e.g. corrections to an open plan) through `turn(services, command)`.
+ const pluginFeatures=module.exports.features.filter(f=>typeof f.turn==='function');
+ const extensionTurn=async command=>{for(const f of pluginFeatures){const reply=await f.turn(s,command);if(reply)return reply;}return null;};
+ return {extensionTurn,ipc:{catalog,uninstall(id){const d=descriptors.find(d=>d.id===id);if(!d?.setting)throw Error('Это расширение нельзя удалить отдельно.');s.saveSettings({[d.setting]:'false'});return catalog();},install(id){const d=descriptors.find(d=>d.id===id);if(!d)throw Error('Расширение не найдено.');if(d.setting)s.saveSettings({[d.setting]:'true'});return catalog();}}};
 }};

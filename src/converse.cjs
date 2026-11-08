@@ -39,6 +39,8 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     // A complex request for agents: subtasks run as parallel background chats of this project.
     // Explicit («раздай агентам») runs at once; a request over several areas gets an offer first
     // («Раздать агентам» / «Ответить одним сообщением», the choice can be remembered).
+    // Plugins first: a plugin may own this chat's next message (e.g. corrections to a work plan).
+    if(!choice){const plugin=await ctx.extensionTurn?.(original);if(plugin)return via(plugin.by||'расширение',plugin);}
     let teamChecked=false;
     if(!choice&&!ctx.dialogue.active()?.agentOf){
       const team=require('./agent-team.cjs'),explicit=team.agentRequest(original);
