@@ -8,7 +8,7 @@
  const call=(method,...args)=>window.petya.feature('timeTracking',method,...args);
  const locale=()=>window.petyaLocale||'ru-RU';
  const hm=t=>new Date(t).toLocaleTimeString(locale(),{hour:'2-digit',minute:'2-digit'});
- const unit=(n,u)=>{try{return new Intl.NumberFormat(locale(),{style:'unit',unit:u,unitDisplay:'short'}).format(n).replace(/ /g,' ');}catch{return n+' '+(u==='hour'?'ч':'мин');}};
+ const unit=(n,u)=>{try{return new Intl.NumberFormat(locale(),{style:'unit',unit:u,unitDisplay:'short'}).format(n).replace(/\u00a0/g,' ');}catch{return n+' '+(u==='hour'?'ч':'мин');}};
  const dur=ms=>{const m=Math.max(0,Math.round(ms/60000)),h=Math.floor(m/60),r=m%60;return h?unit(h,'hour')+(r?' '+unit(r,'minute'):''):unit(r,'minute');};
  const IDS=['work','meetings','communication','other'];
  const open=url=>{if(typeof window.openChatBrowser==='function')window.openChatBrowser(url);else window.open(url,'_blank','noopener');};

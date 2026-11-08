@@ -48,7 +48,7 @@ function winReader(){
  function start(){
   child=spawn('powershell.exe',['-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-EncodedCommand',Buffer.from(POWERSHELL,'utf16le').toString('base64')],{windowsHide:true,stdio:['pipe','pipe','ignore']});
   child.stdout.setEncoding('utf8');
-  child.stdout.on('data',chunk=>{buffer+=chunk;let i;while((i=buffer.indexOf('\n'))>=0){const line=buffer.slice(0,i).replace(/^﻿/,'').trim();buffer=buffer.slice(i+1);if(!line)continue;const q=queue.shift();if(!q)continue;try{q.resolve(JSON.parse(line));}catch(e){q.reject(e);}}});
+  child.stdout.on('data',chunk=>{buffer+=chunk;let i;while((i=buffer.indexOf('\n'))>=0){const line=buffer.slice(0,i).replace(/^\uFEFF/,'').trim();buffer=buffer.slice(i+1);if(!line)continue;const q=queue.shift();if(!q)continue;try{q.resolve(JSON.parse(line));}catch(e){q.reject(e);}}});
   child.on('exit',()=>fail(Error('foreground reader stopped')));child.on('error',fail);
   child.unref?.();child.stdin.unref?.();child.stdout.unref?.();
  }

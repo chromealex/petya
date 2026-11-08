@@ -25,7 +25,7 @@ function scrub(title){
 // {app, title} → {app, title, private?:'app'|'private'|'banking'|'user'}.
 function redact({app,title},{privateApps=''}={}){
  const name=String(app||'').replace(/\s+/g,' ').trim().slice(0,80);
- const raw=String(title||'').replace(/[​‎‏]/g,'').trim();
+ const raw=String(title||'').replace(/[\u200b\u200e\u200f]/g,'').trim();
  const hide=reason=>({app:name,title:'',private:reason});
  const appKey=lower(name),titleKey=lower(raw);
  if(PRIVATE_APPS.some(p=>lower(p)===appKey))return hide('app');

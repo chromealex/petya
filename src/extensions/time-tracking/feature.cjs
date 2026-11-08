@@ -164,7 +164,7 @@ async function turn(s,command,deps={}){
 function csv(rows){
  const q=v=>{const t=String(v??'');return /[",\n;]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t;};
  const iso=t=>{const d=new Date(t);return ymd(t)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');};
- return '﻿'+['start,end,minutes,app,title,project,task,category',...rows.map(r=>[iso(r.start),iso(r.end),((r.end-r.start)/MIN).toFixed(1),r.app,r.title,r.project||'',r.task||'',r.category].map(q).join(','))].join('\r\n')+'\r\n';
+ return '\uFEFF'+['start,end,minutes,app,title,project,task,category',...rows.map(r=>[iso(r.start),iso(r.end),((r.end-r.start)/MIN).toFixed(1),r.app,r.title,r.project||'',r.task||'',r.category].map(q).join(','))].join('\r\n')+'\r\n';
 }
 function setup(s,{dialog}={}){
  const log=worklogs.create(s);

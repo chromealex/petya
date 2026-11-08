@@ -90,7 +90,7 @@ const {InputRequired}=require('../src/input-required.cjs');
  // CSV: one row per span, quoted titles, BOM for Excel.
  const saved=await ipc.exportCsv(c.period.from,c.period.to,'сегодня');
  const text=fs.readFileSync(saved.path,'utf8');
- assert.ok(text.startsWith('﻿start,end,minutes,app,title,project,task,category'));
+ assert.ok(text.startsWith('\uFEFFstart,end,minutes,app,title,project,task,category'));
  assert.ok(text.includes('BW-123')&&text.includes(',work\r\n'));assert.equal(saved.rows,text.trim().split('\r\n').length-1);
  await assert.rejects(ipc.exportCsv(c.period.to,c.period.from),/период/);
  r=await app.turn(s,'выгрузи время в CSV');assert.equal(r.extensionData.timeCard.exportReady,true);assert.match(r.text,/Скачать CSV/);
