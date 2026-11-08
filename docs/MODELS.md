@@ -19,7 +19,9 @@ v21 fourth repair adapter. D2 and D3 (new correction dialogues, one and two rehe
 rejected for forgetting familiar cases and are published as pre-releases `andromeda-d2` and `andromeda-d3`; D4 (D3 data at half the learning rate) learned less and
 forgot as much, pre-release `andromeda-d4`. D5 (familiar cases plus only 120 dialogues of the six weak families) kept the
 familiar cases (789) but learned none of the new corrections, pre-release `andromeda-d5`. D6 (exact blends of D1 and D3, no training) kept the
-familiar cases (up to 791) but lost D3's new corrections; it is a recipe, not published weights.
+familiar cases (up to 791) but lost D3's new corrections; it is a recipe, not published weights. D7 (D3 plus one familiar-only
+rehearsal) is the best so far — 37/54 new, 34/42 v22, 795/801 familiar — but loses five of D1's held-out successes;
+pre-release `andromeda-d7`.
 
 Training keeps here what the next stage needs: data, protocols, scripts, evidence, the training environment in
 `~/.petya-train/env` (recreated from `scripts/train-requirements.txt` when missing; `/tmp` does not survive a restart), the base model in the Hugging Face cache and the parent adapter of the next stage.
