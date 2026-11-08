@@ -11,7 +11,7 @@ function freshQuestion(command){
 function searchCommand(command,topic){const explicit=/^(?:найди|поищи|посмотри|проверь|найти)(?:\s+мне)?\s+(?:в интернете|в сети|в гугле|в google)(?:\s*[:,—-]\s*|\s+)?(.*)$/iu.exec(command)||/^(?:загугли|погугли)\s+(.*)$/iu.exec(command);if(explicit)return {query:explicit[1]||'',fresh:true};const fresh=freshQuestion(command);if(fresh)return {query:fresh,fresh:true,implicit:true};if(topic?.webQuery&&/^(?:а (?:для|на|если|как|что)|покажи другой способ|найди другой способ|обнови(?: ответ)?$)/iu.test(command))return {query:topic.webQuery+' '+command,fresh:false};return null;}
 class WebSearch{
  constructor({enabled,model,read,searchAPI}){Object.assign(this,{enabled,model,read,searchAPI});this.busy=false;}
- async search(raw,{resume=false}={}){if(!this.enabled())throw Error('Включите модуль «Поиск в интернете» в «Подключениях».');const query=queryText(raw);if(!query)throw Error('Что найти в интернете? Произнесите команду вместе с вопросом.');if(this.busy)throw Error('Дождитесь текущего поиска.');this.busy=true;
+ async search(raw,{resume=false}={}){if(!this.enabled())throw Error('Включите модуль «Поиск в интернете» в «Подключениях».');const query=require('./web-fallback.cjs').query(queryText(raw))||queryText(raw);if(!query)throw Error('Что найти в интернете? Произнесите команду вместе с вопросом.');if(this.busy)throw Error('Дождитесь текущего поиска.');this.busy=true;
  try{const links=await this.searchAPI(query,resume);if(!links.length)throw Error('Поисковик не вернул доступные результаты или запросил проверку. Попробуйте позже или уточните вопрос.');
   const pages=[];
   // Read up to three independent sources together; preserve search ranking.
@@ -20,6 +20,8 @@ class WebSearch{
    const batch=links.slice(offset,offset+3-pages.length);offset+=batch.length;
    const results=await Promise.all(batch.map(async link=>{
     if(!this.enabled())return null;
+    // The results page itself (Google's own answer and snippets) comes with its text; it is not read again.
+    if(link.text)return link.text.length>=150?{...link,text:link.text.slice(0,10000)}:null;
     try{const page=await this.read(link.url,{enabled:this.enabled});const text=page.text.slice(0,10000);return text.length>=150?{...link,url:page.url,text}:null;}catch{return null;}
    }));
    pages.push(...results.filter(Boolean));

@@ -9,6 +9,14 @@ const snapshotScript=`(()=>{const area=document.querySelector('#rso')||document.
  return {url:location.href,text:(document.body?.innerText||'').slice(0,60000),links};})()`;
 // A real check from Google: the «sorry» page, a CAPTCHA frame, the consent page or a sign-in.
 const blocked=snap=>{try{const u=new URL(snap.url);if(/^\/sorry\//.test(u.pathname)||/(^|\.)consent\.google\./.test(u.hostname)||/(^|\.)accounts\.google\./.test(u.hostname))return true;}catch{}return /(?:unusual traffic|необычн\p{L}* трафик|не робот|I'm not a robot|recaptcha|Прежде чем перейти к Google|Before you continue to Google)/iu.test(snap.text||'');};
+// The useful part of a results page: the text after the search box, without Google's menus and footer.
+function resultsText(text,query){
+ const lines=String(text||'').split('\n').map(s=>s.trim()).filter(s=>s.length>1);
+ const skip=/^(?:Все|Картинки|Видео|Новости|Покупки|Карты|Книги|Ещё|Инструменты|Режим ИИ|Войти|Настройки|Справка|Конфиденциальность|Условия|All|Images|Videos|News|Shopping|Maps|Books|More|Tools|AI Mode|Sign in|Settings|Help|Privacy|Terms|Feedback|Отзыв)$/iu;
+ const kept=lines.filter(s=>!skip.test(s)&&s!==query);
+ const body=kept.join('\n');
+ return body.length>=300?body.slice(0,10000):'';
+}
 class SearchBrowser{
  constructor({enabled,onAction,onReturn,dataRoot}){this.dataRoot=dataRoot;this.enabled=enabled;this.onAction=onAction;this.onReturn=onReturn;this.windows=new Set();}
  check(){if(!this.enabled())throw Error('Модуль поиска выключен.');}
@@ -27,7 +35,10 @@ class SearchBrowser{
   let rows=linksFrom(snap);
   // No check and no results in Google's markup: the same query in DuckDuckGo's plain results, still hidden.
   if(!rows.length)rows=await this.duck(query).catch(()=>[]);
-  if(!rows.length)throw Error('Поиск не дал ссылок на «'+query+'». Попробуй переформулировать вопрос.');
+  // Google often answers on the results page itself (its overview and the snippets): that text is a source too.
+  const page=resultsText(snap.text,query);
+  if(page)rows=[{url:snap.url,title:'Выдача Google: '+query.slice(0,120),text:page},...rows].slice(0,6);
+  if(!rows.length)throw Error('Google и DuckDuckGo ничего не нашли по запросу «'+query+'». Попробуй сформулировать иначе.');
   if(this.browser.isVisible())this.browser.hide();return rows;
  }
  async duck(query){const win=this.window(false);try{await this.load(win,'https://html.duckduckgo.com/html/?'+new URLSearchParams({q:query,kl:'ru-ru'}));const snap=await win.webContents.executeJavaScript(`(()=>({links:[...document.querySelectorAll('a.result__a')].map(a=>({url:a.href,title:a.innerText}))}))()`);
@@ -36,4 +47,4 @@ class SearchBrowser{
  async read(url){this.check();const win=this.window(false);try{await this.load(win,url);const result=await win.webContents.executeJavaScript(`(()=>({url:location.href,text:(document.querySelector('main')||document.querySelector('article')||document.body)?.innerText?.slice(0,16000)||''}))()`);publicURL(result.url);this.check();return result;}finally{if(!win.isDestroyed())win.destroy();}}
  stop(){for(const win of this.windows)if(!win.isDestroyed())win.destroy();this.windows.clear();}
 }
-module.exports={SearchBrowser,linksFrom,blocked:snap=>blocked(snap)};
+module.exports={SearchBrowser,linksFrom,resultsText,blocked:snap=>blocked(snap)};

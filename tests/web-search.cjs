@@ -7,6 +7,10 @@ const assert=require('node:assert/strict');const {WebSearch,queryText,searchComm
  search.model=async()=>({answer:'Fake',sources:[99]});assert.equal((await search.search('test')).verified,false);
  search.read=async()=>{throw Error('not available');};assert.match((await search.search('test')).text,/прочитать страницы не удалось/);
  search.searchAPI=async()=>{const e=Error('Captcha');e.code='BROWSER_ATTENTION';throw e;};await assert.rejects(()=>search.search('test'),e=>e.code==='BROWSER_ATTENTION');assert.equal(search.busy,false);
+ // The subject is searched, not the question around it; Google's own results text is a source and is not read again.
+ {let asked,read=0;const s=new WebSearch({enabled:()=>true,searchAPI:async q=>{asked=q;return [{url:'https://www.google.com/search?q=x',title:'Выдача Google: x',text:'Intelligence Index Score — сводный показатель. '.repeat(10)}];},read:async()=>{read++;return {url:'',text:''};},model:async()=>({answer:'Сводный показатель.',sources:[1]})});
+  const r=await s.search('Что ты знаешь про Intelligence Index Score?');assert.equal(asked,'Intelligence Index Score');assert.equal(read,0);assert.match(r.text,/^Сводный показатель./);}
+ {const {resultsText}=require('../src/search-browser.cjs');assert.equal(resultsText('Все\nКартинки\nкороткий',''),'');assert.match(resultsText('Все\nКартинки\n'+'Обзор от ИИ: индекс считается по набору тестов. '.repeat(10),'x'),/^Обзор от ИИ/);}
  search.enabled=()=>false;await assert.rejects(()=>search.search('test'),/Включите/);
  console.log('Web search: explicit routing, public links, query privacy, citations, reader failures and browser continuation passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});

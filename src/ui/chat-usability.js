@@ -93,7 +93,9 @@
       row.append(switcher);details.append(row);
     }
     for(const e of message.evidence||[]){const b=el('blockquote');b.append(el('strong',e.name+' · строка '+e.line),el('mark',e.text));const files=chatHistory.flatMap(m=>m.attachments||[]).filter(f=>f.name===e.name);const file=files[0];if(file&&files.every(f=>f.id===file.id))b.append(button('Открыть файл',safeRun(()=>window.openChatAttachment(file,topicSelect.value,{line:e.line}))));details.append(b);}meta.before(details);}
-  if(message.error){node.dataset.error='true';const content=node.querySelector('.message-content'),raw=message.text||'';content.replaceChildren(el('p',errorText(raw)));const details=el('details');details.append(el('summary','Подробности'),el('pre',raw));content.append(details);const restore=button('Вернуть запрос',()=>{const index=Number(node.dataset.messageIndex);const user=chatHistory.slice(0,index).filter(m=>m.role==='user').at(-1);if(user){$('command').value=user.text;$('command').dispatchEvent(new Event('input'));$('command').focus();}});content.append(restore);if(commandProgress.failed)content.append(button('Повторить',safeRun(()=>repeatCommand(false))));}
+  if(message.error){node.dataset.error='true';const content=node.querySelector('.message-content'),raw=message.text||'';const shown=errorText(raw);content.replaceChildren(el('p',shown));
+    // The raw text goes under «Подробности» only when it says more than the line above it.
+    if(raw.trim()&&raw.trim()!==shown.trim()){const details=el('details');details.append(el('summary','Подробности'),el('pre',raw));content.append(details);}if(commandProgress.failed)content.append(button('Повторить',safeRun(()=>repeatCommand(false))));}
  };
  // Inform about actual delays; never invent a percentage for model generation.
  const jobs=new Map();document.addEventListener('petya-chat-job',e=>jobs.set(e.detail.topicId,e.detail.job));
