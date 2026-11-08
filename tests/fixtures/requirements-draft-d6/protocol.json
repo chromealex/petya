@@ -1,0 +1,17 @@
+{
+  "part": "D6",
+  "group": "Andromeda",
+  "parent": "../requirements-draft-v21/repair4-adapter",
+  "parent_sha256": "e4750435ed3c09b138b0cb735c227ce074e9377612b3b147a657a885531a12d0",
+  "hashes": {
+    "../requirements-draft-d2/holdout.jsonl": "5b51097323c8f46ee79ccfcb7df061edf46baa1bddc8c492191268625dc1c03f"
+  },
+  "sources": {
+    "tests/fixtures/requirements-draft-v21/train_checkpointed.py": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+    "tests/fixtures/requirements-draft-v21/checkpoint.py": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549"
+  },
+  "recipe": "No training. D1 and D3 are blended exactly: ΔW = (1−λ)·ΔW(D1) + λ·ΔW(D3), one rank-16 adapter per λ (scripts/merge_adapters.py). λ = 0.3, 0.5 and 0.7.",
+  "why": "D3 learned the new corrections (39/54) and lost familiar cases (783/801); D1 keeps them (787) and fails the new ones (24). A blend of the two is the cheapest test of whether both can be had.",
+  "gate": "A blend replaces D1 only if the 54 generated held-out drafts improve with no D1 success lost, the 42 v22 cases are not worse than D1, and familiar retention is not below D1 (787/801).",
+  "limits": "λ is chosen on the same held-out sets the gate uses; with three values that is a small selection effect."
+}

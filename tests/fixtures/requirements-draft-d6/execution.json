@@ -1,0 +1,84 @@
+{
+  "part": "Andromeda D6",
+  "protocol": "tests/fixtures/requirements-draft-d6/protocol.json",
+  "python": "/Users/aleksandrfeer/.petya-train/env/bin/python",
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "work": "/Users/aleksandrfeer/.petya-train/andromeda-d6",
+  "evaluator": "tests/fixtures/requirements-draft-v8/evaluate.py",
+  "trainer": "tests/fixtures/requirements-draft-v21/train_checkpointed.py",
+  "helper": "tests/fixtures/requirements-draft-v21/checkpoint.py",
+  "verify_artifact": "tests/fixtures/requirements-draft-v21/verify_artifact.py",
+  "verify_continuation": "tests/fixtures/requirements-draft-v21/verify_continuation.py",
+  "initial_stop_after": 16,
+  "resume_retries": 4,
+  "inputs": [
+    {
+      "path": "/Users/aleksandrfeer/.petya-train/inputs/andromeda-D3",
+      "sha256": "e3df18e0a6aed26d20517a6c9149916889869511fc0f5d095da7266cd74e24ff"
+    }
+  ],
+  "merges": [
+    {
+      "name": "d6-l03",
+      "adapters": [
+        [
+          "tests/fixtures/requirements-draft-v21/repair4-adapter",
+          0.7
+        ],
+        [
+          "/Users/aleksandrfeer/.petya-train/inputs/andromeda-D3",
+          0.3
+        ]
+      ]
+    },
+    {
+      "name": "d6-l05",
+      "adapters": [
+        [
+          "tests/fixtures/requirements-draft-v21/repair4-adapter",
+          0.5
+        ],
+        [
+          "/Users/aleksandrfeer/.petya-train/inputs/andromeda-D3",
+          0.5
+        ]
+      ]
+    },
+    {
+      "name": "d6-l07",
+      "adapters": [
+        [
+          "tests/fixtures/requirements-draft-v21/repair4-adapter",
+          0.3
+        ],
+        [
+          "/Users/aleksandrfeer/.petya-train/inputs/andromeda-D3",
+          0.7
+        ]
+      ]
+    }
+  ],
+  "evaluations": [
+    {
+      "name": "on 54 generated held-out drafts",
+      "data": "tests/fixtures/requirements-draft-d2/holdout.jsonl",
+      "output": "holdout.jsonl"
+    },
+    {
+      "name": "on 30 v22 checks",
+      "data": "tests/fixtures/requirements-draft-v22/check.jsonl",
+      "output": "v22-check.jsonl"
+    },
+    {
+      "name": "on 12 v22 drafts",
+      "data": "tests/fixtures/requirements-draft-v22/fresh-drafts.jsonl",
+      "output": "v22-drafts.jsonl"
+    },
+    {
+      "name": "on 801 familiar cases",
+      "data": "tests/fixtures/requirements-draft-v22/acquisition.jsonl",
+      "output": "familiar.jsonl"
+    }
+  ],
+  "limits": "Blends D1 and D3 and evaluates each blend; D1 results come from requirements-draft-d2/results."
+}

@@ -19,6 +19,10 @@ def run(name, arguments, log):
     with open(work/log, 'a') as out:
         code = subprocess.run(['/usr/bin/arch', '-arm64', plan['python'], '-B', *arguments], cwd=ROOT, stdout=out, stderr=subprocess.STDOUT).returncode
     say(name, 'exit', code); return code
+if plan.get('merges'):
+    # A merge plan builds interpolated adapters from published parts and evaluates each; nothing is trained.
+    for item in plan['inputs']:
+        assert sha(Path(item['path'])/'adapters.safetensors') == item['sha256'], 'Changed input adapter ' + item['path']
 for name, expected in protocol['hashes'].items():
     assert sha(folder/name) == expected, 'Changed data: ' + name
 assert sha(parent/'adapters.safetensors') == protocol['parent_sha256'], 'Changed parent adapter'
@@ -40,6 +44,16 @@ def evaluate(items, model):
         out.unlink(missing_ok=True); out.with_suffix('.manifest.json').unlink(missing_ok=True)
         if run(item['name'], ['-u', plan['evaluator'], plan['base'], item['data'], str(out), '--adapter', str(model)], 'evaluation.log'):
             sys.exit(item['name'] + ' failed: see ' + str(work/'evaluation.log'))
+if plan.get('merges'):
+    for merge in plan['merges']:
+        target = work/merge['name']
+        if not (target/'adapters.safetensors').exists():
+            if run('Merge ' + merge['name'], [str(ROOT/'scripts/merge_adapters.py'), str(target), *[p + ':' + str(w) for p, w in merge['adapters']]], 'merge.log'):
+                sys.exit('Merge failed: see ' + str(work/'merge.log'))
+        say(merge['name'], sha(target/'adapters.safetensors'))
+        evaluate([{**e, 'name': merge['name'] + ' · ' + e['name'], 'output': merge['name'] + '-' + e['output']} for e in plan['evaluations']], target)
+    say('Merges done: evaluations captured. Review and the comparison with D1 come next.')
+    sys.exit(0)
 evaluate(plan.get('parent_evaluations', []), parent)
 train = [plan['trainer'], plan['base'], str(folder/protocol['training_file']), str(adapter), '--parent', str(parent), '--epochs', str(protocol['epochs']),
          '--lr', str(protocol['learning_rate']), '--layers', str(protocol['layers']), '--checkpoint-dir', str(checkpoints)]
