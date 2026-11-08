@@ -7,6 +7,7 @@
   "examples": ["Покажи отзывы в Google Play за неделю","На что жалуются игроки в отзывах?","Ответь на последний плохой отзыв"],
   "connects": "App Store Connect или Google Play Console",
   "uses": ["task-tracker","code-fix","share-message"],
+  "provides": {"release-check": "release-check.cjs"},
   "setting": "extension_store-reviews",
   "settings": true,
   "feature": "feature.cjs",

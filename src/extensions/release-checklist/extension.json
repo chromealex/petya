@@ -1,0 +1,20 @@
+{
+  "id": "release-checklist",
+  "name": "Релизный чек-лист",
+  "description": "Готов ли релиз: чек-лист проекта, где CI, крэши, отзывы, патчноут, локализация, размер билда, зависимости, блокеры Jira и номера версий проверяются сами, а ручные пункты отмечаются",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Готов ли релиз 1.5?","Чек-лист релиза","Что мешает выпустить версию 2.0?"],
+  "uses": ["share-message","task-tracker"],
+  "provides": {"release-check": "versions.cjs"},
+  "setting": "extension_release-checklist",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["checklist-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "releaseChecklist": "renderReleaseChecklist"
+  }
+}

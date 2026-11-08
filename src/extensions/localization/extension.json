@@ -5,6 +5,7 @@
   "category": "gamedev",
   "icon": "icon.svg",
   "examples": ["Проверь локализацию","Какие строки не переведены?","Переведи недостающие строки на немецкий"],
+  "provides": {"release-check": "release-check.cjs"},
   "setting": "extension_localization",
   "settings": true,
   "feature": "feature.cjs",
