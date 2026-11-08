@@ -19,5 +19,5 @@ v21 fourth repair adapter. D2 and D3 (new correction dialogues, one and two rehe
 rejected for forgetting familiar cases and are published as pre-releases `andromeda-d2` and `andromeda-d3`.
 
 Training keeps here what the next stage needs: data, protocols, scripts, evidence, the training environment in
-`/tmp/peter-v10/eval-env`, the base model in the Hugging Face cache and the parent adapter of the next stage.
+`~/.petya-train/env` (recreated from `scripts/train-requirements.txt` when missing; `/tmp` does not survive a restart), the base model in the Hugging Face cache and the parent adapter of the next stage.
 Checkpoints and adapters of finished or rejected stages are deleted locally once their part is on GitHub.

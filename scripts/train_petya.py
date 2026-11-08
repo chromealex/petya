@@ -24,6 +24,12 @@ for name, expected in protocol['hashes'].items():
 assert sha(parent/'adapters.safetensors') == protocol['parent_sha256'], 'Changed parent adapter'
 for name, expected in protocol['sources'].items():
     assert sha(ROOT/name) == expected, 'Changed source: ' + name
+if not Path(plan['python']).exists():
+    # The environment lives outside the repository and survives a restart; it is recreated from the pinned list.
+    env = Path(plan['python']).parents[1]
+    say('Creating training environment', env)
+    subprocess.run([sys.executable, '-m', 'venv', str(env)], check=True)
+    subprocess.run(['/usr/bin/arch', '-arm64', plan['python'], '-m', 'pip', 'install', '-q', '-r', str(ROOT/'scripts/train-requirements.txt')], check=True)
 assert Path(plan['python']).exists(), 'Missing training environment ' + plan['python']
 work.mkdir(parents=True, exist_ok=True)
 def evaluate(items, model):

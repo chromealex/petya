@@ -1,9 +1,9 @@
 {
   "part": "Andromeda D4",
   "protocol": "tests/fixtures/requirements-draft-d4/protocol.json",
-  "python": "/tmp/peter-v10/eval-env/bin/python",
+  "python": "/Users/aleksandrfeer/.petya-train/env/bin/python",
   "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
-  "work": "/tmp/petya-andromeda-d4",
+  "work": "/Users/aleksandrfeer/.petya-train/andromeda-d4",
   "trainer": "tests/fixtures/requirements-draft-v21/train_checkpointed.py",
   "helper": "tests/fixtures/requirements-draft-v21/checkpoint.py",
   "initial_stop_after": 16,
