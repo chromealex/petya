@@ -1,0 +1,55 @@
+{
+  "part": "Andromeda D8",
+  "adapter_sha256": "9efdfdcf84d49d4c22f18127bb4b6458a3dd6d123dd24326809a0a83cd9b97fb",
+  "parent": "D7",
+  "steps": 901,
+  "learning_rate": 5e-07,
+  "generated_holdout": {
+    "D8": 39,
+    "D7": 37,
+    "D1": 24,
+    "total": 54,
+    "exact": 19,
+    "lost_D7": [
+      "d2-hold-screen-only-14",
+      "d2-hold-exact-name-22",
+      "d2-hold-code-26",
+      "d2-hold-screen-only-32",
+      "d2-hold-two-recipients-38",
+      "d2-hold-quote-42"
+    ],
+    "gained_vs_D7": 8,
+    "lost_D1": [
+      "d2-hold-exact-name-22",
+      "d2-hold-quote-24",
+      "d2-hold-two-recipients-38"
+    ]
+  },
+  "v22": {
+    "checks": {
+      "D8": 28,
+      "D7": 28,
+      "D1": 27,
+      "total": 30
+    },
+    "drafts": {
+      "D8": 7,
+      "D7": 6,
+      "D1": 6,
+      "total": 12
+    }
+  },
+  "familiar": {
+    "D8": 795,
+    "D7": 795,
+    "D1": 787,
+    "total": 801,
+    "lost_D7": [
+      "v20-only-one-recipient",
+      "fresh-undo-ban"
+    ],
+    "gained_vs_D7": 2
+  },
+  "gate": "passed: not worse than D7 on any set, and four of the five D1 successes D7 lost are back",
+  "decision": "D8 is the group's D since 9 November 2026 (R1-A1-D8)"
+}

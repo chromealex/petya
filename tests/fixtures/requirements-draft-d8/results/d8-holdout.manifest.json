@@ -1,0 +1,14 @@
+{
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "data_sha256": "5b51097323c8f46ee79ccfcb7df061edf46baa1bddc8c492191268625dc1c03f",
+  "adapter": "/Users/aleksandrfeer/.petya-train/andromeda-d8/adapter",
+  "temperature": 0,
+  "thinking": false,
+  "max_tokens": {
+    "draft": 450,
+    "other": 120
+  },
+  "reference_in_prompt": false,
+  "adapter_sha256": "9efdfdcf84d49d4c22f18127bb4b6458a3dd6d123dd24326809a0a83cd9b97fb",
+  "config_sha256": "77d7bef9a07175b1dce74dc8ad9cd83494d52ce6c4edced139185b4bc6d6e07a"
+}

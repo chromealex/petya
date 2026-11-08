@@ -18,13 +18,18 @@ const path=require('node:path');
 const KIND='crash-source';
 const HOOKS=['release','crashFree','resolve','reopen','issueUrl'];
 
+// Without `dir`, the sources of every live extension in the shared registry (src/extension-registry.cjs), installed
+// and development ones included; a broken installed source is reported and skipped, a bundled one is a bug.
 function load(dir){
- return require('./app-links.cjs').scan(dir).filter(x=>x.kind===KIND).map(({provider:p,...x})=>{
-  const bad=()=>Error('Invalid crash source '+x.extension+'/'+x.file);
-  if(typeof p.ready!=='function'||typeof p.issues!=='function')throw bad();
-  for(const hook of HOOKS)if(p[hook]!==undefined&&typeof p[hook]!=='function')throw bad();
-  for(const list of [p.names,p.standalone])if(list!==undefined&&(!Array.isArray(list)||list.some(r=>!(r instanceof RegExp))))throw bad();
-  return {id:p.id||x.extension,extension:x.extension,setting:x.setting,name:p.name||x.name,color:typeof p.color==='string'?p.color:'',service:typeof p.service==='string'?p.service:'',source:p};
+ return require('./app-links.cjs').scan(dir).filter(x=>x.kind===KIND).flatMap(({provider:p,...x})=>{
+  const invalid=typeof p.ready!=='function'||typeof p.issues!=='function'||HOOKS.some(hook=>p[hook]!==undefined&&typeof p[hook]!=='function')||
+   [p.names,p.standalone].some(list=>list!==undefined&&(!Array.isArray(list)||list.some(r=>!(r instanceof RegExp))));
+  if(invalid){
+   const error=Error('Invalid crash source '+x.extension+'/'+x.file);
+   if(x.origin&&x.origin!=='bundled'){const r=require('../extension-registry.cjs');r.report(r.entry(x.extension),error,x.file);return [];}
+   throw error;
+  }
+  return [{id:p.id||x.extension,extension:x.extension,setting:x.setting,name:p.name||x.name,color:typeof p.color==='string'?p.color:'',service:typeof p.service==='string'?p.service:'',source:p}];
  }).sort((a,b)=>a.id.localeCompare(b.id));
 }
 
@@ -44,7 +49,10 @@ function issue(raw,source){
 }
 
 // The registry bound to live services: which extensions are added and connected is read at call time.
-function create(s,{sources=load()}={}){
+function create(s,{sources:fixed}={}){
+ // Without fixed sources (tests), the list follows the registry: a source installed or removed counts at once.
+ const list=()=>fixed||require('../extension-registry.cjs').cached('crash-sources',()=>load());
+ const sources={find:f=>list().find(f),filter:f=>list().filter(f),some:f=>list().some(f),map:f=>list().map(f)};
  const added=x=>!x.setting||s.settings?.[x.setting]==='true';
  const connected=x=>{try{return !!x.source.ready(s.settings||{});}catch{return false;}};
  const ready=x=>added(x)&&connected(x);

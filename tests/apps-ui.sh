@@ -5,7 +5,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.."
 log=$(mktemp)
 status=0
-for test in tests/app-catalog-ui.cjs tests/offer-cards-ui.cjs $(ls tests/*-ui.cjs | grep -E 'tests/(regex-cron|github-settings|ci-builds|pull-requests|crashes|store-reviews|calendar|build-size|localization|dependencies|disk-usage|app-links|meetings|meeting-apps|discord|support|sprint-planning|standup|ad-revenue|competitors|who-knows|glossary|metrics|ab-test|focus|naming|meeting-prep|patch-notes|docker|http-client|screenshot-task|converter|grafana|reminders|journal|code-review|mentor|profiler|playtest|release-checklist|anomalies|sql|search-all|google-sheets|config-balance|spreadsheet-export)-ui\.cjs'); do
+for test in tests/app-catalog-ui.cjs tests/offer-cards-ui.cjs $(ls tests/*-ui.cjs | grep -E 'tests/(regex-cron|github-settings|ci-builds|pull-requests|crashes|store-reviews|calendar|build-size|localization|dependencies|disk-usage|app-links|meetings|meeting-apps|discord|support|sprint-planning|standup|ad-revenue|competitors|who-knows|glossary|metrics|ab-test|focus|naming|meeting-prep|patch-notes|docker|http-client|screenshot-task|converter|grafana|reminders|journal|code-review|mentor|profiler|playtest|release-checklist|anomalies|sql|search-all|google-sheets|config-balance|spreadsheet-export|extension-external)-ui\.cjs'); do
   [ -f "$test" ] || continue
   if timeout 180 xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox "$test" >"$log" 2>&1 && grep -q "UI smoke test passed" "$log"; then
     grep -E "passed$" "$log" | grep -v "UI smoke test passed"

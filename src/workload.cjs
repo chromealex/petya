@@ -79,7 +79,7 @@ class Workload {
 }
 
 // «Чем Аня занимается?»: who she is on the team card and what is open on her in Jira.
-async function personAnswer(workload, member, members = []) {
+async function personAnswer(workload, member, members = [], limit = 8) {
   const lines = [member.name + (member.role ? ' — ' + member.role : '') + '.'];
   if (member.responsibilities) lines.push('Отвечает за: ' + member.responsibilities.replace(/\s+/g, ' ').trim().replace(/[.;]$/, '') + '.');
   if (member.projects) lines.push('Проекты: ' + member.projects.replace(/\s+/g, ' ').trim().replace(/[.;]$/, '') + '.');
@@ -89,7 +89,7 @@ async function personAnswer(workload, member, members = []) {
   const row = snap.rows?.find(r => r.name === member.name);
   if (!row?.jiraId) { lines.push('Аккаунт Jira не найден: укажите его в карточке в «Команде».'); return lines.join('\n'); }
   let open;
-  try { open = await workload.openIssues(row.jiraId); } catch (e) { lines.push('Задачи в Jira прочитать не удалось: ' + e.message); return lines.join('\n'); }
+  try { open = await workload.openIssues(row.jiraId, limit); } catch (e) { lines.push('Задачи в Jira прочитать не удалось: ' + e.message); return lines.join('\n'); }
   if (!open.items.length) { lines.push('Открытых задач в Jira нет.'); return lines.join('\n'); }
   lines.push('В Jira открыто ' + open.total + ' ' + plural(Number(open.total) || 50, 'задача', 'задачи', 'задач') + (open.inProgress ? ', в работе ' + open.inProgress : '') + ':');
   for (const i of open.items) lines.push('- ' + i.key + ' ' + i.summary + (i.status ? ' (' + i.status + ')' : ''));
@@ -136,4 +136,11 @@ function answer(snapshot, question, members = []) {
   return (head ? head + '\n' : '') + rows.join('\n') + tail;
 }
 
-module.exports = { Workload, sources, loadQuestion, answer, line, personAnswer };
+// «Чем занят бэк?»: everyone the question is about, each with the card and a few open Jira issues.
+async function groupAnswer(workload, group, members = []) {
+  const blocks = [];
+  for (const m of group.slice(0, 12)) blocks.push(await personAnswer(workload, m, members, 3));
+  return (group.length === 1 ? '' : 'Нашёл в «Команде» ' + group.length + ' ' + plural(group.length, 'человек', 'человека', 'человек') + ': ' + group.map(m => m.name).join(', ') + '.\n\n') + blocks.join('\n\n');
+}
+
+module.exports = { Workload, sources, loadQuestion, answer, line, personAnswer, groupAnswer };

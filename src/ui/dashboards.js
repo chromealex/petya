@@ -11,7 +11,7 @@
  const ICON={grid:'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',refresh:'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7',more:'M5 12h.01M12 12h.01M19 12h.01',pin:'M12 17v5M8 3h8l-1 6 4 4H5l4-4z',back:'M15 18l-6-6 6-6',plus:'M12 5v14M5 12h14',share:'M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13',drag:'M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01'};
  const button=(label,path,onClick,className='')=>{const b=el('button',className);b.type='button';if(path){b.innerHTML=icon(path);if(label){b.title=label;b.setAttribute('aria-label',label);}}else b.textContent=label;b.onclick=onClick;return b;};
  const fail=e=>{const k=kit();if(k)k.toast(e.message||String(e),{error:true});else notice(e.message,true);};
- const SIZE_LABEL={auto:'Авто',s:'Узкий',m:'Средний',l:'Широкий',w:'Во всю ширину'};
+ const WIDTHS=[[3,'Четверть'],[4,'Треть'],[6,'Половина'],[8,'Две трети'],[12,'Во всю ширину']];
  const EVERY_LABEL={0:'Только вручную',5:'Каждые 5 минут',15:'Каждые 15 минут',60:'Каждый час',240:'Каждые 4 часа',1440:'Раз в день'};
  const shell=document.querySelector('#home .chat-shell');
  const screen=el('section','dash-screen');screen.setAttribute('aria-label','Дашборд');screen.hidden=true;shell?.append(screen);
@@ -47,21 +47,21 @@
   names.append(title,meta(w,d));head.append(names);
   if(Number.isFinite(w.count)&&w.count!==null)head.append(el('span','dash-count',String(w.count)));
   if(!compact){
-   const handle=el('span','dash-widget-drag');handle.innerHTML=icon(ICON.drag);handle.title='Перетащите, чтобы переставить';head.prepend(handle);
+   const handle=el('span','dash-widget-drag');handle.innerHTML=icon(ICON.drag);handle.title='Перетащите за заголовок, чтобы переставить';head.prepend(handle);
    const tools=el('div','dash-widget-tools');
    if(w.live){const r=button('Обновить',ICON.refresh,()=>call('refresh',d.id,w.id).then(paint).catch(fail),'dash-tool');if(w.loading)r.classList.add('loading');tools.append(r);}
    const more=button('Действия с виджетом',ICON.more,()=>kit().menu(more,async()=>widgetMenu(d,w),option=>option.run()),'dash-tool');
    tools.append(more);head.append(tools);
-   card.draggable=true;
   }
   const body=el('div','dash-widget-body');
   if(w.error){const err=el('p','dash-widget-error',w.error);body.append(err);}
   card.append(head,body);
-  const content=el('div');body.append(content);drawBody(content,w);
+  const content=el('div');body.append(content);card.drawn=drawBody(content,w).catch(()=>{});
+  if(!compact){const grip=el('span','dash-resize');grip.title='Потяните, чтобы изменить размер';grip.setAttribute('aria-hidden','true');card.append(grip);}
   return card;
  }
  function widgetMenu(d,w){
-  const rows=[{label:'Размер',note:true},...Object.entries(SIZE_LABEL).map(([size,label])=>({label,current:w.size===size,run:()=>call('widget',d.id,w.id,{size}).then(paint).catch(fail)}))];
+  const rows=[{label:'Ширина',note:true},...WIDTHS.map(([cols,label])=>({label,current:w.pos?.w===cols,run:()=>setWidth(d,w,cols)}))];
   if(w.live)rows.push({label:'Обновлять',note:true},...Object.entries(EVERY_LABEL).map(([every,label])=>({label,current:w.every===Number(every),run:()=>call('widget',d.id,w.id,{every:Number(every)}).then(paint).catch(fail)})));
   rows.push({label:'Ещё',note:true},{label:'Переименовать',run:()=>renameWidget(d,w)});
   if(w.kind==='jira')rows.push({label:'Изменить запрос JQL',hint:w.describe.replace(/^Jira · /,''),run:()=>editJql(d,w)});
@@ -87,40 +87,96 @@
  }
 
  // --- The dashboard screen ---------------------------------------------------------------------------------------
+ // --- Layout: a 12-column grid the person arranges ---------------------------------------------------------------
+ // Each widget has {x, y, w, h} in columns and 32-px rows. Drag a widget by its header, resize it by the corner;
+ // the others make room and everything rises to close gaps. A new widget takes the first free spot, its height is
+ // fitted to its data once. Below ~760 px of width the widgets simply stack in reading order.
+ const COLS=12,ROW=20,GAP=12,PITCH=ROW+GAP;
+ const WIDTH={auto:6,s:4,m:6,l:8,w:12};
+ const overlap=(a,b)=>a!==b&&a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+ function guessH(w){
+  const c=w.data?.charts?.[0];
+  if(c?.type==='kpi')return 6;if(c?.type==='line'||c?.type==='donut')return 11;if(c?.type==='bars')return Math.min(14,4+(c.rows?.length||3));
+  if(Array.isArray(w.data?.jiraItems))return Math.min(22,6+w.data.jiraItems.length*5);return 10;
+ }
+ function freeSpot(items,it){for(let y=0;;y++)for(let x=0;x+it.w<=COLS;x++){it.x=x;it.y=y;if(!items.some(p=>overlap(p,it)))return it;}}
+ // The moved widget keeps its spot; whatever it covers moves down; then everything rises as far as it can.
+ function settle(items,keep=null){
+  const placed=[];
+  for(const it of [...items].sort((a,b)=>(b===keep)-(a===keep)||a.y-b.y||a.x-b.x)){if(it!==keep)while(placed.some(p=>overlap(p,it)))it.y++;placed.push(it);}
+  for(const it of [...items].sort((a,b)=>a.y-b.y||a.x-b.x))while(it.y>0){it.y--;if(items.some(p=>overlap(p,it))){it.y++;break;}}
+  return items;
+ }
+ function layoutOf(d){
+  const items=[],fresh=[];
+  for(const w of d.widgets){const it={id:w.id,...(w.pos||{}),fit:!!w.pos?.fit};if(w.pos)items.push(it);else fresh.push([w,it]);}
+  for(const [w,it] of fresh){it.w=WIDTH[w.size]||6;it.h=guessH(w);it.fit=true;freeSpot(items,it);items.push(it);}
+  return {items:settle(items),changed:fresh.length>0};
+ }
+ const place=(card,it)=>{card.style.gridColumn=(it.x+1)+' / span '+it.w;card.style.gridRow=(it.y+1)+' / span '+it.h;};
+ const saveLayout=(d,items)=>call('layout',d.id,items.map(({id,x,y,w,h,fit})=>({id,x,y,w,h,fit}))).then(v=>{if(v.id===openId)current=v;return v;}).catch(fail);
  function grid(d,{compact=false}={}){
-  const box=el('div','dash-grid'+(compact?' compact':''));
-  for(const w of d.widgets)box.append(widget(d,w,{compact}));
-  pack(box);
-  if(!compact)dragging(box,d);
+  const box=el('div','dash-grid free'+(compact?' compact':''));
+  const {items,changed}=layoutOf(d),byId=new Map(items.map(i=>[i.id,i]));
+  const cards=d.widgets.map(w=>{const card=widget(d,w,{compact});place(card,byId.get(w.id));box.append(card);return card;});
+  // Stack when the grid is narrow (the start screen in a small window, a narrow main window).
+  const stack=()=>box.classList.toggle('stacked',box.clientWidth>0&&box.clientWidth<760);
+  new ResizeObserver(stack).observe(box);
+  if(compact)return box;
+  editable(box,d,items,byId);
+  // Heights of new widgets follow their data once it is drawn.
+  Promise.all(cards.map(c=>c.drawn)).then(()=>{
+   let fitted=false;
+   for(const card of cards){const it=byId.get(card.dataset.id),w=d.widgets.find(x=>x.id===it.id);if(!it.fit||!(w.data&&Object.keys(w.data).length||w.text))continue;
+    const head=card.querySelector('.dash-widget-head'),content=card.querySelector('.dash-widget-body>div:last-child');if(!head||!content||!box.isConnected||box.classList.contains('stacked'))continue;
+    const natural=head.offsetHeight+content.scrollHeight+(card.querySelector('.dash-widget-error')?.offsetHeight||0)+34;
+    it.h=Math.min(30,Math.max(4,Math.ceil((natural+GAP)/PITCH)));it.fit=false;fitted=true;}
+   if(fitted){settle(items);for(const card of cards)place(card,byId.get(card.dataset.id));}
+   if(fitted||changed)saveLayout(d,items);
+  });
   return box;
  }
- // Six columns. A widget with a fixed size takes 2, 3, 4 or 6 of them; «Авто» widgets share a row two or three
- // at a time. A row is always full — what is left goes to its «Авто» widgets (or grows the last one) — and the
- // widgets of a row share its height. Content adapts to the widget's width (container queries in dashboards.css).
- const SPAN={s:2,m:3,l:4,w:6};
- function pack(box){
-  const cards=[...box.children].filter(n=>n.classList.contains('dash-widget'));
-  let row=[],used=0;
-  const flush=()=>{if(!row.length)return;let left=6-used;const autos=row.filter(r=>r.auto),targets=autos.length?autos:[row.at(-1)];
-   for(let k=0;left>0;k++,left--)targets[k%targets.length].span++;
-   for(const r of row)r.card.style.setProperty('--span',String(r.span));row=[];used=0;};
-  const put=(card,span,auto)=>{if(used+span>6)flush();row.push({card,span,auto});used+=span;if(used===6)flush();};
-  for(let i=0;i<cards.length;){
-   const size=cards[i].dataset.size;
-   if(size!=='auto'){put(cards[i],SPAN[size]||3,false);i++;continue;}
-   // A run of «Авто» widgets: fill what the row has left, then rows of two (three when that avoids a lone one).
-   let j=i;while(j<cards.length&&cards[j].dataset.size==='auto')j++;
-   if(row.length){const fit=Math.min(j-i,Math.floor((6-used)/2));for(let k=0;k<fit;k++)put(cards[i++],2,true);flush();}
-   const n=j-i,counts=n===0?[]:n===1?[1]:n%2?[3,...Array((n-3)/2).fill(2)]:Array(n/2).fill(2);
-   for(const take of counts){for(let k=0;k<take;k++)put(cards[i++],6/take,true);flush();}
-  }
-  flush();
+ function editable(box,d,items,byId){
+  let op=null;
+  const ghost=el('div','dash-ghost-cell');ghost.hidden=true;box.append(ghost);
+  const apply=()=>{for(const card of box.querySelectorAll(':scope>.dash-widget'))if(card!==op?.card||op.resize)place(card,byId.get(card.dataset.id));if(op){place(ghost,op.it);}};
+  box.addEventListener('pointerdown',e=>{
+   if(e.button!==0||box.classList.contains('stacked'))return;
+   const card=e.target.closest('.dash-widget');if(!card||card.parentElement!==box)return;
+   const resize=e.target.closest('.dash-resize'),head=e.target.closest('.dash-widget-head');
+   if(!resize&&(!head||e.target.closest('button,a,input,select,textarea')))return;
+   e.preventDefault();
+   const it=byId.get(card.dataset.id),r=card.getBoundingClientRect();
+   op={card,it,resize:!!resize,before:JSON.stringify(items.map(({id,x,y,w,h})=>[id,x,y,w,h])),sx:e.clientX,sy:e.clientY,dx:e.clientX-r.left,dy:e.clientY-r.top,left:r.left,top:r.top};
+   try{card.setPointerCapture(e.pointerId);}catch{}card.classList.add(op.resize?'resizing':'dragging');box.classList.add('editing');ghost.hidden=false;apply();
+  });
+  box.addEventListener('pointermove',e=>{
+   if(!op)return;
+   const g=box.getBoundingClientRect(),colPitch=(g.width+GAP)/COLS,it=op.it;
+   if(op.resize){
+    const r=op.card.getBoundingClientRect();
+    it.w=Math.max(2,Math.min(COLS-it.x,Math.round((e.clientX-r.left+GAP)/colPitch)));
+    it.h=Math.max(3,Math.min(60,Math.round((e.clientY-r.top+GAP)/PITCH)));it.fit=false;
+   }else{
+    it.x=Math.max(0,Math.min(COLS-it.w,Math.round((e.clientX-g.left-op.dx)/colPitch)));
+    it.y=Math.max(0,Math.round((e.clientY-g.top-op.dy)/PITCH));
+    op.card.style.transform='translate('+(e.clientX-op.sx)+'px,'+(e.clientY-op.sy)+'px)';
+   }
+   settle(items,it);apply();
+   // Near the screen's edge the dashboard scrolls along.
+   const s=screen.getBoundingClientRect();if(e.clientY>s.bottom-40)screen.scrollTop+=14;else if(e.clientY<s.top+40)screen.scrollTop-=14;
+  });
+  const end=()=>{
+   if(!op)return;const {card,before}=op;
+   card.style.transform='';card.classList.remove('dragging','resizing');box.classList.remove('editing');ghost.hidden=true;op=null;settle(items);apply();
+   if(JSON.stringify(items.map(({id,x,y,w,h})=>[id,x,y,w,h]))!==before)saveLayout(d,items);
+  };
+  box.addEventListener('pointerup',end);box.addEventListener('pointercancel',end);
  }
- function dragging(box,d){
-  let moving=null;
-  box.addEventListener('dragstart',e=>{moving=e.target.closest('.dash-widget');if(!moving)return;moving.classList.add('moving');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',moving.dataset.id);});
-  box.addEventListener('dragover',e=>{if(!moving)return;e.preventDefault();const over=e.target.closest('.dash-widget');if(!over||over===moving)return;const r=over.getBoundingClientRect();const after=e.clientY>r.top+r.height/2||e.clientX>r.left+r.width/2&&e.clientY>r.top;over[after?'after':'before'](moving);});
-  box.addEventListener('dragend',()=>{if(!moving)return;moving.classList.remove('moving');moving=null;pack(box);call('move',d.id,[...box.children].map(n=>n.dataset.id)).then(paint).catch(fail);});
+ // «Ширина» in the widget menu: the same as resizing by the corner.
+ function setWidth(d,w,cols){
+  const grid=screen.querySelector('.dash-grid.free');if(!grid)return;const {items}=layoutOf(d),it=items.find(i=>i.id===w.id);if(!it)return;
+  it.w=cols;it.x=Math.min(it.x,COLS-cols);it.fit=false;settle(items,it);saveLayout(d,items).then(v=>v&&paint(v));
  }
  function header(d){
   const head=el('header','dash-head');

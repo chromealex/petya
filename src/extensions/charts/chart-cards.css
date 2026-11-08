@@ -22,7 +22,7 @@
 .chart-line-key{display:inline-flex;align-items:center;gap:6px;padding:2px 6px;border:0;border-radius:6px;background:transparent;color:var(--ink);font:inherit;font-size:12px}
 .chart-line-key:hover{background:#ffffff0b}.chart-line-key[aria-pressed="false"]{opacity:.45;text-decoration:line-through}
 .chart-line-plot{position:relative;width:100%;min-width:0}
-.chart-line-svg{display:block;width:100%;height:auto;overflow:visible}
+.chart-line-svg{display:block;width:100%;height:190px;overflow:visible}
 .chart-grid{stroke:#ffffff10;stroke-width:1}
 .chart-axis{fill:var(--muted);font-size:10.5px;font-variant-numeric:tabular-nums}
 .chart-ruler{stroke:#ffffff40;stroke-width:1;stroke-dasharray:3 3}

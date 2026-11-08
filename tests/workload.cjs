@@ -1,6 +1,6 @@
 // Workload of the team: open tasks per person from Jira and Asana, for the team page, chat and assignment.
 const assert = require('assert').strict;
-const { Workload, loadQuestion, answer, sources, personAnswer } = require('../src/workload.cjs');
+const { Workload, loadQuestion, answer, sources, personAnswer, groupAnswer } = require('../src/workload.cjs');
 let count = 0;
 async function test(name, fn) { await fn(); count++; console.log('✓ ' + name); }
 const team = [
@@ -77,6 +77,9 @@ function fixture({ jiraFails = false } = {}) {
     assert.match(text, /^Мария Соколова — QA\.\nОтвечает за: регресс и релизы\./);
     assert.match(text, /открыто 2 задачи, в работе 1:\n- PAY-1 Проверка оплаты \(In Progress\)\n- PAY-2 Регресс 1\.20 \(To Do\)/);
     assert.match(await personAnswer(w, team[2], team), /Аккаунт Jira не найден/);
+    const group = await groupAnswer(w, [masha, team[1]], team);
+    assert.match(group, /^Нашёл в «Команде» 2 человека: Мария Соколова, Иван Петров\.\n\nМария Соколова — QA\./);
+    assert.match(group, /\n\nИван Петров — бэкенд\./);
     const off = new Workload({ settings: () => ({ teamMembers: settings.teamMembers }), workspace: () => null, asana: null, modules: null });
     assert.match(await personAnswer(off, team[1], team), /Jira не подключена/);
   });

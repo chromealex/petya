@@ -1,9 +1,14 @@
-const fs = require('node:fs');
-const path = require('node:path');
 const cancel = require('../answer-cancel.cjs');
-const directory = path.join(__dirname, '../extensions');
-const providers = fs.readdirSync(directory, { withFileTypes: true }).filter(entry => entry.isDirectory())
-  .map(entry => path.join(directory, entry.name, 'desktop-reply.cjs')).filter(file => fs.existsSync(file)).map(file => require(file));
+// desktop-reply.cjs of every live extension (bundled, installed, development: src/extension-registry.cjs),
+// re-read after an extension is installed or removed. An installed provider's `type` must be its id.
+const registry = require('../extension-registry.cjs');
+const providerList = () => registry.cached('desktop-reply', () => registry.files('desktop-reply.cjs').flatMap(e => {
+  const p = registry.load(e, e.file); if (!p) return [];
+  if (e.origin === 'bundled' || p.type === e.id && typeof p.name === 'string' && typeof p.matches === 'function' &&
+    (typeof p.turn === 'function' || typeof p.scope === 'function' && typeof p.answer === 'function')) return [p];
+  registry.report(e, Error('desktop-reply.cjs: нужны type «' + e.id + '», name, matches() и turn() или scope() с answer()'), e.file); return [];
+}));
+const providers = { filter: f => providerList().filter(f), some: f => providerList().some(f), map: f => providerList().map(f) };
 const flag = p => 'extension_' + p.type;
 const list = settings => providers.map(p => ({ id:p.type, name:p.name, description:p.description,
   installed:settings?.[flag(p)] === 'true' }));

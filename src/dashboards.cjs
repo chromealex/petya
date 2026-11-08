@@ -23,11 +23,21 @@ function source(value){
   if(kind==='jira'){const jql=text(value.jql,LIMIT.jql);if(!jql)throw Error('Укажите запрос JQL.');return {kind,jql};}
   return {kind};
 }
+// Where the person put the widget: a 12-column grid, rows of 32 px; `fit` until its height was fitted to its data.
+const COLS=12;
+function position(value){
+  if(!value||typeof value!=='object')return null;
+  const n=(v,lo,hi)=>Number.isInteger(Number(v))?Math.min(hi,Math.max(lo,Number(v))):null;
+  const w=n(value.w,2,COLS),h=n(value.h,2,60),x=n(value.x,0,COLS-2),y=n(value.y,0,2000);
+  if([w,h,x,y].includes(null))return null;
+  return {x:Math.min(x,COLS-w),y,w,h,...(value.fit?{fit:true}:{})};
+}
 function widget(value){
   const out={id:/^[\w-]{6,64}$/.test(String(value?.id||''))?value.id:randomUUID(),title:text(value?.title,LIMIT.title)||'Виджет',
     size:SIZES.includes(value?.size)?value.size:'auto',every:EVERY.includes(Number(value?.every))?Number(value.every):15,source:source(value?.source)};
   if(out.source.kind==='snapshot'){out.every=0;out.data=value?.data&&typeof value.data==='object'?value.data:{};if(value?.text)out.text=String(value.text).slice(0,4000);out.at=Number(value?.at)||Date.now();}
   if(value?.chat&&typeof value.chat==='object')out.chat={topicId:text(value.chat.topicId,80),index:Number.isInteger(value.chat.index)?value.chat.index:undefined};
+  const pos=position(value?.pos);if(pos)out.pos=pos;
   return out;
 }
 function dashboard(value){
@@ -37,7 +47,7 @@ function dashboard(value){
 }
 // Shared file: definitions only. Snapshots carry someone's data, so they stay on this computer.
 function shareable(d){
-  return {version:1,title:d.title,widgets:d.widgets.filter(w=>w.source.kind!=='snapshot').map(({id,title,size,every,source})=>({id,title,size,every,source}))};
+  return {version:1,title:d.title,widgets:d.widgets.filter(w=>w.source.kind!=='snapshot').map(({id,title,size,every,source,pos})=>({id,title,size,every,source,...(pos?{pos}:{})}))};
 }
 const slug=title=>{
   const map={а:'a',б:'b',в:'v',г:'g',д:'d',е:'e',ё:'e',ж:'zh',з:'z',и:'i',й:'y',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'h',ц:'c',ч:'ch',ш:'sh',щ:'sch',ъ:'',ы:'y',ь:'',э:'e',ю:'yu',я:'ya'};
@@ -70,4 +80,4 @@ function phrases(description){
   return {title,parts};
 }
 const wantsDashboard=command=>/^(?:петя[,!\s]+)?(?:пожалуйста[,\s]+)?(?:собери|сделай|создай|построй|заведи|сформируй)\s+(?:мне\s+|нам\s+)?(?:нов\p{L}*\s+)?(?:дашборд|дэшборд|dashboard)/iu.test(String(command||'').trim());
-module.exports={SIZES,EVERY,KINDS,LIMIT,DIR,source,widget,dashboard,shareable,slug,readShared,writeShared,phrases,wantsDashboard};
+module.exports={COLS,position,SIZES,EVERY,KINDS,LIMIT,DIR,source,widget,dashboard,shareable,slug,readShared,writeShared,phrases,wantsDashboard};

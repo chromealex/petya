@@ -1,0 +1,97 @@
+{
+ "v18-code-lifetime": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "81f051a917eccb945dec7a284de863f846db12c43a0dcb2ae75a52ac3158fed7"
+ },
+ "v20-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «293 секунду».",
+  "answer_sha256": "bbb38af43960db17ca16abe20aaebac35ceb7b4135083f512943181724409e85"
+ },
+ "v20-only-one-recipient": {
+  "passed": false,
+  "reason": "Recipients turned into quoted document names.",
+  "answer_sha256": "e2b48c29d490b483167857d5fdddf948719d5a9e1b1d9ed3f91ac762fd407bb4"
+ },
+ "v21-previous-draft-quote": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "a515c7af52460b9222682be49a693a2e1d16f39c55cb0167e3008eb4380dadba"
+ },
+ "fresh-sort-3-1-1": {
+  "passed": false,
+  "reason": "Wrong sort result.",
+  "answer_sha256": "8e51c6d7a3cdcbaf19e27c7abb5beaf1c07e5b5e87011be896aa698c11bdb686"
+ },
+ "fresh-cancel-first": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "403787fa0299bbbd9beccfdacfceba956118b681f28d307852f0609920632721"
+ },
+ "fresh-cancel-second": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "ee62a6d75049945f885ade13a7ab4cc0a601aba4489b5e2e0e893450788122c4"
+ },
+ "fresh-revoke-transmit": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "3e113d16b68c38c93048efbdd84f760f393e8972cfa77d01cf92c9e69b98f279"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "86137e0c9f4b619bd5d5f839f7bca49f75cde0bf0dd2b8e15f3ee3143f9dd962"
+ },
+ "fresh-copy-scope": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "b9233fa0b6acf620038145d74385ac88ea8f9e056bced71d2b854397e5ce2499"
+ },
+ "fresh-undo-ban": {
+  "passed": false,
+  "reason": "Grammar «Прежний запрет не сохранить».",
+  "answer_sha256": "6002fd10d3c0dd22d627f92ccb3cbed215bf1dfcad695c36dc5b183afdca085e"
+ },
+ "fresh-add-not-replace": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "7324be87ebfb8b1efe26d860099ea8b471a45cf8361aa8e9e7974cb2cd262817"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Invented conditions for another badge.",
+  "answer_sha256": "828e10edfc4573eb8f45a6972659e2adcd0350788306e53e4689b9d038238c5a"
+ },
+ "fresh-duration-open": {
+  "passed": false,
+  "reason": "«вместо кода входа» changes the meaning.",
+  "answer_sha256": "937d3d3ff3d0c0304d852cbf68401159d563429ce71a805670c5e89c86ecf759"
+ },
+ "fresh-exact-caption": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "cf0def86b1dcad400603f6e8d7abe4e186ecc6f68470243a8eb3737cef6b1c49"
+ },
+ "fresh-quoted-instruction": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "651945c1fa53d4b4f829db49cee877e63993d70d678426aa65374641c97a3f18"
+ },
+ "fresh-negative-order": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "370d6fc52350ee44b6d88dc15a722a869919be0fe6a5e6a5152cd8b8124920a4"
+ },
+ "fresh-recipient-pending": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "ceff3a56b01e255491ce186bab9c3be6cc02bd8ece7e5e42b03d5a3dff481649"
+ },
+ "fresh-rename-withdrawn": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "061a101053b1667e2f7ae53be46cd133e1de23d90e482fe714fde6c682c53ac5"
+ }
+}
