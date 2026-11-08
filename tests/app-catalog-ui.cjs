@@ -14,6 +14,13 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.deepEqual(order,expected,'categories keep their order');
  assert(await js("[...document.querySelectorAll('[data-category=creative] .app-catalog-row strong')].some(n=>n.textContent==='Художник')"),'existing apps are grouped too');
  assert(await js("[...document.querySelectorAll('[data-category=comms] .app-catalog-row strong')].some(n=>n.textContent==='Slack')"),'service modules get a category');
+ // Download weights: the Artist row, the creative category button, nothing for apps without downloads.
+ await wait("!!document.querySelector('.app-catalog-weight')&&[...document.querySelectorAll('.app-catalog-weight')].some(n=>n.textContent.startsWith('Вес загрузки'))");
+ const artistWeight=await js("[...document.querySelectorAll('.app-catalog-row')].find(r=>r.querySelector('strong').textContent==='Художник').querySelector('.app-catalog-weight').textContent");
+ assert.match(artistWeight,/^Вес загрузки: ≈ 2,2 ГБ$/);
+ assert.match(await js("document.querySelector('[data-category=creative] .app-catalog-group-head button').textContent"),/≈ 2,2 ГБ/);
+ assert.match(await js("[...document.querySelectorAll('.app-catalog-row')].find(r=>r.querySelector('strong').textContent==='Python').querySelector('.app-catalog-weight').textContent"),/Нужен Docker Desktop/);
+ assert.equal(await js("[...document.querySelectorAll('.app-catalog-row')].find(r=>r.querySelector('strong').textContent==='Регулярки и cron').querySelector('.app-catalog-weight').textContent"),'Без загрузок');
  // Pick the whole «Разработка» category, then leave one app out.
  const dev="document.querySelector('[data-category=dev]')";
  const missing=await js(`[...${dev}.querySelectorAll('.app-catalog-row .app-catalog-pick:not(:disabled)')].length`);

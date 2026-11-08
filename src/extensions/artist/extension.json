@@ -2,6 +2,7 @@
   "name": "Художник",
   "description": "Локальное рисование и свой сервер Stable Diffusion",
   "category": "creative",
+  "downloads": [{"id": "runtime", "name": "Генератор stable-diffusion.cpp", "bytes": {"darwin": 37651339, "win32": 18069874}}, {"id": "model", "name": "Модель Stable Diffusion 1.5", "bytes": 2132696762}],
   "setting": "artistEnabled",
   "scripts": [
     [

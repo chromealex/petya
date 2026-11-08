@@ -1160,3 +1160,8 @@ blockquote.growth-learned{margin:6px 0;padding:8px 12px;border-left:3px solid va
 .app-catalog-bar{display:flex;align-items:center;gap:10px;justify-content:flex-end;padding:10px 16px;border-top:1px solid var(--line);background:var(--panel)}
 .app-catalog-bar span{margin-right:auto;color:var(--muted);font-size:13px}
 .app-catalog-bar[hidden]{display:none}
+.app-catalog-row small.app-catalog-weight{color:var(--dim,var(--muted));font-size:11.5px;margin-top:2px}
+.app-catalog-short{color:#f0b4a8;font-weight:500}
+.app-catalog-group-head button small{color:inherit;opacity:.7;font-size:inherit}
+.app-catalog-bar button{white-space:nowrap;flex:none}
+.app-catalog-bar span{min-width:0;flex:1 1 auto}
