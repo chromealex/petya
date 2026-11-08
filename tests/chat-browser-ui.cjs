@@ -28,6 +28,20 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
   // × closes it for this chat.
   await js("document.querySelector('.kit-panel-close').click()");await wait("!document.querySelector('.kit-panel-browser')");
   assert.equal((await js("window.petya.feature('chatBrowser','state',"+JSON.stringify(first)+")")).open,false);
+  // Petya meets a check (sign-in/CAPTCHA) while browsing: the page opens in this chat's browser with a notice,
+  // in the session Petya browses with; once the page leaves the check, Petya continues.
+  const s=globalThis.petyaTestServices;let acted=0,passedAt='';
+  assert.equal(await s.chatBrowser.attend(first,{url:base+'/sorry/check',message:'Google просит проверку',action:'Прочитать страницу',onAction:()=>{acted++;return true;},passed:url=>!url.includes('/sorry/'),onPassed:url=>{passedAt=url;}}),true);
+  await wait("document.querySelector('.kit-panel-browser .chat-browser-address')?.value.endsWith('/sorry/check')",'check page opened');
+  await wait("!document.querySelector('.chat-browser-attention').hidden&&document.querySelector('.chat-browser-attention-text').textContent==='Google просит проверку'",'notice shown');
+  const shared=require('../src/company-browser-session.cjs').companySession(require('electron').session,s.dataRoot,s.chatBrowser.WEB,true);
+  assert.equal(s.chatBrowser.contents(first).session,shared,'same session as Petya\'s search');
+  await js("document.querySelector('.chat-browser-attention-action').click()");for(let i=0;i<50&&!acted;i++)await new Promise(r=>setTimeout(r,40));assert.equal(acted,1,'notice button runs the action');
+  await js("(()=>{const a=document.querySelector('.chat-browser-address');a.value="+JSON.stringify(base+'/results')+";a.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}))})()");
+  for(let i=0;i<100&&!passedAt;i++)await new Promise(r=>setTimeout(r,40));assert(passedAt.endsWith('/results'),'leaving the check continues');
+  await wait("document.querySelector('.chat-browser-attention').hidden",'notice hidden after the check');
+  assert.equal(await s.chatBrowser.attend('missing',{url:base+'/x'}),false,'no chat — the caller falls back to its own window');
+  await js("document.querySelector('.kit-panel-close').click()");await wait("!document.querySelector('.kit-panel-browser')");
   console.log('Chat browser: right panel, per-chat page kept across chat switches, address bar, close passed');
  }finally{server.close();}
 }};

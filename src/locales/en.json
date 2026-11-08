@@ -5756,6 +5756,11 @@
   "Вперёд": "Forward",
   "Не удалось открыть страницу:": "Couldn't open the page:",
   "Нет открытой страницы.": "No page is open.",
-  "Открыть в системном браузере": "Open in the system browser"
+  "Открыть в системном браузере": "Open in the system browser",
+  "Google просит проверку: пройдите её здесь — поиск продолжится сам.": "Google asks for a check: pass it here and the search will continue on its own.",
+  "Google просит проверку: пройди её в браузере справа — поиск продолжится сам.": "Google asks for a check: pass it in the browser on the right and the search will continue on its own.",
+  "Нет действия.": "No action.",
+  "Пете нужен вход в": "Petya needs a sign-in to",
+  "Скрыть подсказку": "Hide the hint"
  }
 }

@@ -22,14 +22,20 @@
   address.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();call('navigate',current,address.value).then(paint).catch(err=>notice(err.message,true));address.blur();}if(e.key==='Escape'){address.value=ui.url||'';address.blur();}});
   address.addEventListener('focus',()=>address.select());
   const surface=el('div','chat-browser-surface'),status=el('div','chat-browser-status');
-  bar.append(back,forward,reload,address,external);root.append(bar,surface,status);
-  return {root,bar,address,back,forward,reload,surface,status,url:'',loading:false};
+  // Why Petya opened this page: a sign-in, a CAPTCHA or a consent screen on its way (see attend in the feature).
+  const need=el('div','chat-browser-attention'),needText=el('span','chat-browser-attention-text'),needAction=el('button','chat-browser-attention-action');
+  needAction.type='button';needAction.onclick=()=>call('act',current).catch(e=>notice(e.message,true));
+  const needClose=button('Скрыть подсказку','M6 6l12 12M18 6L6 18',()=>call('dismiss',current).then(paint).catch(()=>{}));needClose.classList.add('chat-browser-attention-close');
+  need.append(needText,needAction,needClose);need.hidden=true;need.setAttribute('role','status');
+  bar.append(back,forward,reload,address,external);root.append(bar,need,surface,status);
+  return {root,bar,address,back,forward,reload,surface,status,need,needText,needAction,url:'',loading:false};
  }
  function paint(state){
   if(!ui||!state||(state.topicId&&state.topicId!==current))return;
   ui.url=state.url||'';ui.loading=!!state.loading;if(document.activeElement!==ui.address)ui.address.value=ui.url;
   ui.back.disabled=!state.canBack;ui.forward.disabled=!state.canForward;
   ui.reload.title=state.loading?'Остановить':'Обновить';ui.reload.classList.toggle('loading',!!state.loading);
+  ui.need.hidden=!state.attention;ui.needText.textContent=state.attention?.message||'';ui.needAction.textContent=state.attention?.action||'';ui.needAction.hidden=!state.attention?.action;
   ui.status.textContent=state.error?'Не удалось открыть страницу: '+state.error:'';ui.status.hidden=!state.error;
   const box=window.resultKit?.panelBox();if(box){const t=box.querySelector('.kit-panel-title'),sub=box.querySelector('.kit-panel-subtitle');if(t)t.textContent=state.title||'Браузер';if(sub){sub.textContent=state.url?new URL(state.url).host:'';sub.hidden=!state.url;}}
  }
@@ -42,7 +48,10 @@
   const state=await call('open',id,url);paint({...state,topicId:id});sync();
  }
  window.openChatBrowser=openBrowser;
- window.petyaEvents.onChatBrowser?.(state=>{if(state.topicId===current)paint(state);});
+ // Petya stopped at a page that needs the person: bring the chat's browser up (the chat stays open beside it).
+ window.petyaEvents.onChatBrowser?.(state=>{
+  if(state.reveal&&state.topicId===topic()){if(document.getElementById('home')?.hidden&&typeof view==='function')view('home');if(!(ui&&current===state.topicId))openBrowser('').catch(()=>{});else{paint(state);sync();}return;}
+  if(state.topicId===current)paint(state);});
  document.addEventListener('petya-panel',e=>{
   // Another panel (a file preview) took the place: hide the page; the chat keeps its browser.
   if(e.detail.open&&ui&&e.detail.id!=='browser:'+current){observer?.disconnect();observer=null;ui=null;call('hide').catch(()=>{});return;}

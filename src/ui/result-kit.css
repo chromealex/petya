@@ -111,3 +111,8 @@ button.kit-chip{cursor:pointer}button.kit-chip:hover{color:var(--ink);border-col
 .chat-browser-surface{flex:1;min-height:0;background:#fff}
 .chat-browser-status{padding:6px 10px;font-size:12px;color:#f0b4a8;border-top:1px solid var(--line)}.chat-browser-status[hidden]{display:none}
 #home.with-side-panel:has(>.kit-panel-browser){--kit-panel-w:min(720px,48vw)}
+.chat-browser-attention{display:flex;align-items:center;gap:8px;padding:8px 10px;font-size:12.5px;line-height:1.35;background:color-mix(in srgb,var(--accent,#d9a441) 16%,transparent);border-bottom:1px solid var(--line)}
+.chat-browser-attention[hidden]{display:none}
+.chat-browser-attention-text{flex:1;min-width:0}
+.chat-browser-attention-action{flex:none;padding:4px 10px;font-size:12px}.chat-browser-attention-action[hidden]{display:none}
+.chat-browser-attention .chat-browser-attention-close{flex:none;width:24px;height:24px}
