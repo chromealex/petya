@@ -95,3 +95,14 @@ button.kit-chip{cursor:pointer}button.kit-chip:hover{color:var(--ink);border-col
 .kit-chip .kit-person{margin-left:-5px}
 .kit-menu-item.with-person{display:flex;align-items:center;gap:8px}
 .kit-menu-text{min-width:0}
+/* Browser panel: the page fills the panel under its toolbar */
+.kit-panel-browser .kit-panel-body{padding:0;overflow:hidden;display:flex}
+.chat-browser{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.chat-browser-bar{display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line)}
+.chat-browser-tool{display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:7px;background:transparent;color:var(--muted)}
+.chat-browser-tool:hover:not(:disabled){background:#ffffff10;color:var(--ink)}.chat-browser-tool:disabled{opacity:.35}
+.chat-browser-tool.loading svg{animation:chat-browser-spin 1s linear infinite}@keyframes chat-browser-spin{to{transform:rotate(360deg)}}
+.chat-browser-address{flex:1;min-width:0;min-height:30px;padding:4px 10px;border-radius:8px;font-size:13px}
+.chat-browser-surface{flex:1;min-height:0;background:#fff}
+.chat-browser-status{padding:6px 10px;font-size:12px;color:#f0b4a8;border-top:1px solid var(--line)}.chat-browser-status[hidden]{display:none}
+#home.with-side-panel:has(>.kit-panel-browser){--kit-panel-w:min(720px,48vw)}
