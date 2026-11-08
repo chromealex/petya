@@ -3,6 +3,8 @@
   "name": "Zoom",
   "description": "Петя сам записывает встречи Zoom, подписывает, кто говорит, и предлагает вашу личную комнату в календаре",
   "category": "meetings",
+  "icon": "icon.svg",
+  "examples": ["запиши встречу в Zoom", "что обсуждали на созвоне в Zoom", "поставь встречу в моей комнате Zoom"],
   "setting": "extension_zoom",
   "settings": true,
   "feature": "feature.cjs",
