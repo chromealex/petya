@@ -10,7 +10,9 @@ worklogs the user confirms.
   meetings from «Календарь» and focus sessions of «Фокус» above it) or, for longer periods, stacked columns per day,
   and the top apps with a category chip. The chip menu changes the app's category for good
   (`timeTrackingCategories`, «По умолчанию» returns it); browsers are categorized by the page title (Jira, Gmail,
-  YouTube…).
+  YouTube…). No meeting app is named in this app (core-meeting-guard): **meeting time** is the activity that overlaps
+  a calendar meeting of «Календарь» (whatever window was in front), plus windows whose title says it is a call
+  («Meeting», «созвон», «встреча», «вебинар»); the user can map a call app to «Встречи» with the chip.
 - «Сколько я сидел в Unity на этой неделе», «…в слаке вчера», «в браузере», «сколько часов ушло на BW-123» — one app
   (Russian names: юнити, слак, телеграм, фигма…), the browsers, or a Jira task.
 - «Время по задачам», «время по проектам» — from the classifiers this app provides: a Jira key in a window title,

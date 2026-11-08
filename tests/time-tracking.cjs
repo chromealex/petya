@@ -70,6 +70,13 @@ const {InputRequired}=require('../src/input-required.cjs');
  ipc.setCategory('Slack','work');
  c=(await app.turn(s,'на что ушёл день')).extensionData.timeCard;
  assert.equal(Math.round(c.categories.find(x=>x.id==='communication').ms/60000),0);
+ // Activity during a calendar meeting counts as meetings, whatever app was in front.
+ const overlay=require('../src/extensions/time-tracking/overlay.cjs');const realMeetings=overlay.meetings;
+ overlay.meetings=async()=>[{title:'Синк',start:new Date(2026,10,9,9,30).getTime(),end:new Date(2026,10,9,10,0).getTime()}];
+ c=(await app.turn(s,'на что ушёл день')).extensionData.timeCard;
+ assert.equal(Math.round(c.categories.find(x=>x.id==='meetings').ms/60000),60,'30 min of Unity inside the meeting');
+ assert.equal(Math.round(c.total/60000),260,'the total does not change');assert.equal(c.calendar,true);assert.equal(c.meetings.length,1);
+ overlay.meetings=realMeetings;
  ipc.setCategory('Slack','auto');assert.equal(settings.timeTrackingCategories,'{}');
  assert.throws(()=>ipc.setCategory('Slack','sleep'),/категории/);
 
@@ -147,7 +154,7 @@ const {InputRequired}=require('../src/input-required.cjs');
 
  // Categories: browsers by page, user mapping validation.
  assert.equal(categories.of({app:'Google Chrome',title:'Inbox - Gmail'},{}),'communication');
- assert.equal(categories.of({app:'Firefox',title:'Meet - abc-defg-hij'},{}),'meetings');
+ assert.equal(categories.of({app:'Firefox',title:'Созвон по релизу'},{}),'meetings','a call by its title, no meeting app named');
  assert.equal(categories.of({app:'Telegram',title:''},{telegram:'work'}),'work');
  const v={timeTrackingCategories:'{"slack":"work","x":"nap"}'};categories.validate(v);assert.equal(v.timeTrackingCategories,'{"slack":"work"}');
 

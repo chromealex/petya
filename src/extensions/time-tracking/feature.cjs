@@ -54,8 +54,8 @@ function intent(text){
 
 // --- Data for the card ------------------------------------------------------------------------------------------------
 const dur=ms=>{const m=Math.round(ms/MIN),h=Math.floor(m/60);return h?h+' ч'+(m%60?' '+m%60+' мин':''):m+' мин';};
-const ALIASES=[[/^юнит/iu,'unity'],[/^слак|^слэк/iu,'slack'],[/^телег/iu,'telegram'],[/^фигм/iu,'figma'],[/^хром/iu,'chrome'],[/^блендер/iu,'blender'],[/^зум/iu,'zoom'],
- [/^тимс/iu,'teams'],[/^дискорд/iu,'discord'],[/^райдер/iu,'rider'],[/^(?:вс\s*код|vs\s*code|вскод|vscode)/iu,'code'],[/^фотошоп/iu,'photoshop'],[/^терминал/iu,'terminal'],
+const ALIASES=[[/^юнит/iu,'unity'],[/^слак|^слэк/iu,'slack'],[/^телег/iu,'telegram'],[/^фигм/iu,'figma'],[/^хром/iu,'chrome'],[/^блендер/iu,'blender'],
+[/^дискорд/iu,'discord'],[/^райдер/iu,'rider'],[/^(?:вс\s*код|vs\s*code|вскод|vscode)/iu,'code'],[/^фотошоп/iu,'photoshop'],[/^терминал/iu,'terminal'],
  [/^почт/iu,'mail|outlook|почта|thunderbird|spark'],[/^джир/iu,'jira'],[/^ноушн/iu,'notion'],[/^обсидиан/iu,'obsidian'],[/^петe|^пет[еюя]/iu,'петя'],[/^эксел/iu,'excel']];
 // Which spans a named app means: aliases, browsers, then the name's stem against app names (and project names).
 function matcher(query){
@@ -78,11 +78,33 @@ function blocks(spans){
  }
  return out.slice(-600).map(b=>({start:b.start,end:b.end,category:b.category,label:[...b.apps].sort((x,y)=>y[1]-x[1]).slice(0,2).map(([a])=>a).join(', ')}));
 }
+// Activity during a calendar meeting counts as meetings, whatever app was in front (the call app, notes, slides):
+// spans are cut at the meetings' edges. This is how meeting time is known without naming any meeting app.
+function inMeetings(spans,meetings){
+ if(!meetings.length)return spans;
+ const out=[];
+ for(const x of spans){
+  let pieces=[{...x}];
+  for(const m of meetings){
+   const next=[];
+   for(const p of pieces){
+    if(p.inMeeting||m.end<=p.start||m.start>=p.end){next.push(p);continue;}
+    if(p.start<m.start)next.push({...p,end:m.start});
+    next.push({...p,start:Math.max(p.start,m.start),end:Math.min(p.end,m.end),category:'meetings',inMeeting:true});
+    if(p.end>m.end)next.push({...p,start:m.end});
+   }
+   pieces=next;
+  }
+  out.push(...pieces);
+ }
+ return out.map(({inMeeting,...p})=>p);
+}
 const ymd=t=>{const d=new Date(t);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
 
 async function build(s,range,{mode='app',query='',worklog=false,exportReady=false,deps={}}={}){
  const mapping=categories.parse(s.settings.timeTrackingCategories);
- let spans=s.activity.spans({from:range.from,to:range.to}).map(x=>({...x,category:categories.of(x,mapping)}));
+ const meetings=range.to-range.from<=8*86400000?await overlay.meetings(s,{from:range.from,to:range.to,fetcher:deps.fetcher}).catch(()=>null):null;
+ let spans=inMeetings(s.activity.spans({from:range.from,to:range.to}).map(x=>({...x,category:categories.of(x,mapping)})),meetings||[]);
  let app=null;
  if(mode==='app'&&query){const m=matcher(query);spans=spans.filter(m.test);app={query,label:m.label};}
  const total=spans.reduce((n,x)=>n+x.end-x.start,0);
@@ -98,7 +120,6 @@ async function build(s,range,{mode='app',query='',worklog=false,exportReady=fals
  const day=range.kind==='day';
  const days=[];
  if(!day){for(let t=range.from;t<range.to;t=period.addDays(t,1)){const a=t,b=period.addDays(t,1);const list=spans.filter(x=>x.start<b&&x.end>a);days.push({day:ymd(a),from:a,by:Object.fromEntries(categories.IDS.map(id=>[id,list.filter(x=>x.category===id).reduce((n,x)=>n+Math.min(b,x.end)-Math.max(a,x.start),0)]))});}}
- const meetings=range.to-range.from<=8*86400000?await overlay.meetings(s,{from:range.from,to:range.to,fetcher:deps.fetcher}).catch(()=>null):null;
  const status=s.activity.status();
  return {timeCard:{mode,period:{kind:range.kind,label:range.label,from:range.from,to:range.to},now:Date.now(),total,categories:cats,rows,untagged,app,
   timeline:day?blocks(spans):[],days,meetings:meetings||[],calendar:meetings!==null,focus:overlay.focus(s,range),
