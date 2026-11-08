@@ -96,6 +96,13 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await wait("/: 1 ·/.test(document.querySelector('.dk-disk-card .dk-dangling .dk-section').textContent)");
  await wait("[...document.querySelectorAll('.kit-toast')].some(n=>/используется контейнером/.test(n.textContent))");
  assert.equal(await js("document.querySelectorAll('.dk-card img').length"),0);
+ // Settings: what the app needs and the engine state (from the fake docker).
+ await js("window.extensionHost.open('docker')");
+ await wait("!!document.querySelector('[data-extension=\"docker\"]:not([hidden])')");
+ await js("document.querySelector('[data-extension=\"docker\"] details')?.setAttribute('open','')");
+ await wait("/Docker работает \\(движок 29\\.9\\.2\\)/.test(document.querySelector('[data-extension=\"docker\"] .docker-state').textContent)");
+ assert.match(await js("document.querySelector('[data-extension=\"docker\"] .docker-detail').textContent"),/Docker version 29\.9\.2.*Контекст: desktop-linux/);
+ await require('./card-shot.cjs')(win,'[data-extension="docker"]','petya-docker-settings');
  console.log('Docker cards: container table with dots/bars/ports, confirmation before any call, logs search and level filter, crash facts with evidence, disk bars and dangling confirmation passed');
 }};
 require('../src/main.cjs');

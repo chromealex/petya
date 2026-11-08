@@ -3,6 +3,7 @@
 // search and level filter), «почему падает» (facts, the grounded explanation, the log lines it rests on) and the
 // disk card (stacked bar by type, biggest images, dangling images removed only after confirmation).
 (()=>{
+ if(window.renderDockerContainers)return;
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('docker-cards.css',document.currentScript.src).href;document.head.append(style);
  const call=(method,...args)=>window.petya.feature('dockerApp',method,...args);
  const locale=()=>window.petyaLocale||'ru-RU';

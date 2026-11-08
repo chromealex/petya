@@ -2,6 +2,8 @@
 // secret is stored encrypted as a feature secret and never comes back here: its field stays empty with «сохранён»,
 // and an empty field keeps the stored value.
 (()=>{
+ // The extension host may run this script twice when several cards mount it at once.
+ if(document.querySelector('#settings-form>[data-extension="http-client"],#settings-form [data-extension="http-client"]'))return;
  const card=document.createElement('article');card.className='card';card.dataset.extension='http-client';
  card.innerHTML='<h2>API-клиент</h2><p>HTTP-запросы из чата. Окружения — это базовые адреса с заголовками: «дерни GET /users на staging». GET и HEAD к сохранённым адресам выполняются сразу; остальные методы и новые адреса — после подтверждения в карточке. Токены Пети и cookies браузера не отправляются.</p>'+
   '<div class="hc-envs"></div><button type="button" class="hc-add quiet">Добавить окружение</button> <button type="button" class="hc-save-envs">Сохранить</button><p class="connection-status" role="status"></p>';

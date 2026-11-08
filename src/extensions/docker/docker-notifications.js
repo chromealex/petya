@@ -1,6 +1,7 @@
 // «Docker» in the notification center: start/stop/restart, compose up/down and removing images arrive on the shared
 // extension progress channel (the center shows them); this restores the current operation after a reload.
 (()=>{
+ if(window.__petyaDockerNotifications)return;window.__petyaDockerNotifications=true;
  const show=item=>{
   if(item?.id!=='docker-operation')return;
   const {id,...data}=item;

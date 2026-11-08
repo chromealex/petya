@@ -4,6 +4,7 @@
 // «Сохранить в окружение». The OpenAPI card lists endpoints by tag with a method mix bar and puts a chosen one
 // into the composer. Response content is never HTML: text only, images through <img> from a data: URL.
 (()=>{
+ if(window.renderHttpRequest)return;
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('http-cards.css',document.currentScript.src).href;document.head.append(style);
  const call=(method,...args)=>window.petya.feature('httpClient',method,...args);
  const locale=()=>window.petyaLocale||'ru-RU';
