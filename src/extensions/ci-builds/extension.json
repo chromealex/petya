@@ -1,0 +1,16 @@
+{
+  "id": "ci-builds",
+  "name": "Сборки",
+  "description": "Запуски CI в чате: GitHub Actions и Unity Build Automation, история по workflow, первая ошибка упавшей сборки, перезапуск",
+  "category": "gamedev",
+  "setting": "extension_ci-builds",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["ci-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "ciCard": "renderCiCard"
+  }
+}
