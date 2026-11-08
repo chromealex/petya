@@ -1,0 +1,19 @@
+{
+  "id": "word-count",
+  "name": "Счётчик слов",
+  "description": "Считает слова в присланном тексте и показывает самые частые столбиками",
+  "version": "1.0.0",
+  "author": "Петя · пример",
+  "category": "docs",
+  "icon": "icon.svg",
+  "examples": ["Посчитай слова: мама мыла раму, рама мыла маму", "Сколько слов в этом тексте: …"],
+  "setting": "extension_word-count",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["word-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "wordCard": "renderWordCard"
+  }
+}

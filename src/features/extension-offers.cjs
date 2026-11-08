@@ -13,11 +13,20 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
-const directory=path.join(__dirname,'../extensions');
 
-function load(dir=directory){
- return fs.readdirSync(dir,{withFileTypes:true}).filter(e=>e.isDirectory()).map(e=>path.join(dir,e.name,'offer.cjs'))
+// Without `dir`, the offers of every live extension in the shared registry (bundled, installed, development).
+function load(dir){
+ if(dir)return fs.readdirSync(dir,{withFileTypes:true}).filter(e=>e.isDirectory()).map(e=>path.join(dir,e.name,'offer.cjs'))
   .filter(f=>fs.existsSync(f)).map(f=>{const o=require(f);if(o.id!==path.basename(path.dirname(f)))throw Error('Invalid extension offer '+f);return o;});
+ const registry=require('../extension-registry.cjs');
+ return registry.files('offer.cjs').flatMap(e=>{
+  const o=registry.load(e,e.file);if(!o)return [];
+  const regexps=list=>list===undefined||Array.isArray(list)&&list.every(r=>r instanceof RegExp);
+  const valid=o.id===e.id&&(e.origin==='bundled'||typeof o.name==='string'&&typeof o.pitch==='string'&&typeof o.ready==='function'&&['names','topics','avoid','requests'].every(k=>regexps(o[k]))&&(o.connect===undefined||['install','settings'].includes(o.connect))&&(o.connected===undefined||typeof o.connected==='function')&&(o.also===undefined||Array.isArray(o.also)&&o.also.every(x=>typeof x==='string'))&&o.service===undefined);
+  if(valid)return [o];
+  if(e.origin==='bundled')throw Error('Invalid extension offer '+e.file);
+  registry.report(e,Error('offer.cjs: нужны id «'+e.id+'», name, pitch, ready(settings) и списки RegExp names/topics/avoid/requests'),e.file);return [];
+ });
 }
 // Asking or telling Petya to show, check or count something: the request needs data the extension would bring.
 const REQUEST=/(?:^|[\s,.!?«"])(?:покажи|показать|выведи|сколько|какие|какой|какая|что с |что там|что по |проверь|глянь|посмотри|найди|сравни|разбери|собери|дай|открой|запусти|перезапусти|последн\p{L}*|топ\b|список|почему (?:упал|упала|упало|не собрал))/iu;
@@ -54,7 +63,8 @@ function decide(rows){
 }
 
 function setup(s){
- const offers=load();
+ // Follows the registry: an extension installed or removed while Petya runs is offered (or not) at once.
+ const live=()=>require('../extension-registry.cjs').cached('offers',()=>load());
  const pending=new Map();
  const prune=()=>{for(const [k,v]of pending)if(Date.now()-v.at>30*60000)pending.delete(k);};
  const keep=(o,command,topicId,direct)=>{prune();const id=randomUUID();pending.set(id,{id,ext:o.id,command,topicId,direct,at:Date.now()});return {id,ext:o.id,name:o.name,pitch:o.pitch,connect:o.connect||'install',...o.service?{service:o.service}:{}};};
@@ -75,7 +85,7 @@ function setup(s){
  function turn(command){
   const topic=s.dialogue.active();
   if(services(command).length||ownedByPetya(command,topic))return null;
-  const choice=decide(candidates(command,{offers,settings:s.settings,topic}).filter(r=>r.direct));
+  const choice=decide(candidates(command,{offers:live(),settings:s.settings,topic}).filter(r=>r.direct));
   if(!choice)return null;
   const rows=choice.one?[choice.one]:choice.tie;
   const text=choice.one?'Для этого нужно расширение «'+rows[0].offer.name+'»: '+rows[0].offer.pitch+'. Подключить?':
@@ -85,7 +95,7 @@ function setup(s){
  // An extension that is added but needs another one (e.g. «Крэши» without a connected crash source) asks with the same
  // offer card: `ids` are the extensions to choose from, `text` the question. The request resumes after connecting.
  function propose(command,ids,text,by){
-  const list=ids.map(id=>offers.find(o=>o.id===id)).filter(Boolean);
+  const list=ids.map(id=>live().find(o=>o.id===id)).filter(Boolean);
   if(!list.length)return null;
   return answer(command,list,text,by);
  }
@@ -105,7 +115,7 @@ function setup(s){
   if(!result?.handled||result.error||result.question||!topic||services(command).length)return result;
   const message=topic.messages.at(-1);
   if(message?.role!=='assistant'||message.extensionData?.extensionOffer)return result;
-  const choice=decide(candidates(command,{offers,settings:s.settings,topic}).filter(r=>!(topic.extensionOffers||[]).includes(r.offer.id)));
+  const choice=decide(candidates(command,{offers:live(),settings:s.settings,topic}).filter(r=>!(topic.extensionOffers||[]).includes(r.offer.id)));
   if(!choice?.one)return result;
   const item=keep(choice.one.offer,command,topic.id,false);
   const data={extensionOffer:{items:[item],direct:false}};
@@ -116,7 +126,8 @@ function setup(s){
  }
  function find(id){prune();const row=pending.get(id);if(!row)throw Error('Предложение устарело. Повторите запрос.');return row;}
  function accept(id){
-  const row=find(id),o=offers.find(x=>x.id===row.ext);
+  const row=find(id),o=live().find(x=>x.id===row.ext);
+  if(!o){pending.delete(id);throw Error('Расширение больше недоступно.');}
   // Same switch the catalog's «Добавить» uses: the descriptor's setting (and those of the extensions it brings).
   const descriptors=require('./extension-ui.cjs').descriptors,patch={};
   for(const ext of [o.id,...(o.also||[])]){const d=descriptors.find(d=>d.id===ext);if(d?.setting)patch[d.setting]='true';}
@@ -133,6 +144,6 @@ function setup(s){
   return {dismissed:row.ext,forever};
  }
  function unmute(ext){s.saveSettings({extensionOffersMuted:JSON.stringify(muted(s.settings).filter(x=>x!==ext))});return muted(s.settings);}
- return {extensionOffers:{turn,annotate,propose,offers},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
+ return {extensionOffers:{turn,annotate,propose,get offers(){return live();}},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
 }
 module.exports={name:'extensionOffers',defaults:{extensionOffersMuted:'[]'},validate(){},setup,load,candidates,decide,REQUEST};

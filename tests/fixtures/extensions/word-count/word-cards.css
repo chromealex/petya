@@ -1,0 +1,9 @@
+.word-card{width:620px;max-width:100%;margin:12px 0}
+.word-body{display:flex;flex-direction:column;gap:10px}
+.word-totals{margin:0;font-size:14px}
+.word-bars{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:5px}
+.word-bars li{display:grid;grid-template-columns:minmax(70px,140px) 1fr 32px;gap:10px;align-items:center;font-size:13px}
+.word-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.word-track{height:10px;border-radius:5px;background:var(--line,#2b3132);overflow:hidden}
+.word-bar{display:block;height:100%;border-radius:5px;background:#c9ed9d}
+.word-count{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
