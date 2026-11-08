@@ -3,6 +3,7 @@
   "name": "A/B-тесты",
   "description": "Значимость A/B-теста по числам, таблице или CSV: интервалы, аплифт, SRM, мощность и сколько ещё ждать — всё считается кодом",
   "category": "analytics",
+  "icon": "icon.svg",
   "setting": "extension_ab-test",
   "settings": false,
   "feature": "feature.cjs",

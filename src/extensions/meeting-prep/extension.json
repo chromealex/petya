@@ -3,6 +3,7 @@
   "name": "Подготовка к встрече",
   "description": "Перед встречей: участники, о чём говорили с ними в прошлый раз, открытые задачи и их статус, повестка из трёх пунктов со ссылками на источники",
   "category": "meetings",
+  "icon": "icon.svg",
   "setting": "extension_meeting-prep",
   "settings": true,
   "feature": "feature.cjs",

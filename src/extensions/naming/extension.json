@@ -3,6 +3,7 @@
   "name": "Нейминг",
   "description": "Названия для героев, предметов, фич, ивентов и игры в нужном стиле — с проверкой длины, совпадений в проекте, App Store, Google Play и домена",
   "category": "creative",
+  "icon": "icon.svg",
   "setting": "extension_naming",
   "settings": false,
   "feature": "feature.cjs",

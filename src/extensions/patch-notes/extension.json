@@ -3,6 +3,7 @@
   "name": "Патчноуты",
   "description": "Что нового для игроков из задач Jira, коммитов между тегами и PR: по языкам, в лимитах App Store и Google Play, плюс чейнджлог для команды",
   "category": "comms",
+  "icon": "icon.svg",
   "setting": "extension_patch-notes",
   "settings": true,
   "feature": "feature.cjs",

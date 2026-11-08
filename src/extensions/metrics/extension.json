@@ -3,6 +3,7 @@
   "name": "Метрики игры",
   "description": "DAU, новые игроки, ретеншн D1/D7/D30, выручка и ARPDAU за период с изменением к прошлому, необычные дни на графике; данные из подключённых источников (AppMetrica)",
   "category": "analytics",
+  "icon": "icon.svg",
   "setting": "extension_metrics",
   "settings": false,
   "feature": "feature.cjs",

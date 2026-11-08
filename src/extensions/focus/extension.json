@@ -3,6 +3,7 @@
   "name": "Фокус",
   "description": "Фокус-сессии и помодоро: таймер в шапке и центре уведомлений, не срочные уведомления ждут, предупреждение перед встречей, отчёт за день и неделю",
   "category": "personal",
+  "icon": "icon.svg",
   "setting": "extension_focus",
   "settings": false,
   "feature": "feature.cjs",

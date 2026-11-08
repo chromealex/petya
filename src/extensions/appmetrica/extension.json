@@ -3,6 +3,7 @@
   "name": "AppMetrica",
   "description": "Источник для «Метрик игры»: DAU, новые игроки, ретеншн и выручка из AppMetrica (Яндекс) по OAuth-токену",
   "category": "analytics",
+  "icon": "icon.svg",
   "setting": "extension_appmetrica",
   "settings": true,
   "feature": "feature.cjs",
