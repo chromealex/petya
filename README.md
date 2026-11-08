@@ -14,7 +14,7 @@ runtime, packaging) the group is marked stable.
 ## Layout
 
 ```
-andromeda/group.json       current set (R1-A1-D7), optional parts
+andromeda/group.json       current set (R1-A1-D8), optional parts
 andromeda/D1/              model.json (role, base, hashes, evaluation, status), NOTES.md, adapter files
 andromeda/R1/, A1/         model.json; weights only when the part has an adapter
 ```
@@ -29,7 +29,7 @@ project folder.
 
 | Group | Version | Status | Parts |
 |---|---|---|---|
-| Andromeda | R1-A1-D7 | experimental | R1, A1: Qwen3.5-9B-4bit @ 8b2b98c without adapter; D7: D3 plus a familiar-only rehearsal (54 new 37 vs D1 24, v22 34/42 vs 33, familiar 795/801 vs 787). D1 stays published for rollback. |
+| Andromeda | R1-A1-D8 | experimental | R1, A1: Qwen3.5-9B-4bit @ 8b2b98c without adapter; D8: D7 plus its weak correction families (54 new 39 vs D1 24, v22 35/42 vs 33, familiar 795/801 vs 787). D7 and D1 stay published for rollback. |
 
 ### Part history
 

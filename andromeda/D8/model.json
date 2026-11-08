@@ -1,0 +1,33 @@
+{
+  "group": "Andromeda",
+  "component": "D",
+  "version": 8,
+  "id": "D8",
+  "role": "drafts: requirements from Russian dialogues with corrections (summary, description, open questions as JSON)",
+  "status": "stable: the group’s D since 9 Nov 2026 (not worse than D7 on any set)",
+  "base": {
+    "repository": "mlx-community/Qwen3.5-9B-4bit",
+    "revision": "8b2b98c00a6b4d291155e4890773ca8f769aee53",
+    "runtime": "MLX (Apple Silicon)"
+  },
+  "parent": "D7",
+  "adapter": {
+    "type": "LoRA",
+    "rank": 8,
+    "layers": 32,
+    "files": {
+      "adapters.safetensors": "9efdfdcf84d49d4c22f18127bb4b6458a3dd6d123dd24326809a0a83cd9b97fb",
+      "adapter_config.json": "77d7bef9a07175b1dce74dc8ad9cd83494d52ce6c4edced139185b4bc6d6e07a"
+    }
+  },
+  "bytes": 58227644,
+  "source": {
+    "repository": "chromealex/petya",
+    "training": "tests/fixtures/requirements-draft-d8"
+  },
+  "evaluation": {
+    "generated_holdout": "39/54 (D7 37, D1 24): 19 exact; wins back 4 of the 5 D1 successes D7 lost; 3 D1 successes lost in total",
+    "v22_holdout": "28/30 checks, 7/12 drafts (D7 28 + 6, D1 27 + 6)",
+    "familiar": "795/801 (D7 795, D1 787)"
+  }
+}

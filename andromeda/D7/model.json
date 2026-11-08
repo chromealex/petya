@@ -4,7 +4,7 @@
   "version": 7,
   "id": "D7",
   "role": "drafts: requirements from Russian dialogues with corrections (summary, description, open questions as JSON)",
-  "status": "stable: the group’s D since 9 Nov 2026 (owner’s decision; strict gate not met by five held-out drafts)",
+  "status": "superseded by D8 on 9 Nov 2026; kept for rollback",
   "base": {
     "repository": "mlx-community/Qwen3.5-9B-4bit",
     "revision": "8b2b98c00a6b4d291155e4890773ca8f769aee53",
