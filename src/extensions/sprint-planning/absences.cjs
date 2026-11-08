@@ -20,18 +20,22 @@ function parseNote(text,now=new Date()){
  const who=t.slice(0,verb.index).replace(/^(?:а\s+|кстати\s+|запомни,?\s*(?:что\s+)?)/iu,'').replace(/[,:]+$/,'').trim();
  if(!who||who.split(/\s+/).length>3||!/^\p{L}/u.test(who))return null;
  const rest=t.slice(verb.index+verb[0].length);
+ // «не будет 5 минут», «с 10 до 12 часов», «до 18:00»: hours, not days.
+ if(/\d{1,2}:\d{2}|(?:^|\s)(?:час\p{L}*|ч|минут\p{L}*|мин|вечер\p{L}*|утр\p{L}*|недел\p{L}*)(?=\s|$|[,.!?])/iu.test(rest))return null;
  const today=dayStart(now);let a,b;
  const month=(m,name)=>m?Number(m)-1:name&&monthOf(name)>=0?monthOf(name):null;
+ // A single day or «до N» needs a month («20 ноября», «3.12») or «-го»; a bare number may be anything.
+ const dated=x=>!!(x[2]||x[3]&&monthOf(x[3])>=0);
  const r=RANGE.exec(rest);
  if(r){
   const m2=month(r[5],r[6]),m1=month(r[2],r[3])??m2;
   a={d:Number(r[1]),m:m1};b={d:Number(r[4]),m:m2??m1};
  }else{
   const u=UNTIL.exec(rest);
-  if(u){a={d:today.getDate(),m:today.getMonth()};b={d:Number(u[1]),m:month(u[2],u[3])};}
+  if(u&&(dated(u)||/-?го(?=\s|$|[,.!?])/iu.test(u[0]))){a={d:today.getDate(),m:today.getMonth()};b={d:Number(u[1]),m:month(u[2],u[3])};}
   else if(/сегодня/iu.test(rest)){a=b={d:today.getDate(),m:today.getMonth()};}
   else if(/завтра/iu.test(rest)){const d=new Date(today);d.setDate(d.getDate()+1);a=b={d:d.getDate(),m:d.getMonth()};}
-  else{const one=SINGLE.exec(rest);if(!one)return null;a=b={d:Number(one[1]),m:month(one[2],one[3])};}
+  else{const one=SINGLE.exec(rest);if(!one||!dated(one))return null;a=b={d:Number(one[1]),m:month(one[2],one[3])};}
  }
  // Without a month: the nearest such days not entirely in the past.
  let from=new Date(today.getFullYear(),a.m??today.getMonth(),a.d),to=new Date(today.getFullYear(),b.m??(a.m??today.getMonth()),b.d);

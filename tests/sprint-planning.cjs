@@ -94,6 +94,8 @@ function fixture(over={}){
  assert.equal(absences.parseNote('Ваня не будет 3.12',NOW).from,'2026-12-03');
  assert.equal(absences.parseNote('Маша в отпуске',NOW),null,'no dates → not a note');
  assert.equal(absences.parseNote('я в отпуске мечтаю о море',NOW),null);
+ for(const p of ['Маша не будет 5 минут','Олег не будет с 10 до 12 часов','Маша не будет до 18:00','Ваня не будет до 5 вечера','Маша в отпуске 2 недели','Олег не будет 3'])assert.equal(absences.parseNote(p,NOW),null,'not days: '+p);
+ assert.equal(absences.parseNote('Олег на больничном до 20-го',NOW).to,'2026-11-20');assert.equal(absences.parseNote('Маша не будет 20 ноября',NOW).from,'2026-11-20');
  assert.equal(absences.member('Маши',TEAM).jiraId,'u-masha');assert.equal(absences.member('Олегу',TEAM).jiraId,'u-oleg');
 
  // --- Not added / not connected ------------------------------------------------------------------------------------
