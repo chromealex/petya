@@ -38,6 +38,10 @@ button for an app that is not added and connected, and nothing is written until 
 - **Reminder triggers** (`"reminder-trigger"`, events «Напоминания» can wait for, see [reminders.md](reminders.md))
   and **journal sources** (`"journal-source"`, what «Дневник дня» knows about a day, see [journal.md](journal.md))
   are declared the same way and served by their apps' own registries.
+- **Release checks** (`"release-check"`) are declared the same way and read by «Релизный чек-лист»
+  (`src/extensions/release-checklist/checks.cjs`, see [release-checklist.md](release-checklist.md)): each provider
+  answers named checks (`ci.green`, `crashes.release`, …) for a release; provided by Сборки, Крэши, Отзывы в сторах,
+  Патчноуты, Локализация, Размер билда, Зависимости, Jira and the checklist itself (version numbers).
 
 Renderer: `k.links(kind, payload, {context, label, title, primary, onDone, className})` in `src/ui/result-kit.js`
 returns a node for an actions row: nothing without providers, one button for one provider, a button with a «▾» menu
