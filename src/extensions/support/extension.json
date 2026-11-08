@@ -1,0 +1,21 @@
+{
+  "id": "support",
+  "name": "Поддержка игроков",
+  "description": "Тикеты поддержки игроков (Zendesk): открытые и просроченные по SLA, о чём жалуются, черновик ответа по базе знаний — отправка после вашего подтверждения",
+  "category": "comms",
+  "icon": "icon.svg",
+  "examples": ["Что жалуются в поддержку?","Тикеты про оплату за неделю","Ответь на тикет 1234","Сколько тикетов просрочено по SLA?"],
+  "connects": "Zendesk",
+  "uses": ["task-tracker"],
+  "provides": {"support-source": "zendesk.cjs"},
+  "setting": "extension_support",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["support-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "supportCard": "renderSupportCard"
+  }
+}
