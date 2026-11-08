@@ -28,7 +28,18 @@ const own={
  'ad-revenue':['сколько заработали на рекламе вчера','eCPM по сетям','какой формат приносит больше','упала выручка с rewarded','выручка с рекламы за неделю'],
  competitors:['что нового у конкурентов','добавь в конкуренты Clash of Clans','у кого вырос рейтинг','какие механики добавили в обновлениях'],
  'who-knows':['кто разбирается в сетевом коде','к кому идти по магазину','кто писал PlayerController','кто последний трогал инвентарь','кого спросить про матчмейкинг'],
- glossary:['собери глоссарий проекта','проверь термины в локализации','добавь в глоссарий сундук','что у нас значит мана','покажи глоссарий']
+ glossary:['собери глоссарий проекта','проверь термины в локализации','добавь в глоссарий сундук','что у нас значит мана','покажи глоссарий'],
+ metrics:['DAU за неделю','ретеншн D1 D7 D30','сколько новых игроков вчера','как выручка после ивента','DAU из AppMetrica'],
+ appmetrica:['подключи AppMetrica'],
+ 'ab-test':['значим ли тест','посчитай A/B','сколько нужно игроков для теста','есть ли SRM'],
+ focus:['фокус на 50 минут над картой уровня','помодоро 4 раза','сколько я сегодня сфокусировался','помоги сосредоточиться'],
+ naming:['придумай название для ивента на Хэллоуин','имена для героев-гномов','как назвать фичу с сундуками','название игры про бункер'],
+ 'meeting-prep':['подготовь меня к встрече','что обсуждали с Олегом в прошлый раз','о чём следующая встреча','повестка на синк'],
+ 'patch-notes':['напиши патчноут к версии 1.5','что нового для стора','чейнджлог между v1.4 и v1.5','анонс обновления для игроков'],
+ docker:['что запущено в докере','логи контейнера api','почему падает контейнер postgres','перезапусти redis','сколько места занимает докер'],
+ 'http-client':['дерни GET https://api.example.com/v1/users/42','отправь POST на /login с телом {"email":"a@b.c"}','проверь, отвечает ли staging','какой статус у health-check прода','импортируй curl https://api.example.com/v1/ping'],
+ 'screenshot-task':['сделай баг из скриншота','скрин в задачу','заведи баг по этому экрану'],
+ converter:['сожми видео до 10 МБ','конвертни png в webp','сделай гифку из видео','переведи docx в pdf','уменьши картинки в папке до 1024']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -63,7 +74,26 @@ const not={
  // A person search only: factual «кто знает» questions, «кто ты», roles and the team directory are not it.
  'who-knows':['кто знает, когда релиз','кто ты','знаешь ли ты, что такое мана','заполни команду из Jira','кто тестировщик в команде','кто написал Войну и мир','кто знает где ключи'],
  // The project's own words only: general definitions, other products' glossaries and localization files as such are not it.
- glossary:['что такое REST','глоссарий Unity','проверь локализацию','что не переведено в локализации','купи билет в терминале','термины договора аренды']
+ glossary:['что такое REST','глоссарий Unity','проверь локализацию','что не переведено в локализации','купи билет в терминале','термины договора аренды'],
+ // Team metrics and velocity are Jira's, crashes / reviews / ANR other apps', server metrics nobody's here.
+ metrics:['метрики команды','велосити команды','крэши за неделю','отзывы за неделю','ANR за неделю','метрики сервера','подключи AppMetrica'],
+ appmetrica:['DAU за неделю','ретеншн D1 D7 D30','крэши в AppMetrica'],
+ 'ab-test':['тест упал','напиши тесты','проверь тест на регулярку','упали тесты в CI','запусти тесты'],
+ // Camera or input focus and a team planning «to focus on bugs» are not focus sessions.
+ focus:['фокус камеры в Unity','давай сфокусируемся на багах','фокус на задаче','фокус-группа в пятницу','перерыв в работе сервера'],
+ // Code names are the coder's, renaming a task is Jira's, «назови сумму» is arithmetic.
+ naming:['как назвать переменную','переименуй задачу','назови сумму','как называется игра про бункер','придумай название ветки'],
+ // Preparing for a meeting is not its summary, the day's agenda, a new event or recording.
+ 'meeting-prep':['сводка встречи','что у меня сегодня','поставь встречу с Олегом в четверг в 15:00','запиши встречу','что решили на встрече','запомни повестку следующей встречи: релиз'],
+ // Release notes from sources; changes written in the message go to the skills, meeting notes and Slack news elsewhere.
+ 'patch-notes':['заметки встречи','что нового в Slack','напиши патчноут для игроков: исправили зависание магазина, добавили ивент','переведи эту фразу','сводка встречи'],
+ 'http-client':['API Jira','как работает REST','запрос в поддержку','отправь запрос в поддержку','отвечает ли Маша на письма','статус задачи в Jira'],
+ docker:['docker-образ для Python','место на диске','контейнер в Unity UI','перезапусти компьютер','контейнер с грузом пришёл'],
+ zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи'],
+ // A plain screenshot is Petya's computer control; store screenshots and bugs in code belong to others.
+ 'screenshot-task':['сделай скриншот','скриншоты стора','баг в коде','заведи баг в Jira'],
+ // Currency, text translation and shortening an answer are not files.
+ converter:['конвертер валют','переведи текст','сожми ответ','переведи задачу в другой статус','переведи 100 долларов в рубли']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -82,7 +112,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

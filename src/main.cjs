@@ -208,8 +208,10 @@ function saveSettings(input, internal = false, profile = profileState()) {
     for (const key of ['telegramAutoSync','smartNotifications', 'interpretationEnabled', 'slackAutoSync', ...Object.keys(modules.defaults)]) if (!['true', 'false'].includes(next[key])) throw new Error('Некорректная настройка ' + key);
     if(!['auto','claude','codex'].includes(next.interpretationProvider))throw new Error('Некорректный помощник для разъяснения.');
     useBundledSpeech(next);
-    core.localEndpoint(next.whisperUrl); core.localEndpoint(next.ollamaUrl);
-    if (next.jiraUrl) { const url = new URL(next.jiraUrl); if (url.protocol !== 'https:' || !url.hostname.endsWith('.atlassian.net') || url.username || url.password || url.pathname !== '/') throw new Error('Укажите адрес Jira Cloud: https://company.atlassian.net'); next.jiraUrl = url.origin; }
+    // Autosave sends the whole form: an empty or unparsable address must name its field instead of a bare «Invalid URL».
+    for (const key of ['whisperUrl', 'ollamaUrl']) { if (!String(next[key] || '').trim()) next[key] = defaults[key]; try { core.localEndpoint(next[key]); } catch (error) { throw new Error((key === 'ollamaUrl' ? 'Адрес Ollama' : 'Адрес whisper.cpp') + ': ' + (/Invalid URL/.test(error.message) ? 'укажите адрес вида ' + defaults[key] : error.message)); } }
+    if (next.jiraUrl && !/^[a-z]+:\/\//i.test(next.jiraUrl.trim())) next.jiraUrl = 'https://' + next.jiraUrl.trim();
+    if (next.jiraUrl) { let url; try { url = new URL(next.jiraUrl); } catch { throw new Error('Адрес Jira: укажите его в виде https://company.atlassian.net'); } if (url.protocol !== 'https:' || !url.hostname.endsWith('.atlassian.net') || url.username || url.password || url.pathname !== '/') throw new Error('Укажите адрес Jira Cloud: https://company.atlassian.net'); next.jiraUrl = url.origin; }
     require('./jira-selection.cjs').normalizeSelection(next, settings, input);
     const saved = { ...next };
     for (const key of secrets) if (saved[key]) { if (!safeStorage.isEncryptionAvailable()) throw new Error('Хранилище секретов ОС недоступно.'); saved[key] = safeStorage.encryptString(saved[key]).toString('base64'); }
@@ -363,7 +365,12 @@ function setupHandlers() {
   let formatReader;
   const {attachments,allowedMedia,importMedia}=require('./attachments-setup.cjs')({get app(){return app;},get core(){return core;},get dialogue(){return dialogue;},get formatReader(){return formatReader;},get fs(){return fs;},get handle(){return handle;},get memory(){return memory;},get modules(){return modules;},get path(){return path;},get request(){return request;},get serviceOAuth(){return serviceOAuth;},get settings(){return settings;},get speech(){return speech;},get telegramSource(){return telegramSource;},get win(){return win;}});
   const {instructionSkills,inspectAttachments,executeSkill,taskDuplicates,workSkills}=require('./skills-setup.cjs')({get analyzeMaterials(){return analyzeMaterials;},get attachments(){return attachments;},get companies(){return companies;},get companyId(){return companyId;},get dataRoot(){return dataRoot;},get dialogue(){return dialogue;},get fs(){return fs;},get handle(){return handle;},get jiraInsights(){return jiraInsights;},get memory(){return memory;},get path(){return path;},get randomUUID(){return randomUUID;},get request(){return request;},get reviewState(){return reviewState;},get safeStorage(){return safeStorage;},get saveReview(){return saveReview;},get settings(){return settings;},get snapshots(){return snapshots;},get teamFill(){return teamFill;},get text(){return text;},get workspace(){return workspace;}});
-  serviceBrowser=new (require('./service-browser.cjs').ServiceBrowser)({dataRoot,settings:()=>settings,onReturn:show,onAction:service=>{show();win.webContents.send('browser-action',{service});}});
+  const browserAction=service=>{show();win.webContents.send('browser-action',{service});};
+  // Sign-ins, CAPTCHAs and consent pages open in the chat's browser (src/features/chat-browser.cjs).
+  const chatAttend=(options)=>{const id=dialogue.active()?.id;const host=services.chatBrowser;return !!(id&&host&&!smoke)&&host.attend(id,options);};
+  serviceBrowser=new (require('./service-browser.cjs').ServiceBrowser)({dataRoot,settings:()=>settings,onReturn:show,onAction:browserAction,host:{
+    attend:(service,url,partition)=>chatAttend({url,partition,message:'Пете нужен вход в '+require('./service-access.cjs').services[service].name+': войдите здесь и откройте нужную страницу, затем нажмите «Прочитать страницу».',action:'Прочитать страницу',onAction:()=>browserAction(service)}),
+    find:partition=>services.chatBrowser?.find(partition)}});
   serviceAccess=new (require('./service-access.cjs').ServiceAccess)({settings:()=>settings,save:saveSettings,open:service=>smoke?Promise.resolve():serviceBrowser.open(service)});
   handle('integrationChoice',(id,choice)=>serviceAccess.choose(id,choice));
   handle('integrationReset',service=>serviceAccess.reset(service));
@@ -388,7 +395,8 @@ function setupHandlers() {
     fs.writeFileSync(learningFile+'.tmp',JSON.stringify({encrypted:safeStorage.encryptString(JSON.stringify(state)).toString('base64')}),{mode:0o600});fs.renameSync(learningFile+'.tmp',learningFile);
   }});
   const {WebSearch,searchCommand}=require('./web-search.cjs');
-  const searchBrowser=new (require('./search-browser.cjs').SearchBrowser)({dataRoot,enabled:()=>modules.enabled(settings,'web'),onReturn:show,onAction:()=>{show();win.webContents.send('browser-action',{service:'web'});}});
+  const searchBrowser=new (require('./search-browser.cjs').SearchBrowser)({dataRoot,enabled:()=>modules.enabled(settings,'web'),onReturn:show,onAction:()=>browserAction('web'),
+    onAttention:url=>chatAttend({url,partition:services.chatBrowser?.WEB,message:'Google просит проверку: пройдите её здесь — поиск продолжится сам.',passed:require('./search-browser.cjs').passed,onPassed:()=>{if(pendingWeb)browserAction('web');}})});
   stopWebSearch=()=>searchBrowser.stop();
   app.on('will-quit',stopWebSearch);
   const webSearch=new WebSearch({enabled:()=>modules.enabled(settings,'web'),searchAPI:(query,resume)=>searchBrowser.search(query,resume),read:url=>searchBrowser.read(url),model:async(query,pages)=>{
@@ -660,6 +668,7 @@ function setupHandlers() {
   const featureIpc = new Map();
   for (const feature of features) { const { ipc, ...provided } = feature.setup(services) || {}; if (ipc) featureIpc.set(feature.name, ipc); for (const [key, value] of Object.entries(provided)) Object.defineProperty(services, key, { value, enumerable: true, configurable: true }); }
   routeModelRequest=services.modelRuntime.routeRequest;
+  if(smoke)globalThis.petyaTestServices=services; // tests reach feature services in smoke mode only
   publishProfile({workspace,dialogue,telegramSource,serviceAccess,serviceBrowser,slackLogs,buildWatch,reviewAssistant,buildQuestion,buildRepair,slackSync,maintenance,stopWebSearch});
   scope.capture();
   handle('feature', (name, method, ...args) => { const ipc = featureIpc.get(name); if (typeof name !== 'string' || typeof method !== 'string' || !ipc || !Object.hasOwn(ipc, method) || typeof ipc[method] !== 'function') throw Error('Неизвестная функция.'); return ipc[method](...args); });

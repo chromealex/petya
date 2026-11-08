@@ -22,6 +22,10 @@ assert.equal(t('  Сохранить\n'),'  Save\n');
 assert.equal(t('Скачать язык: Немецкий'),'Download language: German');
 assert.equal(t('шаг 3'),'step 3');
 assert.equal(t('Шаги'),'Шаги','a fragment is not replaced inside a longer word');
+const short=core.create({'из':'of','готово':'done','на':'by'}).translate;
+assert.equal(short('готово 2 из 3'),'done 2 of 3','a short word between two numbers is translated');
+assert.equal(short('из 3'),'из 3','a short word elsewhere stays as written');
+assert.equal(short('готово на диске'),'готово на диске');
 assert.equal(t('Release notes'),'Release notes');
 assert.equal(core.create({}).translate('Сохранить'),'Сохранить');
 

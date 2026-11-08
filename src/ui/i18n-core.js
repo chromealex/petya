@@ -20,6 +20,9 @@
   for(const key of [...map.keys()].filter(k=>k.length>=3&&CYRILLIC.test(k)).sort((a,b)=>b.length-a.length)){
    const head=key.slice(0,2);if(!buckets.has(head))buckets.set(head,[]);buckets.get(head).push(key);
   }
+  // Keys shorter than three letters are too ambiguous for composed text, except a word between two numbers («2 из 3»).
+  const short=[...map.keys()].filter(k=>k.length<3&&CYRILLIC.test(k));
+  const DIGIT=/[0-9]/;
   function fragments(text){
    let out='',i=0;
    while(i<text.length){
@@ -31,6 +34,7 @@
       if(LETTER.test(key[key.length-1])&&LETTER.test(text[end]||''))continue;
       hit=key;break;
      }
+     if(!hit&&text[i-1]===' '&&DIGIT.test(text[i-2]||''))hit=short.find(key=>text.startsWith(key,i)&&text[i+key.length]===' '&&DIGIT.test(text[i+key.length+1]||''))||null;
     }
     if(hit){out+=map.get(hit);i+=hit.length;}else{out+=text[i];i++;}
    }

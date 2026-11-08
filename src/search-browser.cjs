@@ -18,7 +18,7 @@ function resultsText(text,query){
  return body.length>=300?body.slice(0,10000):'';
 }
 class SearchBrowser{
- constructor({enabled,onAction,onReturn,dataRoot}){this.dataRoot=dataRoot;this.enabled=enabled;this.onAction=onAction;this.onReturn=onReturn;this.windows=new Set();}
+ constructor({enabled,onAction,onReturn,dataRoot,onAttention}){this.dataRoot=dataRoot;this.onAttention=onAttention;this.enabled=enabled;this.onAction=onAction;this.onReturn=onReturn;this.windows=new Set();}
  check(){if(!this.enabled())throw Error('Модуль поиска выключен.');}
  window(persistent){const ses=require('./company-browser-session.cjs').companySession(session,this.dataRoot,persistent?'petya-web-search':'petya-web-read',persistent);ses.setPermissionRequestHandler((_w,_p,cb)=>cb(false));ses.setPermissionCheckHandler(()=>false);if(!configuredSessions.has(ses)){configuredSessions.add(ses);ses.on('will-download',e=>e.preventDefault());}
   const win=new BrowserWindow({width:1150,height:850,show:false,skipTaskbar:true,title:'Петя · Поиск в интернете',autoHideMenuBar:true,webPreferences:{session:ses,nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,allowRunningInsecureContent:false}});this.windows.add(win);if(persistent&&this.onAction)require('./browser-toolbar.cjs')(win,{label:'Поиск',actionLabel:'Продолжить поиск',onAction:this.onAction,onReturn:this.onReturn});win.webContents.setAudioMuted(true);win.webContents.on('page-title-updated',event=>event.preventDefault());win.webContents.on('did-navigate',(_event,url)=>{try{win.setTitle('Петя · '+new URL(url).origin);}catch{}});win.webContents.setWindowOpenHandler(()=>({action:'deny'}));
@@ -26,12 +26,17 @@ class SearchBrowser{
  }
  async load(win,url){this.check();let timer;try{await Promise.race([(async()=>{try{await win.loadURL(publicURL(url).href);}catch(e){if(e.code!=='ERR_ABORTED'&&e.errno!==-3)throw e;while(!win.isDestroyed()&&win.webContents.isLoadingMainFrame())await new Promise(r=>setTimeout(r,200));if(win.isDestroyed())throw Error('Окно браузера закрыто.');}})(),new Promise((_,reject)=>{timer=setTimeout(()=>{if(!win.isDestroyed())win.webContents.stop();reject(Error('Страница не загрузилась за 25 секунд.'));},25000);})]);}finally{clearTimeout(timer);}this.check();}
  show(){this.check();if(this.browser&&!this.browser.isDestroyed()){this.browser.show();this.browser.focus();return;}this.browser=this.window(true);this.browser.show();return this.load(this.browser,'https://www.google.com/');}
- // The search runs in a hidden window; it is shown only while Google asks for a check (CAPTCHA, consent, sign-in).
+ // The search runs in a hidden window. When Google asks for a check (CAPTCHA, consent, sign-in) the page opens
+ // in the chat's browser (onAttention, same session); once passed there, the search is loaded again here.
+ // Without a chat to show it in, the hidden window itself is shown.
  async search(query,resume=false){this.check();if(!this.browser||this.browser.isDestroyed()){this.browser=this.window(true);resume=false;}
+  if(resume&&this.elsewhere){resume=false;this.elsewhere=false;}
   if(!resume)await this.load(this.browser,'https://www.google.com/search?'+new URLSearchParams({q:query,hl:'ru'}));
   const snap=await this.browser.webContents.executeJavaScript(snapshotScript);const url=new URL(snap.url);
   if(!/(^|\.)google\.[a-z.]+$/i.test(url.hostname)||url.pathname!=='/search'||url.searchParams.get('q')!==query)throw this.attention('Вернитесь к выдаче Google для текущего вопроса, затем нажмите «Продолжить поиск».');
-  if(blocked(snap)){this.browser.show();this.browser.focus();throw this.attention('Google просит проверку: пройди её в окне браузера Пети, и поиск продолжится («Продолжить поиск»).');}
+  if(blocked(snap)){
+   if(this.onAttention&&await Promise.resolve(this.onAttention(snap.url)).catch(()=>false)){this.elsewhere=true;throw this.attention('Google просит проверку: пройди её в браузере справа — поиск продолжится сам.');}
+   this.browser.show();this.browser.focus();throw this.attention('Google просит проверку: пройди её в окне браузера Пети, и поиск продолжится («Продолжить поиск»).');}
   let rows=linksFrom(snap);
   // No check and no results in Google's markup: the same query in DuckDuckGo's plain results, still hidden.
   if(!rows.length)rows=await this.duck(query).catch(()=>[]);
@@ -47,4 +52,6 @@ class SearchBrowser{
  async read(url){this.check();const win=this.window(false);try{await this.load(win,url);const result=await win.webContents.executeJavaScript(`(()=>({url:location.href,text:(document.querySelector('main')||document.querySelector('article')||document.body)?.innerText?.slice(0,16000)||''}))()`);publicURL(result.url);this.check();return result;}finally{if(!win.isDestroyed())win.destroy();}}
  stop(){for(const win of this.windows)if(!win.isDestroyed())win.destroy();this.windows.clear();}
 }
-module.exports={SearchBrowser,linksFrom,resultsText,blocked:snap=>blocked(snap)};
+// The check is over once the page is no longer Google's «sorry», consent or sign-in page.
+const passed=url=>!blocked({url,text:''});
+module.exports={SearchBrowser,linksFrom,resultsText,blocked:snap=>blocked(snap),passed};

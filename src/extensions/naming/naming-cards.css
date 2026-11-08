@@ -1,0 +1,31 @@
+.naming-card{width:620px;max-width:100%;margin:12px 0}
+.naming-card .kit-subtitle{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:340px}
+.naming-body{display:flex;flex-direction:column;gap:10px}
+.naming-note{margin:0;font-size:12.5px;color:#e5ce8c}
+.naming-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+.naming-row{display:flex;flex-direction:column;gap:4px;padding:8px 11px;border-radius:10px;background:#ffffff05;border:1px solid var(--line);border-left:3px solid #c9ed9d}
+.naming-row.is-similar{border-left-color:#e5ce8c}
+.naming-row.is-taken{border-left-color:#f0b4a8;opacity:.86}
+.naming-head{display:flex;align-items:center;gap:8px}
+.naming-sub{display:flex;align-items:center;gap:6px 16px;flex-wrap:wrap}
+.naming-name{font-size:16px;font-weight:650;color:var(--ink);letter-spacing:.1px;overflow-wrap:anywhere;min-width:0}
+.naming-head .kit-chip{flex:none;max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.naming-copy{margin-left:auto;flex:none;font-size:12px;padding:3px 9px;min-height:0}
+.naming-length{display:flex;align-items:center;gap:8px}
+.naming-bar{position:relative;width:120px;height:5px;border-radius:3px;background:#ffffff12;overflow:hidden;flex:none}
+.naming-bar i{position:absolute;inset:0 auto 0 0;border-radius:3px;background:#8fb3e0}
+.naming-bar.over i{background:#f0b4a8}
+.naming-length small{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.naming-dots{display:flex;flex-wrap:wrap;gap:12px}
+.naming-dot{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--muted);cursor:default}
+.naming-dot i{width:8px;height:8px;border-radius:50%;background:#ffffff26;flex:none}
+.naming-dot.is-free i{background:#c9ed9d}
+.naming-dot.is-similar i{background:#e5ce8c}
+.naming-dot.is-taken i{background:#f0b4a8}
+.naming-dot.is-unknown i,.naming-dot.is-skip i{background:transparent;box-shadow:inset 0 0 0 1.5px #ffffff40}
+.naming-meaning{margin:0;font-size:13px;line-height:1.4;color:var(--ink)}
+.naming-notes{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px;font-size:12px;color:var(--muted)}
+.naming-notes li::before{content:'· '}
+.naming-notes li.is-warn{color:#e5ce8c}
+.naming-more{align-self:flex-start;font-size:12.5px}
+@media (max-width:520px){.naming-bar{width:80px}.naming-card .kit-subtitle{max-width:180px}}

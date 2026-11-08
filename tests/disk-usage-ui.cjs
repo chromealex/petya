@@ -47,6 +47,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js("document.querySelectorAll('.disk-row')[1].querySelector('.disk-confirm .primary').disabled"),true);
  assert.match(await js("document.querySelectorAll('.disk-row')[1].querySelector('.disk-confirm-title').textContent"),/ollama rm/);
  assert.equal(await js("document.querySelectorAll('.disk-row')[3].querySelector('.disk-clean')"),null,'Docker is not cleaned by Petya');
+ assert.ok(await js("[...document.querySelectorAll('.disk-row')[3].querySelectorAll('.disk-row-actions button')].some(b=>b.textContent==='Подробнее в Docker')"),'the Docker row links to the «Docker» app');
  await require('./card-shot.cjs')(win,'.disk-card','petya-disk-usage');
  // A stale card (scan not in memory) refuses to clean anything.
  await js("document.querySelectorAll('.disk-row')[0].querySelector('.disk-confirm .primary').click()");

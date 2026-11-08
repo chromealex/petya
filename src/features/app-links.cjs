@@ -17,7 +17,7 @@ const directory=path.join(__dirname,'../extensions');
 const KINDS=['video-meeting','task-tracker','share-message','code-fix','meeting-recording'];
 // Capabilities served by their own registries (sources polled or read by their apps), not offered as card buttons:
 // see each registry module (meeting-sources, crash-sources, metrics/support/ad sources in their apps).
-const REGISTRIES=['meeting-source','support-source','ad-source'];
+const REGISTRIES=['meeting-source','support-source','ad-source','metrics-source'];
 
 // Every `provides` entry of every extension: {kind, extension, setting, name, file, provider}. Unknown kinds and
 // files outside the extension's own directory are refused.

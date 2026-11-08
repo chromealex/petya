@@ -1,0 +1,21 @@
+{
+  "id": "converter",
+  "name": "Конвертер",
+  "description": "Картинки, видео, аудио и документы одной фразой: формат, размер, сжатие до нужного веса, гифка из видео, целая папка по маске. Исходники не трогаю",
+  "category": "computer",
+  "icon": "icon.svg",
+  "setting": "extension_converter",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["converter-cards.js", "message-format.js"],
+    ["converter-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "converterCard": "renderConverterCard"
+  },
+  "downloads": [
+    {"id": "ffmpeg", "name": "ffmpeg (видео и аудио)", "bytes": {"darwin": 70000000, "win32": 109000000}, "approx": true, "optional": true}
+  ],
+  "examples": ["сожми видео до 10 МБ", "конвертни png в webp", "сделай гифку из видео", "уменьши картинки в папке до 1024"]
+}

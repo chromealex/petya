@@ -1,0 +1,17 @@
+{
+  "id": "naming",
+  "name": "Нейминг",
+  "description": "Названия для героев, предметов, фич, ивентов и игры в нужном стиле — с проверкой длины, совпадений в проекте, App Store, Google Play и домена",
+  "category": "creative",
+  "icon": "icon.svg",
+  "setting": "extension_naming",
+  "settings": false,
+  "feature": "feature.cjs",
+  "examples": ["придумай название для ивента на Хэллоуин", "имена для героев-гномов", "как назвать фичу с сундуками", "название игры про бункер"],
+  "scripts": [
+    ["naming-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "namingCard": "renderNamingCard"
+  }
+}

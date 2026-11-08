@@ -1,0 +1,18 @@
+{
+  "id": "focus",
+  "name": "Фокус",
+  "description": "Фокус-сессии и помодоро: таймер в шапке и центре уведомлений, не срочные уведомления ждут, предупреждение перед встречей, отчёт за день и неделю",
+  "category": "personal",
+  "icon": "icon.svg",
+  "setting": "extension_focus",
+  "settings": false,
+  "feature": "feature.cjs",
+  "examples": ["фокус на 50 минут над картой уровня", "помодоро 4 раза", "перерыв 5", "сколько я сегодня сфокусировался"],
+  "scripts": [
+    ["focus-cards.js", "message-format.js"],
+    ["focus-chrome.js", "notifications.js"]
+  ],
+  "results": {
+    "focusCard": "renderFocusCard"
+  }
+}

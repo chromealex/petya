@@ -5,7 +5,7 @@
   document.querySelectorAll('.action-result-card').forEach(n=>n.remove());
   for(const row of state.items){const message=dialogueMessages.querySelector('[data-message-index="'+row.index+'"]');if(!message)continue;const card=el('section');card.className='action-result-card';card.dataset.state=row.status;
    card.append(el('strong',row.status==='confirmed'?(row.verifiedAt?'Результат проверен':'Сервис подтвердил выполнение'):row.status==='rejected'?'Сервис отклонил действие':'Результат пока не подтверждён'));
-   card.append(el('small',row.service+(row.channelName?' · #'+row.channelName:'')+' · '+new Date(row.verifiedAt||row.at).toLocaleString(window.petyaLocale||'ru-RU')));
+   card.append(el('small',row.service+(row.channelName?' · #'+row.channelName:'')+' · '+window.relativeTime(row.verifiedAt||row.at)));
    if(row.summary){const details=el('details');details.append(el('summary','Что отправлено'),el('p',row.summary));card.append(details);}
    if(row.verificationText)card.append(el('p',row.verificationText));
    if(row.status!=='confirmed')card.append(el('p','Повторная отправка отключена. Проверьте результат в сервисе.'));
