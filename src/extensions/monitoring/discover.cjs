@@ -181,6 +181,10 @@ function serializedValues(text){
  const out=[];const lines=text.split(/\r?\n/);let guid='',inBlock=false;
  for(let i=0;i<lines.length;i++){
   const l=lines[i];
+  // A prefab instance's override in a scene: `propertyPath: baseUrl` + `value: https://…` (target is the prefab,
+  // so the field is matched by name only — guid '*').
+  const mod=/^\s*propertyPath:\s*([A-Za-z_]\w*)\s*$/.exec(l);
+  if(mod&&/^\s*value:\s*(.+?)\s*$/.test(lines[i+1]||'')){out.push({guid:'*',field:mod[1],value:/^\s*value:\s*(.+?)\s*$/.exec(lines[i+1])[1].replace(/^['"]|['"]$/g,''),line:i+2});continue;}
   if(l.startsWith('--- ')){guid='';inBlock=false;continue;}
   if(/^MonoBehaviour:/.test(l)){inBlock=true;continue;}
   if(!inBlock)continue;
@@ -308,8 +312,10 @@ async function scan(roots,{limits=LIMITS,progress=()=>{},yieldEvery=200}={}){
  const byScript=new Map();for(const x of csr.serialized){if(!byScript.has(x.file))byScript.set(x.file,[]);byScript.get(x.file).push(x);}
  for(const {f,text} of yamls){
   for(const v of serializedValues(text)){
-   const script=metas.get(v.guid);if(!script)continue;
-   const field=(byScript.get(script)||[]).find(x=>x.field===v.field);if(!field)continue;
+   let field=null;
+   if(v.guid==='*'){const same=csr.serialized.filter(x=>x.field===v.field);if(same.length!==1)continue;field=same[0];}
+   else{const script=metas.get(v.guid);if(!script)continue;field=(byScript.get(script)||[]).find(x=>x.field===v.field);}
+   if(!field)continue;
    if(!/^(?:[a-z]+:\/\/|(?:[a-z0-9-]+\.)+[a-z]{2,}(?::\d+)?$)/i.test(v.value))continue;
    raw.push({text:v.value,file:f.rel,root:f.root,line:v.line,field:field.cls+'.'+field.field,name:field.field,via:field.cls+'.'+field.field+' в '+path.basename(f.rel),override:true,
     kind:/:\/\//.test(v.value)?'url':'host',snippet:snippet(text.split(/\r?\n/)[v.line-1]),parts:[{file:field.file,line:field.line,via:field.cls+'.'+field.field}]});

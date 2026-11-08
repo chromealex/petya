@@ -340,6 +340,11 @@ const data=r=>r.extensionData||r.messages?.at(-1)?.extensionData;
  assert.ok(need('https://api.staging.mygame.com').sources.some(s=>s.override&&s.via.startsWith('ApiClient.baseUrl')));
  assert.ok(need('lobby-eu.mygame.com').sources.some(s=>s.via.startsWith('Lobby.lobbyHost')));
  need('lobby.mygame.com:7000');need('api.mygame.com:7777');
+ // A prefab instance's override in a scene (propertyPath/value), matched by the field name.
+ assert.ok(need('https://lb-eu.mygame.com').sources.some(s=>s.override&&s.file==='Assets/Scenes/Lobby.unity'&&s.via.startsWith('ApiClient.leaderboardUrl')));
+ assert.ok(need('https://lb.mygame.com').overriddenBy?.some(o=>o.value==='https://lb-eu.mygame.com'));
+ // A ternary whose condition compares an enum: both branches.
+ assert.equal(need('https://pay.mygame.com').sources[0].via,'ServerConfig.Payments');assert.deepEqual(need('https://pay.staging.mygame.com').envs,['staging']);
  // Configs, build and deploy files; environment from file names.
  assert.deepEqual(need('https://api.staging.mygame.com').envs,['staging']);
  need('game.mygame.com:7777');need('http://game-server:8080/health');need('https://api.mygame.com/healthz');

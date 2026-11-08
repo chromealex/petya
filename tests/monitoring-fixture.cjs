@@ -52,6 +52,9 @@ namespace Game.Net {
       { Env.Prod, "https://events.mygame.com/collect" },
       { Env.Dev, "https://ev.mygame.io/collect" },
     };
+
+    public static Env Current = Env.Prod;
+    public static string Payments => Current == Env.Prod ? "https://pay.mygame.com" : "https://pay.staging.mygame.com";
   }
 }
 `,
@@ -103,6 +106,16 @@ MonoBehaviour:
   baseUrl: https://api.staging.mygame.com
   leaderboardUrl: https://lb.mygame.com
   timeoutSeconds: 20
+`,
+ 'Assets/Scenes/Lobby.unity':`%YAML 1.1
+--- !u!1001 &3003
+PrefabInstance:
+  m_Modification:
+    m_Modifications:
+    - target: {fileID: 1001, guid: ${'c'.repeat(32)}, type: 3}
+      propertyPath: leaderboardUrl
+      value: https://lb-eu.mygame.com
+      objectReference: {fileID: 0}
 `,
  'Assets/Prefabs/Lobby.prefab':`%YAML 1.1
 --- !u!114 &2002

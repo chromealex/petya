@@ -301,6 +301,12 @@ function evaluator(proj){
   // Ternary: both branches are kept as variants.
   const start=p.i;
   let left=concat(p,ctx,depth,seen);
+  // `env == Env.Prod ? "a" : "b"`: the condition is not a value — skip to its `?` and keep both branches.
+  if(['==','!=','<','>','<=','>=','&&','||'].includes(peek(p)?.v)){
+   let k=p.i,d=0;
+   for(;k<p.tokens.length;k++){const v=p.tokens[k].v;if(v==='('||v==='[')d++;else if(v===')'||v===']'){if(!d)break;d--;}else if(!d&&(v===','||v===';'||v===':'))break;else if(!d&&v==='?'&&p.tokens[k].t==='p')break;}
+   if(p.tokens[k]?.v==='?'){p.i=k;left=[];}
+  }
   if(peek(p)?.v==='?'){
    p.i++;const a=concat(p,ctx,depth,seen);if(!take(p,':'))return left;const b=expr(p,ctx,depth,seen);
    if(a&&b)return [...a,...b].slice(0,MAX_VARIANTS);
