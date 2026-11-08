@@ -26,7 +26,9 @@ const own={
  'sprint-planning':['спланируй спринт','что влезет в следующий спринт','какая у нас скорость','кто перегружен в спринте','velocity команды'],
  standup:['собери стендап','что вчера делала команда','у кого блокеры','настрой стендап на 10:30'],
  'ad-revenue':['сколько заработали на рекламе вчера','eCPM по сетям','какой формат приносит больше','упала выручка с rewarded','выручка с рекламы за неделю'],
- competitors:['что нового у конкурентов','добавь в конкуренты Clash of Clans','у кого вырос рейтинг','какие механики добавили в обновлениях']
+ competitors:['что нового у конкурентов','добавь в конкуренты Clash of Clans','у кого вырос рейтинг','какие механики добавили в обновлениях'],
+ 'who-knows':['кто разбирается в сетевом коде','к кому идти по магазину','кто писал PlayerController','кто последний трогал инвентарь','кого спросить про матчмейкинг'],
+ glossary:['собери глоссарий проекта','проверь термины в локализации','добавь в глоссарий сундук','что у нас значит мана','покажи глоссарий']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -57,7 +59,11 @@ const not={
  // Ad revenue is earnings from ads shown in our games: buying users, turning ads off and purchases are not it.
  'ad-revenue':['реклама игры','маркетинговые кампании','запусти рекламу в TikTok','сколько потратили на рекламу','отключи рекламу','покупки в приложении','выручка от покупок в приложении','падение продаж за неделю'],
  // Competitor games: a contest, a chess opponent, devices and our own store rating are not it.
- competitors:['конкурс','конкурс рисунков','конкурент в шахматах','сравни iPad и iPhone','отзывы в App Store за неделю','конкурентные преимущества']
+ competitors:['конкурс','конкурс рисунков','конкурент в шахматах','сравни iPad и iPhone','отзывы в App Store за неделю','конкурентные преимущества'],
+ // A person search only: factual «кто знает» questions, «кто ты», roles and the team directory are not it.
+ 'who-knows':['кто знает, когда релиз','кто ты','знаешь ли ты, что такое мана','заполни команду из Jira','кто тестировщик в команде','кто написал Войну и мир','кто знает где ключи'],
+ // The project's own words only: general definitions, other products' glossaries and localization files as such are not it.
+ glossary:['что такое REST','глоссарий Unity','проверь локализацию','что не переведено в локализации','купи билет в терминале','термины договора аренды']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
