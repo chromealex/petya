@@ -1,7 +1,10 @@
 // Offers an extension the user does not have yet when the conversation enters its subject.
 // Each extension may declare `offer.cjs` beside its extension.json:
 //   { id, name, pitch, names:[RegExp], topics:[RegExp], avoid:[RegExp], requests?:[RegExp],
-//     connect:'install'|'settings', ready(settings) }
+//     connect:'install'|'settings', ready(settings), connected?(settings), also?:[ids], service?:'<module>' }
+// `also`: extensions added together with this one (a crash source brings «Крэши», which shows its crashes).
+// `service`: the app is connected in Petya's own service settings (Google Play), not in an extension card.
+// `connected`: the catalog's «подключено» when it differs from `ready` (a source is connected before «Крэши» is added).
 // `names` are explicit service names (Sentry, App Store), `topics` the subject words (крэш, отзывы),
 // `avoid` near-misses that belong to someone else («код-ревью» is not store reviews).
 // A direct request («покажи крэши за неделю») is answered by the offer itself and resumes after connecting;
@@ -54,7 +57,7 @@ function setup(s){
  const offers=load();
  const pending=new Map();
  const prune=()=>{for(const [k,v]of pending)if(Date.now()-v.at>30*60000)pending.delete(k);};
- const keep=(o,command,topicId,direct)=>{prune();const id=randomUUID();pending.set(id,{id,ext:o.id,command,topicId,direct,at:Date.now()});return {id,ext:o.id,name:o.name,pitch:o.pitch,connect:o.connect||'install'};};
+ const keep=(o,command,topicId,direct)=>{prune();const id=randomUUID();pending.set(id,{id,ext:o.id,command,topicId,direct,at:Date.now()});return {id,ext:o.id,name:o.name,pitch:o.pitch,connect:o.connect||'install',...o.service?{service:o.service}:{}};};
  const services=command=>{try{return require('../service-access.cjs').detect(command,null);}catch{return [];}};
  // Requests Petya's own handlers answer (Jira, team, Slack digest, sums, weather) are never taken over by an offer.
  // work-query-route classifies ordinary talk as {kind:'chat'}: only other kinds count as owned.
@@ -75,15 +78,26 @@ function setup(s){
   const choice=decide(candidates(command,{offers,settings:s.settings,topic}).filter(r=>r.direct));
   if(!choice)return null;
   const rows=choice.one?[choice.one]:choice.tie;
-  const items=rows.map(r=>keep(r.offer,command,topic?.id,true));
   const text=choice.one?'Для этого нужно расширение «'+rows[0].offer.name+'»: '+rows[0].offer.pitch+'. Подключить?':
    'Это может сделать одно из расширений: '+rows.map(r=>'«'+r.offer.name+'» — '+r.offer.pitch).join('; ')+'. Какое подключить?';
+  return answer(command,rows.map(r=>r.offer),text);
+ }
+ // An extension that is added but needs another one (e.g. «Крэши» without a connected crash source) asks with the same
+ // offer card: `ids` are the extensions to choose from, `text` the question. The request resumes after connecting.
+ function propose(command,ids,text,by){
+  const list=ids.map(id=>offers.find(o=>o.id===id)).filter(Boolean);
+  if(!list.length)return null;
+  return answer(command,list,text,by);
+ }
+ function answer(command,list,text,by='расширения'){
+  const topic=s.dialogue.active();
+  const items=list.map(o=>keep(o,command,topic?.id,true));
   s.dialogue.rememberAction(command,text);
   const t=s.dialogue.active(),message=t.messages.at(-1);
-  message.by='расширения';message.extensionData={...message.extensionData,extensionOffer:{items,direct:true}};
+  message.by=by;message.extensionData={...message.extensionData,extensionOffer:{items,direct:true}};
   if(t){t.extensionOffers=[...new Set([...(t.extensionOffers||[]),...items.map(i=>i.ext)])];}
   s.dialogue.persist();
-  return {handled:true,question:true,text,by:'расширения',topicId:t.id,topicTitle:t.title,messages:t.messages,extensionData:{extensionOffer:{items,direct:true}}};
+  return {handled:true,question:true,text,by,topicId:t.id,topicTitle:t.title,messages:t.messages,extensionData:{extensionOffer:{items,direct:true}}};
  }
  // Called after Petya answered something on the subject: a quiet offer under the answer, once per chat.
  function annotate(command,result){
@@ -103,12 +117,14 @@ function setup(s){
  function find(id){prune();const row=pending.get(id);if(!row)throw Error('Предложение устарело. Повторите запрос.');return row;}
  function accept(id){
   const row=find(id),o=offers.find(x=>x.id===row.ext);
-  // Same switch the catalog's «Добавить» uses: the descriptor's setting.
-  const descriptor=require('./extension-ui.cjs').descriptors.find(d=>d.id===o.id);
-  if(descriptor?.setting)s.saveSettings({[descriptor.setting]:'true'});
+  // Same switch the catalog's «Добавить» uses: the descriptor's setting (and those of the extensions it brings).
+  const descriptors=require('./extension-ui.cjs').descriptors,patch={};
+  for(const ext of [o.id,...(o.also||[])]){const d=descriptors.find(d=>d.id===ext);if(d?.setting)patch[d.setting]='true';}
+  if(Object.keys(patch).length)s.saveSettings(patch);
   pending.delete(id);
   let ready=false;try{ready=!!o.ready(s.settings);}catch{ready=false;}
   if(ready||o.connect!=='settings')return {installed:o.id,name:o.name,retry:row.direct?row.command:null,text:'Расширение «'+o.name+'» добавлено.'};
+  if(o.service)return {installed:o.id,name:o.name,service:o.service,retry:row.command,text:'Подключите «'+o.name+'» в настройках — запрос сохранён: скажите «готово», и я продолжу.'};
   return {installed:o.id,name:o.name,settings:o.id,retry:row.command,text:'Расширение «'+o.name+'» добавлено. Подключите его в настройках — запрос сохранён: скажите «готово», и я продолжу.'};
  }
  function dismiss(id,forever=false){
@@ -117,6 +133,6 @@ function setup(s){
   return {dismissed:row.ext,forever};
  }
  function unmute(ext){s.saveSettings({extensionOffersMuted:JSON.stringify(muted(s.settings).filter(x=>x!==ext))});return muted(s.settings);}
- return {extensionOffers:{turn,annotate,offers},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
+ return {extensionOffers:{turn,annotate,propose,offers},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
 }
 module.exports={name:'extensionOffers',defaults:{extensionOffersMuted:'[]'},validate(){},setup,load,candidates,decide,REQUEST};

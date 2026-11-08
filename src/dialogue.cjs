@@ -37,7 +37,8 @@ function intent(text,active){
  if(discussionOnly(text))return 'chat';
  if(/^(?:а\s+)?(?:что такое|объясни|почему|как думаешь|что думаешь|как лучше|я думаю|мне кажется|давай обсудим)/iu.test(text))return 'chat';
  if(/(?:верн|продолж).*(?:баг|bug|жир|jira)/iu.test(text))return 'bugs';
- if(/(?:\banr\b|анр|google play|гугл пл[еэ]й)/iu.test(text))return 'anr';
+ // Google Play named with crashes is «Крэши»'s subject (its Android vitals crash source), not the ANR card.
+ if(/(?:\banr\b|анр)/iu.test(text)||/google play|гугл пл[еэ]й/iu.test(text)&&!/кр[эеа]ш|crash|падени|вылет/iu.test(text))return 'anr';
  if(/(?:баг|bug|ошиб).*(?:верс|релиз|сколько|jira|жир)|(?:сколько|посмотр|провер).*(?:баг|bug)/iu.test(text))return 'bugs';
  if(/(?:какие|покажи|список|открыт|остал|висит|глянь).*(?:баг|bug)|(?:баг|bug)\p{L}*\s+(?:открыт|остал|какие|висят|есть)/iu.test(text)&&!actionRequest(text))return 'bugs';
  // Inside «Мои задачи», a short status follow-up («а из todo?», «только в работе») narrows the same list.
