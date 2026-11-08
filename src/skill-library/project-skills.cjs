@@ -1,6 +1,7 @@
 // Skills that live in a project's own folder: <root>/skills/*/SKILL.md, .claude/skills, .agents/skills, .codex/skills
 // and .petya/skills. They join the library only for chats of that project and are chosen like the built-in ones;
-// their files are listed for the model, scripts are not run. A project skill with a built-in name gets a prefix.
+// their scripts run only in the isolated sandbox, after the user allows them (src/features/skill-runtime.cjs).
+// A project skill with a built-in name gets a prefix.
 const fs=require('node:fs'),path=require('node:path');
 const {frontMatter,body}=require('./packages.cjs');
 const PLACES=['skills','.claude/skills','.agents/skills','.codex/skills','.petya/skills'];

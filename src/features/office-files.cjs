@@ -11,26 +11,43 @@ const FORMATS={
  pptx:{name:'PowerPoint',re:/\b(?:pptx|powerpoint|keynote)\b|презентаци|слайд/iu},
  pdf:{name:'PDF',re:/\bpdf\b|пдф/iu}
 };
-const MAKE=/^(?:сделай|сделать|создай|создать|подготовь|оформи|сохрани|выгрузи|экспортируй|собери|сгенерируй|сформируй|составь|напиши|переведи|конвертируй|сверстай|перенеси|положи|набросай|нужна|нужен|нужно)$/iu;
-const READ=/(?:^|\s)(?:прочитай|разбери|проанализируй|перескажи|открой|что\s+(?:в|внутри)|о\s+ч[её]м|найди\s+в)(?=\s|$)/iu;
+// Verbs that make a file. «Напиши», «переведи», «нужна» are not among them: «напиши формулу для Excel» and
+// «нужна помощь с Excel» are questions, not files.
+const MAKE=/^(?:сделай|сделать|создай|создать|подготовь|подготовить|оформи|сохрани|выгрузи|экспортируй|собери|сгенерируй|сформируй|составь|конвертируй|сверстай|набросай)$/iu;
+// The format names the file being made: as its noun («сделай презентацию», «сделай pdf», «документом Word»)
+// or after «в/во/как/виде/формате» («выгрузи в Excel», «сохрани как pdf»). Forms like «презентации» belong to
+// another noun («план презентации»).
+const OBJECT=/^(?:docx|word|ворд|xlsx|excel|эксел[ьеия]?|эксель|pptx|powerpoint|keynote|презентаци[юя]|слайды|pdf|пдф)$/iu;
+const LINK=/^(?:в|во|как|виде|формате|файлом|файл|документом|документ|таблицей|таблицу|таблица)$/iu;
+// Words between the verb and the format that make it about something else («выжимку из pdf», «формулу для Excel»).
+const BREAK=/^(?:из|для|про|о|об|по|с|со|от|у|к|ли|помощь|формулу|формулы|план|выжимку|текст|ответ)$/iu;
 // A request to make something else — a task, a message, a post — that only mentions a format
 // («создай задачу в Jira про экспорт в PDF», «напиши письмо и приложи pdf»).
 const OTHER=/(?:^|\s)(?:создай|заведи|открой|напиши|отправь|опубликуй|ответь)\s+(?:\S+\s+){0,2}?(?:задач|тикет|баг|issue|письм|сообщени|коммент|пост|ответ)/iu;
 const EDIT=/^(?:петя[,!\s]+)?(?:добавь|убери|удали|измени|исправь|поправь|переделай|сократи|дополни|замени|поменяй|переименуй|перенеси|раздели|объедини|расширь|допиши|вставь|переставь|отсортируй)(?=\s|$)/iu;
+// A follow-up edits the last file only when it speaks of the file's parts, not of tasks, meetings or reminders.
+const PARTS=/(?:слайд|лист|столб|колонк|строк|ячейк|раздел|пункт|абзац|заголов|таблиц|документ|файл|презентац|страниц|титул|шрифт|цвет|список|глав|итог|вывод|введени|заключени)/iu;
+const NOT_FILE=/(?:задач|тикет|встреч|календар|напомин|jira|джир|slack|слак|письм|почт|канал|событи)/iu;
+const FRESH=30*60000;
 // The format a request asks to make, or null. «/docx …» names it directly; otherwise a verb of making must
-// govern the format word within a few words («выгрузи это в Excel», «сделай pdf из отчёта»).
+// govern the format word («выгрузи это в Excel», «сделай pdf из отчёта», «можешь сделать презентацию?»).
 function intent(text,{previous}={}){
  const t=String(text||'').trim();
  const slash=/^\/(docx|xlsx|pptx|pdf)(?:\s+([\s\S]*))?$/iu.exec(t);if(slash)return {format:slash[1].toLowerCase(),request:slash[2]?.trim()||'Сделай файл по этому разговору.'};
- if(previous&&EDIT.test(t)&&!Object.entries(FORMATS).some(([k,f])=>k!==previous.format&&f.re.test(t)))return {format:previous.format,request:t,revise:true};
- // A question about how to do it («как сделать презентацию в PowerPoint?») is not a request to make one.
- if(/^(?:а\s+)?(?:как|зачем|почему|где|когда|что\s+такое|чем)(?=\s)/iu.test(t))return null;
+ if(previous&&EDIT.test(t)&&PARTS.test(t)&&!NOT_FILE.test(t)&&(!previous.at||Date.now()-previous.at<FRESH)&&!Object.entries(FORMATS).some(([k,f])=>k!==previous.format&&f.re.test(t)))return {format:previous.format,request:t,revise:true};
+ // A question («как сделать презентацию?», «нужно ли конвертировать в pdf?») is not a request, unless it
+ // asks Petya to do it («можешь сделать презентацию по спринту?»).
+ if(/^(?:а\s+)?(?:как|зачем|почему|где|когда|что\s+такое|чем|нужно\s+ли|надо\s+ли|стоит\s+ли)(?=\s)/iu.test(t))return null;
+ if(/\?\s*$/.test(t)&&!/^(?:петя[,\s]+)?(?:можешь|сможешь|сделаешь|подготовишь|не\s+мог(?:ла)?\s+бы)(?=\s)/iu.test(t))return null;
  if(OTHER.test(t))return null;
  const words=t.toLowerCase().replace(/ё/g,'е').match(/[\p{L}\p{N}]+/gu)||[];
  for(let i=0;i<words.length;i++){
   const format=Object.keys(FORMATS).find(k=>FORMATS[k].re.test(words[i]));if(!format)continue;
-  for(let j=i-1;j>=Math.max(0,i-6);j--){
-   if(MAKE.test(words[j])){if(READ.test(t)&&j>0&&!MAKE.test(words[0]))break;return {format,request:t};}
+  const direct=OBJECT.test(words[i]),linked=i>0&&LINK.test(words[i-1]);
+  if(!direct&&!linked)continue;
+  for(let j=i-1;j>=Math.max(0,i-5);j--){
+   if(BREAK.test(words[j]))break;
+   if(MAKE.test(words[j]))return {format,request:t};
   }
  }
  return null;
@@ -63,8 +80,7 @@ module.exports={
   function save(name,bytes){
    const dir=where();fs.mkdirSync(dir,{recursive:true});
    const ext=path.extname(name),base=name.slice(0,-ext.length);let file=path.join(dir,name);
-   for(let k=2;fs.existsSync(file);k++)file=path.join(dir,base+' ('+k+')'+ext);
-   fs.writeFileSync(file+'.tmp',bytes);fs.renameSync(file+'.tmp',file);return file;
+   for(let k=2;;k++){try{fs.writeFileSync(file,bytes,{flag:'wx'});return file;}catch(e){if(e.code!=='EEXIST'||k>999)throw e;}file=path.join(dir,base+' ('+k+')'+ext);}
   }
   // What the file is made from: the chat so far and its files, compacted for the request when long.
   async function material(topic,request,files=[]){
@@ -121,8 +137,8 @@ module.exports={
    const answer=(asked.revise?'Обновил файл':'Готово')+': «'+path.basename(file)+'» — '+measure(asked.format,v)+'. '+String(v.summary||'').trim()+'\nСохранил в '+shown+'. Открыть или показать в папке можно кнопками под ответом.';
    d.rememberAction(command,answer);
    const t=d.active(),message=t.messages.at(-1);
-   message.attachments=[{id:require('node:crypto').randomUUID(),name:path.basename(file),note:FORMATS[asked.format].name+'-файл, создан Петей',localSourcePath:file,generated:true,format:asked.format}];
-   message.officeFile={format:asked.format,content:asked.format==='xlsx'?{title:v.title,sheets:v.sheets}:asked.format==='pptx'?{title:v.title,slides:v.slides}:{title:v.title,markdown:v.markdown},text:text(asked.format,v).slice(0,200000)};
+   message.attachments=[{id:require('node:crypto').randomUUID(),name:path.basename(file),note:FORMATS[asked.format].name+'-файл, создан Петей',localSourcePath:file,generated:true,made:true,format:asked.format}];
+   message.officeFile={at:Date.now(),format:asked.format,content:asked.format==='xlsx'?{title:v.title,sheets:v.sheets}:asked.format==='pptx'?{title:v.title,slides:v.slides}:{title:v.title,markdown:v.markdown},text:text(asked.format,v).slice(0,200000)};
    message.by=v.skill?'навык '+v.skill:'файл '+FORMATS[asked.format].name;d.persist();
    return {handled:true,text:answer,by:message.by,topicId:t.id,topicTitle:t.title,messages:t.messages};
   }

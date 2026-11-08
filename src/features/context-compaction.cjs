@@ -26,13 +26,16 @@ module.exports={
    finally{running=false;}
    if(queue.size)arm(1000);
   }
-  const model=()=>({request:s.request,endpoint:s.core.localEndpoint(s.settings.ollamaUrl),model:s.settings.model,strict:true});
+  // Between model calls the work waits while the user's requests run, so an answer never queues behind it.
+  const pause=async()=>{for(let i=0;i<120&&!idle();i++)await new Promise(r=>{const t=setTimeout(r,500);t.unref?.();});};
+  const model=()=>({request:s.request,endpoint:s.core.localEndpoint(s.settings.ollamaUrl),model:s.settings.model,strict:true,before:pause});
   // One unit of work: the earliest archived block without a summary, then the earliest long recent
   // message. Returns whether anything was compacted (the queue keeps the chat until nothing is left).
   async function step(id){
    const dialogue=s.dialogue,topic=dialogue?.state?.topics?.find(t=>t.id===id);if(!topic||topic.archived)return false;
    const current=archive.refreshArchive(topic);
-   const block=current.chunks.find(c=>!c.compact);
+   // Only full blocks: the trailing partial block grows with every message and would be redone each time.
+   const block=current.chunks.find(c=>!c.compact&&c.to-c.from===archive.BLOCK);
    if(block){
     const text=archive.transcript(topic.messages.slice(block.from,block.to));
     const summary=text.trim()?await compactor.compact({text,purpose:'chat',target:350,...model()}):'';

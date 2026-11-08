@@ -16,10 +16,10 @@ const library=require('../src/skill-library/index.cjs');
  const before=library.shortlist('Напиши релиз-ноты для стора к версии 1.20',skillChoice.skills());
  assert(!before.some(r=>r.skill===english),'English words do not match a Russian request');
  const chosen=await skillChoice.choose('Напиши релиз-ноты для стора к версии 1.20');
- assert.equal(chosen,english,'an untranslated English skill is offered to the model and chosen');
+ assert.equal(chosen,english,'the English skill is translated on the first request and then found by Russian words');
+ assert(asked.some(b=>b.format.properties.ru),'its description was translated');
  assert(asked.at(-1).format.properties.skill.enum.includes('store-release-notes'));
- // The background translation is made once, kept on disk and used for matching by words.
- await skillChoice.translate();
+ // The translation is made once, kept on disk and used for matching by words.
  assert.equal(english.ru,'Пиши релиз-ноты для App Store или Google Play к новой версии игры.');
  const saved=JSON.parse(fs.readFileSync(path.join(dataRoot,'skill-descriptions.json'),'utf8'));
  assert(Object.values(saved).includes(english.ru));
@@ -32,5 +32,5 @@ const library=require('../src/skill-library/index.cjs');
  // Russian skills are not translated, and a request with no fitting skill still gets none.
  const plain=feature.setup({...s,installedSkills:()=>[]}).skillChoice;
  assert.equal(await plain.choose('Какая погода завтра?'),null);
- console.log('Skill languages: English skills offered before translation, translated once, kept on disk and matched by Russian words OK');
+ console.log('Skill languages: English skills translated on first use, kept on disk and matched by Russian words OK');
 })().catch(e=>{console.error(e);process.exit(1);});

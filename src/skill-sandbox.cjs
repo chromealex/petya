@@ -69,10 +69,10 @@ class SkillSandbox{
  async run({files,command,need={pip:[],npm:[],node:false},timeoutMs=LIMITS.timeoutMs},{signal,check=()=>{}}={}){
   const [bin,...args]=command||[];
   if(!['python','python3','bash','sh','node'].includes(bin))throw Error('Навык может запускать python, bash или node.');
+  if(bin==='node'&&!need.node&&!need.npm.length)throw Error('У навыка нет Node-скриптов: Node.js в его среде не установлен.');
   if(args.some(a=>typeof a!=='string'||a.length>4000)||args.length>40)throw Error('Некорректные аргументы скрипта.');
-  if((bin==='node')&&!need.node&&!need.npm.length)need={...need,node:true};
   const payload={files:Object.fromEntries(Object.entries(files||{}).map(([k,v])=>[k,Buffer.from(v).toString('base64')])),command:[bin==='python3'?'python':bin,...args],timeout:Math.ceil(timeoutMs/1000),maxOut:LIMITS.outFiles};
-  const input=JSON.stringify(payload);if(Buffer.byteLength(input)>LIMITS.inputBytes)throw Error('Файлы навыка и пользователя больше 48 МБ: разберите меньше файлов за раз.');
+  const input=JSON.stringify(payload);if(Buffer.byteLength(input)>LIMITS.inputBytes)throw Error('Файлы навыка и пользователя больше 64 МБ: разберите меньше файлов за раз.');
   if(this.active)throw Error('Скрипт навыка уже выполняется. Дождитесь результата.');
   this.active=true;const name='petya-skill-'+randomUUID();let base,created=false;
   try{

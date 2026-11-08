@@ -70,12 +70,13 @@ const limit=body=>compactor.WINDOW-body.options.num_predict-300;
  assert.equal(await contextCompaction.step('bg'),true);
  assert(topic.conversationArchive.chunks[0].compact,'the first archived block got a summary');
  while(await contextCompaction.step('bg'));
- assert(topic.conversationArchive.chunks.every(c=>c.compact),'every archived block is compacted');
+ assert(topic.conversationArchive.chunks.filter(c=>c.to-c.from===12).every(c=>c.compact),'every full archived block is compacted');
+ assert(topic.conversationArchive.chunks.filter(c=>c.to-c.from<12).every(c=>!c.compact),'the growing last block waits until it is full');
  assert(topic.conversationArchive.compacts[archive.messageHash(topic.messages.at(-1))],'the long recent message is compacted');
  assert(persisted>=2);
  assert(asked.every(b=>/Пользователь|Петя/.test(b.messages[0].content)),'chat compaction keeps who said what');
  // A failed model call stores nothing; the block is retried later.
- const t2={id:'bg2',messages:[...Array.from({length:30},(_,i)=>({role:i%2?'assistant':'user',text:'Длинная реплика '+i+' '+'слово '.repeat(120),at:i}))]};
+ const t2={id:'bg2',messages:[...Array.from({length:40},(_,i)=>({role:i%2?'assistant':'user',text:'Длинная реплика '+i+' '+'слово '.repeat(120),at:i}))]};
  const s2={...s,dialogue:{state:{topics:[t2]},persist(){}},request:async()=>{throw Error('Ollama не отвечает');}};
  await assert.rejects(feature.setup(s2).contextCompaction.step('bg2'));
  assert(!archive.buildArchive(t2).chunks.some(c=>c.compact),'no summary is invented on failure');

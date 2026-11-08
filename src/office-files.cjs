@@ -115,7 +115,7 @@ function cell(value,ref,header){
  if(typeof value==='number'&&Number.isFinite(value))return '<c r="'+ref+'"'+(header?' s="1"':'')+'><v>'+value+'</v></c>';
  if(typeof value==='boolean')return '<c r="'+ref+'" t="b"><v>'+(value?1:0)+'</v></c>';
  const text=String(value);
- if(!header&&/^=[A-Za-z(]/.test(text)&&text.length<8000)return '<c r="'+ref+'"><f>'+xml(text.slice(1))+'</f></c>';
+ if(!header&&/^=[A-Za-z(]/.test(text)&&text.length<8000&&safeFormula(text))return '<c r="'+ref+'"><f>'+xml(text.slice(1))+'</f></c>';
  if(!header&&/^-?\d+(?:[.,]\d+)?$/.test(text.trim())&&text.trim().length<16)return '<c r="'+ref+'"><v>'+Number(text.trim().replace(',','.'))+'</v></c>';
  return '<c r="'+ref+'" t="inlineStr"'+(header?' s="1"':' s="2"')+'><is><t xml:space="preserve">'+xml(text)+'</t></is></c>';
 }
@@ -124,6 +124,10 @@ function filterNames(parts,names){
  const rows=parts.map((p,k)=>{const ref=/<autoFilter ref="([A-Z]+)(\d+):([A-Z]+)(\d+)"/.exec(p);return ref?'<definedName name="_xlnm._FilterDatabase" localSheetId="'+k+'" hidden="1">\''+xml(names[k].replace(/'/g,"''"))+'\'!$'+ref[1]+'$'+ref[2]+':$'+ref[3]+'$'+ref[4]+'</definedName>':'';}).join('');
  return rows?'<definedNames>'+rows+'</definedNames>':'';
 }
+// Formulas from model output: only common calculation functions, no links, external references or DDE
+// («=cmd|…», WEBSERVICE, HYPERLINK); anything else is kept as text.
+const FUNCTIONS=new Set('SUM AVERAGE MIN MAX COUNT COUNTA COUNTBLANK COUNTIF COUNTIFS SUMIF SUMIFS AVERAGEIF AVERAGEIFS PRODUCT MEDIAN ROUND ROUNDUP ROUNDDOWN ABS INT MOD POWER SQRT IF IFS IFERROR AND OR NOT CONCATENATE CONCAT TEXT LEN LEFT RIGHT MID UPPER LOWER TRIM TODAY NOW DATE YEAR MONTH DAY WEEKDAY NETWORKDAYS DATEDIF VLOOKUP HLOOKUP XLOOKUP INDEX MATCH RANK PERCENTILE STDEV VAR'.split(' '));
+function safeFormula(text){if(/[|\[\]]/.test(text))return false;for(const m of text.matchAll(/([A-Za-z][A-Za-z0-9._]*)\s*\(/g))if(!FUNCTIONS.has(m[1].toUpperCase()))return false;return true;}
 function xlsx(sheets,{title=''}={}){
  sheets=(Array.isArray(sheets)&&sheets.length?sheets:[{name:'Лист 1',rows:[]}]).slice(0,50);
  const names=sheetNames(sheets);
@@ -206,5 +210,15 @@ function html(markdown,{title=''}={}){
  return '<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>'+xml(title)+'</title><style>body{font:11pt/1.5 -apple-system,"Segoe UI",Arial,sans-serif;color:#1f2937;margin:0}h1{font-size:20pt;color:#1f3864;margin:0 0 12pt}h2{font-size:15pt;color:#2e5395;margin:18pt 0 6pt}h3,h4{font-size:12.5pt;color:#2e5395;margin:14pt 0 4pt}p{margin:0 0 8pt}table{border-collapse:collapse;width:100%;margin:6pt 0 12pt;font-size:10pt}th,td{border:1px solid #a6a6a6;padding:4pt 6pt;text-align:left;vertical-align:top}th{background:#e8eef4}pre{background:#f2f2f2;padding:8pt;font:9pt/1.4 Menlo,Consolas,monospace;white-space:pre-wrap}code{font-family:Menlo,Consolas,monospace;font-size:9.5pt}blockquote{margin:0 0 8pt 16pt;color:#595959;font-style:italic}a{color:#0563c1}h1,h2,h3{page-break-after:avoid}tr{page-break-inside:avoid}</style></head><body>'+body+'</body></html>';
 }
 // A safe file name from a title: no path characters, not empty, at most 80 characters.
-function fileName(title,ext){const base=String(title||'').replace(/[\\/:*?"<>|\x00-\x1f]+/g,' ').replace(/\s+/g,' ').trim().replace(/^\.+/,'').slice(0,80)||'Документ';return base+'.'+ext;}
-module.exports={zip,blocks,inline,docx,xlsx,pptx,html,fileName,xml};
+function fileName(title,ext){let base=String(title||'').replace(/[\\/:*?"<>|\x00-\x1f]+/g,' ').replace(/\s+/g,' ').trim().replace(/^\.+/,'').replace(/[. ]+$/,'').slice(0,80)||'Документ';
+ // Names Windows reserves for devices cannot be files.
+ if(/^(?:con|prn|aux|nul|com\d|lpt\d)$/i.test(base))base+='_';return base+'.'+ext;}
+// A file that came from a script is marked as downloaded from the internet, so the system warns before
+// opening it (macOS quarantine, Windows Mark of the Web). Best effort: the file is kept either way.
+function markDownloaded(file){
+ try{
+  if(process.platform==='darwin')require('node:child_process').execFile('/usr/bin/xattr',['-w','com.apple.quarantine','0081;'+Math.floor(Date.now()/1000).toString(16)+';Petya;',file],()=>{});
+  else if(process.platform==='win32')require('node:fs').writeFileSync(file+':Zone.Identifier','[ZoneTransfer]\r\nZoneId=3\r\n');
+ }catch{/* Not supported by the file system. */}
+}
+module.exports={zip,blocks,inline,docx,xlsx,pptx,html,fileName,xml,markDownloaded,safeFormula};

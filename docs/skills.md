@@ -54,6 +54,36 @@ an image of the skill's own (`petya-skill-<hash>`) — the only step with networ
 «Установить». With «Без установки», without Docker, or with `skillScripts: false`, the skill still answers by its
 logic and says that its scripts did not run. Image builds report progress in the notification center.
 
+## Checking scripts before they run
+
+`src/skill-library/script-audit.cjs` reads every script (`.py`, `.sh`, `.js`, …) and SQL file of a skill before
+anything runs and reports findings with file and line:
+
+* critical (⛔): recursive deletion of a root, home folder, variable or mask (`rm -rf $DIR`), a download piped into a
+  shell (`curl … | bash`), disk formatting, fork bombs, reverse shells, reading keys and passwords (`~/.ssh`,
+  `~/.aws/credentials`, the keychain), running decoded code (`exec(base64…)`), `DROP DATABASE/TABLE`, `TRUNCATE`,
+  `DELETE`/`UPDATE` without `WHERE` or with an always-true condition;
+* warning (⚠️): other deletions, `eval`/`exec`, commands through a shell, unsafe deserialisation (`pickle`,
+  `yaml.load`), wide permissions, `sudo`, cron and services, `git push --force` / `reset --hard`, and SQL mistakes:
+  `= NULL` instead of `IS NULL`, `NOT IN (SELECT …)` with NULLs, `JOIN` without `ON`, tables listed with commas without
+  a condition, `GRANT ALL` / `TO PUBLIC`, passwords in queries, SQL glued from variables (injection);
+* info (ℹ️): network access (there is none in the sandbox), secrets read from the environment, `SELECT *`, `LIKE '%…'`.
+
+The findings are shown in the permission question before the first run, on the «Навыки» page next to each installed
+skill, to the model with the result of each run, and under the answer for the scripts that actually ran. Scripts of a
+skill that did not come with Petya need the user's permission once; any change in its scripts or SQL asks again.
+A built-in skill asks only if the check finds something critical. Code the Python extension writes is checked the same
+way and is not run with a critical finding until the user confirms.
+
+## What comes back from the sandbox
+
+Everything the container returns is treated as untrusted. File names are reduced to a plain name, only documents,
+data and images are kept (`pdf`, `docx`, `xlsx`, `pptx`, `odt`, `txt`, `md`, `csv`, `json`, `png`, `jpg`, …; never
+`.bat`, `.cmd`, `.js`, `.app` or other runnable types), at most 20 MB in total; files are written without overwriting
+and marked as downloaded (macOS quarantine, Windows Mark of the Web). The chat offers only «Показать в папке» for
+them; «Открыть» in the app is only for files Petya built himself. Skill files are read only by their listed names and
+never through a symbolic link.
+
 ## Files Petya makes
 
 «Сделай презентацию по итогам спринта», «выгрузи это в Excel», «оформи документом Word», «сделай pdf», or `/docx`,

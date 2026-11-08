@@ -4,7 +4,7 @@
 // The chosen skill only shapes the answer (src/dialogue-request.cjs adds its instructions); it never
 // grants tools or access. «/name» or «навык name» still runs a skill explicitly.
 const library=require('../skill-library/index.cjs');
-const MIN_SCORE=2,MIN_CONFIDENCE=.7,TTL=5*60000,UNRANKED=4;
+const MIN_SCORE=2,MIN_CONFIDENCE=.7,TTL=5*60000;
 // Skills whose description has no Russian words: users and projects often bring English SKILL.md files.
 // The anthropic docx/xlsx/pptx/pdf packages explain Python libraries Petya does not have; Petya makes these
 // files himself (src/features/office-files.cjs), so they are not chosen as instructions.
@@ -37,7 +37,7 @@ module.exports={
   const remember=()=>{try{const f=file();if(f){fs.writeFileSync(f+'.tmp',JSON.stringify(translations));fs.renameSync(f+'.tmp',f);}}catch{/* Kept in memory. */}};
   const apply=list=>{for(const x of list)if(foreign(x)&&!x.ru){const ru=translations[hash(x.description)];if(ru){x.ru=ru;stamp++;}else waiting.set(hash(x.description),x);}};
   async function translate(){
-   if(translating||!waiting.size||!s.settings.model||require('../model-context.cjs').stats().running)return;
+   if(translating||!waiting.size||!s.settings.model)return;
    translating=true;
    try{for(const [key,x] of [...waiting].slice(0,8)){
     const r=await s.request(s.core.localEndpoint(s.settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:s.settings.model,stream:false,think:false,
@@ -55,11 +55,13 @@ module.exports={
   const choose=async command=>{
    const text=String(command||'').trim();
    if(!text||s.settings.autoSkills==='false'||!s.settings.model||s.settings.semanticTools==='false')return null;
-   const all=skills(),short=library.shortlist(text,all,8,stamp).filter(r=>r.score>=MIN_SCORE);
-   // English skills not translated yet cannot match Russian words: the model sees a few of them anyway.
-   const unranked=all.filter(x=>!x.builtin&&foreign(x)&&!x.ru&&!short.some(r=>r.skill===x)).slice(0,UNRANKED);
-   if(!short.length&&!unranked.length)return null;
-   const candidates=[...short.map(r=>r.skill),...unranked];
+   let all=skills();
+   // English skills not translated yet cannot match Russian words: their translation is made now, once,
+   // instead of offering them blindly on every request.
+   if(waiting.size){await translate();all=skills();}
+   const short=library.shortlist(text,all,8,stamp).filter(r=>r.score>=MIN_SCORE);
+   if(!short.length)return null;
+   const candidates=short.map(r=>r.skill);
    const r=await s.request(s.core.localEndpoint(s.settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(request(s.settings.model,text,candidates,s.dialogue?.active?.()))});
    let v;try{v=JSON.parse(r?.message?.content||'null');}catch{return null;}
    if(!v||typeof v.confidence!=='number'||v.confidence<MIN_CONFIDENCE)return null;
@@ -70,7 +72,9 @@ module.exports={
    chosen=null;let skill=null;
    try{skill=await choose(command);}catch(e){console.error('Skill choice:',e.message);}
    // A short follow-up to an answer made with a skill («Давай», «Что-то не в рифму», «Короче») keeps that skill.
-   if(!skill&&s.settings.autoSkills!=='false'&&String(command).trim().length<=80){const last=[...(s.dialogue?.active?.()?.messages||[])].reverse().find(m=>m.role==='assistant');const name=/^(?:навык|скилл) (\S+)$/u.exec(last?.by||'')?.[1];if(name)skill=skills().find(x=>x.name===name)||null;}
+   if(!skill&&s.settings.autoSkills!=='false'&&String(command).trim().length<=80){const last=[...(s.dialogue?.active?.()?.messages||[])].reverse().find(m=>m.role==='assistant');const name=/^(?:навык|скилл) (\S+)$/u.exec(last?.by||'')?.[1];const kept=name?skills().find(x=>x.name===name):null;
+    // Only a skill that shapes the answer carries over; a skill with files (scripts, references) runs again only when asked.
+    if(kept&&!require('./skill-runtime.cjs').handles(kept))skill=kept;}
    if(skill){
     s.requestProgress?.report('Беру навык '+skill.name);
     // The skill's text for this request: whole when it fits, otherwise the sections it needs, compacted.

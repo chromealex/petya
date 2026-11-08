@@ -19,7 +19,7 @@ module.exports=ctx=>{
   ctx.handle('skillsList',()=>instructionSkills.list());ctx.handle('skillsSave',value=>instructionSkills.put(value));ctx.handle('skillsDelete',id=>instructionSkills.remove(id));
   ctx.handle('skillsParse',markdown=>skillModule.parseMarkdown(markdown));
   ctx.handle('skillsExport',id=>{const skill=instructionSkills.list().find(s=>s.id===id);if(!skill)throw Error('Навык не найден.');return skillModule.markdown(skill);});
-  const executeSkill=async(command,ids)=>{const selected=instructionSkills.resolve(command);if(!selected)return null;const files=ids?ctx.attachments.take(ids):undefined;if(ctx.skillRuntime?.handles(selected.skill)){const result=await ctx.skillRuntime.turn({skill:selected.skill,question:selected.question,command,files:files||[]});if(ids)for(const id of ids)ctx.attachments.remove(id);return result;}const result=await workSkills.turn(selected,command,files)||await skillModule.runSkill({selected,command,dialogue:ctx.dialogue,settings:{...ctx.settings},request:ctx.request,company:ctx.companies.get(ctx.companyId).name,files,...require('./chat-attribution.cjs').contextExcerpt(ctx.memory.prune().slice(-10))});if(ids)for(const id of ids)ctx.attachments.remove(id);return result;};
+  const executeSkill=async(command,ids)=>{const selected=instructionSkills.resolve(command);if(!selected)return null;const files=ids?ctx.attachments.take(ids):undefined;if(ctx.skillRuntime?.handles(selected.skill)){try{return await ctx.skillRuntime.turn({skill:selected.skill,question:selected.question,command,files:files||[]});}finally{if(ids)for(const id of ids)ctx.attachments.remove(id);}}const result=await workSkills.turn(selected,command,files)||await skillModule.runSkill({selected,command,dialogue:ctx.dialogue,settings:{...ctx.settings},request:ctx.request,company:ctx.companies.get(ctx.companyId).name,files,...require('./chat-attribution.cjs').contextExcerpt(ctx.memory.prune().slice(-10))});if(ids)for(const id of ids)ctx.attachments.remove(id);return result;};
   // skill: a skill chosen for the question about these files (src/features/skill-choice.cjs).
   const inspectAttachments=async(ids,question,{skill}={})=>{
     const caption=String(question||'').trim();
@@ -64,7 +64,8 @@ module.exports=ctx=>{
     // A fitting skill shapes the answer about the files too (a bug report from a log, a test report…).
     let skill=null;try{skill=await ctx.skillChoice?.choose?.(request);}catch(e){if(e?.name==='AbortError')throw e;}
     if(skill)require('./request-progress.cjs').report('Беру навык '+skill.name);
-    if(skill&&ctx.skillRuntime?.handles(skill)){const files=ctx.attachments.take(ids);const result=await ctx.skillRuntime.turn({skill,question:request,command,files});for(const id of ids)ctx.attachments.remove(id);return result;}
+    // The files are taken into the skill (kept by its question if it asks one), so they leave the composer either way.
+    if(skill&&ctx.skillRuntime?.handles(skill)){const files=ctx.attachments.take(ids);try{return await ctx.skillRuntime.turn({skill,question:request,command,files});}finally{for(const id of ids)ctx.attachments.remove(id);}}
     return inspectAttachments(ids,command,{skill});
   });
   return {instructionSkills,inspectAttachments,executeSkill,taskDuplicates,workSkills};

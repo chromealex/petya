@@ -89,4 +89,4 @@ function conversationContext(topic,command=''){
  }
  return {roleFacts:require('./role-facts.cjs').roleFacts(topic),archiveSummary:summary,...(archiveCompact.length?{archiveCompact}:{}),recentUserFacts,restoredHistory:restored.sort((a,b)=>a.from-b.from),history,archiveInfo:{version:VERSION,archivedMessages:archive.until,summaryIsExtractive:!archiveCompact.length,compactedBlocks:archiveCompact.length,olderContextOmitted:archive.until>0,originalsRetained:true,compactedRecentMessages:compactedRecent,recentContextOmitted:history.length<messages.slice(archive.until).filter(m=>typeof m?.text==='string').length}};
 }
-module.exports={buildArchive,refreshArchive,conversationContext,tokens,transcript,messageHash,LONG};
+module.exports={buildArchive,refreshArchive,conversationContext,tokens,transcript,messageHash,LONG,BLOCK};

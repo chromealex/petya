@@ -3,7 +3,9 @@
 const path=require('node:path');
 const installed=require('../skill-library/installed.cjs');
 const root=()=>path.join(require('electron').app.getPath('userData'),'skill-packages');
-const view=skill=>({name:skill.name,description:skill.description,files:skill.files.length,folder:skill.folder,source:skill.source});
+// The check of the skill's scripts (src/skill-library/script-audit.cjs) is shown on the «Навыки» page.
+const view=skill=>{const found=require('../skill-library/script-audit.cjs').audit(skill);return {name:skill.name,description:skill.description,files:skill.files.length,folder:skill.folder,source:skill.source,
+ audit:{critical:found.filter(f=>f.severity==='critical').length,warning:found.filter(f=>f.severity==='warning').length,report:require('../skill-library/script-audit.cjs').report(found,20)}};};
 // «Сделай навык: как оформлять релиз-ноты» — Petya writes the skill himself from the request and the chat so far.
 const ASK=/^(?:петя[,!\s]+)?(?:создай|сделай|добавь|заведи|напиши|запомни\s+(?:это\s+)?как|сохрани\s+(?:это\s+)?как)\s+(?:себе\s+)?(?:новый\s+)?(?:навык|скилл)(?:\s+для)?(?=[\s:,—-]|$)[\s:,—-]*([\s\S]*)$/iu;
 module.exports={name:'skillPackages',defaults:{},validate(){},matches:t=>ASK.test(String(t||'').trim()),

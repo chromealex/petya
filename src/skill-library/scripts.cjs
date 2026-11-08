@@ -18,13 +18,21 @@ const scripts=skill=>(skill.files||[]).filter(f=>SCRIPT.test(f));
 function requirements(skill){
  const files=skill.files||[],local=new Set(files.filter(f=>/\.py$/i.test(f)).flatMap(f=>{const parts=f.replace(/\.py$/i,'').split('/');return [parts.at(-1),...parts.slice(0,-1)];}));
  const pip=new Set(),npm=new Set();
- for(const f of files.filter(f=>/(?:^|\/)requirements[\w.-]*\.txt$/i.test(f)))for(const line of read(skill,f).split('\n')){const v=line.replace(/#.*/,'').trim();if(v&&!v.startsWith('-'))pip.add(v);}
+ // requirements.txt lines in their usual forms: spaces around versions, environment markers and extras are
+ // fine; URLs, editable installs and options are not installed and are reported instead.
+ const skipped=[];
+ for(const f of files.filter(f=>/(?:^|\/)requirements[\w.-]*\.txt$/i.test(f)))for(const line of read(skill,f).split('\n')){
+  const v=line.replace(/\s#.*$|^#.*$/,'').split(';')[0].replace(/\s+/g,'').trim();if(!v)continue;
+  if(v.startsWith('-')||/:\/\/|^git\+|^\.|\//.test(v)||!require('../skill-sandbox.cjs').PACKAGE.test(v)){skipped.push(line.trim().slice(0,80));continue;}
+  pip.add(v);
+ }
  const named=new Set([...pip].map(p=>p.toLowerCase().split(/[<>=!~[ ;]/)[0]));
- for(const f of files.filter(f=>/\.py$/i.test(f)))for(const m of imports(read(skill,f))){if(STDLIB.has(m)||local.has(m))continue;const name=PIP[m]||m.toLowerCase().replace(/_/g,'-');if(!named.has(name)){pip.add(name);named.add(name);}}
+ for(const f of files.filter(f=>/\.py$/i.test(f)))for(const m of imports(read(skill,f))){if(STDLIB.has(m)||local.has(m)||m.startsWith('_'))continue;const name=PIP[m]||m.toLowerCase().replace(/_/g,'-');if(!named.has(name)){pip.add(name);named.add(name);}}
  const node=files.some(f=>/\.(?:js|mjs|cjs)$/i.test(f));
  for(const f of files.filter(f=>/(?:^|\/)package\.json$/i.test(f)&&!/node_modules/.test(f))){try{const p=JSON.parse(read(skill,f));for(const [k,v] of Object.entries({...p.dependencies}))npm.add(k+'@'+String(v).replace(/^[\^~]/,''));}catch{/* A broken package.json adds nothing. */}}
  if(node)for(const f of files.filter(f=>/\.(?:js|mjs|cjs)$/i.test(f)))for(const m of String(read(skill,f)).matchAll(/(?:require\(|from\s+)['"]([^'".][^'"]*)['"]/g)){const name=m[1].startsWith('@')?m[1].split('/').slice(0,2).join('/'):m[1].split('/')[0];if(!NODE_BUILTIN.has(name.replace(/^node:/,''))&&!name.startsWith('node:')&&![...npm].some(x=>x.startsWith(name+'@')))npm.add(name);}
- return {pip:[...pip].sort(),npm:[...npm].sort(),node};
+ const valid=x=>require('../skill-sandbox.cjs').PACKAGE.test(x)||(skipped.push(x),false);
+ return {pip:[...pip].filter(valid).sort(),npm:[...npm].filter(valid).sort(),node,skipped};
 }
 // Python scripts that run in the plain sandbox (standard library only): the Python extension takes them.
 function runnable(skill){

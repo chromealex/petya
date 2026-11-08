@@ -99,7 +99,7 @@ const PROMPTS={
 // Map-reduce compaction with the local model. `target` is the size of the result in tokens; pieces are
 // summarised independently and the joined summaries are compacted again until they fit.
 // strict: a failed model call throws instead of falling back to an excerpt (for summaries that are stored).
-async function compact({text,purpose='text',question='',target=1500,request,endpoint,model,cache=shared,progress,limit=2,depth=0,strict=false}){
+async function compact({text,purpose='text',question='',target=1500,request,endpoint,model,cache=shared,progress,limit=2,depth=0,strict=false,before}){
  text=String(text??'');if(tokens(text)<=target)return text;
  if(!request||!endpoint||!model||depth>=5){if(strict)throw Error('Нет модели для сжатия.');return excerpt(text,charsFor(target,text));}
  const piece=Math.min(7000,Math.max(1500,WINDOW-4000));
@@ -107,7 +107,7 @@ async function compact({text,purpose='text',question='',target=1500,request,endp
  const each=Math.max(250,Math.min(1200,Math.floor(target*1.5/parts.length)));
  const summaries=await require('./parallel.cjs').mapLimit(parts,limit,async(part,i)=>{
   const key=hash([purpose,question,model,each,part]),hit=cache.get(key);if(hit!==undefined)return hit;
-  progress?.(i+1,parts.length,depth);
+  await before?.();progress?.(i+1,parts.length,depth);
   const body={model,stream:false,think:false,format:{type:'object',properties:{summary:{type:'string'}},required:['summary'],additionalProperties:false},
    options:{temperature:0.2,num_predict:Math.min(2048,Math.ceil(each*1.6)+200)},messages:[
     {role:'system',content:PROMPTS[purpose]+' Не длиннее '+Math.round(each*0.7)+' слов. Верни JSON {"summary":"..."}.'},
@@ -121,6 +121,6 @@ async function compact({text,purpose='text',question='',target=1500,request,endp
   return summary;
  });
  const joined=summaries.map((s,i)=>parts.length>1?'[часть '+(i+1)+' из '+parts.length+'] '+s:s).join('\n\n');
- return compact({text:joined,purpose,question,target,request,endpoint,model,cache,progress,limit,depth:depth+1,strict});
+ return compact({text:joined,purpose,question,target,request,endpoint,model,cache,progress,limit,depth:depth+1,strict,before});
 }
 module.exports={WINDOW,tokens,charsFor,hash,excerpt,sections,split,lineChunks,relevance,stems,choose,compact,Cache,shared};
