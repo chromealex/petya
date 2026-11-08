@@ -116,3 +116,27 @@ button.kit-chip{cursor:pointer}button.kit-chip:hover{color:var(--ink);border-col
 .chat-browser-attention-text{flex:1;min-width:0}
 .chat-browser-attention-action{flex:none;padding:4px 10px;font-size:12px}.chat-browser-attention-action[hidden]{display:none}
 .chat-browser-attention .chat-browser-attention-close{flex:none;width:24px;height:24px}
+/* Outgoing review in send confirmations (k.outgoingReview): findings with suggestions; never blocks «Отправить». */
+.kit-review{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid #e5ce8c40;border-left:3px solid #e5ce8c;border-radius:8px;background:#e5ce8c0a;font-size:13px}
+.kit-review[hidden]{display:none}
+.kit-review[data-state="clean"]{border-color:#c9ed9d40;border-left-color:#c9ed9d;background:#c9ed9d08}
+.kit-review-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.kit-review-head strong{font-size:12.5px;font-weight:600}
+.kit-review-bar{display:inline-flex;width:64px;height:6px;border-radius:3px;overflow:hidden;background:var(--line)}
+.kit-review-seg{display:block;height:100%;min-width:6px}
+.kit-review-seg[data-severity="problem"],.kit-review-item[data-severity="problem"] .kit-review-dot{background:#f0b4a8}
+.kit-review-seg[data-severity="warning"],.kit-review-item[data-severity="warning"] .kit-review-dot{background:#e5ce8c}
+.kit-review-seg[data-severity="info"],.kit-review-item[data-severity="info"] .kit-review-dot{background:var(--muted)}
+.kit-review-count{font-size:12px;color:var(--muted)}
+.kit-review-note{margin-left:auto;font-size:11.5px;color:var(--muted)}
+.kit-review-list{display:flex;flex-direction:column;gap:4px}
+.kit-review-item{display:grid;grid-template-columns:8px minmax(0,1fr) auto;align-items:start;gap:8px;padding:3px 0}
+.kit-review-dot{width:8px;height:8px;margin-top:6px;border-radius:50%}
+.kit-review-text{display:flex;flex-wrap:wrap;gap:4px 6px;line-height:1.45;min-width:0}
+.kit-review-text q,.kit-review-apply q,.kit-review-done q{quotes:"«" "»";color:var(--ink);overflow-wrap:anywhere}
+.kit-review-text q{font-weight:600}
+.kit-review-message{color:var(--muted)}
+.kit-review-apply,.kit-review-all,.kit-review-undo{display:inline-flex;align-items:center;gap:4px;max-width:260px;padding:3px 8px;font-size:12px;white-space:nowrap}
+.kit-review-apply q{overflow:hidden;text-overflow:ellipsis}
+.kit-review-done{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;color:#c9ed9d}
+@media (max-width:560px){.kit-review-item{grid-template-columns:8px minmax(0,1fr)}.kit-review-apply{grid-column:2;justify-self:start}}

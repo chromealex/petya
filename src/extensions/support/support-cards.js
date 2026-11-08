@@ -155,7 +155,10 @@
    };
    area.oninput=sync;sync();
    const row=k.el('div','kit-actions');row.append(go,counter);
-   editorBox.append(k.el('div','kit-draft-label',(d.draft?'Черновик ответа':'Ответ')+' — уйдёт игроку публичным комментарием ровно этот текст'),area,row);
+   editorBox.append(k.el('div','kit-draft-label',(d.draft?'Черновик ответа':'Ответ')+' — уйдёт игроку публичным комментарием ровно этот текст'),area);
+   // The reply passes the outgoing review (findings and suggestions under the text; sending stays as it is).
+   if(k.outgoingReview)editorBox.append(k.outgoingReview(area,{channel:{service:'support',target:'#'+t.id,audience:'customer'}}));
+   editorBox.append(row);
    if(!d.draft)editorBox.append(k.el('small','kit-meta',d.model?'Черновик не получился — напишите ответ сами.':'Черновик появится, когда в настройках выбрана локальная модель.'));
    body.append(editorBox);
   }

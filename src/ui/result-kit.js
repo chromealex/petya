@@ -247,5 +247,92 @@
   });
   return box;
  }
- window.resultKit={panelBox:()=>side?.box||null,el,safeUrl,links,availableLinks,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam};
+ // --- Outgoing review (src/features/outgoing.cjs, docs/foundations/outgoing.md) ------------------------------------
+ // outgoingReview(area, {channel:{service, target, audience}, context, language}) → a node for a send confirmation,
+ // between the text and the send button. It reviews the textarea when shown and after edits, lists the findings,
+ // and «Заменить» puts one suggestion into the textarea (visible, with «Вернуть»). It never disables sending:
+ // the confirmation sends the textarea as it is. A review that fails or is slow simply shows nothing.
+ // applyFinding(text, finding) → the text with that suggestion, or null when its span is no longer there.
+ function applyFinding(text,f){
+  text=String(text??'');if(typeof f?.suggestion!=='string')return null;
+  if(!f.span)return f.suggestion;
+  let at=-1;
+  if(text.slice(f.span.start,f.span.end)===f.span.text)at=f.span.start;
+  else{const i=text.indexOf(f.span.text);if(i>=0&&i===text.lastIndexOf(f.span.text))at=i;}
+  return at<0?null:text.slice(0,at)+f.suggestion+text.slice(at+f.span.text.length);
+ }
+ const SEVERITY={problem:'Может задеть',warning:'Лучше поправить',info:'На заметку'};
+ const quoteOf=(text,max=60)=>{const q=el('q',null,String(text).length>max?String(text).slice(0,max-1)+'…':String(text));q.dataset.noI18n='';return q;};
+ function outgoingReview(area,{channel={},context={},language='',delay=700,timeout=10000}={}){
+  const box=el('div','kit-review');box.hidden=true;box.setAttribute('aria-live','polite');
+  const head=el('div','kit-review-head'),list=el('div','kit-review-list'),log=el('div','kit-review-log');
+  box.append(head,list,log);
+  let seq=0,timer=null;const applied=[];
+  const put=text=>{area.value=text;area.dispatchEvent(new Event('input',{bubbles:true}));area.focus();};
+  const use=(f,next)=>{applied.push({from:f.span?f.span.text:'',to:f.suggestion,before:area.value,after:next});put(next);};
+  function paintLog(){
+   log.replaceChildren();
+   for(const a of applied.slice(-3)){
+    const row=el('div','kit-review-done');row.append(el('span',null,a.count?'Заменено фрагментов: '+a.count:a.from?'Заменено:':'Текст заменён'));
+    if(a.from&&!a.count)row.append(quoteOf(a.from,40),el('span',null,'→'),quoteOf(a.to||'∅',40));
+    const back=el('button','kit-review-undo','Вернуть');back.type='button';
+    back.disabled=area.value!==a.after;back.title=back.disabled?'Текст уже изменён после замены':'Вернуть как было';
+    back.onclick=()=>{if(area.value!==a.after)return;applied.splice(applied.indexOf(a),1);put(a.before);};
+    row.append(back);log.append(row);
+   }
+  }
+  function paint(r){
+   const findings=r?.findings||[];
+   head.replaceChildren();list.replaceChildren();
+   box.dataset.state=findings.length?'found':'clean';
+   paintLog();
+   if(!findings.length&&!applied.length){box.hidden=true;return;}
+   box.hidden=false;
+   const title=el('strong',null,'Проверка перед отправкой');
+   const bar=el('span','kit-review-bar');bar.setAttribute('aria-hidden','true');
+   for(const level of ['problem','warning','info']){const n=findings.filter(f=>f.severity===level).length;if(!n)continue;const seg=el('span','kit-review-seg');seg.dataset.severity=level;seg.style.flexGrow=String(n);bar.append(seg);}
+   head.append(title);
+   if(findings.length){
+    head.append(bar,el('span','kit-review-count','Замечаний: '+findings.length));
+    const fixable=findings.filter(f=>f.span&&typeof f.suggestion==='string');
+    if(fixable.length>1){
+     const all=el('button','kit-review-all','Заменить всё');all.type='button';all.title='Применить все предложенные замены — текст останется в поле, отправите вы';
+     all.onclick=()=>{let text=area.value,done=0;for(const f of [...fixable].sort((a,b)=>b.span.start-a.span.start)){const next=applyFinding(text,f);if(next!==null){text=next;done++;}}if(done){applied.push({count:done,before:area.value,after:text});put(text);}};
+     head.append(all);
+    }
+   }else head.append(el('span','kit-review-count','Замечаний нет'));
+   head.append(el('small','kit-review-note','Можно отправить как есть'));
+   for(const f of findings){
+    const row=el('div','kit-review-item');row.dataset.severity=f.severity;
+    const dot=el('span','kit-review-dot');dot.title=SEVERITY[f.severity]||'';dot.setAttribute('aria-label',dot.title);
+    const body=el('div','kit-review-text');
+    if(f.span)body.append(quoteOf(f.span.text));
+    body.append(el('span','kit-review-message',f.message));
+    row.append(dot,body);
+    if(typeof f.suggestion==='string'){
+     const b=el('button','kit-review-apply');b.type='button';b.title=f.suggestion||'Убрать фрагмент';
+     if(!f.span)b.append(el('span',null,'Заменить весь текст'));
+     else if(f.suggestion)b.append(el('span',null,'Заменить на'),quoteOf(f.suggestion,48));
+     else b.append(el('span',null,'Убрать'));
+     b.onclick=()=>{const next=applyFinding(area.value,f);if(next===null){toast('Текст изменился — проверяю заново');run();return;}use(f,next);};
+     row.append(b);
+    }
+    list.append(row);
+   }
+  }
+  async function run(){
+   clearTimeout(timer);const text=area.value,my=++seq;
+   if(!text.trim()){paint(null);return;}
+   box.dataset.state='checking';
+   let r=null;
+   try{r=await Promise.race([window.petya?.feature?window.petya.feature('outgoing','review',{text,channel,context,language}):null,new Promise(resolve=>setTimeout(()=>resolve(null),timeout))]);}catch{r=null;}
+   if(my!==seq||area.value!==text)return;
+   paint(r);
+  }
+  area.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(run,delay);});
+  box.refresh=run;
+  setTimeout(run,0);
+  return box;
+ }
+ window.resultKit={panelBox:()=>side?.box||null,el,safeUrl,links,availableLinks,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam,outgoingReview,applyFinding};
 })();

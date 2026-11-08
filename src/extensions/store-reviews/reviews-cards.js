@@ -110,7 +110,10 @@
    finally{send.removeAttribute('aria-busy');}
   };
   area.oninput=sync;sync();
-  row.append(send,cancel,counter);box.append(label,area,row);
+  row.append(send,cancel,counter);box.append(label,area);
+  // The reply passes the outgoing review (findings and suggestions under the text; sending stays as it is).
+  if(k.outgoingReview)box.append(k.outgoingReview(area,{channel:{service:'store-reviews',target:r.store==='play'?'Google Play':'App Store',audience:'public'},context:{rating:r.rating}}));
+  box.append(row);
   item.append(box);area.focus();return box;
  }
  const replied=(k,r)=>{const c=k.chip({label:r.reply.state==='pending'?'ответ на проверке':'ответ отправлен',tone:r.reply.state==='pending'?'progress':'done',title:r.reply.date?when(r.reply.date):''});c.classList.add('rv-replied');return c;};

@@ -30,7 +30,9 @@ replayed. Pause time is excluded from focus time.
   «Ещё 10 минут», «Перерыв 5». Only the newest focus card in the chat is live and has controls.
 
 ## Notifications held during focus
-`hold.cjs` wraps Electron `Notification.prototype.show` once. While a *focus* session (not a break) is active,
+Holding goes through the notification policy core (`docs/foundations/notifications-policy.md`): «Фокус» declares
+`"provides": {"notification-policy": "policy.cjs"}` and the core's single wrapper around Electron
+`Notification.prototype.show` asks it (`hold.cjs` only re-exports the core's wrapper and urgency rule). While a *focus* session (not a break) is active,
 Petya's own system notifications that are not urgent wait; when the session ends they are shown as one summary
 (`focus-held` in the center plus one system notification). Urgent ones pass: a decision/answer/clarification
 needed, errors and failures, questions, meeting reminders, `urgency: 'critical'`, and focus's own notifications.
