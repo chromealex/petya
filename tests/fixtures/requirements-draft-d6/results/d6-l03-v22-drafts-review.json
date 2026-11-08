@@ -1,0 +1,62 @@
+{
+ "v22-new-cancel-one": {
+  "passed": false,
+  "reason": "Inverted: uses final_key; value clarification lost.",
+  "answer_sha256": "7161e1b5d8178fedbe2e11f40420c40b727e40874ff013809d7c3744eed2cfff"
+ },
+ "v22-new-cancel-two": {
+  "passed": false,
+  "reason": "Inverted renames.",
+  "answer_sha256": "25310c187ee1f7159a50aa9c7aa6eff34e5161ee12f3797df58b0299338f9ff9"
+ },
+ "v22-new-two-recipients": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "9f1c24adf34cc5c0a6901a87af168b1d5bc8d5b6afb0ca291a0aeac7f7c4456a"
+ },
+ "v22-new-revoke-send": {
+  "passed": false,
+  "reason": "«Дату не добавлять» lost.",
+  "answer_sha256": "56264135f2bdbe51e4acfe514d0fc0dff3614ac4900da19983021b3ad90950fc"
+ },
+ "v22-new-restore-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "4bf1b3f63f7b62a06cf99546356efae7847a16a55579ff0aec7f1eb649d2220f"
+ },
+ "v22-new-code-item": {
+  "passed": false,
+  "reason": "Invented «по умолчанию».",
+  "answer_sha256": "767f7dbadf72d25867ba3c4678e64b5a43897ded742dd09304d88864be586769"
+ },
+ "v22-new-open-duration": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "542a8942fa8e71a85f03a499e15d732761c67b58f5dbc09addd04c98e5379525"
+ },
+ "v22-new-exact-name": {
+  "passed": false,
+  "reason": "«без ... сохранения начальных нулей» reads as dropping zeros; invented «Другие файлы не включать».",
+  "answer_sha256": "729f8eb077307bbc9425d96772cce0e3453e2a0e6d4275a228b2ed0ea01c9015"
+ },
+ "v22-new-screen-only": {
+  "passed": false,
+  "reason": "«Миграцию не выполнять» lost.",
+  "answer_sha256": "3a0103eb15d0b85d3d1562933ae50894182ae73a5a9e2e2f7e5612b1b0d44178"
+ },
+ "v22-new-add-separate": {
+  "passed": false,
+  "reason": "Quoted name inflected: «Секцию».",
+  "answer_sha256": "6969e693527c85d814461f6d53015f59925c94fb4f7aa1ce44e5292cb5137878"
+ },
+ "v22-new-quote": {
+  "passed": false,
+  "reason": "«Дословно» lost; wrong summary «Передача макета».",
+  "answer_sha256": "85163b863145eee6503755cac6aa56b2be948f19532ecb6b0756035f80978629"
+ },
+ "v22-new-recipient-open": {
+  "passed": false,
+  "reason": "Broken question «Кому уведомление…».",
+  "answer_sha256": "47f32132bc3d2e844914dfd19d59311a9ccd084edff1aa629635e1e2ebf99842"
+ }
+}

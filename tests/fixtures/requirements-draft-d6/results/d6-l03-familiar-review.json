@@ -1,0 +1,117 @@
+{
+ "v14-repeat": {
+  "passed": true,
+  "reason": "Requirements exact; summary says «записей» for «заявок».",
+  "answer_sha256": "01621e9825e1cea8b77cc959303a872c2a4526098b4d8908d3c097c1c49e2152"
+ },
+ "v19-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «257 секунду».",
+  "answer_sha256": "34dbd815e0e85d126b2ec5aa7aedf5660c80635c0714c2e731c9e37a1a0e23f5"
+ },
+ "v20-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «293 секунду».",
+  "answer_sha256": "fe5a457b7f4538407b9bc3a4f1d2e5030b57026f534b622da963f6b0504e26ff"
+ },
+ "v21-previous-draft-quote": {
+  "passed": true,
+  "reason": "«Цитата не отменяет этого» keeps the decision.",
+  "answer_sha256": "b50cbb5f618609a1b608d9c044379efda8c1bff3d32ef2959d3d7352cf0f057a"
+ },
+ "v21-previous-draft-return": {
+  "passed": true,
+  "reason": "«Количество» for «число».",
+  "answer_sha256": "528499ac58492149bf70a3a8a8fccc81b20897efc9ee21324b4d4e3b30ad223c"
+ },
+ "fresh-sort-3-1-0": {
+  "passed": false,
+  "reason": "Wrong sort result.",
+  "answer_sha256": "f785a22dee4233c3a72659bcc12146c3faa9095241112d0caf748aeb8fd57cf4"
+ },
+ "fresh-sort-3-1-1": {
+  "passed": false,
+  "reason": "Wrong sort result.",
+  "answer_sha256": "190346439f68be16dc1048d33c0590a37326b6633636c4866e8330612e689cc5"
+ },
+ "fresh-cancel-first": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "420ffccdfb2ffa2bc4f394f24a174dfc3b6c89c5dad983e968b86501c7f07708"
+ },
+ "fresh-cancel-second": {
+  "passed": false,
+  "reason": "Inverted: keeps source_no.",
+  "answer_sha256": "0598e9cb0ffd6cd5d1de3fe842144ec720c76565620f36d694d9f135281b87c3"
+ },
+ "fresh-revoke-transmit": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "d76d760cdf745c3742edd334c943fa2eaf5c180bdace8cf23a85e17711adad85"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "6730349cff560e545b80ab338516132cefc4c94b756c78108f320e95b60ca114"
+ },
+ "fresh-copy-scope": {
+  "passed": false,
+  "reason": "Contradiction: «без пересылки» while sending to the economist is allowed.",
+  "answer_sha256": "c54bbda9b86a983dc58e5987af5ddf89ffcaf8943cecf5be6118bc1d42d50c57"
+ },
+ "fresh-undo-ban": {
+  "passed": false,
+  "reason": "Wrong direction: «Принимать от смотрителя».",
+  "answer_sha256": "24ee378342dc5c63a48063398c761185d07c527c4822e26054bf7e3a883ae159"
+ },
+ "fresh-add-not-replace": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "18ca54982cce6d9a6dd13a5c8019905efa62a45e7086d29c83165cb5f74be80a"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Garbled «Далать», «другом процессом».",
+  "answer_sha256": "38ae42b810f41c947e3aea59f2051afe45137b8fcfcc581cf04b78289e9f55b4"
+ },
+ "fresh-duration-open": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "49335e0cc03b2bd0ad5758195949bc683122e5cc72e9a66740b1f47384ba2650"
+ },
+ "fresh-exact-caption": {
+  "passed": false,
+  "reason": "Invented ban «Другие имена не менять».",
+  "answer_sha256": "0c017beea54760c46489cde595bf4beb00ee02c51c94d8f59323176f5c93588b"
+ },
+ "fresh-display-only": {
+  "passed": true,
+  "reason": "Screen only, old field hidden, no storage change or migration.",
+  "answer_sha256": "d2283f1fb1a192a29d7e0d0789eee61576ee2485231cf6dc7a6b642d0bda47ff"
+ },
+ "fresh-quoted-instruction": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "d0db42338b29e545bbd3e207a953ab9ca6109ad78981b438b66ef118edb14670"
+ },
+ "fresh-negative-order": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "0148a6492a0f8f7c4c34991122291fc2b31488d3e2d584f7c68d407ed392ca58"
+ },
+ "fresh-interval-prose": {
+  "passed": true,
+  "reason": "Bounds exact.",
+  "answer_sha256": "63aed85961b01c82963e17e0ba162346b45c887b9f2503e8118688a1c5b66285"
+ },
+ "fresh-recipient-pending": {
+  "passed": false,
+  "reason": "Truncated question «Кому адресовать»; lecturer rule lost.",
+  "answer_sha256": "9f1a199a0c4a257353b41f8693aa913a0e13580af518c9e0268b97d200676897"
+ },
+ "fresh-rename-withdrawn": {
+  "passed": true,
+  "reason": "Name kept, icon and link as agreed.",
+  "answer_sha256": "b9dbdc9e0b18516fcabe523b39c7d666048c4d5c76fe6b4009db035c9ff3e6e5"
+ }
+}

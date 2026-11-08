@@ -1,0 +1,127 @@
+{
+ "v14-repeat": {
+  "passed": true,
+  "reason": "Requirements exact; summary says «записей» for «заявок».",
+  "answer_sha256": "01621e9825e1cea8b77cc959303a872c2a4526098b4d8908d3c097c1c49e2152"
+ },
+ "v18-code-lifetime": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1a08d44a791e81a73a8da58539354faf9585f890c8882bc6423eb601b751049d"
+ },
+ "v18-ambiguous-recipient": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "006ca6bafee736daa0564a9e142fa3f5a49b3e3ea87130aa016410795bab16f3"
+ },
+ "v19-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «257 секунду».",
+  "answer_sha256": "34dbd815e0e85d126b2ec5aa7aedf5660c80635c0714c2e731c9e37a1a0e23f5"
+ },
+ "v19-exact-identifier": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "717f3de0c925da5631424e368097ec076122c598ad444e0be11a6af0c17155f4"
+ },
+ "v20-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «293 секунду».",
+  "answer_sha256": "bbb38af43960db17ca16abe20aaebac35ceb7b4135083f512943181724409e85"
+ },
+ "v21-previous-draft-quote": {
+  "passed": false,
+  "reason": "Garbled reason for keeping the example.",
+  "answer_sha256": "a1fb72c384840b90fab45f41187bedd7fc3a868b53904acc16f15888a8e32ab4"
+ },
+ "v21-previous-draft-unset-lifetime": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1d70342ed0de7e9c910821878e504ce085a14e76d6a30c5e26c9284dd1e36b09"
+ },
+ "fresh-sort-3-1-1": {
+  "passed": false,
+  "reason": "Wrong value -11.",
+  "answer_sha256": "f950909c641e5532d838b140fa5241aeca8a37f885416539e7bc326841966393"
+ },
+ "fresh-cancel-first": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "403787fa0299bbbd9beccfdacfceba956118b681f28d307852f0609920632721"
+ },
+ "fresh-cancel-second": {
+  "passed": false,
+  "reason": "Inverted and garbled.",
+  "answer_sha256": "102d3366d7d6d2f71064d8ec39793ea52492390fda55ee0c85ffce88b19ec286"
+ },
+ "fresh-revoke-transmit": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "7087a9a2e58e7b1ed71782cfe55abd3ce9d95eef2a768b6d6ad7b9d1a115e155"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "6730349cff560e545b80ab338516132cefc4c94b756c78108f320e95b60ca114"
+ },
+ "fresh-copy-scope": {
+  "passed": false,
+  "reason": "Contradiction: «без пересылки» and economist allowed.",
+  "answer_sha256": "7498908c4b20bec90ad7b6089b9c2595a2766044ed672cddcd180e7a75e6e7e3"
+ },
+ "fresh-undo-ban": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "f9a76be3eeb7974d23243ee529a66e11ca56dba97e9ba9029be9233efc1d7dcb"
+ },
+ "fresh-add-not-replace": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "7324be87ebfb8b1efe26d860099ea8b471a45cf8361aa8e9e7974cb2cd262817"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Allows reuse of the code by another user.",
+  "answer_sha256": "2d7a44b118766e5dff3a55c45f78b1eed220db1b8cc52d2e06395e5cca7928b7"
+ },
+ "fresh-duration-open": {
+  "passed": false,
+  "reason": "Not-for-login lost.",
+  "answer_sha256": "d5e756d540040f7dd405b0f44708ef574a05dbc04a253c36a8c37fe4fbf3cb07"
+ },
+ "fresh-exact-caption": {
+  "passed": true,
+  "reason": "Exact names, no normalisation.",
+  "answer_sha256": "2387826ba5f9b8d6ae5e92c16459a787bdbac6a0c51840b1c7f3dc07c63f2044"
+ },
+ "fresh-display-only": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "e74a637f9ba573467e88c5022f9b0b87875e519086df95de4481130046529529"
+ },
+ "fresh-quoted-instruction": {
+  "passed": false,
+  "reason": "Typo «преподаателю».",
+  "answer_sha256": "1bb694822575fdf6e24c4249a6a9116a16136adc82d311e2a984f0a6bd6b6baa"
+ },
+ "fresh-negative-order": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "178b1d6853d9f5a85fa7659f337218172c4f63df63858bb56c099139ee83369a"
+ },
+ "fresh-interval-prose": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "384fbc8cb652b4389d6425b0aad513c46e6ad4b702dc55739cd84c1cb20ecaf4"
+ },
+ "fresh-recipient-pending": {
+  "passed": false,
+  "reason": "Truncated question; loses not auto-assigning the lecturer.",
+  "answer_sha256": "871cbd822ef76028bb388bc013d340ad9bfbfa86a2f5668e2af28f72e10d5374"
+ },
+ "fresh-rename-withdrawn": {
+  "passed": true,
+  "reason": "Name kept, icon and link as agreed.",
+  "answer_sha256": "b9dbdc9e0b18516fcabe523b39c7d666048c4d5c76fe6b4009db035c9ff3e6e5"
+ }
+}

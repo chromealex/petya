@@ -1,0 +1,272 @@
+{
+ "d2-hold-cancel-one-0": {
+  "passed": true,
+  "reason": "Both decisions kept.",
+  "answer_sha256": "1e13d49247edf9872584fb74ca45877ec61d6583e05e99b04ea9db8adcc122e0"
+ },
+ "d2-hold-permission-1": {
+  "passed": false,
+  "reason": "Permission turned into a fixed recipient («Получатель — …»).",
+  "answer_sha256": "322802dec455bb2f56d070417a3dd8b5f106d8388c750fe19da119d50da1d3ae"
+ },
+ "d2-hold-two-recipients-2": {
+  "passed": false,
+  "reason": "«Опись» and «без пояснения» lost.",
+  "answer_sha256": "aa52eb4c198cf89f6c4d13318cb0153c81e57a3af5721e7fb24fd076ac3935b0"
+ },
+ "d2-hold-add-field-3": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "ba4f49111bfd9e4035be965b1c9e09f74611d652748138984071039bf2c84bc4"
+ },
+ "d2-hold-exact-name-4": {
+  "passed": false,
+  "reason": "Bans renaming other files, which the user declined.",
+  "answer_sha256": "922a300626f22f834861d586fadac5c35f266f1116005aecad9713e382bf22f1"
+ },
+ "d2-hold-screen-only-5": {
+  "passed": false,
+  "reason": "«Старое скрыть» lost.",
+  "answer_sha256": "4224309ea03f59055b5c606262a786417d1e132e8030f1eca46f1ef2b052431d"
+ },
+ "d2-hold-quote-6": {
+  "passed": false,
+  "reason": "Permission turned into an order («Отправлять»); grammar «Цитата ... сохранить».",
+  "answer_sha256": "bfd33413e7f5b47cd0441807fdae11c911a102796e437ce134a7de97071b37db"
+ },
+ "d2-hold-open-recipient-7": {
+  "passed": false,
+  "reason": "«в зал 3» changes the meaning; grammar «Получателем позже решим».",
+  "answer_sha256": "4b6f549fd419cba506de81f36b444be403a98e6aee397a9ab23ec1e6d0cb3637"
+ },
+ "d2-hold-code-8": {
+  "passed": false,
+  "reason": "Not-for-login lost.",
+  "answer_sha256": "bc70c9932d6343edd13dfa22a0c29f063ba251547b5d25ba84311c1f640ebf22"
+ },
+ "d2-hold-cancel-one-9": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "67790ceb9495bcdf4ef48a28f9bf54bd782e9713295959dc0d1ff230db067da7"
+ },
+ "d2-hold-permission-10": {
+  "passed": false,
+  "reason": "Permission turned into a fixed recipient («Получатель — …»).",
+  "answer_sha256": "3b2002402039313e75d0e8d2e5e6dd12d8fdf576eebe19b292b51c9c32e9ec1c"
+ },
+ "d2-hold-two-recipients-11": {
+  "passed": true,
+  "reason": "Identical copies, notary allowed, trainee not.",
+  "answer_sha256": "8fcbc96c30f282dd7d2c4c8c8ec038637b4af9f4413cc1930b8abdc940a6d25a"
+ },
+ "d2-hold-add-field-12": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "9cd7938cee7af9d1ebe813e181d789aa94fe8c31a306f23cde118a9f94ef18dc"
+ },
+ "d2-hold-exact-name-13": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "9a8af2ea7ebb7f67a3e7f8fa1fc1c1d4f28262419651a4407a69e38291a9d8e8"
+ },
+ "d2-hold-screen-only-14": {
+  "passed": false,
+  "reason": "«Старое скрыть» lost.",
+  "answer_sha256": "960b3a9dccf616912c4ff972356b6c05b514dad106cdea6e0cb44589cf0d2f81"
+ },
+ "d2-hold-quote-15": {
+  "passed": false,
+  "reason": "Recipient and «дословно» lost.",
+  "answer_sha256": "36145e0b08ab9993aef485c81e4419329d1b4e28d6364576c8d8bdc3729b8f4d"
+ },
+ "d2-hold-open-recipient-16": {
+  "passed": false,
+  "reason": "Open question lost.",
+  "answer_sha256": "0c663867cfcc9858c020e64de4853fe15c94f4d1c180127acbdb1ddaddb9b279"
+ },
+ "d2-hold-code-17": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "0f63696d7930b15da68b902ac937be68a53032bfd045a319dfea2e08a0430d41"
+ },
+ "d2-hold-cancel-one-18": {
+  "passed": false,
+  "reason": "Garbled: «Сохранить gate_id вместо port_id», «Находки».",
+  "answer_sha256": "fde677179c69614448546e8550c7032f77e861bf9993158705a23125f96c4680"
+ },
+ "d2-hold-permission-19": {
+  "passed": false,
+  "reason": "Invented ban for others; grammar «Дата не добавлять».",
+  "answer_sha256": "90a4e49eeb23274a9064b60ba0973a54accf4a7302f255febe118d27bf41ef56"
+ },
+ "d2-hold-two-recipients-20": {
+  "passed": false,
+  "reason": "Document «опись» lost.",
+  "answer_sha256": "79f49f1364516ac744a1cfca4294d92d8d1625971e8d3fc8b4a762b0e8c0556a"
+ },
+ "d2-hold-add-field-21": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "def61db0da7f66cce613330129bf641be67f691e5ef329f3d77c118b09edf42b"
+ },
+ "d2-hold-exact-name-22": {
+  "passed": false,
+  "reason": "Garbled summary «Конверт в Жёлоб_Ш-0017».",
+  "answer_sha256": "c53d056cad14bd6f4b6b0830a8d0d2254cd4a52db1e4dea87a61d1b30be60259"
+ },
+ "d2-hold-screen-only-23": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "e1a22cd8e7c2b29061bc5daf78efe1b074bff3a834366575ade241e78136d704"
+ },
+ "d2-hold-quote-24": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "4eab0efc35dd1a1c7fc3f24fb29605b54c7fdeef24c0e2c14c7b5cd24265ef12"
+ },
+ "d2-hold-open-recipient-25": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "cc6fbd14f8eec92a644b59d9cddc06fd5299b4100d6688f30ff2bc9f61336b0f"
+ },
+ "d2-hold-code-26": {
+  "passed": false,
+  "reason": "Not-for-login and new code lost.",
+  "answer_sha256": "14e99d52d824297cbe10d88a7a75027bf5a36623ce302ad339364f50a565019a"
+ },
+ "d2-hold-cancel-one-27": {
+  "passed": true,
+  "reason": "Rename and the kept field.",
+  "answer_sha256": "c72019ecfd4e9bf64b1fa6f5f3b9845147cc70355834cc82cd2ea4b635c95a19"
+ },
+ "d2-hold-permission-28": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "3b9bba0d6f65a1a5839b34fe8ffc6ab5cb1652daa9bf2acb5bf7af5c8a527a56"
+ },
+ "d2-hold-two-recipients-29": {
+  "passed": false,
+  "reason": "Document lost; grammar «с один текстом»; «без пояснения» attached to the ban.",
+  "answer_sha256": "06eaf46dfb8be8b98605037ea6c4ae951052dd7d42e3ebac5d0457be53d64aea"
+ },
+ "d2-hold-add-field-30": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "0b5df85e50c2d1f1b627be094fede249ddf9e2079e446d0f9150c86825717549"
+ },
+ "d2-hold-exact-name-31": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "56c120eed8947a99bea55229c204a55924fc7c9e4e9adebd07a26e3622958d3a"
+ },
+ "d2-hold-screen-only-32": {
+  "passed": false,
+  "reason": "Inverted rename.",
+  "answer_sha256": "1cd23e50cf568f86d10c43e5c94dfd8445f3fab98942ae68f71d95dce14a9e49"
+ },
+ "d2-hold-quote-33": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "3a60ab75d95669239b8d7a06d6b887daf56be08ee3674162a894442eb44916e8"
+ },
+ "d2-hold-open-recipient-34": {
+  "passed": false,
+  "reason": "Garbled «Отобратьть»; «в зал 30»; open question lost.",
+  "answer_sha256": "0ad49f882c36c50675710c862d15315901b0d2cfa8165530e532331af95d35f2"
+ },
+ "d2-hold-code-35": {
+  "passed": false,
+  "reason": "Open question lost; garbled «до этого срока не доходить».",
+  "answer_sha256": "656c09fbbf0d6b57dfe7e45cee80e19fbf4618ad0ab8565a58cac13f633dd948"
+ },
+ "d2-hold-cancel-one-36": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "8281a3d3a288a3192094aa84d1b0801080d9e9eefc726d67c59591c83a8e8921"
+ },
+ "d2-hold-permission-37": {
+  "passed": false,
+  "reason": "Permission turned into a fixed recipient («Получатель — …»).",
+  "answer_sha256": "e2e9c19533d1fcf19e7caab9b7a81e60ceb8099b60eafac60dc46474d83e856f"
+ },
+ "d2-hold-two-recipients-38": {
+  "passed": false,
+  "reason": "Document «регламент» lost.",
+  "answer_sha256": "99c885b203dc59a007ebf742fdd2883d22d5ea48ab802ffdafd29b4e785a61b4"
+ },
+ "d2-hold-add-field-39": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "a585cf6420e616687cccec16bf83924eb3a9f1b2e8b2d5863f43ef986ffcb527"
+ },
+ "d2-hold-exact-name-40": {
+  "passed": false,
+  "reason": "Chinese text in description.",
+  "answer_sha256": "ec6629c1366e1bc5a5eb6dccf3c161c916e03edab104fbd609eb61488db8b0ee"
+ },
+ "d2-hold-screen-only-41": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "7822585e6cdb8a6810ea2f12d7c8477709fad95df40fe61880fd1410dbb35213"
+ },
+ "d2-hold-quote-42": {
+  "passed": false,
+  "reason": "Permission turned into an order («Отправлять»).",
+  "answer_sha256": "9262e5fa684a0f0a99300a33f75db892c984c896a156f960a18b0f0b4371313b"
+ },
+ "d2-hold-open-recipient-43": {
+  "passed": false,
+  "reason": "«в зал 17» changes the meaning.",
+  "answer_sha256": "34fd71cfaa16826905bb79275ae7a624604c58e2b5a16aa7ef5d20e302cbf8b8"
+ },
+ "d2-hold-code-44": {
+  "passed": false,
+  "reason": "Not-for-login lost; invented «Прежний код не возвращать».",
+  "answer_sha256": "ac674bc0e975bc06e1d2c8b22c458f6bd26e077760c95f3ba3e68b21d2ecb69f"
+ },
+ "d2-hold-cancel-one-45": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "3fbd8cbee98a616502261dca71a798d40dcf682feaa3f5ae60facb7885ce8e1d"
+ },
+ "d2-hold-permission-46": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "5ea0788bf4b6f79369b09494da4a86b814883b06ada6eee8cfd5f380dfe78807"
+ },
+ "d2-hold-two-recipients-47": {
+  "passed": true,
+  "reason": "Permissions per recipient.",
+  "answer_sha256": "2c5a56aa4dabed20b7d690f8cda0c3d4f831dada32c9af9b18e3908979bfcc24"
+ },
+ "d2-hold-add-field-48": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1a0edd5a6279d01b8771e0b99372a80b6eda1ef31a4965199152e2ff10fd7d7e"
+ },
+ "d2-hold-exact-name-49": {
+  "passed": false,
+  "reason": "Invented permission to rename other files.",
+  "answer_sha256": "a04aeaf1f8618c709edb25350f82f5c419cc77b84fdb340114dd8c27c0fa397f"
+ },
+ "d2-hold-screen-only-50": {
+  "passed": false,
+  "reason": "«Миграцию не выполнять» lost.",
+  "answer_sha256": "36a08b35e1c27dc3e0cc41607dd4299f2992abef72a7a264c1a825fadc9312dd"
+ },
+ "d2-hold-quote-51": {
+  "passed": false,
+  "reason": "Permission turned into an order («Отправлять»).",
+  "answer_sha256": "9ce3a75d2aa678c81e0c427cd3f57038276dbb5602bcd49fcfa067334464ef84"
+ },
+ "d2-hold-open-recipient-52": {
+  "passed": false,
+  "reason": "Open question lost; garbled «Метадату прежнее сохранить».",
+  "answer_sha256": "dadb2d713677470d0ddb6fa7f5a766e0c12b1f18314a4902f0a5223ba13539df"
+ },
+ "d2-hold-code-53": {
+  "passed": false,
+  "reason": "Open question lost.",
+  "answer_sha256": "cec2d8b7592e638cb5784d7016e35321dca6eaa7e1f6270a8aaaa2da26df963d"
+ }
+}

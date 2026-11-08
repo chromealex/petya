@@ -1,0 +1,37 @@
+{
+  "part": "Andromeda D6",
+  "recipe": "exact blends of D1 and D3, no training",
+  "blends": {
+    "d6-l03": {
+      "holdout": 23,
+      "holdout_lost_D1": 5,
+      "v22-check": 27,
+      "v22-drafts": 3,
+      "familiar": 791,
+      "familiar_lost_D1": 0
+    },
+    "d6-l05": {
+      "holdout": 17,
+      "holdout_lost_D1": 12,
+      "v22-check": 27,
+      "v22-drafts": 3,
+      "familiar": 789,
+      "familiar_lost_D1": 2
+    },
+    "d6-l07": {
+      "holdout": 20,
+      "holdout_lost_D1": 12,
+      "v22-check": 27,
+      "v22-drafts": 4,
+      "familiar": 791,
+      "familiar_lost_D1": 1
+    }
+  },
+  "D1": {
+    "holdout": 24,
+    "v22": "27+6",
+    "familiar": 787
+  },
+  "gate": "rejected: no blend improves the generated held-out drafts without losing D1 successes, and every blend is below D1 on the v22 drafts",
+  "reading": "Every blend keeps the familiar cases (789–791, above D1 787) but loses D3’s gains on the new corrections: D3 had 22 exact held-out drafts, the blends 0–3. The new skill sits in D3’s full delta and does not survive scaling it down."
+}

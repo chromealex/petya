@@ -1,0 +1,112 @@
+{
+ "v14-repeat": {
+  "passed": true,
+  "reason": "Requirements exact; summary says «записей» for «заявок».",
+  "answer_sha256": "01621e9825e1cea8b77cc959303a872c2a4526098b4d8908d3c097c1c49e2152"
+ },
+ "v19-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «257 секунду».",
+  "answer_sha256": "34dbd815e0e85d126b2ec5aa7aedf5660c80635c0714c2e731c9e37a1a0e23f5"
+ },
+ "v20-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «293 секунду».",
+  "answer_sha256": "fe5a457b7f4538407b9bc3a4f1d2e5030b57026f534b622da963f6b0504e26ff"
+ },
+ "v21-previous-draft-quote": {
+  "passed": false,
+  "reason": "Permission not stated; garbled «без запрета на передачу».",
+  "answer_sha256": "b9210c8549ffef440a52d89a57166778b46df33f5d4c28a1d010f845a06b731f"
+ },
+ "fresh-sort-3-1-0": {
+  "passed": false,
+  "reason": "Wrong sort result.",
+  "answer_sha256": "b0e648c7b2478f675f39dadf8c151575b280dfed6580610f12de1a974fc62866"
+ },
+ "fresh-sort-3-1-1": {
+  "passed": false,
+  "reason": "Wrong sort result.",
+  "answer_sha256": "190346439f68be16dc1048d33c0590a37326b6633636c4866e8330612e689cc5"
+ },
+ "fresh-cancel-first": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "403787fa0299bbbd9beccfdacfceba956118b681f28d307852f0609920632721"
+ },
+ "fresh-cancel-second": {
+  "passed": false,
+  "reason": "Inverted and garbled.",
+  "answer_sha256": "102d3366d7d6d2f71064d8ec39793ea52492390fda55ee0c85ffce88b19ec286"
+ },
+ "fresh-revoke-transmit": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "6c5327af0e103d8e66333b42d801350e5cb968b4294958d7010d628c0c036fa3"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "6730349cff560e545b80ab338516132cefc4c94b756c78108f320e95b60ca114"
+ },
+ "fresh-copy-scope": {
+  "passed": false,
+  "reason": "Contradiction: «без пересылки» while sending to the economist is allowed.",
+  "answer_sha256": "dab00ca6fd0b47706362aee0c1a7910a00259ed14b3aa681b0200bf8448de958"
+ },
+ "fresh-undo-ban": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "f9a76be3eeb7974d23243ee529a66e11ca56dba97e9ba9029be9233efc1d7dcb"
+ },
+ "fresh-add-not-replace": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "18ca54982cce6d9a6dd13a5c8019905efa62a45e7086d29c83165cb5f74be80a"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Garbled «Далать»; «При входе по этому коду не использовать».",
+  "answer_sha256": "8a46079e84ee82b02e17c240b438cf2a51745bbc842c0e3e3634a47427b23688"
+ },
+ "fresh-duration-open": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "49335e0cc03b2bd0ad5758195949bc683122e5cc72e9a66740b1f47384ba2650"
+ },
+ "fresh-exact-caption": {
+  "passed": false,
+  "reason": "Invented ban «Другие имена не менять».",
+  "answer_sha256": "0c017beea54760c46489cde595bf4beb00ee02c51c94d8f59323176f5c93588b"
+ },
+ "fresh-display-only": {
+  "passed": false,
+  "reason": "Garbled «Структуру хранилища ... не выполнять»; value transfer ban lost.",
+  "answer_sha256": "129806fce0af6fd463c3b3f1eb411d60adadd503cf95fd6747e54ba343ac02cb"
+ },
+ "fresh-quoted-instruction": {
+  "passed": false,
+  "reason": "Typo «преподаателю».",
+  "answer_sha256": "1bb694822575fdf6e24c4249a6a9116a16136adc82d311e2a984f0a6bd6b6baa"
+ },
+ "fresh-negative-order": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "178b1d6853d9f5a85fa7659f337218172c4f63df63858bb56c099139ee83369a"
+ },
+ "fresh-interval-prose": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "384fbc8cb652b4389d6425b0aad513c46e6ad4b702dc55739cd84c1cb20ecaf4"
+ },
+ "fresh-recipient-pending": {
+  "passed": false,
+  "reason": "Truncated question «Кому адресовать»; lecturer rule lost.",
+  "answer_sha256": "9f1a199a0c4a257353b41f8693aa913a0e13580af518c9e0268b97d200676897"
+ },
+ "fresh-rename-withdrawn": {
+  "passed": true,
+  "reason": "Name kept, icon and link as agreed.",
+  "answer_sha256": "b9dbdc9e0b18516fcabe523b39c7d666048c4d5c76fe6b4009db035c9ff3e6e5"
+ }
+}
