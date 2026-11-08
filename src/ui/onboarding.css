@@ -44,3 +44,15 @@
 @media (max-height:640px){.onb-stage{gap:10px}.onb .pa{--pa-size:110px!important}.onb-say{font-size:17px}}
 @media (prefers-reduced-motion:reduce){.onb-content.onb-enter,.onb-say.pop{animation:none}}
 .onb .pa-bubble{display:none}
+/* Team step: found colleagues as checkable rows, and sharing the team into a project's git. */
+.onb-team{display:flex;flex-direction:column;gap:2px;max-height:216px;overflow:auto;padding:6px;border:1px solid #303637;border-radius:13px;background:#151a1a}
+.onb-member{display:flex;align-items:center;gap:10px;margin:0;padding:7px 8px;border-radius:9px;color:#f0f2ed;font-size:14px;cursor:pointer}
+.onb-member:hover{background:#1f2626}
+.onb-member input{width:auto;margin:0;flex-shrink:0}
+.onb-member-name{flex-shrink:0;font-weight:600}
+.onb-member-meta{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8f9a94;font-size:12px}
+.onb-share{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0;padding:12px 14px;border:1px dashed #4b5a46;border-radius:13px;color:#d6dfd2;font-size:13px}
+.onb-share input{width:auto;margin:0}
+.onb-share select{width:auto;max-width:220px;margin:0;padding:6px 10px}
+.onb-share small{flex-basis:100%;color:#8f9a94;font-size:12px}
+.onb-go{flex-shrink:0;min-width:116px}

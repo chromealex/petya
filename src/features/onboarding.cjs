@@ -4,7 +4,9 @@
 const fs = require('node:fs'), path = require('node:path');
 const guesses = require('../onboarding-guess.cjs');
 const ROLES = require('../onboarding-roles.cjs');
-const KINDS = { name: guesses.guessName, company: guesses.guessCompany, role: guesses.guessRole };
+const KINDS = { name: guesses.guessName, company: guesses.guessCompany, role: guesses.guessRole, team: guesses.guessTeam };
+const projectShare = require('../project-share.cjs');
+const TEAM_FIELDS = ['name', 'email', 'role', 'projects', 'responsibilities'];
 const STEPS = 6;
 const customRole = value => /^custom:[\p{L}\p{M}\p{N} ,.'’/+&()-]{1,60}$/u.test(value);
 function store(file, fsImpl = fs) {
@@ -15,6 +17,9 @@ function store(file, fsImpl = fs) {
 function cleanAnswers(input = {}) {
   const out = {};
   for (const key of ['name', 'company', 'role']) if (typeof input[key] === 'string') out[key] = input[key].trim().slice(0, 100);
+  if (Array.isArray(input.team)) out.team = input.team.filter(m => m && typeof m.name === 'string' && m.name.trim()).slice(0, 50)
+    .map(m => ({ ...Object.fromEntries(TEAM_FIELDS.map(k => [k, typeof m[k] === 'string' ? m[k].trim().slice(0, 400) : ''])), on: m.on !== false }));
+  if (typeof input.shareProject === 'string') out.shareProject = input.shareProject.slice(0, 200);
   if (Array.isArray(input.skipped)) out.skipped = input.skipped.filter(id => ['microphone', 'screen', 'accessibility'].includes(id));
   return out;
 }
@@ -47,6 +52,13 @@ module.exports = {
         guessing = true;
         const report = source => { const win = services.win; if (win && !win.isDestroyed()) win.webContents.send('onboarding-guess', { kind, source }); };
         try { return await KINDS[kind](guesses.environment(), report); } finally { guessing = false; }
+      },
+      // Writes .petya/team.json into one of the recent project folders found on this computer (never a path
+      // from the page), so colleagues get the team with git.
+      shareTeam(project, members) {
+        const dir = guesses.recentProjects(guesses.environment()).dirs.find(d => path.basename(d) === project);
+        if (!dir) throw Error('Папка проекта не найдена.');
+        return { file: projectShare.writeTeam(dir, members), project };
       },
       finish() { saved.write({ done: true, at: Date.now() }); },
       // Some permissions apply only to a new process; the introduction resumes at the saved step after it.

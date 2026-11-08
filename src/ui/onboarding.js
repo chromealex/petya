@@ -3,8 +3,8 @@
 // restart required by macOS resumes at the same step. On a first launch the splash Petya lands on this screen.
 (()=>{
  const api=(method,...args)=>window.petya.feature('onboarding',method,...args);
- const SOURCES={system:'учётная запись компьютера',browser:'профиль браузера',git:'настройки git',slack:'Slack на компьютере',apps:'установленные приложения',projects:'папки проектов'};
- const LOOKING={system:'Смотрю в учётной записи компьютера…',browser:'Заглядываю в профили браузеров…',git:'Читаю настройки git…',slack:'Ищу рабочие пространства Slack…',apps:'Смотрю, какие приложения установлены…',projects:'Проверяю папки проектов…'};
+ const SOURCES={shared:'файл команды в проекте',system:'учётная запись компьютера',browser:'профиль браузера',git:'настройки git',slack:'Slack на компьютере',apps:'установленные приложения',projects:'папки проектов'};
+ const LOOKING={shared:'Ищу команду, которой поделились в проектах…',system:'Смотрю в учётной записи компьютера…',browser:'Заглядываю в профили браузеров…',git:'Читаю настройки git…',slack:'Ищу рабочие пространства Slack…',apps:'Смотрю, какие приложения установлены…',projects:'Проверяю папки проектов…'};
  const PERMISSIONS={
   microphone:{title:'Микрофон',why:'Чтобы слышать «Петя, …» и твой голос на встречах. Аудио не сохраняю.',
    next:{darwin:{'not-determined':'macOS покажет окно — нажми «Разрешить».',other:'Откроются настройки macOS: включи Петю в разделе «Микрофон».'},win32:{other:'Откроются настройки Windows: включи доступ к микрофону для классических приложений.'}}},
@@ -15,7 +15,7 @@
  };
  // Which permissions the introduction offers for a role; the rest are asked when their feature is first used.
  const offered=role=>['microphone',...(['manager','lead'].includes(role)?['screen']:[]),'accessibility'];
- const MIN_GUESS=1200,STEP={name:0,company:1,role:2,permissions:3,done:4};
+ const MIN_GUESS=1200,STEP={name:0,company:1,role:2,team:3,permissions:4,done:5};
  let state,avatar,root,card,step=0,answers={},guessKind='',permissionQueue=null,poll=0;
  const el=(tag,cls,text)=>{const node=document.createElement(tag);if(cls)node.className=cls;if(text!==undefined)node.textContent=text;return node;};
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
@@ -30,14 +30,15 @@
   bubble.classList.toggle('think',think);bubble.classList.remove('pop');void bubble.offsetWidth;bubble.classList.add('pop');
   if(!think)avatar.mood('talk');
  }
- function frame({say:text,body,next='Дальше',onNext,back=true,skip}){
+ function frame({say:text,body,next='Дальше',onNext,back=true,skip,inline=false}){
   const content=root.querySelector('.onb-content');content.replaceChildren();content.classList.remove('onb-enter');void content.offsetWidth;content.classList.add('onb-enter');
   say(text);content.append(...body);
   const actions=el('div','onb-actions');
   if(back&&step>0){const b=el('button','onb-back quiet','Назад');b.type='button';b.onclick=()=>go(step-1);actions.append(b);}
-  const dots=el('div','onb-dots');for(let i=0;i<4;i++){const d=el('i');if(i===Math.min(step,3))d.className='on';else if(i<step)d.className='done';dots.append(d);}actions.append(dots);
+  const dots=el('div','onb-dots');for(let i=0;i<5;i++){const d=el('i');if(i===Math.min(step,4))d.className='on';else if(i<step)d.className='done';dots.append(d);}actions.append(dots);
   if(skip){const s=el('button','quiet onb-skip',skip.label);s.type='button';s.onclick=skip.run;actions.append(s);}
-  const n=el('button','primary onb-next',next);n.type='button';n.onclick=onNext;actions.append(n);
+  // Steps with their own «Далее» next to the field keep the bottom button hidden (Enter still goes on).
+  const n=el('button','primary onb-next',next);n.type='button';n.onclick=onNext;n.hidden=inline;actions.append(n);
   content.append(actions);
   root.onkeydown=event=>{if(event.key==='Enter'&&!event.isComposing&&event.target.tagName!=='BUTTON'){event.preventDefault();n.click();}};
   return n;
@@ -58,12 +59,15 @@
   const started=performance.now();let result=null;
   try{result=await Promise.race([api('guess',kind),wait(6000).then(()=>null)]);}catch{}
   await wait(Math.max(0,MIN_GUESS-(performance.now()-started)));
-  guessKind='';button.disabled=false;
-  if(!result?.value){say('Не угадал. Подскажешь?');avatar.mood('miss');hint?.focus();return;}
-  apply(result.value);
-  say(kind==='name'?['Ага! Тебя зовут ',{data:result.value},'?']:kind==='company'?['Ага! Ты работаешь в ',{data:result.value},'?']:['Ага! Похоже, ты — ',roleLabel(result.value),'.']);
+  guessKind='';button.disabled=false;guessed.add(kind);
+  // After the answer is applied (same tick), the button next to the field turns into «Далее».
+  queueMicrotask(()=>button.dispatchEvent(new Event('onb-guessed')));
+  if(!result?.value){say(kind==='team'?'Не нашёл коллег. Добавишь сам?':'Не угадал. Подскажешь?');avatar.mood('miss');hint?.focus();return;}
+  apply(result.value,result);
+  const sharedIn=result.evidence?.find(e=>e.source==='shared')?.detail;
+  say(kind==='team'?(sharedIn?['Ага! Коллеги уже поделились командой в ',{data:sharedIn},'.']:['Ага! Нашёл коллег:',' '+result.value+'.']):kind==='name'?['Ага! Тебя зовут ',{data:result.value},'?']:kind==='company'?['Ага! Ты работаешь в ',{data:result.value},'?']:['Ага! Похоже, ты — ',roleLabel(result.value),'.']);
   avatar.mood('found');
-  const best=result.candidates.find(c=>c.value===result.value)||result.candidates[0];
+  const best=kind==='team'?result:result.candidates.find(c=>c.value===result.value)||result.candidates[0];
   status.className='onb-status found';status.replaceChildren(el('span',null,'Нашёл:'));
   evidenceText(best).forEach((text,i)=>status.append(document.createTextNode(i?', ':' '),el('span',null,text)));
   for(const item of best.evidence||[])if(item.detail){const d=el('span','onb-detail',' · '+item.detail);d.dataset.noI18n='';status.append(d);}
@@ -71,13 +75,24 @@
   const chips=root.querySelector('.onb-alternatives');chips.replaceChildren();
   if(others.length){chips.append(el('span','onb-or','или'));for(const c of others){const b=el('button','onb-chip',kind==='role'?roleLabel(c.value):c.value);b.type='button';if(kind!=='role')b.dataset.noI18n='';b.onclick=()=>{apply(c.value);avatar.mood('talk');};chips.append(b);}}
  }
+ // «Угадай» lives only while the field is empty and Petya has not guessed yet; then the same place says
+ // «Далее» (something is filled in) or «Пропустить» (he missed and the field is still empty).
+ const guessed=new Set();
+ function smart(button,{kind,filled,next,run}){
+  const update=()=>{const mode=filled()?'next':guessed.has(kind)?'skip':'guess';button.dataset.mode=mode;
+   button.textContent=mode==='next'?'Далее':mode==='skip'?'Пропустить':'Угадай';button.className=mode==='guess'?'onb-guess':mode==='next'?'primary onb-go':'quiet onb-go';};
+  button.onclick=()=>button.dataset.mode==='guess'?run():next();
+  button.addEventListener('onb-guessed',update);update();return update;
+ }
  function textStep({kind,key,text,placeholder,nextStep}){
   const input=el('input','onb-input');input.value=answers[key]||'';input.placeholder=placeholder;input.maxLength=50;input.autocomplete='off';input.spellcheck=false;
   const guessButton=el('button','onb-guess','Угадай');guessButton.type='button';
   const row=el('div','onb-row');row.append(input,guessButton);
   const status=el('p','onb-status'),alternatives=el('div','onb-alternatives');
-  frame({say:text,body:[row,status,alternatives],onNext:()=>{answers[key]=input.value.trim();go(nextStep);}});
-  guessButton.onclick=()=>guess(kind,value=>{input.value=value;},input);
+  const onNext=()=>{answers[key]=input.value.trim();go(nextStep);};
+  frame({say:text,body:[row,status,alternatives],onNext,inline:true});
+  const update=smart(guessButton,{kind,filled:()=>!!input.value.trim(),next:onNext,run:()=>guess(kind,value=>{input.value=value;update();},input)});
+  input.addEventListener('input',update);
   setTimeout(()=>input.focus(),50);
  }
  function roleStep(){
@@ -90,9 +105,52 @@
   const guessButton=el('button','onb-guess','Угадай');guessButton.type='button';
   const row=el('div','onb-row');row.append(custom,guessButton);
   const status=el('p','onb-status'),alternatives=el('div','onb-alternatives');
-  frame({say:answers.name?[{data:answers.name},', а кем ты в команде?']:'А кем ты в команде?',body:[grid,row,status,alternatives],onNext:()=>go(STEP.permissions)});
+  frame({say:answers.name?[{data:answers.name},', а кем ты в команде?']:'А кем ты в команде?',body:[grid,row,status,alternatives],onNext:()=>go(STEP.team),inline:true});
   if(answers.role)select(answers.role);
-  guessButton.onclick=()=>guess('role',select,custom);
+  const update=smart(guessButton,{kind:'role',filled:()=>!!answers.role,next:()=>go(STEP.team),run:()=>guess('role',value=>{select(value);update();},custom)});
+  grid.addEventListener('click',update);custom.addEventListener('input',update);
+ }
+ // Team: colleagues found locally (a team shared in a project's .petya/team.json, then commit authors) or typed
+ // in as «Имя — роль». Checked rows join the Team tab on finish; the team can also go to git for colleagues.
+ let shareProjects=[];
+ function teamStep(){
+  answers.team=answers.team||[];
+  const list=el('div','onb-team'),input=el('input','onb-input');input.placeholder='Имя коллеги — роль';input.maxLength=160;
+  const add=el('button',null,'Добавить');add.type='button';
+  const guessButton=el('button','onb-guess','Угадай');guessButton.type='button';
+  const row=el('div','onb-row');row.append(input,add,guessButton);
+  const status=el('p','onb-status'),alternatives=el('div','onb-alternatives');
+  const share=el('label','onb-share');const shareBox=el('input');shareBox.type='checkbox';const select=el('select','onb-share-project');
+  share.append(shareBox,el('span',null,'Сохранить команду в проект'),select,el('small',null,'Файл .petya/team.json уйдёт в git — у коллег Петя сразу узнает команду.'));
+  const paint=()=>{
+   list.replaceChildren();
+   answers.team.forEach((m,i)=>{
+    const item=el('label','onb-member');const box=el('input');box.type='checkbox';box.checked=m.on!==false;box.onchange=()=>{m.on=box.checked;save();};
+    const who=el('span','onb-member-name',m.name);who.dataset.noI18n='';
+    const meta=el('span','onb-member-meta',[m.role,m.projects,m.email].filter(Boolean).join(' · '));meta.dataset.noI18n='';
+    item.append(box,who,meta);list.append(item);
+   });
+   list.hidden=!answers.team.length;
+   const later=root.querySelector('.onb-skip');if(later)later.hidden=!!answers.team.length;
+   share.hidden=!shareProjects.length||!answers.team.length;
+   select.replaceChildren(...shareProjects.map(p=>{const o=el('option',null,p);o.value=p;return o;}));
+   if(answers.shareProject&&shareProjects.includes(answers.shareProject)){select.value=answers.shareProject;shareBox.checked=true;}
+  };
+  const addTyped=()=>{const [name,role='']=input.value.split(/\s+[—–-]\s+|:\s*/);if(!name?.trim())return;
+   if(!answers.team.some(m=>m.name.toLocaleLowerCase()===name.trim().toLocaleLowerCase()))answers.team.push({name:name.trim(),role:role.trim(),on:true});
+   input.value='';paint();save();avatar.mood('talk');};
+  add.onclick=addTyped;input.onkeydown=event=>{if(event.key==='Enter'){event.preventDefault();event.stopPropagation();addTyped();}};
+  const remember=()=>{answers.shareProject=shareBox.checked?select.value:'';save();};shareBox.onchange=remember;select.onchange=remember;
+  frame({say:answers.name?[{data:answers.name},', с кем ты работаешь? Буду знать, кто за что отвечает.']:'С кем ты работаешь? Буду знать, кто за что отвечает.',
+   body:[list,row,status,alternatives,share],onNext:()=>{remember();go(STEP.permissions);},skip:{label:'Позже',run:()=>go(STEP.permissions)}});
+  const hideGuess=()=>{guessButton.hidden=guessed.has('team')||!!input.value.trim();};
+  input.addEventListener('input',hideGuess);guessButton.addEventListener('onb-guessed',hideGuess);hideGuess();
+  guessButton.onclick=()=>guess('team',(value,result)=>{
+   shareProjects=result.projects||[];
+   for(const m of result.members||[])if(!answers.team.some(t=>(m.email&&t.email===m.email)||t.name.toLocaleLowerCase()===m.name.toLocaleLowerCase()))answers.team.push({name:m.name,email:m.email||'',role:m.role||'',projects:m.projects||'',responsibilities:m.responsibilities||'',on:true});
+   paint();save();
+  },input);
+  paint();
  }
  // Permissions: one card at a time, only what the platform gates and this role needs. Settings sections are
  // opened by the shared permissions module; the status is re-read on return to the window and every 1.5 s.
@@ -136,6 +194,8 @@
   if(answers.name)line('Имя:',answers.name);
   if(answers.company)line('Компания:',answers.company);
   if(answers.role){const li=el('li');li.append(el('span',null,'Роль:'),document.createTextNode(' '),answers.role.startsWith('custom:')?nodes({data:answers.role.slice(7)})[0]:el('span',null,roleLabel(answers.role)));lines.append(li);}
+  const chosen=(answers.team||[]).filter(m=>m.on!==false).length;
+  if(chosen){const li=el('li');li.append(el('span',null,'Команда:'),document.createTextNode(' '+chosen));lines.append(li);}
   const tail='Спрашивай что угодно в чате или скажи «Петя, …».';
   frame({say:answers.name?['Готово, ',{data:answers.name},'! ',tail]:['Готово!',' ',tail],body:[lines],next:'Начать',onNext:finish});
  }
@@ -143,6 +203,7 @@
   if(step===STEP.name)textStep({kind:'name',key:'name',text:'Привет! Я Петя, твой рабочий напарник. Как тебя зовут?',placeholder:'Имя',nextStep:STEP.company});
   else if(step===STEP.company)textStep({kind:'company',key:'company',text:answers.name?[{data:answers.name},', приятно познакомиться! Где ты работаешь?']:'Приятно познакомиться! Где ты работаешь?',placeholder:'Компания',nextStep:STEP.role});
   else if(step===STEP.role)roleStep();
+  else if(step===STEP.team)teamStep();
   else if(step===STEP.permissions)permissionsStep();
   else doneStep();
  }
@@ -151,6 +212,13 @@
   if(Object.keys(input).length)await window.petya.saveSettings(input);
   // The settings form submits its fields later; keep them in step so an old empty value never wins.
   const nameField=document.getElementById('user-name');if(nameField&&answers.name){nameField.value=answers.name;nameField.dispatchEvent(new Event('input',{bubbles:true}));}
+  const chosen=(answers.team||[]).filter(m=>m.on!==false);
+  if(chosen.length){
+   const current=await window.petya.teamList(),members=[...(current.members||[])];
+   for(const m of chosen)if(!members.some(t=>(m.email&&t.email===m.email)||t.name.toLocaleLowerCase()===m.name.toLocaleLowerCase()))members.push({name:m.name,email:m.email||'',role:m.role||'',projects:m.projects||'',responsibilities:m.responsibilities||''});
+   await window.petya.teamSave({members,notes:current.notes||''});document.dispatchEvent(new Event('petya-team-updated'));
+   if(answers.shareProject)await api('shareTeam',answers.shareProject,members);
+  }
   if(answers.company){const list=await window.petya.companies();const current=list.companies.find(c=>c.id===list.activeId);
    if(current&&current.name!==answers.company){await window.petya.companyRename(list.activeId,answers.company);const field=document.getElementById('company-name');if(field)field.value=answers.company;}}
  }

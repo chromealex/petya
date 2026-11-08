@@ -7,11 +7,25 @@ Shown on a fresh install (no name in settings, no chats) and resumed after a res
 1. Name — «Угадай».
 2. Company — «Угадай»; renames the active company on finish.
 3. Role — chips from `src/onboarding-roles.cjs` or a custom role (`custom:<text>`), «Угадай». Stored in `settings.userRole`.
-4. Permissions this role needs, one card at a time (see below).
-5. Done — Petya flies into the logo in the app chrome.
+4. Team — «Угадай» finds a team a colleague shared in a project (`.petya/team.json`, with roles and duties) and the
+   authors of the last 60 days of commits in recent project folders (without the user and bots; roles are not
+   guessed). Typed rows «Имя — роль» are added too. Checked rows join the Team tab; optionally the team is written
+   to `.petya/team.json` of a chosen project folder so colleagues get it with git.
+5. Permissions this role needs, one card at a time (see below).
+6. Done — Petya flies into the logo in the app chrome.
+
+«Угадай» stays only while the field is empty and Petya has not guessed yet; the same place then says «Далее»
+(something is filled in) or «Пропустить» (a miss with an empty field). On the team step it simply disappears.
 
 Extensions for the chosen role are not offered yet: the extension catalog is being reworked around roles.
-When it declares roles, read the role list from the catalog and add the step between 3 and 4.
+When it declares roles, read the role list from the catalog and add the step between 4 and 5.
+
+## Shared project data (`.petya/`)
+`src/project-share.cjs` keeps Petya's data that a team shares through git in `<repo>/.petya/`. Only shareable
+fields go there (no tokens, photos or private service accounts), as stable pretty JSON for small diffs. The first
+kind is the team (`team.json`: name, aliases, role, projects, responsibilities, email, Slack ID, Jira ID), validated
+by the Team tab rules on read and write. The renderer passes a project folder name, never a path: the main process
+resolves it among the recent project folders it found itself.
 
 ## Pieces
 - `src/features/onboarding.cjs` — state (`userData/onboarding.json`, written after every step), guesses, finish, relaunch.

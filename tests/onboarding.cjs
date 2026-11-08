@@ -81,6 +81,46 @@ const SLACK = '/Users/alex/Library/Application Support/Slack/storage/root-state.
   assert.equal((await guess.guessName(linux)).value, 'Alex');
   assert.equal((await guess.guessRole(linux)).value, 'developer');
 
+  // Team: a team shared in a project comes first (with roles), then commit authors; the user and bots are left out.
+  const share = require('../src/project-share.cjs');
+  const repo = '/Users/alex/Projects/Game', site = '/Users/alex/Projects/Site';
+  const teamEnv = fake({
+    commands: {
+      'git config --global --get user.email': 'alex@joy-way.com', 'git config --global --get user.name': 'Alex Silaev',
+      ['git -C ' + repo + ' log --since=60.days --no-merges -n 3000 --format=%aN%x09%aE']: ['Polina Samarina\tpolina@joy-way.com', 'Alex Silaev\talex@joy-way.com', 'dependabot[bot]\t49699333+dependabot[bot]@users.noreply.github.com', 'ivan\tivan@joy-way.com', 'Ivan Petrov\tivan@joy-way.com', 'Polina Samarina\tpolina@joy-way.com'].join('\n'),
+      ['git -C ' + site + ' log --since=60.days --no-merges -n 3000 --format=%aN%x09%aE']: 'Oleg Kim\t1234+oleg@users.noreply.github.com\nPolina Samarina\tpolina.s@gmail.com'
+    },
+    dirs: { '/Users/alex/Projects': ['Game', 'Site'] },
+    mtimes: { [repo + '/.git/logs/HEAD']: NOW - DAY, [site + '/.git/logs/HEAD']: NOW - DAY },
+    files: { [site + '/.petya/team.json']: JSON.stringify({ version: 1, members: [{ name: 'Мария Котова', role: 'Продюсер', responsibilities: 'Релизы', email: 'maria@joy-way.com', photo: 'data:image/png;base64,AAAA' }, { name: '' }] }) }
+  });
+  const teamSources = [];
+  const found = await guess.guessTeam(teamEnv, s => teamSources.push(s));
+  assert.deepEqual(teamSources, ['git', 'projects', 'shared']);
+  assert.ok(!found.members.some(m => m.shared), 'a broken shared file (empty name) is ignored as a whole');
+  assert.deepEqual(found.evidence.map(e => e.source), ['projects']);
+  const goodTeam = JSON.stringify({ version: 1, members: [{ name: 'Мария Котова', role: 'Продюсер', responsibilities: 'Релизы', email: 'maria@joy-way.com', photo: 'data:image/png;base64,AAAA', token: 'x' }] });
+  teamEnv.read = file => file === site + '/.petya/team.json' ? goodTeam : '';
+  const team = await guess.guessTeam(teamEnv);
+  assert.deepEqual(team.members.map(m => m.name), ['Мария Котова', 'Polina Samarina', 'Ivan Petrov', 'Oleg Kim']);
+  assert.equal(team.members[0].role, 'Продюсер'); assert.equal(team.members[0].shared, true); assert.equal(team.members[0].photo, undefined);
+  assert.equal(team.members[1].projects, 'Game, Site', 'one person with a work and a personal email is merged by name');
+  assert.equal(team.members[3].email, '', 'noreply addresses are not kept');
+  assert.deepEqual(team.projects, ['Game', 'Site']);
+  assert.deepEqual(team.evidence.map(e => e.source), ['shared', 'projects']);
+  assert.equal((await guess.guessTeam(fake())).value, '');
+  // Writing the shared file: only shareable fields, stable JSON for small git diffs, read back the same.
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'petya-share-'));
+  assert.equal(share.writeTeam(tmp, [{ name: 'Мария', role: 'Продюсер', email: 'm@x.ru', photo: 'data:image/png;base64,AAAA', accounts: { slack: { id: 'U1' } } }]), path.join('.petya', 'team.json'));
+  const written = fs.readFileSync(path.join(tmp, '.petya/team.json'), 'utf8');
+  assert.ok(written.endsWith('\n') && written.includes('\n  "members"'));
+  assert.deepEqual(JSON.parse(written), { version: 1, members: [{ name: 'Мария', role: 'Продюсер', email: 'm@x.ru' }] });
+  assert.deepEqual(share.readTeam(tmp, f => fs.readFileSync(f, 'utf8')), [{ name: 'Мария', role: 'Продюсер', email: 'm@x.ru' }]);
+  assert.throws(() => share.writeTeam(tmp, [{ name: '' }]), /имя/);
+  fs.rmSync(tmp, { recursive: true, force: true });
+  assert.deepEqual(onboarding.cleanAnswers({ team: [{ name: ' Мария ', role: 'Продюсер', on: false }, { name: '' }, 'x'], shareProject: 'Game' }),
+    { team: [{ name: 'Мария', email: '', role: 'Продюсер', projects: '', responsibilities: '', on: false }], shareProject: 'Game' });
+
   // Progress survives a restart; a done introduction stays closed unless forced.
   const p = onboarding.pendingState;
   assert.equal(p({}, { userName: '', hasChats: false }).pending, true, 'fresh install');

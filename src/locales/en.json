@@ -4270,6 +4270,19 @@
   "— проектов с коммитами за месяц:": "— projects with commits this month:",
   "Ага! Похоже, ты —": "Aha! Looks like you're a",
   "Ага! Тебя зовут": "Aha! Your name is",
-  "Ага! Ты работаешь в": "Aha! You work at"
+  "Ага! Ты работаешь в": "Aha! You work at",
+  ", с кем ты работаешь? Буду знать, кто за что отвечает.": ", who do you work with? I'll know who's responsible for what.",
+  "Ага! Коллеги уже поделились командой в": "Aha! Your colleagues already shared the team in",
+  "Ага! Нашёл коллег:": "Aha! Colleagues found:",
+  "Добавить": "Add",
+  "Имя коллеги — роль": "Colleague's name — role",
+  "Ищу команду, которой поделились в проектах…": "Looking for a team shared in projects…",
+  "Команда:": "Team:",
+  "Не нашёл коллег. Добавишь сам?": "No colleagues found. Will you add them?",
+  "Папка проекта не найдена.": "Project folder not found.",
+  "С кем ты работаешь? Буду знать, кто за что отвечает.": "Who do you work with? I'll know who's responsible for what.",
+  "Сохранить команду в проект": "Save the team to the project",
+  "Файл .petya/team.json уйдёт в git — у коллег Петя сразу узнает команду.": "The .petya/team.json file goes to git — Petya will know the team right away for your colleagues.",
+  "файл команды в проекте": "team file in the project"
  }
 }

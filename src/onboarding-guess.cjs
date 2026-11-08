@@ -151,13 +151,13 @@ function appNames(e) {
 // Project folders with commits in the last 30 days mean everyday development; a Unity project inside means Unity.
 function recentProjects(e) {
   const roots = ['Projects', 'Developer', 'dev', 'code', 'src', 'repos', 'git', 'work', 'Documents/GitHub', 'source/repos', 'Documents/Projects'].map(d => path.join(e.home, d));
-  let recent = 0, unity = 0;
+  let recent = 0, unity = 0;const dirs = [];
   for (const root of roots) for (const name of e.list(root).slice(0, 200)) {
     const dir = path.join(root, name);
     if (e.now - e.mtime(path.join(dir, '.git/logs/HEAD')) > 30 * 86400000) continue;
-    recent++; if (e.exists(path.join(dir, 'ProjectSettings/ProjectVersion.txt'))) unity++;
+    recent++; dirs.push(dir); if (e.exists(path.join(dir, 'ProjectSettings/ProjectVersion.txt'))) unity++;
   }
-  return { recent, unity };
+  return { recent, unity, dirs };
 }
 async function guessRole(e, onSource = () => {}) {
   const score = {}, apps = {};
@@ -180,4 +180,47 @@ async function guessRole(e, onSource = () => {}) {
   return { value: candidates[0]?.score >= 3 ? candidates[0].value : '', candidates };
 }
 
-module.exports = { environment, guessName, guessCompany, guessRole, browserProfiles, slackWorkspaces, appNames, recentProjects, nameFromEmail, companyFromDomain, workDomain };
+// Team: authors of the last 60 days of commits in the recent project folders, without the user and bots.
+// Only names, work emails and the folders they commit to; roles are never guessed (see docs/team.md).
+const BOT = /\[bot\]|dependabot|renovate|github-actions|gitlab-ci|jenkins|teamcity|\bci\b|\bbot\b/i;
+async function guessTeam(e, onSource = () => {}) {
+  onSource('git');
+  const myEmail = (await gitValue(e, 'user.email')).toLowerCase(), myName = clean(await gitValue(e, 'user.name')).toLocaleLowerCase('ru');
+  onSource('projects');
+  const { dirs } = recentProjects(e);
+  const projects = dirs.map(dir => path.basename(dir));
+  // A team a colleague already shared through git (.petya/team.json) comes first, with roles and duties.
+  onSource('shared');
+  const shared = [], sharedIn = [];
+  for (const dir of dirs) {
+    const members = require('./project-share.cjs').readTeam(dir, e.read);
+    if (!members) continue;
+    sharedIn.push(path.basename(dir));
+    for (const m of members) if (!shared.some(s => (s.email && s.email === m.email) || s.name.toLocaleLowerCase('ru') === m.name.toLocaleLowerCase('ru'))) shared.push({ ...m, shared: true });
+  }
+  const people = new Map();
+  const logs = await Promise.all(dirs.slice(0, 25).map(dir => e.run('git', ['-C', dir, 'log', '--since=60.days', '--no-merges', '-n', '3000', '--format=%aN%x09%aE'], 4000).then(out => [dir, out])));
+  for (const [dir, out] of logs) for (const line of out.split('\n')) {
+    const [rawName, rawEmail = ''] = line.split('\t'), name = clean(rawName), email = rawEmail.trim().toLowerCase();
+    if (!name || BOT.test(name) || BOT.test(email) || email === myEmail || name.toLocaleLowerCase('ru') === myName) continue;
+    const key = (email && !/noreply/.test(email) ? email : name.toLocaleLowerCase('ru'));
+    const person = people.get(key) || { name, email: /noreply|localhost|\.local$/.test(email) || !/@.+\./.test(email) ? '' : email, projects: new Set(), commits: 0 };
+    // Prefer the spelling with a space (a full name) over a login.
+    if (!/\s/.test(person.name) && /\s/.test(name)) person.name = name;
+    person.projects.add(path.basename(dir)); person.commits++; people.set(key, person);
+  }
+  // The same person under two emails: merge by name.
+  const byName = new Map();
+  for (const person of people.values()) {
+    const key = person.name.toLocaleLowerCase('ru'), same = byName.get(key);
+    if (same) { same.commits += person.commits; person.projects.forEach(p => same.projects.add(p)); same.email ||= person.email; } else byName.set(key, person);
+  }
+  const known = m => shared.some(s => (m.email && s.email === m.email) || s.name.toLocaleLowerCase('ru') === m.name.toLocaleLowerCase('ru'));
+  const authors = [...byName.values()].filter(p => (realName(p.name) || /\s/.test(p.name)) && !known(p)).sort((a, b) => b.commits - a.commits)
+    .map(p => ({ name: p.name, email: p.email, projects: [...p.projects].slice(0, 6).join(', '), commits: p.commits }));
+  const members = [...shared, ...authors].filter(m => !(myEmail && m.email === myEmail) && m.name.toLocaleLowerCase('ru') !== myName).slice(0, 40);
+  const evidence = [...(sharedIn.length ? [{ source: 'shared', detail: sharedIn.join(', ') }] : []), ...(authors.length ? [{ source: 'projects', count: Math.min(dirs.length, 25) }] : [])];
+  return { value: members.length ? String(members.length) : '', members, projects, candidates: [], evidence };
+}
+
+module.exports = { environment, guessName, guessCompany, guessRole, guessTeam, browserProfiles, slackWorkspaces, appNames, recentProjects, nameFromEmail, companyFromDomain, workDomain };
