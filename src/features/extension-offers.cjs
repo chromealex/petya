@@ -141,10 +141,6 @@ function setup(s){
   return {dismissed:row.ext,forever};
  }
  function unmute(ext){s.saveSettings({extensionOffersMuted:JSON.stringify(muted(s.settings).filter(x=>x!==ext))});return muted(s.settings);}
-<<<<<<< HEAD
- return {extensionOffers:{turn,annotate,offers,prerequisite},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
-=======
- return {extensionOffers:{turn,annotate,propose,offers},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
->>>>>>> apps-crash-sources
+ return {extensionOffers:{turn,annotate,propose,offers,prerequisite},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
 }
 module.exports={name:'extensionOffers',defaults:{extensionOffersMuted:'[]'},validate(){},setup,load,candidates,decide,REQUEST};

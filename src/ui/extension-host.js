@@ -1,15 +1,9 @@
 // Only bundled, validated extension descriptors can supply renderer scripts.
 (()=>{
  const loaded=new Set();let entries=window.petyaExtensionDescriptors;
-<<<<<<< HEAD
  // A script that is still loading is shared by every caller, so cards rendered together load it once.
  const pending=new Map();
  const load=src=>{if(loaded.has(src))return Promise.resolve();if(pending.has(src))return pending.get(src);const p=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=()=>{loaded.add(src);pending.delete(src);resolve();};script.onerror=()=>{pending.delete(src);reject(Error('Не удалось загрузить '+src));};document.body.append(script);});pending.set(src,p);return p;};
-=======
- // One load per script even when two cards of the same app render at once (a second script would run the app twice).
- const pending=new Map();
- const load=src=>{if(loaded.has(src))return Promise.resolve();if(!pending.has(src))pending.set(src,new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=()=>{loaded.add(src);pending.delete(src);resolve();};script.onerror=()=>{pending.delete(src);reject(Error('Не удалось загрузить '+src));};document.body.append(script);}));return pending.get(src);};
->>>>>>> apps-crash-sources
  function fold(card){
   if(card.classList.contains('settings-card'))return;
   const heading=card.querySelector('h2');if(!heading)return;
