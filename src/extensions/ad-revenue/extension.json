@@ -1,0 +1,23 @@
+{
+  "id": "ad-revenue",
+  "name": "Реклама и монетизация",
+  "description": "Выручка с рекламы в играх: по дням, сетям, форматам и странам, eCPM, fill rate, ARPDAU и просадки относительно последних 4 недель",
+  "category": "analytics",
+  "icon": "icon.svg",
+  "examples": ["Сколько заработали на рекламе вчера?","eCPM по сетям за неделю","Какой формат приносит больше?","Упала выручка с rewarded?"],
+  "connects": "AppLovin MAX или Unity LevelPlay",
+  "uses": ["share-message"],
+  "provides": {
+    "ad-source": ["applovin-source.cjs", "levelplay-source.cjs"]
+  },
+  "setting": "extension_ad-revenue",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["ad-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "adRevenue": "renderAdRevenue"
+  }
+}
