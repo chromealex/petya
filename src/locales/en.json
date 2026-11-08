@@ -5746,6 +5746,16 @@
   "Адрес сервиса Zoom: укажите его в виде https://…": "Zoom service address: enter it as https://…",
   "Адрес Ollama": "Ollama address",
   "Адрес whisper.cpp": "whisper.cpp address",
-  "укажите адрес вида ": "enter an address like "
+  "укажите адрес вида ": "enter an address like ",
+  "Адрес или запрос": "Address or search",
+  "Адрес страницы": "Page address",
+  "Браузер": "Browser",
+  "Браузер справа от чата": "Browser next to the chat",
+  "Браузер этого чата закрыт.": "This chat's browser is closed.",
+  "Введите адрес или запрос.": "Enter an address or a search.",
+  "Вперёд": "Forward",
+  "Не удалось открыть страницу:": "Couldn't open the page:",
+  "Нет открытой страницы.": "No page is open.",
+  "Открыть в системном браузере": "Open in the system browser"
  }
 }
