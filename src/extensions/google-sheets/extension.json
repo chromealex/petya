@@ -1,0 +1,22 @@
+{
+  "id": "google-sheets",
+  "name": "Google Таблицы",
+  "description": "Google Таблица в чате: листы, поиск по ячейкам, новая строка и выгрузка из других карточек — запись только после подтверждения",
+  "category": "docs",
+  "icon": "icon.svg",
+  "examples": ["Что в таблице баланса?","Покажи лист Юниты","Найди в таблице лучника","Добавь строку в таблицу Юниты: Маг; 15; 80"],
+  "connects": "Google",
+  "setting": "extension_google-sheets",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["sheets-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "sheetsCard": "renderSheetsCard"
+  },
+  "provides": {
+    "spreadsheet-export": "spreadsheet-export.cjs"
+  }
+}
