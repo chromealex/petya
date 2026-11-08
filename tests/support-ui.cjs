@@ -61,6 +61,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js(`(()=>{const a=document.querySelectorAll('.support-card')[1].querySelector('.sp-editor textarea');a.value=a.value.replace('Здравствуйте!','Здравствуйте, Игрок!');a.dispatchEvent(new Event('input'));a.closest('.sp-editor').querySelector('.primary').click();})()`);
  for(let i=0;i<50;i++){if(sent.length===1)break;await new Promise(r=>setTimeout(r,30));}
  assert.deepEqual(sent[0],[{card:'r1',source:'zendesk',id:'1201'},reply.draft.replace('Здравствуйте!','Здравствуйте, Игрок!')]);
+ for(let i=0;i<50;i++){if(await js(second+".querySelector('.sp-editor')===null"))break;await new Promise(r=>setTimeout(r,30));}
  assert.equal(await js(second+".querySelector('.sp-editor')"),null,'the editor is replaced by the sent text');
  assert.match(await js(second+".querySelector('.sp-sent').textContent"),/Отправлено игроку/);
  assert.equal(await js(second+".querySelector('.kit-card-head .kit-chip').textContent"),'ответ отправлен');

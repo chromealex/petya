@@ -20,7 +20,9 @@ const own={
  localization:['что не переведено в локализации','проверь локализацию','недостающие ключи на немецкий'],
  zoom:['запиши встречу в Zoom','покажи мои встречи в зуме','что было на созвоне в Zoom'],
  'google-meet':['созвон в Meet','запиши созвон в мите','поставь созвон в гугл мит с Олегом','запиши встречу в Google Meet','подключись к созвону через Meet'],
- teams:['встреча в Teams','запиши встречу в тимсе','поставь встречу в тимс на завтра','что было на звонке в Microsoft Teams']
+ teams:['встреча в Teams','запиши встречу в тимсе','поставь встречу в тимс на завтра','что было на звонке в Microsoft Teams'],
+ discord:['что нового в дискорде','баги из дискорда за неделю','покажи частые вопросы игроков','отправь в Discord: сервер перезапустится в 18:00'],
+ support:['что жалуются в поддержку','тикеты про оплату за неделю','ответь на тикет 1234','покажи тикеты в Zendesk']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -38,7 +40,11 @@ const not={
  zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи','созвон в Meet','встреча в тимсе'],
  // Meet and Teams by name only: «meeting», «митинг», «митап», meetings in general, the calendar and Zoom are not them.
  'google-meet':['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','what is the meeting about','meetup в пятницу','что у меня сегодня в календаре','встреча в Teams','тимлид на встрече'],
- teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке']
+ teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке'],
+ // Discord by name: the user's own client, coding with discord.js, other messengers and support tickets are not it.
+ discord:['дискорд не работает','как подключить discord.js','напиши бота для дискорда','что нового в слаке','что пишут в телеграме','тикеты про оплату','что жалуются в поддержку'],
+ // Player tickets: vendors' support, Petya's help, cheering up, store reviews and tracker tickets are not it.
+ support:['поддержка Unity','техподдержка Пети','отзывы в сторах','поддержи меня','создай тикет в Jira','частые вопросы игроков в дискорде','поддерживает ли Unity webp']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -57,7 +63,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
