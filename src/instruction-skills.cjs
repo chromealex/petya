@@ -18,10 +18,13 @@ function parseMarkdown(markdown){
  if(!match)throw Error('Нужен SKILL.md: блок --- с name и description, затем инструкции Markdown.');
  const fields={};let block=null;
  for(const line of match[1].split('\n')){
-  if(block&&/^\s+/.test(line)){fields[block]+=(fields[block]?' ':'')+line.trim();continue;}
+  if(block&&/^\s+/.test(line)){if(block!=='other')fields[block]+=(fields[block]?' ':'')+line.trim();continue;}
   block=null;if(!line.trim()||line.startsWith('#'))continue;
+  // Other fields of the format (license, allowed-tools, metadata, version…) are accepted and not used:
+  // Petya's own tools and sandbox decide what a skill may do.
+  if(/^[\w-]+:/.test(line)&&!/^(?:name|description):/.test(line)){block='other';continue;}
   const field=line.match(/^(name|description):\s*(.*)$/);
-  if(!field)throw Error('Поддерживаются только name и description. Скрипты, инструменты и дополнительные поля не импортируются.');
+  if(!field)throw Error('Не удалось прочитать заголовок SKILL.md: строка «'+line.slice(0,60)+'».');
   if(Object.hasOwn(fields,field[1]))throw Error('Повтор поля '+field[1]);
   let value=field[2];if(/^[>|][-+]?$/.test(value)){block=field[1];value='';}
   else if(value.startsWith('"')){try{value=JSON.parse(value);}catch{throw Error('Некорректные кавычки в '+field[1]);}}

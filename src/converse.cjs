@@ -253,6 +253,8 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     }
     // A fitting skill from the library shapes this answer (a bug report, release notes, a retro…).
     const skill=!choice&&!ctx.attachments.list().length?await ctx.skillChoice?.prepare(value):null;
+    // A skill with its own files (references, templates, scripts) is carried out step by step.
+    if(skill&&ctx.skillRuntime?.handles(skill)){ctx.skillChoice?.done();return ctx.skillRuntime.turn({skill,question:value,command:original});}
     let reply,used=false;try{reply=await ctx.dialogue.turn(value,typeof choice==='string'?choice:undefined,undefined,preparedTopicRoute);}finally{used=!!ctx.skillChoice?.done();}
     if(skill&&used&&reply?.handled&&!reply.error){reply.by='скилл '+skill.name;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&last.text===reply.text){last.by=reply.by;ctx.dialogue.persist();}}
     // The model does not know or is unsure about a public fact: look it up in the background and answer from the pages.

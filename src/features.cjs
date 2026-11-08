@@ -31,6 +31,7 @@ module.exports=[
  require('./features/skill-choice.cjs'),
  require('./features/context-compaction.cjs'),
  require('./features/office-files.cjs'),
+ require('./features/skill-runtime.cjs'),
  require('./features/selftest.cjs'),
  require('./features/morning-brief.cjs'),
  require('./features/optional-models.cjs'),

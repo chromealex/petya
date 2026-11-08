@@ -6,7 +6,7 @@ const {InstructionSkills,parseMarkdown,markdown,runSkill}=require('../src/instru
  assert.deepEqual(parseMarkdown(markdown(s)),{...sample,enabled:true});assert.equal(new InstructionSkills({state:saved}).resolve('/project-status тест').question,'тест');
  assert.equal(store.resolve('$project-status').skill.id,s.id);assert.equal(store.resolve('скилл project-status тест').question,'тест');assert.equal(store.resolve('обсуди /project-status'),null);
  assert.throws(()=>store.put(sample),/занято/);assert.throws(()=>store.put({...sample,name:'../path'}));assert.throws(()=>store.put({...sample,body:'a'.repeat(12001)}));assert.throws(()=>store.resolve('/unknown'),/не найден/);
- assert.throws(()=>parseMarkdown('---\nname: a\ndescription: b\nallowed-tools: bash\n---\nc'),/только/);
+ {const parsed=parseMarkdown('---\nname: a\ndescription: b\nallowed-tools: bash\nlicense: MIT\n---\nc');assert.deepEqual(Object.keys(parsed).sort(),['body','description','enabled','name'],'extra fields are accepted and grant nothing');}
  assert.equal(parseMarkdown('---\nname: a\ndescription: >\n  hello\n  world\n---\nbody').description,'hello world');
  assert.throws(()=>parseMarkdown('---\nname: a\nname: b\ndescription: x\n---\ny'),/Повтор/);
  store.put({...s,enabled:false});assert.throws(()=>store.resolve('/project-status'),/выключен/);store.put(s);
