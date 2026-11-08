@@ -67,6 +67,8 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     if(!choice&&!background){const summary=await ctx.meetingSummary?.turn(original);if(summary)return summary;}
     // «Сделай скилл: …»: Petya writes a skill for himself (src/features/skill-packages.cjs).
     if(!choice&&!background){const made=await ctx.skillPackages?.turn(original);if(made)return made;}
+    // «Сделай презентацию…», «выгрузи в Excel», «/docx …»: a real file, attached to the answer (src/features/office-files.cjs).
+    if(!choice&&!background&&!ctx.attachments.list().length){const file=await ctx.officeFiles?.turn(original);if(file)return file;}
     if(!choice){const important=ctx.highlights?.turn(original);if(important)return important;}
     if(!choice){const screen=await ctx.slackScreen?.turn(original);if(screen)return screen;}
     if(!choice){const discovered=await ctx.contextDiscovery?.turn(original);if(discovered)return discovered;}

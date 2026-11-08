@@ -6,6 +6,9 @@
 const library=require('../skill-library/index.cjs');
 const MIN_SCORE=2,MIN_CONFIDENCE=.7,TTL=5*60000,UNRANKED=4;
 // Skills whose description has no Russian words: users and projects often bring English SKILL.md files.
+// The anthropic docx/xlsx/pptx/pdf packages explain Python libraries Petya does not have; Petya makes these
+// files himself (src/features/office-files.cjs), so they are not chosen as instructions.
+const OFFICE=new Set(['docx','xlsx','pptx','pdf']);
 const foreign=s=>!/[а-яё]/iu.test(s.description||'');
 function request(model,command,candidates,topic){
  const names=candidates.map(s=>s.name);
@@ -48,7 +51,7 @@ module.exports={
   }
   const later=()=>{const t=setTimeout(()=>translate(),5000);t.unref?.();};
   let cached=null;
-  const skills=()=>{const own=s.instructionSkills?.list?.()||[],extra=projectSkills(),key=[own,extra];if(cached&&cached.own===own&&cached.extra.length===extra.length&&cached.extra.every((x,i)=>x===extra[i]))return cached.list;cached={own,extra,list:[...extra,...library.library(own)]};apply(cached.list);if(waiting.size)later();return cached.list;};
+  const skills=()=>{const own=s.instructionSkills?.list?.()||[],extra=projectSkills(),key=[own,extra];if(cached&&cached.own===own&&cached.extra.length===extra.length&&cached.extra.every((x,i)=>x===extra[i]))return cached.list;cached={own,extra,list:[...extra,...library.library(own)].filter(x=>!(x.package&&x.source==='anthropic'&&OFFICE.has(x.name)))};apply(cached.list);if(waiting.size)later();return cached.list;};
   const choose=async command=>{
    const text=String(command||'').trim();
    if(!text||s.settings.autoSkills==='false'||!s.settings.model||s.settings.semanticTools==='false')return null;

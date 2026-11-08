@@ -57,6 +57,8 @@ module.exports=ctx=>{
     const request = ctx.text(command,4000);
     const reply = await require('./features/extension-replies.cjs').turnForAttachments(ctx,ids,request);
     if (reply) return reply;
+    // «Сделай из этого презентацию» with files attached: the file is made from them.
+    if(ctx.officeFiles?.intent?.(request)){const files=ctx.attachments.take(ids);const made=await ctx.officeFiles.turn(request,{files});if(made){for(const id of ids)ctx.attachments.remove(id);return made;}}
     const explicit=await executeSkill(request,ids);if(explicit)return explicit;
     if(require('./team-fill.cjs').isTeamFill(command))return ctx.teamFill.turn(request);
     // A fitting skill shapes the answer about the files too (a bug report from a log, a test report…).
