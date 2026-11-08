@@ -25,7 +25,8 @@ const own={
  appmetrica:['подключи AppMetrica'],
  'ab-test':['значим ли тест','посчитай A/B','сколько нужно игроков для теста','есть ли SRM'],
  focus:['фокус на 50 минут над картой уровня','помодоро 4 раза','сколько я сегодня сфокусировался','помоги сосредоточиться'],
- naming:['придумай название для ивента на Хэллоуин','имена для героев-гномов','как назвать фичу с сундуками','название игры про бункер']
+ naming:['придумай название для ивента на Хэллоуин','имена для героев-гномов','как назвать фичу с сундуками','название игры про бункер'],
+ 'meeting-prep':['подготовь меня к встрече','что обсуждали с Олегом в прошлый раз','о чём следующая встреча','повестка на синк']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -52,6 +53,8 @@ const not={
  focus:['фокус камеры в Unity','давай сфокусируемся на багах','фокус на задаче','фокус-группа в пятницу','перерыв в работе сервера'],
  // Code names are the coder's, renaming a task is Jira's, «назови сумму» is arithmetic.
  naming:['как назвать переменную','переименуй задачу','назови сумму','как называется игра про бункер','придумай название ветки'],
+ // Preparing for a meeting is not its summary, the day's agenda, a new event or recording.
+ 'meeting-prep':['сводка встречи','что у меня сегодня','поставь встречу с Олегом в четверг в 15:00','запиши встречу','что решили на встрече','запомни повестку следующей встречи: релиз'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -70,7 +73,8 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','metrics','ab-test'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','metrics','ab-test'].filter(id=>ids.has(id));,
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','meeting-prep'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

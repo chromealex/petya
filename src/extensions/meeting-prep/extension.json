@@ -1,0 +1,22 @@
+{
+  "id": "meeting-prep",
+  "name": "Подготовка к встрече",
+  "description": "Перед встречей: участники, о чём говорили с ними в прошлый раз, открытые задачи и их статус, повестка из трёх пунктов со ссылками на источники",
+  "category": "meetings",
+  "setting": "extension_meeting-prep",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["prep-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "meetingPrep": "renderMeetingPrep"
+  },
+  "examples": [
+    "Подготовь меня к встрече",
+    "Что обсуждали с Олегом в прошлый раз?",
+    "О чём следующая встреча?",
+    "Повестка на синк"
+  ]
+}
