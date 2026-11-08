@@ -1,3 +1,4 @@
+(()=>{const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('contact-card.css',document.currentScript.src).href;document.head.append(style);})();
 window.renderTelegramContacts=(message,data)=>{
  if(!message)return;
  if(data.telegramConnect&&!message.querySelector('.telegram-connect-offer')){
@@ -14,7 +15,13 @@ window.renderTelegramContacts=(message,data)=>{
   if(contact.observed&&contact.observed!==contact.name){const detail=document.createElement('p');detail.textContent=contact.observed.startsWith(contact.name+' · ')?contact.observed.slice(contact.name.length+3):contact.observed;info.append(detail);}
   const copy=document.createElement('button');copy.type='button';copy.textContent='Копировать имя';
   copy.onclick=async()=>{try{await navigator.clipboard.writeText(contact.name);copy.textContent='Скопировано';}catch{copy.textContent='Не удалось скопировать';}};
-  card.append(icon,info,copy);list.append(card);
+  // Quick follow-ups: write to the person or open the conversation; the role comes from «Команда» when known.
+  const say=text=>()=>{const c=document.getElementById('command');if(!c)return;c.value=text;c.focus();};
+  const write=document.createElement('button');write.type='button';write.textContent='Написать';write.onclick=say('Напиши в Telegram '+contact.name+': ');
+  const thread=document.createElement('button');thread.type='button';thread.textContent='Переписка';thread.onclick=()=>window.processCommand?.('Покажи последнюю переписку с '+contact.name+' в Telegram');
+  const actions=document.createElement('div');actions.className='telegram-contact-actions';actions.append(write,thread,copy);
+  window.petya.teamList?.().then(team=>{const person=(team?.members||[]).find(m=>m.name&&(m.name===contact.name||(m.aliases||[]).includes?.(contact.name)));if(person?.role){source.textContent=person.role+' · из команды';}}).catch(()=>{});
+  card.append(icon,info,actions);list.append(card);
  }
  message.append(list);
 };
