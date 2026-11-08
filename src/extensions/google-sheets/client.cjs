@@ -5,8 +5,7 @@
 // Every write is called only from a card button the user pressed, after a preview of the exact cells.
 // `request(url, options)` is Petya's HTTP helper (JSON in, JSON out, errors carry `status` and `detail`).
 const ROOT='https://sheets.googleapis.com/v4/spreadsheets';
-const READ='https://www.googleapis.com/auth/spreadsheets.readonly';
-const WRITE='https://www.googleapis.com/auth/spreadsheets';
+const {read:READ,write:WRITE}=require('../../google-workspace.cjs').SCOPES.sheets;
 const ID=/^[A-Za-z0-9_-]{20,100}$/;
 const MAX_TITLE=100;
 

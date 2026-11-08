@@ -6,8 +6,9 @@
 // only on a card button, after a preview of the exact cells, and re-checks that the cells did not change meanwhile.
 const kit=require('../app-kit.cjs');
 const {ask}=require('../../input-required.cjs');
-const {SheetsClient,parseUrl,sheetUrl,range,quote,cell,ID:SHEET_ID,READ,WRITE}=require('./client.cjs');
+const {SheetsClient,parseUrl,sheetUrl,range,quote,cell,ID:SHEET_ID}=require('./client.cjs');
 const auth=require('./auth.cjs');
+const workspace=require('../../google-workspace.cjs');
 const table=require('./table.cjs');
 const exportsStore=require('./exports.cjs');
 const {randomUUID}=require('node:crypto');
@@ -314,37 +315,28 @@ function setup(s,{now=()=>Date.now(),poll=1000}={}){
    }catch(e){publish(e.message,{kind:'error',id:NOTICE+'-export'});throw e;}
   });
  }
- // Incremental consent through the mail account sign-in: read first, write only after writing is enabled.
+ // Incremental consent through the shared Google connection: read first, write only after writing is enabled.
  async function connect(key,write=false){
-  const manager=s.mailAccounts?.google;if(!manager)throw Error('Аккаунты Google ещё загружаются.');
+  watching?.stop();
   const account=key?auth.googleAccounts(s.settings).find(a=>a.key===key):null;
-  await manager.start({scopes:[write?WRITE:READ],email:account?.email||''});
+  watching=await workspace.consent(s,auth.PRODUCT,{account:key||'',write:!!write,poll,now,onDone:r=>{
+   watching=null;
+   if(!r.ok)publish(r.error,{kind:'error'});
+   else{publish('Google Таблицы: доступ '+(write?'на чтение и запись':'на чтение')+' для '+(r.account.email||'аккаунта')+' выдан.',{kind:'success'});if(!s.settings.googleSheetsAccount)s.saveSettings?.({googleSheetsAccount:r.account.key});}
+  }});
   publish('Подтвердите доступ к Google Таблицам в браузере'+(account?.email?' для '+account.email:'')+'.',{busy:true});
-  if(watching)clearInterval(watching);
-  const started=now(),before=new Set(auth.googleAccounts(s.settings).filter(a=>write?a.write:a.read).map(a=>a.key));
-  watching=setInterval(()=>{
-   const login=manager.login;if(login?.pending&&now()-started<310000)return;
-   clearInterval(watching);watching=null;
-   const after=auth.googleAccounts(s.settings).filter(a=>write?a.write:a.read);
-   const fresh=after.find(a=>!before.has(a.key))||after.find(a=>a.key===key);
-   if(login?.lastError)publish(login.lastError,{kind:'error'});
-   else if(fresh){publish('Google Таблицы: доступ '+(write?'на чтение и запись':'на чтение')+' для '+(fresh.email||'аккаунта')+' выдан.',{kind:'success'});if(!s.settings.googleSheetsAccount)s.saveSettings?.({googleSheetsAccount:fresh.key});}
-   else publish('Доступ к таблицам не выдан. Отметьте разрешение на Google Таблицы на странице входа и повторите.',{kind:'error'});
-  },poll);
-  watching.unref?.();
   return status();
  }
  function status(){
-  let configured=false;try{configured=!!s.mailAccounts?.google?.status().configured;}catch{configured=false;}
+  const configured=workspace.configured(s);
   return {added:kit.installed(s,ID),mode:auth.mode(s.settings),write:auth.wantsWrite(s.settings),writable:auth.writable(s.settings),connected:auth.connected(s.settings),
    accounts:auth.googleAccounts(s.settings).map(({key,email,label,read,write})=>({key,email,label,read,write})),chosen:auth.chosen(s.settings)?.key||'',configured,
    hasKey:!!s.settings.googleSheetsCredential,serviceEmail:auth.serviceEmail(s.settings),known:known(s.settings).map(({id,title,sheets})=>({id,title,tabs:sheets.length,url:sheetUrl(id)})),operation};
  }
- const account=require('../../google-service-account.cjs');
  const ipc={
   status,connect,
-  cancel(){if(watching)clearInterval(watching);watching=null;s.mailAccounts?.google?.login?.stop?.();publish('Подключение отменено.');return status();},
-  saveKey(text){if(typeof text!=='string'||text.length>20000)throw Error('Выберите JSON ключ сервисного аккаунта Google.');const key=account.parse(text);s.saveSettings({googleSheetsCredential:JSON.stringify(key)},true);return status();},
+  cancel(){watching?.stop();watching=null;s.mailAccounts?.google?.login?.stop?.();publish('Подключение отменено.');return status();},
+  saveKey(text){if(typeof text!=='string'||text.length>20000)throw Error('Выберите JSON ключ сервисного аккаунта Google.');const key=workspace.parseKey(text);s.saveSettings({googleSheetsCredential:JSON.stringify(key)},true);return status();},
   clearKey(){s.saveSettings({clear_googleSheetsCredential:true},true);return status();},
   async remember(link){const url=parseUrl(link);if(!url)throw Error('Нужна ссылка на таблицу Google (docs.google.com/spreadsheets/…).');if(!ready())throw Error('Сначала подключите доступ к таблицам.');remember(s,await clientFor(s).meta(url.id));return status();},
   forget(id){s.saveSettings({googleSheetsKnown:JSON.stringify(known(s.settings).filter(x=>x.id!==id))});return status();},
