@@ -18,7 +18,7 @@ function load(dir){
   return {id:p.id,extension:x.extension,setting:x.setting,name:p.name||x.name,source:p};
  }).sort((a,b)=>a.id.localeCompare(b.id));
 }
-const within=(promise,ms)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(Error('не ответил за '+Math.round(ms/1000)+' с')),ms).unref?.())]);
+const within=(promise,ms)=>Promise.race([promise,new Promise((_,reject)=>setTimeout(()=>reject(Error('не ответил за '+Math.round(ms/1000)+' сек')),ms).unref?.())]);
 function create(s,{sources}={}){
  const list=sources||load();
  const added=x=>!x.setting||s.settings?.[x.setting]==='true';

@@ -11,8 +11,9 @@
  const date=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleDateString(locale(),{day:'numeric',month:'short'});};
  const day=ymd=>date(ymd+'T12:00:00');
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
- const plural=(n,[a,b,c])=>{const x=Math.abs(Math.round(n))%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
- const unit=(mode,n)=>mode==='count'?plural(n,['задача','задачи','задач']):mode==='hours'?'ч':'SP';
+ // Russian forms; another interface language takes the singular only for exactly one (the word is translated in the DOM).
+ const plural=(n,[a,b,c])=>{if(window.petyaLanguage&&window.petyaLanguage!=='ru')return Math.abs(n)===1?a:c;const x=Math.abs(Math.round(n))%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
+ const unit=(mode,n)=>mode==='count'?plural(n,['задача','задачи','задач']):mode==='hours'?(window.petyaLanguage&&window.petyaLanguage!=='ru'?'h':'ч'):'SP';
  const svg=(tag,attrs={})=>{const n=document.createElementNS(SVG,tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);return n;};
  const r1=n=>Math.round(n*10)/10;
 
@@ -124,7 +125,7 @@
   return box;
  }
 
- const REASON={unestimated:'без оценки','no-room':'не влезает','person-full':'нет ёмкости'};
+ const REASON={unestimated:'не оценена','no-room':'не влезает','person-full':'нет ёмкости'};
  function issueRow(k,c,item,onToggle){
   const row=k.el('label','sprint-issue'+(item.include?' on':''));row.dataset.key=item.key;
   const box=k.el('input');box.type='checkbox';box.checked=!!item.include;

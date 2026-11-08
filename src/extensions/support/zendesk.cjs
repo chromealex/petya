@@ -26,7 +26,7 @@ function explain(error){
   403:'У учётной записи Zendesk не хватает прав: нужен агент с доступом к тикетам (для ответа — с правом публичных комментариев).',
   404:'Zendesk не нашёл тикет или раздел. Проверьте номер тикета и поддомен.',
   422:'Zendesk не принял запрос: '+String(error.detail||'').slice(0,200),
-  429:'Zendesk ограничил число запросов. Повторите через '+Math.ceil(Number(error.retryAfter)||60)+' с.'};
+  429:'Zendesk ограничил число запросов. Повторите через '+Math.ceil(Number(error.retryAfter)||60)+' сек.'};
  const e=Error(map[error.status]||error.message||'Zendesk недоступен.');e.status=error.status;e.cause=error;return e;
 }
 async function api(s,path,{query,method='GET',body,url}={}){

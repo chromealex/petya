@@ -12,7 +12,8 @@
  const date=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleDateString(locale(),{day:'numeric',month:'short',timeZone:'UTC'});};
  const ago=iso=>{const d=Math.floor((Date.now()-Date.parse(iso))/DAY);return d<=0?'сегодня':d===1?'вчера':d+' дн. назад';};
  const mb=b=>Math.round(b/1048576).toLocaleString(locale())+' МБ';
- const plural=(n,[a,b,c])=>{const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
+ // Russian forms; another interface language takes the singular only for exactly one (the word is translated in the DOM).
+ const plural=(n,[a,b,c])=>{if(window.petyaLanguage&&window.petyaLanguage!=='ru')return Math.abs(n)===1?a:c;const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
  // Store and model text (names, developers, release notes) is never machine-translated.
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
  const feature=(method,...args)=>window.petya.feature('competitors',method,...args);

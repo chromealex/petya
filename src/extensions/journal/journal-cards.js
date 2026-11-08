@@ -113,13 +113,13 @@
   const sec=k.el('section','jr-section jr-private');
   sec.append(k.el('h5','jr-h','Вопрос дня'));
   const q=k.el('p','jr-prompt',c.prompt);sec.append(q);
-  const answer=k.el('textarea','jr-answer');answer.rows=2;answer.placeholder='Пара строк для себя — видно только вам';answer.setAttribute('aria-label','Ответ на вопрос дня');
+  const answer=k.el('textarea','jr-answer');answer.rows=2;answer.placeholder=(window.t||String)('Пара строк для себя — видно только вам');answer.setAttribute('aria-label',(window.t||String)('Ответ на вопрос дня'));
   const saveA=k.el('button',null,'Сохранить ответ');saveA.type='button';
   saveA.onclick=async()=>{saveA.disabled=true;try{await call('reflect',c.date,answer.value);k.toast('Ответ сохранён');}catch(e){k.toast(e.message,{error:true});}finally{saveA.disabled=false;}};
   sec.append(answer,saveA);
   sec.append(k.el('h5','jr-h','Записи'));
   const notes=k.el('ul','jr-notes');sec.append(notes);
-  const input=k.el('textarea','jr-note');input.rows=2;input.placeholder='Запись в дневник…';input.setAttribute('aria-label','Запись в дневник');
+  const input=k.el('textarea','jr-note');input.rows=2;input.placeholder=(window.t||String)('Запись в дневник…');input.setAttribute('aria-label',(window.t||String)('Запись в дневник'));
   const add=k.el('button',null,'Записать');add.type='button';
   const row=k.el('div','jr-note-row');row.append(input,add);sec.append(row);
   const load=async()=>{
@@ -164,7 +164,7 @@
   };
   async function refresh(){try{const fresh=await call('card',c.brief?'plan':c.mode,c.date);if(fresh)c={...fresh,brief:c.brief};}catch{/* the app may be removed */}paint();}
   paint();
-  const key=c.mode==='week'?'Неделя с '+dateOf(c.week?.[0]?.date||c.date).toLocaleDateString(locale(),{day:'numeric',month:'long'}):c.brief?dayTitle(c.tomorrow):dayTitle(c.date);
+  const key=c.mode==='week'?(window.t||String)('Неделя с')+' '+dateOf(c.week?.[0]?.date||c.date).toLocaleDateString(locale(),{day:'numeric',month:'long'}):c.brief?dayTitle(c.tomorrow):dayTitle(c.date);
   const actions=c.mode==='week'?[{label:'Что я сегодня сделал',run:()=>k.ask('Что я сегодня сделал?',{send:true})}]:[{label:'Итоги недели',run:()=>k.ask('Итоги недели',{send:true})},{label:'Запись в дневник…',run:()=>k.ask('Запиши в дневник: ')}];
   const node=k.card({app:'Дневник',initial:'✎',color:'#5a7a6a',key,status,body,actions,className:'journal-card'});
   node.querySelector('.kit-key')?.setAttribute('data-no-i18n','');

@@ -30,7 +30,7 @@ module.exports={
   let issue;
   try{issue=await read(s,params.key);}
   catch(e){if(e.status===404)throw new TriggerError('not-found','Задачу '+params.key+' в Jira не нашёл или к ней нет доступа.');throw e;}
-  if(reached(issue,params))throw new TriggerError('already',issue.key+' уже '+(params.status?'в статусе «'+issue.status+'»':'закрыта ('+issue.status+')')+'.',{url:browse(s,issue.key)});
+  if(reached(issue,params))throw new TriggerError('already',issue.key+(params.status?' уже в статусе «'+issue.status+'»':' уже закрыта ('+issue.status+')')+'.',{url:browse(s,issue.key)});
   return {params:{...params,summary:issue.summary},label:issue.key+(params.status?' перейдёт в «'+params.status+'»':' закроют'),url:browse(s,issue.key),note:issue.summary?issue.key+' «'+issue.summary+'» сейчас: '+issue.status+'.':''};
  },
  async check(s,params){
