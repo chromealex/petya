@@ -19,7 +19,16 @@ function delivery({semantic,onEvent}) {
   let claudeQueue=Promise.resolve();
   const claude=payload=>{const task=claudeQueue.then(()=>claudeCall(payload));claudeQueue=task.catch(()=>{});return task;};
   return {
-    status:async row=>{if(row.target!=='codex')throw new Error('Claude пока не возвращает статус в Петю. Откройте его чат.');return codex.status(row);},
+    // Claude: the helper reads the chat through Accessibility. A background check is skipped while Claude is
+    // in front, has an unsent draft or is not running ({status:'skipped'}); nothing is ever sent from here.
+    status:async(row,{background=false}={})=>{
+      if(row.target==='codex')return codex.status(row);
+      if(!row.url)throw new Error('Ссылка на чат Claude пока неизвестна. Откройте его чат.');
+      const result=await claude({action:'status',url:row.url,marker:'[Петя: '+row.id+']',background});
+      if(result.status==='skipped')return {status:'skipped',reason:result.reason||''};
+      if(!['inProgress','completed','needsAttention'].includes(result.status))throw new Error('Claude вернул неизвестный статус.');
+      return {status:result.status,answer:typeof result.answer==='string'?result.answer:''};
+    },
     projects:async target=>target==='codex'?codex.projects():(await claude({action:'projects'})).projects,
     choose:(row,projects)=>chooseProject(row.command||'',row.contextText||row.prompt,projects,semantic),
     submit:async(row,project,persist)=>{

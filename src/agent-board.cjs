@@ -81,8 +81,10 @@ function handoffStatus(row,now){
  const run={inProgress:['running','В работе'],completed:['done','Работа завершена'],failed:['failed','Ошибка выполнения'],interrupted:['stopped','Работа прервана'],needsAttention:['waiting','Нужно твоё решение']}[row.executionState];
  if(row.state==='submitted'){
   if(run)return run;
-  // Sent, but this agent's progress cannot be read: after a day it is no longer shown as active.
-  return now-(row.at||0)<DAY?['sent','Отправлена в чат · ход работы виден в приложении']:['done','Отправлена в чат'];
+  // Sent, progress not read yet. Claude chats with a link are read by the task monitor for 3 days (macOS);
+  // without a link progress stays in the app, and after a day the task is no longer shown as active.
+  const watched=row.target==='claude'&&row.url;
+  return now-(row.at||0)<(watched?3:1)*DAY?['sent',watched?'Отправлена в чат · Петя проверит ход работы':'Отправлена в чат · ход работы виден в приложении']:['done','Отправлена в чат'];
  }
  return ({
   routing:['waiting',row.deferred?'Передача отложена':'Нужно выбрать агента'],

@@ -2,8 +2,9 @@
 // Features are listed in src/features.cjs; they need no edits in main.cjs.
 module.exports={
  name:'agents',
- defaults:{agentSplit:'ask'},
- validate(next){if(!['ask','always','never'].includes(next.agentSplit))next.agentSplit='ask';},
+ // claudeStatusCheck: read the progress of tasks handed to Claude from its chats (macOS, Accessibility).
+ defaults:{agentSplit:'ask',claudeStatusCheck:'true'},
+ validate(next){if(!['ask','always','never'].includes(next.agentSplit))next.agentSplit='ask';if(!['true','false'].includes(next.claudeStatusCheck))next.claudeStatusCheck='true';},
  setup(s){
   const agentModel=async(system,data,format,predict=1200)=>{if(!s.settings.model)throw Error('Настройте локальную модель Ollama.');const response=await s.request(s.core.localEndpoint(s.settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:s.settings.model,stream:false,think:false,...format?{format}:{},options:{temperature:0.2,num_predict:predict},messages:[{role:'system',content:system},{role:'user',content:JSON.stringify(data)}]})});return String(response?.message?.content||'');};
   const agentTeam=new (require('../agent-team.cjs').AgentTeam)({dialogue:s.dialogue,jobs:s.chatJobs,
