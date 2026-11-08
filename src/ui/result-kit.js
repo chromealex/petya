@@ -139,11 +139,42 @@
  // Remove plain-text lines the cards replace (e.g. «KEY — title» lines), keeping explanations.
  function dropLines(parent,test){for(const node of parent.querySelectorAll(':scope>p,:scope>ul>li,:scope>ol>li'))if(test(node.textContent.trim()))node.remove();for(const list of parent.querySelectorAll(':scope>ul,:scope>ol'))if(!list.children.length)list.remove();}
 
+ // --- Side panel: a full view next to the chat (one at a time), resizable, closes with Esc --------------
+ let side=null;
+ function panel({id,title,subtitle,actions=[],body}){
+  const home=document.getElementById('home');if(!home)return null;
+  if(!side){
+   const box=el('aside','kit-panel');box.setAttribute('role','complementary');box.tabIndex=-1;
+   const grip=el('div','kit-panel-grip');grip.setAttribute('role','separator');grip.setAttribute('aria-orientation','vertical');grip.title='Потяните, чтобы изменить ширину';
+   grip.onpointerdown=e=>{e.preventDefault();grip.setPointerCapture(e.pointerId);const right=box.getBoundingClientRect().right;
+    grip.onpointermove=m=>{const w=Math.round(Math.min(Math.max(320,right-m.clientX),Math.max(360,innerWidth*0.7)));home.style.setProperty('--kit-panel-w',w+'px');};
+    grip.onpointerup=()=>{grip.onpointermove=null;store.set('panel-width',getComputedStyle(home).getPropertyValue('--kit-panel-w').trim());};};
+   const head=el('div','kit-panel-head'),titles=el('div','kit-panel-titles'),name=el('h3','kit-panel-title'),sub=el('small','kit-panel-subtitle'),tools=el('div','kit-panel-tools');
+   const close=el('button','kit-panel-close','×');close.type='button';close.title='Закрыть (Esc)';close.setAttribute('aria-label','Закрыть панель');close.onclick=()=>closePanel();
+   titles.append(name,sub);head.append(titles,tools,close);const content=el('div','kit-panel-body');box.append(grip,head,content);
+   side={box,name,sub,tools,content,id:null,topic:null};
+   const width=store.get('panel-width','');if(width)home.style.setProperty('--kit-panel-w',width);
+  }
+  side.id=id;side.topic=typeof topicSelect!=='undefined'?topicSelect.value:'';
+  side.name.textContent=title||'';side.sub.textContent=subtitle||'';side.sub.hidden=!subtitle;side.box.setAttribute('aria-label',title||'Просмотр');
+  side.tools.replaceChildren(...actions.map(a=>{const b=el('button',null,a.label);b.type='button';if(a.title)b.title=a.title;b.onclick=()=>a.run(b);return b;}));
+  side.content.replaceChildren(body||el('p','kit-meta','Загружаю…'));side.content.scrollTop=0;
+  if(!side.box.isConnected)home.append(side.box);home.classList.add('with-side-panel');
+  document.dispatchEvent(new CustomEvent('petya-panel',{detail:{id,open:true}}));
+  side.box.focus({preventScroll:true});
+  return {set(node){if(side?.id===id)side.content.replaceChildren(node);},get open(){return side?.id===id&&side.box.isConnected;}};
+ }
+ function closePanel(){if(!side?.box.isConnected)return;const id=side.id;side.box.remove();side.id=null;document.getElementById('home')?.classList.remove('with-side-panel');document.dispatchEvent(new CustomEvent('petya-panel',{detail:{id,open:false}}));}
+ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!openMenu&&side?.box.isConnected&&!document.querySelector('dialog[open]')&&(side.box.contains(document.activeElement)||document.activeElement===document.body)){e.preventDefault();closePanel();}});
+ // A panel belongs to its chat: switching chats closes it.
+ for(const ev of ['petya-dialogue-state','petya-chat-opened'])document.addEventListener(ev,()=>{if(side?.box.isConnected&&typeof topicSelect!=='undefined'&&topicSelect.value!==side.topic)closePanel();});
+ const panelOpen=id=>!!side?.box.isConnected&&side.id===id;
+
  // Hand a follow-up to the chat: send it right away, or put it into the composer for the user to finish.
  async function ask(text,{send=false}={}){
   const box=document.getElementById('command');
   if(send&&typeof submitChatCommand==='function'){await submitChatCommand(text);return;}
   if(box){box.value=text;box.dispatchEvent(new Event('input',{bubbles:true}));box.focus();box.setSelectionRange?.(text.length,text.length);}
  }
- window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons};
+ window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen};
 })();

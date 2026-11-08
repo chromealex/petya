@@ -17,3 +17,34 @@
 .file-table th{color:var(--muted);font-weight:500}
 .file-note,.file-more{font-size:12px;color:var(--muted)}
 .file-more{padding:4px 2px 0}
+
+.file-preview{cursor:pointer}
+.file-preview:hover{border-color:#ffffff30}
+.file-preview:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.file-preview.selected{border-color:#d0f59699;background:#d0f5960a}
+.file-full{display:flex;flex-direction:column;gap:10px;min-height:0}
+.file-full-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;position:sticky;top:-14px;z-index:1;padding:4px 0 8px;background:#161b19}
+.file-full-tools input{flex:1;min-width:140px;min-height:30px;padding:4px 10px;font-size:13px}
+.file-full-tools button{min-height:28px;padding:3px 10px;font-size:12px}
+.file-full-tools button[aria-pressed="true"]{color:var(--green);border-color:#d0f59660}
+.file-full-count{font-size:12px;color:var(--muted)}
+.file-code{font-size:13px;line-height:1.55;border-radius:8px;background:#111415;padding:8px 0;overflow:auto}
+.file-code.mono,.file-code .file-ln{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.file-line{display:flex;min-width:max-content}
+.file-code.wrap .file-line{min-width:0}
+.file-ln{flex:0 0 48px;padding-right:12px;text-align:right;color:#5b6563;user-select:none}
+.file-lt{white-space:pre;padding-right:12px}
+.file-code.wrap .file-lt{white-space:pre-wrap;overflow-wrap:anywhere}
+.file-code mark{background:#e5ce8c55;color:inherit;border-radius:2px}
+.file-code mark.current{background:#e5ce8c;color:#111415}
+.file-full-table{overflow:auto;border:1px solid #ffffff12;border-radius:8px;max-height:calc(100vh - 230px)}
+.file-full-table table{border-collapse:collapse;font-size:13px;min-width:100%}
+.file-full-table th{position:sticky;top:0;background:#1b1f20;text-align:left;white-space:nowrap}
+.file-full-table th button{width:100%;min-height:30px;padding:6px 10px;border:0;border-radius:0;background:transparent;color:var(--muted);font-size:12px;font-weight:500;text-align:left}
+.file-full-table th[aria-sort="ascending"] button::after{content:' ↑';color:var(--green)}
+.file-full-table th[aria-sort="descending"] button::after{content:' ↓';color:var(--green)}
+.file-full-table td{padding:5px 10px;border-top:1px solid #ffffff0d;white-space:nowrap;max-width:360px;overflow:hidden;text-overflow:ellipsis}
+.file-full-table td.num{text-align:right;font-variant-numeric:tabular-nums}
+.file-image-frame{overflow:auto;border-radius:8px;background:repeating-conic-gradient(#1d2222 0 25%,#171b1b 0 50%) 0 0/16px 16px}
+.file-image-frame img{display:block;max-width:100%;height:auto;margin:0 auto}
+.file-full-image.actual .file-image-frame img{max-width:none}
