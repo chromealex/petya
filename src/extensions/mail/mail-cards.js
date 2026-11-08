@@ -6,7 +6,7 @@
  const address=from=>(/<([^<>\s]+@[^<>\s]+)>/.exec(from)||/([^\s<>"]+@[^\s<>"]+)/.exec(from)||[])[1]||'';
  const name=from=>String(from||'').replace(/<[^>]*>/g,'').replace(/"/g,'').trim()||address(from)||'Без отправителя';
  const email=v=>/^[^\s@]+@[^\s@]+$/.test(v||'')?v:'';
- const when=v=>{const d=new Date(v);if(!Number.isFinite(d.getTime()))return '';const today=new Date().toDateString()===d.toDateString();return today?d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});};
+ const when=v=>{const d=new Date(v);return Number.isFinite(d.getTime())?window.relativeTime(d):'';};
  const reSubject=s=>/^(re|ответ|на):/i.test(s)?s:'Re: '+s;
  function openUrl(item){
   if(item.provider==='microsoft')return 'https://outlook.office.com/mail/deeplink/read/'+encodeURIComponent(item.id);

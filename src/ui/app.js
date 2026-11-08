@@ -230,7 +230,7 @@ async function executeCommand(command, at = Date.now(), automatic = false) {
   if (result.kind === 'selected') { await makeDraft(result.context); return; }
   $('resolution').hidden = false;
   $('resolution-title').textContent = result.kind === 'missing' ? 'Не хватает контекста' : 'О какой фиче речь?';
-  for (const context of result.options) { const button = document.createElement('button'); button.className = 'choice'; const title = document.createElement('strong'); title.textContent = context.title; const body = document.createElement('span'); body.textContent = `${context.source} · ${new Date(context.at).toLocaleTimeString(window.petyaLocale||'ru-RU')} · ${context.text.slice(0, 180)}`; button.append(title, body); button.onclick = run(() => makeDraft(context)); $('choices').append(button); }
+  for (const context of result.options) { const button = document.createElement('button'); button.className = 'choice'; const title = document.createElement('strong'); title.textContent = context.title; const body = document.createElement('span'); body.textContent = `${context.source} · ${window.relativeTime(context.at)} · ${context.text.slice(0, 180)}`; button.append(title, body); button.onclick = run(() => makeDraft(context)); $('choices').append(button); }
   const add = document.createElement('button'); add.textContent = 'Другое обсуждение / добавить контекст'; add.onclick = () => view('sources'); $('choices').append(add);
   if (currentIntent === 'do') {
     for (const [label, action] of [

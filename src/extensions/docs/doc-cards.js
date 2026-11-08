@@ -2,7 +2,7 @@
 // open, and a follow-up question about the page. Data: message.extensionData.docItems.
 (()=>{
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('doc-cards.css',document.currentScript.src).href;document.head.append(style);
- const when=v=>{const d=new Date(v);return Number.isFinite(d.getTime())?'обновлено '+d.toLocaleDateString('ru-RU',{day:'numeric',month:'short',year:d.getFullYear()===new Date().getFullYear()?undefined:'numeric'}):'';};
+ const when=v=>{const d=new Date(v);return Number.isFinite(d.getTime())?'обновлено '+window.relativeTime(d):'';};
  function docCard(k,doc){
   const body=k.el('div','doc-body');if(doc.excerpt)body.append(k.el('p','doc-excerpt',doc.excerpt));
   if(doc.sections?.length){const toc=k.el('details','doc-toc');toc.append(k.el('summary',null,'Разделы · '+doc.sections.length));const ol=k.el('ol');for(const s of doc.sections)ol.append(k.el('li',null,s));toc.append(ol);body.append(toc);}
