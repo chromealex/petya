@@ -39,7 +39,7 @@
   window.paintZoomNames?.();
   updateSummary();
   const actions=document.createElement('div');actions.className='actions team-member-wide';
-  const remove=document.createElement('button');remove.type='button';remove.className='quiet';remove.textContent='Удалить участника';remove.onclick=()=>{setDirty(true);card.remove();status.textContent='Изменения не сохранены.';};
+  const remove=window.deleteButton('Удалить участника');remove.onclick=()=>{setDirty(true);card.remove();status.textContent='Изменения не сохранены.';};
   actions.append(remove);editor.append(actions);details.append(summary,editor);card.append(details);list.append(card);return card;
  }
  // «В сервисах»: how the person appears in each service — one row per service. Slack and Jira are always shown

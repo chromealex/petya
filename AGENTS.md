@@ -78,3 +78,8 @@
 - Test a multi-step clarification, invalid/missing input, cancellation, context changes and duplicate submission. Genuine connection, permission and execution failures must remain distinguishable from missing data.
 
 - Chat clarification and permission controls must use the shared question panel in `src/ui/chat-clarification.js` (`createChatQuestion` / `renderClarification`). Keep the question and actions in the composer; use the main composer for free text. Dismiss the panel before resuming or cancelling, report outcomes in chat, and keep only a new unanswered question visible. Test duplicate clicks, follow-up questions, failures, and chat ownership. Do not introduce a second inline input or a separate permission style.
+
+# Interface rules
+- Delete is a red trash-can icon button, everywhere: build it with `window.deleteButton(label, onClick)` or turn an existing button into one with `window.asDeleteButton(button, label)` (`src/ui/delete-button.js`, style `.delete-button` in `ux-pass.css`). The label (e.g. «Удалить участника», «Удалить из очереди») stays as the tooltip and accessible name. No text «Удалить» buttons, no grey «×» for deleting.
+- «Убрать» / «Отвязать» (remove from a selection, unlink, detach a file) is not a delete: keep those as ordinary buttons.
+- A delete that loses data asks for confirmation or offers «Отменить»; deleted company data goes to the Trash.

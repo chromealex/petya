@@ -4143,6 +4143,9 @@
   "Показаны последние": "Showing the latest",
   "Родитель:": "Parent:",
   "автор:": "reporter:",
-  "обновлена": "updated"
+  "обновлена": "updated",
+  "Удалить из словаря": "Delete from the dictionary",
+  "Удалить модель": "Delete the model",
+  "Удалить навык «": "Delete the skill «"
  }
 }

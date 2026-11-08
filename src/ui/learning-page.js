@@ -5,7 +5,7 @@
  const page=$('learning');if(!page)return;
  const node=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
  const button=(text,fn,cls)=>{const b=node('button',cls,text);b.type='button';b.onclick=run(fn);return b;};
- const trash=(fn)=>{const b=button('',fn,'material-delete');b.innerHTML=window.petyaIcons?.trash||'×';b.title='Удалить';b.setAttribute('aria-label','Удалить');return b;};
+ const trash=(fn)=>{const b=button('',fn,'material-delete delete-button');b.innerHTML=window.petyaIcons?.trash||'×';b.title='Удалить';b.setAttribute('aria-label','Удалить');return b;};
  const intro=page.querySelector(':scope>p');if(intro)intro.textContent='Чему Петя научился в разговорах. Учите его прямо в чате — здесь всё видно и можно удалить.';
  // Recurring commands.
  const card=node('article','card learning-recurring');card.innerHTML='<h2>Повторяющиеся команды</h2><p class="small">Скажите в чате, например: «Проверяй почту каждые 5 минут» или «Каждое утро в 9 присылай сводку по задачам». Остановить: «перестань проверять почту».</p><div class="recurring-list"></div>';

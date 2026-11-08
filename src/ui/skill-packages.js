@@ -11,7 +11,7 @@
  add('Установить из папки','folder');add('Установить из архива','archive');
  function draw(rows){list.replaceChildren();if(!rows.length){list.append(node('p','small','Пока нет.'));return;}
   for(const r of rows){const row=node('div','recurring-row'),info=node('div','recurring-info');info.append(node('strong',null,r.name),node('p','material-meta',r.description+(r.files?' · файлов: '+r.files:'')));
-   const del=node('button','material-delete');del.type='button';del.title='Удалить';del.setAttribute('aria-label','Удалить');del.innerHTML=window.petyaIcons?.trash||'×';
+   const del=node('button','material-delete delete-button');del.type='button';del.title='Удалить';del.setAttribute('aria-label','Удалить');del.innerHTML=window.petyaIcons?.trash||'×';
    del.onclick=run(async()=>{if(del.dataset.confirm!=='1'){del.dataset.confirm='1';del.classList.add('confirm');del.textContent='Удалить?';setTimeout(()=>{if(del.isConnected){del.dataset.confirm='';del.classList.remove('confirm');del.innerHTML=window.petyaIcons?.trash||'×';}},4000);return;}draw(await window.petya.feature('skillPackages','remove',r.name));notice('Скилл «'+r.name+'» удалён.');});
    const actions=node('div','material-actions');actions.append(del);row.append(info,actions);list.append(row);}}
  const refresh=()=>window.petya.feature('skillPackages','list').then(draw).catch(e=>notice(e.message,true));

@@ -211,3 +211,9 @@ label.file-label:hover{background:#2e3533}
 .team-avatar.has-photo{padding:0;overflow:hidden;background:none}.team-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
 .project-icon-row{display:flex;align-items:center;gap:10px}.project-icon-preview{width:32px;height:32px;border-radius:7px;object-fit:cover}.project-icon-row .small{margin:0;overflow-wrap:anywhere}.project-icon-box .actions{margin-top:8px}
 .ux-company-row button.danger{color:#f0b4a8;border-color:#f0b4a840}.ux-company-row button.danger:hover{background:#f0b4a814;border-color:#f0b4a880}
+/* Rule: «Удалить» is a red trash-can icon button everywhere (AGENTS.md → «Interface rules»). */
+button.delete-button,.material-delete.delete-button{--delete:#ff7b6b;display:inline-grid;place-items:center;flex:0 0 auto;width:32px;height:32px;min-height:32px;padding:0!important;border:1px solid #ff7b6b40;border-radius:8px;background:#ff7b6b0d;color:var(--delete)}
+button.delete-button:hover,button.delete-button:focus-visible{border-color:#ff7b6b99;background:#ff7b6b1f;color:#ff9c8f}
+button.delete-button:disabled{opacity:.5}
+button.delete-button svg{width:16px;height:16px}
+.material-delete.delete-button.confirm{width:auto;padding:0 10px!important;color:#ffd7ce;background:#402b28;border-color:#8c5349}
