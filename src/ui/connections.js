@@ -186,7 +186,7 @@ function setupConnections() {
         cancel.hidden = !['preparing', 'downloading', 'pulling', 'warming', 'starting'].includes(state.phase);
         let detail = state.message;
         if (['downloading', 'pulling'].includes(state.phase) && state.received) {
-          const mb = n => (n >= 1e9 ? n / 1e9 : n / 1e6).toLocaleString('ru-RU',{maximumFractionDigits:n>=1e9?2:1}) + (n>=1e9?' ГБ':' МБ');
+          const mb = n => (n >= 1e9 ? n / 1e9 : n / 1e6).toLocaleString(window.petyaLocale||'ru-RU',{maximumFractionDigits:n>=1e9?2:1}) + (n>=1e9?' ГБ':' МБ');
           detail += state.total ? ` ${Math.floor(state.received * 100 / state.total)}% · ${mb(state.received)} из ${mb(state.total)}` : ` ${mb(state.received)}`;
         }
         if (['downloading', 'pulling'].includes(state.phase) && state.total) progress.value = state.received * 100 / state.total;

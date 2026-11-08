@@ -33,12 +33,12 @@ function notice(message, error = false, options = {}) {
  updateChromeStatus();arm();
 }
 function run(fn) { return async event => {
- if(event)event.preventDefault();const b=event?.currentTarget;const feedback=b?.tagName==='BUTTON'&&/^(Обновить|Проверить|Загрузить|Синхронизировать)/.test(b.textContent.trim());
+ if(event)event.preventDefault();const b=event?.currentTarget;const feedback=b?.tagName==='BUTTON'&&/^(Обновить|Проверить|Загрузить|Синхронизировать|Refresh|Check|Load|Sync)/.test(b.textContent.trim());
  let label,output,failed=false;const onNotice=e=>{if(e.detail.error)failed=true;};
- if(feedback){if(b.dataset.pending)return;label=b.textContent;b.dataset.pending='true';b.disabled=true;b.setAttribute('aria-busy','true');b.textContent=/^Проверить/.test(label)?'Проверяю…':'Обновляю…';output=b.nextElementSibling;if(!output?.classList.contains('action-feedback')){output=document.createElement('span');output.className='action-feedback';output.setAttribute('role','status');b.after(output);}output.textContent=b.textContent;output.classList.remove('error');document.addEventListener('petya-notice',onNotice);}
- try {await fn(event);if(output&&!failed)output.textContent='Обновлено · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
+ if(feedback){if(b.dataset.pending)return;label=b.textContent;b.dataset.pending='true';b.disabled=true;b.setAttribute('aria-busy','true');b.textContent=/^(Проверить|Check)/.test(label)?'Проверяю…':'Обновляю…';output=b.nextElementSibling;if(!output?.classList.contains('action-feedback')){output=document.createElement('span');output.className='action-feedback';output.setAttribute('role','status');b.after(output);}output.textContent=b.textContent;output.classList.remove('error');document.addEventListener('petya-notice',onNotice);}
+ try {await fn(event);if(output&&!failed)output.textContent='Обновлено · '+new Date().toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
  catch(error){if(b?.closest('.chat-question'))throw error;failed=true;if(output)output.textContent=error.message;notice(error.message,true);}
- finally{if(feedback){document.removeEventListener('petya-notice',onNotice);if(failed){output.classList.add('error');if(/Обновляю|Проверяю/.test(output.textContent))output.textContent='Не удалось обновить. См. сообщение об ошибке.';}b.textContent=label;b.disabled=false;b.removeAttribute('aria-busy');delete b.dataset.pending;}}
+ finally{if(feedback){document.removeEventListener('petya-notice',onNotice);if(failed){output.classList.add('error');if(/Обновляю|Проверяю|Refreshing|Checking/.test(output.textContent))output.textContent='Не удалось обновить. См. сообщение об ошибке.';}b.textContent=label;b.disabled=false;b.removeAttribute('aria-busy');delete b.dataset.pending;}}
 }; }
 function view(name) { window.scrollTo(0,0);document.body.dataset.view=name;document.dispatchEvent(new CustomEvent('petya-view',{detail:name}));updateChromeStatus();document.querySelectorAll('.view').forEach(e => e.hidden = e.id !== name); document.querySelectorAll('.nav').forEach(e => e.classList.toggle('active', e.dataset.view === name)); }
 document.querySelectorAll('.nav').forEach(button => button.onclick = () => view(button.dataset.view));
@@ -211,7 +211,7 @@ async function executeCommand(command, at = Date.now(), automatic = false) {
   planning = true;
   try {
   ++routeRevision; routePanel.hidden = true; activeJiraRoute = null;
-  commandSnapshot = command.replace(/^петя(?=$|[\s,:.!?—-])[\s,:.!?—-]*/iu, '').trim(); commandAt = at;
+  commandSnapshot = command.replace(/^(?:петя|petya|petia|petja)(?=$|[\s,:.!?—-])[\s,:.!?—-]*/iu, '').trim(); commandAt = at;
   if($('command').value.trim()===command.trim()||$('command').value.trim()===commandSnapshot)$('command').value=''; view('home');
   if(!window.pendingChatFiles?.length && (ConversationInput.presenceReply(commandSnapshot)||ConversationInput.isProjectCatalogQuestion(commandSnapshot))){const reply=await commandProgress.step('reply','Отвечаю',()=>window.petya.converse(commandSnapshot),true);automaticVoiceCommand=false;await showDialogueReply(reply,automatic);return;}
   if (meeting.active) { notice('Дослушиваю последние реплики встречи…'); await meeting.flushContext(); commandAt = Date.now(); }
@@ -227,7 +227,7 @@ async function executeCommand(command, at = Date.now(), automatic = false) {
   if (result.kind === 'selected') { await makeDraft(result.context); return; }
   $('resolution').hidden = false;
   $('resolution-title').textContent = result.kind === 'missing' ? 'Не хватает контекста' : 'О какой фиче речь?';
-  for (const context of result.options) { const button = document.createElement('button'); button.className = 'choice'; const title = document.createElement('strong'); title.textContent = context.title; const body = document.createElement('span'); body.textContent = `${context.source} · ${new Date(context.at).toLocaleTimeString('ru-RU')} · ${context.text.slice(0, 180)}`; button.append(title, body); button.onclick = run(() => makeDraft(context)); $('choices').append(button); }
+  for (const context of result.options) { const button = document.createElement('button'); button.className = 'choice'; const title = document.createElement('strong'); title.textContent = context.title; const body = document.createElement('span'); body.textContent = `${context.source} · ${new Date(context.at).toLocaleTimeString(window.petyaLocale||'ru-RU')} · ${context.text.slice(0, 180)}`; button.append(title, body); button.onclick = run(() => makeDraft(context)); $('choices').append(button); }
   const add = document.createElement('button'); add.textContent = 'Другое обсуждение / добавить контекст'; add.onclick = () => view('sources'); $('choices').append(add);
   if (currentIntent === 'do') {
     for (const [label, action] of [

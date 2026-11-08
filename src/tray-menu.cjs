@@ -1,4 +1,5 @@
 const path = require('node:path');
+const {t} = require('./interface-language.cjs');
 
 function createTrayMenu({Menu, nativeImage, platform = process.platform, company, listening, meeting=false, ready, show, navigate, toggle, pause, quit}) {
  const icon = name => {
@@ -7,10 +8,10 @@ function createTrayMenu({Menu, nativeImage, platform = process.platform, company
   image.setTemplateImage(true);
   return image;
  };
- const action = (label, name, click, extra = {}) => ({label, icon:icon(name), click, ...extra});
+ const action = (label, name, click, extra = {}) => ({label:t(label), icon:icon(name), click, ...extra});
  return Menu.buildFromTemplate([
-  {label:'Петя · '+company, enabled:false},
-  {label:'Микрофон: '+(listening?'включён':'выключен')+' · Запись: '+(meeting?'идёт':'выключена'),enabled:false},
+  {label:t('Петя')+' · '+company, enabled:false},
+  {label:t('Микрофон: '+(listening?'включён':'выключен')+' · Запись: '+(meeting?'идёт':'выключена')),enabled:false},
   {type:'separator'},
   action('Открыть Петю', 'open', show),
   {type:'separator'},

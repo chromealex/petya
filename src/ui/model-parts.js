@@ -2,7 +2,7 @@
 // its own. Downloads report to the notification center whether or not the settings are open.
 (()=>{
  const call=(method,...args)=>window.petya.feature('modelParts',method,...args);
- const gb=bytes=>bytes>=1e9?(bytes/1e9).toLocaleString('ru-RU',{maximumFractionDigits:1})+' ГБ':Math.max(1,Math.round(bytes/1e6))+' МБ';
+ const gb=bytes=>bytes>=1e9?(bytes/1e9).toLocaleString(window.petyaLocale||'ru-RU',{maximumFractionDigits:1})+' ГБ':Math.max(1,Math.round(bytes/1e6))+' МБ';
  const card=document.createElement('article');card.className='card';card.dataset.service='model-parts';
  const title=document.createElement('h2'),intro=document.createElement('p'),status=document.createElement('p'),list=document.createElement('div');
  title.textContent='Модели Пети';intro.textContent='Группа своих моделей: R выбирает функцию, A отвечает (необязательная, качается отдельно), D пишет черновики требований. Веса берутся из релизов Пети на GitHub, базовая модель — с Hugging Face; каждый файл проверяется по хэшу.';

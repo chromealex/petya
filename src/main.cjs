@@ -83,7 +83,7 @@ const { ServiceOAuth } = require('./service-oauth.cjs');
 const serviceOAuth = { asana: new ServiceOAuth('asana', directRequest), slack: new ServiceOAuth('slack', directRequest), notion: new ServiceOAuth('notion', directRequest) };
 const modules = require('./modules.cjs');
 const team = require('./team.cjs');
-const defaults = { ...modules.defaults, speechStyle:'0', userName:'', userNameVariants:'', userNameExcluded:'', communicationLanguage:'ru', semanticTools:'true', teamMembers:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', gmailCredential:'', microsoftCredential:'', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto',googlePlayCredential:'', asanaCredential: '', asanaWorkspace: '', slackCredential: '', notionCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', notionToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'true', slackInterval: '5', zoomAutoRecord: 'false', zoomWindowTitle: '', zoomCaptureMic: 'true' };
+const defaults = { ...modules.defaults, speechStyle:'0', userName:'', userNameVariants:'', userNameExcluded:'', communicationLanguage:'auto', speechLanguage:'', semanticTools:'true', teamMembers:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', gmailCredential:'', microsoftCredential:'', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto',googlePlayCredential:'', asanaCredential: '', asanaWorkspace: '', slackCredential: '', notionCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', notionToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'true', slackInterval: '5', zoomAutoRecord: 'false', zoomWindowTitle: '', zoomCaptureMic: 'true' };
 // Feature modules (src/features.cjs) bring their own setting defaults and validation.
 const features = require('./features.cjs');
 for (const feature of features) Object.assign(defaults, feature.defaults || {});
@@ -129,7 +129,7 @@ let trayMeeting = false, trayListening = false, trayReady = false;
 function refreshTrayMenu() {
  if(!tray || tray.isDestroyed())return;
  const company=companies.get(companyId).name;
- tray.setToolTip('Петя · '+company+(trayListening?' · микрофон включён':' · микрофон выключен'));
+ tray.setToolTip(require('./interface-language.cjs').t('Петя · '+company+(trayListening?' · микрофон включён':' · микрофон выключен')));
  tray.setContextMenu(require('./tray-menu.cjs').createTrayMenu({
   Menu,nativeImage,company,listening:trayListening,meeting:trayMeeting,ready:trayReady,show,
   navigate: page => {show();win.webContents.send('navigate',page);},
@@ -139,7 +139,7 @@ function refreshTrayMenu() {
  }));
 }
 function show() { if (process.env.PETYA_VERIFY_BUILD === '1') console.log('show() from ' + (new Error().stack.split('\n')[2] || '').trim()); if (!win || win.isDestroyed()) return; if (win.isMinimized()) win.restore(); win.show(); win.focus(); }
-function notify(body) { if (!smoke && Notification.isSupported()) { const n = new Notification({ icon: appIconPath, title: 'Петя · '+companies.get(companyId).name, body: String(body).slice(0, 250) }); n.on('click', show); n.show(); } }
+function notify(body) { if (!smoke && Notification.isSupported()) { const {t} = require('./interface-language.cjs'); const n = new Notification({ icon: appIconPath, title: t('Петя')+' · '+companies.get(companyId).name, body: t(String(body)).slice(0, 250) }); n.on('click', show); n.show(); } }
 function text(value, max = 50000) { if (typeof value !== 'string' || !value.trim() || value.length > max) throw new Error('Некорректный или слишком длинный текст.'); return value.trim(); }
 function addContext(data) {
   const item = { id: randomUUID(), title: text(data.title, 200), source: ['Zoom', 'Slack', 'Asana', 'Микрофон', 'Заметка'].includes(data.source) ? data.source : 'Заметка', text: text(data.text), at: Date.now(), url: '' };
@@ -204,7 +204,7 @@ function saveSettings(input, internal = false, profile = profileState()) {
     for (const name of ['slack', 'notion']) if (!internal && settings[name+'Credential'] && input[name+'Token']) throw new Error('Сначала отключите вход '+name+' через браузер.');
     if(typeof input.teamMembers==='string')next.teamMembers=JSON.stringify(team.validate(JSON.parse(input.teamMembers)));
     if(typeof input.integrationChoices==='string'){const choices=JSON.parse(input.integrationChoices);if(!choices||typeof choices!=='object'||Array.isArray(choices)||Object.entries(choices).some(([key,value])=>!require('./service-access.cjs').services[key]||value!=='browser'))throw Error('Некорректный выбор способа доступа.');next.integrationChoices=JSON.stringify(choices);}
-    if(!languagePacks.installed(next.communicationLanguage))throw Error('Сначала установи выбранный язык в настройках.');
+    if(next.communicationLanguage!=='auto'&&!languagePacks.installed(next.communicationLanguage))throw Error('Сначала установи выбранный язык в настройках.');if(!['','auto'].includes(next.speechLanguage)&&!/^[a-z]{2}$/.test(next.speechLanguage||''))next.speechLanguage='';if(/^[a-z]{2}$/.test(next.speechLanguage||'')&&!languagePacks.installed(next.speechLanguage))throw Error('Сначала установи выбранный язык в настройках.');
     if(next.userName!==settings.userName&&typeof input.userNameVariants!=='string')next.userNameVariants='';
     const nameProfile=require('./ui/name-profile.js').NameProfile.validate(next.userName,next.userNameVariants,next.userNameExcluded);next.userNameExcluded=nameProfile.excluded;next.userName=nameProfile.name;next.userNameVariants=nameProfile.custom;
     next.speechStyle = require('./speech-style.cjs').validate(next.speechStyle);
@@ -683,7 +683,7 @@ async function switchCompanyRuntime(id,raw) {
   await companyScope?.close().catch(()=>{});
   companyId=previous;dataRoot=companies.directory(previous);loadSettings();loadMemory();setupHandlers();companies.select(previous);
   pendingMessageLink='';
-  require('electron').dialog.showErrorBox('Не удалось переключить компанию',error.message);
+  ((title,body)=>require('electron').dialog.showErrorBox(require('./interface-language.cjs').t(title),require('./interface-language.cjs').t(body)))('Не удалось переключить компанию',error.message);
  } finally {
   switchingCompany=false;
   await win.loadFile(path.join(__dirname,'ui/index.html'));
@@ -694,16 +694,16 @@ if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.setAppUserModelId('com.petya.desktop');
   app.on('second-instance', (_event,args) => {const raw=args.find(s=>chatLocation.parse(s));if(raw)receiveMessageLink(raw);else if(win)show();});
-  try { companies=new (require('./companies.cjs').Companies)(app.getPath('userData'));companyId=companies.state.activeId;dataRoot=companies.directory(companyId);fs.mkdirSync(dataRoot,{recursive:true});app.setPath('sessionData',dataRoot); }catch(error){require('electron').dialog.showErrorBox('Петя: компании недоступны',error.message);app.exit(1);}
+  try { companies=new (require('./companies.cjs').Companies)(app.getPath('userData'));companyId=companies.state.activeId;dataRoot=companies.directory(companyId);fs.mkdirSync(dataRoot,{recursive:true});app.setPath('sessionData',dataRoot); }catch(error){((title,body)=>require('electron').dialog.showErrorBox(require('./interface-language.cjs').t(title),require('./interface-language.cjs').t(body)))('Петя: компании недоступны',error.message);app.exit(1);}
   app.whenReady().then(() => {
     // Linux CI and containers have no OS keyring; tests only use a plain-text store there.
     if(process.env.PETYA_SMOKE_TEST==='1'&&process.platform==='linux'&&!safeStorage.isEncryptionAvailable())safeStorage.setUsePlainTextEncryption?.(true);
     if(app.isPackaged && process.platform==='win32')app.setAsDefaultProtocolClient('petya');
-    try { loadSettings(); loadMemory(); } catch (error) { console.error(error); require('electron').dialog.showErrorBox('Петя: память недоступна', 'Не удалось прочитать настройки или контекст. Файлы не перезаписаны. ' + error.message); app.quit(); return; }
+    try { loadSettings(); loadMemory(); } catch (error) { console.error(error); ((title,body)=>require('electron').dialog.showErrorBox(require('./interface-language.cjs').t(title),require('./interface-language.cjs').t(body)))('Петя: память недоступна', 'Не удалось прочитать настройки или контекст. Файлы не перезаписаны. ' + error.message); app.quit(); return; }
     win = new BrowserWindow({ show: false, skipTaskbar: true, ...(process.platform==='darwin'?{titleBarStyle:'hidden',trafficLightPosition:{x:16,y:24}}:process.platform==='win32'?{titleBarStyle:'hidden',titleBarOverlay:{color:'#18231f',symbolColor:'#eef4e9',height:64}}:{}), width: 1180, height: 840, minWidth: 880, minHeight: 640, backgroundColor: '#111415', title: 'Петя · '+companies.get(companyId).name, icon: appIconPath, webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false, autoplayPolicy:'no-user-gesture-required' } });
     require('./external-links.cjs')(win.webContents,
       url => smoke ? Promise.resolve() : require('electron').shell.openExternal(url),
-      error => require('electron').dialog.showErrorBox('Не удалось открыть ссылку', error.message));
+      error => ((title,body)=>require('electron').dialog.showErrorBox(require('./interface-language.cjs').t(title),require('./interface-language.cjs').t(body)))('Не удалось открыть ссылку', error.message));
     installCapture({ session: session.defaultSession, win, entry, isEntry, desktopCapturer, platform: process.platform });
     if (process.platform === 'darwin' && app.dock) app.dock.hide();
     const icon = nativeImage.createFromPath(path.join(__dirname, process.platform === 'darwin' ? '../assets/trayTemplate.png' : '../assets/tray.png'));

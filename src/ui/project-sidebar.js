@@ -68,9 +68,9 @@
  }
  // Compact last-activity label: «5 мин», «14:20», «вчера», «3 дн», «12.10».
  function activity(at){const date=new Date(Number(at));if(!at||Number.isNaN(date.getTime()))return null;const now=new Date(),ms=now-date,minute=60000,day=86400000;let text;
-  if(ms<minute)text='сейчас';else if(ms<60*minute)text=Math.floor(ms/minute)+' мин';else if(date.toDateString()===now.toDateString())text=date.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
-  else{const midnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),days=Math.ceil((midnight-date.getTime())/day);text=days<=1?'вчера':days<7?days+' дн':date.toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit'});}
-  return {text,iso:date.toISOString(),full:'Последняя активность: '+date.toLocaleString('ru-RU')};}
+  if(ms<minute)text='сейчас';else if(ms<60*minute)text=Math.floor(ms/minute)+' мин';else if(date.toDateString()===now.toDateString())text=date.toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'});
+  else{const midnight=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),days=Math.ceil((midnight-date.getTime())/day);text=days<=1?'вчера':days<7?days+' дн':date.toLocaleDateString(window.petyaLocale||'ru-RU',{day:'2-digit',month:'2-digit'});}
+  return {text,iso:date.toISOString(),full:'Последняя активность: '+date.toLocaleString(window.petyaLocale||'ru-RU')};}
  function chatMenuItems(t,anchor){return t.archived?[
    ['Восстановить',action(()=>archive('chat',t.id,false))],['Переименовать',()=>renameChat(t)]
   ]:[

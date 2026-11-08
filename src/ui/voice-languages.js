@@ -3,17 +3,21 @@
  const title=document.createElement('h2');title.textContent='Языки общения';
  const description=document.createElement('p');description.className='small';description.textContent='Русский и английский уже доступны. Остальные языки можно добавить по необходимости — они используют общую голосовую модель.';
  const rows=document.createElement('div'),label=document.createElement('label'),select=document.createElement('select'),status=document.createElement('p');
- rows.className='voice-language-list';label.className='voice-language-selection';label.textContent='Язык ответов';select.setAttribute('aria-label','Язык ответов');label.append(select);status.className='small';status.setAttribute('role','status');card.append(title,description,rows,label,status);
+ rows.className='voice-language-list';label.className='voice-language-selection';label.textContent='Язык ответов';select.setAttribute('aria-label','Язык ответов');label.append(select);status.className='small';status.setAttribute('role','status');
+ // «Язык речи»: the recognition hint. Automatic detection is offered but may hear Russian as Czech.
+ const speechLabel=document.createElement('label'),speech=document.createElement('select');speechLabel.className='voice-language-selection';speechLabel.textContent='Язык речи';speech.setAttribute('aria-label','Язык речи');speechLabel.append(speech);
+ const speechNote=document.createElement('p');speechNote.className='small';speechNote.textContent='На каком языке ты говоришь с Петей. Автоопределение иногда путает русский с чешским.';
+ card.append(title,description,rows,label,speechLabel,speechNote,status);
  document.getElementById('speech-style')?.closest('.card')?.after(card);
  async function render(){
-  const state=await window.petya.voiceLanguages();rows.replaceChildren();select.replaceChildren();
+  const state=await window.petya.voiceLanguages();rows.replaceChildren();select.replaceChildren(new Option('На языке вопроса','auto'));speech.replaceChildren(new Option('Как язык интерфейса',''),new Option('Определять автоматически','auto'));
   for(const language of state.languages){
    const row=document.createElement('div');row.className='voice-language-row';
    const identity=document.createElement('div');identity.className='voice-language-identity';
    const code=document.createElement('span');code.className='voice-language-code';code.textContent=language.code.toUpperCase();code.setAttribute('aria-hidden','true');
    const name=document.createElement('span');name.className='voice-language-name';name.textContent=language.label;identity.append(code,name);row.append(identity);
    if(language.installed){
-    select.add(new Option(language.label,language.code));const installed=document.createElement('span');installed.className='voice-language-installed';installed.innerHTML='<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 10 4 4 8-8"/></svg>';installed.append(document.createTextNode('Установлен'));row.append(installed);
+    select.add(new Option(language.label,language.code));speech.add(new Option(language.label,language.code));const installed=document.createElement('span');installed.className='voice-language-installed';installed.innerHTML='<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 10 4 4 8-8"/></svg>';installed.append(document.createTextNode('Установлен'));row.append(installed);
    }else{
     const install=document.createElement('button');install.className='voice-language-download';install.type='button';install.dataset.language=language.code;install.setAttribute('aria-label','Скачать язык: '+language.label);
     const paint=()=>{install.innerHTML='<svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3v9m-4-4 4 4 4-4M4 14v3h12v-3"/></svg>';install.append(document.createTextNode('Скачать'));};paint();if(language.downloading){install.disabled=true;install.textContent='Загрузка…';install.setAttribute('aria-busy','true');}
@@ -21,8 +25,9 @@
    }
    rows.append(row);
   }
-  select.value=state.selected;
+  select.value=state.selected;speech.value=state.speech||'';
  }
+ speech.onchange=async()=>{speech.disabled=true;try{await window.petya.saveSettings({speechLanguage:speech.value});status.textContent='Язык речи сохранён.';}catch(e){status.textContent=e.message;await render();}finally{speech.disabled=false;}};
  select.onchange=async()=>{select.disabled=true;try{await window.petya.saveSettings({communicationLanguage:select.value});status.textContent='Язык ответов сохранён.';}catch(e){status.textContent=e.message;await render();}finally{select.disabled=false;}};
  const dismissed=new Set();
  window.offerVoiceLanguage=(text,missing,target)=>{

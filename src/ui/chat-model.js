@@ -3,7 +3,7 @@
  const wrap=document.createElement('label');wrap.className='chat-model';wrap.title='Модель для ответов в этом чате';
  const select=document.createElement('select');select.setAttribute('aria-label','Модель для ответов в этом чате');
  wrap.append(select);
- const size=n=>n>=1e9?(n/1e9).toLocaleString('ru-RU',{maximumFractionDigits:1})+' ГБ':n?Math.round(n/1e6)+' МБ':'';
+ const size=n=>n>=1e9?(n/1e9).toLocaleString(window.petyaLocale||'ru-RU',{maximumFractionDigits:1})+' ГБ':n?Math.round(n/1e6)+' МБ':'';
  let loading=0,selection=null;
  async function refresh(){
   const epoch=++loading;let state;

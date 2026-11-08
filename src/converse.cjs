@@ -1,6 +1,6 @@
 // Extracted from setupHandlers() in main.cjs. `ctx` gives live access to the shared state of main.cjs:
 // agents, allowedMedia, analyzeMaterials, attachments, buildQuestion, buildRepair, chatJobs, checkProgress, companies, companyId, computer, computerApproval, computerIntent, computerLock, core, dailyBrief, dialogue, dictionary, dictionaryScope, draftAnswers, executeSkill, gitWorkspace, importMedia, inspectAttachments, instructionSkills, learning, localImages, mailSkill, modules, pendingWeb, projectMemory, randomUUID, request, requestProgress, runReview, runWeb, saveSettings, searchCommand, serviceAccess, settings, slackLogs, slackRequest, taskDuplicates, taskProgress, teamFill, telegramSource, text, undoLast, voicePreparation, voicePreparationKey, workSkills
-module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,background=false)=>{
+module.exports=ctx=>{let restating=0;const route=(async(command,choice,background=false)=>{
     // Label replies produced by shortcut handlers before the model, so misrouting is visible in the chat.
     const via=(source,reply)=>{if(reply&&typeof reply==='object'&&!reply.by){reply.by=source;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&!last.by&&last.text===reply.text){last.by=source;ctx.dialogue.persist();}}return reply;};
     if(!background&&ctx.chatJobs.busy(ctx.dialogue.active()?.id))throw Error('В этом чате ещё выполняется запрос.');const spoken=ctx.text(command,4000);
@@ -265,6 +265,23 @@ module.exports=ctx=>{let restating=0;const pipeline=(async(command,choice,backgr
     if(applied.length&&reply.handled){const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user');if(m){m.originalText=original;ctx.dialogue.persist();}}
     return {...reply,resolvedCommand:value,appliedRules:applied};
   });
+  // A request in another language is routed as its Russian rewrite (src/command-language.cjs): the
+  // shortcut handlers recognise Russian phrasing. The chat keeps the user's own words.
+  const pipeline=async(command,choice,background=false)=>{
+    if(choice||typeof command!=='string'||!ctx.settings.model)return route(command,choice,background);
+    const rewrite=await require('./command-language.cjs').toRussian(ctx.text(command,4000),{model:ctx.settings.model,ask:body=>ctx.request(ctx.core.localEndpoint(ctx.settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})});
+    if(!rewrite)return route(command,choice,background);
+    require('./request-progress.cjs').report('Понял просьбу как: «'+rewrite.text.slice(0,120)+'»');
+    const before=ctx.dialogue.active(),mark=before?.messages?.length||0;
+    // The question language travels with the request, so «На языке вопроса» answers in it.
+    const reply=await require('./question-language.cjs').run(rewrite.language,()=>route(rewrite.text,choice,background));
+    const topic=ctx.dialogue.active(),added=topic?(topic===before?topic.messages.slice(mark):topic.messages):[];
+    const said=added.find(m=>m.role==='user');
+    if(said&&said.text!==rewrite.original){said.routedText=said.text;said.text=rewrite.original;ctx.dialogue.persist();}
+    // An unhandled request goes on to planning (tasks, docs, agents) in its Russian wording too.
+    if(reply&&typeof reply==='object'){reply.routedCommand=rewrite.text;if(!reply.handled&&!reply.resolvedCommand)reply.resolvedCommand=rewrite.text;}
+    return reply;
+  };
   // When a correction changed the request, the recorded question keeps what was actually said.
   // Petya never switches chats himself. When a step answered in another chat (a Slack log, «Почта Gmail», a skill
   // chat, a project), the open chat gets the request and the answer, with a button to that chat; only the «+» button,

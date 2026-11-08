@@ -20,7 +20,7 @@ let visionTimer;
 refreshAttachments().catch(e=>notice(e.message,true));
 
 async function inspectSourceMedia(id,question='',spoken=false){notice('Загружаю и разбираю медиа…');const added=await window.petya.attachmentImport(id);await refreshAttachments();await showDialogueReply(await window.petya.attachmentInspect([added.id],question||'Прочитай видимые ошибки и разберись, какой баг показан. Отдели факты от гипотез.'),spoken);await refreshAttachments();}
-$('attachment-sources').onclick=run(async()=>{const rows=await window.petya.attachmentSources(),box=$('attachment-sources-list');box.replaceChildren();if(!rows.length){box.textContent='В сохранённых выбранных чатах нет медиа. Обновите Telegram/Slack или прикрепите файл.';return;}for(const row of rows){const button=document.createElement('button');button.type='button';button.className='choice';button.textContent=row.service+' · '+row.title+' · '+row.name+' · '+new Date(row.at).toLocaleString('ru-RU');button.onclick=run(async()=>{button.disabled=true;try{await inspectSourceMedia(row.id,$('command').value.trim());}finally{button.disabled=false;}});box.append(button);}});
+$('attachment-sources').onclick=run(async()=>{const rows=await window.petya.attachmentSources(),box=$('attachment-sources-list');box.replaceChildren();if(!rows.length){box.textContent='В сохранённых выбранных чатах нет медиа. Обновите Telegram/Slack или прикрепите файл.';return;}for(const row of rows){const button=document.createElement('button');button.type='button';button.className='choice';button.textContent=row.service+' · '+row.title+' · '+row.name+' · '+new Date(row.at).toLocaleString(window.petyaLocale||'ru-RU');button.onclick=run(async()=>{button.disabled=true;try{await inspectSourceMedia(row.id,$('command').value.trim());}finally{button.disabled=false;}});box.append(button);}});
 
 $('attachment-video-cancel').onclick=run(async()=>{await window.petya.attachmentVideoCancel();notice('Чтение видео остановлено.');});
 
@@ -38,6 +38,6 @@ $('attachment-video-cancel').onclick=run(async()=>{await window.petya.attachment
  get('vision-model-cancel').onclick=run(async()=>{await window.petya.feature('optional-models','cancel');await paint();});
  get('vision-model-remove').onclick=run(async()=>{await window.petya.feature('optional-models','remove','gemma3:4b');notice('Модель для скриншотов удалена.');await paint();});
  window.petyaEvents.onOllamaInstall(state=>{if(!state.optional||state.model!=='gemma3:4b')return;bar.hidden=!state.busy;if(state.total)bar.value=state.received*100/state.total;else bar.removeAttribute('value');
-  const mb=n=>(n/1e9).toLocaleString('ru-RU',{maximumFractionDigits:2})+' ГБ';status.textContent=state.busy?(state.message||'Скачиваю…')+(state.total?' · '+Math.floor(state.received*100/state.total)+'% · '+mb(state.received)+' из '+mb(state.total):''):state.message||'';
+  const mb=n=>(n/1e9).toLocaleString(window.petyaLocale||'ru-RU',{maximumFractionDigits:2})+' ГБ';status.textContent=state.busy?(state.message||'Скачиваю…')+(state.total?' · '+Math.floor(state.received*100/state.total)+'% · '+mb(state.received)+' из '+mb(state.total):''):state.message||'';
   if(!state.busy)paint();});
  paint();})();

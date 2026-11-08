@@ -45,13 +45,13 @@ function setupConnectionSidebar() {
     const update = () => {
       const badge = connectionBadge(status.textContent, [...status.classList], id, status.dataset.installPhase);
       if(badge.state==='connected')connected=true;
-      const disconnected=badge.state==='disconnected'||/отключ[её]н/iu.test(status.textContent);
+      const disconnected=badge.state==='disconnected'||/отключ[её]н|disconnected/iu.test(status.textContent);
       if(disconnected)connected=false;
       const flags={slack:['hasSlackToken','hasSlackOAuth'],notion:['hasNotionToken','hasNotionOAuth'],jira:['hasJiraToken','hasAtlassianOAuth'],confluence:['hasJiraToken','hasAtlassianOAuth'],asana:['hasAsanaOAuth'],telegram:['hasTelegram'],googleplay:['hasGooglePlay'],gmail:['hasGmail','hasMicrosoft']};
       const configured=(flags[id]||[]).some(key=>!!moduleSettings[key]);
       button.hidden=!moduleEnabled(id)||disconnected||!(badge.state==='connected'||['error','checking'].includes(badge.state)&&(connected||configured));
       button.dataset.state = badge.state; label.textContent = badge.label;
-      button.title = `${title}: ${status.textContent}`;if(['connected','error'].includes(badge.state)){button.dataset.checkedAt=new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});button.title+=' · Результат проверки '+button.dataset.checkedAt;}
+      button.title = `${title}: ${status.textContent}`;if(['connected','error'].includes(badge.state)){button.dataset.checkedAt=new Date().toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'});button.title+=' · Результат проверки '+button.dataset.checkedAt;}
       button.setAttribute('aria-label', `${title}: ${badge.label}. Открыть настройки подключения`);
     };
     button.onclick = () => {

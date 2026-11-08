@@ -1,7 +1,7 @@
 const STOP = new Set('петя заведи создай задачу задачи таску таск жире jira для реализации этой это эту фичи фичу нужно сделать пожалуйста'.split(' '));
 function words(text) { return (text.toLowerCase().match(/[\p{L}\p{N}]+/gu) || []).filter(w => w.length > 2 && !STOP.has(w)); }
 function wake(text) {
-  const match = /(?:^|[\s,.!?])петя(?=$|[\s,:.!?—-])[\s,:.!?—-]*(.*)$/iu.exec(text.trim());
+  const match = /(?:^|[\s,.!?])(?:петя|petya|petia|petja)(?=$|[\s,:.!?—-])[\s,:.!?—-]*(.*)$/iu.exec(text.trim());
   return match ? match[1].trim() : null;
 }
 function actionableContext(context) {
