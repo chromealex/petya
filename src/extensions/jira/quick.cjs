@@ -51,7 +51,7 @@ async function perform(action,row,s,check,args){
   return {handled:true,text:item.key+' · срок: '+show(before.due)+' → '+show(value),undo:{action:'due',args:{date:before.due}}};
  }
  if(action==='execute'){
-  // «Выполнить» / «Исправить»: the task runner plugin opens a work chat with a plan for approval.
+  // «Реализовать» / «Исправить»: the task runner plugin opens a work chat with a plan for approval.
   if(!s.taskRunner)throw Error('Расширение «Выполнение задач» недоступно.');
   const data=await api(issue+'?fields=summary,description,issuetype');
   const {adfText}=require('../../history.cjs');

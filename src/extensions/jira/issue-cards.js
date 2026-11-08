@@ -36,8 +36,8 @@
  function issueCard(item,{compact=false,select}={}){
   const k=kit(),c=chips(item);
   const bug=/bug|баг|ошибк|дефект/i.test(item.type||'');
-  // «Выполнить» / «Исправить» hands the task to the task runner: a separate chat with a plan to approve.
-  const side=compact||item.category==='done'?null:{label:bug?'Исправить':'Выполнить',hint:'план →\nClaude · Codex',icon:bug?k.icons.fix:k.icons.run,tone:bug?'fix':'',
+  // «Реализовать» / «Исправить» hands the task to the task runner: a separate chat with a plan to approve.
+  const side=compact||item.category==='done'?null:{label:bug?'Исправить':'Реализовать',hint:'план →\nClaude · Codex',icon:bug?k.icons.fix:k.icons.run,tone:bug?'fix':'',
    title:'Петя составит план работ в отдельном чате. После вашего «Утвердить» код напишут Claude или Codex (или локальная модель для кода), прогресс — в карточке плана.',
    run:async()=>{const r=await k.quick(key(item),'execute');if(r?.topicId&&typeof selectDialogueTopic==='function')await selectDialogueTopic(r.topicId);}};
   const node=k.card({app:'Jira',initial:'J',color:'#2684ff',key:item.key,href:item.site+'/browse/'+encodeURIComponent(item.key),status:compact?null:c.status,

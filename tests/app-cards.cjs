@@ -18,7 +18,7 @@ const results=require('../src/features/chat-results.cjs');
  assert.deepEqual(calls[0],{action:'stage',expected:{root:'/r',projectId:'p',token:'t1'},paths:['a.txt']});
  assert.equal(staged.state.token,'t2');assert.equal(message.extensionData.gitState.token,'t2');
  await gitAdapter.perform('commit',{...gitRow,message},gs,()=>{},{message:'Fix'});assert.equal(calls[1].expected.token,'t2','next write uses the fresh token');
- // Asana: «мои задачи в асане» answers with cards; done toggles with undo; «Выполнить» goes to the task runner.
+ // Asana: «мои задачи в асане» answers with cards; done toggles with undo; «Реализовать» goes to the task runner.
  const topic={id:'t',title:'Чат',messages:[]};const started=[];
  const asanaApi=[];
  const s={settings:{asanaCredential:'x',asanaWorkspace:'111'},modules:{enabled:()=>true,assertEnabled(){}},requestProgress:{report(){}},

@@ -1,4 +1,4 @@
-// Asana plugin: quick edits of task cards (done, due date) with undo, and «Выполнить» through the task runner.
+// Asana plugin: quick edits of task cards (done, due date) with undo, and «Реализовать» through the task runner.
 const asana=require('./client.cjs');
 const key=item=>JSON.stringify(['asana',item.gid]);
 const QUICK=['complete','reopen','due','execute'];

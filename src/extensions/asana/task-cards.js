@@ -1,5 +1,5 @@
 // Asana plugin, renderer: my tasks as cards — done checkbox and due date apply at once with undo,
-// «Выполнить» / «Исправить» opens the task runner's plan chat. Data: message.extensionData.asanaItems.
+// «Реализовать» / «Исправить» opens the task runner's plan chat. Data: message.extensionData.asanaItems.
 (()=>{
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('task-cards.css',document.currentScript.src).href;document.head.append(style);
  const key=item=>JSON.stringify(['asana',item.gid]);
@@ -19,7 +19,7 @@
   const due=k.chip({label:item.due?'Срок: '+day(item.due):'Срок',tone:late?'alert':'',title:late?'Просрочено':'Срок',menu:async()=>dueOptions(item.due),
    pick:async option=>{const r=await k.quick(pk,'due',{date:option.date},{busy:due});if(r?.item)Object.assign(item,r.item);refresh();}});
   const isBug=bug(item.name);
-  const side=item.completed?null:{label:isBug?'Исправить':'Выполнить',hint:'план →\nClaude · Codex',icon:isBug?k.icons.fix:k.icons.run,tone:isBug?'fix':'',
+  const side=item.completed?null:{label:isBug?'Исправить':'Реализовать',hint:'план →\nClaude · Codex',icon:isBug?k.icons.fix:k.icons.run,tone:isBug?'fix':'',
    title:'Петя составит план работ в отдельном чате. После вашего «Утвердить» код напишут Claude или Codex (или локальная модель для кода), прогресс — в карточке плана.',
    run:async()=>{const r=await k.quick(pk,'execute');if(r?.topicId&&typeof selectDialogueTopic==='function')await selectDialogueTopic(r.topicId);}};
   const node=k.card({app:'Asana',initial:'A',color:'#f06a6a',key:item.project||'Asana',href:item.url,subtitle:'',title:item.name,presentation:pk,chips:[due],side,className:'asana-card'+(item.completed?' done':'')});

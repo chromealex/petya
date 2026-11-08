@@ -1,4 +1,4 @@
-// Task runner plugin: «Выполнить» / «Исправить» on a task card opens a separate chat for the work.
+// Task runner plugin: «Реализовать» / «Исправить» on a task card opens a separate chat for the work.
 // 1. Petya proposes a plan (local model). 2. The user approves it or keeps chatting with corrections —
 //    every message in that chat while the plan is open revises it. 3. After approval the steps go to the
 //    code agents (Codex or Claude) one after another; the plan card shows each step's progress.
@@ -42,8 +42,8 @@ function setup(s){
   const existing=topics().find(t=>!t.archived&&t.taskRun?.task.key===clean.key&&t.taskRun.task.app===clean.app&&!FINAL.has(t.taskRun.state));
   if(existing){s.dialogue.state.activeId=existing.id;s.dialogue.persist();return {handled:true,text:'Открыл чат выполнения '+clean.key+'.',topicId:existing.id,reopened:true};}
   const source=s.dialogue.active();
-  const topic={id:randomUUID(),projectId:source?.projectId||s.dialogue.state.activeProjectId||'general',title:(clean.kind==='bug'?'Исправить ':'Выполнить ')+clean.key+' · '+clean.title.slice(0,60),kind:'chat',messages:[],at:Date.now(),projectMemoryId:source?.projectMemoryId||''};
-  topic.messages.push({role:'user',text:(clean.kind==='bug'?'Исправь ':'Выполни ')+clean.key+': '+clean.title,at:Date.now()});
+  const topic={id:randomUUID(),projectId:source?.projectId||s.dialogue.state.activeProjectId||'general',title:(clean.kind==='bug'?'Исправить ':'Реализовать ')+clean.key+' · '+clean.title.slice(0,60),kind:'chat',messages:[],at:Date.now(),projectMemoryId:source?.projectMemoryId||''};
+  topic.messages.push({role:'user',text:(clean.kind==='bug'?'Исправь ':'Реализуй ')+clean.key+': '+clean.title,at:Date.now()});
   s.requestProgress?.report('Составляю план работ по '+clean.key);
   const plan=await plans.propose(model,clean);
   const localCoder=await codingModel();
