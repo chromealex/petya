@@ -5999,6 +5999,11 @@
   "Отправляю в чат": "Sending to the chat",
   "Результат отправки неизвестен — проверь приложение": "Sending result unknown — check the app",
   "Не удалось передать": "Could not hand off",
-  "Раздаёт агентам": "Splitting across agents"
+  "Раздаёт агентам": "Splitting across agents",
+  "<input type=\"checkbox\" name=\"claudeStatusCheck\">Проверять ход задач в Claude по его чату": "<input type=\"checkbox\" name=\"claudeStatusCheck\">Check the progress of Claude tasks in its chat",
+  "Claude вернул неизвестный статус.": "Claude returned an unknown status.",
+  "Петя читает чат через Универсальный доступ раз в 10 минут, только когда Claude не на переднем плане и в нём нет черновика. При этом в Claude может открыться чат задачи.": "Petya reads the chat through Accessibility every 10 minutes, only while Claude is not in front and has no draft. The task chat may open in Claude.",
+  "Ссылка на чат Claude пока неизвестна. Откройте его чат.": "The Claude chat link is not known yet. Open its chat.",
+  "Отправлена в чат · Петя проверит ход работы": "Sent to the chat · Petya will check the progress"
  }
 }
