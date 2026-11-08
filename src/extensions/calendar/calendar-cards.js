@@ -1,7 +1,7 @@
 // «Календарь», renderer: a day timeline (hours, event blocks, free gaps, the «сейчас» line), a compact week strip,
 // and for a slot search the ranked candidates with everyone's busy time as lanes and the chosen slot highlighted.
 // «Поставить встречу» opens a confirm step (editable title, time, attendees, «Видеозвонок»: the video-meeting
-// providers of added apps, Meet/Teams, known rooms ranked for this meeting, a typed link or none); only «Создать в
+// providers of added apps that fit this calendar, known rooms ranked for this meeting, a typed link or none); only «Создать в
 // календаре» writes. Events with a link that a meeting-recording provider fits get «Записать Петей» (now, during the
 // meeting) or «Петя запишет встречу» (scheduled local recording).
 (()=>{
@@ -159,7 +159,7 @@
    pick(strong&&values.includes('r:'+strong)?'r:'+strong:values.includes(last)?last:values.find(v=>v.startsWith('p:'))||'none');
   };
   list.append(k.el('small','kit-meta','Загружаю варианты…'));
-  window.petyaCalendar.videoChoices(c.draftId).then(fill).catch(()=>fill({providers:[{id:c.provider==='microsoft'?'teams':'google-meet',label:c.provider==='microsoft'?'Teams':'Google Meet'}]}));
+  window.petyaCalendar.videoChoices(c.draftId).then(fill).catch(()=>fill({}));
   return {node:box,
    value(){
     if(current==='none')return {video:'none'};

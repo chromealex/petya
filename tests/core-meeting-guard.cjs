@@ -1,6 +1,7 @@
-// Petya's core knows no meeting app: Zoom lives only in src/extensions/zoom and plugs in through generic interfaces
-// (meeting sources, app links). Fails when a core file (src/*.cjs, src/features/*.cjs, anything in src/ui) or another
-// extension mentions Zoom, apart from the uses below that have nothing to do with the meeting app.
+// Petya's core knows no meeting app: Zoom lives only in src/extensions/zoom, Google Meet in src/extensions/google-meet,
+// Microsoft Teams in src/extensions/teams, and they plug in through generic interfaces (meeting sources, app links).
+// Fails when a core file (src/*.cjs, src/features/*.cjs, anything in src/ui) or another extension (the calendar
+// included) mentions one of them, apart from the uses allowed below that have nothing to do with the meeting app.
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const root=path.join(__dirname,'..');
@@ -41,4 +42,33 @@ assert.equal(zoom.id,'zoom');assert.equal(zoom.setting,'extension_zoom');assert.
 assert.deepEqual(Object.keys(zoom.provides).sort(),['meeting-recording','meeting-source','video-meeting']);
 assert.equal(require('../src/extensions/zoom/feature.cjs').defaults.extension_zoom,'false','not installed for new users');
 assert.ok(!fs.existsSync(path.join(root,'src/extensions/zoom-bot')),'the old extension directory is gone');
-console.log('Core meeting guard: '+files.length+' core and extension files free of Zoom outside the extension ('+Object.keys(ALLOWED).length+' unrelated uses allowed) passed');
+
+// Google Meet and Microsoft Teams are extensions too (src/extensions/google-meet, src/extensions/teams): the core and
+// every other extension, the calendar included, know neither by name, nor their links, nor their calendar fields.
+// The calendar only asks video-meeting providers (app links: run, prepareEvent, recognizeLink).
+const VIDEO=/google[\s-]?meet|meet\.google|hangout|microsoft[\s-]?teams|teams\.(?:microsoft|live)|teamsforbusiness|onlineMeetingProvider|isOnlineMeeting|тимс|extension_(?:google-meet|teams)/i;
+const VIDEO_WORDS=/\bMeet\b|\bTeams\b|['"](?:google-meet|teams)['"]/;
+const VIDEO_ALLOWED={
+ // The one-time migration adds the two extensions for calendar users.
+ 'src/meeting-migration.cjs':{why:'migration of calendar users to the video apps'}
+};
+const videoFiles=[];
+for(const e of fs.readdirSync(path.join(root,'src'),{withFileTypes:true}))if(e.isFile()&&/\.(?:cjs|js|ps1)$/.test(e.name))videoFiles.push('src/'+e.name);
+{const all=files.length;files.length=0;walk('src/features',f=>/\.cjs$/.test(f));walk('src/ui',()=>true);walk('src/extensions',f=>!/^src\/extensions\/(?:google-meet|teams)\//.test(f)&&/\.(?:cjs|js|json|html|css)$/.test(f));videoFiles.push(...files);files.length=all;}
+const videoProblems=[];
+for(const file of videoFiles){
+ const text=fs.readFileSync(path.join(root,file),'utf8');if(!VIDEO.test(text)&&!VIDEO_WORDS.test(text))continue;
+ if(VIDEO_ALLOWED[file])continue;
+ text.split(/\r?\n/).forEach((line,i)=>{if(VIDEO.test(line)||VIDEO_WORDS.test(line))videoProblems.push(file+':'+(i+1)+': '+line.trim().slice(0,140));});
+}
+assert.deepEqual(videoProblems,[],'Google Meet and Teams belong to their extensions; core and other extensions use video-meeting providers and meeting sources');
+for(const file of Object.keys(VIDEO_ALLOWED)){const text=fs.readFileSync(path.join(root,file),'utf8');assert.ok(VIDEO.test(text)||VIDEO_WORDS.test(text),'remove the stale allowance for '+file);}
+for(const [id,setting] of [['google-meet','extension_google-meet'],['teams','extension_teams']]){
+ const d=JSON.parse(fs.readFileSync(path.join(root,'src/extensions',id,'extension.json'),'utf8'));
+ assert.equal(d.id,id);assert.equal(d.setting,setting);assert.equal(d.category,'meetings');
+ assert.deepEqual(Object.keys(d.provides).sort(),['meeting-recording','meeting-source','video-meeting']);
+ assert.equal(require('../src/extensions/'+id+'/feature.cjs').defaults[setting],'false','not installed for new users: '+id);
+}
+assert.ok(!fs.existsSync(path.join(root,'src/extensions/calendar/video-meet.cjs'))&&!fs.existsSync(path.join(root,'src/extensions/calendar/video-teams.cjs')),'the calendar provides no video meetings of its own');
+assert.equal(JSON.parse(fs.readFileSync(path.join(root,'src/extensions/calendar/extension.json'),'utf8')).provides,undefined);
+console.log('Core meeting guard: '+files.length+' core and extension files free of Zoom outside the extension ('+Object.keys(ALLOWED).length+' unrelated uses allowed), '+videoFiles.length+' free of Google Meet and Teams outside theirs passed');

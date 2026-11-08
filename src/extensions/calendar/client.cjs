@@ -50,7 +50,7 @@ class CalendarClient{
   const data=await this.call(GOOGLE+'/calendars/primary/events?'+q);
   return (data.items||[]).filter(e=>e.status!=='cancelled').map(e=>{
    const self=(e.attendees||[]).find(a=>a.self),allDay=!!e.start?.date;
-   const video=e.hangoutLink||(e.conferenceData?.entryPoints||[]).find(p=>p.entryPointType==='video')?.uri;
+   const video=conferenceLink(e);
    return {id:String(e.id||''),title:clip(e.summary)||'(без названия)',start:allDay?localDate(e.start.date):new Date(e.start?.dateTime).toISOString(),end:allDay?localDate(e.end?.date||e.start.date):new Date(e.end?.dateTime).toISOString(),allDay,
     location:clip(e.location),link:safe(video),url:safe(e.htmlLink),declined:self?.responseStatus==='declined',tentative:self?.responseStatus==='tentative',free:e.transparency==='transparent',
     meta:{description:clip(e.description,2000),attendees:(e.attendees||[]).map(a=>String(a.email||'').toLowerCase()).filter(Boolean).slice(0,50),organizer:String(e.organizer?.email||'').toLowerCase()}};
@@ -86,24 +86,34 @@ class CalendarClient{
   });
  }
 
- // One event with attendees (they get invitations). Returns {id,url,link}. `meeting` is the video call:
- // {patch, query} from a calendar-native provider (Meet, Teams), {url, note} for a link put into the event
- // (another app's room, a known room, a typed link), or null for none.
+ // One event with attendees (they get invitations). Returns {id,url,link}. `meeting` is the video call: {url, note}
+ // for a link put into the event (another app's room, a known room, a typed link), {prepareEvent} for a call the
+ // calendar service creates with the event (a video-meeting app adds its fields to the request, see
+ // src/features/app-links.cjs), or null for none. The join link of a created call comes back with the event.
  async create({title,start,end,attendees=[],meeting=null}){
   const link=meeting?.url?safe(meeting.url):'';
   const text=link?(meeting.note?meeting.note+'\n':'')+'Ссылка на видеозвонок: '+link:'';
+  let event;
+  if(this.provider==='microsoft')event={calendar:'microsoft',query:{},body:{subject:title,start:{dateTime:new Date(start).toISOString().slice(0,19),timeZone:'UTC'},end:{dateTime:new Date(end).toISOString().slice(0,19),timeZone:'UTC'},
+   attendees:attendees.map(a=>({emailAddress:{address:a.email,name:a.name||a.email},type:'required'})),
+   ...link?{location:{displayName:link,locationUri:link},body:{contentType:'text',content:text}}:{}}};
+  else event={calendar:'google',query:{sendUpdates:'all'},body:{summary:title,start:{dateTime:new Date(start).toISOString(),timeZone:this.timeZone},end:{dateTime:new Date(end).toISOString(),timeZone:this.timeZone},
+   attendees:attendees.map(a=>({email:a.email,...a.name?{displayName:a.name}:{}})),...link?{location:link,description:text}:{}}};
+  if(typeof meeting?.prepareEvent==='function'){
+   const next=await meeting.prepareEvent(event);
+   // The invitations are sent either way: an app may add its own query parameters, never remove these.
+   event={...next,query:{...next.query,...event.calendar==='google'?{sendUpdates:'all'}:{}}};
+  }
   if(this.provider==='microsoft'){
-   const e=await this.call(GRAPH+'/me/events',{method:'POST',body:{subject:title,start:{dateTime:new Date(start).toISOString().slice(0,19),timeZone:'UTC'},end:{dateTime:new Date(end).toISOString().slice(0,19),timeZone:'UTC'},
-    attendees:attendees.map(a=>({emailAddress:{address:a.email,name:a.name||a.email},type:'required'})),...meeting?.patch||{},
-    ...link?{location:{displayName:link,locationUri:link},body:{contentType:'text',content:text}}:{}}});
+   const e=await this.call(GRAPH+'/me/events',{method:'POST',body:event.body});
    return {id:String(e.id||''),url:safe(e.webLink),link:link||safe(e.onlineMeeting?.joinUrl)};
   }
-  const q=new URLSearchParams({sendUpdates:'all',...meeting?.query||{}});
-  const e=await this.call(GOOGLE+'/calendars/primary/events?'+q,{method:'POST',body:{summary:title,start:{dateTime:new Date(start).toISOString(),timeZone:this.timeZone},end:{dateTime:new Date(end).toISOString(),timeZone:this.timeZone},
-   attendees:attendees.map(a=>({email:a.email,...a.name?{displayName:a.name}:{}})),...meeting?.patch||{},...link?{location:link,description:text}:{}}});
-  return {id:String(e.id||''),url:safe(e.htmlLink),link:link||safe(e.hangoutLink||(e.conferenceData?.entryPoints||[]).find(p=>p.entryPointType==='video')?.uri)};
+  const e=await this.call(GOOGLE+'/calendars/primary/events?'+new URLSearchParams(event.query),{method:'POST',body:event.body});
+  return {id:String(e.id||''),url:safe(e.htmlLink),link:link||safe(conferenceLink(e))};
  }
 }
+// The video entry point of a Google event's conference (whatever service created it).
+const conferenceLink=e=>(e.conferenceData?.entryPoints||[]).find(p=>p.entryPointType==='video')?.uri;
 const clip=(v,n=300)=>String(v||'').trim().slice(0,n);
 const safe=v=>{try{const u=new URL(String(v||''));return u.protocol==='https:'?u.href:'';}catch{return '';}};
 // Graph dateTimeTimeZone in UTC («2026-11-09T07:00:00.0000000») → ISO.

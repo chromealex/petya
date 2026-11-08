@@ -1,8 +1,14 @@
 // Cross-app links: one app offers a capability, other apps' cards use it without knowing who provides it.
 // An extension declares in its extension.json `"provides": {"<kind>": "<file>.cjs"}` (or a list of files); each
 // file exports {id?, name?, label, order?, ready(settings) -> bool, fits?(context) -> bool, hint?(settings) -> string,
-// async run(services, payload, check), recognizeLink?(url)}. `available(kind, context)` lists only providers whose app is added and
-// connected (ready) and that fit the context, in a stable order; `run(kind, id, payload)` calls one of them.
+// async run(services, payload, check), recognizeLink?(url), prepareEvent?(event, context)}. `available(kind, context)`
+// lists only providers whose app is added and connected (ready) and that fit the context, in a stable order;
+// `run(kind, id, payload)` calls one of them.
+// `prepareEvent` is for a video-meeting provider whose call is created by the calendar service together with the
+// event: its `run` answers {native:true}, and right before the calendar writes the event it passes the request it
+// is about to send, {calendar:'google'|'microsoft', body, query}, through `prepare(kind, id, event, context)`; the
+// provider returns it with its own fields added (the calendar knows no service). `context.account` is the calendar
+// account {provider, email, kind}.
 // Nothing here writes on its own: a provider runs only when a card button the user pressed asks for it, and
 // providers whose own flows confirm (Jira, Slack, the Programmer) return a prepared chat request instead of writing.
 const fs=require('node:fs');
@@ -33,7 +39,7 @@ function scan(dir=directory){
 // Stable order inside a kind: the provider's own `order` (lower first), then by id.
 function load(dir=directory){
  const out=scan(dir).filter(x=>KINDS.includes(x.kind)).map(({provider:p,...x})=>{
-  if(typeof p.label!=='string'||typeof p.ready!=='function'||typeof p.run!=='function')throw Error('Invalid capability provider '+x.extension+'/'+x.file);
+  if(typeof p.label!=='string'||typeof p.ready!=='function'||typeof p.run!=='function'||p.prepareEvent!==undefined&&typeof p.prepareEvent!=='function')throw Error('Invalid capability provider '+x.extension+'/'+x.file);
   return {kind:x.kind,id:p.id||x.extension,extension:x.extension,setting:x.setting,name:p.name||x.name,provider:p};
  });
  const rank=p=>Number.isFinite(p.provider.order)?p.provider.order:1000;
@@ -61,6 +67,17 @@ function create(s,{providers=load()}={}){
   const check=()=>{if(!ready(p))throw Error('Подключение «'+p.name+'» изменилось. Повторите действие.');};
   return p.provider.run(s,payload&&typeof payload==='object'?payload:{},check);
  }
+ // A provider's changes to a calendar event right before it is written (see `prepareEvent` above). The provider must
+ // still be ready; the result keeps the event's shape.
+ async function prepare(kind,id,event,context={}){
+  if(!KINDS.includes(kind))throw Error('Неизвестный вид связи между приложениями.');
+  const p=providers.find(x=>x.kind===kind&&x.id===id);
+  if(!p||typeof p.provider.prepareEvent!=='function')throw Error('Такого приложения для этого действия нет.');
+  if(!ready(p))throw Error('Приложение «'+p.name+'» не добавлено или не подключено.');
+  const next=await p.provider.prepareEvent({...event,body:{...event?.body},query:{...event?.query}},context||{});
+  if(!next||typeof next!=='object'||!next.body||typeof next.body!=='object'||next.calendar!==event?.calendar)throw Error('Приложение «'+p.name+'» не подготовило встречу.');
+  return {calendar:next.calendar,body:next.body,query:next.query&&typeof next.query==='object'?next.query:{}};
+ }
  // Which service a meeting link belongs to, asked of the providers of added apps that know their own links:
  // {kind, key, url, name} or null. Nothing outside the providers knows any service's link format.
  function recognize(url){
@@ -71,7 +88,7 @@ function create(s,{providers=load()}={}){
   }
   return null;
  }
- return {available,run,recognize,providers:()=>providers.map(({kind,id,extension,name})=>({kind,id,extension,name}))};
+ return {available,run,prepare,recognize,providers:()=>providers.map(({kind,id,extension,name})=>({kind,id,extension,name}))};
 }
 
 module.exports={name:'appLinks',defaults:{},validate(){},KINDS,REGISTRIES,scan,load,create,

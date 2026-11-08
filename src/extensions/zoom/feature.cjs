@@ -3,87 +3,27 @@
 // (video-meeting.cjs) and scheduled recordings of Zoom events («Петя запишет встречу», meeting-recording.cjs).
 // The recording itself, its start mode and the microphone setting are Petya's own (src/features/meeting-memory.cjs);
 // there is no meeting bot and no Zoom sign-in.
-const {randomUUID}=require('node:crypto');
 const room=require('./personal-room.cjs');
 const source=require('./meeting-source.cjs');
-const ID='zoom',MAX=8,EARLY=60000;
-function parseSchedule(value){try{const list=JSON.parse(value||'[]');return Array.isArray(list)?list.filter(x=>x&&typeof x.id==='string'):[];}catch{return [];}}
+const meetingSchedule=require('../../meeting-schedule.cjs');
+const ID='zoom',KEY='meetingRecordingSchedule';
 function validate(next){
  if(next.zoomPersonalLink){const link=room.valid(next.zoomPersonalLink);if(!link)throw Error('Ссылка на личную комнату Zoom — вида https://…zoom.us/j/1234567890.');next.zoomPersonalLink=link;}
- const list=parseSchedule(next.meetingRecordingSchedule);
- if(list.length>MAX)throw Error('Слишком много запланированных записей.');
- next.meetingRecordingSchedule=JSON.stringify(list);
+ meetingSchedule.validate(next,KEY);
 }
-const hm=iso=>{const d=new Date(iso);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
+// Scheduled recordings (src/meeting-schedule.cjs): from the start time Petya waits for the Zoom meeting source to see
+// the meeting and then starts the recording; each one has a stable notification that can be cancelled.
+const options=s=>({id:ID,app:'Zoom',key:KEY,enabled:()=>s.settings.extension_zoom==='true',detect:()=>source.detect({settings:s.settings,dataRoot:s.dataRoot})});
+function scheduler(s,extra={}){return meetingSchedule.create(s,{...options(s),...extra});}
 
-// Scheduled recordings: from the start time Petya waits for the Zoom meeting source to see the meeting and then
-// starts the recording; each one has a stable notification that can be cancelled.
-function scheduler(s,{now=()=>Date.now(),publish=()=>{},detect=()=>source.detect({settings:s.settings,dataRoot:s.dataRoot})}={}){
- const list=()=>parseSchedule(s.settings.meetingRecordingSchedule);
- const save=items=>s.saveSettings({meetingRecordingSchedule:JSON.stringify(items)},true);
- const note=(item,text,{busy=false,kind='info',cancellable=true}={})=>publish({id:'meeting-schedule:'+item.id,title:'Запись встречи',text,busy,kind,version:kind+':'+text.slice(0,60),cancellable:cancellable?item.id:''});
- function add({title,start,end}={}){
-  const a=Date.parse(start),b=Date.parse(end);
-  if(!Number.isFinite(a)||!Number.isFinite(b)||b<=a)throw Error('Нет времени встречи.');
-  if(b<=now())throw Error('Эта встреча уже закончилась.');
-  const name=String(title||'Встреча').replace(/\s+/g,' ').trim().slice(0,80)||'Встреча';
-  const items=list().filter(x=>Date.parse(x.end)>now());
-  const same=items.find(x=>x.start===new Date(a).toISOString()&&x.title===name);
-  if(same)return same;
-  if(items.length>=MAX)throw Error('Уже запланировано '+MAX+' записей. Отмените одну из них в уведомлениях.');
-  const item={id:randomUUID(),title:name,start:new Date(a).toISOString(),end:new Date(b).toISOString()};
-  save([...items,item]);
-  note(item,'Петя запишет встречу «'+item.title+'» в '+hm(item.start)+'.');
-  return item;
- }
- function cancel(id){
-  const items=list(),item=items.find(x=>x.id===id);if(!item)throw Error('Запись уже отменена или прошла.');
-  save(items.filter(x=>x.id!==id));
-  note(item,'Запись встречи «'+item.title+'» отменена.',{cancellable:false});
-  return list();
- }
- let busy=false;
- async function tick(){
-  if(busy||s.settings.extension_zoom!=='true')return;busy=true;
-  try{
-   const items=list();let changed=false;
-   for(const item of items){
-    const a=Date.parse(item.start),b=Date.parse(item.end),t=now();
-    if(t>=b){
-     changed=true;item.done=true;
-     if(!item.started)note(item,'Встреча «'+item.title+'» не записана: Zoom не показал её на этом компьютере.',{kind:'error',cancellable:false});
-     continue;
-    }
-    if(t<a-EARLY||item.started)continue;
-    if(s.settings.meetingAutoRecord==='off'){changed=true;item.done=true;note(item,'Запись встреч выключена в настройках — встреча «'+item.title+'» не записана.',{kind:'error',cancellable:false});continue;}
-    try{
-     const seen=await detect();
-     if(!seen?.active)throw Error('not yet');
-     await s.meetingRecording('startCapture');
-     item.started=true;changed=true;
-     note(item,'Петя записывает встречу «'+item.title+'».',{kind:'success',cancellable:false});
-    }catch{
-     if(!item.waiting){item.waiting=true;changed=true;note(item,'Жду встречу «'+item.title+'» в Zoom, чтобы начать запись.',{busy:true});}
-    }
-   }
-   if(changed)save(items.filter(x=>!x.done));
-  }finally{busy=false;}
- }
- return {add,cancel,list,tick};
-}
-
-module.exports={name:'zoom',defaults:{['extension_'+ID]:'false',zoomPersonalLink:'',zoomWindowTitle:'',meetingRecordingSchedule:'[]'},validate,scheduler,
+module.exports={name:'zoom',defaults:{['extension_'+ID]:'false',zoomPersonalLink:'',zoomWindowTitle:'',[KEY]:'[]'},validate,scheduler,
  setup(s){
-  const publish=item=>{if(s.win&&!s.win.isDestroyed?.())s.win.webContents.send('extension-install-progress',item);};
-  const schedule=scheduler(s,{publish});
-  if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){const timer=setInterval(()=>schedule.tick().catch(()=>{}),20000);timer.unref?.();}
+  const {schedule,ipc}=meetingSchedule.setup(s,options(s));
   const status=()=>({personalLink:room.valid(s.settings.zoomPersonalLink),zoomInstalled:room.installed()});
   const configure=input=>{
    if(typeof input?.personalLink==='string')s.saveSettings({zoomPersonalLink:input.personalLink.trim()},true);
    return status();
   };
-  // Pending schedules for the notification center after a window reload.
-  const schedules=()=>schedule.list().map(x=>({id:'meeting-schedule:'+x.id,title:'Запись встречи',text:x.started?'Петя записывает встречу «'+x.title+'».':'Петя запишет встречу «'+x.title+'» в '+hm(x.start)+'.',busy:!!x.waiting&&!x.started,kind:'info',version:'restore',cancellable:x.started?'':x.id}));
-  return {meetingSchedule:schedule,ipc:{status,configure,schedules,cancelSchedule:id=>{schedule.cancel(String(id||''));return schedules();}}};
+  return {meetingSchedule:schedule,ipc:{status,configure,...ipc}};
  }
 };

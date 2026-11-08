@@ -1,13 +1,14 @@
 // Meeting sources (src/features/meeting-sources.cjs): declared by extensions in `provides`, counted only while the
 // extension is added; detection order and failures, speaker choice by overlap, participants, join links, the
-// service letter; invalid declarations refused. Then the real Zoom source: registered only with the Zoom extension.
+// service letter; invalid declarations refused. Then the real sources (Google Meet, Microsoft Teams, Zoom): each
+// registered only with its own extension.
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const registry=require('../src/features/meeting-sources.cjs');
 (async()=>{
- // --- The real declarations: Zoom is the only meeting source, and only while «Zoom» is added ---
+ // --- The real declarations: one source per meeting app, each only while its extension is added ---
  const real=registry.load();
- assert.deepEqual(real.map(x=>[x.id,x.extension,x.setting]),[['zoom','zoom','extension_zoom']]);
+ assert.deepEqual(real.map(x=>[x.id,x.extension,x.setting]),[['google-meet','google-meet','extension_google-meet'],['teams','teams','extension_teams'],['zoom','zoom','extension_zoom']]);
  const settings={};const s={settings,dataRoot:''};
  const live=registry.create(s);
  assert.deepEqual(live.list(),[],'a new user has no meeting source');
@@ -17,6 +18,15 @@ const registry=require('../src/features/meeting-sources.cjs');
  assert.deepEqual(live.list(),[{id:'zoom',extension:'zoom',name:'Zoom'}],'added from the catalog → registered');
  assert.deepEqual(live.recognize('https://us02web.zoom.us/j/1234567890?pwd=a'),{kind:'zoom',key:'zoom:1234567890',url:'https://us02web.zoom.us/j/1234567890?pwd=a',name:'Zoom',source:'zoom'});
  settings.extension_zoom='false';assert.deepEqual(live.list(),[],'removed → not asked any more');
+ assert.equal(live.recognize('https://meet.google.com/abc-defg-hij'),null,'Meet links: only with «Google Meet»');
+ settings['extension_google-meet']='true';settings.extension_teams='true';
+ assert.deepEqual(live.list().map(x=>x.name),['Google Meet','Microsoft Teams']);
+ assert.deepEqual(live.recognize('https://meet.google.com/abc-defg-hij'),{kind:'meet',key:'meet:abc-defg-hij',url:'https://meet.google.com/abc-defg-hij',name:'Google Meet',source:'google-meet'});
+ assert.equal(live.recognize('https://teams.live.com/meet/9387162534?p=abcd').source,'teams');
+ assert.equal(live.recognize('https://us02web.zoom.us/j/1234567890'),null);
+ if(!['darwin','win32'].includes(process.platform))assert.deepEqual(await live.detect(),{active:false},'no window listing here: no meeting, no error');
+ assert.equal(live.speaker('google-meet',1,2),'','browser and Teams sources name no speakers');
+ settings['extension_google-meet']='false';settings.extension_teams='false';
  // The Zoom source itself: speakers only while it records, participants from its private sample file.
  const zoom=require('../src/extensions/zoom/meeting-source.cjs');
  assert.deepEqual(zoom.speakers({from:0,to:10}),[]);

@@ -1,8 +1,10 @@
 // «Видеозвонок» of a new calendar event and the providers behind it: known rooms learned from the calendar (distinct
 // days, normalization, ranking, manual links, rename/forget, persistence), the Zoom personal room of the Zoom extension
-// (validation, local plain-text discovery, the «paste it once» question; only while the extension is added), Meet/Teams
-// patches, the event payloads for a link, and the local recording: provider fit and the scheduled start.
-// The calendar knows no Zoom links itself: they are recognised by the Zoom extension's provider (`recognizeLink`).
+// (validation, local plain-text discovery, the «paste it once» question; only while the extension is added), Meet and
+// Teams calls of the «Google Meet» / «Microsoft Teams» extensions (prepareEvent, readiness by account type), the event
+// payloads for a link, and the local recording: provider fit and the scheduled start.
+// The calendar knows no Zoom, Meet or Teams links itself: they are recognised by those extensions' providers
+// (`recognizeLink`).
 process.env.TZ='Europe/Moscow';
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
@@ -12,7 +14,11 @@ const {SCOPES}=require('../src/extensions/calendar/client.cjs');
 const room=require('../src/extensions/zoom/personal-room.cjs');
 const zoom=require('../src/extensions/zoom/feature.cjs');
 const recording=require('../src/extensions/zoom/meeting-recording.cjs');
-const recognize=require('../src/extensions/zoom/video-meeting.cjs').recognizeLink;
+const zoomLinks=require('../src/extensions/zoom/video-meeting.cjs').recognizeLink;
+const meetVideo=require('../src/extensions/google-meet/video-meeting.cjs');
+const teamsVideo=require('../src/extensions/teams/video-meeting.cjs');
+// What the app-links registry answers with all three apps added.
+const recognize=u=>zoomLinks(u)||meetVideo.recognizeLink(u)||teamsVideo.recognizeLink(u);
 const links=require('../src/features/app-links.cjs');
 const json=(v,status=200)=>({ok:status<300,status,json:async()=>v});
 const NOW=new Date(2026,10,9,9,0);
@@ -21,12 +27,14 @@ const at=(d,h,m=0)=>new Date(2026,10,d,h,m).toISOString();
  // --- Normalization and dedup ---
  assert.equal(normalize('https://us02web.zoom.us/j/1234567890'),null,'without the Zoom extension a Zoom link is not a known meeting link');
  assert.equal(normalize('https://us02web.zoom.us/j/1234567890',{any:true}).kind,'link','typed, it is an ordinary link');
+ assert.equal(normalize('https://meet.google.com/abc-defg-hij'),null,'without «Google Meet» a Meet link is not a known meeting link');
+ assert.equal(normalize('https://teams.microsoft.com/l/meetup-join/19%3ameeting_X%40thread.v2/0'),null,'nor a Teams link without «Microsoft Teams»');
  const z=normalize('https://us02web.zoom.us/j/1234567890?pwd=AbC.1&utm_source=mail#success',{recognize});
  assert.deepEqual(z,{kind:'zoom',key:'zoom:1234567890',url:'https://us02web.zoom.us/j/1234567890?pwd=AbC.1',app:'Zoom'},'tracking dropped, passcode kept');
  assert.equal(normalize('https://zoom.us/j/1234567890',{recognize}).key,z.key,'the same room on another Zoom host');
- assert.equal(normalize('https://meet.google.com/ABC-defg-hij/').url,'https://meet.google.com/abc-defg-hij');
+ assert.deepEqual(normalize('https://meet.google.com/ABC-defg-hij/',{recognize}),{kind:'meet',key:'meet:abc-defg-hij',url:'https://meet.google.com/abc-defg-hij',app:'Google Meet'});
  const teams='https://teams.microsoft.com/l/meetup-join/19%3ameeting_X%40thread.v2/0?context=%7b%22Tid%22%3a%221%22%7d';
- assert.equal(normalize(teams).url,teams,'Teams keeps its context');
+ assert.equal(normalize(teams,{recognize}).url,teams,'Teams keeps its context');assert.equal(normalize(teams,{recognize}).app,'Microsoft Teams');
  assert.equal(normalize('https://telemost.yandex.ru/j/12345678901234').kind,'telemost');
  assert.equal(normalize('https://example.com/agenda'),null,'not a meeting link: not learned');
  assert.deepEqual(normalize('https://example.com/room?utm_campaign=x&id=7',{any:true}),{kind:'link',key:'example.com/room?id=7',url:'https://example.com/room?id=7'});
@@ -51,7 +59,7 @@ const at=(d,h,m=0)=>new Date(2026,10,d,h,m).toISOString();
  rooms.learn([sync('s1',2),sync('s2',4),sync('s3',6)],{self:'me@corp.ru'});
  // --- Ranking: same people > similar title > frequency ---
  const forOleg=rooms.rank({title:'Синк по релизу',attendees:['oleg@corp.ru']});
- assert.equal(forOleg[0].name,'Синк с Олегом · Meet');assert.match(forOleg[0].reason,/те же участники · похожее название · использовалась 3 раза/);assert.equal(forOleg[0].strong,true);
+ assert.equal(forOleg[0].name,'Синк с Олегом · Google Meet');assert.match(forOleg[0].reason,/те же участники · похожее название · использовалась 3 раза/);assert.equal(forOleg[0].strong,true);
  const forDaily=rooms.rank({title:'Дейли команды',attendees:['anna@corp.ru','oleg@corp.ru']});
  assert.equal(forDaily[0].key,'zoom:1112223334');assert.equal(forDaily[0].strong,true);
  const stranger=rooms.rank({title:'Интервью',attendees:['new@x.org']});
@@ -87,7 +95,7 @@ const at=(d,h,m=0)=>new Date(2026,10,d,h,m).toISOString();
  let calls=[],routes=[];
  const fetcher=async(url,o={})=>{calls.push({url,method:o.method||'GET',body:o.body?JSON.parse(o.body):null});for(const [test,answer] of routes)if(test(url,o))return typeof answer==='function'?answer(url,o):answer;throw Error('unexpected '+url);};
  const manager={client:id=>({access:async()=>'tok-'+id}),status:()=>({configured:true}),login:{}};
- const s={settings:{model:'',extension_calendar:'true',extension_zoom:'true',teamMembers:JSON.stringify([{name:'Олег Иванов',email:'oleg@corp.ru'}]),
+ const s={settings:{model:'',extension_calendar:'true',extension_zoom:'true','extension_google-meet':'true',extension_teams:'true',teamMembers:JSON.stringify([{name:'Олег Иванов',email:'oleg@corp.ru'}]),
    gmailCredential:JSON.stringify({accounts:[{id:'g1',email:'me@corp.ru',tokens:{scope:SCOPES.google.join(' ')}}]})},
   requestProgress:{report(){}},mailAccounts:{google:manager,microsoft:manager},saveSettings(v){Object.assign(s.settings,v);},
   dialogue:{state:{topics:[topic]},active:()=>topic,persist(){},rememberAction(c,text){topic.messages.push({role:'user',text:c},{role:'assistant',text});}}};
@@ -161,14 +169,36 @@ const at=(d,h,m=0)=>new Date(2026,10,d,h,m).toISOString();
  const graph2=calls.find(c=>c.method==='POST'&&c.url.endsWith('/me/events')).body;
  assert.equal(graph2.isOnlineMeeting,true);assert.equal(graph2.onlineMeetingProvider,'teamsForBusiness');assert.equal(teamsMade.created.link,'https://teams.microsoft.com/l/meetup-join/ev');
  await assert.rejects(ui.create({draftId:(await draft('найди час с Олегом Ивановым завтра')).draftId,slot:0,video:'google-meet'}),/не добавлено или не подключено/,'Meet is not offered for an Outlook calendar');
- const meet=require('../src/extensions/calendar/video-meet.cjs');
- const patch=await meet.run({},{calendar:'google'});assert.equal(patch.patch.conferenceData.createRequest.conferenceSolutionKey.type,'hangoutsMeet');assert.equal(patch.query.conferenceDataVersion,'1');
- await assert.rejects(meet.run({},{calendar:'microsoft'}),/Google Календаря/);
+ // A personal Microsoft account: Teams is neither listed nor created; a work account's card gets it.
+ s.settings.microsoftCredential=JSON.stringify({accounts:[{id:'m1',email:'me@outlook.com',tokens:{scope:'https://graph.microsoft.com/Calendars.ReadWrite'}}]});
+ const msPersonal=await draft('найди час с Олегом Ивановым завтра');
+ assert.deepEqual((await ui.videoChoices(msPersonal.draftId)).providers.map(p=>p.id),['zoom'],'no Teams for a personal account');
+ calls=[];await ui.create({draftId:msPersonal.draftId,slot:0,video:true});
+ assert.equal(calls.find(c=>c.method==='POST'&&c.url.endsWith('/me/events')).body.isOnlineMeeting,undefined,'the default for a personal account is not Teams');
+ await assert.rejects(ui.create({draftId:(await draft('найди час с Олегом Ивановым завтра')).draftId,slot:0,video:'teams'}),/не добавлено или не подключено/);
+ s.settings.microsoftCredential=JSON.stringify({accounts:[{id:'m1',email:'me@corp.com',tokens:{scope:'https://graph.microsoft.com/Calendars.ReadWrite'}}]});
+ assert.deepEqual((await ui.videoChoices((await draft('найди час с Олегом Ивановым завтра')).draftId)).providers.map(p=>[p.id,p.label]),[['zoom','Zoom (личная комната)'],['teams','Teams']]);
+ // «Microsoft Teams» removed from the catalog: no Teams choice and no Teams call, the calendar works on.
+ s.settings.extension_teams='false';
+ const msNoApp=await draft('найди час с Олегом Ивановым завтра');
+ assert.deepEqual((await ui.videoChoices(msNoApp.draftId)).providers.map(p=>p.id),['zoom']);
+ await assert.rejects(ui.create({draftId:msNoApp.draftId,slot:0,video:'teams'}),/не добавлено или не подключено/);
+ s.settings.extension_zoom='false';calls=[];
+ await ui.create({draftId:(await draft('найди час с Олегом Ивановым завтра')).draftId,slot:0,video:true});
+ const bare=calls.find(c=>c.method==='POST'&&c.url.endsWith('/me/events')).body;
+ assert.equal(bare.isOnlineMeeting,undefined);assert.equal(bare.location,undefined,'no video app at all: the event has no call');
+ s.settings.extension_zoom='true';s.settings.extension_teams='true';
+ // The Google Meet provider itself: run confirms, prepareEvent adds the conference request.
+ assert.deepEqual(await meetVideo.run({},{calendar:'google'},()=>{}),{provider:'google-meet',native:true});
+ await assert.rejects(meetVideo.run({},{calendar:'microsoft'},()=>{}),/Google Календаря/);
+ const ev=meetVideo.prepareEvent({calendar:'google',body:{summary:'x'},query:{sendUpdates:'all'}});
+ assert.equal(ev.body.conferenceData.createRequest.conferenceSolutionKey.type,'hangoutsMeet');assert.equal(ev.query.conferenceDataVersion,'1');assert.equal(ev.query.sendUpdates,'all');
+ assert.equal(meetVideo.ready({extension_calendar:'true',gmailCredential:JSON.stringify({accounts:[{id:'g',tokens:{scope:'https://www.googleapis.com/auth/gmail.readonly'}}]})}),false,'mail-only Google account: no Meet');
 
  room.installed=realInstalled;room.discover=realDiscover;
  // --- Local recording: fit, readiness and the scheduled start ---
  assert.equal(recording.fits({url:'https://us02web.zoom.us/j/1112223334'}),true);
- assert.equal(recording.fits({url:'https://meet.google.com/abc-defg-hij'}),false,'browser meetings are not captured');
+ assert.equal(recording.fits({url:'https://meet.google.com/abc-defg-hij'}),false,'a Meet link is Google Meet\'s to record');
  assert.equal(recording.ready({meetingAutoRecord:'off'}),false);assert.equal(recording.ready({meetingAutoRecord:'ask'}),true);
  let t=Date.parse(at(10,9,50));const notes=[];let started=0,meetingOpen=false;
  // The recording starts once the Zoom meeting source sees the meeting (a manual start would not need it).
@@ -180,7 +210,7 @@ const at=(d,h,m=0)=>new Date(2026,10,d,h,m).toISOString();
  assert.equal(plan.add({title:'Синк по релизу',start:at(10,10),end:at(10,11)}).id,out.scheduled.id,'a second press does not schedule twice');
  assert.equal(plan.list().length,1);assert.match(notes[0].text,/в 10:00/);assert.equal(notes[0].cancellable,out.scheduled.id);
  await plan.tick();assert.equal(started,0,'not before the start');
- t=Date.parse(at(10,10,0));await plan.tick();assert.equal(started,0);assert.match(notes.at(-1).text,/Жду встречу/);assert.equal(notes.at(-1).busy,true);
+ t=Date.parse(at(10,10,0));await plan.tick();assert.equal(started,0);assert.match(notes.at(-1).text,/Жду, когда встреча «Синк по релизу» начнётся в Zoom/);assert.match(notes.at(-1).id,/^meeting-schedule:zoom:/);assert.equal(notes.at(-1).busy,true);
  const waiting=notes.length;await plan.tick();assert.equal(notes.length,waiting,'waiting is told once');
  meetingOpen=true;t+=60000;await plan.tick();assert.equal(started,1);assert.match(notes.at(-1).text,/записывает/);
  t+=60000;await plan.tick();assert.equal(started,1,'started once');
@@ -194,5 +224,5 @@ const at=(d,h,m=0)=>new Date(2026,10,d,h,m).toISOString();
  assert.throws(()=>zoom.validate({zoomPersonalLink:'https://evil.com/j/1234567890'}),/личную комнату/);
  // The Zoom extension removed: scheduled items wait, nothing starts.
  rs.settings.extension_zoom='false';meetingOpen=true;plan.add({title:'Позже',start:at(13,10),end:at(13,11)});t=Date.parse(at(13,10,5));const before=started;await plan.tick();assert.equal(started,before);
- console.log('Calendar video: known rooms (distinct days, normalization, ranking, manual, rename/forget, private file), Zoom personal room (validation, discovery, question), Meet/Teams patches, Google/Graph link payloads, local recording fit and scheduled start passed');
+ console.log('Calendar video: known rooms (distinct days, normalization, ranking, manual, rename/forget, private file), Zoom personal room (validation, discovery, question), Meet/Teams calls through prepareEvent with readiness by account, Google/Graph link payloads, local recording fit and scheduled start passed');
 })().catch(e=>{console.error(e);process.exit(1);});

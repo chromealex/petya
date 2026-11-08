@@ -8,13 +8,14 @@ function read(memory, {sessionId = '', offset = 0, limit = 100} = {}) {
  return {scope:'company', total:rows.length, items:rows.slice(offset,offset+limit)};
 }
 module.exports = {
- name:'meetingMemory', defaults:{meetingAutoRecord:'auto', meetingCaptureMic:'true', meetingMigration:'1'}, read,
+ name:'meetingMemory', defaults:{meetingAutoRecord:'auto', meetingCaptureMic:'true', meetingMigration:'1', videoAppsMigration:'1'}, read,
  validate(next){
   if(!migration.MODES.includes(next.meetingAutoRecord))throw Error('Проверьте режим записи встреч.');
   if(!['true','false'].includes(next.meetingCaptureMic))throw Error('Проверьте настройку микрофона на встречах.');
  },
- // Called when the settings file is read: keys of the old single-app recorder become meeting keys once (src/meeting-migration.cjs).
- migrate(settings,saved,context){return migration.migrateSettings(settings,saved,context);},
+ // Called when the settings file is read: keys of the old single-app recorder become meeting keys once, and the video
+ // meeting apps that used to be calendar choices are added for calendar users once (src/meeting-migration.cjs).
+ migrate(settings,saved,context){const meetings=migration.migrateSettings(settings,saved,context),video=migration.migrateVideoApps(settings,saved);return meetings||video;},
  setup(s) {
   if(migration.pending(s.settings))try{s.saveSettings({},true);}catch{/* saved with the next change */}
   const {safeStorage,app}=require('electron');

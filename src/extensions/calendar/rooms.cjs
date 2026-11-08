@@ -1,14 +1,13 @@
 // Known meeting rooms: video links Petya saw in the user's own calendar on different days (a daily stand-up's call,
-// a weekly sync's Meet) plus links the user typed in the confirm step. Learned from the events the calendar already
+// a weekly sync's video room) plus links the user typed in the confirm step. Learned from the events the calendar already
 // reads (and one 60-day look-back a day at most), normalized (tracking parameters dropped), named by the most common
 // event title. Stored per company in a small private JSON file; never sent anywhere.
 // Links of meeting services that have their own app (extension) are recognised by that app's provider
-// (`recognizeLink`, passed in as `recognize`); the calendar itself knows only Meet, Teams and a few services
-// without an app.
+// (`recognizeLink`, passed in as `recognize`); the calendar itself knows only a few services without an app.
 const fs=require('node:fs');
 const path=require('node:path');
 const DAY=86400000,LOOKBACK=60;
-const KIND={meet:'Meet',teams:'Teams',webex:'Webex',jitsi:'Jitsi',telemost:'Телемост'};
+const KIND={webex:'Webex',jitsi:'Jitsi',telemost:'Телемост'};
 const URLS=/https:\/\/[^\s<>"'\])}]+/g;
 const TRACKING=/^(?:utm_\w+|fbclid|gclid|mc_eid|mc_cid|_ga|ref|source)$/i;
 const ymd=d=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');};
@@ -21,12 +20,6 @@ function normalize(raw,{any=false,recognize=null}={}){
  if(u.protocol!=='https:'||u.username||u.password||u.port||String(raw).length>2000)return null;
  const host=u.hostname.toLowerCase().replace(/\.$/,'');u.hash='';
  if(typeof recognize==='function'){let known=null;try{known=recognize(u.href);}catch{known=null;}if(known&&typeof known.key==='string'&&typeof known.url==='string')return {kind:String(known.kind||'link'),key:known.key,url:known.url,...known.name?{app:String(known.name)}:{}};}
- if(host==='meet.google.com'){const m=/^\/([a-z]{3}-[a-z]{4}-[a-z]{3})\/?$/i.exec(u.pathname);if(!m)return any?plain(u,host):null;const code=m[1].toLowerCase();return {kind:'meet',key:'meet:'+code,url:'https://meet.google.com/'+code};}
- // Teams join links carry the meeting in the path and the tenant in `context`: kept whole.
- if(host==='teams.microsoft.com'&&/^\/l\/meetup-join\//.test(u.pathname)||host==='teams.live.com'&&/^\/meet\//.test(u.pathname)){
-  for(const k of [...u.searchParams.keys()])if(TRACKING.test(k))u.searchParams.delete(k);
-  return {kind:'teams',key:'teams:'+decodeURIComponent(u.pathname).toLowerCase(),url:u.href};
- }
  if(/(?:^|\.)webex\.com$/.test(host)&&u.pathname.length>1)return {...plain(u,host),kind:'webex'};
  if(host==='meet.jit.si'&&u.pathname.length>1)return {...plain(u,host),kind:'jitsi'};
  if(/^telemost\.(?:360\.)?yandex\.(?:ru|com)$/.test(host)&&/^\/j\/\d+/.test(u.pathname))return {...plain(u,host),kind:'telemost',key:'telemost:'+u.pathname.replace(/\/$/,'')};
@@ -104,7 +97,8 @@ class Rooms{
  days(r){return new Set(Object.values(r.events)).size;}
  count(r){return Object.keys(r.events).length;}
  isKnown(r){return !this.data.forgotten.includes(r.key)&&(r.manual||this.days(r)>=2);}
- label(r){const kind=r.app||KIND[r.kind]||(()=>{try{return new URL(r.url).hostname;}catch{return 'ссылка';}})();return r.name||(top(r.titles)?top(r.titles)+' · '+kind:kind);}
+ label(r){const kind=r.app||this.appName(r)||KIND[r.kind]||(()=>{try{return new URL(r.url).hostname;}catch{return 'ссылка';}})();return r.name||(top(r.titles)?top(r.titles)+' · '+kind:kind);}
+ appName(r){if(typeof this.recognize!=='function')return '';try{return String(this.recognize(r.url)?.name||'');}catch{return '';}}
  view(r){return {key:r.key,kind:r.kind,url:r.url,name:this.label(r),custom:!!r.name,manual:!!r.manual,count:this.count(r),days:this.days(r),last:r.last?new Date(r.last).toISOString():''};}
  list(){return Object.values(this.data.rooms).filter(r=>this.isKnown(r)).sort((a,b)=>this.count(b)-this.count(a)||(b.last||0)-(a.last||0)).map(r=>this.view(r));}
  get(key){const r=this.data.rooms[key];return r&&this.isKnown(r)?this.view(r):null;}
@@ -128,4 +122,9 @@ class Rooms{
  due(){return this.now()-(this.data.refreshed||0)>DAY;}
  refreshed(){this.data.refreshed=this.now();this.save();}
 }
-module.exports={Rooms,normalize,linksOf,LOOKBACK,KIND};
+// The meeting a known room is for: the name the user gave it or the most common title of its events (for apps that
+// see a call by its link or code and want to name the recording), '' when the room is not known.
+function meetingTitle(file,key){
+ try{const r=new Rooms({file}).data.rooms[key];return r?String(r.name||top(r.titles)||''):'';}catch{return '';}
+}
+module.exports={Rooms,normalize,linksOf,meetingTitle,LOOKBACK,KIND};
