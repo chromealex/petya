@@ -4190,6 +4190,11 @@
   "дн.": "days",
   "завтра": "tomorrow",
   "исполнится": "turns",
-  "сегодня исполняется": "turns today"
+  "сегодня исполняется": "turns today",
+  "Адрес Jira: укажите его в виде https://company.atlassian.net": "Jira address: enter it as https://company.atlassian.net",
+  "Адрес сервиса Zoom: укажите его в виде https://…": "Zoom service address: enter it as https://…",
+  "Адрес Ollama": "Ollama address",
+  "Адрес whisper.cpp": "whisper.cpp address",
+  "укажите адрес вида ": "enter an address like "
  }
 }

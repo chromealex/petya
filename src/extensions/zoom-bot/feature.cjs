@@ -3,7 +3,8 @@ const {ZoomBot}=require('./controller.cjs');
 const {createRemote,DEFAULT_URL}=require('./remote.cjs');
 function validate(next){
  if(!['off','ask','auto'].includes(next.zoomBotMode)||!['bot','local'].includes(next.zoomCaptureMode))throw Error('Проверьте режим подключения Zoom.');
- if(next.zoomBotUrl){const u=new URL(next.zoomBotUrl);if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash)throw Error('Сервис Zoom должен использовать HTTPS.');}
+ if(!String(next.zoomBotUrl||'').trim())next.zoomBotUrl=DEFAULT_URL;
+ if(next.zoomBotUrl){let u;try{u=new URL(next.zoomBotUrl);}catch{throw Error('Адрес сервиса Zoom: укажите его в виде https://…');}if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash)throw Error('Сервис Zoom должен использовать HTTPS.');}
 }
 module.exports={name:'zoomBot',defaults:{zoomBotMode:'auto',zoomCaptureMode:'local',zoomBotUrl:DEFAULT_URL,zoomBotCredential:'',zoomCredential:''},secrets:['zoomBotCredential','zoomCredential'],validate,
  setup(s){

@@ -214,8 +214,10 @@ function saveSettings(input, internal = false, profile = profileState()) {
     for (const key of ['telegramAutoSync','smartNotifications', 'interpretationEnabled', 'slackAutoSync', 'zoomAutoRecord', 'zoomCaptureMic', ...Object.keys(modules.defaults)]) if (!['true', 'false'].includes(next[key])) throw new Error('Некорректная настройка ' + key);
     if(!['auto','claude','codex'].includes(next.interpretationProvider))throw new Error('Некорректный помощник для разъяснения.');
     useBundledSpeech(next);
-    core.localEndpoint(next.whisperUrl); core.localEndpoint(next.ollamaUrl);
-    if (next.jiraUrl) { const url = new URL(next.jiraUrl); if (url.protocol !== 'https:' || !url.hostname.endsWith('.atlassian.net') || url.username || url.password || url.pathname !== '/') throw new Error('Укажите адрес Jira Cloud: https://company.atlassian.net'); next.jiraUrl = url.origin; }
+    // Autosave sends the whole form: an empty or unparsable address must name its field instead of a bare «Invalid URL».
+    for (const key of ['whisperUrl', 'ollamaUrl']) { if (!String(next[key] || '').trim()) next[key] = defaults[key]; try { core.localEndpoint(next[key]); } catch (error) { throw new Error((key === 'ollamaUrl' ? 'Адрес Ollama' : 'Адрес whisper.cpp') + ': ' + (/Invalid URL/.test(error.message) ? 'укажите адрес вида ' + defaults[key] : error.message)); } }
+    if (next.jiraUrl && !/^[a-z]+:\/\//i.test(next.jiraUrl.trim())) next.jiraUrl = 'https://' + next.jiraUrl.trim();
+    if (next.jiraUrl) { let url; try { url = new URL(next.jiraUrl); } catch { throw new Error('Адрес Jira: укажите его в виде https://company.atlassian.net'); } if (url.protocol !== 'https:' || !url.hostname.endsWith('.atlassian.net') || url.username || url.password || url.pathname !== '/') throw new Error('Укажите адрес Jira Cloud: https://company.atlassian.net'); next.jiraUrl = url.origin; }
     require('./jira-selection.cjs').normalizeSelection(next, settings, input);
     const saved = { ...next };
     for (const key of secrets) if (saved[key]) { if (!safeStorage.isEncryptionAvailable()) throw new Error('Хранилище секретов ОС недоступно.'); saved[key] = safeStorage.encryptString(saved[key]).toString('base64'); }
