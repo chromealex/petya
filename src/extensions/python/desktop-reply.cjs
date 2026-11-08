@@ -9,7 +9,7 @@ const provider={
   const ready=await s.python.status();check();
   if(!ready.ready)return require('../../input-required.cjs').ask({text:ready.message+' Когда среда будет готова, продолжу этот запрос.',label:'Среда Python',options:['Проверить снова','Отмена'],strictChoices:true},()=>{check();return provider.turn(s,command,context,check);});
   const rows=context.files.length?s.attachments.take(context.files.map(f=>f.id)):[];
-  if(rows.some(f=>typeof f.text!=='string'||/первые|сокращ[её]н/iu.test(f.note||'')))throw Error('Для Python нужны полные текстовые данные. Прикрепите CSV, JSON или лог до 40000 символов на файл.');
+  if(rows.some(f=>typeof f.text!=='string'||/первые|сокращ[её]н/iu.test(f.note||'')))throw Error('Для Python нужны полные текстовые данные. Прикрепите CSV, JSON или лог целиком.');
   if(new Set(rows.map(f=>f.name)).size!==rows.length)throw Error('Имена файлов совпадают. Переименуйте одно вложение.');
   const files=Object.fromEntries(rows.map(f=>[f.name,f.text]));
   let code=/```(?:python|py)\s*\n([\s\S]*?)```/i.exec(command)?.[1],result;
