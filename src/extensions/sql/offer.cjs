@@ -1,6 +1,8 @@
 // When to offer «SQL по словам»: a question to a database (SQL, ClickHouse, BigQuery, PostgreSQL, «в базе данных»,
 // «схема таблицы»). Not this: SQL migrations, DDL and query tuning (the Programmer), «что такое JOIN» (an explanation),
 // a knowledge base (docs), spreadsheets, and game metrics in words (DAU, retention, revenue are «Метрики игры»).
+// Connected: an own connection, or Grafana (added and connected) whose SQL datasources are query sources.
+const connected=settings=>require('./connections.cjs').connected(settings)||settings.extension_grafana==='true'&&(()=>{try{return require('../grafana/client.cjs').connected(settings);}catch{return false;}})();
 const W='(?:^|[^\\p{L}\\p{N}_])',E='(?=$|[^\\p{L}\\p{N}_])';
 module.exports={
  id:'sql',name:'SQL по словам',
@@ -10,6 +12,6 @@ module.exports={
  avoid:[new RegExp('миграц\\p{L}*|'+W+'(?:что такое|что значит|объясни|расскажи|чем отлича\\p{L}*|как работает)|баз\\p{L}* знани\\p{L}*|индекс\\p{L}*|процедур\\p{L}*|триггер\\p{L}*|спроектируй|нормализ\\p{L}*|(?:create|alter|drop) table|(?:создай|удали|измени|добавь|очисти)\\p{L}* (?:таблиц|столб|колонк|строк|запис|баз)|оптимизир\\p{L}*|ускорь|бэкап\\p{L}*|google sheets|гугл[- ]?таблиц\\p{L}*|excel|эксел\\p{L}*|firebase|crashlytics|крашлитикс\\p{L}*|кр[эеа]ш\\p{L}*','iu')],
  requests:[/(?:покажи|сколько|посчитай|выбери|выгрузи|напиши|составь|сделай|найди|топ|какие|какой|выполни|запусти)/iu],
  connect:'settings',
- connected:settings=>require('./connections.cjs').connected(settings),
- ready:settings=>settings.extension_sql==='true'&&require('./connections.cjs').connected(settings)
+ connected,
+ ready:settings=>settings.extension_sql==='true'&&connected(settings)
 };

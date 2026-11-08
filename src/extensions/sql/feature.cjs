@@ -216,7 +216,7 @@ async function turn(s,command,{connection=''}={}){
  const conns=await sources.all(s);
  if(!conns.length){
   if(k==='data')return null;
-  return kit.reply(s,text,{by:BY,question:true,text:'Подключите базу в настройках «SQL по словам»: ClickHouse, PostgreSQL или BigQuery. Лучше пользователем только с правами на чтение.'});
+  return kit.reply(s,text,{by:BY,question:true,text:'Подключите базу в настройках «SQL по словам»: ClickHouse, PostgreSQL или BigQuery (лучше пользователем только с правами на чтение) — или добавьте «Grafana» с SQL-источниками данных.'});
  }
  // A data question in words is taken only when it is about this database's data: the schema of a connection is cached
  // and one of its tables or columns is close to the question, or there is a single connection.

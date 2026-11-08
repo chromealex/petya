@@ -339,7 +339,28 @@ const saKey=JSON.stringify({type:'service_account',client_email:'reader@game-ana
  assert.deepEqual(ext.map(c=>[c.id,c.dialect,c.label]),[['src:grafana:7','clickhouse','ClickHouse prod · Grafana']],'unknown dialects are skipped');
  assert.deepEqual((await sources.engine({},ext[0]).run('SELECT 1',{maxRows:5})).o,{maxRows:5});
  assert.ok(require('../src/features/app-links.cjs').REGISTRIES.includes('query-source'));
- assert.deepEqual(sources.load().map(x=>x.id),[],'no bundled query source yet');
+ assert.deepEqual(sources.load().map(x=>x.id),['grafana'],'Grafana is a bundled query source');
+ // Grafana's SQL datasources as connections: schema and queries through /api/ds/query with rawSql.
+ const gq=[];
+ const gs={settings:{extension_grafana:'true',grafanaUrl:'https://grafana.example.com',grafanaToken:'g'.repeat(24)},
+  async request(url,options={}){
+   assert.equal(options.headers.Authorization,'Bearer '+'g'.repeat(24));
+   if(url==='https://grafana.example.com/api/frontend/settings')return {datasources:{'CH prod':{uid:'ch1',type:'grafana-clickhouse-datasource'},'Prometheus':{uid:'pr',type:'prometheus'},'Billing':{uid:'my1',type:'mysql'}}};
+   if(url==='https://grafana.example.com/api/ds/query'){const body=JSON.parse(options.body),q=body.queries[0];gq.push(q);
+    if(/system\.columns/.test(q.rawSql))return {results:{A:{frames:[{schema:{fields:[{name:'table'},{name:'name'},{name:'type'},{name:'comment'}]},data:{values:[['events','events'],['ts','user_id'],['DateTime','UInt64'],['','']]}}]}}};
+    if(/broken/.test(q.rawSql))return {results:{A:{error:'Code: 60. Table broken does not exist',frames:[]}}};
+    return {results:{A:{frames:[{schema:{fields:[{name:'day',type:'time'},{name:'n',type:'number'}]},data:{values:[[Date.UTC(2026,10,1),Date.UTC(2026,10,2)],[5,7]]}}]}}};}
+   throw Error('unexpected '+url);
+  }};
+ const graf=await sources.all(gs);
+ assert.deepEqual(graf.map(c=>[c.id,c.dialect,c.label]),[['src:grafana:ch1','clickhouse','CH prod · Grafana'],['src:grafana:my1','mysql','Billing · Grafana']],'only SQL datasources');
+ const gschema=await sources.engine(gs,graf[0]).schema();
+ assert.deepEqual(gschema.tables.map(t=>[t.name,t.columns.map(c=>c.name)]),[['events',['ts','user_id']]]);
+ assert.equal(gq[0].datasource.uid,'ch1');assert.equal(gq[0].format,1);
+ const grun=await sources.engine(gs,graf[0]).run('SELECT day, n FROM events LIMIT 500',{maxRows:500});
+ assert.deepEqual(grun.rows,[['2026-11-01T00:00:00.000Z',5],['2026-11-02T00:00:00.000Z',7]]);assert.equal(chart.detect(grun.columns,grun.rows).type,'line');
+ await assert.rejects(sources.engine(gs,graf[1]).run('SELECT * FROM broken'),/Grafana: Code: 60/);
+ assert.equal(gq.at(-1).format,'table');
 
  ch.server.close();pgs.server.close();fs.rmSync(tmp,{recursive:true,force:true});
  console.log('SQL по словам: routing and near-misses, not added / not connected, ClickHouse HTTP (readonly=1 last, limits, schema cache, EXPLAIN ESTIMATE, read-only profile, errors), PostgreSQL wire protocol (SCRAM, read-only transaction, one statement, errors), BigQuery (shared key, shards, dry run, bytes limit), model retries, auto-run, «Выполнить», typed SQL without a model, charts, query-source contract passed');

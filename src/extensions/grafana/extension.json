@@ -6,7 +6,7 @@
   "icon": "icon.svg",
   "connects": "Grafana",
   "uses": ["share-message"],
-  "provides": {"metrics-source": "metrics-source.cjs"},
+  "provides": {"metrics-source": "metrics-source.cjs", "query-source": "query-source.cjs"},
   "setting": "extension_grafana",
   "settings": true,
   "feature": "feature.cjs",
