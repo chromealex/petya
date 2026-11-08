@@ -25,7 +25,11 @@
   'Занятость коллег Microsoft показывает только для рабочих и учебных аккаунтов; для личного аккаунта видна только ваша занятость.'
  ])help.append(el('p',null,line));
  const status=el('p');status.setAttribute('role','status');
- card.append(list,buttons,hoursRow,help,status);
+ // Known rooms: links Petya learned from the calendar or that were typed for a meeting; rename or forget them.
+ const roomsBox=el('details','calendar-rooms');roomsBox.append(el('summary',null,'Комнаты для звонков'));
+ const roomsList=el('div');roomsList.style.cssText='display:flex;flex-direction:column;gap:6px;margin-top:6px';
+ roomsBox.append(el('p','small','Ссылки на встречи, которые повторяются в вашем календаре в разные дни, и ссылки, вставленные при создании встречи. Хранятся только на этом компьютере.'),roomsList);
+ card.append(list,buttons,hoursRow,roomsBox,help,status);
  document.getElementById('settings-form').append(card);
  const call=(method,...args)=>window.petya.feature('calendarApp',method,...args);
  let chosen='',timer=null;
@@ -52,7 +56,19 @@
   if(!pending&&timer){clearInterval(timer);timer=null;}
   notify(st.operation);
  }
- async function refresh(){try{paint(await call('status'));}catch(e){status.textContent=e.message;}}
+ function paintRooms(rooms){
+  roomsList.replaceChildren();
+  if(!rooms.length){roomsList.append(el('p','muted','Пока нет: Петя запомнит ссылку, которая встретится в календаре в разные дни.'));return;}
+  for(const r of rooms){
+   const row=el('div');row.style.cssText='display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+   const name=el('input');name.type='text';name.value=r.name;name.maxLength=80;name.setAttribute('aria-label','Название комнаты');name.style.minWidth='180px';
+   const url=el('small',null,r.url);url.setAttribute('data-no-i18n','');url.style.cssText='color:var(--muted);overflow-wrap:anywhere';
+   const rename=el('button',null,'Переименовать');rename.type='button';rename.onclick=async()=>{try{paintRooms(await call('renameRoom',r.key,name.value));status.textContent='Комната переименована.';}catch(e){status.textContent=e.message;}};
+   const forget=el('button',null,'Забыть');forget.type='button';forget.onclick=async()=>{try{paintRooms(await call('forgetRoom',r.key));status.textContent='Комната забыта.';}catch(e){status.textContent=e.message;}};
+   row.append(name,rename,forget,url);roomsList.append(row);
+  }
+ }
+ async function refresh(){try{paint(await call('status'));paintRooms(await call('rooms'));}catch(e){status.textContent=e.message;}}
  async function connect(provider,key){
   try{status.textContent='Откройте браузер и разрешите доступ к календарю.';paint(await call('connect',provider,key));}
   catch(e){status.textContent=e.message;}
