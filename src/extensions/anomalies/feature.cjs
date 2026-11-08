@@ -11,7 +11,7 @@ const feeds=require('./feeds.cjs');
 const engine=require('./engine.cjs');
 const {shift}=require('./stats.cjs');
 const ID='anomalies',BY='Аномалии';
-const SOURCE_APPS={metrics:['appmetrica'],crashes:['sentry','crashlytics','google-play'],support:['support'],ads:['ad-revenue'],reviews:['store-reviews']};
+const SOURCE_APPS={metrics:['appmetrica','grafana'],crashes:['sentry','crashlytics','google-play'],support:['support'],ads:['ad-revenue'],reviews:['store-reviews']};
 const KIND_NAMES={metrics:'метрики игры',crashes:'крэши',support:'поддержка',ads:'реклама',reviews:'отзывы в сторах'};
 
 // --- Routing ------------------------------------------------------------------------------------------------------
@@ -70,8 +70,8 @@ function summary(card){
 }
 // No connected source: the shared offer card lists the apps that would bring data.
 function connectQuestion(s,command){
- const text='Аномалии пока не из чего искать: подключите источник данных — метрики игры (AppMetrica), крэши (Sentry, Crashlytics, Google Play), поддержку (Zendesk), рекламу (AppLovin MAX, LevelPlay) или отзывы в сторах. Какой подключить?';
- const offered=s.extensionOffers?.propose?.(command,['appmetrica','sentry','crashlytics','support','ad-revenue','store-reviews'],text,BY);
+ const text='Аномалии пока не из чего искать: подключите источник данных — метрики игры (AppMetrica, Grafana), крэши (Sentry, Crashlytics, Google Play), поддержку (Zendesk), рекламу (AppLovin MAX, LevelPlay) или отзывы в сторах. Какой подключить?';
+ const offered=s.extensionOffers?.propose?.(command,['appmetrica','grafana','sentry','crashlytics','support','ad-revenue','store-reviews'],text,BY);
  return offered||kit.reply(s,command,{by:BY,question:true,text});
 }
 

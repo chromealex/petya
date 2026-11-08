@@ -28,7 +28,7 @@
  async function refresh(){
   try{
    const st=await call('status');
-   q('.an-sources').textContent=st.kinds.length?'Источники: '+st.kinds.map(k=>k.name).join(', ')+'.':'Нет подключённых источников: подключите метрики игры (AppMetrica), крэши, поддержку, рекламу или отзывы в сторах — до этого ежедневная проверка не запускается.';
+   q('.an-sources').textContent=st.kinds.length?'Источники: '+st.kinds.map(k=>k.name).join(', ')+'.':'Нет подключённых источников: подключите метрики игры (AppMetrica, Grafana), крэши, поддержку, рекламу или отзывы в сторах — до этого ежедневная проверка не запускается.';
    q('.an-daily-on').checked=!!st.daily;q('.an-daily-time').value=st.daily||'09:00';q('[name=anomaliesSensitivity]').value=st.sensitivity;
    rules(st.rules);say(st.kinds.length?'':'Ждёт источник данных.',st.kinds.length?'connected':'');
   }catch(e){say(e.message,'error');}
