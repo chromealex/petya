@@ -40,7 +40,7 @@
 .cb-row.focus td{background:#e5ce8c14}
 .cb-row.focus td:first-child{box-shadow:inset 3px 0 0 #e5ce8c}
 .cb-row.same td{color:var(--muted)}
-.cb-delta{display:flex;gap:6px;align-items:center;justify-content:flex-end}
+.cb-dval{display:inline-flex;gap:6px;align-items:center;justify-content:flex-end}
 .cb-dbar{display:inline-block;height:6px;border-radius:3px}
 .cb-dbar.up{background:#c9ed9d}
 .cb-dbar.down{background:#f0b4a8}

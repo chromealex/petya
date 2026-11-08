@@ -61,7 +61,7 @@
     const obj=k.el('td','cb-obj');obj.append(raw(k.el('strong',null,r.label||r.object||r.key)));if(r.file)obj.append(raw(k.el('small',null,short(r.file)+(r.line?':'+r.line:''))));if(r.file)obj.title=r.file+(r.line?', строка '+r.line:'');
     const field=k.el('td','cb-fieldcell');if(r.column){field.append(raw(k.el('span',null,r.column)));if(r.field)field.append(raw(k.el('small',null,r.field)));}
     const delta=k.el('td','cb-delta num');
-    if(r.delta!==null&&r.delta!==undefined){const rel=Math.abs(r.delta)/Math.max(1,Math.abs(Number(r.config)||0));const b=k.el('span','cb-dbar '+(r.delta>0?'up':'down'));b.style.width=Math.max(6,rel/maxRel*48)+'px';delta.append(k.el('span',null,(r.delta>0?'+':'−')+val(Math.abs(r.delta))),b);}
+    if(r.delta!==null&&r.delta!==undefined){const rel=Math.abs(r.delta)/Math.max(1,Math.abs(Number(r.config)||0));const b=k.el('span','cb-dbar '+(r.delta>0?'up':'down'));b.style.width=Math.max(6,rel/maxRel*48)+'px';const inner=k.el('span','cb-dval');inner.append(k.el('span',null,(r.delta>0?'+':'−')+val(Math.abs(r.delta))),b);delta.append(inner);}
     row.append(obj,field,raw(k.el('td','num'+(r.status==='diff'?' sheet':''),r.status==='no-row'?'—':val(r.sheet))),raw(k.el('td','num',r.status==='no-object'?'—':val(r.config))),delta);
     const st=k.el('td');st.append(k.chip(STATUS[r.status]||{label:r.status}));row.append(st);tbody.append(row);
    }
