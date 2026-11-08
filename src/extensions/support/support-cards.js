@@ -9,8 +9,11 @@
  const fmt=n=>Number(n||0).toLocaleString(locale());
  const day=d=>new Date(d+'T12:00:00Z').toLocaleDateString(locale(),{day:'numeric',month:'short'});
  const when=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?'':d.toLocaleDateString(locale(),{day:'numeric',month:'short'})+' '+d.toLocaleTimeString(locale(),{hour:'2-digit',minute:'2-digit'});};
- const plural=(n,[one,few,many])=>{const a=Math.abs(n)%100,b=a%10;return a>10&&a<20?many:b===1?one:b>=2&&b<=4?few:many;};
- const hours=h=>{const v=Math.abs(h);if(v<1)return 'меньше часа';if(v<48){const n=Math.round(v);return n+' '+plural(n,['час','часа','часов']);}const n=Math.round(v/24);return n+' '+plural(n,['день','дня','дней']);};
+ // Russian forms; another interface language takes the singular only for exactly one (the word is translated in the DOM).
+ const plural=(n,[one,few,many])=>{if(window.petyaLanguage&&window.petyaLanguage!=='ru')return Math.abs(n)===1?one:many;const a=Math.abs(n)%100,b=a%10;return a>10&&a<20?many:b===1?one:b>=2&&b<=4?few:many;};
+ // Hours and days in the interface locale («5 часов», «5 hours»).
+ const unit=(n,u)=>{try{return new Intl.NumberFormat(locale(),{style:'unit',unit:u,unitDisplay:'long'}).format(n).replace(/ /g,' ');}catch{return n+' '+(u==='hour'?plural(n,['час','часа','часов']):plural(n,['день','дня','дней']));}};
+ const hours=h=>{const v=Math.abs(h);if(v<1)return 'меньше часа';if(v<48)return unit(Math.round(v),'hour');return unit(Math.round(v/24),'day');};
  // Players' texts, subjects, problem titles and drafts are left alone by the UI translator.
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
  const notify=(id,data)=>document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail:{id,...data}}));
@@ -136,7 +139,7 @@
   const sentLine=sent=>{const p=k.el('p','sp-sent');p.append(k.el('b',null,'Отправлено игроку: '),raw(k.el('span',null,sent.text)));return p;};
   if(d.sent)body.append(sentLine(d.sent));
   else{
-   const area=raw(k.el('textarea'));area.value=d.draft||'';area.rows=7;area.setAttribute('aria-label','Текст ответа');
+   const area=raw(k.el('textarea'));area.value=d.draft||'';area.rows=7;area.setAttribute('aria-label',(window.t||String)('Текст ответа'));
    const counter=k.el('small','sp-counter');
    const go=k.el('button','primary','Отправить');go.type='button';
    const sync=()=>{counter.textContent=fmt(area.value.length)+' '+plural(area.value.length,['символ','символа','символов']);go.disabled=!area.value.trim();};

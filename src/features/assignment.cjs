@@ -3,7 +3,7 @@
 // before and after), and sends to Asana through a batch here (Jira keeps its own batch in workspace.cjs).
 // The same workload snapshot answers «загрузка команды» in chat and shows load on the team page.
 const assign = require('../assign.cjs');
-const { Workload, loadQuestion, answer } = require('../workload.cjs');
+const { Workload, loadQuestion, answer, personAnswer } = require('../workload.cjs');
 const { Asana } = require('../asana.cjs');
 
 module.exports = {
@@ -80,7 +80,9 @@ module.exports = {
         asanaProjects: projects,
         asanaSend: async ({ id, project, tasks } = {}) => { await asana.prepareBatch({ id, project: String(project || ''), tasks }); workload.cache = null; return asana.sendBatch(id); }
       },
-      teamLoad: { turn, workload }
+      teamLoad: { turn, workload,
+        // A question about one colleague («чем Аня занимается?»): the card and what is open on them in Jira.
+        person: async (member, text) => { const reply = await personAnswer(workload, member, members()); s.dialogue.rememberAction(text, reply); const t = s.dialogue.active(); return { handled: true, text: reply, by: 'команда', topicId: t?.id, topicTitle: t?.title, messages: t?.messages }; } }
     };
   }
 };

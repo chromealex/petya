@@ -23,7 +23,7 @@
  };
  const search='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></svg>';
  // Cross-app capability kinds (src/features/app-links.cjs) as the catalog names them.
- const KIND_NAMES={'video-meeting':'Видеозвонок','task-tracker':'Задача в трекер','share-message':'Сообщение в канал','code-fix':'Починка кода','meeting-recording':'Запись встречи'};
+ const KIND_NAMES={'video-meeting':'Видеозвонок','task-tracker':'Задача в трекер','share-message':'Сообщение в канал','code-fix':'Починка кода','meeting-recording':'Запись встречи','reminder-trigger':'Напоминание по событию','journal-source':'Дневник дня','meeting-source':'Распознавание встреч','metrics-source':'Источник метрик','crash-source':'Источник крэшей','support-source':'Источник тикетов','ad-source':'Источник рекламы','spreadsheet-export':'Выгрузка в таблицу','release-check':'Пункт релизного чек-листа'};
  // Saved credentials of service modules (flags from settings, never the secrets themselves).
  const SERVICE_FLAGS={slack:['hasSlackToken','hasSlackOAuth'],notion:['hasNotionToken','hasNotionOAuth'],jira:['hasJiraToken','hasAtlassianOAuth'],confluence:['hasJiraToken','hasAtlassianOAuth'],asana:['hasAsanaOAuth'],telegram:['hasTelegram'],googleplay:['hasGooglePlay'],gmail:['hasGmail','hasMicrosoft']};
 

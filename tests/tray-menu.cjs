@@ -13,4 +13,7 @@ menu=createTrayMenu({...options,listening:true});
 assert.ok(menu.some(item=>item.label==='Выключить микрофон'));
 menu=createTrayMenu({...options,ready:false});
 assert.equal(menu.find(item=>item.label==='Включить микрофон').enabled,false);
+let opened='';menu=createTrayMenu({...options,listening:false,dashboards:[{id:'d1',title:'Релиз'}],openDashboard:id=>opened=id});
+menu.find(item=>item.label==='Дашборды').submenu[0].click();assert.equal(opened,'d1');
+assert(!createTrayMenu({...options,listening:false}).some(item=>item.label==='Дашборды'),'no dashboards — no submenu');
 console.log('Tray menu tests passed');

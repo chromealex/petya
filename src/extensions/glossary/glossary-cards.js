@@ -6,7 +6,8 @@
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('glossary-cards.css',document.currentScript.src).href;document.head.append(style);
  const locale=()=>window.petyaLocale||'ru-RU';
  const num=v=>Number(v||0).toLocaleString(locale());
- const plural=(n,[a,b,c])=>{const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
+ // Russian forms; another interface language takes the singular only for exactly one (the word is translated in the DOM).
+ const plural=(n,[a,b,c])=>{if(window.petyaLanguage&&window.petyaLanguage!=='ru')return Math.abs(n)===1?a:c;const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
  // Terms, definitions, translations and strings are project data: never machine-translated.
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
  const feature=(method,...args)=>window.petya.feature('glossary',method,...args);

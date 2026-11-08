@@ -1,7 +1,7 @@
 const path = require('node:path');
 const {t} = require('./interface-language.cjs');
 
-function createTrayMenu({Menu, nativeImage, platform = process.platform, company, listening, meeting=false, ready, show, navigate, toggle, pause, quit}) {
+function createTrayMenu({Menu, nativeImage, platform = process.platform, company, listening, meeting=false, ready, show, navigate, toggle, pause, quit, dashboards=[], openDashboard=()=>{}}) {
  const icon = name => {
   if(platform !== 'darwin') return undefined;
   const image = nativeImage.createFromPath(path.join(__dirname, '../assets/tray-menu', name+'.png'));
@@ -18,6 +18,8 @@ function createTrayMenu({Menu, nativeImage, platform = process.platform, company
   action(listening ? 'Выключить микрофон' : 'Включить микрофон', listening ? 'mic-off' : 'mic', toggle, {enabled:ready}),
   action('Остановить всё прослушивание', 'pause', pause, {enabled:ready&&(listening||meeting)}),
   {type:'separator'},
+  // Dashboards (src/features/dashboards.cjs): open one in Petya straight from the menu bar.
+  ...(dashboards.length?[{label:t('Дашборды'),enabled:ready,submenu:dashboards.map(d=>({label:d.title,click:()=>openDashboard(d.id)}))}]:[]),
   action('Материалы', 'context', () => navigate('sources'), {enabled:ready}),
   action('Команда', 'team', () => navigate('team'), {enabled:ready}),
   action('История', 'history', () => navigate('history'), {enabled:ready}),

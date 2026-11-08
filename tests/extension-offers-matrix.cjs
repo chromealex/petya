@@ -44,7 +44,9 @@ const own={
  docker:['что запущено в докере','логи контейнера api','почему падает контейнер postgres','перезапусти redis','сколько места занимает докер'],
  'http-client':['дерни GET https://api.example.com/v1/users/42','отправь POST на /login с телом {"email":"a@b.c"}','проверь, отвечает ли staging','какой статус у health-check прода','импортируй curl https://api.example.com/v1/ping'],
  'screenshot-task':['сделай баг из скриншота','скрин в задачу','заведи баг по этому экрану'],
- converter:['сожми видео до 10 МБ','конвертни png в webp','сделай гифку из видео','переведи docx в pdf','уменьши картинки в папке до 1024']
+ converter:['сожми видео до 10 МБ','конвертни png в webp','сделай гифку из видео','переведи docx в pdf','уменьши картинки в папке до 1024'],
+ reminders:['какие у меня напоминания','поставь напоминание на завтра','покажи мои напоминания'],
+ journal:['что я сегодня сделал','итоги недели','план на завтра','запиши в дневник: идея с картой']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -62,6 +64,11 @@ const not={
  'build-size':['размер команды','размер экрана','сборка упала'],
  localization:['переведи эту фразу','перевод денег','перевести задачу в другой статус'],
  'regex-cron':['регулярно созваниваемся','регулярные встречи по понедельникам'],
+ // «Напомни …» is never an offer (Petya's own recurring commands and dialogue answer it); a reminder to a colleague,
+ // birthdays and meetings are neighbours.
+ reminders:['напомни в 16:00 позвонить','напомни Ивану про отчёт','дни рождения','поставь встречу в 16:00','проверяй почту каждые 5 минут','напомни, что мы обсуждали'],
+ // A game devlog, log files and changelogs are not the personal journal; nor are meeting or sprint results.
+ journal:['дневник разработки','журнал логов','журнал изменений','итоги встречи','итоги спринта','план релиза','что я сделал не так'],
  // Zoom by name only: zooming a picture or the screen is not the meeting app, and meetings in general are Petya's.
  zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи','созвон в Meet','встреча в тимсе'],
  // Meet and Teams by name only: «meeting», «митинг», «митап», meetings in general, the calendar and Zoom are not them.
@@ -124,7 +131,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

@@ -35,6 +35,9 @@ button for an app that is not added and connected, and nothing is written until 
 - **Ad sources** (`"ad-source"`) are declared the same way and read by «Реклама и монетизация»
   (`src/extensions/ad-revenue/sources.cjs`, see [ad-revenue.md](ad-revenue.md)): revenue reports of ad mediation
   services (AppLovin MAX, Unity LevelPlay), never card buttons.
+- **Reminder triggers** (`"reminder-trigger"`, events «Напоминания» can wait for, see [reminders.md](reminders.md))
+  and **journal sources** (`"journal-source"`, what «Дневник дня» knows about a day, see [journal.md](journal.md))
+  are declared the same way and served by their apps' own registries.
 
 Renderer: `k.links(kind, payload, {context, label, title, primary, onDone, className})` in `src/ui/result-kit.js`
 returns a node for an actions row: nothing without providers, one button for one provider, a button with a «▾» menu

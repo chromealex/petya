@@ -40,6 +40,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     // Explicit («раздай агентам») runs at once; a request over several areas gets an offer first
     // («Раздать агентам» / «Ответить одним сообщением», the choice can be remembered).
     // Plugins first: a plugin may own this chat's next message (e.g. corrections to a work plan).
+    // «Собери дашборд: баги спринта, крэши за неделю» (src/features/dashboards.cjs) — before the apps named in it.
+    if(!choice){const board=ctx.dashboards?.turn(original);if(board)return board;}
     if(!choice){const plugin=await ctx.extensionTurn?.(original);if(plugin)return via(plugin.by||'расширение',plugin);}
     // A direct request about the subject of an extension the user does not have yet is answered by the offer to add it.
     if(!choice&&!ctx.dialogue.active()?.agentOf&&!ctx.attachments.list().length){const offered=ctx.extensionOffers?.turn(original);if(offered)return offered;}

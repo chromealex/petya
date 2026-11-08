@@ -107,6 +107,8 @@
     if(unsent){const row=node('div',null,'project-chat-row'),b=button('Новый чат',newChat);b.className='project-sidebar-chat';row.append(b);showDraft(row,b,unsent);group.append(row);}
     const saved=state.projects.find(project=>project.id===p.id)?.savedCount;
     if(saved){const b=button('Сохранённые ответы · '+saved,()=>window.showProjectAnswers(p.id));b.className='project-view-all';group.append(b);}
+    // The project's dashboards (src/ui/dashboards.js).
+    window.projectSidebarExtras?.(p.id,group);
   }
   // Agent chats sit under the chat that started them; an agent whose parent is hidden stays at top level.
   const parents=new Set(rows.map(t=>t.id)),agents=new Map();for(const t of rows)if(t.agentOf&&t.agentOf!==t.id&&parents.has(t.agentOf)){if(!agents.has(t.agentOf))agents.set(t.agentOf,[]);agents.get(t.agentOf).push(t);}

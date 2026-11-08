@@ -10,7 +10,8 @@
  const num=v=>Number(v||0).toLocaleString(locale(),{maximumFractionDigits:1});
  // Moments are relative where the app has the shared helper (src/ui/relative-time.js); a short date otherwise.
  const date=ms=>{const d=new Date(ms);if(isNaN(d))return '';if(typeof window.shortTime==='function')return window.shortTime(d);return d.toLocaleDateString(locale(),{day:'numeric',month:'short',...(d.getFullYear()!==new Date().getFullYear()?{year:'numeric'}:{})});};
- const plural=(n,[a,b,c])=>{const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
+ // Russian forms; another interface language takes the singular only for exactly one (the word is translated in the DOM).
+ const plural=(n,[a,b,c])=>{if(window.petyaLanguage&&window.petyaLanguage!=='ru')return Math.abs(n)===1?a:c;const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
  // Names, commit subjects, issue summaries, file paths and quotes are data, never translated.
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
  const feature=(method,...args)=>window.petya.feature('whoKnows',method,...args);
@@ -97,7 +98,7 @@
    k.el('p',null,'Код: за каждый коммит в файлах темы — 1 + lg(1 + изменённых строк); коммит, найденный только по описанию, — 1. Jira: исполнитель — 3, автор — 1, комментарий — 1 (до 3 на задачу). Slack и встречи: 1 за сообщение или реплику (до 3 на тред или встречу). Каждый балл теряет половину веса за 4 месяца.'));
   if(c.search){const words=[...(c.search.identifiers||[]),...(c.search.paths||[]),...(c.search.text||[]).filter(t=>/[а-яё]/i.test(t))];if(words.length)how.append(raw(k.el('p','who-terms','Искал: '+[...new Set(words)].join(', '))));}
   body.append(how);
-  const status=people.length?{label:people.length+' '+plural(people.length,['человек','человека','человек']),tone:'done'}:{label:'нет следов',tone:'alert'};
+  const status=people.length?{label:people.length===1?'1 человек':people.length+' '+plural(people.length,['человек','человека','человек']),tone:'done'}:{label:'нет следов',tone:'alert'};
   const actions=[];
   if(c.mode!=='last')actions.push({label:'Кто последним трогал',run:()=>k.ask('Кто последний трогал код по теме «'+c.topic+'»',{send:true})});
   actions.push({label:'Спросить про другую тему',run:()=>k.ask('Кто разбирается в ')});

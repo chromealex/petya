@@ -32,7 +32,7 @@ function explain(error){
  const map={401:'Discord не принял токен бота. Проверьте его в «Настройки → Discord».',
   403:code===50013?'Боту не хватает прав в этом канале (нужно «Отправлять сообщения», в ветках — «Отправлять сообщения в ветках»).':'У бота нет доступа к каналу: дайте ему «Просматривать каналы» и «Читать историю сообщений».',
   404:'Discord не нашёл сервер, канал или сообщение. Проверьте выбор в «Настройки → Discord».',
-  429:'Discord ограничил число запросов. Повторите через '+Math.ceil(Number(error.retryAfter)||5)+' с.'};
+  429:'Discord ограничил число запросов. Повторите через '+Math.ceil(Number(error.retryAfter)||5)+' сек.'};
  const e=Error(map[error.status]||error.message||'Discord недоступен.');e.status=error.status;e.code=code;e.cause=error;return e;
 }
 async function api(s,path,{query,method='GET',body}={}){

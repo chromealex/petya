@@ -7,7 +7,8 @@
  const locale=()=>window.petyaLocale||'ru-RU';
  const when=iso=>{const d=new Date(iso);return isNaN(d)?'':d.toLocaleString(locale(),{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});};
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
- const plural=(n,[a,b,c])=>{const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
+ // Russian forms; another interface language takes the singular only for exactly one (the word is translated in the DOM).
+ const plural=(n,[a,b,c])=>{if(window.petyaLanguage&&window.petyaLanguage!=='ru')return Math.abs(n)===1?a:c;const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
 
  function tile(k,value,label,tone=''){const b=k.el('div','standup-tile'+(tone?' '+tone:''));b.append(k.el('span','standup-value',value),k.el('span','standup-label',label));return b;}
  function bar(k,t,thread){
@@ -65,7 +66,7 @@
   const body=k.el('div','standup-body');
   const tiles=k.el('div','standup-tiles');
   tiles.append(tile(k,(c.thread?t.answered:t.people-t.silent)+' / '+t.people,c.thread?'ответили в треде':'с активностью'),
-   tile(k,String(t.blockers),plural(t.blockers,['блокер','блокера','блокеров'])+(t.blocked?' у '+t.blocked:''),t.blockers?'alert':''),
+   tile(k,String(t.blockers),plural(t.blockers,['блокер','блокера','блокеров'])+(t.blocked?' · людей: '+t.blocked:''),t.blockers?'alert':''),
    tile(k,String(t.silent),c.thread?'нет ответа':'без активности',t.silent?'progress':''));
   body.append(tiles);
   if(t.people)body.append(bar(k,t,!!c.thread));
@@ -84,7 +85,7 @@
   ];
   const status=t.blockers?{label:t.blocked+' с блокерами',tone:'alert'}:t.silent?{label:'не все ответили',tone:'progress'}:{label:'без блокеров',tone:'done'};
   const src=[c.sources?.jira?'Jira':'',c.sources?.git?'git':'',c.sources?.slack?'Slack':''].filter(Boolean).join(' · ');
-  const subtitle='с '+when(c.since)+(src?' · '+src:'')+(c.schedule?' · '+c.schedule.days+' в '+c.schedule.time:'');
+  const subtitle='период с '+when(c.since)+(src?' · '+src:'')+(c.schedule?' · '+c.schedule.days+', '+c.schedule.time:'');
   const card=k.card({app:'Стендап',initial:'С',color:'#5b4fc4',key:c.project.name+(c.jira?' · '+c.jira:''),href:c.thread?.url,status,subtitle,body,actions,className:'standup-card'});
   const key=card.querySelector('.kit-key');if(key)raw(key);
   parent.append(card);

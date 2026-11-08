@@ -120,12 +120,16 @@ function useBundledSpeech(target) {
 }
 function publicSettings() { return { ...settings, ...Object.fromEntries(features.flatMap(feature=>feature.secrets||[]).map(key=>[key,''])), unityToken:'', companyId, companyName:companies.get(companyId).name, telegramCredential:'',hasTelegram:!!settings.telegramCredential, microsoftCredential:'', gmailCredential:'', hasGmail:!!settings.gmailCredential, googlePlayCredential:'', hasGooglePlay:!!settings.googlePlayCredential, asanaCredential: '', hasAsanaOAuth: !!settings.asanaCredential, slackCredential: '', notionCredential: '', hasSlackOAuth: !!settings.slackCredential, hasNotionOAuth: !!settings.notionCredential, atlassianCredential: '', hasAtlassianOAuth: !!settings.atlassianCredential, jiraToken: '', slackToken: '', notionToken: '', hasNotionToken: !!settings.notionToken || !!settings.notionCredential, hasJiraToken: !!settings.jiraToken || !!settings.atlassianCredential, hasSlackToken: !!settings.slackToken || !!settings.slackCredential }; }
 let trayMeeting = false, trayListening = false, trayReady = false;
+// Dashboards in the tray menu (src/features/dashboards.cjs sets this once features are up).
+let trayDashboards = () => [];
 function refreshTrayMenu() {
  if(!tray || tray.isDestroyed())return;
  const company=companies.get(companyId).name;
  tray.setToolTip(require('./interface-language.cjs').t('Петя · '+company+(trayListening?' · микрофон включён':' · микрофон выключен')));
  tray.setContextMenu(require('./tray-menu.cjs').createTrayMenu({
   Menu,nativeImage,company,listening:trayListening,meeting:trayMeeting,ready:trayReady,show,
+  dashboards:(()=>{try{return trayDashboards();}catch{return [];}})(),
+  openDashboard: id => {show();win.webContents.send('dashboard-open',id);},
   navigate: page => {show();win.webContents.send('navigate',page);},
   toggle: () => win.webContents.send('toggle-listening'),
   pause: () => win.webContents.send('pause-all'),
@@ -669,6 +673,7 @@ function setupHandlers() {
   for (const feature of features) { const { ipc, ...provided } = feature.setup(services) || {}; if (ipc) featureIpc.set(feature.name, ipc); for (const [key, value] of Object.entries(provided)) Object.defineProperty(services, key, { value, enumerable: true, configurable: true }); }
   routeModelRequest=services.modelRuntime.routeRequest;
   if(smoke)globalThis.petyaTestServices=services; // tests reach feature services in smoke mode only
+  if(services.dashboards){trayDashboards=()=>services.dashboards.menu();services.dashboards.onChange=refreshTrayMenu;refreshTrayMenu();}
   publishProfile({workspace,dialogue,telegramSource,serviceAccess,serviceBrowser,slackLogs,buildWatch,reviewAssistant,buildQuestion,buildRepair,slackSync,maintenance,stopWebSearch});
   scope.capture();
   handle('feature', (name, method, ...args) => { const ipc = featureIpc.get(name); if (typeof name !== 'string' || typeof method !== 'string' || !ipc || !Object.hasOwn(ipc, method) || typeof ipc[method] !== 'function') throw Error('Неизвестная функция.'); return ipc[method](...args); });

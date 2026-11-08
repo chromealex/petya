@@ -33,15 +33,20 @@ module.exports={
   const turn=async command=>{
    const text=String(command||'').trim();
    // About the team: team words, what someone is responsible for, or the name of a saved colleague.
-   const names=require('../team.cjs').members(s.settings).flatMap(m=>[m.name,...String(m.aliases||'').split(',')].map(n=>String(n||'').trim().split(/\s+/)[0]).filter(n=>n&&n.length>=3));
-   const mentionsColleague=names.some(n=>new RegExp('(?:^|[^\\p{L}])'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').slice(0,-1)+'\\p{L}{0,3}(?![\\p{L}])','iu').test(text));
+   const team=require('../team.cjs').members(s.settings);
+   const firstNames=m=>[m.name,...String(m.aliases||'').split(',')].map(n=>String(n||'').trim().split(/\s+/)[0]).filter(n=>n&&n.length>=3);
+   const said=n=>new RegExp('(?:^|[^\\p{L}])'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').slice(0,-1)+'\\p{L}{0,3}(?![\\p{L}])','iu').test(text);
+   const mentioned=team.filter(m=>firstNames(m).some(said)),mentionsColleague=mentioned.length>0;
    if(!(ABOUT.test(text)||PERSON_FACT.test(text)||mentionsColleague)||shellCommand(text)||s.attachments?.list?.().length)return null;
    let intent;try{s.requestProgress?.report('Понимаю просьбу про команду');intent=await classify(text,s.dialogue.active());}catch(e){console.error('Team intent:',e.message);return null;}
    if(intent==='fill')return s.teamFill.turn(text,false,null,null,{force:true});
    if(intent==='existing')return s.teamFill.turn(text,false,null,null,{force:true,existing:true});
    // Facts the user states: the request itself is the source; every saved value must be quoted from it.
    if(intent==='facts')return s.teamFill.turn(text,false,null,null,{force:true});
-   return null; // workload and anything else: the usual pipeline (Jira reports, the model's answer)
+   // A question about one named colleague («чем Аня занимается?», «над чем работает Полина»): the card and their
+   // open Jira issues, instead of leaving the wording to chance further down the pipeline.
+   if((intent==='workload'||intent==='other')&&mentioned.length===1&&s.teamLoad?.person&&/\?\s*$|^(?:а\s+)?(?:чем|что|над чем|кто|какие|как)(?=\s)/iu.test(text))return s.teamLoad.person(mentioned[0],text);
+   return null; // workload of the team and anything else: the usual pipeline (Jira reports, the model's answer)
   };
   return {teamIntent:{turn,classify}};
  }
