@@ -48,7 +48,8 @@ module.exports={
   id: 'focus',                 // default: the extension id
   label: 'Фокус-сессия',
   order: 10,                   // lower wins a tie (default 1000)
-  ready: settings => bool,     // optional; the registry also requires the extension to be added
+  ready: settings => bool,     // optional, default yes: whether it applies now (usually its app's switch).
+                               // Unlike other registries the app need not be added: a condition may outlive the switch.
   // Synchronous (Notification.show is): null for no opinion.
   decide(services, notification) { return {action:'deliver'|'hold'|'summarize', reason:'…'} | null; },
   // Required to hold: keep it and release it yourself when the condition ends.
@@ -77,8 +78,8 @@ is shown. A notification is never lost: the worst case is that it is shown.
 
 The focus app's holding moved here without behaviour change: the same urgency rule, the same held list and release;
 `tests/notification-policy.cjs` compares the policy with the old gate on the same notifications in every session
-state (none, running, paused, resumed, break, after). The one difference: a removed «Фокус» app no longer holds
-(registries ask only added apps); before, a session left running after removing the app kept holding.
+state (none, running, paused, resumed, break, after). The focus policy declares no `ready`, so — as before — a session
+that is running holds even if the app was switched off meanwhile; it ends and releases as usual.
 
 Quiet hours, meetings in progress and per-source mute rules are policies other apps can add with the contract above;
 `tests/notification-policy.cjs` exercises such policies (stubs) against the core.

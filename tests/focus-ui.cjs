@@ -57,7 +57,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(item,'ПаузаСтопЕщё 10 минут');
  // A non-urgent system notification during the session is held; an urgent one is not.
  const {Notification}=require('electron');
- assert.ok(Notification.prototype.show.petyaFocusHold,'Electron Notification.show is wrapped');
+ assert.ok(Notification.prototype.show.petyaNotificationGate,'Electron Notification.show is wrapped by the notification policy core');
  new Notification({title:'Петя',body:'Ответ готов.'}).show();
  new Notification({title:'Петя',body:'Нужно уточнить проект для Codex'}).show();
  assert.equal(await js("window.petya.feature('focusApp','status').then(s=>s.held)"),1);

@@ -6,7 +6,7 @@
 //   "provides": { "notification-policy": "<file>.cjs" }
 // and the file exports
 //   { id?, label?, order?,                              // order: lower wins a tie (default 1000)
-//     ready?(settings) -> bool,                         // the registry adds «the extension is added»
+//     ready?(settings) -> bool,                         // whether it applies now (e.g. its app's switch); default yes
 //     decide(services, notification) -> null | {action:'deliver'|'hold'|'summarize', reason?},   // synchronous
 //     accept?(services, notification) }                 // required to hold: the policy keeps it and releases it
 // notification: {title, body, source, urgency, urgent, at}. `source` names who sent it ('petya' when unknown,
@@ -70,8 +70,9 @@ function describe(n,now=Date.now()){
 }
 
 function create(s,{policies=load(),now=Date.now,send}={}){
- const added=p=>!p.setting||s.settings?.[p.setting]==='true';
- const ready=p=>{try{return added(p)&&(typeof p.provider.ready!=='function'||!!p.provider.ready(s.settings||{}));}catch{return false;}};
+ // A policy says itself whether it applies (`ready`); the registry does not require its app to be added, because a
+ // condition may outlive the switch (a focus session that was running when the app was removed still ends normally).
+ const ready=p=>{try{return typeof p.provider.ready!=='function'||!!p.provider.ready(s.settings||{});}catch{return false;}};
  const publish=send||(item=>{try{if(s.win&&!s.win.isDestroyed?.()&&!s.win.webContents?.isDestroyed?.())s.win.webContents.send('extension-install-progress',item);}catch{/* window closing */}});
  const summarized=[];
  // The decision for one notification: {action, policy, reason}. Pure: nothing is kept here.

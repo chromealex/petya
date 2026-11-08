@@ -75,6 +75,6 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js("[..."+tone+".querySelectorAll('.kit-actions button')].map(b=>b.textContent).join('|')"),'Скопировать|Отправить в Slack|Проверить снова');
  assert.equal(await js("document.querySelectorAll('.tone-card')[1].querySelector('.tc-ok')!==null"),true);
  const shot2=await require('./card-shot.cjs')(win,'.tone-card','petya-tone-check-card');
- console.log('Tone check UI: Discord confirmation reviewed with findings, applied suggestion with «Вернуть», follows edits, sends exactly the field; chat card with marks, scale, applied fix and softer variant passed ('+shot1+', '+shot2+')');
+ console.log('Tone check UI: Discord confirmation reviewed with findings, applied suggestion with «Вернуть», follows edits, sends exactly the field; chat card with marks, scale, applied fix and softer variant ('+shot1+', '+shot2+') passed');
 }};
 require('../src/main.cjs');

@@ -28,7 +28,7 @@ fs.rmSync(path.join(tmp,'ext','unknown'),{recursive:true});
 
 // --- Decisions: quiet hours summarize, a meeting holds, per-source mute summarizes; hold beats summarize ---
 let hour=14,meeting=false;const kept=[];
-const policy=(id,order,provider,setting='extension_'+id)=>({id,extension:id,setting,label:id,order,provider});
+const policy=(id,order,provider,setting='extension_'+id)=>({id,extension:id,setting,label:id,order,provider:{ready:st=>st[setting]==='true',...provider}});
 const policies=[
  policy('mute',5,{decide:(s,n)=>n.source==='assignments'&&s.settings.muteAssignments==='true'&&!n.urgent?{action:'summarize',reason:'Поручения без звука'}:null}),
  policy('meeting',10,{decide:(s,n)=>meeting&&!n.urgent?{action:'hold',reason:'Идёт встреча'}:null,accept:(s,n)=>kept.push(n.body)}),
@@ -58,7 +58,7 @@ p.clear();assert.equal(p.summary().length,0);
 // A policy whose accept fails: the notification is shown, never lost.
 const lossy=core.create(s,{policies:[policy('meeting',1,{decide:()=>({action:'hold'}),accept:()=>{throw Error('disk full');}})],send(){}});
 assert.equal(lossy.route(n('Создана задача BW-14')),false);
-// Not added → not asked.
+// A policy that is not ready (its switch off) is not asked.
 s.settings.extension_meeting='false';meeting=true;hour=14;
 assert.equal(p.decide(n('Создана задача BW-15')).action,'deliver');
 s.settings.extension_meeting='true';meeting=false;
@@ -115,9 +115,9 @@ for(const [name,enter] of Object.entries(states)){
   if(expected)assert.deepEqual(e.store.held.at(-1),{title:x.title,body:x.body,at:clock});
  }
 }
-// The policy is asked only while the focus app is added.
+// As before the migration, a running session holds even if the app was switched off meanwhile (it still ends normally).
 fs2.settings.extension_focus='false';e.store.start({minutes:25},clock);
-assert.equal(policyCore.decide(n('Ответ готов.')).action,'deliver');
+assert.equal(policyCore.decide(n('Ответ готов.')).action,'hold');
 fs2.settings.extension_focus='true';
 assert.deepEqual([policyCore.decide(n('Ответ готов.')).action,policyCore.decide(n('Ответ готов.')).policy],['hold','focus']);
 e.store.stop(clock);
