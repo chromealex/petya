@@ -15,4 +15,20 @@ assert.equal(ipc.catalog().find(e=>e.id==='artist').installed,false);
 ipc.install('artist');assert.equal(settings.artistEnabled,'true');
 assert.throws(()=>ipc.install('../../main'));
 assert.equal(registry.features.filter(f=>f.name==='artist').length,1);
-console.log('Extension UI: every extension declares settings ownership, local renderer paths and installation state.');
+// Catalog presentation: every app the catalog lists has example phrases and an icon; service modules without
+// an extension directory get examples from categories.json; connection status never exposes secrets.
+const listed=registry.descriptors.filter(d=>d.setting&&!d.service);
+for(const d of listed){assert(d.examples?.length>=2,d.id+' has examples');assert(d.iconSvg?.startsWith('<svg'),d.id+' has an icon');assert(!/<script|href|\son\w+=/i.test(d.iconSvg));}
+for(const id of ['unity','telegram','slack','jira','confluence','asana'])assert(registry.descriptors.find(d=>d.id===id).examples.length>=3,id+' has examples');
+for(const id of ['notion','ai','googleplay','gmail','web'])assert(registry.groups.moduleExamples[id].length>=3,id+' has module examples');
+for(const c of registry.groups.categories)assert(Number.isFinite(c.hue),c.id+' has a hue');
+const links=require('../src/features/app-links.cjs');
+for(const d of registry.descriptors)for(const kind of d.uses||[])assert(links.KINDS.includes(kind));
+const s2={settings:{extension_crashes:'true','extension_pull-requests':'true',extension_github:'true',githubToken:'ghp_secret'},saveSettings(){}};
+const rows=registry.setup(s2).ipc.catalog(),row=id=>rows.find(e=>e.id===id);
+assert.equal(row('crashes').connected,false,'added Crashes without a Sentry token needs connecting');
+assert.equal(row('pull-requests').connected,true);assert.equal(row('github').connected,true);
+assert.equal(row('regex-cron').connected,null,'apps without a service have no connection state');
+assert(!JSON.stringify(rows).includes('ghp_secret'),'secrets stay in the main process');
+s2.settings.sentryToken='t';s2.settings.sentryOrg='o';assert.equal(row('crashes').connected,false,'catalog rows are a snapshot');assert.equal(registry.setup(s2).ipc.catalog().find(e=>e.id==='crashes').connected,true);
+console.log('Extension UI: every extension declares settings ownership, local renderer paths and installation state; catalog examples, icons and connection state.');

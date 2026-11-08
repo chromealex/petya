@@ -2,6 +2,7 @@
   "name": "Jira",
   "description": "Задачи, версии и отчёты",
   "category": "team",
+  "examples": ["Заведи задачу в Jira на эту фичу","Какие задачи в текущей версии?","Покажи мои задачи в Jira"],
   "setting": "module_jira",
   "service": "jira",
   "settings": true,

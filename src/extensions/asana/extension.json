@@ -3,6 +3,8 @@
   "name": "Asana",
   "description": "Мои задачи Asana в чате: отметить выполненной, срок, «Реализовать» через план работ",
   "category": "team",
+  "icon": "icon.svg",
+  "examples": ["Покажи мои задачи в Asana","Отметь задачу выполненной","Перенеси срок задачи на пятницу"],
   "settings": false,
   "feature": "feature.cjs",
   "scripts": [

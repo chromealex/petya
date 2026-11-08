@@ -4,6 +4,8 @@ const directory=path.join(__dirname,'../extensions');
 // Catalog categories: ordered groups, and the category of service modules that have no extension directory.
 const groups=JSON.parse(fs.readFileSync(path.join(directory,'categories.json'),'utf8'));
 const categoryIds=new Set(groups.categories.map(c=>c.id));
+const {KINDS}=require('./app-links.cjs');
+for(const [id,list] of Object.entries(groups.moduleExamples||{}))if(!groups.modules?.[id]||!Array.isArray(list)||!list.every(e=>typeof e==='string'&&e.trim()))throw Error('Invalid module examples '+id);
 const descriptors=fs.readdirSync(directory,{withFileTypes:true}).filter(e=>e.isDirectory()).map(e=>path.join(directory,e.name,'extension.json')).filter(fs.existsSync).map(file=>{
  const d=JSON.parse(fs.readFileSync(file,'utf8'));
  if(d.id!==path.basename(path.dirname(file))||!/^[a-z][a-z0-9-]*$/.test(d.id))throw Error('Invalid extension identity');
@@ -12,9 +14,22 @@ const descriptors=fs.readdirSync(directory,{withFileTypes:true}).filter(e=>e.isD
  if(d.category!==undefined&&!categoryIds.has(d.category))throw Error('Unknown extension category '+d.category);
  // What the app downloads: [{id,name,bytes|{platform:bytes},approx?,optional?,requires?}].
  for(const item of d.downloads||[]){const sizes=typeof item.bytes==='object'?Object.values(item.bytes):[item.bytes];if(!/^[a-z][a-z0-9-]*$/.test(item.id||'')||!item.name||!sizes.every(n=>Number.isSafeInteger(n)&&n>0))throw Error('Invalid extension download '+d.id);}
+ // Catalog presentation: what to say (examples), a monochrome stroke icon (inlined so it takes currentColor),
+ // the service it connects to and the cross-app kinds its cards use.
+ if(d.examples!==undefined&&!(Array.isArray(d.examples)&&d.examples.length&&d.examples.length<=6&&d.examples.every(e=>typeof e==='string'&&e.trim()&&e.length<=120)))throw Error('Invalid extension examples '+d.id);
+ if(d.icon!==undefined){
+  if(!/^[a-z][a-z0-9-]*\.svg$/.test(d.icon))throw Error('Invalid extension icon '+d.id);
+  const svg=fs.readFileSync(path.join(path.dirname(file),d.icon),'utf8').trim();
+  if(!/^<svg[\s>]/.test(svg)||!svg.endsWith('</svg>')||/<script|<style|foreignObject|\son[a-z]+\s*=|href|url\(/i.test(svg))throw Error('Unsafe extension icon '+d.id);
+  d.iconSvg=svg;
+ }
+ if(d.uses!==undefined&&!(Array.isArray(d.uses)&&d.uses.every(k=>KINDS.includes(k))))throw Error('Invalid extension uses '+d.id);
+ if(d.connects!==undefined&&!(typeof d.connects==='string'&&d.connects.trim()))throw Error('Invalid extension connects '+d.id);
+ if(d.connectsKeys!==undefined&&!(Array.isArray(d.connectsKeys)&&d.connectsKeys.every(k=>/^[A-Za-z][\w-]*$/.test(k))))throw Error('Invalid extension connectsKeys '+d.id);
  if(d.markup){if(!/^[a-z][a-z0-9-]*\.html$/.test(d.markup))throw Error('Invalid settings template');d.template=fs.readFileSync(path.join(path.dirname(file),d.markup),'utf8');}
  return d;
 });
+const offers=new Map(descriptors.map(d=>[d.id,path.join(directory,d.id,'offer.cjs')]).filter(([,f])=>fs.existsSync(f)).map(([id,f])=>[id,require(f)]));
 let snapshot=()=>[];
 require('electron').ipcMain?.on('petya:extension-ui-bootstrap',event=>{event.returnValue=snapshot();});
 // Download sizes for this platform: what adding the app downloads (minus what is already here) and what it may
@@ -32,7 +47,15 @@ async function sizes(services,{platform=process.platform,timeout=4000,free}={}){
  return {apps:out,available,reserve:512*1024**2};
 }
 module.exports={name:'extensionUI',descriptors,groups,sizes,bytesOf,features:descriptors.filter(d=>d.feature).map(d=>require(path.join(directory,d.id,d.feature))),setup(s){
- const catalog=()=>descriptors.map(d=>({...d,installed:!d.setting||s.settings[d.setting]==='true'}));
+ // `connected` (only for apps that declare `connects`): the app's offer says it is ready, or one of its
+ // `connectsKeys` settings is filled. Secrets themselves never leave the main process.
+ const connected=d=>{
+  if(!d.connects)return null;
+  const offer=offers.get(d.id);
+  try{if(offer)return !!offer.ready(s.settings||{});}catch{return false;}
+  return (d.connectsKeys||[]).some(k=>!!String(s.settings?.[k]||'').trim());
+ };
+ const catalog=()=>descriptors.map(d=>({...d,installed:!d.setting||s.settings[d.setting]==='true',connected:connected(d)}));
  snapshot=catalog;
  // Plugins may claim a chat turn (e.g. corrections to an open plan) through `turn(services, command)`.
  const pluginFeatures=module.exports.features.filter(f=>typeof f.turn==='function');

@@ -2,6 +2,7 @@
   "name": "Confluence",
   "description": "Документы и пространства",
   "category": "docs",
+  "examples": ["Найди в Confluence документ по авторизации","Что написано в спецификации магазина?","Найди страницу с правилами релиза"],
   "setting": "module_confluence",
   "service": "confluence",
   "settings": true,
