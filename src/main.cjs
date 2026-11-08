@@ -727,7 +727,7 @@ else {
       if(!smoke&&!process.argv.includes('--hidden')||pendingMessageLink||process.argv.includes('--petya-company-open'))show(); if (!smoke && process.env.PETYA_VERIFY_BUILD !== '1') { backgroundTimer = setInterval(backgroundTick, 5000); backgroundTick(); } });
     if (process.env.PETYA_VERIFY_BUILD === '1') {
       win.webContents.once('did-finish-load', async () => {
-        let valid = await win.webContents.executeJavaScript('document.title === "Петя" && typeof window.petya.plan === "function"');
+        let valid = await win.webContents.executeJavaScript('["Петя", "Petya"].includes(document.title) && typeof window.petya.plan === "function"');
         // app.dock.hide() settles asynchronously on macOS; give it a moment before judging the tray start.
         for (let i = 0; i < 20 && process.platform === 'darwin' && app.dock.isVisible(); i++) await new Promise(r => setTimeout(r, 100));
         const shown = win.isVisible(), dockHidden = process.platform !== 'darwin' || !app.dock.isVisible();
