@@ -5,6 +5,8 @@ const calls = ['companyIconRefresh','teamPhotoOptions','teamPhotoPick','chatProj
 contextBridge.exposeInMainWorld('petya', Object.fromEntries(calls.map(name => [name, async (...args) => { try { return await ipcRenderer.invoke('petya:' + name, ...args); } catch (error) { throw new Error(error.message.replace(/^Error invoking remote method '[^']+':\s*(?:Error: |TypeError: )?/, '')); } }])));
 contextBridge.exposeInMainWorld('petyaEvents', {
   onChatBrowser: callback => ipcRenderer.on('chat-browser', (_,state) => callback(state)),
+  onDashboards: callback => ipcRenderer.on('dashboards', (_,state) => callback(state)),
+  onDashboardOpen: callback => ipcRenderer.on('dashboard-open', (_,id) => callback(id)),
   onModelRuntime: callback => ipcRenderer.on('model-runtime-progress', (_,state) => callback(state)),
   onModelParts: callback => ipcRenderer.on('model-parts-progress', (_,state) => callback(state)),
   onPythonProgress: callback => ipcRenderer.on('python-progress', (_,state) => callback(state)),

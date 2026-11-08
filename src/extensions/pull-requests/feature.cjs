@@ -117,4 +117,6 @@ async function turn(s,command){
   // GitHub errors already say what to fix (token, permissions, repository); others go through the shared wording.
   return e.github?kit.reply(s,command,{by:BY,error:true,text:BY+' · '+e.message}):kit.failure(s,command,BY,e);}
 }
-module.exports={name:'pullRequests',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,route,summarize};
+// Dashboards (src/features/dashboards.cjs): read-only requests refresh there by themselves.
+const dashboard={accepts:text=>{const r=route(String(text||''));return !!r&&r.kind!=='pr';},widgets:[{title:'Ждут моего ревью',command:'какие PR ждут моего ревью'},{title:'Мои PR',command:'мои открытые PR'}]};
+module.exports={name:'pullRequests',dashboard,defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,route,summarize};

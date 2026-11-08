@@ -181,4 +181,6 @@ async function turn(s,command){
  return check(s,t);
 }
 function setup(){return {ipc:{progress:()=>operation}};}
-module.exports={name:'dependencies',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,wanted,only,deps,summarize};
+// Dashboards (src/features/dashboards.cjs): read-only requests refresh there by themselves.
+const dashboard={accepts:text=>wanted(String(text||'')),widgets:[{title:'Устаревшие зависимости',command:'какие зависимости устарели'}]};
+module.exports={name:'dependencies',dashboard,defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,wanted,only,deps,summarize};

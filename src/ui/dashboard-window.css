@@ -1,0 +1,14 @@
+/* The small dashboard window (src/dashboard-window.cjs): one column, compact widgets. */
+body.dashboard-window{margin:0;background:var(--bg);color:var(--ink);overflow:auto;user-select:none}
+body.dashboard-window main{display:block;padding:0 12px 16px;max-width:none}
+.dash-window-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:6px;padding:10px 0 8px;background:var(--bg);border-bottom:1px solid var(--line);margin-bottom:10px;letter-spacing:normal;font-size:inherit}
+.dash-window-head h1{flex:1;min-width:0;margin:0;font-size:15px;letter-spacing:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-window-head button{font-size:12px;padding:4px 9px}
+.dash-window-head button[aria-pressed=true]{border-color:var(--green);color:var(--green)}
+body.dashboard-window .dash-grid{grid-template-columns:minmax(0,1fr);gap:10px}
+body.dashboard-window .dash-widget,body.dashboard-window .dash-widget[data-size]{grid-column:1/-1}
+body.dashboard-window .dash-widget-body{max-height:none}
+/* The main window's layout (chrome, rail, sidebar offsets) does not exist here. */
+body.dashboard-window{padding:0!important;display:block!important;height:auto}
+body.dashboard-window>main{margin:0!important;padding:0 12px 16px!important;width:auto!important;max-width:none!important;grid-column:auto;min-height:0;overflow:visible}
+.dash-window-head h1{color:var(--ink)}

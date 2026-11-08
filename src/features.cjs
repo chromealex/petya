@@ -11,6 +11,7 @@ module.exports=[
  require('./features/action-results.cjs'),
  require('./features/window-state.cjs'),
  require('./features/chat-browser.cjs'),
+ require('./features/dashboards.cjs'),
  require('./features/clarifications.cjs'),
  require('./features/extension-ui.cjs'),
  ...require('./features/extension-ui.cjs').features,
