@@ -10,6 +10,8 @@ const panelNumber=v=>{const m=String(v||'').match(/^(?:panel-)?(\d{1,9})$/);retu
 function parse(raw){
  let url;try{url=new URL(String(raw).replace(/[).,;!?]+$/,''));}catch{return null;}
  if(!/^https?:$/.test(url.protocol))return null;
+ // Google Docs/Sheets/Slides links share the «/d/<id>» shape but are never Grafana.
+ if(/(?:^|\.)docs\.google\.com$/i.test(url.hostname))return null;
  const m=url.pathname.match(PATH);if(!m)return null;
  const p=url.searchParams,vars={};
  for(const [k,v] of p)if(k.startsWith('var-')&&k.length>4){(vars[k.slice(4)]=vars[k.slice(4)]||[]).push(v);}

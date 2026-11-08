@@ -54,7 +54,10 @@ const own={
  playtest:['разбери плейтест','где игрок застрял','моменты фрустрации в этом видео'],
  mentor:['что мне автоматизировать?','что я делаю руками','где я теряю время','покажи, что мне стоит автоматизировать'],
  'release-checklist':['готов ли релиз 1.5','чек-лист релиза','что мешает выпустить версию 2.0','можно ли выпускать 1.5','релизный чек-лист'],
- anomalies:['что необычного вчера','есть аномалии за неделю?','покажи аномалии','что необычного в метриках','какие аномалии вчера']
+ anomalies:['что необычного вчера','есть аномалии за неделю?','покажи аномалии','что необычного в метриках','какие аномалии вчера'],
+ mentor:['что мне автоматизировать?','что я делаю руками','где я теряю время','покажи, что мне стоит автоматизировать'],
+ 'google-sheets':['что в гугл таблице баланса','открой Google Sheets','найди лучника в гугл таблице','покажи https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/edit#gid=0'],
+ 'config-balance':['сверь баланс с конфигами','что поменялось в балансе с прошлой версии','проверь конфиги юнитов','почему урон лучника в игре не как в таблице'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -134,7 +137,11 @@ const not={
  // Readiness of a release as a whole: its notes, crashes or reviews after it, its date and other checklists are not it.
  'release-checklist':['напиши патчноут к версии 1.5','новые крэши после релиза 1.4.2','плохие отзывы после обновления','когда релиз?','чек-лист переезда','статус CI','готов ли отчёт'],
  // Unusual days in the data: weather, gifts, ad revenue drops (the ad app's view) and plain metrics are not it.
- anomalies:['аномальная жара','необычный подарок','придумай необычное имя','упала выручка с рекламы','аномалии eCPM','DAU за неделю','какие крэши за неделю','странный сон']
+ anomalies:['аномальная жара','необычный подарок','придумай необычное имя','упала выручка с рекламы','аномалии eCPM','DAU за неделю','какие крэши за неделю','странный сон'],
+ // Google Sheets by name or link only: tables in answers, Excel/CSV files, reconciling with configs and localization are not it.
+ 'google-sheets':['таблица умножения','сделай таблицу сравнения тарифов','открой csv с продажами','сверь баланс в гугл таблице с конфигами','что не переведено в локализации','что в таблице'],
+ // Game balance against configs only: CI/server configs, Petya's settings and money balance are not it.
+ 'config-balance':['конфиг CI','настройки Пети','баланс на карте','конфиг nginx','какой у меня баланс на карте','проверь конфиг nginx','баланс работы и жизни','сверь бюджет с планом'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -153,7 +160,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-sheets','config-balance'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
