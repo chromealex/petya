@@ -1,0 +1,13 @@
+{
+  "id": "asana",
+  "name": "Asana",
+  "description": "Мои задачи Asana в чате: отметить выполненной, срок, «Выполнить» через план работ",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["task-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "asanaItems": "renderAsanaTasks"
+  }
+}

@@ -124,5 +124,11 @@
  // Remove plain-text lines the cards replace (e.g. «KEY — title» lines), keeping explanations.
  function dropLines(parent,test){for(const node of parent.querySelectorAll(':scope>p,:scope>ul>li,:scope>ol>li'))if(test(node.textContent.trim()))node.remove();for(const list of parent.querySelectorAll(':scope>ul,:scope>ol'))if(!list.children.length)list.remove();}
 
- window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store};
+ // Hand a follow-up to the chat: send it right away, or put it into the composer for the user to finish.
+ async function ask(text,{send=false}={}){
+  const box=document.getElementById('command');
+  if(send&&typeof submitChatCommand==='function'){await submitChatCommand(text);return;}
+  if(box){box.value=text;box.dispatchEvent(new Event('input',{bubbles:true}));box.focus();box.setSelectionRange?.(text.length,text.length);}
+ }
+ window.resultKit={el,safeUrl,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask};
 })();

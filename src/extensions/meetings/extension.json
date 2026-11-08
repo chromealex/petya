@@ -1,0 +1,12 @@
+{
+  "id": "meetings",
+  "name": "Встречи",
+  "description": "Сводка встречи карточкой: решения, задачи с исполнителями, что не обсудили",
+  "settings": false,
+  "scripts": [
+    ["summary-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "meetingSummary": "renderMeetingSummary"
+  }
+}

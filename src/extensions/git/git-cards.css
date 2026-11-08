@@ -1,0 +1,18 @@
+.git-card{width:640px;max-width:100%;margin:12px 0}
+.git-card .kit-key{color:var(--ink);font-weight:600}
+.git-body{display:flex;flex-direction:column;gap:10px}
+.git-files{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px;max-height:260px;overflow:auto}
+.git-files li{display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:13px}
+.git-files li[aria-busy="true"]{opacity:.5}
+.git-path{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.git-commit{display:flex;gap:6px;align-items:center}
+.git-commit input{flex:1;min-width:0;min-height:32px;padding:4px 10px;font:inherit;font-size:13px}
+.git-commit button{min-height:32px;padding:4px 10px;font-size:13px}
+.git-diff{display:flex;flex-direction:column;gap:6px}
+.git-diff-bar{display:flex;align-items:center;gap:8px}
+.git-diff-bar select{max-width:70%;min-height:28px;font-size:12px}
+.git-code{max-height:320px;overflow:auto;padding:6px 0;border-radius:8px;background:#161a1b;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.6}
+.git-code div{padding:0 12px;white-space:pre}
+.git-code .plus{background:#2f4a2255;color:#d0f596}
+.git-code .minus{background:#5a2a2a55;color:#f0b4a8}
+.git-code .hunk{color:#86c2ff}

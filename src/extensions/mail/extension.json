@@ -1,0 +1,12 @@
+{
+  "id": "mail",
+  "name": "Почта",
+  "description": "Письма карточками: важные сверху, черновик ответа, письмо в задачу",
+  "settings": false,
+  "scripts": [
+    ["mail-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "mailItems": "renderMailItems"
+  }
+}

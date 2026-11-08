@@ -5,6 +5,13 @@ const root=path.join(__dirname,'../extensions');
 const adapters=fs.readdirSync(root,{withFileTypes:true}).filter(row=>row.isDirectory())
   .map(row=>path.join(root,row.name,'result.cjs')).filter(file=>fs.existsSync(file)).map(file=>require(file));
 
+// Plugins turn a service result (e.g. Google Play rows) into card data with `extract(result)` → {dataKey: value};
+// the host only stores it on the message as extensionData, the plugin's renderer draws it.
+function extract(result){
+  const data={};
+  for(const adapter of adapters){if(typeof adapter.extract!=='function')continue;try{Object.assign(data,adapter.extract(result)||{});}catch{}}
+  return Object.keys(data).length?data:undefined;
+}
 function collect(topic,services){
   return (topic?.messages||[]).flatMap((message,index)=>adapters.flatMap(adapter=>
     (adapter.describe(message,topic,services)||[]).map(result=>({
@@ -100,4 +107,4 @@ function setup(s){
   }
   return {chatResults:{current,adopt,turn,selected},ipc:{snapshot,choose,action}};
 }
-module.exports={name:'chatResults',setup,collect,scope};
+module.exports={name:'chatResults',setup,collect,scope,extract};
