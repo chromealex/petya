@@ -32,7 +32,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.doesNotMatch(await js(card+".textContent"),/zoom/i,'the core card names no meeting app');
  // The catalog lists Zoom under «Встречи и календарь»; adding it brings the meeting source.
  await js("window.openAppCatalog()");await wait("!!document.querySelector('[data-category=meetings]')");
- assert(await js("[...document.querySelectorAll('[data-category=meetings] .app-catalog-row strong')].some(n=>n.textContent==='Zoom')"),'Zoom is an app of the meetings category');
+ assert(await js("[...document.querySelectorAll('[data-category=meetings] .app-tile strong')].some(n=>n.textContent==='Zoom')"),'Zoom is an app of the meetings category');
  assert.match(await js("document.querySelector('[data-category=meetings] .app-catalog-group-head')?.textContent||document.querySelector('[data-category=meetings]').textContent"),/приложения встреч/);
  await js("document.querySelector('[data-category=meetings]').scrollIntoView({block:'start'})");
  files.push(await shot('petya-meetings-catalog'));
