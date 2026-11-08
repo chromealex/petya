@@ -30,6 +30,8 @@ const card={project:'GAME',site:SITE,board:{id:'7',name:'GAME board',url:SITE+'/
 require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const js=code=>win.webContents.executeJavaScript(code);
  await js('window.chatNavigationReady');
+ // Connected apps for the cross-app buttons (Slack for share-message, Jira for task-tracker), as the registry would list them.
+ await js("window.resultKit.availableLinks=async kind=>kind==='share-message'?[{id:'slack',name:'Slack',label:'Отправить в Slack'}]:kind==='task-tracker'?[{id:'jira',name:'Jira',label:'В задачу Jira'}]:[];0");
  await js(`view('home');showDialogueMessages([{role:'user',text:'спланируй спринт'},{role:'assistant',text:'Скорость за 5 спринтов — в среднем 30 SP.',by:'Планирование спринта',extensionData:{sprintPlan:${JSON.stringify(card)}}}],'Спринт')`);
  for(let i=0;i<150;i++){if(await js("!!document.querySelector('.sprint-card')"))break;await new Promise(r=>setTimeout(r,30));}
  assert.equal(await js("document.querySelectorAll('.sprint-card').length"),1);

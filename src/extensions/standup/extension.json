@@ -1,0 +1,19 @@
+{
+  "id": "standup",
+  "name": "Стендап",
+  "description": "Асинхронный стендап: «вчера / сегодня / блокеры» по каждому из Jira и коммитов или из ответов в треде Slack, по расписанию — сводка и уведомление; в Slack только по кнопке",
+  "category": "team",
+  "icon": "icon.svg",
+  "examples": ["Собери стендап","Что вчера делала команда?","У кого блокеры?","Настрой стендап на 10:30"],
+  "connects": "Jira или Slack",
+  "uses": ["share-message","task-tracker"],
+  "setting": "extension_standup",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["standup-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "standupCard": "renderStandupCard"
+  }
+}
