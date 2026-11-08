@@ -11,6 +11,8 @@ What it does, in short:
 
 A detailed per-version feature history is in [docs/HISTORY.md](docs/HISTORY.md).
 
+Skills («Навыки») — Russian and English SKILL.md packages with references, templates and scripts run in an isolated sandbox, and Word, Excel, PowerPoint and PDF files made from chat — are described in [docs/skills.md](docs/skills.md); how chats, attachments and skills of any size fit the model window is in [docs/context-compaction.md](docs/context-compaction.md).
+
 ## Running
 
 Requires Node.js 22.12+.
