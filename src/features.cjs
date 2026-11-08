@@ -50,5 +50,6 @@ module.exports=[
  require('./features/model-parts.cjs'),
  require('./features/boot-splash.cjs'),
  require('./features/onboarding.cjs'),
- require('./features/project-share.cjs')
+ require('./features/project-share.cjs'),
+ require('./features/semantic-index.cjs')
 ];
