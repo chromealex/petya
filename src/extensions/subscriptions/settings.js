@@ -46,4 +46,6 @@
  days.onchange=async()=>{try{await window.petya.saveSettings({mailRecordsDays:days.value});}catch(e){note(e.message);}refresh();};
  scan.onclick=async()=>{scan.disabled=true;note('Читаю почту…');try{const r=await records('scan');note('Прочитано писем: '+r.read+', новых записей: '+r.added+'.');}catch(e){note(e.message);}refresh();};
  window.petyaEvents?.onWindowShown?.(refresh);refresh();
+ // A reading in progress survives a window reload in the notification center (the main process publishes the same id).
+ records('status').then(st=>{if(st?.running)document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail:{id:'mail-records-scan',title:'Записи из почты',text:'Читаю письма с чеками, подписками и бронями…',busy:true,kind:'info',version:'restore'}}));}).catch(()=>{});
 })();

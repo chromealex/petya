@@ -38,7 +38,7 @@
   if(!st.enabled)return 'Учёт выключен.';
   const parts=[st.paused?(st.pausedUntil&&st.pausedUntil-Date.now()<86400000?'На паузе до '+new Date(st.pausedUntil).toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'}):'На паузе'):'Учёт идёт'];
   if(st.current&&!st.paused)parts.push('сейчас: '+st.current.app);
-  if(st.days)parts.push('история за '+st.days+' дн. ('+Math.max(1,Math.round(st.bytes/1024))+' КБ)');
+  if(st.days)parts.push('дней в истории: '+st.days+' · '+Math.max(1,Math.round(st.bytes/1024))+' КБ');
   if(st.last?.permission===false)parts.push('заголовки окон не видны: нет доступа к записи экрана в настройках системы');
   if(!st.supported)parts.push('на этом компьютере активное окно не определяется');
   return parts.join(' · ')+'.';

@@ -16,7 +16,7 @@
  // The total split by category: one stacked bar and a legend with durations.
  function split(k,c){
   const box=k.el('div','time-split');
-  const head=k.el('div','time-total');head.append(k.el('strong',null,dur(c.total)),k.el('small',null,c.app?'в «'+c.app.query+'»':'учтено'));
+  const head=k.el('div','time-total');const what=k.el('small',null,c.app?c.app.query:'учтено');if(c.app)what.dataset.noI18n='';head.append(k.el('strong',null,dur(c.total)),what);
   const bar=k.el('div','time-bar');bar.setAttribute('role','img');
   const legend=k.el('div','time-legend');
   const parts=[];
@@ -81,7 +81,7 @@
    li.append(label,bar,k.el('span','time-dur',dur(r.ms)));
    if(c.mode==='app'&&!c.app){
     const chip=k.chip({label:c.labels[r.category],title:'Категория приложения',menu:async()=>[...IDS.map(id=>({label:c.labels[id],id,current:id===r.category})),{label:'По умолчанию',id:'auto'}],
-     pick:async o=>{await call('setCategory',r.key,o.id);k.toast(o.id==='auto'?'Категория по умолчанию вернётся в следующем ответе':'«'+r.key+'» теперь: '+c.labels[o.id]);if(o.id!=='auto'){r.category=o.id;repaint();}}});
+     pick:async o=>{await call('setCategory',r.key,o.id);k.toast(o.id==='auto'?'Категория по умолчанию вернётся в следующем ответе':'Новая категория для '+r.key+': '+c.labels[o.id]);if(o.id!=='auto'){r.category=o.id;repaint();}}});
     chip.classList.add('time-cat');chip.style.setProperty('--cat',c.colors[r.category]);li.append(chip);
    }
    list.append(li);
@@ -116,7 +116,7 @@
    try{
     const results=await call('worklogWrite',p.id,[...chosen]);
     for(const res of results){const li=ul.querySelector('[data-row="'+CSS.escape(res.id)+'"]');if(!li)continue;li.querySelector('input').disabled=true;li.append(k.el('small','time-wl-state '+(res.ok?'ok':'bad'),res.ok?'записано':res.error||'ошибка'));}
-    const ok=results.filter(r=>r.ok).length;k.toast(ok===results.length?'Время записано в Jira':'Записано '+ok+' из '+results.length,{error:ok!==results.length});
+    const ok=results.filter(r=>r.ok).length;k.toast(ok===results.length?'Время записано в Jira':'Записано в Jira: '+ok+' / '+results.length,{error:ok!==results.length});
     confirm.remove();cancel.textContent='Закрыть';cancel.disabled=false;
    }catch(e){k.toast(e.message,{error:true});confirm.disabled=false;cancel.disabled=false;}
    finally{confirm.removeAttribute('aria-busy');}
@@ -143,7 +143,7 @@
    if(c.rows.length){
     body.append(k.el('h5','time-h',c.mode==='task'?'По задачам':c.mode==='project'?'По проектам':c.app?'Окна':'Приложения'));
     body.append(rows(k,c,paint));
-    if(c.untagged>60000)body.append(k.el('small','kit-meta','Без '+(c.mode==='task'?'задачи':'проекта')+': '+dur(c.untagged)));
+    if(c.untagged>60000)body.append(k.el('small','kit-meta',(c.mode==='task'?'Без задачи: ':'Без проекта: ')+dur(c.untagged)));
    }else if(c.total&&(c.mode==='task'||c.mode==='project'))body.append(k.el('p','kit-meta',c.mode==='task'?'Задач Jira (ключей вида BW-123) в заголовках окон не нашлось.':'Проектов в заголовках окон редакторов не нашлось.'));
    body.append(wl);
   };
@@ -151,7 +151,7 @@
   paint();
   const status=!c.tracking.enabled?{label:'учёт выключен',tone:'alert'}:c.tracking.paused?{label:'на паузе',tone:'progress'}:{label:'учёт идёт',tone:'done'};
   const actions=[];
-  if(c.total)actions.push({label:'Скачать CSV',primary:!!c.exportReady,run:async()=>{const r=await call('exportCsv',c.period.from,c.period.to,c.period.label);if(r?.path)k.toast('Сохранено: '+r.rows+' строк');}});
+  if(c.total)actions.push({label:'Скачать CSV',primary:!!c.exportReady,run:async()=>{const r=await call('exportCsv',c.period.from,c.period.to,c.period.label);if(r?.path)k.toast('Сохранено строк: '+r.rows);}});
   if(c.jira&&c.total)actions.push({label:'Записать время в Jira',primary:!!c.worklog,run:()=>worklog(k,c,wl)});
   if(c.mode!=='task'&&c.total)actions.push({label:'По задачам',run:()=>k.ask('Время по задачам за '+(c.period.kind==='day'?c.period.label:'неделю'),{send:true})});
   if(c.mode!=='project'&&c.total)actions.push({label:'По проектам',run:()=>k.ask('Время по проектам за '+(c.period.kind==='day'?c.period.label:'неделю'),{send:true})});

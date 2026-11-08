@@ -65,7 +65,7 @@
   if(c.reminders&&sv.remind&&sv.status==='active')tools.append(tool(k,'remind','Напомнить перед списанием',()=>k.ask(sv.remind,{send:true})));
   if(sv.url)tools.append(tool(k,'mail','Открыть письмо',()=>open(sv.url)));
   const hide=tool(k,'hide','Не подписка — скрыть',null);
-  hide.onclick=async()=>{hide.disabled=true;try{await call('hide',sv.merchant);li.remove();k.toast('«'+sv.merchant+'» скрыт',{undo:async()=>{await call('hide',sv.merchant,true);repaint();}});}catch(e){k.toast(e.message,{error:true});hide.disabled=false;}};
+  hide.onclick=async()=>{hide.disabled=true;try{await call('hide',sv.merchant);li.remove();k.toast('Скрыто: '+sv.merchant,{undo:async()=>{await call('hide',sv.merchant,true);repaint();}});}catch(e){k.toast(e.message,{error:true});hide.disabled=false;}};
   tools.append(hide);
   li.append(name,price,sparkline(sv.charges,sv.currency),next,tools);
   return li;
@@ -95,7 +95,7 @@
   let data=c;paint(data);
   const refresh=async()=>{const r=await call('refresh');data=r.subscriptionsCard||data;paint(data);k.toast('Прочитано писем: '+r.read+', новых записей: '+r.added);};
   const count=c.services.filter(s=>s.status==='active').length;
-  const status=count?{label:count+' активн.',tone:'done'}:{label:'нет подписок',tone:'accent'};
+  const status=count?{label:'активных: '+count,tone:'done'}:{label:'нет подписок',tone:'accent'};
   parent.append(k.card({app:'Подписки',initial:'↻',color:'#5a6a8a',key:'Подписки и продления',status,body,actions:[{label:'Обновить из почты',run:refresh}],className:'subs-card'}));
  };
 })();
