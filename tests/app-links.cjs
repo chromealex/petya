@@ -54,7 +54,13 @@ const links=require('../src/features/app-links.cjs');
  assert.deepEqual(ids('share-message'),['slack']);
  assert.deepEqual(ids('code-fix'),['coder']);
  const live={settings:{}};const reg=links.create(live,{providers:real});
- for(const kind of links.KINDS)assert.deepEqual(reg.available(kind),[],'nothing connected → nothing listed: '+kind);
+ for(const kind of ['task-tracker','share-message','code-fix'])assert.deepEqual(reg.available(kind),[],'nothing connected → nothing listed: '+kind);
+ // Local recording needs no connection: listed while recording is not switched off, for Zoom links only.
+ assert.deepEqual(reg.available('meeting-recording').map(p=>[p.id,p.label]),[['zoom-bot','Записать Петей']]);
+ assert.deepEqual(reg.available('meeting-recording',{url:'https://meet.google.com/abc-defg-hij'}),[]);
+ live.settings.zoomBotMode='off';assert.deepEqual(reg.available('meeting-recording'),[]);delete live.settings.zoomBotMode;
+ assert.deepEqual(ids('video-meeting'),['zoom','google-meet','teams']);
+ assert.deepEqual(ids('meeting-recording'),['zoom-bot']);
  Object.assign(live.settings,{module_jira:'true',jiraUrl:'https://acme.atlassian.net',atlassianCredential:'c',module_asana:'true',asanaCredential:'a',asanaWorkspace:'123',module_slack:'true',slackCredential:'s',extension_coder:'true'});
  assert.deepEqual(reg.available('task-tracker').map(p=>p.id),['jira','asana']);
  const task={title:'Крэш PROJ-1 — NullReferenceException',description:'120 событий за неделю',link:'https://sentry.io/i/1',type:'bug'};

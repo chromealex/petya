@@ -7,10 +7,22 @@
   "settings": true,
   "feature": "feature.cjs",
   "scripts": [
-    ["calendar-cards.js", "message-format.js"],
-    ["settings.js", "notifications.js"]
+    [
+      "calendar-cards.js",
+      "message-format.js"
+    ],
+    [
+      "settings.js",
+      "notifications.js"
+    ]
   ],
   "results": {
     "calendarCard": "renderCalendarCard"
+  },
+  "provides": {
+    "video-meeting": [
+      "video-meet.cjs",
+      "video-teams.cjs"
+    ]
   }
 }

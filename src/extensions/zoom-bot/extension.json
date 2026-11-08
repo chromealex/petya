@@ -15,5 +15,9 @@
       "notifications.js",
       "notifications.js"
     ]
-  ]
+  ],
+  "provides": {
+    "video-meeting": "video-meeting.cjs",
+    "meeting-recording": "meeting-recording.cjs"
+  }
 }

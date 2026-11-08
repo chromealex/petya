@@ -1,7 +1,6 @@
 // Calendar REST clients over the mail accounts Petya already has (Google OAuth / Microsoft OAuth, shared tokens):
 // Google Calendar API v3 and Microsoft Graph. Read: events of a period and free/busy of people. Write: one event,
 // called only from the card's confirm button. Access tokens come from the shared account client (`token()`).
-const {randomUUID}=require('node:crypto');
 const GOOGLE='https://www.googleapis.com/calendar/v3';
 const GRAPH='https://graph.microsoft.com/v1.0';
 // Scopes the calendar asks for on top of mail reading (incremental consent).
@@ -41,10 +40,11 @@ class CalendarClient{
  // Events of [from,to): [{id,title,start,end,allDay,location,link,url,declined,tentative}] sorted by start.
  async events(from,to){
   if(this.provider==='microsoft'){
-   const q=new URLSearchParams({startDateTime:from.toISOString(),endDateTime:to.toISOString(),$top:'250',$orderby:'start/dateTime',$select:'id,subject,start,end,isAllDay,location,onlineMeeting,onlineMeetingUrl,webLink,isCancelled,showAs,responseStatus'});
+   const q=new URLSearchParams({startDateTime:from.toISOString(),endDateTime:to.toISOString(),$top:'250',$orderby:'start/dateTime',$select:'id,subject,start,end,isAllDay,location,onlineMeeting,onlineMeetingUrl,webLink,isCancelled,showAs,responseStatus,bodyPreview,attendees,organizer'});
    const data=await this.call(GRAPH+'/me/calendarView?'+q,{headers:{Prefer:'outlook.timezone="UTC"'}});
    return (data.value||[]).filter(e=>!e.isCancelled).map(e=>({id:String(e.id||''),title:clip(e.subject)||'(без названия)',start:utc(e.start),end:utc(e.end),allDay:!!e.isAllDay,
-    location:clip(e.location?.displayName),link:safe(e.onlineMeeting?.joinUrl||e.onlineMeetingUrl),url:safe(e.webLink),declined:e.responseStatus?.response==='declined',tentative:e.showAs==='tentative',free:e.showAs==='free'})).sort(byStart);
+    location:clip(e.location?.displayName),link:safe(e.onlineMeeting?.joinUrl||e.onlineMeetingUrl),url:safe(e.webLink),declined:e.responseStatus?.response==='declined',tentative:e.showAs==='tentative',free:e.showAs==='free',
+    meta:{description:clip(e.bodyPreview,2000),attendees:(e.attendees||[]).map(a=>String(a.emailAddress?.address||'').toLowerCase()).filter(Boolean).slice(0,50),organizer:String(e.organizer?.emailAddress?.address||'').toLowerCase()}})).sort(byStart);
   }
   const q=new URLSearchParams({timeMin:from.toISOString(),timeMax:to.toISOString(),singleEvents:'true',orderBy:'startTime',maxResults:'250'});
   const data=await this.call(GOOGLE+'/calendars/primary/events?'+q);
@@ -52,7 +52,8 @@ class CalendarClient{
    const self=(e.attendees||[]).find(a=>a.self),allDay=!!e.start?.date;
    const video=e.hangoutLink||(e.conferenceData?.entryPoints||[]).find(p=>p.entryPointType==='video')?.uri;
    return {id:String(e.id||''),title:clip(e.summary)||'(без названия)',start:allDay?localDate(e.start.date):new Date(e.start?.dateTime).toISOString(),end:allDay?localDate(e.end?.date||e.start.date):new Date(e.end?.dateTime).toISOString(),allDay,
-    location:clip(e.location),link:safe(video),url:safe(e.htmlLink),declined:self?.responseStatus==='declined',tentative:self?.responseStatus==='tentative',free:e.transparency==='transparent'};
+    location:clip(e.location),link:safe(video),url:safe(e.htmlLink),declined:self?.responseStatus==='declined',tentative:self?.responseStatus==='tentative',free:e.transparency==='transparent',
+    meta:{description:clip(e.description,2000),attendees:(e.attendees||[]).map(a=>String(a.email||'').toLowerCase()).filter(Boolean).slice(0,50),organizer:String(e.organizer?.email||'').toLowerCase()}};
   }).filter(e=>!Number.isNaN(Date.parse(e.start))).sort(byStart);
  }
 
@@ -85,20 +86,25 @@ class CalendarClient{
   });
  }
 
- // One event with attendees (they get invitations). Returns {id,url,link}.
- async create({title,start,end,attendees=[],video=true}){
+ // One event with attendees (they get invitations). Returns {id,url,link}. `meeting` is the video call:
+ // {patch, query} from a calendar-native provider (Meet, Teams), {url, note} for a link put into the event
+ // (Zoom personal room, a known room, a typed link), or null for none.
+ async create({title,start,end,attendees=[],meeting=null}){
+  const link=meeting?.url?safe(meeting.url):'';
+  const text=link?(meeting.note?meeting.note+'\n':'')+'Ссылка на видеозвонок: '+link:'';
   if(this.provider==='microsoft'){
    const e=await this.call(GRAPH+'/me/events',{method:'POST',body:{subject:title,start:{dateTime:new Date(start).toISOString().slice(0,19),timeZone:'UTC'},end:{dateTime:new Date(end).toISOString().slice(0,19),timeZone:'UTC'},
-    attendees:attendees.map(a=>({emailAddress:{address:a.email,name:a.name||a.email},type:'required'})),...video?{isOnlineMeeting:true,onlineMeetingProvider:'teamsForBusiness'}:{}}});
-   return {id:String(e.id||''),url:safe(e.webLink),link:safe(e.onlineMeeting?.joinUrl)};
+    attendees:attendees.map(a=>({emailAddress:{address:a.email,name:a.name||a.email},type:'required'})),...meeting?.patch||{},
+    ...link?{location:{displayName:link,locationUri:link},body:{contentType:'text',content:text}}:{}}});
+   return {id:String(e.id||''),url:safe(e.webLink),link:link||safe(e.onlineMeeting?.joinUrl)};
   }
-  const q=new URLSearchParams({sendUpdates:'all',...video?{conferenceDataVersion:'1'}:{}});
+  const q=new URLSearchParams({sendUpdates:'all',...meeting?.query||{}});
   const e=await this.call(GOOGLE+'/calendars/primary/events?'+q,{method:'POST',body:{summary:title,start:{dateTime:new Date(start).toISOString(),timeZone:this.timeZone},end:{dateTime:new Date(end).toISOString(),timeZone:this.timeZone},
-   attendees:attendees.map(a=>({email:a.email,...a.name?{displayName:a.name}:{}})),...video?{conferenceData:{createRequest:{requestId:randomUUID(),conferenceSolutionKey:{type:'hangoutsMeet'}}}}:{}}});
-  return {id:String(e.id||''),url:safe(e.htmlLink),link:safe(e.hangoutLink||(e.conferenceData?.entryPoints||[]).find(p=>p.entryPointType==='video')?.uri)};
+   attendees:attendees.map(a=>({email:a.email,...a.name?{displayName:a.name}:{}})),...meeting?.patch||{},...link?{location:link,description:text}:{}}});
+  return {id:String(e.id||''),url:safe(e.htmlLink),link:link||safe(e.hangoutLink||(e.conferenceData?.entryPoints||[]).find(p=>p.entryPointType==='video')?.uri)};
  }
 }
-const clip=v=>String(v||'').trim().slice(0,300);
+const clip=(v,n=300)=>String(v||'').trim().slice(0,n);
 const safe=v=>{try{const u=new URL(String(v||''));return u.protocol==='https:'?u.href:'';}catch{return '';}};
 // Graph dateTimeTimeZone in UTC («2026-11-09T07:00:00.0000000») → ISO.
 const utc=v=>{const s=String(v?.dateTime||'').slice(0,23);const d=new Date(/[zZ]|[+-]\d\d:\d\d$/.test(s)?s:s+'Z');return Number.isNaN(+d)?'':d.toISOString();};

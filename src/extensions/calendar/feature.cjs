@@ -8,8 +8,11 @@ const team=require('../../team.cjs');
 const when=require('./when.cjs');
 const slots=require('./slots.cjs');
 const people=require('./people.cjs');
-const {CalendarClient,CalendarError,SCOPES,granted}=require('./client.cjs');
+const {CalendarClient,CalendarError,SCOPES}=require('./client.cjs');
+const {accounts,connected}=require('./accounts.cjs');
+const {Rooms,normalize}=require('./rooms.cjs');
 const {randomUUID}=require('node:crypto');
+const path=require('node:path');
 const ID='calendar',BY='Календарь';
 
 // --- Routing -------------------------------------------------------------------------------------------------
@@ -36,16 +39,19 @@ function intent(text){
  return null;
 }
 
-// --- Accounts: the mail accounts' tokens, calendar scopes granted or not --------------------------------------
-function accounts(settings){
- const out=[];
- for(const [provider,key] of [['google','gmailCredential'],['microsoft','microsoftCredential']]){
-  let c={};try{c=JSON.parse(settings[key]||'{}')||{};}catch{c={};}
-  for(const a of Array.isArray(c.accounts)?c.accounts:[])if(a?.id)out.push({key:provider+':'+a.id,id:a.id,provider,email:String(a.email||''),label:String(a.label||''),calendar:granted(provider,a.tokens?.scope)});
- }
- return out;
+// --- Known meeting rooms (per company data folder) and cross-app links ---------------------------------------
+const roomStores=new Map();
+function roomsFor(s){
+ const file=s.dataRoot?path.join(s.dataRoot,'calendar-rooms.json'):'';
+ if(!roomStores.has(file))roomStores.set(file,new Rooms({file}));
+ return roomStores.get(file);
 }
-const connected=settings=>accounts(settings).some(a=>a.calendar);
+const linksFor=s=>s.appLinks||require('../../features/app-links.cjs').create(s);
+// Events read for a card: meeting links are learned from them, the private details stay out of the chat.
+function learned(s,events,account){
+ try{roomsFor(s).learn(events.map(e=>({...e,...e.meta})),{self:account.email.toLowerCase()});}catch{/* learning never blocks the answer */}
+ return events.map(({meta,...e})=>e);
+}
 function hours(settings){
  const a=when.minutes(settings.calendarWorkStart),b=when.minutes(settings.calendarWorkEnd);
  return a!==null&&b!==null&&a<b?{workStart:settings.calendarWorkStart,workEnd:settings.calendarWorkEnd}:{workStart:'10:00',workEnd:'19:00'};
@@ -82,7 +88,7 @@ async function agenda(s,text,account,{fetcher,now}){
  const range=when.range(text,now)||{from:when.startOfDay(now),to:when.addDays(when.startOfDay(now),1),label:'сегодня',single:true};
  const client=clientFor(s,account,fetcher);
  s.requestProgress?.report?.('Читаю календарь');
- const events=await client.events(range.from,range.to);
+ const events=learned(s,await client.events(range.from,range.to),account);
  const base={account:account.key,accountEmail:account.email,provider:account.provider,...hours(s.settings),now:now.toISOString()};
  if(range.single){
   const list=timed(events),upcoming=list.find(e=>Date.parse(e.end)>+now);
@@ -99,7 +105,7 @@ async function free(s,text,account,{fetcher,now}){
  const range=when.range(text,now)||{from:when.startOfDay(now),to:when.addDays(when.startOfDay(now),1),label:'сегодня',single:true};
  const client=clientFor(s,account,fetcher);
  s.requestProgress?.report?.('Смотрю свободное время');
- const events=await client.events(range.from,range.to);
+ const events=learned(s,await client.events(range.from,range.to),account);
  const busy=events.filter(e=>!e.allDay&&!e.declined&&!e.free);
  const h=hours(s.settings),wins=slots.windows(range,{...h,now});
  const gaps=slots.gaps(busy,wins);
@@ -213,7 +219,35 @@ function setup(s,{fetcher=globalThis.fetch,now=()=>new Date(),poll=1000}={}){
   for(const topic of s.dialogue.state?.topics||[])for(const message of topic.messages||[]){const card=message.extensionData?.calendarCard;if(card?.draftId===draftId)return {topic,message,card};}
   return null;
  }
- async function create({draftId,slot=0,title:name,video=true}={}){
+ // The video call of a new event. `video`: true (the calendar's own Meet/Teams, the old default), false or 'none',
+ // a provider id ('zoom', 'google-meet', 'teams'), {room:key} (a known room) or {url} (a link the user typed).
+ async function videoFor(video,{account,summary,card,zoomLink}){
+  if(video===false||video==='none'||video?.kind==='none')return null;
+  const links=linksFor(s);
+  const id=video===true||video===undefined?(account.provider==='microsoft'?'teams':'google-meet'):typeof video==='string'?video:video?.kind==='provider'?String(video.id||''):'';
+  if(id){
+   const r=await links.run('video-meeting',id,{calendar:account.provider,title:summary,attendees:(card.attendees||[]).map(a=>a.email),link:zoomLink});
+   if(r?.needLink)return {needLink:true,text:r.text};
+   return r?.native?{patch:r.patch,query:r.query,provider:r.provider}:{url:r.url,provider:r.provider||id};
+  }
+  if(video?.room!==undefined||video?.kind==='room'){const room=roomsFor(s).get(String(video.room??video.key));if(!room)throw Error('Эта комната больше не в списке. Выберите другую.');return {url:room.url,provider:room.kind,room:room.key};}
+  if(video?.url!==undefined||video?.kind==='custom'){const n=normalize(String(video.url||''),{any:true});if(!n)throw Error('Нужна ссылка https:// на встречу.');return {url:n.url,provider:n.kind,custom:true};}
+  throw Error('Выберите видеозвонок.');
+ }
+ // Choices for «Видеозвонок» in the confirm step: providers (Zoom personal room, Meet/Teams of this calendar) and
+ // known rooms ranked for this meeting. A due 60-day look-back of the calendar refreshes the rooms first.
+ async function videoChoices(draftId){
+  const found=locate(String(draftId||''));if(!found)throw Error('Подбор устарел или удалён. Повторите запрос в чате.');
+  const card=found.card,rooms=roomsFor(s);
+  const account=accounts(s.settings).find(a=>a.key===card.account);
+  if(account?.calendar&&rooms.due()){
+   try{const to=now(),from=new Date(+to-require('./rooms.cjs').LOOKBACK*86400000);learned(s,await clientFor(s,account,fetcher).events(from,to),account);rooms.refreshed();}catch{/* the known rooms stay as they are */}
+  }
+  const providers=linksFor(s).available('video-meeting',{calendar:card.provider});
+  const ranked=rooms.rank({title:card.title,attendees:(card.attendees||[]).map(a=>a.email)});
+  return {providers,rooms:ranked,strong:ranked[0]?.strong?ranked[0].key:''};
+ }
+ async function create({draftId,slot=0,title:name,video=true,zoomLink}={}){
   if(typeof draftId!=='string'||!draftId)throw Error('Нет данных встречи.');
   const found=locate(draftId);if(!found)throw Error('Подбор устарел или удалён. Повторите запрос в чате.');
   const card=found.card;
@@ -227,9 +261,14 @@ function setup(s,{fetcher=globalThis.fetch,now=()=>new Date(),poll=1000}={}){
   const summary=String(name??card.title).replace(/\s+/g,' ').trim().slice(0,200)||card.title;
   creating.add(draftId);
   try{
-   const result=await clientFor(s,account,fetcher).create({title:summary,start:choice.start,end:choice.end,attendees:card.attendees||[],video:!!video});
-   card.created={...result,title:summary,start:choice.start,end:choice.end,attendees:(card.attendees||[]).map(a=>a.email),at:now().toISOString()};card.chosen=Number(slot);
+   // The link is resolved before anything is written: a missing Zoom link is a question, not a failure.
+   const meeting=await videoFor(video,{account,summary,card,zoomLink});
+   if(meeting?.needLink)return {needLink:true,text:meeting.text};
+   const people=(card.attendees||[]).map(a=>a.email);
+   const result=await clientFor(s,account,fetcher).create({title:summary,start:choice.start,end:choice.end,attendees:card.attendees||[],meeting});
+   card.created={...result,title:summary,start:choice.start,end:choice.end,attendees:people,video:meeting?.provider||'',at:now().toISOString()};card.chosen=Number(slot);
    s.dialogue.persist();
+   try{if(meeting?.room)roomsFor(s).use(meeting.room,{title:summary,attendees:people});else if(meeting?.custom)roomsFor(s).remember(meeting.url,{title:summary,attendees:people});}catch{/* the event exists; the room list is a convenience */}
    return {created:card.created};
   }catch(e){
    // No answer from the service: the event may exist. Never offer to repeat it blindly.
@@ -264,7 +303,8 @@ function setup(s,{fetcher=globalThis.fetch,now=()=>new Date(),poll=1000}={}){
   return {accounts:accounts(s.settings).map(({key,provider,email,label,calendar})=>({key,provider,email,label,calendar})),configured:{google:conf('google'),microsoft:conf('microsoft')},
    chosen:s.settings.calendarAccount||'',...hours(s.settings),duration:defaultDuration(s.settings),operation};
  }
- return {ipc:{create,connect,status,cancel(){if(watching)clearInterval(watching);watching=null;for(const p of ['google','microsoft'])s.mailAccounts?.[p]?.login?.stop?.();publish('Подключение отменено.',false);return status();}}};
+ const rooms={list:()=>roomsFor(s).list(),rename:(key,name)=>{roomsFor(s).rename(String(key||''),name);return roomsFor(s).list();},forget:key=>roomsFor(s).forget(String(key||''))};
+ return {ipc:{create,videoChoices,rooms:rooms.list,renameRoom:rooms.rename,forgetRoom:rooms.forget,connect,status,cancel(){if(watching)clearInterval(watching);watching=null;for(const p of ['google','microsoft'])s.mailAccounts?.[p]?.login?.stop?.();publish('Подключение отменено.',false);return status();}}};
 }
 
 function validate(next){
