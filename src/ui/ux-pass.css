@@ -249,3 +249,5 @@ button.delete-button svg{width:16px;height:16px}
 .team-birthday-row button{min-height:32px;padding:3px 10px;font-size:12px}
 .team-birthday-note{color:var(--muted)}
 .team-account-main dl{cursor:default}
+/* User messages: the time stays at the right edge; the actions appear to its left on hover. */
+#home .chat-feed .message-user .message-meta>time{order:99}
