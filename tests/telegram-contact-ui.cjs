@@ -18,6 +18,6 @@ const key=load.resolve('./tests/smoke.cjs');require.cache[key]={id:key,filename:
  await js("selectDialogueTopic('contact-test')");await wait("!!document.querySelector('.telegram-contact-card')");
  if(!await js("dialogueMessages.textContent.includes('Telegram не подключён как сервис')"))throw Error('Missing service explanation');
  await sleep(300);fs.writeFileSync(path.join(require('node:os').tmpdir(),'petya-telegram-contact.png'),(await win.webContents.capturePage()).toPNG());
- await js("document.querySelector('.telegram-connect-offer button').click()");await wait("!!document.querySelector('.app-catalog')");if(await js("document.querySelectorAll('.app-catalog-row').length")!==1)throw Error('Wrong connection target');
+ await js("document.querySelector('.telegram-connect-offer button').click()");await wait("!!document.querySelector('.app-catalog')");await wait("document.querySelector('.app-catalog-details')?.dataset.app==='telegram'");if(await js("document.querySelectorAll('.app-tile').length")!==1)throw Error('Wrong connection target');
  console.log('Telegram UI: permission resumes search, card survives reopen, missing-service note and connection action passed');
 }};load('./src/main.cjs');

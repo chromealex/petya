@@ -13,5 +13,11 @@ for test in tests/app-catalog-ui.cjs tests/offer-cards-ui.cjs $(ls tests/*-ui.cj
     echo "FAILED: $test"; grep -E "Error|assert|Timeout| in: " "$log" | grep -v -E "checkSavedConnection|fetch failed|ECONNREFUSED" | head -20; status=1
   fi
 done
+# The catalog in English: reports Russian text left untranslated and saves petya-catalog-en*.png.
+if timeout 180 xvfb-run -a env PETYA_SMOKE_TEST=1 PETYA_INTERFACE_LANGUAGE=en ./node_modules/electron/dist/electron --no-sandbox tests/app-catalog-ui.cjs >"$log" 2>&1 && grep -q "UI smoke test passed" "$log"; then
+  grep -E "passed$|Untranslated" "$log" | grep -v "UI smoke test passed"
+else
+  echo "FAILED: tests/app-catalog-ui.cjs (English)"; grep -E "Error|assert|Timeout| in: " "$log" | head -20; status=1
+fi
 rm -f "$log"
 exit $status
