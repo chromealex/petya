@@ -46,7 +46,9 @@ const own={
  'screenshot-task':['сделай баг из скриншота','скрин в задачу','заведи баг по этому экрану'],
  converter:['сожми видео до 10 МБ','конвертни png в webp','сделай гифку из видео','переведи docx в pdf','уменьши картинки в папке до 1024'],
  reminders:['какие у меня напоминания','поставь напоминание на завтра','покажи мои напоминания'],
- journal:['что я сегодня сделал','итоги недели','план на завтра','запиши в дневник: идея с картой']
+ journal:['что я сегодня сделал','итоги недели','план на завтра','запиши в дневник: идея с картой'],
+ 'code-review':['сделай код-ревью','проверь мои изменения','ревью ветки перед пулл-реквестом','посмотри мой дифф','отревьюй мой код'],
+ mentor:['что мне автоматизировать?','что я делаю руками','где я теряю время','покажи, что мне стоит автоматизировать']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -112,7 +114,11 @@ const not={
  // A plain screenshot is Petya's computer control; store screenshots and bugs in code belong to others.
  'screenshot-task':['сделай скриншот','скриншоты стора','баг в коде','заведи баг в Jira'],
  // Currency, text translation and shortening an answer are not files.
- converter:['конвертер валют','переведи текст','сожми ответ','переведи задачу в другой статус','переведи 100 долларов в рубли']
+ converter:['конвертер валют','переведи текст','сожми ответ','переведи задачу в другой статус','переведи 100 долларов в рубли'],
+ // Code review of my changes: the concept, store reviews, people's reviews, PR lists, Jira tasks on review and showing a diff are not it.
+ 'code-review':['что такое код-ревью','перфоманс-ревью','отзывы в App Store','какие PR ждут моего ревью','задачи на ревью в Jira','покажи diff','ревью сотрудника','годовое ревью','что в PR 123'],
+ // The user's own habits: a mentor for a subject or a junior, the day's plan, the recurring list and automating a build are not it.
+ mentor:['наставник по Unity','ментор для джуна','найди наставника','что мне делать сегодня','какие у меня повторы','что можно автоматизировать в сборке Unity','автоматизируй деплой','что у меня сегодня в календаре']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -131,7 +137,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
