@@ -8,6 +8,8 @@ const settings={};
 function offered(text){const d=offers.decide(offers.candidates(text,{offers:all,settings}));return d?d.one?[d.one.offer.id]:d.tie.map(r=>r.offer.id):[];}
 // app → requests that must offer exactly it
 const own={
+ sql:['покажи схему таблицы events','SQL-запрос: сколько игроков дошли до 10 уровня за неделю','топ стран по числу матчей в ClickHouse','сколько платящих в BigQuery за вчера','какие таблицы в базе данных'],
+ 'search-all':['найди везде про матчмейкинг','где обсуждали оплату в Китае','поиск по всему: лиги','поищи везде насчёт релиза 2.3'],
  'regex-cron':['объясни регулярку /^a+$/','составь крон на каждый будний день в 9','что значит cron */15 * * * *'],
  crashes:['какие крэши за неделю','топ крэшей','новые крэши после релиза 1.4.2','сколько падений вчера'],
  // Crash sources: each by its own name; accepting one also adds «Крэши».
@@ -56,6 +58,8 @@ const own={
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
+ sql:['напиши SQL-миграцию для таблицы players','что такое JOIN','база знаний по проекту','найди в базе знаний про лиги','создай таблицу users в базе','сколько новых игроков вчера','DAU за неделю','найди в таблице выручку'],
+ 'search-all':['найди файл config.json','найди в интернете про лиги','найди в таблице выручку за октябрь','найди человека, который знает Unity','кто знает про матчмейкинг','найди в Confluence про лиги','что обсуждали на встрече'],
  crashes:['ANR за неделю','упала сборка','сервер упал','падение продаж за неделю'],
  // ANR stays the Google Play ANR card (a core reader, no offer); Firebase products other than Crashlytics are not it.
  sentry:['ANR за неделю','какие крэши за неделю','упала сборка'],
@@ -149,7 +153,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
