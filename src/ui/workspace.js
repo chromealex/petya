@@ -139,6 +139,7 @@ const AGENT_STATE = { waiting: 'ждёт', reading: 'читает', done: 'го�
 let lastDecompose = null;
 function renderDecomposeProgress(state) {
   const box = $('decompose-progress'); lastDecompose = state;
+  $('decompose-bar').hidden = !state?.busy;
   if (!state) { box.hidden = true; return; }
   // The same line as the chat's «Думаю…»: what Petya does now and for how long; the agents open on click.
   if (state.stage === 'starting') box.open = false;
@@ -149,14 +150,18 @@ function renderDecomposeProgress(state) {
   if (agents.length && state.busy) text += ` · ${agents.reduce((n, a) => n + a.done, 0)} из ${agents.reduce((n, a) => n + a.total, 0)}, агентов: ${reading || agents.length}`;
   if (measured) text += ` · ${state.percent}%`;
   $('decompose-stage').textContent = text;
+  // Under the line: the overall share of the work once it is measured; until then it only shows that work goes on.
+  const bar = $('decompose-bar');
+  if (measured) bar.value = state.percent; else bar.removeAttribute('value');
   const time = $('decompose-time'), started = Number(state.startedAt) || Date.now();
   if (state.busy) { time.dataset.started = String(started); time.textContent = window.formatDuration?.(Date.now() - started) || ''; }
   else { delete time.dataset.started; time.textContent = state.startedAt ? window.formatDuration?.((Number(state.at) || Date.now()) - started) || '' : ''; }
   const list = $('decompose-agents'); list.replaceChildren();
   for (const agent of agents) {
     const item = document.createElement('li'); item.className = agent.state === 'reading' ? 'current' : 'done'; item.dataset.state = agent.state;
-    item.textContent = `Агент ${agent.n} · ${agent.done} из ${agent.total} · ${agent.current ? 'читает: ' + agent.current : (AGENT_STATE[agent.state] || agent.state) + ' — ' + agent.range}`;
-    list.append(item);
+    const line = document.createElement('span'); line.textContent = `Агент ${agent.n} · ${agent.done} из ${agent.total} · ${agent.current ? 'читает: ' + agent.current : (AGENT_STATE[agent.state] || agent.state) + ' — ' + agent.range}`;
+    const own = document.createElement('progress'); own.max = Math.max(1, agent.total); own.value = agent.done; own.setAttribute('aria-label', `Агент ${agent.n}: ${agent.done} из ${agent.total}`);
+    item.append(line, own); list.append(item);
   }
   list.hidden = !agents.length;
   box.classList.toggle('single', list.hidden); if (list.hidden) box.open = false;
