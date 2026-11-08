@@ -128,7 +128,7 @@ function setup(s){
  // card for it: accepting adds that app (and opens its settings when a service must be connected), and the
  // original request is sent again. Returns the card data, or null when no such extension offers itself.
  function prerequisite(id,command){
-  const o=offers.find(x=>x.id===id);if(!o)return null;
+  const o=live().find(x=>x.id===id);if(!o)return null;
   const topic=s.dialogue.active();
   return {items:[keep(o,command,topic?.id,true)],direct:true};
  }
