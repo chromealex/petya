@@ -17,7 +17,8 @@ module.exports={
   describe(message,topic,s){
     const tasks=(message.jiraItems||[]).map(item=>({key:[item.site,item.key],item,presentationKey:JSON.stringify([item.site,item.key]),
       title:'Jira · '+item.key,subtitle:item.summary,
-      actions:[{id:'open',label:'Открыть в Jira'},{id:'details',label:'К ответу'},{id:'edit',label:'Изменить'},...quick.map(id=>({id,label:id,hidden:true}))]}));
+      // Editing happens in the card itself (expanded view), not through the composer.
+      actions:[{id:'open',label:'Открыть в Jira'},{id:'details',label:'К ответу'},{id:'edit',label:'Изменить',hidden:true},...quick.map(id=>({id,label:id,hidden:true}))]}));
     return [...reports.describe(message,topic,s),...tasks];
   },
   async perform(action,row,s,check,args){

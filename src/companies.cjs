@@ -21,5 +21,10 @@ class Companies{
  setIcon(id,{icon='',source='',at=Date.now()}={}){this.get(id);if(icon&&(typeof icon!=='string'||!/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(icon)||icon.length>60000))throw Error('Некорректная иконка компании.');
   this.save({...this.state,companies:this.state.companies.map(c=>{if(c.id!==id)return c;const next={...c,iconAt:at};if(icon){next.icon=icon;next.iconSource=source||'slack';}else{delete next.icon;delete next.iconSource;}return next;})});}
  select(id){this.get(id);this.save({...this.state,activeId:id});}
+ // Removes a company from the list; returns its data folder for the caller to move to the Trash.
+ // The current company and the first one (its data is the app's root folder) cannot be removed.
+ remove(id){const c=this.get(id);if(id==='default')throw Error('Первую компанию удалить нельзя: в её папке лежат общие данные Пети. Её можно переименовать.');
+  if(id===this.state.activeId)throw Error('Сначала переключитесь на другую компанию.');
+  const dir=this.directory(id);this.save({...this.state,companies:this.state.companies.filter(x=>x.id!==id)});return {name:c.name,dir};}
 }
 module.exports={Companies};

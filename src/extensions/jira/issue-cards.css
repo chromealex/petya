@@ -11,3 +11,23 @@
 .jira-issue-card .kit-side small{padding-right:0;display:block;color:var(--muted,#a7b1ac);font-size:11px}
 .jira-issue-card .kit-card-main{position:relative}
 .jira-issue-card.has-side .chat-result-inline-actions{right:0;bottom:-4px}
+
+.jira-issue-card .chat-result-inline-actions button[data-action=edit]{display:none}
+.jira-title-edit{margin-left:6px;width:22px;height:22px;padding:0;border:0;border-radius:5px;background:transparent;color:var(--muted);font-size:13px;line-height:1;vertical-align:1px;opacity:0;transition:opacity .15s}
+.jira-card:hover .jira-title-edit,.jira-title-edit:focus-visible{opacity:1}.jira-title-edit:hover{background:#ffffff10;color:var(--ink)}
+.jira-expand{align-self:flex-start;min-height:26px;padding:2px 10px 2px 8px;border:0;border-radius:6px;background:transparent;color:var(--muted);font-size:12px}
+.jira-expand::before{content:'▸ '}.jira-expand[aria-expanded=true]::before{content:'▾ '}.jira-expand:hover{color:var(--ink);background:#ffffff08}
+.jira-details{display:flex;flex-direction:column;gap:12px;padding:10px 12px;border-radius:10px;background:#ffffff05}
+.jira-section{display:flex;flex-direction:column;gap:6px}
+.jira-section-head{display:flex;align-items:center;justify-content:space-between}
+.jira-section h5{margin:0;font-size:12px;font-weight:500;color:var(--muted)}
+.jira-section-head button{min-height:24px;padding:2px 8px;font-size:12px}
+.jira-description p,.jira-comment-text p{margin:0 0 6px;font-size:13px;line-height:1.55;color:var(--ink);overflow-wrap:anywhere}
+.jira-comments{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto}
+.jira-comment-head{display:flex;align-items:center;gap:8px;font-size:12px;margin-bottom:2px}
+.jira-comment-text{padding-left:28px}
+.jira-comment-new{display:flex;gap:6px;align-items:flex-end}.jira-comment-new textarea{flex:1;min-height:38px;font:inherit;font-size:13px;resize:vertical}
+.jira-comment-new button{min-height:32px;padding:4px 12px;font-size:13px}
+.jira-edit{display:flex;flex-direction:column;gap:6px}.jira-edit input,.jira-edit textarea{width:100%;box-sizing:border-box;font:inherit;font-size:14px}
+.jira-edit .kit-actions button{min-height:28px;padding:3px 10px;font-size:12px}
+.jira-files{margin:0;padding-left:18px;font-size:13px}

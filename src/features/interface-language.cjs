@@ -6,6 +6,9 @@ require('electron').ipcMain?.on('petya:interface-language-bootstrap',event=>{try
 module.exports={name:'interfaceLanguage',defaults:{},setup(s){
  return {ipc:{
   get:()=>language.describe(),
-  set(preference){const result=language.setPreference(preference);s.refreshTrayMenu?.();return result;}
+  set(preference){const result=language.setPreference(preference);s.refreshTrayMenu?.();return result;},
+  // The page cannot reload itself: the main window blocks renderer navigation (external-links.cjs), so a
+  // location.reload() was silently cancelled. The main process reloads it instead.
+  reload(){const contents=s.win?.webContents;if(!contents||contents.isDestroyed())throw Error('Окно Пети недоступно.');setTimeout(()=>{if(!contents.isDestroyed())contents.reload();},50);return true;}
  },t:language.t};
 }};

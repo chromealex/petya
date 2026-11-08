@@ -1,6 +1,6 @@
 // Jira quick edits from the chat card: one field at a time, applied at once, each with an undo.
 // Options (statuses, people, priorities) are read live from Jira for the selected issue.
-const actions=['transitions','status','people','assignee','priorities','priority','due','execute'];
+const actions=['transitions','status','people','assignee','priorities','priority','due','execute','full','summary','description','comment','uncomment'];
 function connection(row,s,check){
  check();s.modules.assertEnabled(s.settings,'jira');
  const item=row.item,scope=require('./desktop-reply.cjs').scope(s,s.dialogue.active());
@@ -49,6 +49,38 @@ async function perform(action,row,s,check,args){
   await api(issue,{method:'PUT',body:JSON.stringify({fields:{duedate:value||null}})});update(row,s,{due:value});
   const show=v=>v?new Date(v+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'}):'без срока';
   return {handled:true,text:item.key+' · срок: '+show(before.due)+' → '+show(value),undo:{action:'due',args:{date:before.due}}};
+ }
+ // The expanded card: description, people, dates, labels and the latest comments.
+ if(action==='full'){
+  const {adfText}=require('../../history.cjs');
+  const data=await api(issue+'?'+new URLSearchParams({fields:'summary,description,reporter,assignee,created,updated,labels,components,issuetype,parent,attachment,comment',expand:'renderedFields'}));
+  const f=data.fields||{},comments=(f.comment?.comments||[]).slice(-30);
+  return {details:{key:item.key,summary:f.summary||'',description:adfText(f.description)||'',reporter:f.reporter?.displayName||'',assignee:f.assignee?.displayName||'',
+   created:f.created||'',updated:f.updated||'',type:f.issuetype?.name||'',parent:f.parent?{key:f.parent.key,summary:f.parent.fields?.summary||''}:null,
+   labels:(f.labels||[]).slice(0,20),components:(f.components||[]).map(c=>c.name).slice(0,20),attachments:(f.attachment||[]).slice(0,20).map(a=>({name:a.filename,size:a.size})),
+   comments:comments.map(c=>({id:c.id,author:c.author?.displayName||'',created:c.created||'',text:adfText(c.body)||''})),commentTotal:f.comment?.total||comments.length}};
+ }
+ // In-place edits from the expanded card; each returns the previous value as its undo.
+ if(action==='summary'){
+  const value=text(String(args.value||''),255),data=await api(issue+'?fields=summary'),before=data.fields?.summary||'';
+  await api(issue,{method:'PUT',body:JSON.stringify({fields:{summary:value}})});update(row,s,{summary:value});
+  return {handled:true,text:item.key+' · название изменено',summary:value,undo:before?{action:'summary',args:{value:before}}:undefined};
+ }
+ if(action==='description'){
+  const value=String(args.value??'');if(value.length>30000)throw Error('Описание длиннее 30 000 символов.');
+  const {adfText}=require('../../history.cjs'),data=await api(issue+'?fields=description'),before=adfText(data.fields?.description)||'';
+  await api(issue,{method:'PUT',body:JSON.stringify({fields:{description:value.trim()?require('../../core.cjs').adf(value):null}})});
+  return {handled:true,text:item.key+' · описание изменено',description:value,undo:{action:'description',args:{value:before}}};
+ }
+ if(action==='comment'){
+  const value=text(String(args.value||''),20000);
+  const made=await api(issue+'/comment',{method:'POST',body:JSON.stringify({body:require('../../core.cjs').adf(value)})});
+  if(!made?.id)throw Error('Jira не подтвердила комментарий.');
+  return {handled:true,text:item.key+' · комментарий добавлен',comment:{id:made.id,author:made.author?.displayName||'',created:made.created||'',text:value},undo:{action:'uncomment',args:{id:made.id}}};
+ }
+ if(action==='uncomment'){
+  const id=text(String(args.id||''),32);if(!/^\d+$/.test(id))throw Error('Некорректный комментарий.');
+  await api(issue+'/comment/'+id,{method:'DELETE'});return {handled:true,text:item.key+' · комментарий удалён',removed:id};
  }
  if(action==='execute'){
   // «Реализовать» / «Исправить»: the task runner plugin opens a work chat with a plan for approval.
