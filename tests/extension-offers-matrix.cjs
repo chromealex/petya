@@ -62,7 +62,9 @@ const own={
  'tone-check':['как это звучит: КТО СЛОМАЛ БИЛД?!','смягчи сообщение: опять забыли обновить доку','проверь тон ответа игроку','не слишком резко: ревью нужно до пятницы, без вариантов','перепиши помягче: опять забыли обновить доку'],
  // «документы про монетизацию» is offered as file search too (names), but an added «Метрики игры» also claims «монетизац»;
  // the chat tries «Поиск файлов» first (directory order) — see docs/apps/file-search.md.
- 'file-search':['где презентация про Китай с графиком LTV?','найди скрипт, который сохраняет прогресс','документы про монетизацию','в каком файле считается урон?','поищи заметки про онбординг']
+ 'file-search':['где презентация про Китай с графиком LTV?','найди скрипт, который сохраняет прогресс','документы про монетизацию','в каком файле считается урон?','поищи заметки про онбординг'],
+ logs:['покажи логи сервера за последний час','ошибки оплаты в логах за час','логи сервиса payments за последний час','что в Loki за сутки','найди ошибки в Кибане','логи пода api за 15 минут'],
+ kubernetes:['что с подами в кубере','покажи поды в k8s','почему падает под в kubernetes','какие поды в CrashLoopBackOff','статус деплоймента в кубере']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -152,7 +154,11 @@ const not={
  // Petya's own voice, spelling, «тонкий клиент», the mood of reviews or of the community and sending itself are not it.
  'tone-check':['тон голоса Пети','поменяй тон голоса','проверь орфографию в письме','тонкий клиент','какая тональность отзывов','настроение игроков в дискорде','смягчи свет в сцене','отправь в Discord: сервер перезапустится в 18:00','попроси команду проверить билд','как звучит мой голос'],
  // Own files only: the web, «search everything», trackers, wikis, chats, disk space and writing code are others'.
- 'file-search':['найди в интернете отзывы о Unity 6','поиск по всему про релиз','найди задачу в Jira про сохранения','найди страницу в Confluence про релиз','какие файлы занимают больше всего места','чем забит диск','сожми видео до 10 МБ','напиши скрипт сохранения прогресса','найди время для встречи','найди коммит про сохранения']
+ 'file-search':['найди в интернете отзывы о Unity 6','поиск по всему про релиз','найди задачу в Jira про сохранения','найди страницу в Confluence про релиз','какие файлы занимают больше всего места','чем забит диск','сожми видео до 10 МБ','напиши скрипт сохранения прогресса','найди время для встречи','найди коммит про сохранения'],
+ // Server logs: Docker containers, CI builds, Unity, git, chats, sign-in and monitoring (alerts, server health) are not it.
+ logs:['логи контейнера api','логи сборки в CI','что с серверами','какие алерты горят','лог чата','логин не работает','логистика заказов','git log за неделю','Editor.log в Unity','сервер упал','метрики сервера'],
+ // Kubernetes: Docker, pod logs (the logs app), monitoring, dialogue lines, store releases and «под Windows» are not it.
+ kubernetes:['что в докере','перезапусти контейнер redis','логи пода api','что с серверами','какие алерты горят','реплики персонажа в диалоге','собери под Windows','выкатка в Google Play','подпиши договор']
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -171,7 +177,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-sheets','config-balance','meeting-hints','tone-check','file-search'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
