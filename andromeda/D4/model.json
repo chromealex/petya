@@ -1,0 +1,33 @@
+{
+  "group": "Andromeda",
+  "component": "D",
+  "version": 4,
+  "id": "D4",
+  "role": "drafts: requirements from Russian dialogues with corrections (summary, description, open questions as JSON)",
+  "status": "rejected: half the learning rate learns less (27 of 54 new) and keeps no more familiar cases (780); D1 stays the group’s D",
+  "base": {
+    "repository": "mlx-community/Qwen3.5-9B-4bit",
+    "revision": "8b2b98c00a6b4d291155e4890773ca8f769aee53",
+    "runtime": "MLX (Apple Silicon)"
+  },
+  "parent": "D1",
+  "adapter": {
+    "type": "LoRA",
+    "rank": 8,
+    "layers": 32,
+    "files": {
+      "adapters.safetensors": "46dcf95b51f19d5d04a46bfdd5581fa51d07810cb0e9479501ceb2e7c39dfe6d",
+      "adapter_config.json": "77d7bef9a07175b1dce74dc8ad9cd83494d52ce6c4edced139185b4bc6d6e07a"
+    }
+  },
+  "bytes": 58227644,
+  "source": {
+    "repository": "chromealex/petya",
+    "training": "tests/fixtures/requirements-draft-d4"
+  },
+  "evaluation": {
+    "generated_holdout": "27/54 (D1 24/54), 11 D1 successes lost",
+    "v22_holdout": "27/30 checks, 6/12 drafts (D1 the same)",
+    "familiar": "780/801 (D1 787/801), 12 lost, 5 gained"
+  }
+}
