@@ -1,10 +1,10 @@
 {
   "group": "Andromeda",
-  "version": "R1-A1-D1",
+  "version": "R1-A1-D7",
   "components": {
     "R": "R1",
     "A": "A1",
-    "D": "D1"
+    "D": "D7"
   },
   "optional": [
     "A"
