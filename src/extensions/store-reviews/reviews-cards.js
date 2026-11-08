@@ -7,10 +7,13 @@
  const STORE={appstore:'App Store',play:'Google Play'};
  const COLORS=['#f0b4a8','#f3c79c','#e5ce8c','#cfe39a','#9ed99a'];
  const call=(method,...args)=>window.petya.feature('storeReviews',method,...args);
- const num=v=>v===null||v===undefined?'—':Number(v).toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:2});
- const day=d=>new Date(d+'T12:00:00Z').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
- const when=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?'':d.toLocaleDateString('ru-RU',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});};
+ const locale=()=>window.petyaLocale||'ru-RU';
+ const num=v=>v===null||v===undefined?'—':Number(v).toLocaleString(locale(),{minimumFractionDigits:1,maximumFractionDigits:2});
+ const day=d=>new Date(d+'T12:00:00Z').toLocaleDateString(locale(),{day:'numeric',month:'short'});
+ const when=iso=>{const d=new Date(iso);return Number.isNaN(d.getTime())?'':d.toLocaleDateString(locale(),{day:'numeric',month:'short'})+' '+d.toLocaleTimeString(locale(),{hour:'2-digit',minute:'2-digit'});};
  const plural=(n,[one,few,many])=>{const a=Math.abs(n)%100,b=a%10;return a>10&&a<20?many:b===1?one:b>=2&&b<=4?few:many;};
+ // Service, user and model content (review texts, quotes, themes, app names) is left alone by the UI translator.
+ const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
  const notify=(id,data)=>document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail:{id,...data}}));
 
  function starsNode(k,rating){const box=k.el('span','rv-stars');box.setAttribute('aria-label',rating+' из 5');box.style.color=COLORS[Math.max(0,rating-1)];box.append('★'.repeat(rating));box.append(k.el('span','rv-stars-off','★'.repeat(5-rating)));return box;}
@@ -23,7 +26,7 @@
   if(s.delta!==null){
    const tone=s.delta<=-0.1?'down':s.delta>=0.1?'up':'flat';
    const line=k.el('span','rv-delta '+tone,(s.delta>0?'▲ +':s.delta<0?'▼ −':'± ')+num(Math.abs(s.delta)));
-   const against=s.compared==='previousVersion'?'к прошлой версии':'к прошлым '+d.days+' '+plural(d.days,['дню','дням','дням']);
+   const against=s.compared==='previousVersion'?'к прошлой версии':'к прошлому периоду';
    line.append(k.el('small',null,' '+against+(Array.isArray(s.compared)&&s.compared.length===1&&d.stores.length>1?' ('+STORE[s.compared[0]]+')':'')));
    line.title='Было: '+num(s.previous.average)+' по '+s.previous.count+' '+plural(s.previous.count,['отзыву','отзывам','отзывам']);
    box.append(line);
@@ -70,9 +73,9 @@
   for(const c of d.clusters){
    const item=k.el('div','rv-cluster');
    const head=k.el('div','rv-cluster-head');const bar=k.el('span','rv-cluster-bar');const fill=k.el('span');fill.style.width=(100*c.count/max)+'%';bar.append(fill);
-   head.append(k.el('span','rv-cluster-title',c.title),bar,k.el('span','rv-cluster-count',c.count+' '+plural(c.count,['отзыв','отзыва','отзывов'])));
+   head.append(raw(k.el('span','rv-cluster-title',c.title)),bar,k.el('span','rv-cluster-count',c.count+' '+plural(c.count,['отзыв','отзыва','отзывов'])));
    item.append(head);
-   for(const q of c.quotes||[])item.append(k.el('blockquote','rv-quote','«'+q.text+'»'));
+   for(const q of c.quotes||[])item.append(raw(k.el('blockquote','rv-quote','«'+q.text+'»')));
    box.append(item);
   }
   return box;
@@ -81,8 +84,8 @@
  function editor(k,d,r,item,chips,initial){
   item.querySelector('.kit-draft')?.remove();
   const box=k.el('div','kit-draft rv-editor');
-  const label=k.el('label','kit-draft-label','Ответ в '+STORE[r.store]+' — отправится ровно этот текст');
-  const area=k.el('textarea');area.value=initial||'';area.rows=4;area.setAttribute('aria-label','Текст ответа');
+  const label=k.el('label','kit-draft-label',r.store==='play'?'Ответ в Google Play — отправится ровно этот текст':'Ответ в App Store — отправится ровно этот текст');
+  const area=raw(k.el('textarea'));area.value=initial||'';area.rows=4;area.setAttribute('aria-label','Текст ответа');
   const counter=k.el('small','rv-counter');const sync=()=>{counter.textContent=area.value.length+' / '+r.limit;counter.classList.toggle('over',area.value.length>r.limit);send.disabled=!area.value.trim()||area.value.length>r.limit;};
   const row=k.el('div','kit-actions');
   const send=k.el('button','primary','Отправить ответ');send.type='button';
@@ -103,7 +106,7 @@
   item.append(box);area.focus();return box;
  }
  const replied=(k,r)=>{const c=k.chip({label:r.reply.state==='pending'?'ответ на проверке':'ответ отправлен',tone:r.reply.state==='pending'?'progress':'done',title:r.reply.date?when(r.reply.date):''});c.classList.add('rv-replied');return c;};
- const ownReply=(k,r)=>{const p=k.el('p','rv-own-reply');p.append(k.el('b',null,'Ответ: '),r.reply.text);return p;};
+ const ownReply=(k,r)=>{const p=k.el('p','rv-own-reply');p.append(k.el('b',null,'Ответ: '),raw(k.el('span',null,r.reply.text)));return p;};
 
  function review(k,d,r){
   const item=k.el('article','rv-item');item.dataset.review=r.store+':'+r.id;
@@ -111,13 +114,13 @@
   top.append(starsNode(k,r.rating));
   const chips=k.el('span','rv-item-chips');
   if(d.stores.length>1)chips.append(k.chip({label:STORE[r.store]}));
-  const place=[r.territory,r.language].filter(Boolean).join(' · ');if(place)chips.append(k.chip({label:place,title:r.store==='play'?'Язык устройства (Google Play не сообщает страну)':'Страна App Store'}));
-  if(r.version)chips.append(k.chip({label:'v'+r.version}));
+  const place=[r.territory,r.language].filter(Boolean).join(' · ');if(place)chips.append(raw(k.chip({label:place,title:r.store==='play'?'Язык устройства (Google Play не сообщает страну)':'Страна App Store'})));
+  if(r.version)chips.append(raw(k.chip({label:'v'+r.version})));
   if(r.reply)chips.append(replied(k,r));
-  top.append(chips,k.el('span','rv-when',[r.author,when(r.date)].filter(Boolean).join(' · ')));
+  top.append(chips,raw(k.el('span','rv-when',[r.author,when(r.date)].filter(Boolean).join(' · '))));
   item.append(top);
-  if(r.title)item.append(k.el('div','rv-title',r.title));
-  const text=k.el('p','rv-text',r.text||'(без текста)');
+  if(r.title)item.append(raw(k.el('div','rv-title',r.title)));
+  const text=r.text?raw(k.el('p','rv-text',r.text)):k.el('p','rv-text','(без текста)');
   item.append(text);
   if((r.text||'').length>220){
    text.classList.add('clamped');
@@ -163,6 +166,8 @@
   if(!d.focus.update)actions.push({label:'После обновления',title:'Последняя версия против предыдущей',run:()=>k.ask('отзывы '+d.app+where+' после обновления',{send:true})});
   if(d.days<30)actions.push({label:'За месяц',run:()=>k.ask('отзывы '+d.app+where+' за месяц',{send:true})});
   const subtitle=d.stores.map(x=>STORE[x]).join(' · ')+' · '+(d.focus.update&&d.version?'версия '+d.version:d.days+' '+plural(d.days,['день','дня','дней']))+(d.territory?' · '+d.territory:'');
-  parent.append(k.card({app:'Отзывы в сторах',initial:'★',color:'#9a7a2c',key:d.app,status,subtitle,body,actions,className:'reviews-card'}));
+  const node=k.card({app:'Отзывы в сторах',initial:'★',color:'#9a7a2c',key:d.app,status,subtitle,body,actions,className:'reviews-card'});
+  const key=node.querySelector('.kit-key');if(key)raw(key);
+  parent.append(node);
  };
 })();
