@@ -22,7 +22,9 @@ const own={
  'google-meet':['созвон в Meet','запиши созвон в мите','поставь созвон в гугл мит с Олегом','запиши встречу в Google Meet','подключись к созвону через Meet'],
  teams:['встреча в Teams','запиши встречу в тимсе','поставь встречу в тимс на завтра','что было на звонке в Microsoft Teams'],
  discord:['что нового в дискорде','баги из дискорда за неделю','покажи частые вопросы игроков','отправь в Discord: сервер перезапустится в 18:00'],
- support:['что жалуются в поддержку','тикеты про оплату за неделю','ответь на тикет 1234','покажи тикеты в Zendesk']
+ support:['что жалуются в поддержку','тикеты про оплату за неделю','ответь на тикет 1234','покажи тикеты в Zendesk'],
+ 'sprint-planning':['спланируй спринт','что влезет в следующий спринт','какая у нас скорость','кто перегружен в спринте','velocity команды'],
+ standup:['собери стендап','что вчера делала команда','у кого блокеры','настрой стендап на 10:30']
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -44,7 +46,11 @@ const not={
  // Discord by name: the user's own client, coding with discord.js, other messengers and support tickets are not it.
  discord:['дискорд не работает','как подключить discord.js','напиши бота для дискорда','что нового в слаке','что пишут в телеграме','тикеты про оплату','что жалуются в поддержку'],
  // Player tickets: vendors' support, Petya's help, cheering up, store reviews and tracker tickets are not it.
- support:['поддержка Unity','техподдержка Пети','отзывы в сторах','поддержи меня','создай тикет в Jira','частые вопросы игроков в дискорде','поддерживает ли Unity webp']
+ support:['поддержка Unity','техподдержка Пети','отзывы в сторах','поддержи меня','создай тикет в Jira','частые вопросы игроков в дискорде','поддерживает ли Unity webp'],
+ // Sprint planning: running sprints, weekend plans, a task's work plan and team workload right now are not it.
+ 'sprint-planning':['спринт в беге','планы на выходные','план работ по задаче','загрузка команды','кто перегружен','какая скорость интернета'],
+ // Standup: comedy, getting up, meeting summaries and the meeting in the calendar are not it.
+ standup:['стенд-ап комедия','встань','сводка встречи','во сколько стендап','сходим на стендап шоу'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -63,7 +69,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
