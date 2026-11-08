@@ -182,7 +182,7 @@ const find=(calls,pred)=>calls.find(c=>pred(c.url.searchParams,c.url.pathname));
  ({s}=services());
  assert.deepEqual(await amFeature.setup(s).ipc.applications(),[{id:'4242',name:'Bunker Wars'},{id:'77',name:'Other'}]);
  assert.equal(amClient.connected({appmetricaToken:'t',appmetricaApps:''}),false);
- assert.deepEqual(links.scan().filter(x=>x.kind==='metrics-source').map(x=>x.extension),['appmetrica'],'declared through provides');
+ assert.deepEqual(links.scan().filter(x=>x.kind==='metrics-source').map(x=>x.extension),['appmetrica','grafana'],'declared through provides');
  assert.ok(!links.load().some(x=>x.kind==='metrics-source'),'not a card link');
 
  // --- Offers ---

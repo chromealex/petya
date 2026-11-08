@@ -35,6 +35,7 @@ const own={
  glossary:['собери глоссарий проекта','проверь термины в локализации','добавь в глоссарий сундук','что у нас значит мана','покажи глоссарий'],
  metrics:['DAU за неделю','ретеншн D1 D7 D30','сколько новых игроков вчера','как выручка после ивента','DAU из AppMetrica'],
  appmetrica:['подключи AppMetrica'],
+ grafana:['что на дашборде лиг','какие дашборды есть','покажи графану','что в Grafana по матчмейкингу','https://dashboards.wombyte.net/d/c9e4b7f6-9caf-428d-a93f-578ec4be556f/leagues?viewPanel=2'],
  'ab-test':['значим ли тест','посчитай A/B','сколько нужно игроков для теста','есть ли SRM'],
  focus:['фокус на 50 минут над картой уровня','помодоро 4 раза','сколько я сегодня сфокусировался','помоги сосредоточиться'],
  naming:['придумай название для ивента на Хэллоуин','имена для героев-гномов','как назвать фичу с сундуками','название игры про бункер'],
@@ -84,7 +85,10 @@ const not={
  // The project's own words only: general definitions, other products' glossaries and localization files as such are not it.
  glossary:['что такое REST','глоссарий Unity','проверь локализацию','что не переведено в локализации','купи билет в терминале','термины договора аренды'],
  // Team metrics and velocity are Jira's, crashes / reviews / ANR other apps', server metrics nobody's here.
- metrics:['метрики команды','велосити команды','крэши за неделю','отзывы за неделю','ANR за неделю','метрики сервера','подключи AppMetrica'],
+ metrics:['метрики команды','велосити команды','крэши за неделю','отзывы за неделю','ANR за неделю','метрики сервера','подключи AppMetrica','что на дашборде лиг','DAU в графане'],
+ // Grafana by name, a dashboard link or dashboards as the subject: not game metrics words (those stay «Метрики игры»'s
+ // until panels are mapped), not Grafana being down, not «нарисуй график» (charts) and not PromQL without Grafana.
+ grafana:['DAU за неделю','ретеншн D1 D7 D30','метрики игры за месяц','графана не открывается','не могу войти в графану','нарисуй график продаж','rate(http_requests_total[5m]) в prometheus','покажи лиги за неделю'],
  appmetrica:['DAU за неделю','ретеншн D1 D7 D30','крэши в AppMetrica'],
  'ab-test':['тест упал','напиши тесты','проверь тест на регулярку','упали тесты в CI','запусти тесты'],
  // Camera or input focus and a team planning «to focus on bugs» are not focus sessions.
@@ -120,7 +124,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
