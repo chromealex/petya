@@ -136,9 +136,23 @@ function decomposeStageText(state) {
 }
 window.decomposeStageText = decomposeStageText;
 const AGENT_STATE = { waiting: 'ждёт', reading: 'читает', done: 'готово', failed: 'ошибка', stopped: 'остановлен' };
-let lastDecompose = null;
+let lastDecompose = null, stageSwap = 0, swapState = null;
+const STAGE_FADE = 150;
+// A new stage fades the old sign and text out, then the new ones in; the bar keeps moving meanwhile.
 function renderDecomposeProgress(state) {
-  const box = $('decompose-progress'); lastDecompose = state;
+  const box = $('decompose-progress'), shown = box.hidden ? '' : box.dataset.stage, calm = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  lastDecompose = state;
+  if (state && shown && (stageSwap || state.stage !== shown) && !calm) {
+    swapState = state;
+    if (state.busy && Number.isFinite(state.percent) && state.percent > 0) $('decompose-bar').value = state.percent;
+    if (!stageSwap) { box.classList.add('stage-out'); stageSwap = setTimeout(() => { stageSwap = 0; const next = swapState; swapState = null; paintDecomposeProgress(next); box.classList.remove('stage-out'); }, STAGE_FADE); }
+    return;
+  }
+  clearTimeout(stageSwap); stageSwap = 0; swapState = null; box.classList.remove('stage-out');
+  paintDecomposeProgress(state);
+}
+function paintDecomposeProgress(state) {
+  const box = $('decompose-progress');
   $('decompose-bar').hidden = !state?.busy;
   if (!state) { box.hidden = true; return; }
   // The same line as the chat's «Думаю…»: what Petya does now and for how long; the agents open on click.

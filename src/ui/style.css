@@ -1049,7 +1049,10 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 @keyframes work-merge{0%{transform:translateX(0);box-shadow:12px 0 var(--work)}60%,100%{transform:translateX(6px);box-shadow:0 0 var(--work)}}
 #workspace-card .decompose-progress.live[data-stage=planning]>summary::before{width:12px;height:10px;margin:0 5px;background:linear-gradient(var(--work),var(--work)) 0 0/0 2px no-repeat,linear-gradient(var(--work),var(--work)) 0 4px/0 2px no-repeat,linear-gradient(var(--work),var(--work)) 0 8px/0 2px no-repeat;animation:work-plan 1.6s steps(1,end) infinite}
 @keyframes work-plan{0%{background-size:0 2px,0 2px,0 2px}20%{background-size:12px 2px,0 2px,0 2px}45%{background-size:12px 2px,8px 2px,0 2px}70%,100%{background-size:12px 2px,8px 2px,10px 2px}}
-@media (prefers-reduced-motion:reduce){#workspace-card .decompose-progress.live[data-stage]>summary::before{animation:none}}
+#workspace-card .decompose-progress .steps-label{flex:0 1 auto;min-width:0}
+#workspace-card .decompose-progress>summary::before,#workspace-card .decompose-progress .steps-label{transition:opacity .15s ease,scale .15s ease}
+#workspace-card .decompose-progress.stage-out>summary::before{opacity:0;scale:.5}#workspace-card .decompose-progress.stage-out .steps-label{opacity:0}
+@media (prefers-reduced-motion:reduce){#workspace-card .decompose-progress.live[data-stage]>summary::before{animation:none}#workspace-card .decompose-progress>summary::before,#workspace-card .decompose-progress .steps-label{transition:none}}
 @media (prefers-reduced-motion:reduce){#home .chat-feed .message-steps.live>summary::before,#workspace-card .decompose-progress.live>summary::before{animation:none;border-color:var(--green)}}
 .message-steps .steps-label{min-width:0;overflow-wrap:anywhere}.message-steps .steps-duration{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 #home .chat-feed .message-steps>ol,#workspace-card .decompose-progress>ol{display:block;max-width:none;margin:8px 0 0;padding:0;border:1px solid #ffffff12;border-radius:12px;overflow:hidden;background:#ffffff02}
@@ -1128,7 +1131,7 @@ blockquote.growth-learned{margin:6px 0;padding:8px 12px;border-left:3px solid va
 .model-part{display:grid;gap:4px;padding:8px 0;border-top:1px solid rgba(255,255,255,.08)}.model-part small{opacity:.75}
 
 /* The chat's thin bar under «Думаю…»: shown collapsed too, the overall percentage once measured. */
-#workspace-card .decompose-progress>summary{flex-wrap:wrap}#workspace-card .decompose-progress>summary::after{order:1}.decompose-bar-row{order:2;flex-basis:100%;padding-left:30px;line-height:0}.decompose-bar-row:has(>[hidden]){display:none}
+#workspace-card .decompose-progress>summary{position:relative;max-width:100%}#workspace-card .decompose-progress>summary:has(.decompose-bar-row>:not([hidden])){padding-bottom:9px}.decompose-bar-row{position:absolute;left:30px;bottom:0;line-height:0}.decompose-bar-row:has(>[hidden]){display:none}
 #decompose-bar[hidden]{display:none}#decompose-bar{display:block;appearance:none;width:180px;height:3px;margin:2px 0 0;border:0;border-radius:3px;overflow:hidden;background:var(--line)}#decompose-bar::-webkit-progress-bar{background:var(--line)}#decompose-bar::-webkit-progress-value{background:var(--green);transition:width .3s}#decompose-bar:indeterminate{background:linear-gradient(90deg,var(--line) 0%,var(--green) 50%,var(--line) 100%);background-size:200% 100%;animation:chat-progress-slide 1.5s linear infinite}
 .decompose-progress li progress{display:block;appearance:none;width:100%;height:2px;margin-top:6px;border:0;border-radius:2px;overflow:hidden;background:#ffffff14}.decompose-progress li progress::-webkit-progress-bar{background:#ffffff14}.decompose-progress li progress::-webkit-progress-value{background:var(--green)}.decompose-progress li.done progress::-webkit-progress-value{opacity:.55}
 @media (prefers-reduced-motion:reduce){#decompose-bar:indeterminate{animation:none}}
