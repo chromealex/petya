@@ -20,7 +20,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.match(artistWeight,/^Вес загрузки: ≈ 2,2 ГБ$/);
  assert.match(await js("document.querySelector('[data-category=creative] .app-catalog-group-head button').textContent"),/≈ 2,2 ГБ/);
  assert.match(await js("[...document.querySelectorAll('.app-catalog-row')].find(r=>r.querySelector('strong').textContent==='Python').querySelector('.app-catalog-weight').textContent"),/Нужен Docker Desktop/);
- assert.equal(await js("[...document.querySelectorAll('.app-catalog-row')].find(r=>r.querySelector('strong').textContent==='Регулярки и cron').querySelector('.app-catalog-weight').textContent"),'Без загрузок');
+ assert.equal(await js("!![...document.querySelectorAll('.app-catalog-row')].find(r=>r.querySelector('strong').textContent==='Регулярки и cron').querySelector('.app-catalog-weight')"),false,'apps without downloads show no weight line');
  // Pick the whole «Разработка» category, then leave one app out.
  const dev="document.querySelector('[data-category=dev]')";
  const missing=await js(`[...${dev}.querySelectorAll('.app-catalog-row .app-catalog-pick:not(:disabled)')].length`);

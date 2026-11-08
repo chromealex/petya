@@ -29,7 +29,7 @@
   const installBytes=list=>list.reduce((sum,item)=>sum+(weight(item)?.install||0),0);
   function weightLine(item){
    const w=weight(item),line=make('small');line.className='app-catalog-weight';
-   if(!w){line.textContent=item.service?'':'Без загрузок';return line.textContent?line:null;}
+   if(!w)return null;
    const parts=[];
    if(w.install)parts.push('Вес загрузки: ≈ '+size(w.install));
    else if(w.items.some(i=>!i.optional&&i.present))parts.push('Уже скачано');
