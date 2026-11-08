@@ -29,7 +29,7 @@
   const k=window.resultKit;if(!k||!c?.langs||parent.querySelector('.loc-card'))return;
   const body=k.el('div','loc-body');
   const sets=k.el('p','loc-sets');
-  c.sets.forEach((x,i)=>{if(i)sets.append(k.el('span','muted',' · '));sets.append(raw(k,'b',null,x.name),k.el('span','muted',' '+x.format+', ключей: '+x.keys.toLocaleString(loc())));});
+  c.sets.forEach((x,i)=>{if(i)sets.append(k.el('span','muted',' · '));sets.append(raw(k,'b',null,x.name),' ',raw(k,'span','muted',x.format),k.el('span','muted',' · Ключей: '+x.keys.toLocaleString(loc())));});
   body.append(sets);
   // Problems table with filters by kind (and by language from the counters).
   let filter=c.filter||'',lang='',limit=12;
@@ -59,7 +59,7 @@
   if(!c.langs.length)langs.append(k.el('p','loc-empty','Есть только исходный язык — сравнивать не с чем.'));
   body.append(langs);
   if(c.problems.length){body.append(chips,table);paint();}
-  if(c.problemCount>c.problems.length)body.append(k.el('small','kit-meta','В таблице первые '+c.problems.length+' проблем из '+c.problemCount+'.'));
+  if(c.problemCount>c.problems.length)body.append(k.el('small','kit-meta','Показано проблем: '+c.problems.length+' из '+c.problemCount));
   // Translations waiting for review.
   const t=c.translation;let saveBox=null;
   if(t){
@@ -67,7 +67,7 @@
    box.append(k.el('h5','loc-h',t.saved?'Переводы сохранены':'Переводы на проверку: '+t.count));
    if(t.items?.length){const list=t.items.map(x=>{const row=k.el('div','loc-tr');const key=raw(k,'span','loc-key',shownKey(x.key));key.title=x.set;row.append(key,raw(k,'code','loc-code',x.lang),raw(k,'span','loc-text muted',x.source),raw(k,'span','loc-text',x.text));return row;});box.append(k.collapse(list,6,'Показать остальные переводы'));}
    if(t.failed?.length){const ul=k.el('ul','loc-failed');for(const f of t.failed){const li=k.el('li');li.append(raw(k,'span','loc-key',shownKey(f.key)),raw(k,'code','loc-code',f.lang),k.el('span',null,f.reason));ul.append(li);}
-    box.append(k.el('small','kit-meta','Не удалось перевести: '+t.failedCount+'. Эти строки не будут записаны.'),ul);}
+    box.append(k.el('small','kit-meta','Не удалось перевести: '+t.failedCount),k.el('small','kit-meta','Эти строки не будут записаны.'),ul);}
    const files=k.el('ul','loc-files');for(const f of t.files||[]){const li=k.el('li');li.append(raw(k,'span',null,f.path));files.append(li);}
    box.append(k.el('small','kit-meta',t.saved?'Записаны новые файлы:':'Будут созданы новые файлы (исходники не меняются):'),files);
    if(t.capped)box.append(k.el('small','kit-meta','Переведена только часть строк — попросите ещё раз для остальных.'));

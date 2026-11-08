@@ -31,20 +31,20 @@
    row.append(sw,k.el('span','bsize-legend-label',x.label),k.el('span','bsize-num',fmt(x.compressed)));
    if(diff){const d=x.compressed-x.before.compressed;row.append(k.el('span','bsize-num bsize-delta'+(d>0?' up':d<0?' down':''),d?signed(d):'—'));}
    else row.append(k.el('span','bsize-num muted',Math.round(100*x.compressed/total)+'%'));
-   row.title=x.count+' файл(ов), распаковано '+fmt(x.size)+(diff?' (было '+fmt(x.before.size)+')':'');
+   row.title=['Файлов: '+x.count,'Распаковано: '+fmt(x.size),diff?'Было распаковано: '+fmt(x.before.size):''].filter(Boolean).join(' · ');
    box.append(row);
   }
   return box;
  }
  function barCell(k,value,max,tone){const box=k.el('span','bsize-cell-bar');const fill=k.el('span',tone);fill.style.width=Math.max(2,100*value/(max||1))+'%';box.append(fill);return box;}
- // Long archive paths keep their head and tail: «assets/…/Textures/atlas.bundle».
- const short=p=>{if(p.length<=36)return p;const parts=p.split('/');if(parts.length<4)return '…'+p.slice(-35);const tail=parts.slice(-2).join('/');return parts[0]+'/…/'+(tail.length>30?'…'+tail.slice(-29):tail);};
+ // Long archive paths keep the top folder and the file name: «assets/…/atlas.bundle»; the full path is the tooltip.
+ const short=p=>{if(p.length<=32)return p;const parts=p.split('/'),file=parts.at(-1);if(file.length>28)return '…'+p.slice(-29);const dir=parts.length>1?parts[0]+'/…/':'';return (dir+file).length<=32?dir+file:'…/'+file;};
  const pathCell=(k,p)=>{const n=k.el('span','bsize-path',short(p));n.title=p;n.setAttribute('data-no-i18n','');return n;};
  function grownTable(k,rows){
   const max=Math.max(...rows.map(r=>r.delta),1);
   return k.table([
    {label:'Файл',value:r=>pathCell(k,r.path)},
-   {label:'Было → стало',value:r=>k.el('span','bsize-num',(r.status==='new'?'новый':fmt(r.before))+' → '+fmt(r.after))},
+   {label:'Было → стало',value:r=>{const n=k.el('span','bsize-num');n.append(r.status==='new'?k.el('span','muted','Новый файл'):fmt(r.before),' → '+fmt(r.after));return n;}},
    {label:'Δ',value:r=>k.el('span','bsize-num bsize-delta up',signed(r.delta))},
    {label:'',value:r=>barCell(k,r.delta,max,'up')}],rows);
  }
@@ -53,14 +53,16 @@
   return k.table([
    {label:'Файл',value:r=>pathCell(k,r.path)},
    {label:'В архиве',value:r=>k.el('span','bsize-num',fmt(r.compressed))},
-   {label:'Распаковано',value:r=>k.el('span','bsize-num muted',fmt(r.size)+(r.stored?' · без сжатия':''))},
+   {label:'Распаковано',value:r=>{const n=k.el('span','bsize-num muted',fmt(r.size));if(r.stored)n.title='Хранится без сжатия';return n;}},
    {label:'',value:r=>barCell(k,r.compressed,max,'')}],rows);
  }
  function allFiles(k,c,diff){
   const box=k.el('div','bsize-all');box.hidden=true;
   const rows=c.files.map(f=>k.el('div','bsize-file'));
-  c.files.forEach((f,i)=>{rows[i].append(pathCell(k,f.path),k.el('span','bsize-num'+(diff?' bsize-delta'+(f.delta>0?' up':' down'):''),diff?(f.status==='new'?'новый ':f.status==='removed'?'удалён ':'')+signed(f.delta):fmt(f.compressed)),k.el('span','bsize-num muted',diff?fmt(f.before)+' → '+fmt(f.after):fmt(f.size)));});
-  box.append(k.el('small','kit-meta',diff?'Изменившиеся файлы по размеру изменения'+(c.fileCount>c.files.length?' — первые '+c.files.length+' из '+c.fileCount:'')+'. Размеры — в архиве.':'Файлы по размеру в архиве'+(c.fileCount>c.files.length?' — первые '+c.files.length+' из '+c.fileCount:'')+'. Справа — распакованный размер.'),k.collapse(rows,40,'Показать ещё'));
+  c.files.forEach((f,i)=>{const size=k.el('span','bsize-num'+(diff?' bsize-delta'+(f.delta>0?' up':' down'):''),diff?signed(f.delta):fmt(f.compressed));if(diff&&f.status!=='changed')size.title=f.status==='new'?'Новый файл':'Файл удалён';rows[i].append(pathCell(k,f.path),size,k.el('span','bsize-num muted',diff?fmt(f.before)+' → '+fmt(f.after):fmt(f.size)));});
+  box.append(k.el('small','kit-meta',diff?'Изменившиеся файлы по размеру изменения. Размеры — в архиве.':'Файлы по размеру в архиве. Справа — распакованный размер.'));
+  if(c.fileCount>c.files.length)box.append(k.el('small','kit-meta','Показано файлов: '+c.files.length+' из '+c.fileCount));
+  box.append(k.collapse(rows,40,'Показать ещё'));
   return box;
  }
 
@@ -73,28 +75,28 @@
   const head=k.el('div','bsize-total');
   head.append(k.el('span','bsize-big',fmt(b.bytes)));
   if(diff){const d=b.bytes-a.bytes;head.append(k.el('span','bsize-delta-big'+(d>0?' up':d<0?' down':''),signed(d)+' · '+pct(d,a.bytes)));}
-  head.append(k.el('span','bsize-sub','распаковано '+fmt(b.size)+(diff?' ('+signed(b.size-a.size)+')':'')+' · '+b.files.toLocaleString(loc())+' файлов'));
+  head.append(k.el('span','bsize-sub','Распаковано: '+fmt(b.size)+(diff?' ('+signed(b.size-a.size)+')':'')),k.el('span','bsize-sub','Файлов: '+b.files.toLocaleString(loc())));
   body.append(head);
-  if(diff){const who=k.el('p','bsize-who');who.append(k.el('span','muted','Старый: '),noI18n(k.el('b',null,ident(a))),k.el('span','muted',' → новый: '),noI18n(k.el('b',null,ident(b))),k.el('span','muted',' · '+c.basis));body.append(who);}
+  if(diff){const who=k.el('p','bsize-who');who.append(k.el('span','muted','Старый билд: '),noI18n(k.el('b',null,ident(a))),k.el('br'),k.el('span','muted','Новый билд: '),noI18n(k.el('b',null,ident(b))),k.el('span','muted',' · '+c.basis));body.append(who);}
   // Stacked bars on one scale.
   const bars=k.el('div','bsize-bars');
-  if(diff){const scale=Math.max(a.compressed,b.compressed);bars.append(stacked(k,c.categories,x=>x.before.compressed,scale,natives,'было'),stacked(k,c.categories,x=>x.compressed,scale,natives,'стало'));}
-  else bars.append(stacked(k,c.categories,x=>x.compressed,b.compressed,natives,'в архиве'));
+  if(diff){const scale=Math.max(a.compressed,b.compressed);bars.append(stacked(k,c.categories,x=>x.before.compressed,scale,natives,'Было'),stacked(k,c.categories,x=>x.compressed,scale,natives,'Стало'));}
+  else bars.append(stacked(k,c.categories,x=>x.compressed,b.compressed,natives,'В архиве'));
   body.append(bars,legend(k,c,natives,diff));
   if(c.modules?.length>1){const mods=k.el('div','bsize-modules');mods.append(k.el('small','kit-meta','Модули AAB'));for(const m of c.modules){const chip=noI18n(k.chip({label:m.name+' · '+fmt(m.compressed)+(diff&&m.compressed!==m.before.compressed?' ('+signed(m.compressed-m.before.compressed)+')':'')}));mods.append(chip);}body.append(mods);}
   // Files.
   if(diff){
    if(c.grown.length){body.append(k.el('h5','bsize-h','Что выросло больше всего'),grownTable(k,c.grown));}
    else body.append(k.el('p','bsize-who','Ни один файл не вырос.'));
-   if(c.added||c.removed)body.append(k.el('small','kit-meta','Новых файлов: '+c.added+', удалённых: '+c.removed+'.'));
+   if(c.added||c.removed)body.append(k.el('small','kit-meta',['Новых файлов: '+c.added,'Удалённых файлов: '+c.removed].join(' · ')));
   }else if(c.largest?.length)body.append(k.el('h5','bsize-h','Крупнейшие файлы'),largestTable(k,c.largest));
   // Warnings.
   if(c.warnings?.length){const ul=k.el('ul','bsize-warnings');for(const w of c.warnings){const li=k.el('li',w.level);li.append(k.el('span','bsize-mark',w.level==='warn'?'!':'i'),k.el('span',null,w.text));ul.append(li);}body.append(ul);}
   if(c.note)body.append(k.el('p','bsize-note',c.note));
   const all=allFiles(k,c,diff);body.append(all);
   const grew=diff?b.bytes-a.bytes:0;
-  const status=diff?{label:(grew>0?'вырос на ':grew<0?'уменьшился на ':'без изменений ')+(grew?fmt(Math.abs(grew)):''),tone:grew>a.bytes*0.01?'alert':grew>0?'progress':'done'}:
-   {label:c.warnings?.some(w=>w.level==='warn')?'есть замечания':'без замечаний',tone:c.warnings?.some(w=>w.level==='warn')?'progress':'done'};
+  const status=diff?{label:grew>0?'Вырос: '+signed(grew):grew<0?'Уменьшился: '+signed(grew):'Без изменений',tone:grew>a.bytes*0.01?'alert':grew>0?'progress':'done'}:
+   {label:c.warnings?.some(w=>w.level==='warn')?'Есть замечания':'Без замечаний',tone:c.warnings?.some(w=>w.level==='warn')?'progress':'done'};
   const actions=[
    {label:'Показать все файлы',run:btn=>{all.hidden=!all.hidden;btn.dataset.open=String(!all.hidden);btn.textContent=all.hidden?'Показать все файлы':'Скрыть файлы';}},
    {label:'Что сжать?',primary:true,run:()=>k.ask('Что сжать в этом билде?',{send:true})}];
