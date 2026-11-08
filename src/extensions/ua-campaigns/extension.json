@@ -1,0 +1,22 @@
+{
+  "id": "ua-campaigns",
+  "name": "Закупка трафика",
+  "description": "Расходы на привлечение игроков из AppLovin, Unity Ads и Meta: траты, установки и CPI по сетям, кампаниям и дням, ROAS по выручке с рекламы",
+  "category": "analytics",
+  "icon": "icon.svg",
+  "examples": ["Сколько потратили на закупку за неделю?", "CPI по сетям за 30 дней", "Какая кампания дороже всех?", "Расходы на рекламные кампании вчера"],
+  "connects": "AppLovin, Unity Ads или Meta",
+  "provides": {
+    "ua-source": ["applovin-ua-source.cjs", "unity-ua-source.cjs", "meta-ua-source.cjs"]
+  },
+  "setting": "extension_ua-campaigns",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["ua-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "uaCampaigns": "renderUaCampaigns"
+  }
+}
