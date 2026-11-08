@@ -65,5 +65,23 @@ const offers=require('../src/features/extension-offers.cjs');
  assert.deepEqual(ipc.muted(),['regex-cron']);
  assert.equal(feature.turn('объясни регулярку /a/'),null,'muted: no offer even for a direct request');
  assert.deepEqual(ipc.unmute('regex-cron'),[]);
- console.log('Extension offers: ties asked, named service wins, avoid/ready/muted skipped, direct offer with retry, quiet offer once per chat, accept/dismiss/unmute passed');
+ // An added app asks for another one with the same card (`propose`): «Крэши» without a crash source.
+ const crashChat=topic;s.dialogue.active=()=>topic;s.settings.extension_crashes='true';
+ const asked=feature.propose('какие крэши за неделю',['sentry','crashlytics','google-play','nope'],'Крэши пока неоткуда взять. Какой подключить?','Крэши');
+ assert.equal(asked.question,true);assert.equal(asked.by,'Крэши');assert.equal(crashChat.messages.at(-1).by,'Крэши');
+ const items=asked.extensionData.extensionOffer.items;
+ assert.deepEqual(items.map(i=>[i.ext,i.connect]),[['sentry','settings'],['crashlytics','settings'],['google-play','settings']],'unknown ids are skipped');
+ assert.equal(feature.propose('x',['nope'],'?'),null);
+ // `also`: accepting a source adds «Крэши» too and keeps the request until the source is connected.
+ s.settings.extension_crashes='false';
+ const sentry=ipc.accept(items[0].id);
+ assert.equal(s.settings.extension_sentry,'true');assert.equal(s.settings.extension_crashes,'true');
+ assert.deepEqual([sentry.settings,sentry.service,sentry.retry],['sentry',undefined,'какие крэши за неделю']);
+ // `service`: Google Play is connected in Petya's service settings, not in an extension card.
+ const play=ipc.accept(items[2].id);
+ assert.deepEqual([play.settings,play.service,play.retry],[undefined,'googleplay','какие крэши за неделю']);assert.match(play.text,/Подключите «Google Play» в настройках/);
+ s.settings.googlePlayCredential='{}';
+ const fresh=feature.propose('крэши в Google Play',['google-play'],'?');
+ assert.deepEqual(ipc.accept(fresh.extensionData.extensionOffer.items[0].id).retry,'крэши в Google Play','connected: retried at once');
+ console.log('Extension offers: ties asked, named service wins, avoid/ready/muted skipped, direct offer with retry, quiet offer once per chat, accept/dismiss/unmute, propose, also and service passed');
 })().catch(e=>{console.error(e);process.exit(1);});

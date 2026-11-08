@@ -1,0 +1,92 @@
+{
+ "v20-repeat": {
+  "passed": false,
+  "reason": "Wrong inflection «293 секунду».",
+  "answer_sha256": "fe5a457b7f4538407b9bc3a4f1d2e5030b57026f534b622da963f6b0504e26ff"
+ },
+ "v21-previous-draft-quote": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "a515c7af52460b9222682be49a693a2e1d16f39c55cb0167e3008eb4380dadba"
+ },
+ "fresh-sort-3-1-1": {
+  "passed": false,
+  "reason": "Wrong sort result.",
+  "answer_sha256": "8e51c6d7a3cdcbaf19e27c7abb5beaf1c07e5b5e87011be896aa698c11bdb686"
+ },
+ "fresh-cancel-first": {
+  "passed": true,
+  "reason": "Same requirements in other words.",
+  "answer_sha256": "403787fa0299bbbd9beccfdacfceba956118b681f28d307852f0609920632721"
+ },
+ "fresh-cancel-second": {
+  "passed": false,
+  "reason": "Keeps source_no, which should be replaced.",
+  "answer_sha256": "7e34ca4c8c65573a430a22e8553ce65d837467f2b9355ca7c4a78b1fa88c946b"
+ },
+ "fresh-revoke-transmit": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "3e113d16b68c38c93048efbdd84f760f393e8972cfa77d01cf92c9e69b98f279"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "cb693d185e923a5e467756b5af0ff0a5f11e1e00d8426216a61ca36b8af04335"
+ },
+ "fresh-copy-scope": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "826b95cbea6aeba65eb7bfc02a458894be7616bb5376b91ffbd45bcb1002a41a"
+ },
+ "fresh-undo-ban": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "9a51017d8ee1f9da6aaba5ae1de264c718e7808945ab230fb145607cc0c1e938"
+ },
+ "fresh-add-not-replace": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "7324be87ebfb8b1efe26d860099ea8b471a45cf8361aa8e9e7974cb2cd262817"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Allows reuse of the code.",
+  "answer_sha256": "ce9cdcb547c62a70722caec0e3c3fc6415c9abef93cb4db45bc6e8c9bcbbdb42"
+ },
+ "fresh-duration-open": {
+  "passed": false,
+  "reason": "Not-for-login lost.",
+  "answer_sha256": "d6c198ff661bef155c086dbbc0868c6c50162efcb27ea38cf2697ee6bd332fda"
+ },
+ "fresh-exact-caption": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "b045d49b9644c5356e8a8aae5fb76ce4d5f70b2a08581f455d0585110ae2c94d"
+ },
+ "fresh-display-only": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "e74a637f9ba573467e88c5022f9b0b87875e519086df95de4481130046529529"
+ },
+ "fresh-quoted-instruction": {
+  "passed": false,
+  "reason": "Typo «преподаателю».",
+  "answer_sha256": "37689475964971f42bad1af0494943d20a061a3ec30f2b113628d436f350166f"
+ },
+ "fresh-negative-order": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "370d6fc52350ee44b6d88dc15a722a869919be0fe6a5e6a5152cd8b8124920a4"
+ },
+ "fresh-recipient-pending": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "89f96110bc6f589981e8e714a71f378599df3d28ef96439f3e139add1a71b932"
+ },
+ "fresh-rename-withdrawn": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1b75606eb7f10a09fd0b3ca79858d1f33a349d2ca02ea498a02487b1a0a39a5a"
+ }
+}
