@@ -16,7 +16,7 @@ incremental consent. Dates, free/busy, and slot ranking are computed by code. Th
 | «поставь встречу с Машей в четверг в 15:00 «Синк»» | the requested slot (with conflicts) plus nearby alternatives |
 
 These phrases are not handled by the app and return `null`: meeting summaries («сводка встречи», «что решили на встрече»,
-which belong to `meetings`), «слушай встречу Zoom», Jira due dates («срок задачи»), «календарь отпусков»,
+which belong to `meetings`), «слушай встречу», Jira due dates («срок задачи»), «календарь отпусков»,
 birthdays, cron, «что у меня сегодня по задачам», and «найди время в логах». The same list is in `AVOID`
 and `offer.cjs`.
 
