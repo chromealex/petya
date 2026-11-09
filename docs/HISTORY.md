@@ -13,6 +13,7 @@ OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 - «Команда» has «Это я» on each card (one card at most) and an «это вы» mark next to the name. Without a mark Petya finds your card himself by your Jira email or your full name.
 - In answers Petya talks to that person as «ты» and no longer suggests «Алекс (или ты)» when you are the Alex in question.
 - Scrollbars look the same everywhere: the thin chat scrollbar on every screen, including the dashboard window.
+- Settings «Модели Пети» show the group's version, let you pick a published version of each part, and choose the default answer model.
 
 ## 0.12.2 — «Важное» as a popover, steadier materials, «Реализовать» fixed
 
