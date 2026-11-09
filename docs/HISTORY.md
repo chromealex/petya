@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.14.1 — the macOS download passes Apple's check
+
+- The release build signs every binary inside the app with the Developer ID, the hardened runtime and a timestamp, inside out — Electron's framework libraries and helpers included — so `Petya.dmg` passes notarization and opens on any Apple Silicon Mac without a warning.
+
 ## 0.14.0 — «Генератор уровней»: RTS maps from a phrase
 
 - New app «Генератор уровней» (gamedev): «сгенерируй карту 2 на 2 с рекой посередине», «сделай симметричную карту для 4 игроков, побольше руды». Petya drives the RTS engine through its own MCP server rtsmcp and shows the map as a picture with starts and deposits, path lengths between starts and the engine's validation.

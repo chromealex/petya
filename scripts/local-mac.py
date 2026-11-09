@@ -101,12 +101,20 @@ with info_path.open('wb') as stream:
     plistlib.dump(info, stream)
 # Sign with the selected persistent certificate, including nested helpers.
 subprocess.run(['xattr', '-cr', str(output)], check=True)
-# Notarization rejects any unsigned binary, also outside the bundle's standard places (the app's own folder).
+# Notarization rejects any binary without the Developer ID, the hardened runtime and a timestamp, wherever it is
+# (Electron's framework libraries, Squirrel's ShipIt, the app's own folder), and --deep does not reach them all:
+# a release signs inside out — every binary, then the nested frameworks and helper apps, then the app.
 if release:
-    for file in sorted(app_dir.rglob('*')):
-        if file.is_file() and not file.is_symlink() and macho(file):
-            sign(file)
-sign(output, deep=True)
+    contents = output / 'Contents'
+    depth = lambda path: len(path.parts)
+    main_executable = contents / 'MacOS' / info.get('CFBundleExecutable', 'Electron')
+    for file in sorted((f for f in contents.rglob('*') if f.is_file() and not f.is_symlink() and f != main_executable and macho(f)), key=depth, reverse=True):
+        sign(file)
+    for bundle in sorted((b for b in contents.rglob('*') if b.is_dir() and not b.is_symlink() and b.suffix in ('.framework', '.app')), key=depth, reverse=True):
+        sign(bundle)
+    sign(output)
+else:
+    sign(output, deep=True)
 subprocess.run(['codesign', '--verify', '--deep', '--strict', str(output)], check=True)
 # Verify the bundled server and model before publishing the archive.
 with socket.socket() as probe:
