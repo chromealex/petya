@@ -90,14 +90,22 @@ function setup(s){
 }
 
 // --- Building the review --------------------------------------------------------------------------------------
+// The model's part of a review is kept for the same changes and model, so a dashboard widget that repeats «проверь мои
+// изменения» every few minutes asks the model again only when the diff changed.
+const reviewed=new Map();
+const changesKey=(s,changes)=>require('node:crypto').createHash('sha256').update(JSON.stringify([s.companyId||'',s.settings.model||'',changes.files,changes.repoFiles||[]])).digest('hex');
 async function build(s,changes,{progress}){
  const found=checks.run(changes);
  let model=null;
+ const key=s.settings.model&&changes.files.length?changesKey(s,changes):'';
+ if(key&&reviewed.has(key))return {...reviewed.get(key),cached:true};
  if(s.settings.model&&changes.files.length){
   publish(s,'Читаю изменения: '+changes.files.length+' '+kit.plural(changes.files.length,['файл','файла','файлов'])+'…',true);
   model=await review.modelReview(s,changes.files,{progress});
  }
- return {...review.assemble(changes,found,model),model:!!model,dropped:model?.dropped||0,failed:model?.failed||0,cut:!!model?.cut};
+ const card={...review.assemble(changes,found,model),model:!!model,dropped:model?.dropped||0,failed:model?.failed||0,cut:!!model?.cut};
+ if(key&&model&&!model.failed){reviewed.set(key,card);while(reviewed.size>20)reviewed.delete(reviewed.keys().next().value);}
+ return card;
 }
 function summary(card,where){
  const t=card.totals,parts=[];
@@ -130,7 +138,7 @@ async function localReview(s,command,want,root){
  const card=await build(s,changes,{progress:file=>s.requestProgress?.report('Смотрю '+file)});
  const data={source:'local',repo:changes.name,title:where,branch:changes.branch,base:changes.base,mode:changes.mode,head:changes.head.slice(0,12),...card,at:new Date().toISOString()};
  const text=summary(card,where);
- if(card.model)publish(s,text,false,card.totals.blocker?'attention':'success',String(Date.now()));
+ if(card.model&&!card.cached)publish(s,text,false,card.totals.blocker?'attention':'success',String(Date.now()));
  return kit.reply(s,command,{by:BY,text,data:{codeReview:data}});
 }
 
@@ -162,7 +170,7 @@ async function prReview(s,command,repo,number){
  const url=/^https:\/\/github\.com\//.test(pr.html_url||'')?pr.html_url:'';
  const data={source:'pr',key,repo,number:Number(number),url,title:String(pr.title||'').slice(0,300),branch:String(pr.head?.ref||''),base:String(pr.base?.ref||''),head:String(pr.head?.sha||'').slice(0,12),...card,at:new Date().toISOString()};
  const text=summary(card,ref+' «'+data.title+'»');
- if(card.model)publish(s,text,false,card.totals.blocker?'attention':'success',String(Date.now()));
+ if(card.model&&!card.cached)publish(s,text,false,card.totals.blocker?'attention':'success',String(Date.now()));
  return kit.reply(s,command,{by:BY,text,sources:url?[{title:ref,url}]:[],data:{codeReview:data}});
 }
 
@@ -178,4 +186,7 @@ async function turn(s,command){
   return e.github?kit.reply(s,command,{by:BY,error:true,text:BY+' · '+e.message}):kit.failure(s,command,BY,e);
  }
 }
-module.exports={name:'codeReview',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,route,summary,commentBody,prReady};
+// Dashboards (docs/dashboards.md): a review only reads (comments reach a PR only from the card's confirmed button), so
+// every request the app takes can be a widget that refreshes; an unchanged diff is not sent to the model again.
+const dashboard={accepts:text=>!!route(String(text||'')),size:'l',widgets:[{title:'Ревью моих изменений',command:'проверь мои изменения'}]};
+module.exports={name:'codeReview',dashboard,defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,route,summary,commentBody,prReady};

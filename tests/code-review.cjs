@@ -119,6 +119,13 @@ fs.writeFileSync(path.join(root,'logo.bin'),Buffer.alloc(1536*1024,1));
  assert.deepEqual(modelCalls.map(byFile).sort(),['src/debug.js','src/format.js','src/sum.js'],'the model reads only reviewed files');
  assert.equal(modelCalls[0].format.properties.comments.items.properties.severity.enum.join(),'blocker,warning,nit','strict schema');
  assert.ok(!modelCalls.some(b=>b.messages[1].content.includes('lockfileVersion')),'lock files are not sent to the model');
+ // A dashboard widget repeats the request: the same diff is not sent to the model again, and nothing is announced.
+ const before=modelCalls.length,again=await app.turn(s,'проверь мои изменения');
+ assert.equal(modelCalls.length,before,'unchanged changes: the model is not asked again');
+ assert.equal(again.extensionData.codeReview.comments.length,card.comments.length);
+ assert.equal(app.dashboard.accepts('проверь мои изменения'),true);assert.equal(app.dashboard.accepts('сделай ревью PR #12'),true);
+ assert.equal(app.dashboard.accepts('какие PR ждут моего ревью'),false);assert.equal(app.dashboard.accepts('отзывы в App Store'),false);
+ assert.ok(app.dashboard.widgets.every(w=>app.dashboard.accepts(w.command)));
  const skipped=Object.fromEntries(card.files.filter(f=>f.status==='skipped').map(f=>[f.path,f.reason]));
  assert.deepEqual(skipped,{'dist/app.min.js':'generated','logo.bin':'binary','package-lock.json':'lock'});
  const find=(file,check)=>card.comments.find(c=>c.file===file&&(typeof check==='number'?c.line===check:c.check===check));
