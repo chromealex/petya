@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.12.5 — where the Grafana token comes from
+
+- Grafana settings explain who creates the service account token and how, with a link to this Grafana's service accounts page. The link uses the organization from a pasted dashboard link (`?orgId=`).
+
 ## 0.12.4 — a macOS download in every release
 
 - The Release workflow builds Petya for Apple Silicon Macs on GitHub as well: the speech runtime (whisper.cpp with Metal and the base model), every binary signed with the Developer ID and the hardened runtime, `Petya.dmg` notarized by Apple and stapled. It is attached to the release next to `Petya-Setup.exe`.
