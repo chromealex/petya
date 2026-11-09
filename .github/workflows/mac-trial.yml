@@ -1,0 +1,19 @@
+name: Mac trial (temporary)
+on:
+  push:
+    branches: [mac-trial]
+jobs:
+  mac:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22, cache: npm}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: npm ci --no-audit --no-fund
+      - run: scripts/setup-whisper-mac.sh
+      - run: python3 scripts/build.py --mac
+        env: {PETYA_SIGNING_IDENTITY: '-', PETYA_RELEASE_SIGN: '1'}
+      - run: codesign -dvv --entitlements - Petya.app 2>&1 | head -30; du -sh Petya.app
