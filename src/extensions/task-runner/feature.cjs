@@ -88,7 +88,7 @@ function setup(s){
    const routed=await s.agents.route(record.id,run.agent==='auto'?'':run.agent);
    const row=routed.record||record;
    if(!routed.ready){step.state='attention';step.note=routed.reason||row.error||'Нужно выбрать агента или проект.';}
-   else if(row.state==='project-required'){step.state='attention';step.note=row.error||'Уточните проект в разделе «Claude и Codex».';}
+   else if(row.state==='project-required'){step.state='attention';step.note=row.error||'Уточните проект в разделе «Агенты».';}
    else{step.url=row.url||'';step.state=row.target==='codex'&&row.state==='submitted'?'running':'sent';step.note=step.state==='sent'?'Отправлено в '+(row.target==='claude'?'Claude':'Codex')+'. Отметьте шаг, когда он готов.':'';}
   }catch(e){step.state='failed';step.note=e.message;}
   s.dialogue.persist();
