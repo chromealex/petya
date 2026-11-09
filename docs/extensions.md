@@ -282,6 +282,14 @@ served by a dedicated registry next to app links. Two exist:
   knowledge an app keeps itself that counts on «Развитие» like learned phrases (`key` = `growth.key(kind, content)`,
   so the same content never earns twice and points earned before the app owned the knowledge stay); «Почта» reports
   its mail rules (`src/extensions/mail/growth-source.cjs`).
+- `voice-action` (`src/voice-actions.cjs`): `{id, label, help?, order?, legacy?, ready?(settings), async run(services,
+  {output, command, slots}) → {ask, kind?} | turn result}` — what a learned voice command («Мои голосовые команды» on
+  «Навыки») can do besides Petya's own «Выполнить команду в чате» and «Ответить заданным текстом». The command stores
+  `"<app id>:<id>"`; the editor lists only the actions of added (and `ready`) apps; a command whose app is gone runs its
+  filled-in text as a chat command. `legacy` names the action id Petya's core used before the app owned it: such
+  commands move to the app's action once when it is added, otherwise to «Выполнить команду в чате». Example:
+  `src/extensions/jira/voice-action.cjs` (`{id:'bugs', label:'Проверить баги в Jira', legacy:'bugs', run:(_, {output})
+  => ({ask: output, kind: 'bugs'})}`), `src/extensions/google-play/voice-action.cjs`.
 
 A source counts only while its extension is added; an installed extension may provide one, and a broken installed
 source is skipped and reported. A new source kind is a core change: add it to `REGISTRIES` in `app-links.cjs` and

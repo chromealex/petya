@@ -22,6 +22,11 @@ module.exports=ctx=>{
   const extra=()=>[...(ctx.recurring?.list()||[]).map(r=>({key:'recurring:'+r.id,title:r.command,points:15,at:r.createdAt||null,source:'Повторяющаяся команда из чата',learned:'Сам делаю «'+r.command+'» '+r.schedule+' и пишу результат в чат «По расписанию».'})),...(ctx.services?require('./growth-sources.cjs').items(ctx.services):[])];
   ctx.handle('learningList',()=>({...ctx.learning.list(),growthSummary:ctx.learning.growth(extra())}));
   ctx.handle('growthNote',(key,text)=>{ctx.learning.growthNote(key,text);return ctx.learning.growth(extra());});
+  // Voice-command actions: Petya's own two plus those of added apps (voice-action, src/voice-actions.cjs). Commands
+  // saved with an action Petya's core had before an app owned it move to that app's action (or to «run a chat
+  // command» without the app) once.
+  try{const moved=require('./voice-actions.cjs').migrate(ctx.learning,ctx.settings);if(moved)console.log('Voice commands moved to app actions:',moved);}catch(e){console.error('Voice actions migration:',e.message);}
+  ctx.handle('learningActions',()=>require('./voice-actions.cjs').list(ctx.settings));
   ctx.handle('learningSave',skill=>ctx.learning.put(skill));
   ctx.handle('learningDelete',id=>ctx.learning.remove(id));
   ctx.handle('learningTest',(command,draft)=>ctx.learning.preview(ctx.text(command,4000),draft));

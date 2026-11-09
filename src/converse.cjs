@@ -212,7 +212,14 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
       const result=ctx.learning.execute(value);
       // A learned command runs as a request of its own: whoever handles that request (an added app, Petya) answers it.
       if(result?.command){const reply=await pipeline(result.command,undefined,background);const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user'&&m.text===result.command);if(m){m.originalText=original;ctx.dialogue.persist();}return reply&&typeof reply==='object'?{...reply,appliedRules:applied}:reply;}
-      if(result?.query){const offer=await ctx.serviceAccess.offer(result.query,ctx.dialogue.active());if(offer)return {...offer,appliedRules:applied};const reply=await ctx.dialogue.turn(result.query,undefined,result.kind);const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user');if(m){m.originalText=original;ctx.dialogue.persist();}return {...reply,appliedRules:applied};}
+      // An app's action (voice-action providers, src/voice-actions.cjs); without the app the text runs as a chat command.
+      if(result?.action){
+        const provider=require('./voice-actions.cjs').find(result.action,ctx.settings);
+        const out=provider?await provider.provider.run(ctx,{output:result.output,command:original,slots:result.slots||{}}):{command:result.output};
+        if(out?.command){const reply=await pipeline(out.command,undefined,background);const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user'&&m.text===out.command);if(m){m.originalText=original;ctx.dialogue.persist();}return reply&&typeof reply==='object'?{...reply,appliedRules:applied}:reply;}
+        if(out?.ask){const offer=await ctx.serviceAccess.offer(out.ask,ctx.dialogue.active());if(offer)return {...offer,appliedRules:applied};const reply=await ctx.dialogue.turn(out.ask,undefined,out.kind);const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user');if(m){m.originalText=original;ctx.dialogue.persist();}return {...reply,appliedRules:applied};}
+        if(out&&typeof out==='object')return {...out,appliedRules:applied};
+      }
       if(result){ctx.dialogue.rememberAction(original,result.text);const topic=ctx.dialogue.active();return {...result,topicId:topic.id,topicTitle:topic.title,messages:topic.messages,appliedRules:applied};}
     }
     if(!choice&&require('./dialogue.cjs').intent(value,ctx.dialogue.active())==='tasks'){

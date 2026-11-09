@@ -1,7 +1,8 @@
 const growth=require('./growth.cjs');
 const {randomUUID}=require('node:crypto');
-// `command` runs the filled-in output as a chat request of its own (an app added to Petya may answer it).
-const ACTIONS=['command','answer','bugs','anr'];
+// `command` runs the filled-in output as a chat request of its own (an app added to Petya may answer it); `answer`
+// says it. Other actions are apps' ("<app>:<action>", voice-action providers, src/voice-actions.cjs).
+const {CORE:ACTIONS,ID:APP_ACTION}=require('./voice-actions.cjs');
 const clean=s=>String(s||'').trim().replace(/[.!?]+$/u,'').replace(/\s+/g,' ');
 const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 function compile(pattern){
@@ -29,7 +30,7 @@ function validate(input){
  if(!input||typeof input!=='object')throw new Error('Укажите навык.');
  const name=clean(input.name),patterns=Array.isArray(input.patterns)?input.patterns.map(clean).filter(Boolean):[];
  if(!name||name.length>100||!patterns.length||patterns.length>20||patterns.some(p=>p.length>500))throw new Error('Нужны название до 100 символов и 1–20 фраз до 500 символов.');
- if(!ACTIONS.includes(input.action))throw new Error('Выберите доступное действие.');
+ if(!ACTIONS.includes(input.action)&&!APP_ACTION.test(String(input.action||'')))throw new Error('Выберите доступное действие.');
  const output=String(input.output||'').trim();if(output.length>4000)throw new Error('Текст слишком длинный.');
  for(const p of patterns){const {names}=compile(p);for(const m of output.matchAll(/\{([a-z]+)\}/g))if(!names.includes(m[1]))throw new Error('В ответе есть переменная, которой нет во фразе.');}
  if(!output)throw new Error('Укажите текст ответа или запрос к сервису.');
@@ -71,7 +72,7 @@ class Learning{
   return {matched:true,...found[0]};
  }
  execute(command){const p=this.preview(command);if(!p.matched&&!p.error)return null;if(p.error)return {handled:true,error:true,text:p.error};
-  if(p.action==='answer')return {handled:true,text:p.output};if(p.action==='command')return {command:p.output};return {query:p.output,kind:p.action};
+  if(p.action==='answer')return {handled:true,text:p.output};if(p.action==='command')return {command:p.output};return {action:p.action,output:p.output,slots:p.slots};
  }
  // An app that took over a kind of learned command rewrites it in place: same id, its growth is kept, no undo entry.
  replaceSkill(id,patch){const next=this.list(),index=next.skills.findIndex(s=>s.id===id);if(index<0)return null;const before=next.skills[index],after=validate({...before,...patch,id});next.skills[index]=after;growth.record(next,'skills',after,before,this.now());this.commit(next);return after;}

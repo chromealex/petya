@@ -22,6 +22,7 @@
     "jiraItems": "renderJiraIssues"
   },
   "provides": {
+    "voice-action": "voice-action.cjs",
     "search-source": "search-source.cjs",
     "task-tracker": "task-tracker.cjs",
     "release-check": "release-check.cjs"

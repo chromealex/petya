@@ -57,7 +57,28 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await wait("!document.querySelector('#learning .mail-rule-form')");
  await js("window.extensionHost.remove('mail')");await settle();
  assert.equal((await tabs('learning')).includes(mailKey),false,'the tab goes with the app');
+ // Voice-command actions: Petya's own two, then those of added apps only.
+ const options=()=>js("[...document.querySelectorAll('#learn-action option')].map(o=>o.value)");
+ const refreshed=()=>js("refreshLearningActions().then(()=>true)");
+ await js("window.extensionHost.remove('jira').catch(()=>{})");await refreshed();
+ assert.deepEqual(await options(),['command','answer'],'no app actions without the apps');
+ await js("window.extensionHost.open('jira',{stay:true})");await refreshed();
+ assert.deepEqual(await options(),['command','answer','jira:bugs'],'Jira added: its action, not Google Play\'s');
+ await js("window.petya.saveSettings({module_googleplay:'true'})");await refreshed();
+ assert.deepEqual(await options(),['command','answer','jira:bugs','google-play:anr']);
+ assert.deepEqual(await js("[...document.querySelectorAll('#learn-action option')].slice(2).map(o=>o.textContent)"),en?['Check bugs in Jira','Check ANR in Google Play']:['Проверить баги в Jira','Проверить ANR в Google Play']);
+ // The editor is folded away on «Навыки» (commands are taught in the chat); shown here to look at the list.
+ await js("view('learning');window.petyaTabs.select('learning','commands');{const f=$('learn-form');const h=f.closest('details')||f;h.classList.remove('never-shown');if(h.tagName==='DETAILS')h.open=true;f.closest('article')?.classList.remove('never-shown');editLearning({name:'Баги проекта',patterns:['что с багами в {query}'],action:'jira:bugs',output:'Покажи баги в проекте {query}'});f.scrollIntoView({block:'center'})}");
+ assert.match(await js("$('learn-action-help').textContent"),en?/Jira/:/через Jira/);
+ await shot('voice-actions',{rail:'wide'});await shot('voice-actions-compact',{rail:'compact'});
+ // Without the app: a command keeps its action, shown as «not added», and runs as a chat command meanwhile.
+ await js("window.petya.saveSettings({module_googleplay:'false'})");await js("window.extensionHost.remove('jira')");await refreshed();
+ assert.deepEqual(await options(),['command','answer','jira:bugs']);
+ assert.equal(await js("document.querySelector('#learn-action option[value=\"jira:bugs\"]').dataset.app"),'missing');
+ await js("editLearning();{const f=$('learn-form');(f.closest('details')||f).classList.add('never-shown')}");await refreshed();
+ assert.deepEqual(await options(),['command','answer']);
+
  console.log('Screenshots:',shots.join(' '));
- console.log('Apps own UI: mail rules tab passed');
+ console.log('Apps own UI: mail rules tab, voice-command actions passed');
 }};
 require('../src/main.cjs');

@@ -920,6 +920,14 @@
   "Напомни через {delay}: {message}"
  ],
  "strings": {
+  "Действие голосовой команды": "Voice command action",
+  "Очки развития": "Growth points",
+  "Действие приложения (приложение не добавлено)": "App action (the app is not added)",
+  "Приложение этого действия не добавлено: пока его нет, Петя выполнит текст как команду в чате.": "The app of this action is not added: until it is, Petya runs the text as a chat command.",
+  "Проверить ANR в Google Play": "Check ANR in Google Play",
+  "Проверить баги в Jira": "Check bugs in Jira",
+  "Укажите запрос с приложением или переменной {query}. Петя прочитает ANR через Google Play Console; при нехватке данных уточнит выбор.": "Write a request with the app or the {query} variable. Petya reads the ANR through Google Play Console; if something is missing he asks.",
+  "Укажите запрос с проектом или приложением либо переменной {query}. Петя прочитает баги через Jira; при нехватке данных уточнит выбор.": "Write a request with the project or app or the {query} variable. Petya reads the bugs through Jira; if something is missing he asks.",
   ". Можно настроить чтение и пересказ Gmail.": ". Reading and summarizing Gmail can be set up.",
   ". Почта:": ". Mail:",
   ". Правила:": ". Rules:",
