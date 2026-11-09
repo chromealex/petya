@@ -8,6 +8,12 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.11.0 — Google Drive, people records, more messengers
+
+- **Google Drive**: find files, read a Google Doc and answer from it with checked quotes, save an answer as a new Doc.
+- **People records** on «Команда»: absences, 1:1 notes and follow-ups; «Встречи 1:1» prepares a one-on-one, «Отсутствия» shows who is away and when they return; sprint capacity counts absences.
+- **Messengers as sources**: Slack, Mattermost and VK Teams answer «что писали» the same way.
+
 ## 0.10.0 — app catalog, dashboards, agent board, English interface
 
 - **App catalog**: 80+ apps by category with tiles, details and examples; apps install from a folder or a .zip without rebuilding (`docs/extensions.md`).
