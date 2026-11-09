@@ -34,6 +34,5 @@ module.exports={
  limits:{telegramCredential:100000},
  publicFlags:settings=>({hasTelegram:!!settings.telegramCredential}),
  validate(next){if(!['true','false'].includes(next.telegramAutoSync))throw Error('Некорректная настройка telegramAutoSync');},
- serviceName:'Telegram',
  setup
 };

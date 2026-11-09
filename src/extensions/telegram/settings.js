@@ -1,7 +1,4 @@
 (() => {
- // The person's Telegram account (from a Slack profile or a contact search) is a row of «В сервисах» on «Команда».
- window.petyaTeamIdentities ||= {list:[],register(identity){if(identity?.service&&!this.list.some(i=>i.service===identity.service))this.list.push(identity);}};
- window.petyaTeamIdentities.register({service:'telegram',title:'Telegram',order:20});
  // Telegram card: one «Подключить» shows a QR code to scan in the Telegram app; the chosen chats save on click.
  const card=document.createElement('article');card.className='card';card.dataset.service='telegram';card.hidden=!moduleEnabled('telegram');
  card.innerHTML=`<h2>Telegram · личный аккаунт</h2><p>Источник текстового контекста из выбранных чатов и каналов этой компании. Без отправки сообщений и отметок прочтения. Секретные чаты недоступны.</p>

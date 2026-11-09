@@ -88,7 +88,7 @@
  window.petyaTeamIdentities ||= {list:[],register(identity){if(identity?.service&&!this.list.some(i=>i.service===identity.service))this.list.push(identity);}};
  const identities=()=>window.petyaTeamIdentities.list.slice().sort((a,b)=>(a.order??100)-(b.order??100)||a.service.localeCompare(b.service));
  const identity=service=>window.petyaTeamIdentities.list.find(i=>i.service===service);
- const SERVICES={jira:'Jira',meetings:'Встречи',instagram:'Instagram',whatsapp:'WhatsApp',linkedin:'LinkedIn',asana:'Asana',notion:'Notion',confluence:'Confluence',gmail:'Почта',github:'GitHub'};
+ const SERVICES={slack:'Slack',jira:'Jira',telegram:'Telegram',meetings:'Встречи',instagram:'Instagram',whatsapp:'WhatsApp',linkedin:'LinkedIn',asana:'Asana',notion:'Notion',confluence:'Confluence',gmail:'Почта',github:'GitHub'};
  const FIELDS={name:'Имя',handle:'Ник',title:'Должность',email:'Email',url:'Ссылка',id:'ID'};
  const node=(tag,className,text)=>{const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=text;return n;};
  const serviceTitle=service=>identity(service)?.title||SERVICES[service]||service;

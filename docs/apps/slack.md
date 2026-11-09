@@ -5,8 +5,8 @@ names no part of it; it plugs in through registries (`docs/extensions.md` §9–
 
 | What | File | Plugs in through |
 |---|---|---|
-| Connection card (sign-in through the Slack app or a user token, channels, background sync) | `settings.js` | `window.petyaConnections` |
-| Settings `slackToken`, `slackCredential` (secrets), `slackChannels`, `slackAutoSync`, `slackInterval` | `feature.cjs` | feature `defaults` / `secrets` / `flags` / `validate` |
+| Connection card (sign-in through the Slack app or a user token, channels, background sync) | `settings.js`, `connection-check.cjs` | `window.addConnectionCard`, `connection-check` |
+| Settings `slackToken`, `slackCredential` (secrets), `slackChannels`, `slackAutoSync`, `slackInterval` | `feature.cjs` | feature `defaults` / `secrets` / `publicFlags` / `validate`; `connection-check.cjs` for «Сохранить и проверить» |
 | Sync of the chosen channels and threads into the context memory | `sync.cjs` | `serviceJobs` (`slack`), IPC `syncSlack` |
 | The open Slack thread being read (macOS `assets/native/slack-view`, Windows `view.ps1`) | `logs.cjs` | `serviceJobs` |
 | «Попроси команду …», «… в #канал» (confirmed channel, mentions by role, receipts, verification) | `team-request.cjs`, `channel-route.cjs`, `recipients.cjs` | chat route `send`, IPC `slackRequestReply` |
@@ -28,7 +28,7 @@ handler. Stored data keeps its place: the sent requests and report shares stay i
 team records.
 
 Still read from the core (later lanes): the build watchers and repair of Slack threads (`src/build-*.cjs`,
-`src/review-assistant.cjs`), the connection check and OAuth client (`src/connections.cjs`, `src/service-oauth.cjs`),
+`src/review-assistant.cjs`), the OAuth client and help links (`src/service-oauth.cjs`, `src/connections.cjs` guides),
 the company icon (`src/company-icon.cjs`), project memory's channel bindings (`src/project-memory.cjs`), the team
 record's `slackId` (`src/team.cjs`, `src/team-enrich.cjs`, `src/team-fill.cjs`), the clarification fields
 `slackRequestChoices` / `slackRequestReply` (`src/features/clarifications.cjs`, `src/ui/dialogue.js`).

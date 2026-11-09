@@ -399,8 +399,7 @@ Petya's own modules; the other registries count an app while its switch is `"tru
     settings save (true = its source changed: watchers derived from it reset), `clear` runs on «Очистить материалы»;
   - feature fields the core reads: `secrets` (keep the old keys — saved connections keep working), `publicFlags(settings)`
     → the `has…` flags the window sees instead of secrets, `limits` (longer settings, e.g. a saved session),
-    `validate(next, input, {previous, internal})` (the settings before the save, and whether Petya itself saves), `serviceName` (named to the model as a connected service while its
-    module is on), `projectBinding: {kind, verify(services, value)}` (a project's binding of this kind, e.g. a channel,
+    `validate(next, input, {previous, internal})` (the settings before the save, and whether Petya itself saves), `projectBinding: {kind, verify(services, value)}` (a project's binding of this kind, e.g. a channel,
     checked by the app — `src/project-memory.cjs`);
   - renderer registries in the app's scripts: `window.addConnectionCard(def)` (`connection-check` above) with the
     extra fields `connectLabel?, savedOnly?, checkedOk?, manualTitle?, tokenButton?, decorate?(parts), after?(parts)`

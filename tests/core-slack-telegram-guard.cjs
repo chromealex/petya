@@ -4,7 +4,7 @@
 // its source, login IPC, sync, media and the answer context. They plug in through registries only: background jobs
 // (src/features/service-jobs.cjs), chat routes and answer contexts (src/features/chat-routes.cjs), media sources
 // (src/media-sources.cjs), team sources (src/team-sources.cjs), tool-router capabilities (src/capabilities.cjs), the
-// connection card registry (window.petyaConnections) and team identities (window.petyaTeamIdentities).
+// connection cards (window.addConnectionCard + connection-check) and team identities (window.petyaTeamIdentities).
 // Fails when
 //  - a core file this lane cleaned names Slack or Telegram outside the allowed lines below (each with why), or
 //  - any core file (src/*.cjs|js, src/features/*.cjs, src/ui) requires the Slack or Telegram app's code, apart from
@@ -20,7 +20,7 @@ const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 for(const file of ['src/slack.cjs','src/slack-context.cjs','src/slack-channel-route.cjs','src/slack-recipients.cjs','src/slack-request.cjs','src/slack-digest.cjs','src/slack-log.cjs','src/slack-team.cjs','src/slack-setup.cjs','src/slack-view.ps1','src/report-share.cjs','src/telegram.cjs','src/telegram-setup.cjs','src/features/slack-open.cjs','src/features/slack-screen.cjs','src/features/jira-slack-people.cjs','src/ui/report-share.js'])
  assert.equal(fs.existsSync(path.join(root,file)),false,file+' moved into its app');
 
-// 2. Files this lane cleaned: no Slack or Telegram outside these lines.
+// 2. Files this lane cleaned (also src/connections.cjs: its help links table stays, like every service's): no Slack or Telegram outside these lines.
 const CLEAN={
  'src/converse.cjs':[
   // Computer control's Telegram contact search renders its own cards (computer-control lane, not moved here).
@@ -40,6 +40,8 @@ const CLEAN={
   /const projectOperations=new Set\(\[/,
   // Build watchers of Slack threads (build cluster: build-watch, build-question, build-repair, review-assistant).
   /buildWatch=new|reviewAssistant=new|buildQuestion=new|new repairSourcesModule\.RepairSources/,
+  // The all-services table of what the dialogue model is told is on (a later shared service registry replaces it).
+  /services:Object\.entries\(\{jira:'Jira'/,
   // The team record's Slack member id (team data model, src/team.cjs).
   /m\.slackId/,
   // Project memory binds Slack channels per account (src/project-memory.cjs, src/chat-project-context.cjs).
@@ -58,7 +60,8 @@ const CLEAN={
  // Project memory binds Slack channels to projects (src/project-memory.cjs, not moved here).
  'src/capabilities.cjs':[/id:'project-memory'/],
  'src/features/service-jobs.cjs':[],'src/features/chat-routes.cjs':[],'src/features/extension-offers.cjs':[],'src/features/extension-replies.cjs':[],
- 'src/ui/notifications.js':[],'src/ui/background.js':[],'src/ui/chat-browser.js':[],'src/ui/connections.js':[],'src/ui/team.js':[],'src/ui/app.js':[],
+ 'src/ui/notifications.js':[],'src/ui/background.js':[],'src/ui/chat-browser.js':[],'src/ui/connections.js':[],// The all-services table of titles a person is known in (a later shared service registry replaces it).
+ 'src/ui/team.js':[/^ const SERVICES=\{slack:/],'src/ui/app.js':[],
  // The module switches of the connections page.
  'src/ui/modules.js':[/^const optionalModules =/],
  // The «Добавить текст» form's source label for a pasted Slack conversation; computer control's example request.
@@ -74,8 +77,6 @@ assert.deepEqual(problems,[],'Slack and Telegram belong to their apps; these cor
 const REQUIRES={
  // Build watchers and the build repair read Slack thread links and logs (build cluster, a later lane).
  'src/build-watch.cjs':'build cluster','src/build-question.cjs':'build cluster','src/build-repair.cjs':'build cluster','src/build-repair-sources.cjs':'build cluster',
- // The connection check of the Slack card resolves the chosen channels (connection layer, like the mail connection).
- 'src/connections.cjs':'connection layer',
  // Computer control's Telegram contact search (computer-control lane).
  'src/converse.cjs':'computer control','src/computer-setup.cjs':'computer control','src/computer-intent.cjs':'computer control'
 };
@@ -92,7 +93,7 @@ assert.deepEqual(loads,[],'core files load Slack or Telegram code');
 const slack=JSON.parse(read('src/extensions/slack/extension.json')),telegram=JSON.parse(read('src/extensions/telegram/extension.json'));
 assert.equal(slack.setting,'module_slack');assert.equal(telegram.setting,'module_telegram');
 assert.equal(slack.feature,'feature.cjs');assert.equal(telegram.feature,'feature.cjs');
-for(const kind of ['chat-route','media-source','team-source','capability','messenger-source','share-message'])assert.ok(slack.provides[kind],'Slack provides '+kind);
+for(const kind of ['chat-route','media-source','team-source','capability','connection-check','messenger-source','share-message'])assert.ok(slack.provides[kind],'Slack provides '+kind);
 for(const kind of ['chat-route','answer-context','media-source','capability','messenger-source'])assert.ok(telegram.provides[kind],'Telegram provides '+kind);
 assert.ok(slack.scripts.some(([file])=>file==='settings.js')&&slack.scripts.some(([file])=>file==='team-identity.js')&&slack.scripts.some(([file])=>file==='report-share.js'),'the Slack card, the «Команда» row and the report panel are the app\'s scripts');
 const slackFeature=require('../src/extensions/slack/feature.cjs'),telegramFeature=require('../src/extensions/telegram/feature.cjs');
@@ -100,10 +101,11 @@ assert.deepEqual(slackFeature.secrets,['slackCredential','slackToken'],'the same
 assert.deepEqual(Object.keys(slackFeature.defaults).sort(),['slackAutoSync','slackChannels','slackCredential','slackInterval','slackToken']);
 assert.deepEqual(telegramFeature.secrets,['telegramCredential']);assert.deepEqual(Object.keys(telegramFeature.defaults).sort(),['telegramAutoSync','telegramCredential']);
 const links=require('../src/features/app-links.cjs');
-for(const kind of ['chat-route','answer-context','media-source','team-source','capability'])assert.ok(links.REGISTRIES.includes(kind),kind+' is a registry');
-const routes=require('../src/features/chat-routes.cjs').routes().map(r=>r.extension+':'+r.provider.stage).sort();
+for(const kind of ['chat-route','answer-context','media-source','team-source','capability','connection-check'])assert.ok(links.REGISTRIES.includes(kind),kind+' is a registry');
+const routes=require('../src/features/chat-routes.cjs').routes().filter(r=>['slack','telegram'].includes(r.extension)).map(r=>r.extension+':'+r.provider.stage).sort();
 assert.deepEqual(routes,['slack:digest','slack:media','slack:people','slack:reference','slack:screen','slack:send','telegram:media','telegram:sync']);
 assert.deepEqual(require('../src/features/chat-routes.cjs').contexts().map(c=>c.extension+':'+c.provider.key),['telegram:telegramContext']);
+assert.equal(require('../src/features/connection-checks.cjs').find('slack')?.fields.join(),'slackToken,slackChannels','the Slack card is checked by the app');
 
 // 5. Without the apps their requests are not the core's: no route, no capability, no media.
 const chat=require('../src/features/chat-routes.cjs').create({settings:{module_slack:'false',module_telegram:'false'}});

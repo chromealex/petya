@@ -97,6 +97,5 @@ module.exports={
   const name=value.replace(/^#/,''),found=channels.filter(c=>!c.is_archived&&(c.id===name||c.name.toLowerCase()===name.toLowerCase()));
   if(found.length!==1)throw Error('Назовите точное имя доступного канала Slack.');return {id:found[0].id,name:found[0].name};
  }},
- serviceName:'Slack',
  setup,connected,account
 };
