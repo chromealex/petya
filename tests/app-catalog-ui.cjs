@@ -46,12 +46,11 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  // Every tile has a distinct icon (stroke svg or the service's own artwork), no checkbox clutter until hover/select.
  assert(await js("[...document.querySelectorAll('.app-tile .app-icon')].every(i=>i.querySelector('svg,img'))"),'every tile has an icon');
  assert.equal(await js("getComputedStyle(document.querySelector('.app-tile-pick')).opacity"),'0');
- // Every app not yet added shows its size when added (its own files plus the downloads it needs); never «Без загрузок».
+ // Download weight only where something is downloaded; never «Без загрузок».
  await wait(`!!${tile('artist')}.querySelector('.app-weight')`);
  assert.match(await js(`${tile('artist')}.querySelector('.app-weight').textContent`),/^≈ 2,2 ГБ$/);
- assert.match(await js("document.querySelector('[data-category=creative] .app-catalog-add-all').textContent"),/2,2 ГБ/);
- assert.match(await js(`${tile('regex-cron')}.querySelector('.app-weight')?.textContent||''`),/^\d+ КБ$/,'an app without downloads shows its own size');
- assert.match(await js(`${tile('regex-cron')}.querySelector('.app-weight').title`),/^Размер при установке: приложение \d+ КБ$/);
+ assert.match(await js("document.querySelector('[data-category=creative] .app-catalog-add-all').textContent"),/≈ 2,2 ГБ/);
+ assert.equal(await js(`!!${tile('regex-cron')}.querySelector('.app-weight')`),false,'no weight line for apps without downloads');
  assert.equal(await js("document.querySelector('.app-catalog').textContent.includes('Без загрузок')"),false);
  await shot('petya-catalog-wide');
 
@@ -104,8 +103,6 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert(await js("document.querySelector('.app-catalog-details').textContent.includes('по желанию')"));
  await js(`${tile('regex-cron')}.querySelector('.app-tile-main').click()`);await wait("document.querySelector('.app-catalog-details')?.dataset.app==='regex-cron'");
  assert.equal(await js("[...document.querySelectorAll('.app-details-section h4')].some(h=>h.textContent==='Загрузки')"),false,'no downloads section without downloads');
- assert.match(await js("document.querySelector('.app-details-section[data-section=size]')?.textContent||''"),/^Размер при установкеПриложение\d+ КБ уже в Пете$/,'own size, already part of Petya');
- assert.match(await js("document.querySelector('.app-details-actions .primary').textContent"),/^Добавить · \d+ КБ$/);
 
  // Add from details, then an example goes into the composer (not sent) and the catalog closes.
  await js("document.querySelector('.app-details-actions .primary').click()");
@@ -130,7 +127,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const catalog=await js("window.petya.feature('extensionUI','catalog')");
  for(const id of missing.slice(0,2)){const e=catalog.find(x=>x.id===id);if(e&&!e.service)assert(e.installed,id+' saved as added');}
  const left=missing.length-2;
- assert.match(await js(`${dev}.querySelector('.app-catalog-add-all').textContent`),new RegExp('^Добавить остальные \\('+left+'\\) · [\\d,]+ (?:КБ|МБ)$'),'the rest of the category with its size');
+ assert.equal(await js(`${dev}.querySelector('.app-catalog-add-all').textContent`),'Добавить остальные ('+left+')');
  // Muted offers come back when their app is added.
  await js("window.petya.saveSettings({extensionOffersMuted:JSON.stringify(['dependencies','pull-requests'])})");
  await js(`${dev}.querySelector('.app-catalog-add-all').click()`);

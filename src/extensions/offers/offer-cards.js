@@ -34,17 +34,5 @@
   const card=k.card({app:'Расширения',initial:'+',color:'#2f6f5e',key:offer.items.length>1?'Подходят расширения':'Расширение «'+offer.items[0].name+'»',
    subtitle:offer.direct?'нужно для ответа':'может помочь',body,actions,className:'offer-card'+(offer.direct?'':' quiet')});
   parent.append(card);
-  // What adding takes: each offered app's own files plus the downloads it needs right away.
-  if(!done.length)window.petya.feature('extensionUI','sizes').then(r=>{
-   const apps=r?.apps||{},num=(n,d)=>n.toLocaleString(window.petyaLocale||'ru-RU',{maximumFractionDigits:d});
-   const en=!/^ru/i.test(window.petyaLocale||'ru'),u=x=>en?{ГБ:'GB',МБ:'MB',КБ:'KB'}[x]:x;
-   const size=n=>n>=1e9?num(n/1e9,1)+' '+u('ГБ'):n>=1e6?num(n/1e6,n<1e7?1:0)+' '+u('МБ'):Math.max(1,Math.round(n/1e3))+' '+u('КБ');
-   const rows=offer.items.filter(i=>!i.service&&apps[i.ext]).map(i=>({name:i.name,w:apps[i.ext]}));
-   if(!rows.length||!card.isConnected||card.querySelector('.offer-size'))return;
-   const total=rows.reduce((a,r)=>a+(r.w.own||0)+(r.w.install||0),0),approx=rows.some(r=>r.w.approx);
-   const line=k.el('p','offer-size','Размер при установке: '+(approx?'≈ ':'')+size(total)+(rows.some(r=>r.w.install)?' (с загрузками)':''));
-   line.title=rows.map(r=>r.name+': приложение '+size(r.w.own||0)+(r.w.install?', загрузки '+size(r.w.install):'')+(r.w.optional?', по желанию ещё '+size(r.w.optional):'')).join('\n');
-   const pitch=body.querySelector('.offer-pitch,.offer-list');(pitch||body.firstChild)?.after(line);
-  }).catch(()=>{});
  };
 })();

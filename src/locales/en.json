@@ -2,7 +2,6 @@
  "language": "en",
  "name": "English",
  "untranslated": [
-  "проверь мои изменения",
   "Андрюх",
   "Андрюша",
   "Ань",
@@ -10811,17 +10810,6 @@
   "В папке разработки нет расширения.": "The development folder has no extension.",
   "Папка расширения": "Extension folder",
   "Архив расширения": "Extension archive",
-  "Папка разработки расширения": "Extension development folder",
-  "Ревью моих изменений": "Review of my changes",
-  "Размер при установке": "Size when added",
-  "Размер при установке:": "Size when added:",
-  "Всего при добавлении": "Total when added",
-  "уже в Пете": "already in Petya",
-  "(с загрузками)": "(with downloads)",
-  ", загрузки": ", downloads",
-  ", по желанию ещё": ", optionally",
-  ": приложение": ": app",
-  "загрузки": "downloads",
-  "по желанию ещё": "optionally"
+  "Папка разработки расширения": "Extension development folder"
  }
 }

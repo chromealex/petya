@@ -97,12 +97,8 @@
   let filter='all',openId=null,selecting=false,confirmRemove=null;const chosen=new Set();
   let weights={apps:{},available:null,reserve:0};
   const unit=u=>/^ru/i.test(window.petyaLocale||'ru')?u:({ГБ:'GB',МБ:'MB',КБ:'KB'}[u]||u);
-  const num=(n,d=0)=>n.toLocaleString(window.petyaLocale||'ru-RU',{maximumFractionDigits:d});
-  const size=n=>n>=1e9?num(n/1e9,1)+' '+unit('ГБ'):n>=1e6?num(n/1e6,n<1e7?1:0)+' '+unit('МБ'):Math.max(1,Math.round(n/1e3)).toLocaleString(window.petyaLocale||'ru-RU')+' '+unit('КБ');
-  // What adding an app takes: its own files plus the downloads it needs right away (optional ones only on request).
-  const appBytes=id=>{const w=weights.apps[id];return w?(w.own||0)+(w.install||0):0;};
-  const installBytes=list=>list.reduce((sum,item)=>sum+appBytes(item.id),0);
-  const weightTitle=id=>{const w=weights.apps[id];if(!w)return '';const parts=['приложение '+size(w.own||0)];if(w.install)parts.push('загрузки '+size(w.install));if(w.optional)parts.push('по желанию ещё '+size(w.optional));return 'Размер при установке: '+parts.join(', ');};
+  const size=n=>{const gb=n/1e9;return gb>=1?gb.toLocaleString(window.petyaLocale||'ru-RU',{maximumFractionDigits:1})+' '+unit('ГБ'):Math.max(1,Math.round(n/1e6)).toLocaleString(window.petyaLocale||'ru-RU')+' '+unit('МБ');};
+  const installBytes=list=>list.reduce((sum,item)=>sum+(weights.apps[item.id]?.install||0),0);
 
   function items(){
    const list=[...optionalModules.map(([id,name])=>({id,name,service:true,extension:extensions.find(e=>e.id===id)})),...extensions.filter(e=>!e.service&&e.setting).map(e=>({id:e.id,name:e.name,service:false,extension:e}))];
@@ -196,8 +192,8 @@
    main.append(icon(item),text);main.setAttribute('aria-label',item.name);main.setAttribute('aria-description',item.description);
    const foot=make('div','','app-tile-foot'),s=status(item);if(s)foot.append(s);
    if(item.origin!=='bundled'){const o=make('span',ORIGIN_NAMES[item.origin],'app-origin');o.dataset.origin=item.origin;foot.append(o);}
-   const bytes=!item.enabled&&appBytes(item.id);
-   if(bytes){const w=make('span',(weights.apps[item.id]?.install?'≈ ':'')+size(bytes),'app-weight');w.title=weightTitle(item.id);foot.append(w);}
+   const bytes=!item.enabled&&weights.apps[item.id]?.install;
+   if(bytes){const w=make('span','≈ '+size(bytes),'app-weight');w.title='Вес загрузки: ≈ '+size(bytes);foot.append(w);}
    const action=state==='connect'?button('Подключить','app-tile-action',()=>busy(action,()=>openSettings(item)))
     :state==='added'?button('Открыть','app-tile-action',()=>showDetails(item.id))
     :button('Добавить','app-tile-action',()=>busy(action,()=>add(item)));
@@ -220,7 +216,7 @@
    header.append(label);
    if(addAll&&missing.length){
     const bytes=installBytes(missing),b=button(missing.length<members.length?'Добавить остальные ('+missing.length+')':'Добавить всю категорию','app-catalog-add-all');
-    if(bytes){b.append(make('span',' · '+size(bytes),'app-catalog-add-weight'));b.title='Размер при установке: '+size(bytes);
+    if(bytes){b.append(make('span',' · ≈ '+size(bytes),'app-catalog-add-weight'));b.title='Вес загрузки: ≈ '+size(bytes);
      if(weights.available!==null&&bytes+weights.reserve>weights.available)b.title+='. Не хватит места: свободно '+size(weights.available);}
     b.onclick=()=>busy(b,()=>addMany(missing));header.append(b);
    }else if(addAll&&members.length)header.append(make('span','Всё добавлено','app-catalog-all-added'));
@@ -275,7 +271,7 @@
    for(const id of [...chosen])if(!picked.some(i=>i.id===id))chosen.delete(id);
    bar.hidden=!picked.length;if(!picked.length)return;
    const bytes=installBytes(picked),note=make('span','Выбрано: '+picked.length,'app-catalog-bar-note');
-   if(bytes)note.append(make('span',' · '+size(bytes)));
+   if(bytes)note.append(make('span',' · вес ≈ '+size(bytes)));
    // Not enough free space for what the chosen apps download: a warning, adding is still allowed.
    const short=bytes&&weights.available!==null&&bytes+weights.reserve>weights.available;
    if(short){const warn=make('strong',' · не хватит места: свободно '+size(weights.available),'app-catalog-short');note.append(warn);}
@@ -298,8 +294,7 @@
    const s=status(item);if(s)details.append(s);
    details.append(make('p',item.description,'app-details-description'));
    const actions=make('div','','app-details-actions');
-   if(!item.enabled){const go=button('Добавить','primary',function(){busy(this,()=>add(item));});const bytes=appBytes(item.id);
-    if(bytes){go.append(make('span',' · '+size(bytes),'app-add-weight'));go.title=weightTitle(item.id);}actions.append(go);}
+   if(!item.enabled)actions.append(button('Добавить','primary',function(){busy(this,()=>add(item));}));
    else if(state==='connect')actions.append(button('Подключить','primary',function(){busy(this,()=>openSettings(item));}));
    else if(item.settings)actions.append(button('Настройки','',function(){busy(this,()=>openSettings(item));}));
    if(actions.children.length)details.append(actions);
@@ -326,10 +321,8 @@
     details.append(box);
    }
    const w=weights.apps[item.id];
-   if(w){
-    const box=make('section','','app-details-section');box.append(make('h4','Размер при установке'));box.dataset.section='size';
-    const own=make('div','','app-details-row');own.append(make('span','Приложение'));
-    const ownRight=make('span',size(w.own||0),'app-details-state');if(w.bundled)ownRight.append(make('small',' уже в Пете'));own.append(ownRight);box.append(own);
+   if(w?.items?.length){
+    const box=make('section','','app-details-section');box.append(make('h4','Загрузки'));
     for(const i of w.items){
      const row=make('div','','app-details-row');row.append(make('span',i.name));
      const right=make('span',i.present?'уже скачано':(i.approx?'≈ ':'')+size(i.bytes),'app-details-state');
@@ -337,7 +330,6 @@
      row.append(right);box.append(row);
      if(i.requires)box.append(make('p','Нужен '+i.requires,'app-details-note'));
     }
-    if(w.items.length){const total=make('div','','app-details-row app-details-total');total.append(make('span','Всего при добавлении'),make('span',(w.approx?'≈ ':'')+size((w.own||0)+(w.install||0)),'app-details-state'));box.append(total);}
     details.append(box);
    }
    // Works with: providers of the kinds this app's cards use, and apps whose cards use what it provides.
