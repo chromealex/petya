@@ -1,0 +1,33 @@
+{
+  "group": "Andromeda",
+  "component": "D",
+  "version": 9,
+  "id": "D9",
+  "role": "drafts: requirements from Russian dialogues with corrections (summary, description, open questions as JSON)",
+  "status": "stable: the group’s D since 9 Nov 2026 (not worse than D8 on any set)",
+  "base": {
+    "repository": "mlx-community/Qwen3.5-9B-4bit",
+    "revision": "8b2b98c00a6b4d291155e4890773ca8f769aee53",
+    "runtime": "MLX (Apple Silicon)"
+  },
+  "parent": "D8",
+  "adapter": {
+    "type": "LoRA",
+    "rank": 8,
+    "layers": 32,
+    "files": {
+      "adapters.safetensors": "53e20e498ad1fc7147de2dd2b94c826c23794fa11af97b75ae1718cd19a889f2",
+      "adapter_config.json": "77d7bef9a07175b1dce74dc8ad9cd83494d52ce6c4edced139185b4bc6d6e07a"
+    }
+  },
+  "bytes": 58227644,
+  "source": {
+    "repository": "chromealex/petya",
+    "training": "tests/fixtures/requirements-draft-d9"
+  },
+  "evaluation": {
+    "generated_holdout": "39/54 (D8 39, D1 24): 25 exact (D8 19); screen-only, exact-name, two-recipients and quote cases gained, 7 D8 successes lost",
+    "v22_holdout": "28/30 checks, 7/12 drafts (D8 28 + 7)",
+    "familiar": "796/801 (D8 795, D1 787)"
+  }
+}

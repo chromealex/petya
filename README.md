@@ -14,7 +14,7 @@ runtime, packaging) the group is marked stable.
 ## Layout
 
 ```
-andromeda/group.json       current set (R1-A1-D8), optional parts
+andromeda/group.json       current set (R1-A1-D9), optional parts
 andromeda/D1/              model.json (role, base, hashes, evaluation, status), NOTES.md, adapter files
 andromeda/R1/, A1/         model.json; weights only when the part has an adapter
 ```
@@ -29,11 +29,18 @@ project folder.
 
 | Group | Version | Status | Parts |
 |---|---|---|---|
-| Andromeda | R1-A1-D8 | experimental | R1, A1: Qwen3.5-9B-4bit @ 8b2b98c without adapter; D8: D7 plus its weak correction families (54 new 39 vs D1 24, v22 35/42 vs 33, familiar 795/801 vs 787). D7 and D1 stay published for rollback. |
+| Andromeda | R1-A1-D9 | experimental | R1, A1: Qwen3.5-9B-4bit @ 8b2b98c without adapter; D9: D8 plus its four weak correction families (54 new 39 vs D1 24, 25 exact; v22 35/42 vs 33; familiar 796/801 vs 787). D8, D7 and D1 stay published for rollback. |
 
 ### Part history
 
 | Part | Status | Result |
 |---|---|---|
-| D1 | in the group | v21 fourth repair |
+| D1 | rollback | v21 fourth repair |
 | D2 | rejected | new dialogues 39/54 (D1 24), v22 34/42 (D1 33), familiar 782/801 (D1 787) |
+| D3 | rejected | new 39/54, v22 33/42, familiar 783/801 (below D1) |
+| D4 | rejected | half learning rate: new 27/54, v22 33/42, familiar 780/801 |
+| D5 | rejected | less data: new 21/54, v22 30/42, familiar 789/801 |
+| D6 | rejected | D1/D3 blends (recipe only): best λ0.3 new 23/54, v22 30/42, familiar 791/801 |
+| D7 | rollback | D3 plus familiar rehearsal: new 37/54, v22 34/42, familiar 795/801 |
+| D8 | rollback | D7 plus five weak families: new 39/54, v22 35/42, familiar 795/801 |
+| D9 | in the group | D8 plus four weak families: new 39/54 (25 exact), v22 35/42, familiar 796/801 |
