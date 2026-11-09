@@ -35,6 +35,23 @@ function urgent(n){
 let pending=null;
 function tag(meta,fn){const previous=pending;pending=meta&&typeof meta==='object'?meta:null;try{return fn();}finally{pending=previous;}}
 
+// A background system notification from an app, through the policies: tagged with the app's `source` (so a mute rule
+// or quiet hours can tell it apart) and marked urgent when the app says so (a service down), then shown — the
+// wrapper below routes it, so a policy may deliver, hold or summarize it. The app's own notification-center item
+// is separate and stays. Returns whether a notification was created (false in smoke tests or without a service).
+function notify(s,{source,title,body,urgent=false},{electron}={}){
+ if(s?.smoke)return false;
+ try{
+  const {Notification}=electron||require('electron');
+  if(!Notification?.isSupported?.())return false;
+  return tag({source},()=>{
+   const note=new Notification({title:String(title||'Петя').slice(0,120),body:String(body||'').slice(0,250)});
+   try{note.petyaSource=String(source||'petya');if(urgent)note.petyaUrgent=true;}catch{/* frozen */}
+   note.show();return true;
+  });
+ }catch{return false;}
+}
+
 // One wrapper around Notification.prototype.show, installed once per process; `gate(notification)` returns true
 // to keep it from showing. Installing again replaces the gate. Returns whether the wrapper is active.
 function install(electron,gate){
@@ -114,7 +131,7 @@ function create(s,{policies=load(),now=Date.now,send}={}){
 }
 
 let bound=null;
-module.exports={name:'notificationPolicy',defaults:{},validate(){},KIND,URGENT,urgent,tag,install,load,describe,create,
+module.exports={name:'notificationPolicy',defaults:{},validate(){},KIND,URGENT,urgent,tag,notify,install,load,describe,create,
  setup(s){
   bound=create(s);
   const electron=(()=>{try{return require('electron');}catch{return null;}})();

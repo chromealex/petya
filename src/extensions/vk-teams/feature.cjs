@@ -157,13 +157,20 @@ function locate(s,cardId){
 }
 const timers=new Set();
 // While the app is added and connected, the bot's queue is read every 5 minutes so events are not lost; a new or
-// changed error is announced once in the notification center (stable id `vk-teams-sync`), the recovery once too.
-function background(s,publish){
+// changed error is announced once in the notification center (stable id `vk-teams-sync`) and as a system
+// notification through the notification policy (source `vk-teams`; docs/foundations/notifications-policy.md), so
+// focus sessions, quiet hours or a mute rule decide when it pops up; the recovery once, in the center only.
+function background(s,publish,{electron}={}){
  let lastError='';
  return async function quiet(){
   if(!kit.installed(s,ID)||!client.connected(s.settings)||!s.dataRoot)return;
   try{await sync(s,{rounds:20});if(lastError){lastError='';publish({id:'vk-teams-sync',title:'VK Teams',text:'Сообщения бота снова обновляются.',kind:'success',busy:false});}}
-  catch(e){if(e.message!==lastError){lastError=e.message;publish({id:'vk-teams-sync',title:'VK Teams',text:'Не удалось получить сообщения бота: '+e.message,kind:'error',busy:false});}}
+  catch(e){if(e.message!==lastError){
+   lastError=e.message;const text='Не удалось получить сообщения бота: '+e.message;
+   publish({id:'vk-teams-sync',title:'VK Teams',text,kind:'error',busy:false});
+   const tr=v=>{try{return require('../../interface-language.cjs').t(v);}catch{return v;}};
+   require('../../features/notification-policy.cjs').notify(s,{source:'vk-teams',title:tr('Петя')+' · VK Teams',body:tr('Не удалось получить сообщения бота: ')+e.message},{electron});
+  }}
  };
 }
 function setup(s){

@@ -26,8 +26,9 @@ Directory: `src/extensions/monitoring/`. Settings card: sources, uptime checks, 
 - Background (off by default, «Сообщать, когда сервис падает и когда поднимается»): due uptime checks and, every
   `monitoringPollMin` minutes, a light snapshot of all sources; a service going down / coming back / flapping is told
   once (foundation `transitions`: two observations confirm, flapping held until settled), as one notification-center
-  card per service plus a system notification; restored after a window reload. See the foundation doc for routing
-  through the notification policy when it lands.
+  card per service plus a system notification through the notification policy (source `monitoring`, urgent when
+  down; focus, quiet hours or a mute rule decide when it pops up); restored after a window reload. See the
+  foundation doc.
 - Dashboards: `dashboard.accepts` takes read-only requests only (no silence, no discovery).
 
 ## Sources

@@ -23,11 +23,22 @@ A sender wraps its notify call so the notification carries a source:
 require('./features/notification-policy.cjs').tag({source:'assignments'},()=>ctx.notify(text));
 ```
 
-or sets `notification.petyaSource` itself. Without a tag the source is `'petya'`. Known sources:
+or sets `notification.petyaSource` itself. Without a tag the source is `'petya'`.
+
+An app's background notice uses the helper, which tags it, marks it urgent when asked and shows it (nothing in smoke
+tests); the app's own notification-center item stays separate and is always published:
+
+```js
+require('../../features/notification-policy.cjs').notify(s, {source:'monitoring', title, body, urgent:true}, {electron});
+```
+
+Known sources:
 
 | source | sender |
 | --- | --- |
 | `assignments` | smart notifications about assignments (`src/agents-setup.cjs` → `TaskMonitor`): done, failed, interrupted, decision needed |
+| `monitoring` | «Мониторинг» state changes (`notice` in `src/extensions/monitoring/feature.cjs`): a service down (urgent), back up, flapping; the center card `monitoring:<service>` stays |
+| `vk-teams` | «VK Teams» background sync failures (`background` in `src/extensions/vk-teams/feature.cjs`), once per new error; the recovery is in the center item `vk-teams-sync` only |
 | `petya` | everything else (chat answers, created tasks, reminders, …) |
 
 ### Urgent
@@ -88,4 +99,6 @@ Quiet hours, meetings in progress and per-source mute rules are policies other a
 
 `tests/notification-policy.cjs` — registration and order, strongest decision, broken policies, summaries and the
 center item, the source of smart notifications (muting `assignments` summarizes them, a decision needed still
-shows), the focus parity check. `tests/focus.cjs` and `tests/focus-ui.cjs` keep covering the focus app itself.
+shows), `notify` for monitoring and VK Teams (a mute rule by source summarizes a recovery, a service down and a
+failure still show, the center card is always there), the focus parity check. `tests/vk-teams.cjs` checks the sync
+alert's system notification (once, source `vk-teams`). `tests/focus.cjs` and `tests/focus-ui.cjs` keep covering the focus app itself.

@@ -249,16 +249,23 @@ function addChecks(s,list){
  return added;
 }
 
+// A service state change from the watch: its notification-center card (one per service, updated in place) and a
+// system notification through the notification policy (docs/foundations/notifications-policy.md), tagged
+// `monitoring` and urgent when the service went down, so focus sessions, quiet hours or a mute rule decide when it
+// pops up — never whether the card is there.
+function notice(s,{publish,electron=null}){
+ return n=>{
+  publish({id:n.id,title:n.title,text:n.text,busy:false,version:n.version,kind:n.kind,service:n.service});
+  require('../../features/notification-policy.cjs').notify(s,{source:'monitoring',title:tr('Петя')+' · '+tr(n.title),body:tr(n.text),urgent:n.type==='down'},{electron});
+ };
+}
+
 // --- Setup: ipc for the card and settings, the background watch ----------------------------------------------------------
 function setup(s,{now=()=>Date.now(),electron=null}={}){
  const publish=item=>{try{if(s.win&&!s.win.isDestroyed?.()&&!s.win.webContents?.isDestroyed?.())s.win.webContents.send('extension-install-progress',item);}catch{/* window closing */}};
  // Proxies: the app session's resolver (system proxy / PAC) when Electron is there.
  try{const {session}=electron||require('electron');if(session?.defaultSession?.resolveProxy)H.useSystemProxy(url=>session.defaultSession.resolveProxy(url));}catch{/* plain node: environment proxies */}
- const deliver=n=>{
-  publish({id:n.id,title:n.title,text:n.text,busy:false,version:n.version,kind:n.kind,service:n.service});
-  if(s.smoke)return;
-  try{const {Notification}=electron||require('electron');if(Notification?.isSupported?.())new Notification({title:tr('Петя')+' · '+tr(n.title),body:tr(n.text).slice(0,250)}).show();}catch{/* no notification service */}
- };
+ const deliver=notice(s,{publish,electron});
  const watch=Watch.create(s,{store:store(s),registry:()=>registry(s),now,deliver});
  if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){const timer=setInterval(()=>watch.tick().catch(()=>{}),30000);timer.unref?.();timers.add(timer);}
  const installed=()=>{if(!kit.installed(s,ID))throw Error('Расширение «Мониторинг» не добавлено.');};
@@ -346,7 +353,7 @@ module.exports={name:'monitoring',
  defaults:{['extension_'+ID]:'false',monitoringPrometheusUrl:'',monitoringPrometheusToken:'',monitoringAlertmanagerUrl:'',monitoringAlertmanagerToken:'',monitoringGrafanaUrl:'',monitoringGrafanaToken:'',
   monitoringUptimeChecks:'0',monitoringWatch:'false',monitoringPollMin:'2',monitoringWindow:'5m',monitoringAliases:''},
  secrets:['monitoringPrometheusToken','monitoringAlertmanagerToken','monitoringGrafanaToken'],
- validate,setup,turn,boardTurn,silenceTurn,discoverTurn,summary,matchersOf,addChecks,dashboard,
+ validate,setup,notice,turn,boardTurn,silenceTurn,discoverTurn,summary,matchersOf,addChecks,dashboard,
  // Stops the background watch started by setup (hosts that unload extensions call it).
  teardown(){for(const t of timers)clearInterval(t);timers.clear();}};
 const timers=new Set();

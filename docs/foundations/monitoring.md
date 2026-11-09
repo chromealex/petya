@@ -80,12 +80,13 @@ A tracker for background notifications (pure, injected clock, serializable with 
 
 ## Notifications and the notification policy
 
-Today «Мониторинг» publishes state changes to the notification center itself (one card per service, id
-`monitoring:<service>`, updated in place; plus a system notification). When the outgoing/notification policy core
-lands, the single place to change is `deliver` in `src/extensions/monitoring/feature.cjs` (and the call in
-`watch.cjs`): pass each event as `{kind:'service-state', key:'monitoring:<service>', urgency: down ? 'high' : 'normal',
-title, text, dedupe: version}` through the policy (quiet hours, focus holds, channels) instead of publishing directly.
-The tracker already removes duplicates and flapping, so the policy receives at most one event per real change.
+«Мониторинг» publishes each state change as one notification-center card per service (id `monitoring:<service>`,
+updated in place) and a system notification through the notification policy
+([notifications-policy.md](notifications-policy.md)): `notice` in `src/extensions/monitoring/feature.cjs` (the
+watch's `deliver`) calls the core's `notify` with source `monitoring`, urgent when the service went down. Policies
+(focus sessions, quiet hours, a per-source mute rule) decide when the popup shows — a summarized or held one is not
+lost — and never whether the card is there. The tracker already removes duplicates and flapping, so the policy
+receives at most one event per real change.
 
 ## `anomalies` compatibility (planned)
 

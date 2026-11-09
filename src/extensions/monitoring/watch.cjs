@@ -2,10 +2,8 @@
 // a service going down or coming back is told once (the foundation's `transitions`: two observations in a row
 // confirm a change, a flapping service is told once and then held until it settles). Off until the user turns
 // it on in the settings and has a check or a source. Notifications go to the notification center (one card per
-// service, updated in place) and as a system notification.
-// Notification policy: when the outgoing/notification policy core lands, `deliver` is the single place to route
-// these through it (kind 'service-state', urgency 'high' for down, 'normal' for recovered/flapping) — see
-// docs/foundations/monitoring.md.
+// service, updated in place) and as a system notification through the notification policy (`deliver` = `notice` in
+// feature.cjs: source `monitoring`, urgent when down) — see docs/foundations/monitoring.md.
 const U=require('./uptime.cjs');
 const {transitions}=require('../../features/monitor-sources.cjs');
 const MIN=60000;
