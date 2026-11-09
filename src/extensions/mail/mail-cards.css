@@ -1,2 +1,24 @@
 .mail-excerpt{margin:0;font-size:13px;line-height:1.5;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .mail-card .kit-key{color:var(--ink);font-weight:500}
+/* «Почтовые правила» tab on «Навыки» (mail-rules.js) */
+.mail-rules{display:flex;flex-direction:column;gap:12px;max-width:760px}
+.mail-rules-intro{margin:0;color:var(--muted)}
+.mail-rule-list{display:flex;flex-direction:column;gap:8px}
+.mail-rule{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#ffffff05}
+.mail-rule.off{opacity:.7}
+.mail-rule-draft{border-style:dashed}
+.mail-rule-info{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
+.mail-rule-info p{margin:0}
+.mail-rule-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mail-rule-phrases{color:var(--muted);overflow-wrap:anywhere}
+.mail-rule-chips{display:flex;gap:6px;flex-wrap:wrap}
+.mail-rule-result{white-space:pre-wrap;max-height:240px;overflow:auto;color:var(--ink)}
+.mail-rule .kit-actions{flex:none;justify-content:flex-end}
+.mail-rule-new{align-self:flex-start}
+.mail-rule-form{display:flex;flex-direction:column;gap:10px;padding:14px;border:1px solid var(--line);border-radius:10px}
+.mail-rule-form label{display:flex;flex-direction:column;gap:4px}
+.mail-rule-form label.check{flex-direction:row;align-items:center;gap:8px}
+.mail-rule-form p{margin:0}
+.mail-rule-accounts{display:flex;flex-direction:column;gap:4px;padding-left:4px}
+@media (max-width:720px){.mail-rule{flex-direction:column}.mail-rule .kit-actions{justify-content:flex-start}}
+.mail-rule-form input[type=number]{max-width:140px}

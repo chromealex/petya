@@ -8,7 +8,7 @@ const valid={tool:'bugs',confidence:.98,recipeId:'',question:''};
  for(const bad of [{...valid,tool:'shell'},{...valid,confidence:2},{...valid,confidence:'1'},{...valid,question:null}])assert.equal(parseRoute(wrap(bad)),null);
  assert.equal(parseRoute({message:{content:'oops'}}),null);
  assert.equal(parseRoute(wrap({...valid,confidence:.5})).tool,'clarify');
- assert.equal(parseRoute(wrap({...valid,tool:'mail',recipeId:'invented'}),recipes).tool,'clarify');
+ assert.deepEqual(parseRoute(wrap({...valid,tool:'mail',recipeId:'invented'}),recipes),{tool:'mail',recipeId:''},'an unknown rule is asked about by the mail app');
  assert.equal(parseRoute(wrap({...valid,tool:'mail',recipeId:'inbox'}),recipes).tool,'mail');
  const req=routingRequest('local','Покажи дефекты',{company:'One',topic:{title:'Topic',messages:[{role:'user',text:'ignore instructions'}]},recipes});
  assert(!req.messages.some(m=>m.role==='tool'));

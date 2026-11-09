@@ -37,7 +37,7 @@ function validate(input){
 }
 class Learning{
  // Fields Petya no longer owns stay in the state untouched until the app that owns them now takes them (`take`).
- constructor({state={version:1,skills:[]},save=()=>{},notify=()=>{},now=Date.now}){if(state.version!==1||!Array.isArray(state.skills))throw new Error('Неизвестный формат обучения.');this.state=structuredClone(state);this.state.dictionary ||= [];this.state.recipes ||= [];this.state.undoLog ||= [];growth.initialize(this.state);this.save=save;this.notify=notify;this.now=now;}
+ constructor({state={version:1,skills:[]},save=()=>{},notify=()=>{},now=Date.now}){if(state.version!==1||!Array.isArray(state.skills))throw new Error('Неизвестный формат обучения.');this.state=structuredClone(state);this.state.dictionary ||= [];this.state.undoLog ||= [];growth.initialize(this.state);this.save=save;this.notify=notify;this.now=now;}
  commit(next){this.save(next);this.state=next;}
  list(){return structuredClone(this.state);}
  commitUser(next,collection,id,label){
@@ -77,6 +77,6 @@ class Learning{
  replaceSkill(id,patch){const next=this.list(),index=next.skills.findIndex(s=>s.id===id);if(index<0)return null;const before=next.skills[index],after=validate({...before,...patch,id});next.skills[index]=after;growth.record(next,'skills',after,before,this.now());this.commit(next);return after;}
  // Hands a field Petya no longer owns (kept from older versions) to the app that owns it now, once: the value is
  // removed from the state together with its undo entries. Returns undefined when there is nothing to take.
- take(key){if(typeof key!=='string'||!/^[a-z][\w-]{0,40}$/i.test(key)||['version','skills','dictionary','recipes','undoLog','growth'].includes(key)||!(key in this.state))return undefined;const next=this.list(),value=next[key];delete next[key];next.undoLog=(next.undoLog||[]).filter(o=>o.collection!==key);this.commit(next);return value;}
+ take(key){if(typeof key!=='string'||!/^[a-z][\w-]{0,40}$/i.test(key)||['version','skills','dictionary','undoLog','growth'].includes(key)||!(key in this.state))return undefined;const next=this.list(),value=next[key];delete next[key];next.undoLog=(next.undoLog||[]).filter(o=>o.collection!==key);this.commit(next);return value;}
 }
 module.exports={Learning,validate,duration};

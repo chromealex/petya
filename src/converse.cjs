@@ -1,5 +1,5 @@
 // Extracted from setupHandlers() in main.cjs. `ctx` gives live access to the shared state of main.cjs:
-// agents, allowedMedia, analyzeMaterials, attachments, buildQuestion, buildRepair, chatJobs, checkProgress, companies, companyId, computer, computerApproval, computerIntent, computerLock, core, dailyBrief, dialogue, dictionary, dictionaryScope, draftAnswers, executeSkill, gitWorkspace, importMedia, inspectAttachments, instructionSkills, learning, localImages, mailSkill, modules, pendingWeb, projectMemory, randomUUID, request, requestProgress, runReview, runWeb, saveSettings, searchCommand, serviceAccess, settings, slackLogs, slackRequest, taskDuplicates, taskProgress, teamFill, telegramSource, text, undoLast, voicePreparation, voicePreparationKey, workSkills
+// agents, allowedMedia, analyzeMaterials, attachments, buildQuestion, buildRepair, chatJobs, checkProgress, companies, companyId, computer, computerApproval, computerIntent, computerLock, core, dailyBrief, dialogue, dictionary, dictionaryScope, draftAnswers, executeSkill, gitWorkspace, importMedia, inspectAttachments, instructionSkills, learning, localImages, mail (the «Почта» app), modules, pendingWeb, projectMemory, randomUUID, request, requestProgress, runReview, runWeb, saveSettings, searchCommand, serviceAccess, settings, slackLogs, slackRequest, taskDuplicates, taskProgress, teamFill, telegramSource, text, undoLast, voicePreparation, voicePreparationKey, workSkills
 module.exports=ctx=>{let restating=0;const route=(async(command,choice,background=false)=>{
     // Label replies produced by shortcut handlers before the model, so misrouting is visible in the chat.
     const via=(source,reply)=>{if(reply&&typeof reply==='object'&&!reply.by){reply.by=source;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&!last.by&&last.text===reply.text){last.by=source;ctx.dialogue.persist();}}return reply;};
@@ -185,10 +185,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
 
     if(!choice&&/^(?:посмотри|разбери|объясни|изучи) (?:вот )?(?:это|вложени[яе]|файл|скриншот)/iu.test(original)){const pending=ctx.attachments.list();if(pending.length)return ctx.inspectAttachments(pending.map(a=>a.id),original);if(!ctx.dialogue.active()?.attachments?.length)return require('./input-required.cjs').ask({text:'Какой файл разобрать? Прикрепите его здесь — исходный запрос сохранён.',label:'Файл или пояснение',files:true},answer=>pipeline(original+'\n'+answer,undefined,background));}
     if(!choice){if(ctx.pendingWeb&&/^продолжи(?:ть)? поиск[.!?]*$/iu.test(original))return ctx.runWeb(ctx.pendingWeb.original,ctx.pendingWeb.search,true);const search=ctx.searchCommand(original,ctx.dialogue.active());if(search){step('Ищу в интернете: «'+String(search.query||original).slice(0,80)+'»');return ctx.runWeb(original,search);}}
-    if(!choice){const mail=await ctx.mailSkill.turn(original);if(mail){
-      if(mail.mail||mail.mailTeaching){ctx.dialogue.prune();let topic=ctx.dialogue.state.topics.find(t=>t.mail);if(!topic){topic={id:ctx.randomUUID(),title:'Почта Gmail',kind:'chat',mail:true,messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);}ctx.dialogue.state.activeId=topic.id;}
-      ctx.dialogue.rememberAction(original,mail.text);const topic=ctx.dialogue.active();return {...mail,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
-    }}
+    // Mail rules of the «Почта» app (src/extensions/mail): teaching, a rule's phrase, «проверь почту».
+    if(!choice&&ctx.mail){const mail=await ctx.mail.turn(original);if(mail)return mail;}
     if(!choice){
       if(require('./capabilities.cjs').PHRASES.undo.test(original))return ctx.undoLast();
       if(require('./capabilities.cjs').PHRASES.dailyBrief.test(original))return ctx.dailyBrief();
@@ -224,7 +222,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     let preparedTopicRoute=!choice?ctx.voicePreparation.take(value,ctx.voicePreparationKey()):undefined;
     // Existing explicit actions and pending choices keep their original execution path.
     if(!choice&&ctx.settings.semanticTools!=='false'&&!require('./dialogue.cjs').discussionOnly(value)&&ctx.settings.model&&!ctx.dialogue.active()?.pending&&!ctx.dialogue.active()?.attachments?.length&&!require('./dialogue.cjs').actionRequest(value)){
-      const semantic=require('./semantic-tools.cjs'),recipes=ctx.mailSkill.list().filter(r=>r.enabled);let route;
+      const semantic=require('./semantic-tools.cjs'),recipes=(ctx.mail?.rules()||[]).filter(r=>r.enabled);let route;
       try {
         const base=new URL(ctx.core.localEndpoint(ctx.settings.ollamaUrl));
         const info=await ctx.request(new URL('/api/show',base).href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:ctx.settings.model})});
@@ -257,7 +255,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
         },
         mail:async(_command,r)=>{
           const offer=await ctx.serviceAccess.offer('Проверь Gmail: '+value,ctx.dialogue.active());if(offer)return offer;
-          const result=await ctx.mailSkill.run(recipes.find(skill=>skill.id===r.recipeId));ctx.dialogue.rememberAction(original,result.text);return result;
+          return ctx.mail?ctx.mail.run(r.recipeId,original):null;
         }
       });
       if(routed)return {...routed,selectedTool:route.tool};

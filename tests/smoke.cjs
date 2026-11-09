@@ -98,10 +98,12 @@ module.exports = async (win, workspace) => {
     for(const id of new Set([reviewTopic.topicId,attachmentReply.topicId]))await window.petya.attachmentForget(id);if(await window.petya.attachmentTopic()) throw new Error('Attachment deletion failed');
     await window.petya.saveSettings({model:previous.model});
 
-    if (!document.getElementById('mail-skill-form') || !document.getElementById('gmail-start')) throw new Error('Missing Gmail teaching UI');
-    const mailSkill = await window.petya.mailSkillSave({name:'Smoke Gmail',phrases:['smoke mail']});
-    if (!(await window.petya.mailSkills()).recipes.some(r=>r.id===mailSkill.id)) throw new Error('Mail skill not persisted');
-    await window.petya.mailSkillDelete(mailSkill.id);
+    // The mail connection stays in «Настройки»; the mail rules are the «Почта» app's (its IPC, its tab on «Навыки»).
+    if (!document.getElementById('gmail-start') || document.getElementById('mail-skill-form')) throw new Error('Mail connection card or a core mail rules form');
+    const mailRules = await window.petya.feature('mail','save',{name:'Smoke Gmail',phrases:['smoke mail']});
+    const mailRule = mailRules.rules.find(r=>r.name==='Smoke Gmail');if (!mailRule) throw new Error('Mail rule not persisted');
+    if (!(await window.petya.feature('mail','list')).rules.some(r=>r.id===mailRule.id)) throw new Error('Mail rule not listed');
+    await window.petya.feature('mail','remove',mailRule.id);
     if ((await window.petya.settings()).gmailCredential) throw new Error('Gmail credential exposed');
 
     if (!document.querySelector('[data-service=asana]').hidden) throw new Error('Optional module visible by default');

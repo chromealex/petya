@@ -18,8 +18,8 @@ module.exports=ctx=>{
   ctx.handle('undoInfo',()=>ctx.learning.undoInfo());ctx.handle('undoLast',undoLast);
   const dailyBrief=()=>require('./daily-brief.cjs').dailyBrief({records:ctx.agents.records,jira:ctx.workspace.history,contexts:ctx.memory.prune(),slackEnabled:ctx.modules.enabled(ctx.settings,'slack')});
   ctx.handle('dailyBrief',dailyBrief);
-  // Knowledge from the chat kept elsewhere counts too: recurring commands.
-  const extra=()=>(ctx.recurring?.list()||[]).map(r=>({key:'recurring:'+r.id,title:r.command,points:15,at:r.createdAt||null,source:'Повторяющаяся команда из чата',learned:'Сам делаю «'+r.command+'» '+r.schedule+' и пишу результат в чат «По расписанию».'}));
+  // Knowledge from the chat kept elsewhere counts too: recurring commands, and what apps keep themselves (growth-source).
+  const extra=()=>[...(ctx.recurring?.list()||[]).map(r=>({key:'recurring:'+r.id,title:r.command,points:15,at:r.createdAt||null,source:'Повторяющаяся команда из чата',learned:'Сам делаю «'+r.command+'» '+r.schedule+' и пишу результат в чат «По расписанию».'})),...(ctx.services?require('./growth-sources.cjs').items(ctx.services):[])];
   ctx.handle('learningList',()=>({...ctx.learning.list(),growthSummary:ctx.learning.growth(extra())}));
   ctx.handle('growthNote',(key,text)=>{ctx.learning.growthNote(key,text);return ctx.learning.growth(extra());});
   ctx.handle('learningSave',skill=>ctx.learning.put(skill));

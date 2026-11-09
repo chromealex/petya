@@ -1,4 +1,5 @@
-// Mail: Google and Microsoft accounts, mail skills and their IPC.
+// Mail: Google and Microsoft accounts and their IPC. What to read and how is the «Почта» app's
+// (src/extensions/mail), which reads through these accounts.
 // Extracted from main.cjs: shared state comes through ctx (live getters/setters).
 module.exports=ctx=>{
   const clientDefaults=require('./integration-clients.cjs').load();
@@ -10,11 +11,6 @@ module.exports=ctx=>{
   ctx.handle('mailCancel',()=>{gmail.google.login.stop();gmail.microsoft.login.stop();return gmail.status();});
 
   ctx.app.on('will-quit',()=>gmail.stop());
-  const mailSkill=new (require('./mail-skill.cjs').MailSkill)({learning:ctx.learning,gmail,model:async(system,data,format)=>{
-    if(!ctx.settings.model)throw Error('Настройте локальную модель Ollama.');
-    const response=await ctx.request(ctx.core.localEndpoint(ctx.settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:ctx.settings.model,stream:false,think:false,...format?{format}:{},options:{num_predict:1800},messages:[{role:'system',content:system},{role:'user',content:JSON.stringify(data)}]})});
-    const content=response.message?.content||'';return format?JSON.parse(content):content;
-  }});
   ctx.handle('gmailStatus',()=>gmail.status());
   ctx.handle('gmailRename',(id,label)=>gmail.rename(id,label));
   ctx.handle('gmailImport',async()=>{
@@ -24,7 +20,5 @@ module.exports=ctx=>{
   });
   ctx.handle('gmailStart',()=>gmail.start());ctx.handle('gmailDisconnect',id=>gmail.disconnect(id));
   ctx.handle('gmailGuide',()=>require('electron').shell.openExternal('https://developers.google.com/identity/protocols/oauth2/native-app'));
-  ctx.handle('mailSkills',()=>({recipes:mailSkill.list(),draft:mailSkill.draft()}));
-  ctx.handle('mailSkillSave',input=>{const value=mailSkill.put(input);mailSkill.setDraft(null);return value;});ctx.handle('mailSkillDelete',id=>mailSkill.remove(id));ctx.handle('mailSkillTest',input=>mailSkill.run(input));
-  return {mailSkill,clientDefaults,mailAccounts:gmail};
+  return {clientDefaults,mailAccounts:gmail};
 };

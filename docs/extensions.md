@@ -237,7 +237,7 @@ An app can add its own interface to Petya's window, not only cards in the chat:
   `petyaTabs.add`. Do not build a page's tabs by hand.
 - Example: `tests/fixtures/extensions/ui-notes` (a rail page, a tab on «Навыки» and one on «Команда») and `ui-tips` (a tab
   sharing the name, a tab on the other app's page); test `tests/extension-places-ui.cjs`. Bundled: «Напоминания» shows
-  its list on «Навыки» → «Напоминания».
+  its list on «Навыки» → «Напоминания», «Почта» its mail rules on «Навыки» → «Почтовые правила».
 
 ## 9. Cross-app kinds
 
@@ -278,6 +278,10 @@ served by a dedicated registry next to app links. Two exist:
   maxDays?, names?, confirm?, plan?, fetch(services, {start, end, plan?, check})}`, read by «Покупки в игре» (App Store
   Connect and Google Play reports in `src/extensions/iap`, a purchases table of «SQL по словам»); a source with
   `confirm` runs only the plan the user confirmed on the card.
+- `growth-source` (`src/growth-sources.cjs`): `{id, items(services) → [{key, title, learned, points, at, source}]}` —
+  knowledge an app keeps itself that counts on «Развитие» like learned phrases (`key` = `growth.key(kind, content)`,
+  so the same content never earns twice and points earned before the app owned the knowledge stay); «Почта» reports
+  its mail rules (`src/extensions/mail/growth-source.cjs`).
 
 A source counts only while its extension is added; an installed extension may provide one, and a broken installed
 source is skipped and reported. A new source kind is a core change: add it to `REGISTRIES` in `app-links.cjs` and
@@ -331,7 +335,8 @@ warns about free space. Model downloads keep their own approval. Apps without do
   goes away when the app is turned off; look at screenshots in the wide and the compact rail
   (`tests/extension-places-ui.cjs` shows how).
 - Guards: `tests/extension-ui.cjs` (descriptors), `tests/core-meeting-guard.cjs` (the core and other apps never name
-  a meeting service), `tests/core-reminders-guard.cjs` (reminders live only in their app),
+  a meeting service), `tests/core-reminders-guard.cjs` (reminders live only in their app), `tests/core-mail-rules-guard.cjs`
+  (mail rules live only in «Почта»),
   `tests/interface-language.cjs` (translations).
 - Finally `npm test` and the smoke test
   (`xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci`).

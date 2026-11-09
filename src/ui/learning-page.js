@@ -1,6 +1,6 @@
-// «Обучение» is what Petya learned from the chat: recurring commands with their timers, corrections,
-// mail skills. Things are taught in the chat («Проверяй почту каждые 5 минут», «я имел в виду …», «Научись
-// проверять почту»); this page lists them with deletion. The manual forms stay out of sight.
+// «Обучение» is what Petya learned from the chat: recurring commands with their timers, corrections, phrases.
+// Things are taught in the chat («Проверяй почту каждые 5 минут», «я имел в виду …»); this page lists them with
+// deletion. The manual forms stay out of sight. Apps add their own tabs here (extension.json "ui").
 (() => {
  const page=$('learning');if(!page)return;
  const node=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;};
@@ -30,9 +30,8 @@
  if(dictionary){dictionary.querySelector('h2').textContent='Исправления';const p=dictionary.querySelector(':scope>p');if(p)p.textContent='Когда вы поправляете Петю в чате («Нет, я имел в виду …»), он запоминает исправление сам и сразу делает по-новому. Ненужное удалите.';
   const form=$('dictionary-form');if(!form.closest('details.learning-manual')){const d=node('details','learning-manual');d.append(node('summary',null,'Добавить вручную'));form.before(d);d.append(form);}
   const list=$('dictionary-list');if(list&&form.closest('details'))form.closest('details').before(list);}
- // Phrase skills: the list stays, the editor goes; mail skills are taught in the chat («Научись проверять почту»).
- for(const id of ['learn-form','mail-skill-form']){const form=$(id);const holder=form?.closest('details')||form;holder?.classList.add('never-shown');}
- $('learn-new')?.classList.add('never-shown');$('mail-new')?.classList.add('never-shown');
+ // Phrase skills: the list stays, the editor goes.
+ {const form=$('learn-form');const holder=form?.closest('details')||form;holder?.classList.add('never-shown');}
+ $('learn-new')?.classList.add('never-shown');
  const skills=$('learned-list')?.closest('article');if(skills){const h=skills.querySelector('h2');if(h)h.textContent='Фразы';}
- const mail=$('mail-skills-list')?.closest('article');if(mail){const p=mail.querySelector(':scope>p');if(p)p.textContent='Скажите в чате «Научись проверять почту» и опишите правила — Петя предложит пробный запуск и сохранит навык.';}
 })();

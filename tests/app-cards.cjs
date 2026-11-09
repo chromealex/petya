@@ -46,7 +46,7 @@ const results=require('../src/features/chat-results.cjs');
  assert.equal(query,'онбординг');assert.match(found.text,/1 страницу/);
  const card=topic.messages.at(-1).extensionData.docItems[0];assert.deepEqual(card.sections,['Цели','Экраны']);assert.match(card.excerpt,/Онбординг показывает/);
  // Mail: the mail skill passes letters to the mail plugin's cards.
- const {MailSkill}=require('../src/mail-skill.cjs');
+ const {MailRules:MailSkill}=require('../src/extensions/mail/rules.cjs');
  const skill=Object.create(MailSkill.prototype);skill.gmail={async read(){return {results:[{account:'me@acme.com',provider:'google',messages:[{id:'m1',from:'Полина <polina@acme.com>',subject:'Релиз',date:'Fri, 6 Nov 2026',text:'Можно в четверг?',priority:true}]}]};}};
  skill.summarize=async()=>({handled:true,text:'Полина спрашивает про релиз.'});
  const mail=await skill.run({enabled:true,days:3,unread:true,skipPromotions:true,priority:[],instructions:'',allAccounts:true,accounts:[],name:'Почта'});
