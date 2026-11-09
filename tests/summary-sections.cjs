@@ -7,7 +7,7 @@ const sections=require('../src/summary-sections.cjs');
 const {dailyBrief}=require('../src/daily-brief.cjs');
 (async()=>{
  assert.ok(require('../src/features/app-links.cjs').REGISTRIES.includes('summary-section'));
- assert.deepEqual(sections.load().map(x=>[x.id,x.extension,x.setting]),[['slack','slack','module_slack']]);
+ assert.deepEqual(sections.load().map(x=>[x.id,x.extension,x.setting]),[['slack','slack','module_slack'],['mail','mail','module_gmail']]);
  const now=new Date(2026,10,9,15).getTime(),from=new Date(now).setHours(0,0,0,0);
  const memory={prune:()=>[{source:'Slack',at:now-3600000,messages:[{at:now-3600000},{at:now-60000},{at:from-1000}]},{source:'Telegram',at:now}]};
  // Without Slack added: no Slack section.

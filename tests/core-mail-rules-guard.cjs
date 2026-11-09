@@ -2,7 +2,7 @@
 // belong to the «Почта» app (src/extensions/mail): its engine (rules.cjs), its storage (rules.json, migrated from the
 // learned-skills state), its tab on «Навыки» and its points on «Развитие» (growth-source). Fails when a core file
 // (src/*.cjs|js, src/features/*.cjs apart from the extension plumbing, src/ui) has mail rule logic or interface text.
-// The mail connection (Google / Microsoft accounts) stays a Petya connection and is not checked here.
+// The mail connection (Google / Microsoft accounts) is the app's too: tests/core-mail-guard.cjs.
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const root=path.join(__dirname,'..');
@@ -27,7 +27,7 @@ assert.equal(new Learning({}).list().recipes,undefined,'no mail rules in the lea
 assert.equal(new Learning({state:{version:1,skills:[],recipes:[{id:'x'}]}}).take('recipes')?.[0]?.id,'x','the app can take the old field');
 assert.ok(!/mailSkill/.test(fs.readFileSync(path.join(root,'src/preload.cjs'),'utf8')),'no mail rule IPC in the preload');
 assert.ok(!/skipPromotions|recipes/.test(fs.readFileSync(path.join(root,'src/growth.cjs'),'utf8')),'growth knows no mail rules');
-assert.ok(!/mail-skill-form|mail-skills-list/.test(fs.readFileSync(path.join(root,'src/ui/mail-connection.js'),'utf8')),'no mail rules form in the core');
+assert.ok(!/mail-skill-form|mail-skills-list/.test(fs.readFileSync(path.join(root,'src/extensions/mail/settings.js'),'utf8')),'no mail rules form in the connection card');
 // The app owns them: the tab, the engine, the points.
 const app=JSON.parse(fs.readFileSync(path.join(root,'src/extensions/mail/extension.json'),'utf8'));
 assert.deepEqual(app.ui.tabs.map(t=>[t.page,t.title]),[['learning','Почтовые правила']]);

@@ -190,7 +190,8 @@ window.petyaEvents.onBrowserAction(run(async state=>{view('home');if(state.servi
 
  const tg=$('tg-chats');if(tg){const tf=filters(tg,'Найти чат Telegram');const selection=el('span',null,'small');tf.bar.append(selection);const count=()=>selection.textContent='Выбрано: '+tg.querySelectorAll('input:checked').length;tg.addEventListener('change',count);watchList(tg,count);}
  // Place optional connection guides behind a disclosure, preserving their fields.
- for(const card of settings.querySelectorAll('[data-service="googleplay"], [data-service="web"], [data-service="gmail"]')){const body=card.querySelector('.settings-disclosure-body');if(body){const text=[...body.querySelectorAll(':scope>p')].filter(p=>!p.classList.contains('connection-status')&&!p.id&&p.textContent.length>180);if(text.length){const d=el('details',null,'compact-help');d.append(el('summary','Как это работает'));text[0].before(d);d.append(...text);}}}
+ // A card opts in with data-fold-guides (Petya's web search card, apps' service cards).
+ for(const card of settings.querySelectorAll('[data-fold-guides]')){const body=card.querySelector('.settings-disclosure-body');if(body){const text=[...body.querySelectorAll(':scope>p')].filter(p=>!p.classList.contains('connection-status')&&!p.id&&p.textContent.length>180);if(text.length){const d=el('details',null,'compact-help');d.append(el('summary','Как это работает'));text[0].before(d);d.append(...text);}}}
 
  const computerLive=el('div',null,'ux-computer-live');computerLive.hidden=true;const computerLabel=el('span');computerLive.append(computerLabel,button('Стоп',()=>$('computer-stop').click()));document.querySelector('.app-chrome').insertBefore(computerLive,$('company-manage'));
  document.addEventListener('petya-computer-status',event=>{computerLive.hidden=event.detail.mode==='off';computerLabel.textContent=event.detail.mode==='desktop'?'Управление компьютером':event.detail.target?.name||'Управление приложением';});

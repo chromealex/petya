@@ -47,7 +47,7 @@ async function backgroundTick() {
 
 const { Agents, delegation, promptFor, batchTasks } = require('./agents.cjs');
 const appIconPath = path.join(__dirname, '../assets/app-icon.png');
-const { guides, scopedInput, checkConnection } = require('./connections.cjs');
+const { guides, guide, scopedInput, checkConnection } = require('./connections.cjs');
 const { Speech, speechError } = require('./speech.cjs');
 const speech = new (require('./speech-pool.cjs').SpeechPool)({isolated:true});
 const { Workspace } = require('./workspace.cjs');
@@ -62,7 +62,7 @@ const { ServiceOAuth } = require('./service-oauth.cjs');
 const serviceOAuth = { asana: new ServiceOAuth('asana', directRequest), slack: new ServiceOAuth('slack', directRequest), notion: new ServiceOAuth('notion', directRequest) };
 const modules = require('./modules.cjs');
 const team = require('./team.cjs');
-const defaults = { ...modules.defaults, speechStyle:'0', userName:'', userNameVariants:'', userNameExcluded:'', communicationLanguage:'auto', speechLanguage:'', semanticTools:'true', teamMembers:'[]', teamRemoved:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', gmailCredential:'', microsoftCredential:'', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto',googlePlayCredential:'', asanaCredential: '', asanaWorkspace: '', slackCredential: '', notionCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', notionToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'true', slackInterval: '5' };
+const defaults = { ...modules.defaults, speechStyle:'0', userName:'', userNameVariants:'', userNameExcluded:'', communicationLanguage:'auto', speechLanguage:'', semanticTools:'true', teamMembers:'[]', teamRemoved:'[]', integrationChoices:'{}', telegramCredential:'',telegramAutoSync:'false', smartNotifications:'true',interpretationEnabled:'true',interpretationProvider:'auto', asanaCredential: '', asanaWorkspace: '', slackCredential: '', atlassianCredential: '', whisperVocabulary: 'Петя, Jira, Confluence, Asana, Slack, Notion, Claude, Codex, Google Play, ANR', whisperUrl: 'http://127.0.0.1:8080/inference', ollamaUrl: 'http://127.0.0.1:11434/api/chat', model: '', jiraUrl: '', jiraEmail: '', jiraProjects: '', jiraProject: '', jiraIssueType: '', jiraToken: '', slackToken: '', slackChannels: '', jiraBoardId: '', jiraVersionId: '', confluenceSpace: '', teamRoles: '', contextDays: '7', slackAutoSync: 'true', slackInterval: '5' };
 // Feature modules (src/features.cjs) bring their own setting defaults and validation.
 const features = require('./features.cjs');
 for (const feature of features) Object.assign(defaults, feature.defaults || {});
@@ -95,7 +95,9 @@ defaults.whisperBinary = fs.existsSync(localBinary) ? localBinary : '';
 defaults.whisperModel = fs.existsSync(localModel) ? localModel : '';
 // Stop whisper-server processes left by a Petya that was killed or crashed (each holds ~700 MB).
 if (process.env.PETYA_SMOKE_TEST !== '1') { const stale = require('./speech.cjs').cleanupOrphans(path.join(app.getPath('userData'), 'whisper-pids.json'), [localBinary]); if (stale.length) console.log('Stopped stale whisper-server: ' + stale.length); }
-const secrets = [...features.flatMap(feature=>feature.secrets||[]),'unityToken','telegramCredential','teamMembers','teamRemoved','microsoftCredential','gmailCredential','googlePlayCredential','asanaCredential', 'slackCredential', 'notionCredential', 'atlassianCredential', 'jiraToken', 'slackToken', 'notionToken'];
+// How long a feature's setting may be (feature `limits: {key: length}`; others: 2000 characters).
+const featureLimits = Object.assign({}, ...features.map(feature => feature.limits || {}));
+const secrets = [...features.flatMap(feature=>feature.secrets||[]),'unityToken','telegramCredential','teamMembers','teamRemoved','asanaCredential', 'slackCredential', 'atlassianCredential', 'jiraToken', 'slackToken'];
 const entry = pathToFileURL(path.join(__dirname, 'ui/index.html')).href;
 // Chromium and Node encode file URLs differently («RUNNER~1» vs «RUNNER%7E1» in Windows short paths): compare the paths.
 const entryPath = path.join(__dirname, 'ui/index.html');
@@ -132,7 +134,9 @@ function useBundledSpeech(target) {
     if ((!target[key] || !fs.existsSync(target[key])) && defaults[key]) target[key] = defaults[key];
   }
 }
-function publicSettings() { return { ...settings, ...Object.fromEntries(features.flatMap(feature=>feature.secrets||[]).map(key=>[key,''])), unityToken:'', companyId, companyName:companies.get(companyId).name, telegramCredential:'',hasTelegram:!!settings.telegramCredential, microsoftCredential:'', gmailCredential:'', hasGmail:!!settings.gmailCredential, googlePlayCredential:'', hasGooglePlay:!!settings.googlePlayCredential, asanaCredential: '', hasAsanaOAuth: !!settings.asanaCredential, slackCredential: '', notionCredential: '', hasSlackOAuth: !!settings.slackCredential, hasNotionOAuth: !!settings.notionCredential, atlassianCredential: '', hasAtlassianOAuth: !!settings.atlassianCredential, jiraToken: '', slackToken: '', notionToken: '', hasNotionToken: !!settings.notionToken || !!settings.notionCredential, hasJiraToken: !!settings.jiraToken || !!settings.atlassianCredential, hasSlackToken: !!settings.slackToken || !!settings.slackCredential }; }
+// Flags features show the window instead of their secrets («сохранён»), e.g. {hasToken} (feature `publicFlags(settings)`).
+const featureFlags = () => Object.assign({}, ...features.map(feature => { try { return feature.publicFlags?.(settings) || {}; } catch { return {}; } }));
+function publicSettings() { return { ...settings, ...Object.fromEntries(features.flatMap(feature=>feature.secrets||[]).map(key=>[key,''])), unityToken:'', companyId, companyName:companies.get(companyId).name, telegramCredential:'',hasTelegram:!!settings.telegramCredential, ...featureFlags(), asanaCredential: '', hasAsanaOAuth: !!settings.asanaCredential, slackCredential: '', hasSlackOAuth: !!settings.slackCredential, atlassianCredential: '', hasAtlassianOAuth: !!settings.atlassianCredential, jiraToken: '', slackToken: '', hasJiraToken: !!settings.jiraToken || !!settings.atlassianCredential, hasSlackToken: !!settings.slackToken || !!settings.slackCredential }; }
 let trayMeeting = false, trayListening = false, trayReady = false;
 // Dashboards in the tray menu (src/features/dashboards.cjs sets this once features are up).
 let trayDashboards = () => [];
@@ -206,21 +210,19 @@ function handle(name, fn) { ipcMain.handle('petya:' + name, async (event, ...arg
 }); }
 function saveSettings(input, internal = false, profile = profileState()) {
     const {workspace,memory,maintenance,telegramSource,buildRepair,buildQuestion,buildWatch,slackLogs,slackSync,stopWebSearch}=profile;
-    if(typeof input.microsoftCredential==='string'&&input.microsoftCredential.length>200000)throw Error('Too many Microsoft accounts.');
-    if(typeof input.gmailCredential==='string'&&input.gmailCredential.length>200000)throw Error('Слишком большой объём данных аккаунтов Gmail.');
     const next = { ...settings };
-    for (const key of Object.keys(defaults)) if ((!(key.endsWith('Credential') || key === 'asanaWorkspace') || internal) && typeof input[key] === 'string') { if (!secrets.includes(key) || input[key]) next[key] = input[key].trim().slice(0, key==='telegramCredential'?100000:['teamMembers','teamRemoved'].includes(key)?400000:['gmailCredential','microsoftCredential'].includes(key)?200000:key==='googlePlayCredential'?20000:2000); }
+    for (const key of Object.keys(defaults)) if ((!(key.endsWith('Credential') || key === 'asanaWorkspace') || internal) && typeof input[key] === 'string') { if (!secrets.includes(key) || input[key]) next[key] = input[key].trim().slice(0, key==='telegramCredential'?100000:['teamMembers','teamRemoved'].includes(key)?400000:featureLimits[key]||2000); }
     for (const key of secrets) if ((!(key.endsWith('Credential') || key === 'asanaWorkspace') || internal) && input['clear_' + key] === true) next[key] = '';
     if (next.unityUrl !== settings.unityUrl && !input.unityToken) next.unityToken = '';
     if (!internal && settings.atlassianCredential && (input.jiraToken || (input.jiraUrl && input.jiraUrl.replace(/\/$/, '') !== settings.jiraUrl))) throw new Error('Сначала отключите вход Atlassian через браузер.');
-    for (const name of ['slack', 'notion']) if (!internal && settings[name+'Credential'] && input[name+'Token']) throw new Error('Сначала отключите вход '+name+' через браузер.');
+    for (const name of ['slack']) if (!internal && settings[name+'Credential'] && input[name+'Token']) throw new Error('Сначала отключите вход '+name+' через браузер.');
     if(typeof input.teamMembers==='string')next.teamMembers=JSON.stringify(team.validate(JSON.parse(input.teamMembers)));
     if(typeof input.integrationChoices==='string'){const choices=JSON.parse(input.integrationChoices);if(!choices||typeof choices!=='object'||Array.isArray(choices)||Object.entries(choices).some(([key,value])=>!require('./service-access.cjs').services[key]||value!=='browser'))throw Error('Некорректный выбор способа доступа.');next.integrationChoices=JSON.stringify(choices);}
     if(next.communicationLanguage!=='auto'&&!languagePacks.installed(next.communicationLanguage))throw Error('Сначала установи выбранный язык в настройках.');if(!['','auto'].includes(next.speechLanguage)&&!/^[a-z]{2}$/.test(next.speechLanguage||''))next.speechLanguage='';if(/^[a-z]{2}$/.test(next.speechLanguage||'')&&!languagePacks.installed(next.speechLanguage))throw Error('Сначала установи выбранный язык в настройках.');
     if(next.userName!==settings.userName&&typeof input.userNameVariants!=='string')next.userNameVariants='';
     const nameProfile=require('./ui/name-profile.js').NameProfile.validate(next.userName,next.userNameVariants,next.userNameExcluded);next.userNameExcluded=nameProfile.excluded;next.userName=nameProfile.name;next.userNameVariants=nameProfile.custom;
     next.speechStyle = require('./speech-style.cjs').validate(next.speechStyle);
-    for (const feature of features) feature.validate?.(next);
+    for (const feature of features) feature.validate?.(next, input);
     next.contextDays = String(retention(next.contextDays));
     if (!['1', '5', '15'].includes(next.slackInterval)) throw new Error('Интервал Slack: 1, 5 или 15 минут.');
     for (const key of ['telegramAutoSync','smartNotifications', 'interpretationEnabled', 'slackAutoSync', ...Object.keys(modules.defaults)]) if (!['true', 'false'].includes(next[key])) throw new Error('Некорректная настройка ' + key);
@@ -307,7 +309,6 @@ function setupHandlers() {
   };
   maintenance();
   const contextFor = id => { maintenance(); const c = snapshots.get(id); if (!c) throw new Error('Выберите контекст заново.'); return c; };
-  const googlePlay=new (require('./google-play.cjs').GooglePlay)({settings:()=>settings,request});
   const jiraInsights=new (require('./jira-insights.cjs').JiraInsights)(workspace);
   const dialogueFile=path.join(dataRoot,'dialogue-memory.json');
   let dialogueState={topics:[],activeId:''};
@@ -360,7 +361,7 @@ function setupHandlers() {
       const response=await request(core.localEndpoint(settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(routingRequest(settings.model,command,topics,activeId))});
       return parseRoute(response,topics)||{unclear:true};
     },
-    readers:{tasks:(command,topic,context)=>readProjectJira(command,topic,context,'tasks'),bugs:(command,topic,context)=>readProjectJira(command,topic,context,'bugs'),anr:(...args)=>googlePlay.read(...args)},
+    readers:{tasks:(command,topic,context)=>readProjectJira(command,topic,context,'tasks'),bugs:(command,topic,context)=>readProjectJira(command,topic,context,'bugs')},
     answer:answerDialogue
   });
   const reviewFile=path.join(dataRoot,'review-memory.json');
@@ -441,7 +442,7 @@ function setupHandlers() {
     topic.webQuery=result.query;topic.at=Date.now();topic.messages.push({role:'user',text:original,at:Date.now()},{role:'assistant',text:result.text,sources:result.sources,at:Date.now()});dialogue.state.activeId=topic.id;dialogue.persist();return {handled:true,...result,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
   };
   handle('webSearchContinue',()=>{if(!pendingWeb)throw Error('Нет поиска для продолжения.');return runWeb(pendingWeb.original,pendingWeb.search,true);});
-  const {clientDefaults,mailAccounts}=require('./mail-setup.cjs')({get app(){return app;},get core(){return core;},get fs(){return fs;},get handle(){return handle;},get modules(){return modules;},get request(){return request;},get saveSettings(){return saveSettings;},get settings(){return settings;},get show(){return show;},get win(){return win;}});
+  const clientDefaults=require('./integration-clients.cjs').load();
   const {dailyBrief,dictionary,dictionaryScope,undoLast}=require('./learning-setup.cjs')({get recurring(){return services.recurring;},get services(){return services;},get agents(){return agents;},get app(){return app;},get dialogue(){return dialogue;},get handle(){return handle;},get learning(){return learning;},get memory(){return memory;},get modules(){return modules;},get settings(){return settings;},get smoke(){return smoke;},get text(){return text;},get workspace(){return workspace;}});
   const projectFile=path.join(dataRoot,'project-memory.json');
   const projectState=fs.existsSync(projectFile)?JSON.parse(safeStorage.decryptString(Buffer.from(JSON.parse(fs.readFileSync(projectFile,'utf8')).encrypted,'base64'))):undefined;
@@ -529,8 +530,6 @@ function setupHandlers() {
     get checkProgress(){return checkProgress;},
     get companies(){return companies;},
     get companyId(){return companyId;},
-    // The Google Play reader (ANR), for dashboard widgets (src/features/dashboards.cjs).
-    get googlePlay(){return googlePlay;},
     // The open company and whether it is being switched: a meeting recorder outlives its company (src/meeting-carry.cjs).
     currentCompanyId:()=>profileState().companyId,companySwitching:()=>switchingCompany,
     switchCompany:id=>requestCompanySwitch(id),
@@ -551,7 +550,6 @@ function setupHandlers() {
     get instructionSkills(){return instructionSkills;},
     get learning(){return learning;},
     get localImages(){return localImages;},
-    get mailAccounts(){return mailAccounts;},
     get modules(){return modules;},
     get pendingWeb(){return pendingWeb;},
     get projectMemory(){return projectMemory;},
@@ -607,24 +605,6 @@ function setupHandlers() {
   handle('chatJobFinish',(id,state,result)=>chatJobs.finishForeground(id,state,result));
   handle('chatJobState',id=>{const t=dialogue.state.topics.find(t=>t.id===id);return t?{topicId:t.id,projectId:t.projectId,job:t.chatJob,messages:t.messages,result:t.lastChatResult}:null;});
   require('./chat-projects-setup.cjs')({get attachments(){return attachments;},get chatJobs(){return chatJobs;},get chatUndo(){return chatUndo;},get dialogue(){return dialogue;},get handle(){return handle;},get projectMemory(){return projectMemory;},get settings(){return settings;},get slackAccount(){return slackAccount;},get win(){return win;}});
-  handle('googlePlayImport',async()=>{
-    const result=await require('electron').dialog.showOpenDialog(win,{title:'Ключ сервисного аккаунта Google Play',properties:['openFile'],filters:[{name:'JSON',extensions:['json']}]});
-    if(result.canceled)return publicSettings();
-    const keyFile=result.filePaths[0];if(fs.statSync(keyFile).size>20000)throw new Error('Файл ключа слишком большой.');
-    const credential=require('./google-play.cjs').credential(fs.readFileSync(keyFile,'utf8'));
-    return saveSettings({googlePlayCredential:JSON.stringify(credential),module_googleplay:'true'},true);
-  });
-  // One click: sign in with Google in the browser; the service account key stays as the fallback.
-  handle('googlePlayConnect',async()=>{
-    const play=require('./google-play.cjs'),client=require('./integration-clients.cjs').load().google;
-    const credential=await play.login({client:client&&{client_id:client.client_id,client_secret:client.client_secret},open:url=>require('electron').shell.openExternal(url),request});
-    const saved=saveSettings({googlePlayCredential:JSON.stringify(credential),module_googleplay:'true'},true);
-    show(); // the person comes back from the browser: Petya's window is in front
-    let apps=null;try{apps=(await googlePlay.apps()).length;}catch{}
-    return {...saved,playApps:apps};
-  });
-  handle('googlePlayDisconnect',()=>saveSettings({clear_googlePlayCredential:true},true));
-  handle('googlePlayCheck',async()=>({apps:await googlePlay.apps()}));
   const {routed}=require('./jira-setup.cjs')({get contextFor(){return contextFor;},get delegation(){return delegation;},get dialogue(){return dialogue;},get handle(){return handle;},get projectMemory(){return projectMemory;},get settings(){return settings;},get modules(){return modules;},get taskDuplicates(){return taskDuplicates;},get text(){return text;},get workSkills(){return workSkills;},get workspace(){return workspace;}});
   require('./asana-setup.cjs')({get addContext(){return addContext;},get composeDraft(){return composeDraft;},get contextFor(){return contextFor;},get handle(){return handle;},get modules(){return modules;},get request(){return request;},get settings(){return settings;},get text(){return text;}});
   // Saved chats may ask for attention right after start; the build check needs a quiet tray start.
@@ -682,8 +662,9 @@ function setupHandlers() {
   // ollamaReady is created right after its installer; the installer only reports progress to it later.
   const {ollamaInstaller,ollamaReady,visionReady}=require('./ollama-setup.cjs')({get OllamaInstaller(){return OllamaInstaller;},get OllamaReady(){return OllamaReady;},get app(){return app;},get core(){return core;},get dialogue(){return dialogue;},get directRequest(){return directRequest;},get handle(){return handle;},get quitting(){return quitting;},set quitting(v){quitting=v;},get saveSettings(){return saveSettings;},get settings(){return settings;},get smoke(){return smoke;},get text(){return text;},get win(){return win;}});
   handle('connectionGuide', service => {
-    if (!Object.hasOwn(guides, service)) throw new Error('Неизвестный сервис.');
-    return require('electron').shell.openExternal(guides[service]);
+    const url = typeof service === 'string' ? guide(service) : '';
+    if (!url) throw new Error('Неизвестный сервис.');
+    return require('electron').shell.openExternal(url);
   });
   slackLogs = new (require('./slack-log.cjs').SlackLogs)({store:memory,request,settings:()=>settings,token:async()=>settings.slackCredential?(await serviceOAuth.slack.token(settings.slackCredential)).accessToken:settings.slackToken});
   slackSync = new SlackContext({ settings: () => settings, request, store: memory });

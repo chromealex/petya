@@ -79,7 +79,7 @@ extension (refused). Everything the extension needs is inside its folder; there 
 | `provides` | `{kind: "file.cjs" \| [files]}` | Kinds it serves to other apps (section 9). |
 | `downloads` | `[{id, name, bytes \| {darwin, win32}, approx?, optional?, requires?}]` | What adding it downloads (section 11). |
 | `ui` | `{pages: [...], tabs: [...], personFields: [...]}` | Its own items in Petya's interface: a page in the left rail, tabs on Petya's or other apps' pages, fields on the cards of «Команда» (section 8a). |
-| `quickStart` | `{"order": 0–1000}` | Bundled service apps: a button in «С чего начать» on «Настройки» → «Сервисы» (first run, nothing added yet), in `order`; the button adds the app and opens its card. Service modules without an app folder declare it in `categories.json` `moduleQuickStart` (`{"notion": 30}`). Today: Slack 10, Jira 20, Notion 30, Почта 40. |
+| `quickStart` | `{"order": 0–1000}` | Bundled service apps: a button in «С чего начать» on «Настройки» → «Сервисы» (first run, nothing added yet), in `order`; the button adds the app and opens its card. Service modules without an app folder declare it in `categories.json` `moduleQuickStart` (`{"<module>": 30}`). Today: Slack 10, Jira 20, Notion 30, Почта 40 (all from their apps). |
 
 `registry.validate()` checks all of this; bundled errors throw at startup (a bug), external errors refuse the
 extension and show a notification with the reason.
@@ -96,9 +96,15 @@ module.exports={
  setup(services){ return {ipc:{…}}; },               // once per company; returns ipc and at most its own service
  async turn(s,command){ … },                         // a chat turn, or null
  teardown(){ … },                                    // stop timers/watchers/listeners (needed for live removal)
- migrate(settings,saved,{dataRoot}){ … }             // optional: one-time settings migration on load
+ migrate(settings,saved,{dataRoot}){ … },            // optional: one-time settings migration on load
+ limits:{wordCountToken:20000},                      // optional: longest value a setting may keep (default 2000)
+ publicFlags:settings=>({hasWordCountToken:!!settings.wordCountToken}) // optional: flags the window sees instead of secrets
 };
 ```
+
+`validate(next, input)` gets the merged settings and what was asked to be saved (`input`, before values are cut to
+`limits`), so a too-long value can be refused rather than cut. `publicFlags` is how a settings card shows «сохранён»
+for a secret it never receives (Почта: `hasGmail`, Google Play: `hasGooglePlay`, Notion: `hasNotionToken`).
 
 - **`turn(s, command)` returns `null` unless the request is clearly for this app *and* `kit.installed(s, id)`.**
   Petya tries extension turns before its own handlers, so a greedy pattern steals ordinary talk. Match the subject
@@ -313,6 +319,45 @@ write its registry on `app-links.scan()` with `registry.cached()` (bundled code)
 document the others in `docs/apps/<id>.md`. An app that needs a source the user has not connected asks with
 `services.extensionOffers.propose(command, ids, text, by)` — the same offer card, resumed after connecting.
 
+Five more registries let an app take over a place in Petya's own request handling and settings that only Petya's core
+had (bundled apps today; the shapes are checked like the others):
+
+- `route-tool` (`src/features/route-tools.cjs`): a tool of the semantic tool router (`src/semantic-tools.cjs`) —
+  `{id, says, order?, rule?, choices?(services), keepsClarify?(question), ready?(settings), async run(services,
+  {command, original, route})}`. `says` is the tool's line in the router prompt («<id>: <says>»), placed among Petya's
+  tools by `order` (bugs 10, web 30, brief 35, meeting 50); `rule` one more sentence after the shared rules; `choices`
+  the enabled options the model may pick (`route.recipeId`, the field the router was trained with; an unknown one comes
+  back empty); `keepsClarify` keeps the router's own question about them. Example: «Почта» `mail`
+  (`src/extensions/mail/route-tool.cjs`: rules as choices, order 40), «Google Play» `anr` (order 20) — with both added the
+  prompt is the text Petya's core had.
+- `chat-route` (`src/features/chat-routes.cjs`): `{id, order?, ready?(settings), async turn(services, command)}` tried at
+  a fixed point of the request pipeline (`src/converse.cjs`: after the web search shortcut, before undo, the daily
+  summary, learned commands and the tool router), so a handler that moves out of the core keeps its place; unlike
+  `feature.turn`, which goes before Petya's handlers. Example: «Почта»'s mail rules (`src/extensions/mail/chat-route.cjs`).
+- `dialogue-kind` (`src/features/dialogue-kinds.cjs`): a chat subject an app reads data for, answered in the open chat
+  like Petya's bugs and tasks — `{id, title, by, label, service?, router?, routerNote?, detect?(text), read(services,
+  command, topic, context)}`: the new chat's title, the answer's signature, the retry label (saved on the message as
+  `retryLabel`), the service module (connection offers in a chat of that kind), the topic router's line and note
+  (`src/intent-router.cjs`), whether a request is clearly of this kind (checked where Petya's own patterns are,
+  `src/dialogue.cjs` `intent`), and the reader. The chat keeps the kind for follow-ups; «Повторить» re-reads
+  (`src/features/chat-return.cjs`). Example: «Google Play» `anr` (`src/extensions/google-play/anr-kind.cjs`).
+- `doc-source` (`src/features/doc-sources.cjs`): a documentation source of the task decomposition (`src/workspace.cjs`
+  `searchDocs` / `fullDocument`) next to Confluence — `{id, name, ready(settings), watch?, note?, search({settings,
+  request}, terms) → {docs, warnings}, full?({settings, request}, doc)}`; `watch` lists the settings whose change voids a
+  running search, `note` is shown first while the source is used, `full` reads a chosen page the search gave only the
+  start of. Example: «Notion» (`src/extensions/notion/doc-source.cjs`).
+- `connection-check` (`src/features/connection-checks.cjs`): what «Сохранить и проверить» of a service card the app owns
+  saves and checks — `{service, fields, guide?, configured(settings), check(settings, request)}`, used by
+  `connectService`, `checkSavedConnection` and `connectionGuide`. The card itself is Petya's shared service card:
+  the app's `settings.js` (after `connections.js`) puts its markup into the form and calls
+  `window.addConnectionCard({id, title, description, field, flag?, fields, oauth?, guideLabel?, placeholder?,
+  connected?})` (`src/ui/connections.js`); a `.connection-help[data-help-title]` block folds into the compact help, a
+  `data-clear-secret` box is sent by the form's save, `data-fold-guides` on a card folds its long paragraphs. Example:
+  «Notion» (`src/extensions/notion/settings.js`, `connection-check.cjs`).
+
+Service modules (`module_*` settings) count as added unless switched off in `doc-source` and `connection-check`, like
+Petya's own modules; the other registries count an app while its switch is `"true"`.
+
 ## 10. Other hooks
 
 - `desktop-reply.cjs` — `{type:<id>, name, description, matches(command, context), turn(s, command, context, check)
@@ -360,7 +405,9 @@ warns about free space. Model downloads keep their own approval. Apps without do
   (`tests/extension-places-ui.cjs` shows how).
 - Guards: `tests/extension-ui.cjs` (descriptors), `tests/core-meeting-guard.cjs` (the core and other apps never name
   a meeting service), `tests/core-reminders-guard.cjs` (reminders live only in their app), `tests/core-mail-rules-guard.cjs`
-  (mail rules live only in «Почта»),
+  (mail rules live only in «Почта»), `tests/core-mail-guard.cjs`, `tests/core-notion-guard.cjs`,
+  `tests/core-google-play-guard.cjs` (Gmail / Outlook, Notion and Google Play live only in their apps; the shared scan
+  `tests/core-guard-scan.cjs` allows only the service-module tables and word lists, each with its reason),
   `tests/interface-language.cjs` (translations).
 - Finally `npm test` and the smoke test
   (`xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci`).

@@ -1,12 +1,14 @@
 const serviceLogins = new Set();
-async function connectCloudService(name, status, button, form) {
+// Browser sign-in through Petya's OAuth broker; `options` of a card an app owns: {title, connected} (its name and what
+// to say once connected).
+async function connectCloudService(name, status, button, form, options = {}) {
   if(serviceLogins.has(name)) return;
   serviceLogins.add(name);button.disabled=true;
   let cancelled=false;
   const cancel=connectionNode('button','Отменить');cancel.type='button';cancel.onclick=()=>{cancelled=true;};status.after(cancel);
   try {
     const login=await window.petya.serviceOAuthStart(name);
-    status.textContent='Сверьте код '+login.code+' в браузере и разрешите доступ '+({slack:'Slack',notion:'Notion',asana:'Asana'})[name]+'.';
+    status.textContent='Сверьте код '+login.code+' в браузере и разрешите доступ '+(options.title||({slack:'Slack',asana:'Asana'})[name])+'.';
     const deadline=Date.now()+600000;
     while(!cancelled && Date.now()<deadline) {
       await new Promise(r=>setTimeout(r,2000));if(cancelled)break;
@@ -23,7 +25,7 @@ async function connectCloudService(name, status, button, form) {
       await window.petya.serviceOAuthClaim(name,site.id);
       document.dispatchEvent(new CustomEvent('petya-connection-checked',{detail:{service:name,ok:true}}));
       if(form.elements[name+'Token']){form.elements[name+'Token'].value='';form.elements['clear_'+name+'Token'].checked=false;}
-      status.textContent='Подключено · '+site.name+(name==='asana'?'. Откройте раздел Asana для работы с задачами.':name==='slack'?'. Укажите каналы или маску jw-* в настройках.':'. Доступны страницы, выбранные при входе.');
+      status.textContent='Подключено · '+site.name+(name==='asana'?'. Откройте раздел Asana для работы с задачами.':name==='slack'?'. Укажите каналы или маску jw-* в настройках.':options.connected?'. '+options.connected:'.');
       status.className='connection-status connected';return;
     }
     status.textContent=cancelled?'Подключение отменено.':'Время входа истекло. Повторите подключение.';
@@ -76,8 +78,7 @@ async function connectAtlassian(status, button, form) {
 const connectionDefinitions = [
   { id: 'whisper', title: 'whisper.cpp', description: 'Распознавание речи на вашем компьютере', field: 'whisperUrl', fields: ['whisperUrl', 'whisperBinary', 'whisperModel', 'whisperVocabulary'] },
   { id: 'ollama', title: 'Ollama', description: 'Понимание команд и декомпозиция', field: 'ollamaUrl', fields: ['ollamaUrl', 'model'] },
-  { id: 'slack', title: 'Slack', description: 'Обсуждения команды', field: 'slackToken', flag: 'hasSlackToken', fields: ['slackToken', 'slackChannels'] },
-  { id: 'notion', title: 'Notion', description: 'Документация и требования', field: 'notionToken', flag: 'hasNotionToken', fields: ['notionToken'] },
+  { id: 'slack', title: 'Slack', description: 'Обсуждения команды', field: 'slackToken', flag: 'hasSlackToken', fields: ['slackToken', 'slackChannels'], oauth: true },
   { id: 'jira', title: 'Jira', description: 'Задачи, спринты и версии', field: 'jiraToken', flag: 'hasJiraToken', fields: ['jiraUrl', 'jiraEmail', 'jiraToken', 'jiraProjects', 'jiraProject', 'jiraIssueType', 'jiraBoardId', 'jiraVersionId', 'confluenceSpace'] }
 ];
 const connectionCards = new Map();
@@ -87,22 +88,27 @@ function connectionStatus(def, settings) {
   if(def.id === 'jira') atlassianConnected=!!settings.hasAtlassianOAuth;
   card.status.textContent = def.flag && settings[def.flag] ? 'Настроено · проверка не выполнена' : ['whisper', 'ollama'].includes(def.id) ? 'Локальный сервис · требуется проверка' : 'Не подключено';
   card.status.className = 'connection-status';
-  if (def.id === 'notion') {
+  if (def.placeholder) {
     card.content.open = false;
-    $('settings-form').elements.notionToken.placeholder = settings.hasNotionToken ? 'Токен сохранён. Оставьте пустым, чтобы использовать его' : 'Вставьте токен, скопированный из Notion';
+    $('settings-form').elements[def.field].placeholder = settings[def.flag] ? def.placeholder.saved : def.placeholder.empty;
   }
 }
-function setupConnections() {
-  const form = $('settings-form');
-  for (const def of connectionDefinitions) {
+// A service card an app owns (its settings.js, loaded after this file): the same card as Petya's own services, from
+// its markup already in the form and a definition {id, title, description, field, flag?, fields, oauth?, guideLabel?,
+// placeholder?: {saved, empty}, connected?}; «Сохранить и проверить» goes to the app's connection-check.
+window.addConnectionCard = def => {
+  setupConnection(def, $('settings-form'));
+  return window.petya.settings().then(settings => connectionStatus(def, settings)).catch(e => notice(e.message, true));
+};
+function setupConnection(def, form) {
     const field = form.elements[def.field], card = field.closest('article'); card.dataset.service = def.id;
     const content = document.createElement('details'); content.className = 'connection-options'; content.append(connectionNode('summary', 'Настройки подключения'));
     const original = [...card.children]; original.forEach(child => { if (!['H2'].includes(child.tagName) && !child.classList.contains('eyebrow')) content.append(child); });
     const status = connectionNode('p', 'Не проверено', 'connection-status'); status.setAttribute('role', 'status');
     const description = connectionNode('p', def.description), controls = connectionNode('div', '', 'actions');
     const connect = connectionNode('button', 'Подключить', 'primary'); connect.type = 'button';connect.dataset.connectionLogin='true';
-    const guide = connectionNode('button', def.id === 'ollama' ? 'Установить Ollama' : def.id === 'notion' ? 'Настройки Notion ↗' : ['ollama', 'whisper'].includes(def.id) ? 'Установка' : 'Открыть настройки сервиса ↗'); guide.type = 'button'; guide.onclick = run(() => window.petya.connectionGuide(def.id));
-    connect.onclick = () => { content.open = true; if (def.id !== 'notion') field.focus(); content.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
+    const guide = connectionNode('button', def.id === 'ollama' ? 'Установить Ollama' : def.guideLabel ? def.guideLabel : ['ollama', 'whisper'].includes(def.id) ? 'Установка' : 'Открыть настройки сервиса ↗'); guide.type = 'button'; guide.onclick = run(() => window.petya.connectionGuide(def.id));
+    connect.onclick = () => { content.open = true; if (!def.oauth) field.focus(); content.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
     if(def.id === 'jira') {
       connect.textContent='Подключить Jira и Confluence';
       connect.onclick=()=>connectAtlassian(status,connect,form);
@@ -110,14 +116,14 @@ function setupConnections() {
       disconnect.onclick=run(async()=>{ await window.petya.atlassianDisconnect();atlassianConnected=false;status.textContent='Atlassian отключён';status.className='connection-status'; });
       controls.append(disconnect);
     }
-    if(['slack','notion'].includes(def.id)) {
+    if(def.oauth) {
       connect.textContent=def.id==='slack'?'Через приложение Slack':'Подключить '+def.title;
-      connect.onclick=()=>connectCloudService(def.id,status,connect,form);
+      connect.onclick=()=>connectCloudService(def.id,status,connect,form,def);
       const disconnect=connectionNode('button','Отключить '+def.title);disconnect.type='button';
       disconnect.onclick=run(async()=>{await window.petya.serviceOAuthDisconnect(def.id);status.textContent=def.title+' отключён';status.className='connection-status';});controls.append(disconnect);
     }
     const verify = connectionNode('button', 'Сохранить и проверить', 'primary'); verify.type = 'button';
-    const savedOnly = connectionNode('p', ['slack', 'notion', 'jira'].includes(def.id) ? 'Нажмите «Подключить» и разрешите доступ в браузере. Создавать приложение и копировать ключи не нужно. Токены обновляются автоматически.' : 'Запустите локальный сервер, затем проверьте доступ.', 'small');
+    const savedOnly = connectionNode('p', def.oauth || def.id === 'jira' ? 'Нажмите «Подключить» и разрешите доступ в браузере. Создавать приложение и копировать ключи не нужно. Токены обновляются автоматически.' : 'Запустите локальный сервер, затем проверьте доступ.', 'small');
     if(def.id === 'slack') savedOnly.textContent='Подключите Slack через приложение или укажите API-токен.';
     if(def.id === 'jira') savedOnly.textContent='При входе разрешите доступ к Jira и Confluence на нужном сайте. Доступ к каждому сервису проверяется отдельно. Токены обновляются автоматически.';
     verify.onclick = run(async () => {
@@ -131,8 +137,8 @@ function setupConnections() {
         // Do not overwrite unsaved fields from another service.
         for (const key of def.fields) if (key.endsWith('Token')) { form.elements[key].value = ''; form.elements['clear_' + key].checked = false; }
         status.textContent = result.reason ? result.message : (result.ready ? 'Подключено · ' : 'Требуется настройка · ') + result.message;
-        status.className = 'connection-status' + (result.reason ? ' error' : result.ready ? ' connected' : '');window.showConnectionRecovery?.(card,status,result); if(!['slack','notion','jira'].includes(def.id)) connect.textContent = 'Настроить';
-        if (def.id === 'notion') { if (input.notionToken.trim() && !input.clear_notionToken) field.placeholder = 'Токен сохранён. Оставьте пустым, чтобы использовать его'; content.open = !result.ready; }
+        status.className = 'connection-status' + (result.reason ? ' error' : result.ready ? ' connected' : '');window.showConnectionRecovery?.(card,status,result); if(!(def.oauth || def.id === 'jira')) connect.textContent = 'Настроить';
+        if (def.placeholder) { if (input[def.field].trim() && !input['clear_' + def.field]) field.placeholder = def.placeholder.saved; content.open = !result.ready; }
         if (def.id === 'ollama' && Array.isArray(result.models)) {
           let list = $('ollama-models'); if (!list) { list = document.createElement('datalist'); list.id = 'ollama-models'; content.append(list); form.elements.model.setAttribute('list', list.id); }
           list.replaceChildren(...result.models.map(name => new Option(name, name)));
@@ -222,12 +228,12 @@ function setupConnections() {
         finally { start.disabled = false; }
       }); controls.append(start);
     }
-    if(['slack','notion','jira'].includes(def.id)) {
+    if(def.oauth || def.id === 'jira') {
       const manual=document.createElement('details');manual.append(connectionNode('summary','Ручное подключение по токену'));
       for(const key of def.id==='jira'?['jiraEmail','jiraToken','clear_jiraToken']:[def.id+'Token','clear_'+def.id+'Token']) {
         const node=content.querySelector('[name="'+key+'"]')?.closest('label');if(node)manual.append(node);
       }
-      const oldHelp=content.querySelector('.notion-setup') || card.querySelector('.slack-setup');if(oldHelp)manual.append(oldHelp);
+      const oldHelp=content.querySelector('.connection-help') || card.querySelector('.slack-setup');if(oldHelp)manual.append(oldHelp);
       manual.append(guide);content.append(manual);card.append(savedOnly);
       if(def.id==='slack') {
         manual.querySelector('summary').textContent='API-токен Slack';
@@ -254,7 +260,10 @@ function setupConnections() {
     const setupHelp = card.querySelector('.ollama-setup'); if (setupHelp) card.insertBefore(setupHelp, content);
     connectionCards.set(def.id, { card, status, content });
     card.querySelectorAll('input,textarea,select').forEach(e => { const invalidate = () => { status.textContent = 'Настройки изменены · сохраните и проверьте'; status.className = 'connection-status'; }; e.addEventListener('input', invalidate); e.addEventListener('change', invalidate); });
-  }
+}
+function setupConnections() {
+  const form = $('settings-form');
+  for (const def of connectionDefinitions) setupConnection(def, form);
   // «Запись встреч»: the core recorder. Meeting apps (extensions that provide a meeting source) add automatic start
   // and speaker names; without one a meeting is recorded with «Слушать встречу».
   const meetings = connectionNode('article', '', 'card'); meetings.dataset.service = 'meetings';

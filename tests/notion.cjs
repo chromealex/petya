@@ -1,5 +1,5 @@
 const assert = require('assert').strict;
-const { Notion } = require('../src/notion.cjs');
+const { Notion } = require('../src/extensions/notion/client.cjs');
 const { Workspace } = require('../src/workspace.cjs');
 const title = text => ({ type: 'title', title: [{ plain_text: text }] });
 const page = { id: 'abc-123', object: 'page', properties: { Name: title('Вход по коду') } };
@@ -22,11 +22,11 @@ async function test(name, fn) { await fn(); count++; console.log('✓ ' + name);
   await test('unreadable pages are not passed to the planner as empty documents', async () => { const n = new Notion(async url => { if (url.endsWith('/search')) return { results: [page] }; const e = new Error('HTTP 403'); e.status = 403; throw e; }, async () => {}); const r = await n.search(['код'], 'test'); assert.equal(r.docs.length, 0); assert(r.warnings[0].includes('403')); });
   await test('Notion works without Jira and provider errors preserve other documents', async () => {
     let settings = { notionToken: 'test' }; const w = new Workspace({ settings: () => settings, request: async () => { throw new Error('Confluence offline'); } });
-    w.notion.search = async () => ({ docs: [{ id: 'notion:1', source: 'Notion', title: 'Код', text: 'текст', score: 1 }], warnings: [] });
+    require('../src/extensions/notion/doc-source.cjs').client(w.request).search = async () => ({ docs: [{ id: 'notion:1', source: 'Notion', title: 'Код', text: 'текст', score: 1 }], warnings: [] });
     const context = { title: 'Код', text: 'Вход' }; assert.equal((await w.searchDocs(context)).docs.length, 1);
     settings = { ...settings, jiraUrl: 'https://test.atlassian.net', jiraEmail: 'a', jiraToken: 't', jiraProject: 'TEST' };
     const r = await w.searchDocs(context); assert.equal(r.docs.length, 1); assert(r.warnings.some(x => x.includes('Confluence offline')));
-    w.searchConfluence = async () => ({ docs: [{ id: 'confluence:1', title: 'Код', score: 1 }] }); w.notion.search = async () => { throw new Error('HTTP 429'); };
+    w.searchConfluence = async () => ({ docs: [{ id: 'confluence:1', title: 'Код', score: 1 }] }); require('../src/extensions/notion/doc-source.cjs').client(w.request).search = async () => { throw new Error('HTTP 429'); };
     const partial = await w.searchDocs(context); assert.equal(partial.docs[0].id, 'confluence:1'); assert(partial.warnings.some(x => x.includes('429')));
   });
   await test('selected Notion content and citation reach decomposition', async () => {

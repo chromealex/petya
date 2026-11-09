@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {GmailAccounts}=require('../src/gmail-accounts.cjs');const {MailRules:MailSkill,defaults}=require('../src/extensions/mail/rules.cjs');
+const assert=require('node:assert/strict');const {GmailAccounts}=require('../src/extensions/mail/gmail-accounts.cjs');const {MailRules:MailSkill,defaults}=require('../src/extensions/mail/rules.cjs');
 (async()=>{
  const client={client_id:'test',client_secret:'x'},tokens={access_token:'a',refresh_token:'r',expiresAt:Date.now()+999999};let state={client,tokens};
  const manager=new GmailAccounts({load:()=>structuredClone(state),save:s=>state=structuredClone(s),enabled:()=>true,open:async()=>{}});

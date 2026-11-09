@@ -1,5 +1,5 @@
 // Google service-account access tokens (OAuth 2.0 JWT bearer grant), shared by the Google Play reports client
-// (src/google-play.cjs) and the Firebase Crashlytics BigQuery reader (src/extensions/crashlytics). The private key
+// (src/extensions/google-play/client.cjs) and the Firebase Crashlytics BigQuery reader (src/extensions/crashlytics). The private key
 // never leaves the main process; tokens are cached per key and scope until a minute before they expire.
 const {createSign,createPrivateKey}=require('node:crypto');
 const TOKEN_URL='https://oauth2.googleapis.com/token';

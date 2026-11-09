@@ -34,20 +34,22 @@ function taskListRequest(text){
  const read=/(?:^|\s)(?:покажи|показать|посмотри|посмотреть|глянь|глянуть|проверь|проверить|перечисли|прочитай|список|какие|какая|сколько|что|есть ли|открыт\p{L}*|висит|висят|остал\p{L}*|мои|мой)(?=\s|$)/u.test(s);
  return read&&(tasks||jira&&/(?:^|\s)(?:посмотри|глянь|проверь|покажи|что)(?=\s|$)/u.test(s));
 }
+// Subjects added apps read data for (dialogue-kind, src/features/dialogue-kinds.cjs), next to Petya's own bugs and tasks.
+const kinds=()=>require('./features/dialogue-kinds.cjs');
+const readKind=kind=>kind==='bugs'||kind==='tasks'||!!kinds().get(kind);
 function intent(text,active){
  if(taskListRequest(text))return 'tasks';
  if(discussionOnly(text))return 'chat';
  if(/^(?:а\s+)?(?:что такое|объясни|почему|как думаешь|что думаешь|как лучше|я думаю|мне кажется|давай обсудим)/iu.test(text))return 'chat';
  if(/(?:верн|продолж).*(?:баг|bug|жир|jira)/iu.test(text))return 'bugs';
- // Google Play named with crashes is «Крэши»'s subject (its Android vitals crash source), not the ANR card.
- if(/(?:\banr\b|анр)/iu.test(text)||/google play|гугл пл[еэ]й/iu.test(text)&&!/кр[эеа]ш|crash|падени|вылет/iu.test(text))return 'anr';
+ const own=kinds().detect(text);if(own)return own;
  if(/(?:баг|bug|ошиб).*(?:верс|релиз|сколько|jira|жир)|(?:сколько|посмотр|провер).*(?:баг|bug)/iu.test(text))return 'bugs';
  if(/(?:какие|покажи|список|открыт|остал|висит|глянь).*(?:баг|bug)|(?:баг|bug)\p{L}*\s+(?:открыт|остал|какие|висят|есть)/iu.test(text)&&!actionRequest(text))return 'bugs';
  // Inside «Мои задачи», a short status follow-up («а из todo?», «только в работе») narrows the same list.
  if(active?.kind==='tasks'&&active.taskAssignee==='currentUser'&&!discussionOnly(text.replace(/^а\s+/iu,''))&&require('./personal-tasks.cjs').details(text,active))return 'tasks';
- // A leading «а» is not evidence that a new subject is a bug/ANR request.
+ // A leading «а» is not evidence that a new subject is a bug request or an app's subject.
  const continuation=text.trim().replace(/^(?:а|теперь)\s+/iu,'').replace(/[.!?]+$/u,'');
- if(active&&['bugs','anr','tasks'].includes(active.kind)&&(/^(?:в|по|для)\s+проект[еу]?\s+[\p{L}\p{N}][\p{L}\p{N} _-]*$/iu.test(continuation)||/^теперь\s+в\s+[\p{L}\p{N}][\p{L}\p{N} _-]*[.!?]*$/iu.test(text)||/^(?:обнови(?: ответ| данные)?|сколько(?: их)?(?: всего| осталось| открытых| закрытых)?|посмотри ещё|проверь ещё)$/iu.test(continuation)||/^(?:по|за|в|для)\s+(?:эт|предыдущ|последн|прошл|текущ|нов|сегодня|вчера|\d)/iu.test(continuation)))return active.kind;
+ if(active&&readKind(active.kind)&&(/^(?:в|по|для)\s+проект[еу]?\s+[\p{L}\p{N}][\p{L}\p{N} _-]*$/iu.test(continuation)||/^теперь\s+в\s+[\p{L}\p{N}][\p{L}\p{N} _-]*[.!?]*$/iu.test(text)||/^(?:обнови(?: ответ| данные)?|сколько(?: их)?(?: всего| осталось| открытых| закрытых)?|посмотри ещё|проверь ещё)$/iu.test(continuation)||/^(?:по|за|в|для)\s+(?:эт|предыдущ|последн|прошл|текущ|нов|сегодня|вчера|\d)/iu.test(continuation)))return active.kind;
  return 'chat';
 }
 const versionNumbers=text=>String(text).match(/\d+(?:\.\d+)+/g)||[];
@@ -99,6 +101,8 @@ class Dialogue {
  busyChat(id){return id===undefined?this.running.size>0:this.running.has(id||'new:'+this.state.activeProjectId);}
  get busy(){return this.busyChat(this.active()?.id||'');}
  constructor({state={topics:[],activeId:''},save=()=>{},answer,readers,routeTopic,autoTopics,context=()=>'',days=()=>30,now=Date.now}){Object.assign(this,{state,save,answer,readers,routeTopic,autoTopics:autoTopics||(()=>true),context,days,now});this.running=new Set();this.ensureProjects(true);this.prune();}
+ // The reader of a kind: Petya's own (`readers`: tasks, bugs) or an added app's (dialogue-kind); a given reader wins.
+ reader(kind){return Object.hasOwn(this.readers||{},kind)?this.readers[kind]:kinds().reader(kind);}
  prune(){const oldCount=(this.state.topics||[]).length;const cutoff=this.now()-Number(this.days())*86400000;const expiredRoute=this.state.lastRouting?.at<cutoff;if(expiredRoute)delete this.state.lastRouting;this.state.topics=(this.state.topics||[]).filter(t=>t.at>=cutoff);if(!this.active())this.state.activeId='';if(oldCount!==this.state.topics.length||expiredRoute)this.persist();}
  active(){return this.state.topics.find(t=>t.id===this.state.activeId);}
  ensureProjects(migrate=false){
@@ -172,14 +176,14 @@ class Dialogue {
    // Chats are made by the user (the «+» button, «новый чат», «новая тема»): Petya answers in the open chat and
    // never moves the conversation to another or a new chat on its own guess about the subject (settings.autoTopics='true' brings that back).
    if(this.autoTopics?.()&&kind==='chat'&&!discussionOnly(text)&&!forcedKind&&!back&&!newTopic&&!aboutShown&&!freshChat(active)&&this.routeTopic){
-    try{const route=await (preparedRoute?.owner===this&&preparedRoute.text===text&&preparedRoute.stateKey===JSON.stringify(this.state)?preparedRoute.result:this.routeTopic(text,this.scoped(),active?.id));unclear=!!route?.unclear;if(['bugs','anr'].includes(route?.kind))kind=route.kind;if(route?.topicId&&route.topicId!==active?.id){const found=this.scoped().find(t=>t.id===route.topicId);if(found)offer=found;}}catch{unclear=true;}
+    try{const route=await (preparedRoute?.owner===this&&preparedRoute.text===text&&preparedRoute.stateKey===JSON.stringify(this.state)?preparedRoute.result:this.routeTopic(text,this.scoped(),active?.id));unclear=!!route?.unclear;if(route?.kind==='bugs'||kinds().get(route?.kind))kind=route.kind;if(route?.topicId&&route.topicId!==active?.id){const found=this.scoped().find(t=>t.id===route.topicId);if(found)offer=found;}}catch{unclear=true;}
    }
-   // Tasks, bugs or ANR are answered in the open chat, which takes that kind for the follow-ups; without an open chat
+   // Tasks, bugs or an app's subject are answered in the open chat, which takes that kind for the follow-ups; without an open chat
    // a new one is made. They never go to another existing chat (only «вернёмся к багам» opens one).
    if(!newTopic&&active&&kind!=='chat'&&active.kind!==kind)active.kind=kind;
    if(newTopic||!active||(kind!=='chat'&&active.kind!==kind)){
     const hint=!newTopic&&active?(active.title+' '+active.messages.slice(-2).map(m=>m.text).join(' ')):'';const previousProject=!newTopic?active?.jiraProject:undefined;const previousVersion=!newTopic?active?.versionId:undefined;
-    active={id:randomUUID(),title:kind==='bugs'?'Баги в Jira':kind==='tasks'?'Задачи в Jira':kind==='anr'?'ANR в Google Play':(suggestedTitle||text.slice(0,80)),kind,messages:[],at:this.now(),contextHint:hint,...['bugs','tasks'].includes(kind)&&previousProject?{jiraProject:previousProject,...previousVersion?{versionId:previousVersion}:{}}:{}};
+    active={id:randomUUID(),title:kind==='bugs'?'Баги в Jira':kind==='tasks'?'Задачи в Jira':kinds().get(kind)?.title||(suggestedTitle||text.slice(0,80)),kind,messages:[],at:this.now(),contextHint:hint,...['bugs','tasks'].includes(kind)&&previousProject?{jiraProject:previousProject,...previousVersion?{versionId:previousVersion}:{}}:{}};
     if(!this.state.topics.includes(active))this.state.topics.push(active);this.state.activeId=active.id;
    }
    const before=structuredClone(active);
@@ -190,12 +194,12 @@ class Dialogue {
     const followUp=back&&/[:,—]\s*\S{3,}|\s(?:и|а)\s+(?:посоветуй|расскажи|покажи|объясни|назови|напомни|скажи|дай|что|как|какой|какая|какие|сколько|почему)/iu.test(text.replace(/^(?:верн[её]мся|вернись|продолжим|вернуться)/iu,''));
     if(backOffer&&!followUp)result={text:'Чат «'+backOffer.title+'» уже есть. Перейти в него?'};
     else if(back&&!followUp){const last=active.messages.filter(m=>m.role==='assistant').at(-1);result={text:'Вернулись к теме «'+active.title+'». '+(last?'Последний сохранённый ответ от '+new Date(last.at).toLocaleString('ru-RU')+': '+last.text+' Для свежих данных скажите «обнови».':'Что обсудим?')};}
-    else if(kind==='bugs'||kind==='anr'||kind==='tasks'){
-     result=await this.readers[kind](text,active,active.contextHint||this.context());
+    else if(readKind(kind)){
+     result=await this.reader(kind)(text,active,active.contextHint||this.context());
      if(result.question){active.pending={command:text,kind,field:result.field,options:result.options||[]};result.text=result.question;}
-     result.by=result.by||{bugs:'Jira: баги',anr:'Google Play: ANR',tasks:'Jira: задачи'}[kind];
+     result.by=result.by||{bugs:'Jira: баги',tasks:'Jira: задачи'}[kind]||kinds().get(kind)?.by;
     }else {const answer=await this.answer(text,active,unclear);result=typeof answer==='string'?{text:answer}:{...answer};if(active.answeredBy&&!result.by)result.by=active.answeredBy;delete active.answeredBy;}
-   }catch(error){result={text:'Не удалось проверить данные: '+error.message,error:true,...(['bugs','tasks','anr'].includes(kind)?{retryStep:kind}:{})};}
+   }catch(error){result={text:'Не удалось проверить данные: '+error.message,error:true,...(readKind(kind)?{retryStep:kind}:{})};}
    require('./answer-cancel.cjs').check();
    // Petya never switches chats on his own: the answer stays here, and a chat that already holds this subject
    // (the same Jira list, «Баги в Jira», the chat the router picked) is offered with a button.
@@ -205,7 +209,7 @@ class Dialogue {
    if(result.title)active.title=result.title;
    if(result.data)active.lastData=result.data;
    if(result.error && kind==='chat' && active.attachments?.length)result.retryStep='files';
-   active.messages.push({role:'assistant',text:result.text,error:!!result.error,...(result.error&&(['bugs','tasks','anr'].includes(kind)||result.retryStep)?{retryStep:result.retryStep||kind}:{}),sources:result.sources||[],jiraItems:require('./extensions/jira/result.cjs').capture(result),...(()=>{const data=require('./features/chat-results.cjs').extract(result);return data?{extensionData:{...result.extensionData,...data}}:result.extensionData?{extensionData:result.extensionData}:{};})(),usedMaterials:result.usedMaterials||[],at:this.now(),...(result.by?{by:result.by}:{}),...(result.chatOffer?{chatOffer:result.chatOffer}:{})});this.persist();
+   active.messages.push({role:'assistant',text:result.text,error:!!result.error,...(result.error&&(readKind(kind)||result.retryStep)?{retryStep:result.retryStep||kind,...kinds().get(result.retryStep||kind)?{retryLabel:kinds().get(result.retryStep||kind).label}:{}}:{}),sources:result.sources||[],jiraItems:require('./extensions/jira/result.cjs').capture(result),...(()=>{const data=require('./features/chat-results.cjs').extract(result);return data?{extensionData:{...result.extensionData,...data}}:result.extensionData?{extensionData:result.extensionData}:{};})(),usedMaterials:result.usedMaterials||[],at:this.now(),...(result.by?{by:result.by}:{}),...(result.chatOffer?{chatOffer:result.chatOffer}:{})});this.persist();
    return {handled:true,...result,topicId:active.id,topicTitle:active.title,messages:active.messages,topics:this.list()};
   }finally{this.running.delete(runningKey);}
  }

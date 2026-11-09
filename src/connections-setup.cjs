@@ -21,8 +21,10 @@ module.exports=ctx=>{
         return { ready: false, state: 'unknown', message: screen === 'granted' ? 'Разрешение экрана есть. Для проверки звуковой дорожки нажмите «Проверить доступ к звуку».' : 'Захват звука требует отдельной проверки кнопкой подключения. Автопроверка не включает запись.' };
       }
       if (['claude', 'codex'].includes(service)) { const ready = await ctx.available(service); return { ready, state: ready ? 'connected' : 'disconnected', message: ready ? 'Приложение найдено. Вход и выполнение проверяются в самом приложении.' : 'Приложение не найдено. Установите его и выполните вход.' }; }
-      if (!Object.hasOwn(ctx.guides, service) || !['slack', 'notion', 'asana', 'jira', 'confluence', 'ollama', 'whisper'].includes(service)) throw new Error('Неизвестный сервис.');
-      const configured = service === 'asana' ? snapshot.asanaCredential : service === 'slack' ? snapshot.slackToken || snapshot.slackCredential : service === 'notion' ? snapshot.notionToken || snapshot.notionCredential : ['jira', 'confluence'].includes(service) ? snapshot.atlassianCredential || snapshot.jiraToken && snapshot.jiraEmail && snapshot.jiraUrl : true;
+      // A card an app owns (connection-check, src/features/connection-checks.cjs) says itself whether it is configured.
+      const own = require('./features/connection-checks.cjs').find(service);
+      if (!own && (!Object.hasOwn(ctx.guides, service) || !['slack', 'asana', 'jira', 'confluence', 'ollama', 'whisper'].includes(service))) throw new Error('Неизвестный сервис.');
+      const configured = own ? own.configured(snapshot) : service === 'asana' ? snapshot.asanaCredential : service === 'slack' ? snapshot.slackToken || snapshot.slackCredential : ['jira', 'confluence'].includes(service) ? snapshot.atlassianCredential || snapshot.jiraToken && snapshot.jiraEmail && snapshot.jiraUrl : true;
       if (!configured) return { ready: false, state: 'disconnected', message: 'Не подключено. Откройте настройки сервиса.' };
       let timer;
       try {

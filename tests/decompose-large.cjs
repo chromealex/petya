@@ -3,7 +3,7 @@
 const assert = require('assert').strict;
 const plan = require('../src/decompose.cjs');
 const { Workspace } = require('../src/workspace.cjs');
-const { Notion } = require('../src/notion.cjs');
+const { Notion } = require('../src/extensions/notion/client.cjs');
 let count = 0;
 async function test(name, fn) { await fn(); count++; console.log('✓ ' + name); }
 const settings = { jiraUrl: 'https://test.atlassian.net', jiraEmail: 'a@b.c', jiraToken: 't', jiraProject: 'TEST', model: 'qwen', ollamaUrl: 'http://localhost:11434/api/chat', notionToken: 'n' };
@@ -144,7 +144,7 @@ const context = { title: 'Оплата', text: 'Обсудили новую оп
     const preview = await n.content('page', 'n'); assert(preview.truncated && preview.text.length <= 18000);
     reads = 0; const full = await n.content('page', 'n', { full: true }); assert(!full.truncated); assert(full.text.includes('REQ-30')); assert(full.text.startsWith('## Раздел 1'));
     const fake = ollama(), w = new Workspace({ settings: () => settings, request: fake.request });
-    w.notion.content = async (id, token, options) => { assert.equal(id, 'abc'); assert(options.full); return { text: '# Оплата\n' + 'REQ-99 ' + filler.repeat(10), truncated: false }; };
+    require('../src/extensions/notion/doc-source.cjs').client(w.request).content = async (id, token, options) => { assert.equal(id, 'abc'); assert(options.full); return { text: '# Оплата\n' + 'REQ-99 ' + filler.repeat(10), truncated: false }; };
     w.docs.set('notion:abc', { id: 'notion:abc', source: 'Notion', title: 'Оплата', text: 'начало', more: true, url: 'https://www.notion.so/abc' });
     await w.prepare('декомпозируй', context, ['notion:abc']); assert(fake.log.at(-1).user.includes('REQ-99'));
   });

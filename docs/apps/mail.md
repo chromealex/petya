@@ -2,9 +2,27 @@
 
 The mail app: letters as chat cards (important first, a reply draft opened in the mail service, a letter to a task)
 and the **mail rules** — how Petya checks mail on request. It is the `gmail` service module of the catalog
-(`"setting": "module_gmail"`, `"service": "gmail"`): adding «Почта» shows the connection card in «Настройки» (Google /
-Microsoft accounts, read-only; `src/mail-accounts.cjs`, `src/ui/mail-connection.js` stay Petya's connection) and the
-rules tab on «Навыки».
+(`"setting": "module_gmail"`, `"service": "gmail"`): adding «Почта» shows its connection card in «Настройки» (Google /
+Microsoft accounts, read-only) and the rules tab on «Навыки».
+
+## The mail connection
+
+The app owns the mail service (moved from Petya's core in this lane; the settings keys and stored accounts are
+unchanged, so nothing is migrated):
+
+| File | What |
+|---|---|
+| `gmail.cjs`, `outlook.cjs` | Gmail REST v1 and Microsoft Graph v1.0 clients: loopback OAuth with PKCE, refresh, read-only mail, incremental consent (`start({scopes, email})`) for the apps that add scopes. |
+| `gmail-accounts.cjs`, `accounts.cjs` | Up to 20 accounts per provider in `gmailCredential` / `microsoftCredential`; `MailAccounts` joins both. |
+| `connection.cjs` | Creates the accounts for `setup` (the built-in OAuth clients of `src/integration-clients.json` are imported once) and the account IPC; the settings declaration: defaults, secrets, `limits` (200 000 characters each), `publicFlags` (`hasGmail`), `validate` (too many accounts is refused). |
+| `settings.js`, `settings.css` | The «Почта» card in «Настройки» → «Сервисы» (`data-service="gmail"`, shown while the module is on). |
+
+The accounts are created whether or not «Почта» is added and are returned as `services.mailAccounts`, the name other
+apps have always read (Календарь, Google Диск, Google Таблицы, «Поиск по всему», «Записи из почты», a meeting service's
+summary letters, `src/google-workspace.cjs`); reading mail checks the module (`check()` of the clients). Account IPC
+(`window.petya.feature('mail', …)`): `accountStatus`, `accountStart`, `accountStartMicrosoft`, `accountCancel`,
+`accountRename`, `accountDisconnect`, `accountImportGoogle` (the file comes from the system dialog),
+`accountConfigureMicrosoft`, `accountGuide`.
 
 ## Mail rules
 
@@ -35,14 +53,21 @@ log; the tab's «Отменить» replaces it.
 
 ## Hooks into Petya
 
-- `feature.cjs` returns the service `mail` = `{rules(), turn(command), run(id, command)}`; Petya's request pipeline
-  calls `mail.turn` where mail requests always went (after web search and the service offers), and the tool router reads
-  `mail.rules()` for its `mail` tool. Without the app both return nothing and the request goes on to the dialogue.
-- IPC (`window.petya.feature('mail', …)`): `list`, `save`, `remove`, `restore`, `toggle`, `dropDraft`, `test`.
+- `feature.cjs` returns the service `mail` = `{rules(), turn(command), run(id, command)}` and `mailAccounts`.
+- `chat-route.cjs` (`chat-route`, `src/features/chat-routes.cjs`): `mail.turn` at the place of the request pipeline mail
+  requests always had (after web search and the service offers, before Petya's own shortcuts).
+- `route-tool.cjs` (`route-tool`, `src/features/route-tools.cjs`): the tool router's `mail` — its line in the router
+  prompt, the rule «Для mail выбери существующий recipeId…», the enabled rules as `choices` (the model's `recipeId`),
+  `keepsClarify` for the router's question about which rule, and `run` (the connection offer first, then `mail.run`).
+  The prompt is the same text as before while «Почта» is added; without the app there is no `mail` tool.
+- `summary-section.cjs` (`summary-section`): the closing line of «Что у нас сегодня?» («Это не полная сводка почты и
+  календаря…»), now under the heading «Почта и календарь» and only while «Почта» is added.
+- Rule IPC (`window.petya.feature('mail', …)`): `list`, `save`, `remove`, `restore`, `toggle`, `dropDraft`, `test`.
 
 ## Tests
 
 `tests/mail-skills.cjs` (teaching, persistence in the app file, delete and restore, trial, «Проверь почту» offer,
 migration incl. a failed write and a full store, growth points kept), `tests/gmail-accounts.cjs`, `tests/app-cards.cjs`,
-`tests/parallel-thinking.cjs`, `tests/core-mail-rules-guard.cjs` (the core has no mail rule logic or text), the tab in
-`tests/apps-own-ui.cjs`. Gmail and Microsoft Graph are verified with stubbed responses; live mailboxes are not.
+`tests/parallel-thinking.cjs`, `tests/outlook.cjs`, `tests/company-integrations.cjs`, `tests/core-mail-rules-guard.cjs`
+(the core has no mail rule logic or text), `tests/core-mail-guard.cjs` (the core names no Gmail / Outlook outside the
+service-module tables; the app owns the connection), the tab in `tests/apps-own-ui.cjs`, the card in `tests/smoke.cjs`. Gmail and Microsoft Graph are verified with stubbed responses; live mailboxes are not.

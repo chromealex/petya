@@ -3,9 +3,12 @@
   "name": "Google Play",
   "description": "Карточка ANR: показатели, порог Google и динамика по дням; крэши Android vitals для «Крэшей»",
   "category": "gamedev",
-  "settings": false,
+  "setting": "module_googleplay",
+  "service": "googleplay",
+  "settings": true,
   "feature": "feature.cjs",
   "scripts": [
+    ["settings.js", "dialogue.js"],
     ["vitals-cards.js", "message-format.js"]
   ],
   "results": {
@@ -13,6 +16,8 @@
   },
   "provides": {
     "voice-action": "voice-action.cjs",
-    "crash-source": "crash-source.cjs"
+    "crash-source": "crash-source.cjs",
+    "route-tool": "route-tool.cjs",
+    "dialogue-kind": "anr-kind.cjs"
   }
 }

@@ -185,8 +185,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
 
     if(!choice&&/^(?:посмотри|разбери|объясни|изучи) (?:вот )?(?:это|вложени[яе]|файл|скриншот)/iu.test(original)){const pending=ctx.attachments.list();if(pending.length)return ctx.inspectAttachments(pending.map(a=>a.id),original);if(!ctx.dialogue.active()?.attachments?.length)return require('./input-required.cjs').ask({text:'Какой файл разобрать? Прикрепите его здесь — исходный запрос сохранён.',label:'Файл или пояснение',files:true},answer=>pipeline(original+'\n'+answer,undefined,background));}
     if(!choice){if(ctx.pendingWeb&&/^продолжи(?:ть)? поиск[.!?]*$/iu.test(original))return ctx.runWeb(ctx.pendingWeb.original,ctx.pendingWeb.search,true);const search=ctx.searchCommand(original,ctx.dialogue.active());if(search){step('Ищу в интернете: «'+String(search.query||original).slice(0,80)+'»');return ctx.runWeb(original,search);}}
-    // Mail rules of the «Почта» app (src/extensions/mail): teaching, a rule's phrase, «проверь почту».
-    if(!choice&&ctx.mail){const mail=await ctx.mail.turn(original);if(mail)return mail;}
+    // Added apps' own requests at this point of the pipeline (chat-route, src/features/chat-routes.cjs).
+    if(!choice){const routed=await require('./features/chat-routes.cjs').turn(ctx,original);if(routed)return routed;}
     if(!choice){
       if(require('./capabilities.cjs').PHRASES.undo.test(original))return ctx.undoLast();
       if(require('./capabilities.cjs').PHRASES.dailyBrief.test(original))return ctx.dailyBrief();
@@ -229,25 +229,27 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     let preparedTopicRoute=!choice?ctx.voicePreparation.take(value,ctx.voicePreparationKey()):undefined;
     // Existing explicit actions and pending choices keep their original execution path.
     if(!choice&&ctx.settings.semanticTools!=='false'&&!require('./dialogue.cjs').discussionOnly(value)&&ctx.settings.model&&!ctx.dialogue.active()?.pending&&!ctx.dialogue.active()?.attachments?.length&&!require('./dialogue.cjs').actionRequest(value)){
-      const semantic=require('./semantic-tools.cjs'),recipes=(ctx.mail?.rules()||[]).filter(r=>r.enabled);let route;
+      // Added apps' tools join Petya's own (route-tool, src/features/route-tools.cjs); a tool may offer choices.
+      const semantic=require('./semantic-tools.cjs'),routeTools=require('./features/route-tools.cjs'),tools=routeTools.list(ctx.settings),recipes=routeTools.choices(ctx,tools);let route;
       try {
         const base=new URL(ctx.core.localEndpoint(ctx.settings.ollamaUrl));
         const info=await ctx.request(new URL('/api/show',base).href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:ctx.settings.model})});
         if(info.remote_host||info.remote_model||/cloud/i.test(ctx.settings.model))throw Error('Нужна локальная модель.');
         step('Выбираю, чем ответить');
         preparedTopicRoute ||= ctx.dialogue.prepareRoute(value);
-        const response=await ctx.request(base.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(semantic.routingRequest(ctx.settings.model,value,{company:ctx.companies.get(ctx.companyId).name,topic:ctx.dialogue.active(),recipes,capabilities:restating?[]:require('./capabilities.cjs').CATALOG}))});
-        route=semantic.parseRoute(response,recipes,restating?[]:require('./capabilities.cjs').CATALOG);
+        const response=await ctx.request(base.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(semantic.routingRequest(ctx.settings.model,value,{company:ctx.companies.get(ctx.companyId).name,topic:ctx.dialogue.active(),recipes,tools,capabilities:restating?[]:require('./capabilities.cjs').CATALOG}))});
+        route=semantic.parseRoute(response,recipes,restating?[]:require('./capabilities.cjs').CATALOG,tools);
         // An unsure tool router must not answer for the conversation: the dialogue model sees the whole
         // history and asks its own question when the request is really unclear («Приведи пример команды»).
-        if(route?.tool==='clarify'&&!/почтов/iu.test(route.question))route=null;
+        // An app's own question about its choices (which of its rules) stays.
+        if(route?.tool==='clarify'&&!routeTools.keepsClarify(tools,route.question))route=null;
       }catch{} // Offline or malformed model output cannot trigger a tool.
       const read=async(kind,service)=>{
         const offer=await ctx.serviceAccess.offer('Проверь '+service+': '+value,ctx.dialogue.active());
         return offer||ctx.dialogue.turn(value,undefined,kind);
       };
       const routed=await semantic.dispatch(route,value,{
-        bugs:()=>read('bugs','Jira'),anr:()=>read('anr','Google Play'),
+        bugs:()=>read('bugs','Jira'),
         web:()=>ctx.runWeb(original,{query:value,fresh:true}),brief:()=>ctx.dailyBrief(),
         meeting:()=>ctx.meetingSummary?ctx.meetingSummary.answer(value):null,
         // Another function of Petya in other words: the restated request goes through the pipeline once; the chat
@@ -260,10 +262,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
           if(asked){asked.text=original;asked.understoodAs=canonical;ctx.dialogue.persist();}
           return reply&&typeof reply==='object'?{...reply,understoodAs:canonical,messages:t?.messages||reply.messages}:reply;
         },
-        mail:async(_command,r)=>{
-          const offer=await ctx.serviceAccess.offer('Проверь Gmail: '+value,ctx.dialogue.active());if(offer)return offer;
-          return ctx.mail?ctx.mail.run(r.recipeId,original):null;
-        }
+        ...Object.fromEntries(tools.map(t=>[t.id,(_command,r)=>t.run(ctx,{command:value,original,route:r})]))
       });
       if(routed)return {...routed,selectedTool:route.tool};
     }
@@ -299,7 +298,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     return reply;
   };
   // When a correction changed the request, the recorded question keeps what was actually said.
-  // Petya never switches chats himself. When a step answered in another chat (a Slack log, «Почта Gmail», a skill
+  // Petya never switches chats himself. When a step answered in another chat (a Slack log, an app's own chat, a skill
   // chat, a project), the open chat gets the request and the answer, with a button to that chat; only the «+» button,
   // the chat list and such buttons switch chats.
   function stay(result,owner,project,command,startedAt){

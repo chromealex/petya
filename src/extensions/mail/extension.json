@@ -5,10 +5,11 @@
   "category": "comms",
   "setting": "module_gmail",
   "service": "gmail",
-  "settings": false,
+  "settings": true,
   "quickStart": {"order": 40},
   "feature": "feature.cjs",
   "scripts": [
+    ["settings.js", "personal-dictionary.js"],
     ["mail-cards.js", "message-format.js"],
     ["mail-rules.js", "message-format.js"]
   ],
@@ -19,6 +20,9 @@
     "tabs": [{"page": "learning", "title": "Почтовые правила", "render": "renderMailRules"}]
   },
   "provides": {
-    "growth-source": "growth-source.cjs"
+    "growth-source": "growth-source.cjs",
+    "chat-route": "chat-route.cjs",
+    "route-tool": "route-tool.cjs",
+    "summary-section": "summary-section.cjs"
   }
 }

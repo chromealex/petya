@@ -28,7 +28,7 @@ module.exports = async (win, workspace) => {
     await modulesReady;
     if(!$('microsoft-start')||!$('mail-cancel')||!$('tg-connect')||!$('tg-phone-step').hidden)throw Error('Missing simplified connection UI');
     if((await window.petya.settings()).microsoftCredential)throw Error('Microsoft tokens exposed');
-    const mailStatus=await window.petya.gmailStatus();if(!mailStatus.microsoft||mailStatus.microsoft.connected)throw Error('Unexpected fresh mail provider state');
+    const mailStatus=await window.petya.feature('mail','accountStatus');if(!mailStatus.microsoft||mailStatus.microsoft.connected)throw Error('Unexpected fresh mail provider state');
     const previousWeb=(await window.petya.settings()).module_web;await window.petya.saveSettings({module_web:'false'});
     try{await window.petya.attachmentAdd('private.abc',new TextEncoder().encode('sample').buffer);throw Error('Unknown format should request web access');}catch(e){if(!e.message.includes('поиск'))throw e;}
     await refreshFormats();if(!$('format-pending').textContent.includes('Включить поиск'))throw Error('Missing format learning retry');

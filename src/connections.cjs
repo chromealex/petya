@@ -1,11 +1,16 @@
 const { resolveChannels } = require('./slack.cjs');
 const { localEndpoint } = require('./core.cjs');
-const guides = Object.freeze({ asana: 'https://app.asana.com/0/my-apps', slackTokens: 'https://docs.slack.dev/authentication/tokens/', slackPublicRead: 'https://docs.slack.dev/reference/scopes/channels.read/', slackPrivateRead: 'https://docs.slack.dev/reference/scopes/groups.read/', slackOAuth: 'https://docs.slack.dev/authentication/installing-with-oauth/', slack: 'https://api.slack.com/apps', notion: 'https://www.notion.so/my-integrations', jira: 'https://id.atlassian.com/manage-profile/security/api-tokens', confluence: 'https://id.atlassian.com/manage-profile/security/api-tokens', ollama: 'https://ollama.com/download', whisper: 'https://github.com/ggml-org/whisper.cpp/tree/master/examples/server' });
-const fields = Object.freeze({ asana: [], slack: ['slackToken', 'slackChannels'], notion: ['notionToken'], jira: ['jiraUrl', 'jiraEmail', 'jiraToken', 'jiraProjects', 'jiraProject', 'jiraIssueType', 'jiraBoardId', 'jiraVersionId', 'confluenceSpace'], confluence: ['jiraUrl', 'jiraEmail', 'jiraToken', 'confluenceSpace'], ollama: ['ollamaUrl', 'model'], whisper: ['whisperUrl', 'whisperBinary', 'whisperModel'] });
+const guides = Object.freeze({ asana: 'https://app.asana.com/0/my-apps', slackTokens: 'https://docs.slack.dev/authentication/tokens/', slackPublicRead: 'https://docs.slack.dev/reference/scopes/channels.read/', slackPrivateRead: 'https://docs.slack.dev/reference/scopes/groups.read/', slackOAuth: 'https://docs.slack.dev/authentication/installing-with-oauth/', slack: 'https://api.slack.com/apps', jira: 'https://id.atlassian.com/manage-profile/security/api-tokens', confluence: 'https://id.atlassian.com/manage-profile/security/api-tokens', ollama: 'https://ollama.com/download', whisper: 'https://github.com/ggml-org/whisper.cpp/tree/master/examples/server' });
+const fields = Object.freeze({ asana: [], slack: ['slackToken', 'slackChannels'], jira: ['jiraUrl', 'jiraEmail', 'jiraToken', 'jiraProjects', 'jiraProject', 'jiraIssueType', 'jiraBoardId', 'jiraVersionId', 'confluenceSpace'], confluence: ['jiraUrl', 'jiraEmail', 'jiraToken', 'confluenceSpace'], ollama: ['ollamaUrl', 'model'], whisper: ['whisperUrl', 'whisperBinary', 'whisperModel'] });
+// Cards apps own (connection-check, src/features/connection-checks.cjs) bring their fields, check and guide link.
+const app = service => require('./features/connection-checks.cjs').find(service);
+const fieldsOf = service => Object.hasOwn(fields, service) ? fields[service] : app(service)?.fields;
+const guide = service => Object.hasOwn(guides, service) ? guides[service] : app(service)?.guide || '';
 function scopedInput(service, input) {
-  if (!Object.hasOwn(fields, service)) throw new Error('Неизвестный сервис.');
-  const result = Object.fromEntries(fields[service].filter(k => typeof input?.[k] === 'string').map(k => [k, input[k]]));
-  for (const key of fields[service]) if (key.endsWith('Token') && input?.['clear_' + key] === true) result['clear_' + key] = true;
+  const keys = fieldsOf(service);
+  if (!keys) throw new Error('Неизвестный сервис.');
+  const result = Object.fromEntries(keys.filter(k => typeof input?.[k] === 'string').map(k => [k, input[k]]));
+  for (const key of keys) if (key.endsWith('Token') && input?.['clear_' + key] === true) result['clear_' + key] = true;
   return result;
 }
 async function checkConnection(service, s, request) {
@@ -24,12 +29,6 @@ async function checkConnection(service, s, request) {
     const channels = (s.slackChannels || '').trim() ? await resolveChannels(s.slackChannels, s.slackToken, request) : [];
     for (const channel of channels.slice(0, 1)) { const history = await call('https://slack.com/api/conversations.history?' + new URLSearchParams({ channel, limit: 1 }), headers); if (!history.ok) throw new Error(`Нет доступа к ${channel}: ${history.error}`); }
     return { message: `${data.team || 'Slack'} · ${data.user || 'авторизация проверена'}. ${channels.length ? `Найдено каналов/переписок: ${channels.length}. Чтение первого проверено; остальные проверяются при загрузке.` : 'Укажите каналы для загрузки обсуждений.'}`, ready: !!channels.length };
-  }
-  if (service === 'notion') {
-    const headers = { Authorization: 'Bearer ' + (s.notionCredential ? '' : need(s.notionToken, 'Notion token')), 'Notion-Version': '2025-09-03', 'Content-Type': 'application/json' };
-    const data = await call('https://api.notion.com/v1/search', headers, { method: 'POST', body: JSON.stringify({ filter: { value: 'page', property: 'object' }, page_size: 1 }) });
-    if (!Array.isArray(data.results)) throw new Error('Notion вернул неожиданный ответ.');
-    return { message: data.results.length ? 'Доступ к поиску страниц проверен.' : 'Авторизация проверена. Доступных страниц пока нет — добавьте интеграцию в Connections нужных страниц.', ready: !!data.results.length };
   }
   if (service === 'jira' || service === 'confluence') {
     const site = new URL(need(s.jiraUrl, 'адрес Atlassian'));
@@ -60,6 +59,7 @@ async function checkConnection(service, s, request) {
     if (data?.status !== 'ok') throw new Error('whisper-server ещё не готов. Проверьте загрузку модели.');
     return { message: 'whisper-server готов. Качество распознавания проверьте голосовой командой.', ready: true };
   }
+  if (!Object.hasOwn(fields, service) && app(service)) return app(service).check(s, request);
   throw new Error('Неизвестный сервис.');
 }
-module.exports = { guides, fields, scopedInput, checkConnection };
+module.exports = { guides, guide, fields, scopedInput, checkConnection };

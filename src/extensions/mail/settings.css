@@ -1,0 +1,3 @@
+/* The account rows of the mail connection card (settings.js), as the rows of Petya's own lists. */
+#gmail-accounts>p{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;margin:0;border-bottom:1px solid var(--line)}
+#gmail-accounts input{flex:1 1 180px;width:auto}

@@ -2,7 +2,7 @@ const assert=require('node:assert/strict');
 const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
 const {Learning}=require('../src/learning.cjs');
 const {MailRules:MailSkill,store,validate,defaults}=require('../src/extensions/mail/rules.cjs');
-const {Gmail,clientConfig}=require('../src/gmail.cjs');
+const {Gmail,clientConfig}=require('../src/extensions/mail/gmail.cjs');
 (async()=>{
  // The rules are the «Почта» app's own file (rules.json), not Petya's learned-skills state.
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'petya-mail-rules-')),file=path.join(dir,'rules.json');let reads=0;

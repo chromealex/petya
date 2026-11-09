@@ -32,8 +32,9 @@ async function read(s,page){
   return {text:diff.storageToMarkdown(p?.body?.storage?.value),version:String(p?.version?.number||''),title:String(p?.title||page.title)};
  }
  if(page.service==='notion'){
-  const {Notion}=require('../../notion.cjs');
-  const n=s.workspace?.notion||new Notion((u,o)=>s.request(u,o),()=>Promise.resolve());
+  // The client «Notion» reads with (one per request function, so calls stay spaced), or a fresh one.
+  const {Notion}=require('../notion/client.cjs');
+  const n=typeof s.workspace?.request==='function'?require('../notion/doc-source.cjs').client(s.workspace.request):new Notion((u,o)=>s.request(u,o),()=>Promise.resolve());
   const c=await n.content(page.id,s.settings.notionToken,{full:true});
   return {text:c.text,version:'',title:page.title};
  }
