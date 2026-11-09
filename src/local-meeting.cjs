@@ -9,12 +9,14 @@ const idle=sources=>sources?.list?.().length?'Ожидаю встречу.':'З�
 class LocalMeeting {
  // place(state) → {record, note}: which company the meeting belongs to (src/meeting-company.cjs); record:false means
  // another company takes it over, so this one neither offers nor starts the recording.
- constructor({settings,sources=null,recording,createCapture,emit,place=null,ended=null}){
-  Object.assign(this,{settings,sources,recording,createCapture,emit,place,ended});this.phase='idle';this.present=false;this.found=null;
+ // blocked() → a reason not to start (another company records a meeting now, src/meeting-carry.cjs), or ''.
+ constructor({settings,sources=null,recording,createCapture,emit,place=null,ended=null,blocked=null}){
+  Object.assign(this,{settings,sources,recording,createCapture,emit,place,ended,blocked});this.phase='idle';this.present=false;this.found=null;
   this.monitor=new MeetingMonitor({
    inspect:async()=>{let state;try{state=this.sources?await this.sources.detect():{active:false};}catch(error){if(this.capture)return {active:true};throw error;}
     if(state.active){this.found=state;if(!this.present){this.present=true;this.emit(this.snapshot());}}return state;},
    start:async state=>{
+    if(this.blocked?.())return;
     let placed={record:true,note:''};if(this.place){try{placed=await this.place(state)||placed;}catch{/* recorded here */}}
     if(!placed.record){this.present=false;this.found=null;return;}
     this.publish('detected','Обнаружена встреча'+(state?.app?' · '+state.app:'')+'.'+(placed.note?' '+placed.note:''));if(settings().meetingAutoRecord==='auto')await this.start();},
@@ -38,6 +40,7 @@ class LocalMeeting {
  }
  async start(){
   if(this.starting)return this.starting;if(this.capture)return this.snapshot();
+  const reason=this.blocked?.();if(reason)throw Error(reason);
   this.starting=this.begin();try{return await this.starting;}finally{this.starting=null;}
  }
  async begin(){

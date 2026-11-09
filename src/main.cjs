@@ -529,6 +529,8 @@ function setupHandlers() {
     get checkProgress(){return checkProgress;},
     get companies(){return companies;},
     get companyId(){return companyId;},
+    // The open company and whether it is being switched: a meeting recorder outlives its company (src/meeting-carry.cjs).
+    currentCompanyId:()=>profileState().companyId,companySwitching:()=>switchingCompany,
     switchCompany:id=>requestCompanySwitch(id),
     get computer(){return computer;},
     get computerApproval(){return computerApproval;},
@@ -624,7 +626,8 @@ function setupHandlers() {
   require('./asana-setup.cjs')({get addContext(){return addContext;},get composeDraft(){return composeDraft;},get contextFor(){return contextFor;},get handle(){return handle;},get modules(){return modules;},get request(){return request;},get settings(){return settings;},get text(){return text;}});
   // Saved chats may ask for attention right after start; the build check needs a quiet tray start.
   handle('requestAttention', () => { if (process.env.PETYA_VERIFY_BUILD !== '1') show(); });
-  handle('companies',()=>({...companies.list(),activeId:companyId}));
+  // `recording`: companies whose meeting is being recorded now, the open one or in the background (src/meeting-carry.cjs).
+  handle('companies',()=>({...companies.list(),activeId:companyId,recording:require('./meeting-carry.cjs').recording()}));
   handle('companyCreate',name=>companies.create(name,settings));
   // Company icon: Slack workspace (API, then the open Slack window), then Jira; refreshed daily or after connecting a service.
   handle('companyIconRefresh',async(force=false)=>{await require('./company-icon.cjs').refreshCompanyIcon({companies,companyId,force:!!force,settings,request,nativeImage:require('electron').nativeImage,download:async(url,options={})=>{const response=await fetch(url,{headers:options.headers,redirect:'error',signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('HTTP '+response.status);return new Uint8Array(await response.arrayBuffer());},
@@ -647,9 +650,10 @@ function setupHandlers() {
     companies.get(id);if(id===companyId)return {unchanged:true};
     if(chatJobs.any()||dialogue.running.size)throw Error('Дождитесь завершения запросов в чатах перед сменой компании.');
     if(ollamaReady.state.busy||visionReady.state.busy||imageInstaller.state?.busy)throw Error('Дождитесь завершения загрузки модели.');
-    if(backgroundBusy||slackSync?.running||telegramSource?.busy||services.meetingRecording?.('captureStatus')?.busy)throw Error('Обновляются материалы компании. Дождитесь завершения синхронизации.');
+    // A meeting being recorded goes on in the background for its company (src/meeting-carry.cjs).
+    if(backgroundBusy||slackSync?.running||telegramSource?.busy)throw Error('Обновляются материалы компании. Дождитесь завершения синхронизации.');
     if(activeOperations>1)throw Error('Петя завершает текущую операцию. Переключите компанию после завершения.');
-    if(trayListening||trayMeeting)throw Error('Остановите запись перед переключением компании.');
+    if(trayListening)throw Error('Выключите микрофон перед переключением компании.');
     if(smoke && process.env.PETYA_COMPANY_SWITCH_TEST!=='1')return {testOnly:true};
     switchingCompany=true;
     win.webContents.send('pause-all');

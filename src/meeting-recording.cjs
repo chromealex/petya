@@ -34,7 +34,8 @@ class MeetingRecording {
  finish(id){const s=this.state(id);if(s.phase!=='recording')return this.public(s);if(!s.segments.length){s.phase='error';s.message='В записи нет сохранённых звуковых фрагментов. Проверьте источники звука и начните запись заново.';this.persist(s);return this.public(s);}s.phase='processing';s.message=s.completed<s.segments.length?'Встреча завершена. Дорасшифровываю запись…':'Встреча завершена. Сохраняю расшифровку…';this.persist(s);void this.process(s);return this.public(s);}
  retry(id){const s=this.state(id);if(s.phase!=='error')throw Error('Повтор доступен после ошибки обработки.');s.phase='processing';this.persist(s);void this.process(s);return this.public(s);}
  async process(s){
-  if(this.running.has(s.id))return;this.running.add(s.id);
+  // Held while the company is closed and its meeting is recorded in the background (src/meeting-carry.cjs).
+  if(this.held||this.running.has(s.id))return;this.running.add(s.id);
   try{
    for(;s.completed<s.segments.length;){
     const part=s.segments[s.completed],bytes=Buffer.from(this.decrypt(fs.readFileSync(path.join(this.directory,part.filename))),'base64');
@@ -61,6 +62,8 @@ class MeetingRecording {
    s.phase='error';s.message='Не удалось обработать встречу: '+e.message;this.persist(s);}
   finally{this.running.delete(s.id);if(s.phase==='processing'&&this.sessions.get(s.id)===s)void this.process(s);}
  }
+ // Recognition of what was recorded while held.
+ resume(){this.held=false;for(const s of this.sessions.values())if(['recording','processing'].includes(s.phase)&&(s.phase==='processing'||s.completed<s.segments.length))void this.process(s);}
  // Deleting a meeting removes its audio, its state and nothing else; the caller removes the saved transcript.
  remove(id){const s=this.state(id);this.sessions.delete(id);for(const part of s.segments)fs.rmSync(path.join(this.directory,part.filename),{force:true});fs.rmSync(path.join(this.directory,id+'.json'),{force:true});this.emit({id,phase:'removed'});}
 }
