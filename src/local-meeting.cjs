@@ -21,7 +21,7 @@ class LocalMeeting {
    stop:async()=>{await this.stop(false);this.present=false;this.found=null;this.ended?.();this.publish('idle',idle(this.sources));}
   });
  }
- snapshot(){return {id:this.id||'local-observer',phase:this.phase,present:this.present,active:!!this.capture,busy:!!this.capture||!!this.starting,mode:this.settings().meetingAutoRecord,app:this.found?.app||'',sources:this.sources?.list?.().map(x=>x.name)||[],message:this.message||idle(this.sources),canStart:this.phase==='detected'||this.phase==='stopped'&&this.present,canRetry:this.phase==='error'};}
+ snapshot(){return {id:this.id||'local-observer',phase:this.phase,present:this.present,active:!!this.capture,busy:!!this.capture||!!this.starting,mode:this.settings().meetingAutoRecord,app:this.found?.app||'',speakerNote:this.found?.speakerNote||'',speakerAccess:this.found?.speakerAccess||'',sources:this.sources?.list?.().map(x=>x.name)||[],message:this.message||idle(this.sources),canStart:this.phase==='detected'||this.phase==='stopped'&&this.present,canRetry:this.phase==='error'};}
  publish(phase,message){this.phase=phase;this.message=message;this.emit(this.snapshot());}
  async tick(){
   try{

@@ -35,8 +35,10 @@ module.exports={
   // Who is in the meeting, from Zoom's window (tile labels, the participant list), so Petya can tell which
   // company it belongs to before recording (src/meeting-company.cjs). Read at most every 20 seconds.
   const now=Date.now();
-  if(!seen||now-seen.at>20000){let names=[];try{const r=parse((await readWindow()).texts||[]);names=[...new Set([...r.people,...r.talking])];}catch{}seen={at:now,names};}
-  return {active:true,app:'Zoom',windowTitle:state.windows.find(w=>zoomWindow.isMeeting(w.title))?.title||'',participants:seen.names};
+  if(!seen||now-seen.at>20000){let names=[],blind=false;try{const raw=await readWindow();blind=raw.trusted===false&&process.platform==='darwin';const r=parse(raw.texts||[]);names=[...new Set([...r.people,...r.talking])];}catch{}seen={at:now,names,blind};}
+  // Without macOS «Универсальный доступ» Petya cannot read Zoom's window, so speakers stay «Собеседники».
+  const speakerNote=seen.blind?'Петя не видит, кто говорит в Zoom: разрешите ему «Универсальный доступ» в настройках macOS.':'';
+  return {active:true,app:'Zoom',windowTitle:state.windows.find(w=>zoomWindow.isMeeting(w.title))?.title||'',participants:seen.names,...(speakerNote?{speakerNote,speakerAccess:'accessibility'}:{})};
  },
  begin(context={}){
   timeline?.stop();
@@ -44,7 +46,7 @@ module.exports={
   timeline.start();
  },
  end(){timeline?.stop();},
- speakers({from,to}={}){return timeline?timeline.intervals(from,to):[];},
+ speakers({from,to,settings={}}={}){return timeline?timeline.intervals(from,to,{me:[settings.userName,...String(settings.userNameVariants||'').split(',')]}):[];},
  participants(context={}){
   const names=new Set(timeline?[...timeline.people]:[]);
   try{const sample=JSON.parse(fs.readFileSync(path.join(context.dataRoot,SAMPLE),'utf8'));for(const n of sample.people||[])names.add(n);}catch{}
