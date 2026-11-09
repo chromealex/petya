@@ -48,7 +48,9 @@
   if(!window.chatResultsApi)throw Error('Результаты чата ещё загружаются.');
   busy?.setAttribute('aria-busy','true');
   try{
-   const result=await window.chatResultsApi.perform(key,action,args);
+   // A card on a dashboard acts through the dashboard (src/ui/dashboards.js); in the chat, through the chat's results.
+   const routed=window.dashboardCardAction?.(key,action,args);
+   const result=routed?await routed:await window.chatResultsApi.perform(key,action,args);
    const undo=result?.undo&&(()=>window.chatResultsApi.perform(key,result.undo.action,result.undo.args).then(r=>{if(r?.text)toast(r.text);return r;}));
    if(result?.text)toast(result.text,{undo});
    return result;

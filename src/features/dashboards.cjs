@@ -338,6 +338,23 @@ function setup(s){
 
   // --- IPC -------------------------------------------------------------------------------------------------------
   const own=id=>{const d=find(id);return d;};
+  // A control on a widget's card («Исправить», a status chip, a checkbox): the same adapter action as in the chat, run
+  // on the widget's own data in the dashboard's sandbox — the open chat knows nothing about these cards.
+  async function cardAction(id,widgetId,key,actionId,args){
+    const d=find(id),w=d.widgets.find(x=>x.id===widgetId);if(!w)throw Error('Виджет не найден.');
+    if(args!==undefined&&(typeof args!=='object'||args===null||JSON.stringify(args).length>20000))throw Error('Некорректные параметры действия.');
+    const shown=w.source.kind==='snapshot'?{data:w.data,text:w.text}:loadCache().get(cacheKey(d,w))||{};
+    const box=sandbox(d);const message=box.topic.messages[0];Object.assign(message,{extensionData:shown.data||{},...(shown.data||{}),text:shown.text||''});
+    const results=require('./chat-results.cjs');
+    const row=results.collect(box.topic,box.s).find(r=>r.presentationKey===key);if(!row)throw Error('Карточка устарела. Обновите виджет.');
+    const action=row.actions.find(a=>a.id===actionId);if(!action)throw Error('Действие больше недоступно.');
+    if(action.command)return {command:action.command};
+    const project=s.dialogue.state.projects.find(p=>p.id===(d.projectId||'general'));
+    const out=await require('../modules.cjs').withProject(project,()=>row.adapter.perform(actionId,row,box.s,()=>{},args));
+    // Its data changed (a status, a checkbox): the widget is refreshed so the card shows it.
+    if(out&&!out.topicId)refresh(d.id,w.id,true).catch(()=>{});
+    return out;
+  }
   const ipc={
     list:(projectId='')=>all(projectId||'').map(summary),
     get:id=>{const d=sync(find(id));refresh(d.id).catch(()=>{});return view(find(d.id));},
@@ -346,6 +363,7 @@ function setup(s){
     watch:(id,on=true)=>watch(id,!!on),
     popout:id=>{const d=find(id);windows().open(d.id,d.title);return true;},
     refresh:(id,widgetId='')=>refresh(id,widgetId,true),
+    cardAction:(id,widgetId,key,actionId,args)=>cardAction(String(id),String(widgetId),String(key),String(actionId),args),
     fromChat:topicId=>fromChat(String(topicId||'')),
     chatDashboard:topicId=>{const d=state().dashboards.find(x=>x.fromChat===topicId);return d?summary(d):null;},
     pin:(dashboardId,topicId,index)=>{

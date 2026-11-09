@@ -22,11 +22,17 @@
  // --- One widget -------------------------------------------------------------------------------------------------
  // Loading without data yet: a calm placeholder of the card's shape, not a line of text.
  const skeleton=()=>{const box=el('div','dash-skeleton');box.setAttribute('aria-label','Загружаю…');for(const width of [72,100,88,56])box.append(Object.assign(el('span'),{style:'width:'+width+'%'}));return box;};
- async function drawBody(body,w){
+ // Cards on a widget act through the dashboard (feature cardAction), not through the open chat: the keys of the
+ // cards drawn in each widget are remembered, and result-kit's quick() asks here first.
+ const cardOwners=new Map();
+ window.dashboardCardAction=(key,actionId,args)=>{const owner=cardOwners.get(key);if(!owner||!document.querySelector('.dash-screen:not([hidden]) [data-result-presentation="'+CSS.escape(key)+'"]'))return null;
+  return call('cardAction',owner.dashboardId,owner.widgetId,key,actionId,args).then(async result=>{if(result?.topicId&&typeof selectDialogueTopic==='function'){close();await selectDialogueTopic(result.topicId);}return result;});};
+ async function drawBody(body,w,d){
   body.replaceChildren();
   if(w.data&&Object.keys(w.data).length){
    const holder=el('div','dash-widget-content');body.append(holder);
    try{await window.extensionHost?.render(holder,{role:'assistant',extensionData:w.data,...w.data});}catch{}
+   if(d)for(const node of holder.querySelectorAll('[data-result-presentation]'))cardOwners.set(node.dataset.resultPresentation,{dashboardId:d.id,widgetId:w.id});
    if(!holder.childElementCount&&w.text)holder.append(el('p','dash-widget-text',w.text));
   }else if(w.text)body.append(el('p','dash-widget-text',w.text));
   else if(w.loading||!w.at&&!w.error)body.append(skeleton());
@@ -56,7 +62,7 @@
   const body=el('div','dash-widget-body');
   if(w.error){const err=el('p','dash-widget-error',w.error);body.append(err);}
   card.append(head,body);
-  const content=el('div');body.append(content);card.drawn=drawBody(content,w).catch(()=>{});
+  const content=el('div');body.append(content);card.drawn=drawBody(content,w,d).catch(()=>{});
   if(!compact){const grip=el('span','dash-resize');grip.title='Потяните, чтобы изменить размер';grip.setAttribute('aria-hidden','true');card.append(grip);}
   return card;
  }

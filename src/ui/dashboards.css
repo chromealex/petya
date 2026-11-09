@@ -2,6 +2,9 @@
    full, widgets of a row share its height). Cards drawn inside widgets lose their own frame: the widget is it. */
 #home .chat-shell.showing-dashboard>:not(.dash-screen){display:none!important}
 #home .chat-shell.showing-dashboard::after{display:none}
+/* While a dashboard is on screen it is the selected thing in the sidebar; the chat it hides is not. */
+#home:has(.chat-shell.showing-dashboard) .project-chat-row:has(>.project-sidebar-chat[aria-current=true]){background:transparent}
+#home:has(.chat-shell.showing-dashboard) .project-sidebar .project-sidebar-chat[aria-current=true]{color:inherit;background:transparent}
 .dash-screen{--dash-gap:14px;flex:1;min-height:0;overflow:auto;padding:22px 26px 48px;box-sizing:border-box}
 .dash-screen[hidden]{display:none}
 
