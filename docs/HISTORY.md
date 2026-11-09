@@ -8,6 +8,15 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.14.3 — dashboards from metrics, Grafana and ANR
+
+- «Собери дашборд: основные метрики проекта (из wombyte), краши и ANR» builds three widgets: game metrics read from the Grafana at dashboards.wombyte.net, crashes and the Google Play ANR card.
+- Short phrases work: «краши», «отзывы», «сборки», «ANR» are read as «покажи …».
+- «(из wombyte)», «из графаны»: a source named in the phrase picks that source; Grafana is known by the name in its address.
+- New widgets: «Основные метрики», «DAU за неделю», «Выручка за месяц», «ANR за неделю», and the Grafana dashboards you opened recently.
+- When a phrase has no source, Petya names the app to add or connect («для «ANR» подключите «Google Play Console»») and offers to add it; the generic hint stays only for phrases no app knows.
+- In the chat «DAU из wombyte» reads the metrics from that Grafana.
+
 ## 0.14.2 — Google Play says why it refused
 
 - Instead of «Сервис вернул HTTP 403» the Google Play connection says what is missing: the Google Play Developer Reporting API turned off in the Google Cloud project (with the link to turn it on), or no access to the apps in Play Console (who to invite and with which permission). An expired sign-in asks to reconnect.

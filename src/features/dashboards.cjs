@@ -15,11 +15,20 @@ const LOAD_MS=90000;
 const cap=v=>{const t=String(v||'').trim();return t?t[0].toUpperCase()+t.slice(1):t;};
 
 function setup(s){
-  // Extension features that put their reads on dashboards: `dashboard: {accepts(command), widgets:[{title,command}]}`.
+  // Extension features that put their reads on dashboards: `dashboard: {accepts(command), widgets, size?, ready?,
+  // connect?, names?, sources?, load?}` (docs/dashboards.md). `load` replaces `turn` for apps whose chat answer comes
+  // from elsewhere (Google Play's ANR) or that take a chosen source (Метрики игры).
   const ui=require('./extension-ui.cjs');
-  const plugins=new Map();ui.descriptors.filter(d=>d.feature).forEach((d,i)=>{const mod=ui.features[i];if(mod?.dashboard&&typeof mod.turn==='function')plugins.set(d.id,{d,mod});});
+  const plugins=new Map();ui.descriptors.filter(d=>d.feature).forEach((d,i)=>{const mod=ui.features[i];if(mod?.dashboard&&typeof mod.dashboard.accepts==='function'&&(typeof mod.turn==='function'||typeof mod.dashboard.load==='function'))plugins.set(d.id,{d,mod});});
   const byKey=new Map();for(const d of ui.descriptors)for(const key of Object.keys(d.results||{}))byKey.set(key,d.id);
   const installed=id=>{const d=ui.descriptors.find(x=>x.id===id);return !!d&&(!d.setting||s.settings[d.setting]==='true');};
+  // Connected: an app that says how (`dashboard.ready(settings)`) and a source it names; others count as connected.
+  const call=(fn,...a)=>{try{return typeof fn==='function'?fn(...a):undefined;}catch{return undefined;}};
+  const ready=e=>typeof e.mod.dashboard.ready!=='function'||!!call(e.mod.dashboard.ready,s.settings||{});
+  const usable=(id,e)=>installed(id)&&ready(e);
+  const ownNames=e=>[e.d.name,e.d.id,...(call(e.mod.dashboard.names,s.settings||{})||[])];
+  const subSources=e=>call(e?.mod?.dashboard?.sources,s.settings||{})||[];
+  const named=(hint,names)=>names.some(n=>model.mentions(hint,n));
   const state=()=>{const st=s.dialogue.state;if(!Array.isArray(st.dashboards))st.dashboards=[];if(!st.dashboardStart||typeof st.dashboardStart!=='object')st.dashboardStart={};return st;};
   const save=()=>s.dialogue.persist();
   const project=id=>s.dialogue.state.projects?.find(p=>p.id===id)||null;
@@ -62,7 +71,7 @@ function setup(s){
         return {id:w.id,title:w.title,size:w.size,pos:w.pos||null,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,
           data:hit.data||null,text:hit.text||'',at:hit.at||0,error:hit.error||'',count:hit.count??null,loading:running.has(cacheKey(d,w))};})};
   }
-  const describe=src=>src.kind==='extension'?(plugins.get(src.extension)?.d.name||src.extension)+' · «'+src.command+'»':src.kind==='provider'?(providers.find(p=>p.type===src.provider)?.name||src.provider)+' · «'+src.query+'»':src.kind==='jira'?'Jira · '+src.jql:'Снимок карточки, не обновляется';
+  const describe=src=>src.kind==='extension'?(plugins.get(src.extension)?.d.name||src.extension)+' · «'+src.command+'»'+(src.selected?' · '+(subSources(plugins.get(src.extension)).find(x=>x.id===src.selected)?.name||src.selected):''):src.kind==='provider'?(providers.find(p=>p.type===src.provider)?.name||src.provider)+' · «'+src.query+'»':src.kind==='jira'?'Jira · '+src.jql:'Снимок карточки, не обновляется';
   const summary=d=>({id:d.id,title:d.title,projectId:d.projectId,shared:!!d.shared,folder:d.shared?.folder||'',widgets:d.widgets.length,start:state().dashboardStart[d.projectId]===d.id,fromChat:d.fromChat||''});
 
   // --- Refresh ---------------------------------------------------------------------------------------------------
@@ -89,7 +98,7 @@ function setup(s){
       const entry=plugins.get(src.extension);
       if(!entry||!installed(src.extension))throw Error('Расширение «'+(entry?.d.name||src.extension)+'» не добавлено.');
       if(!entry.mod.dashboard.accepts(src.command))throw Error('Этот запрос не подходит для дашборда.');
-      const reply=await entry.mod.turn(box.s,src.command);
+      const reply=typeof entry.mod.dashboard.load==='function'?await entry.mod.dashboard.load(box.s,src.command,{selected:src.selected||'',topic:box.topic}):await entry.mod.turn(box.s,src.command);
       if(!reply)throw Error('Расширение не ответило на «'+src.command+'».');
       const data=reply.extensionData||box.topic.messages.at(-1).extensionData||null;
       if(reply.error||reply.question&&!data)throw Error(String(reply.text||'Не удалось получить данные.').slice(0,400));
@@ -187,15 +196,74 @@ function setup(s){
   // Each phrase is a request one source accepts: an extension's read, Jira issues by JQL, or a provider's read.
   function catalog(projectId){
     const rows=[];
-    for(const [id,{d,mod}] of plugins)if(installed(id))for(const w of mod.dashboard.widgets||[])rows.push({title:w.title,phrase:w.command,source:{kind:'extension',extension:id,command:w.command},app:d.name});
+    for(const [id,e] of plugins)if(usable(id,e)){const list=typeof e.mod.dashboard.widgets==='function'?call(e.mod.dashboard.widgets,s)||[]:e.mod.dashboard.widgets||[];
+      for(const w of list)if(w?.title&&w.command)rows.push({title:w.title,phrase:w.command,source:{kind:'extension',extension:id,command:w.command},app:e.d.name});}
     if(jira.connected(s))for(const w of jira.presets)rows.push({title:w.title,phrase:w.phrase,source:{kind:'jira',jql:jira.jqlFor(w.phrase,jira.projectsOf(s,{projectMemoryId:project(projectId)?.memoryId}))},app:'Jira'});
     return rows;
   }
+  // Every phrase of a dashboard request is implicitly «покажи …»: a bare noun («краши», «ANR») is tried as such when
+  // no source takes it as written.
+  const FORMS=[t=>t,t=>'покажи '+t];
+  // Where a phrase may go, in order. A source hint («(из wombyte)», «DAU из графаны») first selects one of an app's
+  // own sources (Grafana feeding «Метрики игры», named by its host) or the app itself; then the phrase as written;
+  // then, for a hint nobody knows, the phrase without it.
+  function routes(phrase){
+    const known=name=>[...plugins.values()].some(e=>named(name,ownNames(e))||subSources(e).some(x=>named(name,x.names||[x.name])));
+    const h=model.sourceHint(phrase,known),out=[];
+    if(h){
+      for(const [id,e] of plugins)for(const x of subSources(e))if(named(h.name,x.names||[x.name]))out.push({id,e,text:h.body,selected:x.id,source:x});
+      for(const [id,e] of plugins)if(named(h.name,ownNames(e)))out.push({id,e,text:h.body+' из '+e.d.name});
+    }
+    for(const [id,e] of plugins)out.push({id,e,text:phrase});
+    if(h)for(const [id,e] of plugins)out.push({id,e,text:h.body});
+    return out;
+  }
+  const accepts=(e,text)=>!!call(e.mod.dashboard.accepts,text);
+  const providerOn=p=>installed(p.type)||p.service&&s.modules?.enabled?.(s.settings,p.type);
   function widgetFor(phrase,projectId){
-    for(const [id,{d,mod}] of plugins)if(installed(id)&&mod.dashboard.accepts(phrase))return model.widget({title:cap(phrase),size:mod.dashboard.size||'auto',source:{kind:'extension',extension:id,command:phrase}});
-    if(jira.connected(s)){const jql=jira.jqlFor(phrase,jira.projectsOf(s,{projectMemoryId:project(projectId)?.memoryId}));if(jql)return model.widget({title:jira.titleFor(phrase),size:'auto',source:{kind:'jira',jql}});}
-    for(const p of providers)if(installed(p.type)||p.service&&s.modules?.enabled?.(s.settings,p.type))try{if(p.matches?.(phrase,{settings:s.settings,topic:null}))return model.widget({title:cap(phrase),size:'auto',source:{kind:'provider',provider:p.type,query:phrase}});}catch{}
+    const list=routes(phrase),projects=jira.connected(s)?jira.projectsOf(s,{projectMemoryId:project(projectId)?.memoryId}):null;
+    for(const form of FORMS){
+      for(const r of list){
+        if(!usable(r.id,r.e)||r.source&&!r.source.ready)continue;
+        const command=form(r.text);if(!accepts(r.e,command))continue;
+        return model.widget({title:cap(phrase),size:r.e.mod.dashboard.size||'auto',source:{kind:'extension',extension:r.id,command,...(r.selected?{selected:r.selected}:{})}});
+      }
+      if(projects){const jql=jira.jqlFor(form(phrase),projects);if(jql)return model.widget({title:jira.titleFor(phrase),size:'auto',source:{kind:'jira',jql}});}
+      for(const p of providers)if(providerOn(p))try{if(p.matches?.(form(phrase),{settings:s.settings,topic:null}))return model.widget({title:cap(phrase),size:'auto',source:{kind:'provider',provider:p.type,query:form(phrase)}});}catch{}
+    }
     return null;
+  }
+  // A phrase nothing connected takes: the app that would take it, added or not, connected or not, and what to do —
+  // add it, connect it (or the source the phrase names), or, for an app whose cards are not widgets yet, pin its card
+  // from a chat.
+  function advise(phrase){
+    const list=routes(phrase);
+    for(const form of FORMS)for(const r of list){
+      if(!accepts(r.e,form(r.text)))continue;
+      const add=!installed(r.id),missing=r.source?!r.source.ready:!ready(r.e);
+      if(!add&&!missing)continue;
+      const c=missing&&!r.source?call(r.e.mod.dashboard.connect,s.settings||{},phrase)||{}:{};
+      const connect=!missing?[]:r.source?[r.source.name]:c.names?.length?c.names:[r.e.d.name];
+      const where=!missing?'':r.source?(call(r.e.mod.dashboard.connect,s.settings||{},phrase)||{}).where||'':c.where||'';
+      return {phrase,add:add?r.e.d.name:'',offers:[...(add?[r.id]:[]),...(!missing?[]:r.source?[r.source.extension].filter(Boolean):c.offers||[])],connect,where};
+    }
+    if(!jira.connected(s)&&FORMS.some(f=>jira.jqlFor(f(phrase),[])))return {phrase,add:'',offers:[],connect:['Jira'],where:'Подключения → «Jira»'};
+    for(const p of providers)if(!providerOn(p))try{if(FORMS.some(f=>p.matches?.(f(phrase),{settings:s.settings,topic:null})))return {phrase,add:p.name,offers:[],connect:[],where:''};}catch{}
+    try{
+      const o=require('./extension-offers.cjs'),pick=o.decide(o.candidates('покажи '+phrase,{offers:s.extensionOffers?.offers||[],settings:s.settings||{}}))?.one;
+      if(pick)return {phrase,add:pick.offer.name,offers:[pick.offer.id],connect:[],where:'',pin:true};
+    }catch{}
+    return null;
+  }
+  const quoted=list=>list.map(m=>'«'+m+'»').join(', ');
+  const tip=a=>'для «'+a.phrase+'» '+[a.add&&'добавьте «'+a.add+'»',a.connect.length&&'подключите '+a.connect.map(n=>'«'+n+'»').join(' или ')+(a.where?' ('+a.where+')':''),a.pin&&'закрепите его карточку из чата («В дашборд…»)'].filter(Boolean).join(' и ');
+  // What to say about phrases without a widget: the concrete apps where known, the generic hint otherwise.
+  function missedText(missed,{none=false}={}){
+    const tips=missed.map(advise),known=tips.filter(Boolean),unknown=missed.filter((m,i)=>!tips[i]);
+    const offers=[...new Set(known.flatMap(a=>a.offers))];
+    if(!known.length)return {text:none?'Не нашёл источников для: '+quoted(missed)+'. Подключите приложения (Jira, Крэши, Отзывы, Сборки…) в каталоге или сделайте дашборд из чата с карточками.':'Не нашёл источника для: '+quoted(missed)+'.',offers};
+    const lines=known.map(tip).join('; ');
+    return {text:(none?'Пока не из чего собрать дашборд: '+lines:cap(lines))+'.'+(unknown.length?' Не нашёл источника для: '+quoted(unknown)+'.':''),offers};
   }
   function compose(description,projectId){
     const {title,parts}=model.phrases(description);
@@ -211,9 +279,13 @@ function setup(s){
     let text,dashboard=null;
     try{
       const {d,missed}=compose(command,projectId);
-      if(!d.widgets.length)text='Не нашёл источников для: '+missed.map(m=>'«'+m+'»').join(', ')+'. Подключите приложения (Jira, Крэши, Отзывы, Сборки…) в каталоге или сделайте дашборд из чата с карточками.';
+      if(!d.widgets.length){
+        const m=missedText(missed,{none:true});text=m.text;
+        // The apps to add or connect, on the shared offer card: accepting it repeats this request.
+        if(m.offers.length){const offered=s.extensionOffers?.propose?.(command,m.offers,text,'Дашборды');if(offered)return offered;}
+      }
       else{const saved=commit(d);dashboard={id:saved.id,title:saved.title};refresh(saved.id).catch(()=>{});
-        text='Собрал дашборд «'+saved.title+'»: '+saved.widgets.map(w=>w.title).join(', ')+'.'+(missed.length?' Не нашёл источника для: '+missed.map(m=>'«'+m+'»').join(', ')+'.':'')+' Он в списке проекта слева.';}
+        text='Собрал дашборд «'+saved.title+'»: '+saved.widgets.map(w=>w.title).join(', ')+'.'+(missed.length?' '+missedText(missed).text:'')+' Он в списке проекта слева.';}
     }catch(e){text=e.message;}
     s.dialogue.rememberAction(command,text);
     const t=s.dialogue.active(),message=t.messages.at(-1);if(dashboard)message.dashboard=dashboard;s.dialogue.persist();
@@ -239,12 +311,12 @@ function setup(s){
       add(d,w);const saved=commit(d);refresh(saved.id).catch(()=>{});return {dashboard:summary(saved),widget:w.title,live:w.source.kind!=='snapshot'};
     },
     create:(title,projectId)=>summary(commit(model.dashboard({title:String(title||'').trim()||'Дашборд',projectId:projectId||s.dialogue.state.activeProjectId||'general',widgets:[]}))),
-    compose:(description,projectId,title='')=>{const {d,missed}=compose('собери дашборд: '+String(description||''),projectId);if(!d.widgets.length)throw Error('Не нашёл источников для: '+missed.map(m=>'«'+m+'»').join(', ')+'.');if(title)d.title=String(title).trim().slice(0,model.LIMIT.title)||d.title;const saved=commit(d);refresh(saved.id).catch(()=>{});return {dashboard:summary(saved),missed};},
+    compose:(description,projectId,title='')=>{const {d,missed}=compose('собери дашборд: '+String(description||''),projectId);if(!d.widgets.length)throw Error(missedText(missed).text);if(title)d.title=String(title).trim().slice(0,model.LIMIT.title)||d.title;const saved=commit(d);refresh(saved.id).catch(()=>{});return {dashboard:summary(saved),missed};},
     // Adds widgets from a description to an existing dashboard («Добавить: крэши за неделю»).
     addFrom:(id,description)=>{const d=own(id),parts=model.phrases('собери дашборд: '+String(description||'')).parts,missed=[];
       for(const part of parts){const w=widgetFor(part,d.projectId);if(w)add(d,w);else missed.push(part);}
-      if(parts.length===missed.length)throw Error('Не нашёл источника для: '+missed.map(m=>'«'+m+'»').join(', ')+'.');
-      commit(d);refresh(d.id).catch(()=>{});return {view:view(find(id)),missed};},
+      if(parts.length===missed.length)throw Error(missedText(missed).text);
+      commit(d);refresh(d.id).catch(()=>{});return {view:view(find(id)),missed,note:missed.length?missedText(missed).text:''};},
     catalog:projectId=>catalog(projectId||s.dialogue.state.activeProjectId||'general'),
     addSource:(id,src,title)=>{const d=own(id);add(d,model.widget({title,source:src}));commit(d);refresh(d.id).catch(()=>{});return view(find(id));},
     rename:(id,title)=>{const d=own(id);d.title=String(title||'').trim().slice(0,model.LIMIT.title)||d.title;commit(d);return view(find(id));},
@@ -284,7 +356,7 @@ function setup(s){
     example:projectId=>{const e=require('../dashboard-example.cjs').example();const d=commit(model.dashboard({...e,projectId:projectId||s.dialogue.state.activeProjectId||'general'}));return summary(d);},
     copy:id=>{const d=find(id);const copy=model.dashboard({title:d.title,projectId:d.projectId,widgets:d.widgets.map(w=>({...w,id:undefined}))});return summary(commit(copy));}
   };
-  const api={turn,list:all,find,view,refresh,fromChat,compose,onChange:null,
+  const api={turn,list:all,find,view,refresh,fromChat,compose,advise,onChange:null,
     // The tray menu: start dashboards first, then the rest.
     menu:()=>all('').sort((a,b)=>Number(state().dashboardStart[b.projectId]===b.id)-Number(state().dashboardStart[a.projectId]===a.id)).slice(0,10).map(d=>({id:d.id,title:d.title}))};
   return {dashboards:api,ipc};

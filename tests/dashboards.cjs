@@ -26,6 +26,111 @@ assert.equal(jira.jqlFor('создай задачу про баг',[]),'','write
 assert.equal(jira.jqlFor('крэши за неделю',[]),'','not about Jira');
 assert.equal(jira.jqlFor('JQL: project = X ORDER BY rank',[]),'project = X ORDER BY rank');
 
+// --- Source hints -------------------------------------------------------------------------------------------------
+assert.deepEqual(model.sourceHint('основные метрики проекта (из wombyte)'),{body:'основные метрики проекта',name:'wombyte',paren:true});
+assert.equal(model.sourceHint('отзывы в сторах'),null,'a trailing «в X» is a hint only when X is a known source');
+assert.deepEqual(model.sourceHint('DAU из wombyte',n=>n==='wombyte'),{body:'DAU',name:'wombyte',paren:false});
+assert(model.mentions('графаны','Графана')&&model.mentions('Wombyte','wombyte')&&!model.mentions('графики','Графана'));
+assert.deepEqual(require('../src/extensions/grafana/client.cjs').names('https://dashboards.wombyte.net/?orgId=2'),['wombyte'],'the Grafana host gives its name');
+assert.deepEqual(model.source({kind:'extension',extension:'metrics',command:'DAU',selected:'grafana'}),{kind:'extension',extension:'metrics',command:'DAU',selected:'grafana'});
+
+// «Собери дашборд: основные метрики проекта (из wombyte), краши и ANR» — the request that found nothing before.
+const REQUEST='Собери дашборд: основные метрики проекта (из wombyte), краши и ANR';
+const GRAFANA={extension_grafana:'true',grafanaUrl:'https://dashboards.wombyte.net/?orgId=2',grafanaToken:'glsa_test',grafanaMetricMap:JSON.stringify({dau:{d:'kpi',p:1,f:'',t:'DAU',dt:'KPI'}})};
+const PLAY={module_googleplay:'true',googlePlayCredential:JSON.stringify({type:'oauth',client:{client_id:'c',client_secret:'x'},refresh_token:'r'})};
+// Google's answers for the ANR card: the token, one app, the freshness of the ANR set and two days of rows.
+const day=(y,m,d)=>({year:y,month:m,day:d});
+async function play(url,options={}){
+ url=String(url);
+ if(url==='https://oauth2.googleapis.com/token')return {access_token:'a',expires_in:3600};
+ if(url.includes('apps:search'))return {apps:[{name:'apps/com.wombyte.game',displayName:'Wombyte Game',packageName:'com.wombyte.game'}]};
+ if(url.endsWith('/anrRateMetricSet'))return {freshnessInfo:{freshnesses:[{aggregationPeriod:'DAILY',latestEndTime:day(2026,11,8)}]}};
+ if(url.endsWith('/anrRateMetricSet:query')&&options.method==='POST'){const v=n=>({decimalValue:{value:String(n)}});
+  return {rows:[{startTime:day(2026,11,6),metrics:[{metric:'anrRate',...v(0.004)},{metric:'userPerceivedAnrRate',...v(0.002)},{metric:'userPerceivedAnrRate7dUserWeighted',...v(0.0021)}]},
+   {startTime:day(2026,11,7),metrics:[{metric:'anrRate',...v(0.005)},{metric:'userPerceivedAnrRate',...v(0.003)},{metric:'userPerceivedAnrRate7dUserWeighted',...v(0.0022)}]}]};}
+ throw Error('unexpected request '+url);
+}
+async function sources(root){
+ const metrics=require('../src/extensions/metrics/feature.cjs'),registry=require('../src/extensions/metrics/sources.cjs');
+ const make=(settings,extra={})=>{
+  const topic={id:'c1',title:'Дашборды',projectId:'general',kind:'chat',at:1,messages:[]};
+  const dialogue={state:{topics:[topic],projects:[{id:'general',name:'Общее'}],activeProjectId:'general',activeId:'c1'},active(){return topic;},persist(){},
+   rememberAction(command,text){topic.messages.push({role:'user',text:command,at:Date.now()},{role:'assistant',text,at:Date.now()});}};
+  const s={dialogue,settings,dataRoot:fs.mkdtempSync(path.join(root,'s-')),win:null,modules:{assertEnabled(){},enabled:(st,name)=>st['module_'+name]!=='false'},
+   projectShare:{folders:()=>[]},projectMemory:{get:()=>null},request:play,requestProgress:{report(){}},...extra};
+  return {s,topic,feature:require('../src/features/dashboards.cjs').setup(s)};
+ };
+ // Everything added and connected: three widgets — metrics read from the wombyte Grafana, crashes, the ANR card.
+ const all={extension_crashes:'true',extension_metrics:'true',extension_storeReviews:'true','extension_store-reviews':'true','extension_ci-builds':'true',...GRAFANA,...PLAY};
+ let {s,topic,feature}=make({...all});
+ // Metrics are read through the real Grafana source description (its names), with a stubbed fetch.
+ const declared=registry.load(),grafana=declared.find(x=>x.id==='grafana');
+ assert.deepEqual(registry.create(s,{sources:declared}).names(grafana).slice(-1),['wombyte'],'Grafana is called by its host');
+ const dates=Array.from({length:30},(_,i)=>new Date(Date.now()-(30-i)*86400000).toISOString().slice(0,10));
+ const fetched=[];
+ metrics.useSources(registry.create(s,{sources:declared.map(x=>x.id!=='grafana'?x:{...x,source:{...x.source,retention:undefined,
+  fetch:async(sx,q)=>{fetched.push(q);return {series:[{metric:'dau',unit:'users',series:dates.map((date,i)=>({date,value:1000+i}))}]};}}})}));
+ try{
+  const reply=feature.dashboards.turn(REQUEST);
+  assert.match(reply.text,/^Собрал дашборд «Дашборд»: Основные метрики проекта \(из wombyte\), Краши, ANR\. Он в списке/,reply.text);
+  const d=feature.dashboards.find(reply.dashboard.id);
+  assert.deepEqual(d.widgets.map(w=>w.source),[
+   {kind:'extension',extension:'metrics',command:'основные метрики проекта',selected:'grafana'},
+   {kind:'extension',extension:'crashes',command:'покажи краши'},
+   {kind:'extension',extension:'google-play',command:'ANR'}]);
+  const v=await feature.ipc.refresh(d.id);
+  assert.match(v.widgets[0].describe,/^Метрики игры · «основные метрики проекта» · Grafana$/);
+  assert.equal(v.widgets[0].error,'',v.widgets[0].error);
+  assert.deepEqual(v.widgets[0].data.metricsCard.sources.map(b=>b.id),['grafana'],'only the source the hint named');assert.equal(fetched.length,1);
+  assert.equal(v.widgets[1].data.crashCard?.totals?.issues>0,true,'crashes refresh through «Крэши»');
+  // The ANR widget is the chat's vitals card: the same reader, the same card data.
+  const vitals=v.widgets[2].data.playVitals;
+  assert.equal(v.widgets[2].error,'',v.widgets[2].error);
+  assert.equal(vitals.app,'Wombyte Game');assert.equal(vitals.date,'2026-11-07');assert.equal(vitals.perceived,0.003);assert.deepEqual(vitals.days.map(x=>x.date),['2026-11-06','2026-11-07']);
+  assert.match(v.widgets[2].text,/ANR: 0,5%/);
+  assert.equal(topic.messages.length,2,'refreshing writes nothing to the chat');
+  // «ANR за неделю», «зависания»; the adder offers the ready widgets of the three apps.
+  for(const phrase of ['ANR за неделю','зависания'])assert.equal(feature.dashboards.compose('собери дашборд: '+phrase,'general').d.widgets[0]?.source.extension,'google-play',phrase);
+  const titles=feature.ipc.catalog('general').map(r=>r.title);
+  for(const t of ['Основные метрики','DAU за неделю','Выручка за месяц','ANR за неделю','Крэши за неделю'])assert(titles.includes(t),t+' in the adder: '+titles);
+  // «DAU из wombyte», «выручка (из графаны)»: the hint selects the Grafana source; a Grafana dashboard by name is Grafana's.
+  const one=phrase=>feature.dashboards.compose('собери дашборд: '+phrase,'general').d.widgets[0]?.source;
+  assert.deepEqual(one('DAU из wombyte'),{kind:'extension',extension:'metrics',command:'DAU',selected:'grafana'});
+  assert.deepEqual(one('выручка (из графаны)'),{kind:'extension',extension:'metrics',command:'выручка',selected:'grafana'});
+  assert.deepEqual(one('дашборд лиг (из wombyte)'),{kind:'extension',extension:'grafana',command:'дашборд лиг из Grafana'});
+  assert.equal(one('https://dashboards.wombyte.net/d/kpi/main?orgId=2').extension,'grafana','a pasted dashboard link');
+  // Bare nouns: every phrase is implicitly «покажи …».
+  assert.deepEqual(one('отзывы'),{kind:'extension',extension:'store-reviews',command:'отзывы'});
+  assert.equal(one('сборки').command,'покажи сборки');
+  assert.equal(one('краши').command,'покажи краши');
+  // Not data: nothing matches, and nobody is suggested for it.
+  assert.equal(feature.dashboards.compose('собери дашборд: поставь встречу','general').d.widgets.length,0);
+  assert.equal(feature.dashboards.advise('поставь встречу'),null);
+ }finally{metrics.reset();}
+ // Jira's «баги спринта» as a bare noun phrase.
+ ({feature}=make({jiraUrl:'https://bw.atlassian.net',jiraEmail:'a@b.c',jiraToken:'t',jiraProjects:'BW'}));
+ assert.equal(feature.dashboards.compose('собери дашборд: баги спринта','general').d.widgets[0]?.source.kind,'jira');
+
+ // Nothing added: the reply names the app for each phrase, and the offer card brings them.
+ let offered=null;
+ ({s,topic,feature}=make({},{extensionOffers:{offers:[],propose(command,ids,text,by){offered={command,ids,text,by};return {handled:true,question:true,text};}}}));
+ let reply=feature.dashboards.turn(REQUEST);
+ assert.match(reply.text,/^Пока не из чего собрать дашборд: для «основные метрики проекта \(из wombyte\)» добавьте «Метрики игры» и подключите «AppMetrica» или «Grafana»; для «краши» добавьте «Крэши»; для «ANR» подключите «Google Play Console» \(Подключения → «Google Play Console»\)\.$/,reply.text);
+ assert(offered.ids.includes('metrics')&&offered.ids.includes('crashes'),'the offer card adds the apps: '+offered.ids);
+ assert.equal(offered.command,REQUEST,'accepting the offer repeats the request');
+ // Without the offer card: the same text in the chat, no dashboard.
+ ({s,topic,feature}=make({}));
+ reply=feature.dashboards.turn(REQUEST);assert.match(reply.text,/для «ANR» подключите «Google Play Console»/);assert.equal(reply.dashboard,undefined);
+ // Metrics added, the wombyte Grafana known but without a token: «подключите Grafana»; Google Play connected → ANR built.
+ ({s,topic,feature}=make({extension_metrics:'true',...GRAFANA,grafanaToken:'',...PLAY}));
+ reply=feature.dashboards.turn(REQUEST);
+ assert.match(reply.text,/^Собрал дашборд «Дашборд»: ANR\. Для «основные метрики проекта \(из wombyte\)» подключите «Grafana» \(Каталог → «Grafana», затем Настройки → «Grafana»: адрес, токен/,reply.text);
+ assert.match(reply.text,/для «краши» добавьте «Крэши»/);
+ // A phrase nobody knows keeps the generic hint.
+ ({feature}=make({}));
+ assert.match(feature.dashboards.turn('Собери дашборд: погода на марсе').text,/^Не нашёл источников для: «погода на марсе»\. Подключите приложения/);
+}
+
 // --- Feature ------------------------------------------------------------------------------------------------------
 (async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'petya-dash-')),repo=path.join(root,'repo');fs.mkdirSync(repo);
@@ -79,7 +184,7 @@ assert.equal(jira.jqlFor('JQL: project = X ORDER BY rank',[]),'project = X ORDER
   ipc.start('p1',d.id);assert.equal(ipc.startOf('p1').id,d.id);assert(ipc.list('p1').find(x=>x.id===d.id).start);
   // «Собери дашборд»: phrases → sources; what has no source is named.
   const reply=feature.dashboards.turn('Собери дашборд «Релиз»: крэши за неделю, отзывы в сторах');
-  assert.match(reply.text,/Собрал дашборд «Релиз»: Крэши за неделю\. Не нашёл источника для: «отзывы в сторах»/);
+  assert.match(reply.text,/Собрал дашборд «Релиз»: Крэши за неделю\. Для «отзывы в сторах» добавьте «Отзывы в сторах»\./,'the app that would take the phrase is named');
   assert.equal(topic.messages.at(-1).dashboard.id,reply.dashboard.id);
   assert.equal(feature.dashboards.turn('что умеет дашборд'),null);
   assert.throws(()=>ipc.compose('погода на марсе','p1'),/Не нашёл/);
@@ -95,6 +200,7 @@ assert.equal(jira.jqlFor('JQL: project = X ORDER BY rank',[]),'project = X ORDER
   assert.equal(ipc.copy(out.id).shared,false);
   ipc.remove(out.id);assert(!fs.existsSync(path.join(repo,out.file)));assert.equal(ipc.startOf('p1'),null);
   void file;
-  console.log('Dashboards: sources, sandboxed refresh, chat → dashboard, pin, compose, start screen and sharing through .petya passed');
+  await sources(root);
+  console.log('Dashboards: sources, sandboxed refresh, chat → dashboard, pin, compose, start screen, sharing through .petya, bare nouns, source hints, ANR and the missed-phrase advice passed');
  }finally{crashes.turn=realTurn;fs.rmSync(root,{recursive:true,force:true});}
 })().catch(e=>{console.error(e);process.exit(1);});

@@ -67,11 +67,16 @@ async function comment(s,b){
  }catch{return '';}
 }
 
-async function metricsTurn(s,command,now=new Date()){
- const ask=query.parse(command);
- const ready=list(s).ready().filter(x=>!ask.source||x.id===ask.source);
+// `source`: a source chosen outside the words of the request (a dashboard widget «… (из wombyte)»).
+async function metricsTurn(s,command,now=new Date(),{source=null}={}){
+ const reg=list(s);
+ const ask=query.parse(command,{sources:reg.all().map(x=>({id:x.id,names:reg.names(x)}))});
+ if(source)ask.source=source;
+ const ready=reg.ready().filter(x=>!ask.source||x.id===ask.source);
  if(!ready.length){
-  const added=list(s).added();
+  const named=ask.source&&reg.find(ask.source);
+  if(named)return kit.reply(s,command,{by:BY,question:true,text:'Источник «'+named.name+'» не подключён к «Метрикам игры». '+(KNOWN.find(k=>k.id===named.id)?.where||'Откройте его настройки')+' — потом повторите вопрос.'});
+  const added=reg.added();
   const text=added.length?'Источник «'+added.map(x=>x.name).join('», «')+'» добавлен, но не подключён. Откройте Настройки → «'+added[0].name+'» и сохраните доступ — потом повторите вопрос.':
    'Чтобы показать метрики игры, подключите источник данных: '+KNOWN.map(x=>x.name+' ('+x.where+')').join('; ')+'.';
   return kit.reply(s,command,{by:BY,question:true,text});
@@ -100,4 +105,25 @@ async function turn(s,command){
  try{return await metricsTurn(s,text);}
  catch(e){return kit.failure(s,command,BY,e);}
 }
-module.exports={name:'gameMetrics',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,metricsTurn,summary,reset:()=>{override=null;},useSources:x=>{override=x;}};
+// Dashboards (src/features/dashboards.cjs): every request here only reads, so whatever «Метрики игры» answers can
+// be a widget. A widget may pick one source («основные метрики (из wombyte)» → Grafana): `sources` lists them with
+// the names a request may use, `load` reads with the chosen one.
+const settingsOnly=settings=>({settings:settings||{}});
+const dashboard={
+ accepts:text=>query.about(String(text||'')),
+ size:'w',
+ widgets:[{title:'Основные метрики',command:'основные метрики за неделю'},{title:'DAU за неделю',command:'DAU за неделю'},{title:'Выручка за месяц',command:'выручка за месяц'}],
+ ready:settings=>list(settingsOnly(settings)).ready().length>0,
+ sources:settings=>{const reg=list(settingsOnly(settings));return reg.all().map(x=>({id:x.id,name:x.name,extension:x.extension,names:reg.names(x),ready:reg.isReady(x)}));},
+ // What to connect for a phrase: the source it names, otherwise any of the known ones.
+ connect:(settings,phrase='')=>{
+  const reg=list(settingsOnly(settings)),hit=reg.all().find(x=>reg.names(x).some(n=>query.mentions(phrase,n)));
+  const pick=hit?[hit]:reg.all().filter(x=>!reg.isReady(x));
+  return {names:pick.map(x=>x.name),where:pick.length===1?KNOWN.find(k=>k.id===pick[0].id)?.where||'':'',offers:pick.map(x=>x.extension).filter(Boolean)};
+ },
+ async load(s,command,{selected}={}){
+  if(!kit.installed(s,ID))throw Error('Расширение «Метрики игры» не добавлено.');
+  return metricsTurn(s,String(command||''),new Date(),{source:selected||null});
+ }
+};
+module.exports={name:'gameMetrics',dashboard,defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,metricsTurn,summary,reset:()=>{override=null;},useSources:x=>{override=x;}};

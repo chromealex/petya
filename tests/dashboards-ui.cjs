@@ -118,6 +118,48 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("selectDialogueTopic('')");await wait("document.querySelector('.dash-screen').hidden");
  await mjs("window.petyaDashboard.openMain()");await wait("!document.querySelector('.dash-screen').hidden&&document.querySelector('.dash-screen').dataset.id==="+JSON.stringify(dashId),'opened in the main window');
  mini.close();
+ // «Собери дашборд: основные метрики проекта (из wombyte), краши и ANR»: three widgets drawn by the chat's own cards —
+ // «Метрики игры» read from the wombyte Grafana, «Крэши», and the Google Play ANR card.
+ {
+  const metrics=require('../src/extensions/metrics/feature.cjs'),registry=require('../src/extensions/metrics/sources.cjs'),compute=require('../src/extensions/metrics/compute.cjs');
+  const play=require('../src/extensions/google-play/feature.cjs').dashboard,realLoad=play.load;
+  Object.assign(s.settings,{extension_metrics:'true',extension_grafana:'true',grafanaUrl:'https://dashboards.wombyte.net/?orgId=2',grafanaToken:'glsa_test',grafanaMetricMap:JSON.stringify({dau:{d:'kpi',p:1,f:'',t:'DAU',dt:'KPI'}}),
+   module_googleplay:'true',googlePlayCredential:JSON.stringify({type:'oauth',client:{client_id:'c',client_secret:'x'},refresh_token:'r'})});
+  const wd=d=>new Date(d+'T00:00:00Z').getUTCDay(),wave=d=>[0,180,-120,90,-60,150,-100][wd(d)];
+  metrics.useSources(registry.create(s,{sources:registry.load().map(x=>x.id!=='grafana'?x:{...x,source:{...x.source,retention:undefined,fetch:async(_,q)=>{const days=compute.range(q.from,q.to);
+   return {series:[{metric:'dau',unit:'users',series:days.map((d,i)=>({date:d,value:12400+wave(d)+i*14}))},{metric:'new',unit:'users',series:days.map(d=>({date:d,value:1310+(wd(d)%6===0?240:0)}))},
+    {metric:'revenue',unit:'currency:USD',series:days.map((d,i)=>({date:d,value:6100+(wd(d)%6===0?1400:0)+i*9}))}]};}}})}));
+  const day=(y,m,d)=>({year:y,month:m,day:d}),v=n=>({decimalValue:{value:String(n)}});
+  const anr=[0.0042,0.0039,0.0047,0.0051,0.0044,0.0038,0.0041];
+  play.load=(sx,command,opts)=>realLoad(new Proxy(sx,{get:(t,k)=>k!=='request'?t[k]:async(url,options={})=>{url=String(url);
+   if(url.startsWith('https://oauth2.googleapis.com/token'))return {access_token:'a',expires_in:3600};
+   if(url.includes('apps:search'))return {apps:[{name:'apps/com.wombyte.game',displayName:'Wombyte Game',packageName:'com.wombyte.game'}]};
+   if(url.endsWith('/anrRateMetricSet'))return {freshnessInfo:{freshnesses:[{aggregationPeriod:'DAILY',latestEndTime:day(2026,11,8)}]}};
+   if(url.endsWith(':query')&&options.method==='POST')return {rows:anr.map((r,i)=>({startTime:day(2026,11,1+i),metrics:[{metric:'anrRate',...v(r*1.9)},{metric:'userPerceivedAnrRate',...v(r)},{metric:'userPerceivedAnrRate7dUserWeighted',...v(0.0043)}]}))};
+   throw Error('unexpected '+url);}}),command,opts);
+  const days=Array.from({length:7},(_,i)=>new Date(Date.UTC(2026,10,2+i)).toISOString().slice(0,10));
+  const issue=(id,title,culprit,events,users,isNew,spark)=>({id,source:'google-play',title,culprit,level:'fatal',events,users,firstSeen:null,lastSeen:'2026-11-08T09:00:00Z',versions:['versionCode 10422'],platform:'Android',project:'Wombyte Game',shortId:'',url:'https://play.google.com/console/',unhandled:false,isNew,spark,canResolve:false});
+  const issues=[issue('a1','java.lang.IllegalStateException','com.wombyte.Billing.onPurchase',420,130,false,[2,3,1,4,6,5,8,9,7,10,12,9,11,14]),issue('b2','SIGSEGV','libunity.so',95,60,true,[0,0,0,0,0,0,0,0,0,0,30,0,65,0]),issue('c3','java.lang.OutOfMemoryError','Bitmap.createBitmap',61,40,false,[1,0,2,1,3,2,4,3,5,4,6,5,4,6])];
+  const crashCard={sources:[{id:'google-play',name:'Google Play',color:'#9dd9c9',issues:3,more:false,events:576,users:230,fresh:1,url:'https://play.google.com/console/',scope:'Wombyte Game',note:'',error:'',canResolve:false,crashFree:null}],
+   period:{label:'за неделю',kind:'week',from:'2026-11-01T10:00:00Z',to:'2026-11-08T10:00:00Z'},release:null,platform:null,environment:'',onlyNew:false,totals:{issues:3,more:false,events:576,users:230,fresh:1},
+   chart:{days,series:[{id:'google-play:a1',source:'google-play',label:issues[0].title,values:[50,60,40,70,80,60,60]},{id:'google-play:b2',source:'google-play',label:issues[1].title,values:[0,0,0,30,0,65,0]}],bySource:[{id:'google-play',label:'Google Play',color:'#9dd9c9',values:[58,66,49,108,92,133,70]}],from:'2026-11-02',to:'2026-11-08'},issues,notes:[],common:''};
+  const crashTurn=crashes.turn;
+  crashes.turn=async(sx,command)=>require('../src/extensions/app-kit.cjs').reply(sx,command,{by:'Крэши',text:'За неделю: 3 крэша.',data:{crashCard}});
+  try{
+   await js("selectDialogueTopic('')");
+   await send('Собери дашборд: основные метрики проекта (из wombyte), краши и ANR');
+   await wait("[...document.querySelectorAll('.dash-open-reply')].some(b=>b.textContent.includes('Дашборд'))",'three-widget compose reply');
+   await js("[...document.querySelectorAll('.dash-open-reply')].find(b=>b.textContent.includes('Дашборд')).click()");
+   await wait("document.querySelectorAll('.dash-screen .dash-widget').length===3&&!!document.querySelector('.dash-screen .metrics-card')&&!!document.querySelector('.dash-screen .crash-card')&&!!document.querySelector('.dash-screen .vitals-card')",'metrics, crashes and the ANR card on the dashboard');
+   assert.deepEqual(await js("[...document.querySelectorAll('.dash-screen .dash-widget h3')].map(h=>h.textContent)"),['Основные метрики проекта (из wombyte)','Краши','ANR']);
+   assert.equal(await js("document.querySelectorAll('.dash-screen .dash-widget-error, .dash-screen .dash-error').length"),0,'no widget failed');
+   for(let i=0;i<60;i++){const ws=(await js("window.petya.feature('dashboards','peek',document.querySelector('.dash-screen').dataset.id)")).widgets;if(ws.every(w=>w.pos&&!w.pos.fit))break;await new Promise(r=>setTimeout(r,100));}
+   await new Promise(r=>setTimeout(r,400));
+   assert(await js("(()=>{const r=[...document.querySelectorAll('.dash-screen .dash-grid.free>.dash-widget')].map(w=>w.getBoundingClientRect());return r.every((a,i)=>r.every((b,j)=>i===j||a.right<=b.left+1||b.right<=a.left+1||a.bottom<=b.top+1||b.bottom<=a.top+1));})()"),'three widgets without overlaps');
+   await shot('sources');
+   await js("document.querySelector('.dash-screen').scrollTop=2000");await shot('sources-bottom');
+  }finally{crashes.turn=crashTurn;play.load=realLoad;metrics.reset();}
+ }
  // The analytics example: KPI tiles and line charts, marked as made-up data.
  await js("window.openDashboardExample('')");
  await wait("document.querySelector('.dash-head h1')?.textContent==='Пример · аналитика игры'&&document.querySelectorAll('.dash-widget .chart-kpi-tile').length===5&&document.querySelectorAll('.dash-widget .chart-line-svg').length===3",'analytics example');

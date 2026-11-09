@@ -9,6 +9,11 @@ service-account JSON key, saved as `googlePlayCredential`; scope `playdeveloperr
 | ANR | `src/google-play.cjs` `read()` (the `anr` reader of the dialogue) + `vitals-cards.js` | «ANR за неделю», «ANR в Google Play»: ANR rate, user-perceived ANR rate, the 7-day weighted rate, Google's bad-behaviour threshold, per-day chart. |
 | Crashes | `crash-source.cjs` (a `crash-source` for «Крэши», [crashes.md](crashes.md)) | «крэши в Google Play», «крэши в гугл плей», or any crash request while Google Play is connected: Android vitals crash clusters in the «Крэши» card. |
 
+On dashboards (`feature.cjs`, no chat `turn`): «ANR», «ANR за неделю», «зависания» become a widget whose
+`dashboard.load` runs the same `read()` and `result.cjs` `extract`, so the widget is the chat's ANR card and refreshes
+like the others. With several apps and none named in the phrase the widget asks to name one. See
+[dashboards.md](../dashboards.md).
+
 ANR stays a separate topic: the crash source returns only `CRASH` issues, and «ANR …» requests still go to the ANR
 card. A request that names Google Play together with a crash word is routed to «Крэши» (`src/dialogue.cjs` `intent`,
 `src/service-access.cjs`), not to the ANR reader.
@@ -44,7 +49,8 @@ Petya's service settings (`service: 'googleplay'`), so accepting opens that card
 
 `node tests/google-play-crashes.cjs` (run by `tests/crashes.cjs`): request shapes (interval, filters, order, page size,
 count query body), parsing, «новый», app choice, versionCode filter and crash-free users, iOS skip, missing freshness,
-errors, routing away from ANR, offer. ANR: `tests/dialogue.cjs`, `tests/one-click-connect.cjs`. All with stubs.
+errors, routing away from ANR, offer. ANR: `tests/dialogue.cjs`, `tests/one-click-connect.cjs`; the ANR widget:
+`tests/dashboards.cjs` (stubbed Play API) and `tests/dashboards-ui.cjs`. All with stubs.
 
 To verify live: the exact filter syntax `reportType = CRASH` on `errorCountMetricSet` (documented as equality on
 dimensions; the value may need quotes), `errorIssues:search` with an end hour close to now, issue grouping (the

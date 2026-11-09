@@ -226,7 +226,7 @@
   adder.replaceChildren();adder.hidden=false;
   const form=el('form','dash-adder-form'),input=el('input');input.placeholder='Что показать? Например: «баги спринта, крэши за неделю»';input.setAttribute('aria-label','Что добавить на дашборд');
   const go=el('button','primary','Добавить');go.type='submit';form.append(input,go);
-  form.onsubmit=async e=>{e.preventDefault();if(!input.value.trim())return;go.disabled=true;try{const r=await call('addFrom',d.id,input.value);paint(r.view);input.value='';if(r.missed.length)kit().toast('Не нашёл источника для: '+r.missed.join(', '),{error:true});}catch(err){fail(err);}finally{go.disabled=false;}};
+  form.onsubmit=async e=>{e.preventDefault();if(!input.value.trim())return;go.disabled=true;try{const r=await call('addFrom',d.id,input.value);paint(r.view);input.value='';if(r.missed.length)kit().toast(r.note||'Не нашёл источника для: '+r.missed.join(', '),{error:true});}catch(err){fail(err);}finally{go.disabled=false;}};
   const ready=el('div','dash-adder-ready');
   adder.append(form,el('p','small','Готовые виджеты подключённых приложений:'),ready);
   try{const rows=await call('catalog',d.projectId);if(!rows.length)ready.append(el('p','small','Подключите Jira, «Крэши», «Отзывы», «Сборки» или «Календарь» — их данные можно держать на дашборде. Любую карточку из чата можно добавить через «•••» → «В дашборд…».'));

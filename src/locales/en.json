@@ -910,7 +910,8 @@
   "разбери загрузки",
   "Ё",
   "ё",
-  "г."
+  "г.",
+  "Графана"
  ],
  "strings": {
   "# Итоги встречи Выдели решения, открытые вопросы и поручения. Поручения оформи таблицей: действие, ответственный, срок, источник. Не назначай людей и сроки самостоятельно; неизвестные поля отмечай «не указано». Если расшифровки нет, попроси приложить её. Не утверждай, что задачи уже созданы.": "# Meeting summary List decisions, open questions and action items. Format action items as a table: action, owner, due date, source. Do not assign people or due dates yourself; mark unknown fields “not specified”. If there is no transcript, ask me to attach it. Do not claim that tasks have already been created.",
@@ -13498,7 +13499,7 @@
   "Открыть сервисные аккаунты": "Open service accounts",
   "Петя только читает дашборды и выполняет запросы их панелей; дайте сервисному аккаунту доступ к нужным папкам.": "Petya only reads dashboards and runs their panels' queries; give the service account access to the folders you need.",
   "Токен создаёт администратор организации в Grafana: «Add service account» с ролью Viewer, затем «Add service account token» — получится строка glsa_…. Если у вас нет прав администратора, попросите того, кто ведёт Grafana.": "An organization admin creates the token in Grafana: «Add service account» with the Viewer role, then «Add service account token» — you get a glsa_… string. If you are not an admin, ask whoever runs your Grafana.",
-  "ПЕТЯ / 0.14.2": "PETYA / 0.14.2",
+  "ПЕТЯ / 0.14.3": "PETYA / 0.14.3",
   "! Приглашаем вас на этап «": "! We invite you to the «",
   "! Рады, что ты с нами": "! Glad to have you with us",
   "# Перформанс-ревью ·": "# Performance review ·",
@@ -14991,6 +14992,19 @@
   "склон": "slope",
   "точечная": "point",
   "у баз": "near the bases",
-  "черновик удалён": "draft deleted"
+  "черновик удалён": "draft deleted",
+  "ANR за неделю": "ANR this week",
+  "Google Play не подключён: Подключения → «Google Play Console».": "Google Play is not connected: Connections → “Google Play Console”.",
+  "» не подключён к «Метрикам игры».": "” is not connected to “Game metrics”.",
+  "В Google Play несколько приложений — назовите одно в запросе виджета:": "Google Play has several apps — name one in the widget's request:",
+  "Выручка за месяц": "Revenue this month",
+  "Настройки → «Grafana»: адрес и токен сервисного аккаунта": "Settings → “Grafana”: address and service account token",
+  "Основные метрики": "Key metrics",
+  "Откройте его настройки": "Open its settings",
+  "Подключения → «Google Play Console»": "Connections → “Google Play Console”",
+  "Расширение «Метрики игры» не добавлено.": "The “Game metrics” extension is not added.",
+  "выручка за месяц": "revenue this month",
+  "основные метрики за неделю": "key metrics this week",
+  "— потом повторите вопрос.": "— then ask again."
  }
 }

@@ -9,7 +9,7 @@ const DAU=re(W+'(?:dau|mau|wau|дау|мау)'+E+'|активн\\p{L}*\\s+(?:и�
 const NEW=re('(?:нов\\p{L}*)\\s+(?:игрок|пользовател|юзер|установ)\\p{L}*|(?:^|[^\\p{L}])(?:new users|инстал\\p{L}*)'+E);
 const RETENTION=re(W+'(?:ретеншн\\p{L}*|ретенш\\p{L}*|ретеншен\\p{L}*|retention|удержани\\p{L}*|d1|d7|d30|д1|д7|д30)'+E);
 const REVENUE=re(W+'(?:выручк\\p{L}*|доход\\p{L}*|revenue|arpdau|arpu|arppu|арпу|платеж\\p{L}*|монетизаци\\p{L}*)'+E);
-const METRICS=re('метрик\\p{L}*\\s+(?:игры|приложения|проекта|продукта|по игре)|продуктов\\p{L}* метрик\\p{L}*|(?:^|[^\\p{L}])kpi(?:[^\\p{L}]|$)|ключев\\p{L}* метрик\\p{L}*');
+const METRICS=re('метрик\\p{L}*\\s+(?:игры|приложения|проекта|продукта|по игре)|(?:основн|главн|важн)\\p{L}* (?:продуктов\\p{L}* )?метрик\\p{L}*|продуктов\\p{L}* метрик\\p{L}*|(?:^|[^\\p{L}])kpi(?:[^\\p{L}]|$)|ключев\\p{L}* метрик\\p{L}*');
 // «сравни эту неделю с прошлой» says nothing about the subject: it is a metrics request only when nothing else is named.
 const WEEKS=re('сравни\\p{L}*\\s+(?:эту|текущую|прошлую)\\s+неделю\\s+с\\s+(?:прошлой|позапрошлой)|(?:эта|текущая)\\s+неделя\\s+против\\s+прошлой');
 // Neighbours: team metrics and velocity (Jira), crashes, store reviews, ANR, server metrics, build size, in-app
@@ -56,7 +56,16 @@ function version(text){
 }
 const compare=text=>re('сравни\\p{L}*|по сравнению|против прошл|с прошл\\p{L}* (?:недел|месяц|период)|после ивента|после акци|после обновлени|после релиза').test(text);
 
-function parse(text){
- return {days:period(text),focus:focus(text),platform:platform(text),version:version(text),compare:compare(text),source:SOURCE.test(text)?'appmetrica':null};
+// The source a request names: AppMetrica by its own words, any other source by its name or the names it gives
+// (`sources`: [{id, names}] — Grafana answers to its host, «DAU из wombyte» for dashboards.wombyte.net).
+const mentions=(text,name)=>{const n=String(name||'').toLowerCase().replace(/ё/g,'е').trim();if(n.length<3)return false;
+ const stem=n.length>=6&&/[а-я]$/.test(n)?n.slice(0,-1):n;
+ return re(W+stem.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+(stem===n?'':'\\p{L}{0,3}')+E).test(String(text||'').replace(/ё/gi,'е'));};
+function source(text,sources=[]){
+ if(SOURCE.test(text))return 'appmetrica';
+ return sources.find(x=>(x.names||[]).some(n=>mentions(text,n)))?.id||null;
 }
-module.exports={about,parse,period,focus,platform,version,compare,SOURCE,DAU,NEW,RETENTION,REVENUE,METRICS,ELSEWHERE};
+function parse(text,{sources}={}){
+ return {days:period(text),focus:focus(text),platform:platform(text),version:version(text),compare:compare(text),source:source(text,sources)};
+}
+module.exports={about,parse,source,mentions,period,focus,platform,version,compare,SOURCE,DAU,NEW,RETENTION,REVENUE,METRICS,ELSEWHERE};
