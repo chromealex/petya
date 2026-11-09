@@ -15072,6 +15072,7 @@
   "сопоставьте панели Grafana с метриками (Настройки → «Grafana» → «Сопоставить панели с метриками»)": "map Grafana panels to metrics (Settings → «Grafana» → «Map panels to metrics»)",
   "Включить API в Google Cloud": "Enable the API in Google Cloud",
   "Открыть Google Cloud": "Open Google Cloud",
-  "Открыть Play Console": "Open Play Console"
+  "Открыть Play Console": "Open Play Console",
+  "Обновляю": "Refreshing"
  }
 }

@@ -35,7 +35,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  {const slow=crashes.turn;crashes.turn=async(...a)=>{await new Promise(r=>setTimeout(r,900));return slow(...a);};
   const sel=".dash-widget[data-kind=extension]";
   const before=await js("(()=>{const c=document.querySelector('"+sel+"');return {h:c.offsetHeight,text:c.querySelector('.dash-widget-meta').textContent};})()");
-  await js("document.querySelector('"+sel+" .dash-tool[aria-label=\"Обновить\"]').click()");
+  await js("document.querySelector('"+sel+" .dash-refresh').click()");
   await wait("document.querySelector('"+sel+"')?.classList.contains('refreshing')",'the card is marked as refreshing');
   const during=await js("(()=>{const c=document.querySelector('"+sel+"'),sp=c.querySelector('.dash-widget-spin');document.querySelectorAll('.dash-widget').forEach(n=>n.blur?.());return {h:c.offsetHeight,meta:c.querySelector('.dash-widget-meta').textContent,chart:!!c.querySelector('.chart-card'),pos:getComputedStyle(sp).position,anim:getComputedStyle(sp).animationName};})()");
   assert.equal(during.h,before.h,'no shift while refreshing');assert(!/обновляю/i.test(during.meta),during.meta);assert.equal(during.meta,before.text,'the meta line keeps its time');
