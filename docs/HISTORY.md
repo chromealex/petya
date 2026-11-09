@@ -8,6 +8,12 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.12.0 — retro, ADR, funnels, purchases; Unity connects itself
+
+- **New apps**: retro, ADR (architecture decisions), doc freshness, funnels, in-app purchases, «объясни график»; search sources, export to Google Docs and Sheets, messengers wired into the apps that read chats.
+- **Unity finds and connects itself**; apps without settings (Asana) can be deleted from the catalog.
+- **Slack feed** in the chat, Petya's own dialogs instead of system ones, Zoom speakers named without screen-reading access.
+
 ## 0.11.4 — a Jira link opens that issue
 
 - A Jira issue link («https://…/browse/BW-4569 посмотри эту таску», or just the link) or «посмотри задачу BW-12» shows that issue — type, status, priority, assignee, due date, version, parent, description, the latest comments and links, with its card — instead of the project's task list. Only the connected Jira site and the projects allowed in the connection are read.

@@ -1,6 +1,6 @@
 {
   "name": "petya-desktop",
-  "version": "0.11.4",
+  "version": "0.12.0",
   "private": true,
   "description": "Контекстный голосовой помощник для macOS и Windows",
   "author": "Petya",
