@@ -143,7 +143,18 @@ async function sources(root){
   assert.match(v.widgets[0].error,/несколько приложений — выберите/);assert.deepEqual(v.widgets[0].choice.options.map(o=>o.id),['apps/com.a.one','apps/com.b.two']);
   feature.ipc.widget(made.dashboard.id,v.widgets[0].id,{selected:'apps/com.b.two',title:'ANR · Two'});
   v=await feature.ipc.refresh(made.dashboard.id);
-  assert.equal(v.widgets[0].error,'',v.widgets[0].error);assert.equal(v.widgets[0].choice,null);assert.equal(v.widgets[0].data.playVitals.app,'Two');assert.equal(v.widgets[0].title,'ANR · Two');}
+  assert.equal(v.widgets[0].error,'',v.widgets[0].error);assert.equal(v.widgets[0].choice,null);assert.equal(v.widgets[0].data.playVitals.app,'Two');assert.equal(v.widgets[0].title,'ANR · Two');
+  // Crashes too: the card asks which game (or all), and the chosen package is named in the read.
+  ({s,topic,feature}=make({...PLAY,extension_crashes:'true'},{request:two}));
+  const crashes=require('../src/extensions/crashes/feature.cjs'),real=crashes.crashesTurn;let asked='';
+  crashes.crashesTurn=async(sx,text)=>{asked=text;return require('../src/extensions/app-kit.cjs').reply(sx,text,{by:'Крэши',text:'ok',data:{crashCard:{totals:{issues:1}}}});};
+  try{const c=feature.ipc.compose('краши','general');let cv=await feature.ipc.refresh(c.dashboard.id);
+   assert.match(cv.widgets[0].error,/чьи крэши показывать/);assert.deepEqual(cv.widgets[0].choice.options.map(o=>o.id),['all','apps/com.a.one','apps/com.b.two']);
+   feature.ipc.widget(c.dashboard.id,cv.widgets[0].id,{selected:'apps/com.a.one'});cv=await feature.ipc.refresh(c.dashboard.id);
+   assert.equal(cv.widgets[0].error,'');assert.match(asked,/com\.a\.one$/,asked);
+   feature.ipc.widget(c.dashboard.id,cv.widgets[0].id,{selected:'all'});cv=await feature.ipc.refresh(c.dashboard.id);
+   assert.equal(cv.widgets[0].error,'');assert.equal(asked,'краши','«all» reads every app');
+  }finally{crashes.crashesTurn=real;}}
  // A phrase nobody knows: Petya asks for a page; without one, the generic hint.
  ({feature}=make({}));
  let unknown;try{feature.dashboards.turn('Собери дашборд: погода на марсе');}catch(e){unknown=e;}

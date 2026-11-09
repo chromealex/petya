@@ -128,10 +128,21 @@ async function turn(s,command){
 // Dashboards (src/features/dashboards.cjs): read-only requests refresh there by themselves.
 // A dashboard part names the subject alone («краши»), so the crash word itself is enough.
 // The widget reads the crash card itself, so a bare «краши» (which the chat would not take without «покажи») works.
-const dashboard={accepts:text=>query.about(String(text||''),{named:true}),
- async load(s,command){
+const dashboard={accepts:text=>query.about(String(text||''),{named:true}), choosable:true,
+ async load(s,command,{selected=''}={}){
   if(!kit.installed(s,ID))throw Error('Расширение «Крэши» не добавлено.');
-  try{return await module.exports.crashesTurn(s,String(command||''));}
+  let text=String(command||'');
+  // Google Play with several apps: the card asks which game (or all of them) once; the choice stays with the widget
+  // and is read by naming the package, as «крэши Bunker Wars» would in the chat.
+  const playOn=s.settings?.module_googleplay!=='false'&&!!s.settings?.googlePlayCredential&&typeof s.request==='function';
+  if(/^apps\/[a-zA-Z0-9._-]+$/.test(selected))text+=' '+selected.slice(5);
+  else if(selected!=='all'&&playOn){
+   const {GooglePlay}=require('../../google-play.cjs');let list=[];
+   try{list=await new GooglePlay({settings:()=>s.settings,request:s.request}).apps();}catch{}
+   const t=text.toLowerCase(),named=list.some(a=>[a.label,a.packageName].some(n=>n&&n.length>2&&t.includes(n.toLowerCase())));
+   if(list.length>1&&!named)return {choice:{text:'В Google Play несколько приложений — выберите, чьи крэши показывать.',options:[{id:'all',label:'Все приложения'},...list.map(a=>({id:a.id,label:a.label+' · '+a.packageName}))]}};
+  }
+  try{return await module.exports.crashesTurn(s,text);}
   catch(e){return kit.reply(s,command,{by:BY,error:true,text:BY+' · '+(e.message||'источник крэшей недоступен.')});}
  },
  widgets:[{title:'Крэши за неделю',command:'крэши за неделю'},{title:'Новые крэши',command:'новые крэши за неделю'}]};

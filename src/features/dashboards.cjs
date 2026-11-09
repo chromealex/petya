@@ -69,7 +69,7 @@ function setup(s){
       // Reading order (the small window, screen readers): top to bottom, left to right.
       widgets:[...d.widgets].sort((a,b)=>(a.pos?a.pos.y:1e9)-(b.pos?b.pos.y:1e9)||(a.pos?.x||0)-(b.pos?.x||0)).map(w=>{const hit=w.source.kind==='snapshot'?{data:w.data,text:w.text,at:w.at}:c.get(cacheKey(d,w))||{};
         return {id:w.id,title:w.title,size:w.size,pos:w.pos||null,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,...(w.source.kind==='web'?{url:w.source.url}:{}),
-          data:hit.data||null,text:hit.text||'',at:hit.at||0,error:hit.error||'',choice:hit.error&&hit.choice||null,count:hit.count??null,loading:running.has(cacheKey(d,w))};})};
+          data:hit.data||null,text:hit.text||'',at:hit.at||0,error:hit.error||'',choice:hit.error&&hit.choice||null,count:hit.count??null,chosen:w.source.kind==='extension'&&!!w.source.selected&&plugins.get(w.source.extension)?.mod?.dashboard?.choosable===true,loading:running.has(cacheKey(d,w))};})};
   }
   const describe=src=>src.kind==='extension'?(plugins.get(src.extension)?.d.name||src.extension)+' · «'+src.command+'»'+(src.selected?' · '+(subSources(plugins.get(src.extension)).find(x=>x.id===src.selected)?.name||src.selected):''):src.kind==='provider'?(providers.find(p=>p.type===src.provider)?.name||src.provider)+' · «'+src.query+'»':src.kind==='jira'?'Jira · '+src.jql:src.kind==='web'?'Страница · '+(()=>{try{return new URL(src.url).host;}catch{return src.url;}})():'Снимок карточки, не обновляется';
   const summary=d=>({id:d.id,title:d.title,projectId:d.projectId,shared:!!d.shared,folder:d.shared?.folder||'',widgets:d.widgets.length,start:state().dashboardStart[d.projectId]===d.id,fromChat:d.fromChat||''});

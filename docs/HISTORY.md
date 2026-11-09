@@ -8,6 +8,11 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.17.2 — the crashes widget asks which game too
+
+- The «Крэши» widget with several Google Play apps asks which game to show — or «Все приложения» — with the same search and list as ANR, instead of mixing every game into one card. The choice stays with the widget and is read by naming the package.
+- «Выбрать другое приложение» in the widget menu asks again (ANR and crashes).
+
 ## 0.17.1 — dashboard card actions, menus that scroll, dashboards apart from chats
 
 - «Исправить» and the other card actions work on a dashboard widget too; menus scroll instead of squeezing over the card; the hidden dashboard chat is never selected.

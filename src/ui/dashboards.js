@@ -84,6 +84,8 @@
   const rows=[{label:'Ширина',note:true},...WIDTHS.map(([cols,label])=>({label,current:w.pos?.w===cols,run:()=>setWidth(d,w,cols)}))];
   if(w.live)rows.push({label:'Обновлять',note:true},...Object.entries(EVERY_LABEL).map(([every,label])=>({label,current:w.every===Number(every),run:()=>call('widget',d.id,w.id,{every:Number(every)}).then(paint).catch(fail)})));
   rows.push({label:'Ещё',note:true},{label:'Переименовать',run:()=>renameWidget(d,w)});
+  // A card that asked which app (Google Play): ask again.
+  if(w.chosen)rows.push({label:'Выбрать другое приложение',run:()=>call('widget',d.id,w.id,{selected:'',title:w.title.split(' · ')[0]}).then(paint).catch(fail)});
   if(w.kind==='jira')rows.push({label:'Изменить запрос JQL',hint:w.describe.replace(/^Jira · /,''),run:()=>editJql(d,w)});
   // A web widget: its page opens next to the chat (to sign in or check the figures).
   if(w.kind==='web'&&w.url)rows.push({label:'Открыть в браузере',hint:w.describe.replace(/^Страница · /,''),run:()=>{if(typeof view==='function')view('home');window.openChatBrowser?.(w.url);}});

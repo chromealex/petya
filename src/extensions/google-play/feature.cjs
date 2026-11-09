@@ -14,6 +14,7 @@ const connected=settings=>settings?.module_googleplay!=='false'&&!!settings?.goo
 const dashboard={
  accepts:text=>{const t=String(text||'').trim();return !!t&&t.length<=300&&ANR.test(t)&&!QUIET.test(t);},
  size:'m',
+ choosable:true,
  widgets:[{title:'ANR за неделю',command:'ANR за неделю'}],
  ready:connected,
  connect:()=>({names:['Google Play Console'],where:'Подключения → «Google Play Console»',offers:[]}),
