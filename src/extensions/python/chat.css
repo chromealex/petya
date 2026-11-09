@@ -1,8 +1,8 @@
 .python-result{display:flex;flex-direction:column;gap:8px;margin:10px 0;width:640px;max-width:100%}
-.python-table{overflow:auto;max-height:360px;border:1px solid #ffffff12;border-radius:10px}
+.python-table{overflow:auto;max-height:360px;border:1px solid color-mix(in srgb,var(--on) 7%,transparent);border-radius:10px}
 .python-table table{width:100%;border-collapse:collapse;font-size:13px}
-.python-table th{position:sticky;top:0;background:#1b1f20;padding:7px 10px;text-align:left;font-weight:500;color:var(--muted);white-space:nowrap}
-.python-table td{padding:6px 10px;border-top:1px solid #ffffff10}
+.python-table th{position:sticky;top:0;background:var(--panel);padding:7px 10px;text-align:left;font-weight:500;color:var(--muted);white-space:nowrap}
+.python-table td{padding:6px 10px;border-top:1px solid color-mix(in srgb,var(--on) 6%,transparent)}
 .python-table th.num{text-align:right}
 .python-table td.num{text-align:right;font-variant-numeric:tabular-nums}
 .python-bar{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}
@@ -13,4 +13,4 @@
 .python-code{flex:1;min-width:0}
 .python-code>summary{font-size:12px;color:var(--muted);cursor:pointer;padding:4px 0}
 .python-code pre{max-height:280px;overflow:auto;font-size:12px}
-.python-error{color:#f0b4a8}
+.python-error{color:var(--alert)}

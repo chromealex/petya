@@ -3,22 +3,22 @@
 .ci-muted{color:var(--muted);font-size:12px}
 .ci-note{margin:0}
 .ci-section{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-top:2px}
-.ci-warn{margin:0;font-size:12.5px;color:#e5ce8c}
-.ci-branch{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:11.5px;padding:1px 6px;border-radius:5px;background:#ffffff0d;color:var(--ink);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ci-dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:#8a948f}
-.ci-dot.success{background:#c9ed9d}.ci-dot.failure{background:#f0b4a8}.ci-dot.running,.ci-dot.queued{background:#e5ce8c}
+.ci-warn{margin:0;font-size:12.5px;color:var(--warn)}
+.ci-branch{font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:11.5px;padding:1px 6px;border-radius:5px;background:color-mix(in srgb,var(--on) 5%,transparent);color:var(--ink);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci-dot{display:inline-block;flex:none;width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.ci-dot.success{background:var(--ok)}.ci-dot.failure{background:var(--alert)}.ci-dot.running,.ci-dot.queued{background:var(--warn)}
 /* Failed run */
-.ci-failure{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border:1px solid #f0b4a840;border-radius:10px;background:#f0b4a80a}
+.ci-failure{display:flex;flex-direction:column;gap:6px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--alert) 25%,transparent);border-radius:10px;background:color-mix(in srgb,var(--alert) 4%,transparent)}
 .ci-failure-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13.5px}
 .ci-commit{font-size:13px;color:var(--ink);overflow-wrap:anywhere}
 .ci-path{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12.5px}
-.ci-job,.ci-step{padding:1px 7px;border-radius:6px;background:#ffffff0a}
-.ci-step{color:#f0b4a8;background:#f0b4a814}
+.ci-job,.ci-step{padding:1px 7px;border-radius:6px;background:color-mix(in srgb,var(--on) 4%,transparent)}
+.ci-step{color:var(--alert);background:color-mix(in srgb,var(--alert) 8%,transparent)}
 .ci-arrow{color:var(--muted)}
 .ci-log{display:flex;flex-direction:column;gap:1px;max-height:180px;overflow:auto;padding:8px 10px;border-radius:8px;background:#0000004d;font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:12px;line-height:1.45}
 .ci-log-line{white-space:pre-wrap;overflow-wrap:anywhere;color:#f3d2cb}
-.ci-log-line+.ci-log-line{color:#d9dcda}
-.ci-confirm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid #e5ce8c55;border-radius:10px;background:#e5ce8c0d;font-size:13px}
+.ci-log-line+.ci-log-line{color:var(--ink)}
+.ci-confirm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border:1px solid color-mix(in srgb,var(--warn) 33%,transparent);border-radius:10px;background:color-mix(in srgb,var(--warn) 5%,transparent);font-size:13px}
 .ci-confirm span{flex:1 1 220px}
 .ci-confirm button{min-height:30px;padding:4px 10px;font-size:13px}
 /* History strips */
@@ -26,21 +26,21 @@
 .ci-history-row{display:grid;grid-template-columns:minmax(0,1fr) auto 76px;align-items:center;gap:10px}
 .ci-history-name{display:flex;align-items:center;gap:6px;min-width:0;font-size:13px}
 .ci-history-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ci-source{flex:none;font-size:10px;padding:1px 5px;border-radius:4px;background:#ffffff10;color:var(--muted)}
-.ci-source.unity{background:#86c2ff1f;color:#a9d3ff}
+.ci-source{flex:none;font-size:10px;padding:1px 5px;border-radius:4px;background:color-mix(in srgb,var(--on) 6%,transparent);color:var(--muted)}
+.ci-source.unity{background:color-mix(in srgb,var(--info) 12%,transparent);color:var(--info)}
 .ci-strip{display:flex;gap:3px}
-.ci-cell{display:block;width:14px;height:14px;border-radius:3px;background:#8a948f66}
-.ci-cell.success{background:#c9ed9d}.ci-cell.failure{background:#f0b4a8}.ci-cell.running,.ci-cell.queued{background:#e5ce8c}
-.ci-cell.cancelled,.ci-cell.skipped{background:#8a948f88}.ci-cell.empty{background:transparent;outline:1px dashed #ffffff14;outline-offset:-1px}
+.ci-cell{display:block;width:14px;height:14px;border-radius:3px;background:color-mix(in srgb,var(--muted) 40%,transparent)}
+.ci-cell.success{background:var(--ok)}.ci-cell.failure{background:var(--alert)}.ci-cell.running,.ci-cell.queued{background:var(--warn)}
+.ci-cell.cancelled,.ci-cell.skipped{background:color-mix(in srgb,var(--muted) 53%,transparent)}.ci-cell.empty{background:transparent;outline:1px dashed color-mix(in srgb,var(--on) 8%,transparent);outline-offset:-1px}
 a.ci-cell:hover,a.ci-cell:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
 .ci-history-last{font-size:12px;text-align:right;color:var(--muted)}
-.ci-history-last.done{color:#c9ed9d}.ci-history-last.alert{color:#f0b4a8}.ci-history-last.progress{color:#e5ce8c}
+.ci-history-last.done{color:var(--ok)}.ci-history-last.alert{color:var(--alert)}.ci-history-last.progress{color:var(--warn)}
 /* Recent runs */
 .ci-runs{margin:0;padding:0;list-style:none;display:flex;flex-direction:column}
-.ci-run{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 0;border-top:1px solid #ffffff0d}
+.ci-run{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:10px;align-items:center;padding:7px 0;border-top:1px solid color-mix(in srgb,var(--on) 5%,transparent)}
 .ci-run:first-child{border-top:0}
 .ci-run-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
-.ci-run-status.success{color:#c9ed9d}.ci-run-status.failure{color:#f0b4a8}.ci-run-status.running,.ci-run-status.queued{color:#e5ce8c}
+.ci-run-status.success{color:var(--ok)}.ci-run-status.failure{color:var(--alert)}.ci-run-status.running,.ci-run-status.queued{color:var(--warn)}
 .ci-run-main{display:flex;flex-direction:column;gap:2px;min-width:0}
 .ci-run-title{font-size:13px;color:var(--ink);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 a.ci-run-title:hover{text-decoration:underline}

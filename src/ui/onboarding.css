@@ -1,34 +1,34 @@
 /* First-run introduction: Petya on top, his line and one question below. Sits under the startup splash. */
 .onb{position:fixed;inset:0;z-index:2147482000;display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow:auto;-webkit-app-region:no-drag}
-.onb-backdrop{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,#29452f 0,transparent 58%),radial-gradient(ellipse at 15% 0%,#24382c 0,transparent 55%),#111415}
+.onb-backdrop{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 30%,var(--line) 0,transparent 58%),radial-gradient(ellipse at 15% 0%,var(--hover) 0,transparent 55%),var(--bg)}
 .onb-stage{position:relative;display:flex;flex-direction:column;align-items:center;gap:14px;width:min(560px,100%);margin:auto}
 .onb-card{width:100%;display:flex;flex-direction:column;gap:16px}
 /* Petya's lines: a comic speech bubble with its tail up to him; a thought cloud while he guesses or waits. */
-.onb-say{position:relative;align-self:center;max-width:100%;margin:6px 0 0;padding:13px 22px;border-radius:22px;background:#f0f2ed;color:#172216;text-align:center;font-size:19px;line-height:1.35;font-weight:600;letter-spacing:-.3px;box-shadow:0 8px 22px #0007;transform-origin:50% 0}
-.onb-say::before{content:"";position:absolute;left:50%;top:-11px;margin-left:-11px;border:solid transparent;border-width:0 11px 12px;border-bottom-color:#f0f2ed}
-.onb-say.think{background:#dfe8d6;color:#2f3d2c;font-weight:500;font-style:italic;border-radius:28px}
-.onb-say.think::before{top:-15px;margin-left:-6px;width:12px;height:12px;border:0;border-radius:50%;background:#dfe8d6}
-.onb-say.think::after{content:"";position:absolute;left:50%;top:-25px;margin-left:2px;width:7px;height:7px;border-radius:50%;background:#dfe8d6}
+.onb-say{position:relative;align-self:center;max-width:100%;margin:6px 0 0;padding:13px 22px;border-radius:22px;background:var(--ink);color:var(--on-accent);text-align:center;font-size:19px;line-height:1.35;font-weight:600;letter-spacing:-.3px;box-shadow:0 8px 22px #0007;transform-origin:50% 0}
+.onb-say::before{content:"";position:absolute;left:50%;top:-11px;margin-left:-11px;border:solid transparent;border-width:0 11px 12px;border-bottom-color:var(--ink)}
+.onb-say.think{background:var(--ink);color:var(--hover);font-weight:500;font-style:italic;border-radius:28px}
+.onb-say.think::before{top:-15px;margin-left:-6px;width:12px;height:12px;border:0;border-radius:50%;background:var(--ink)}
+.onb-say.think::after{content:"";position:absolute;left:50%;top:-25px;margin-left:2px;width:7px;height:7px;border-radius:50%;background:var(--ink)}
 .onb-say.pop{animation:onb-pop .32s cubic-bezier(.34,1.56,.64,1)}
 @keyframes onb-pop{from{transform:scale(.85);opacity:.3}}
 .onb-content{display:flex;flex-direction:column;gap:12px}
 .onb-content.onb-enter{animation:onb-enter .35s ease both}
 .onb-row{display:flex;gap:10px}
 .onb-input{flex:1;min-width:0;font-size:16px;padding:12px 14px;border-radius:11px}
-.onb-guess{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;border-color:#647f4e;color:#d0f596;background:#22301f}
+.onb-guess{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;border-color:#647f4e;color:var(--accent);background:var(--panel-2)}
 .onb-guess::before{content:"";width:15px;height:15px;border:2px solid currentColor;border-radius:50%;box-shadow:5px 5px 0 -4px currentColor;transform:translate(-1px,-1px)}
-.onb-guess:hover{background:#2c3d27}
-.onb-status{margin:0;min-height:22px;color:#abb4af;font-size:13px}
-.onb-status.found{color:#d0f596}.onb-status.found .onb-detail{color:#abb4af}
+.onb-guess:hover{background:var(--hover)}
+.onb-status{margin:0;min-height:22px;color:var(--muted);font-size:13px}
+.onb-status.found{color:var(--accent)}.onb-status.found .onb-detail{color:var(--muted)}
 .onb-status.miss{color:#ffcfb8}
 .onb-alternatives{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.onb-alternatives:empty{display:none}
-.onb-or{color:#abb4af;font-size:12px}
+.onb-or{color:var(--muted);font-size:12px}
 .onb-chip{padding:7px 13px;border-radius:999px;font-size:13px}
 .onb-roles{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
 .onb-role{padding:9px 15px}
-.onb-role.on{background:#d0f596;border-color:#d0f596;color:#172216;font-weight:650}
-.onb-permission{background:#1b1f20;border:1px solid #303637;border-radius:15px;padding:18px 20px}
-.onb-permission strong{display:block;font-size:16px;color:#f0f2ed}
+.onb-role.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:650}
+.onb-permission{background:var(--panel);border:1px solid var(--hover);border-radius:15px;padding:18px 20px}
+.onb-permission strong{display:block;font-size:16px;color:var(--ink)}
 .onb-permission p{margin:6px 0 0;font-size:13px}
 .onb-how{color:#c9d3cd}
 .onb-summary{list-style:none;margin:0 auto;padding:0;color:#c9d3cd;text-align:center}
@@ -36,8 +36,8 @@
 .onb-actions{display:flex;align-items:center;gap:10px;margin-top:8px}
 .onb-dots{display:flex;gap:6px;margin-right:auto}
 .onb-back+.onb-dots{margin-left:4px}
-.onb-dots i{width:7px;height:7px;border-radius:50%;background:#414847;transition:background .2s,width .2s}
-.onb-dots i.done{background:#647f4e}.onb-dots i.on{width:20px;border-radius:4px;background:#d0f596}
+.onb-dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .2s,width .2s}
+.onb-dots i.done{background:#647f4e}.onb-dots i.on{width:20px;border-radius:4px;background:var(--accent)}
 .onb-next{min-width:120px}
 .pa-flying .pa-glow,.pa-flying .pa-shadow,.pa-flying .pa-bubble,.pa-flying .pa-orbit{opacity:0!important;transition:opacity .2s}
 @keyframes onb-enter{from{opacity:0;transform:translateY(8px)}}
@@ -45,14 +45,14 @@
 @media (prefers-reduced-motion:reduce){.onb-content.onb-enter,.onb-say.pop{animation:none}}
 .onb .pa-bubble{display:none}
 /* Team step: found colleagues as checkable rows, and sharing the team into a project's git. */
-.onb-team{display:flex;flex-direction:column;gap:2px;max-height:216px;overflow:auto;padding:6px;border:1px solid #303637;border-radius:13px;background:#151a1a}
-.onb-member{display:flex;align-items:center;gap:10px;margin:0;padding:7px 8px;border-radius:9px;color:#f0f2ed;font-size:14px;cursor:pointer}
-.onb-member:hover{background:#1f2626}
+.onb-team{display:flex;flex-direction:column;gap:2px;max-height:216px;overflow:auto;padding:6px;border:1px solid var(--hover);border-radius:13px;background:var(--panel)}
+.onb-member{display:flex;align-items:center;gap:10px;margin:0;padding:7px 8px;border-radius:9px;color:var(--ink);font-size:14px;cursor:pointer}
+.onb-member:hover{background:var(--panel-2)}
 .onb-member input{width:auto;margin:0;flex-shrink:0}
 .onb-member-name{flex-shrink:0;font-weight:600}
-.onb-member-meta{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8f9a94;font-size:12px}
-.onb-share{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0;padding:12px 14px;border:1px dashed #4b5a46;border-radius:13px;color:#d6dfd2;font-size:13px}
+.onb-member-meta{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:12px}
+.onb-share{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:0;padding:12px 14px;border:1px dashed #4b5a46;border-radius:13px;color:var(--ink);font-size:13px}
 .onb-share input{width:auto;margin:0}
 .onb-share select{width:auto;max-width:220px;margin:0;padding:6px 10px}
-.onb-share small{flex-basis:100%;color:#8f9a94;font-size:12px}
+.onb-share small{flex-basis:100%;color:var(--muted);font-size:12px}
 .onb-go{flex-shrink:0;min-width:116px}

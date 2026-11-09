@@ -3,43 +3,43 @@
 .funnel-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
 .funnel-step{display:flex;flex-direction:column;gap:4px;padding:6px 0 2px}
 .funnel-step-head{display:flex;align-items:baseline;gap:8px;font-size:13px;min-width:0}
-.funnel-n{flex:none;width:18px;height:18px;border-radius:50%;background:#ffffff10;color:var(--muted);font-size:11px;display:inline-flex;align-items:center;justify-content:center}
+.funnel-n{flex:none;width:18px;height:18px;border-radius:50%;background:color-mix(in srgb,var(--on) 6%,transparent);color:var(--muted);font-size:11px;display:inline-flex;align-items:center;justify-content:center}
 .funnel-label{flex:1;min-width:0;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
 .funnel-users{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600}
 .funnel-share{font-variant-numeric:tabular-nums;color:var(--muted);width:52px;text-align:right}
-.funnel-track{height:14px;border-radius:4px;background:#ffffff08;margin-left:26px;overflow:hidden}
-.funnel-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,#7f93d6,#9fb2ee)}
-.funnel-gap{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin-left:26px;padding:2px 8px;font-size:12px;color:var(--muted);border-left:2px solid #ffffff14}
-.funnel-gap.worst{border-left-color:#f0b4a8;background:#f0b4a80d;border-radius:0 6px 6px 0}
+.funnel-track{height:14px;border-radius:4px;background:color-mix(in srgb,var(--on) 3%,transparent);margin-left:26px;overflow:hidden}
+.funnel-bar{height:100%;border-radius:4px;background:linear-gradient(90deg,#7f93d6,var(--info))}
+.funnel-gap{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;margin-left:26px;padding:2px 8px;font-size:12px;color:var(--muted);border-left:2px solid color-mix(in srgb,var(--on) 8%,transparent)}
+.funnel-gap.worst{border-left-color:var(--alert);background:color-mix(in srgb,var(--alert) 5%,transparent);border-radius:0 6px 6px 0}
 .funnel-arrow{color:var(--muted)}
-.funnel-lost{color:#f0b4a8;font-variant-numeric:tabular-nums;font-weight:600}
+.funnel-lost{color:var(--alert);font-variant-numeric:tabular-nums;font-weight:600}
 .funnel-lost-n{font-variant-numeric:tabular-nums}
 .funnel-time b{font-weight:500;color:var(--ink)}
-.funnel-worst{margin-left:auto;color:#f0b4a8;font-size:11px;text-transform:lowercase}
+.funnel-worst{margin-left:auto;color:var(--alert);font-size:11px;text-transform:lowercase}
 .funnel-section{font-size:12px;color:var(--muted)}
 .funnel-segments{display:flex;flex-direction:column;gap:8px}
 .funnel-seg-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .funnel-seg-chips{display:flex;gap:5px;flex-wrap:wrap}
 .funnel-seg-chips .kit-chip{min-height:22px;font-size:11.5px;padding:1px 9px}
-.funnel-seg-chips .kit-chip[aria-pressed="true"]{color:var(--ink);border-color:#d0f59680;background:#d0f5960f}
+.funnel-seg-chips .kit-chip[aria-pressed="true"]{color:var(--ink);border-color:color-mix(in srgb,var(--accent) 50%,transparent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
 .funnel-seg-table{width:100%;border-collapse:separate;border-spacing:4px 3px;font-size:12px;font-variant-numeric:tabular-nums}
 .funnel-seg-table th{font-weight:500;color:var(--muted);text-align:left;padding:0 4px}
 .funnel-seg-table th.num,.funnel-seg-table td.num{text-align:right}
 .funnel-seg-table th.step{text-align:center;width:52px}
 .funnel-seg-table td{padding:3px 4px;color:var(--ink);white-space:nowrap}
 .funnel-seg-table td.name{max-width:150px;overflow:hidden;text-overflow:ellipsis}
-.funnel-seg-table td.cell{background:#ffffff06;border-radius:4px;padding:0;height:16px;vertical-align:middle}
-.funnel-mini{display:block;height:10px;margin:0 3px;border-radius:3px;background:#9fb2ee}
+.funnel-seg-table td.cell{background:color-mix(in srgb,var(--on) 2%,transparent);border-radius:4px;padding:0;height:16px;vertical-align:middle}
+.funnel-mini{display:block;height:10px;margin:0 3px;border-radius:3px;background:var(--info)}
 .funnel-seg-table td.conv{font-weight:600}
-.funnel-seg-table td.conv.better{color:#c9ed9d}
-.funnel-seg-table td.conv.worse{color:#f0b4a8}
+.funnel-seg-table td.conv.better{color:var(--ok)}
+.funnel-seg-table td.conv.worse{color:var(--alert)}
 .funnel-note{margin:0;font-size:12px;color:var(--muted)}
-.funnel-error{margin:0;font-size:13px;color:#f0b4a8}
+.funnel-error{margin:0;font-size:13px;color:var(--alert)}
 .funnel-sql{display:flex;flex-direction:column;gap:8px}
 .funnel-what{margin:0;font-size:13px;color:var(--muted)}
 .funnel-what b{color:var(--ink);font-weight:500;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .funnel-chips{display:flex;flex-wrap:wrap;align-items:center;gap:4px}
-.funnel-chip{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;padding:2px 7px;border-radius:6px;background:#ffffff0c;color:var(--ink)}
+.funnel-chip{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;padding:2px 7px;border-radius:6px;background:color-mix(in srgb,var(--on) 5%,transparent);color:var(--ink)}
 .funnel-chev{color:var(--muted);font-size:11px}
 .funnel-code{margin:0;max-height:220px;overflow:auto;padding:10px 12px;border-radius:8px;background:#00000038;color:var(--ink);font:11.5px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}
 .funnel-est{margin:0;font-size:12px;color:var(--muted)}

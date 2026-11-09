@@ -1,15 +1,15 @@
 .subs-card{width:620px;max-width:100%;margin:12px 0}
 .subs-body{display:flex;flex-direction:column;gap:10px}
 .subs-totals{display:flex;gap:8px;flex-wrap:wrap}
-.subs-tile{flex:1;min-width:130px;display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:10px;background:#ffffff06;border:1px solid var(--line)}
+.subs-tile{flex:1;min-width:130px;display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:10px;background:color-mix(in srgb,var(--on) 2%,transparent);border:1px solid var(--line)}
 .subs-tile strong{font-size:20px;font-weight:650;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .subs-tile small{font-size:11.5px;color:var(--muted);line-height:1.3}
-.subs-tile.is-soon strong{color:#e5ce8c}
+.subs-tile.is-soon strong{color:var(--warn)}
 .subs-h{margin:4px 0 0;font-size:11px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)}
 .subs-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
 .subs-row{display:grid;grid-template-columns:minmax(110px,1.4fr) 92px 96px 100px 98px;gap:10px;align-items:center;padding:6px 8px;border-radius:9px;font-size:13px}
-.subs-row:hover{background:#ffffff05}
-.subs-row.is-soon{background:#e5ce8c0f}
+.subs-row:hover{background:color-mix(in srgb,var(--on) 2%,transparent)}
+.subs-row.is-soon{background:color-mix(in srgb,var(--warn) 6%,transparent)}
 .subs-row.is-lapsed{opacity:.6}
 .subs-name{display:flex;flex-direction:column;min-width:0}
 .subs-name b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
@@ -17,7 +17,7 @@
 .subs-price,.subs-next{display:flex;flex-direction:column;min-width:0}
 .subs-price span{font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap}
 .subs-next span{white-space:nowrap}
-.subs-row.is-soon .subs-next span{color:#e5ce8c;font-weight:600}
+.subs-row.is-soon .subs-next span{color:var(--warn);font-weight:600}
 .subs-spark{color:var(--muted);overflow:visible}
 .subs-tools{display:flex;gap:4px;justify-content:flex-end;flex-wrap:wrap}
 .subs-tool{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;padding:0;border-radius:8px;color:var(--muted)}
@@ -26,11 +26,11 @@
 .subs-renewal{display:grid;grid-template-columns:82px minmax(100px,1fr) 80px 172px 28px;gap:10px;align-items:center;padding:6px 8px;border-radius:9px;font-size:13px}
 .subs-renewal b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--mono,ui-monospace,Menlo,monospace);font-size:12.5px}
 .subs-kind{font-size:11px;color:var(--muted)}
-.subs-life{height:6px;border-radius:3px;background:#ffffff0a;overflow:hidden}
-.subs-life span{display:block;height:100%;background:#c9ed9d;border-radius:3px}
-.subs-renewal.is-soon .subs-life span{background:#e5ce8c}
-.subs-renewal.is-over .subs-life span{background:#f0b4a8}
-.subs-renewal.is-soon .subs-when{color:#e5ce8c}
+.subs-life{height:6px;border-radius:3px;background:color-mix(in srgb,var(--on) 4%,transparent);overflow:hidden}
+.subs-life span{display:block;height:100%;background:var(--ok);border-radius:3px}
+.subs-renewal.is-soon .subs-life span{background:var(--warn)}
+.subs-renewal.is-over .subs-life span{background:var(--alert)}
+.subs-renewal.is-soon .subs-when{color:var(--warn)}
 .subs-when{font-size:12px;color:var(--muted);white-space:nowrap}
 .subs-more summary{cursor:pointer;font-size:12px;color:var(--muted)}
 @media (max-width:560px){.subs-row{grid-template-columns:minmax(90px,1fr) 80px 80px}.subs-spark,.subs-tools{display:none}.subs-renewal{grid-template-columns:70px 1fr auto}.subs-life{display:none}}

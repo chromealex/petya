@@ -1,9 +1,9 @@
 .reminder-card{width:620px;max-width:100%;margin:12px 0}
 .rem-body{display:flex;flex-direction:column;gap:12px}
-.rem-icon{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;background:#ffffff0a;color:var(--muted)}
-.rem-icon-clock,.rem-icon-repeat{color:#c9b8ef}
-.rem-icon-task{color:#9cc3f0}.rem-icon-presence{color:#c9ed9d}.rem-icon-calendar{color:#e5ce8c}.rem-icon-build{color:#f0c8a8}
-.rem-understood{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:12px;background:#ffffff06;border:1px solid var(--line,#ffffff14)}
+.rem-icon{flex:none;display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:9px;background:color-mix(in srgb,var(--on) 4%,transparent);color:var(--muted)}
+.rem-icon-clock,.rem-icon-repeat{color:var(--violet)}
+.rem-icon-task{color:var(--info)}.rem-icon-presence{color:var(--ok)}.rem-icon-calendar{color:var(--warn)}.rem-icon-build{color:#f0c8a8}
+.rem-understood{display:flex;gap:12px;align-items:flex-start;padding:12px;border-radius:12px;background:color-mix(in srgb,var(--on) 2%,transparent);border:1px solid var(--line,color-mix(in srgb,var(--on) 8%,transparent))}
 .rem-understood.deleted .rem-big{text-decoration:line-through;color:var(--muted)}
 .rem-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
 .rem-big{font-size:16px;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
@@ -11,34 +11,34 @@
 .rem-absolute{font-size:12px;color:var(--muted)}
 .rem-actions{flex:none;display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 .rem-actions button,.rem-link{min-height:28px;padding:3px 10px;border-radius:8px;font-size:12.5px}
-.rem-link{display:inline-flex;align-items:center;color:var(--ink);border:1px solid #ffffff1f;text-decoration:none}
-.rem-link:hover{border-color:#ffffff3a}
-.rem-edit-button{display:inline-flex;align-items:center;justify-content:center;width:30px;padding:0!important;background:transparent;border:1px solid #ffffff1f;color:var(--muted)}
+.rem-link{display:inline-flex;align-items:center;color:var(--ink);border:1px solid color-mix(in srgb,var(--on) 12%,transparent);text-decoration:none}
+.rem-link:hover{border-color:color-mix(in srgb,var(--on) 23%,transparent)}
+.rem-edit-button{display:inline-flex;align-items:center;justify-content:center;width:30px;padding:0!important;background:transparent;border:1px solid color-mix(in srgb,var(--on) 12%,transparent);color:var(--muted)}
 .rem-edit-button svg{width:15px;height:15px}
 .rem-groups{display:flex;flex-direction:column;gap:10px}
 .rem-group-title{margin:0 0 4px;font-size:11.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
-.rem-group[data-group="fired"] .rem-group-title{color:#f0b4a8}
+.rem-group[data-group="fired"] .rem-group-title{color:var(--alert)}
 .rem-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
-.rem-row{display:flex;gap:10px;align-items:center;padding:7px 8px;border-radius:10px;background:#ffffff05}
-.rem-row.fired{background:#f0b4a80f;box-shadow:inset 3px 0 0 #f0b4a8}
-.rem-row.focus{outline:1px solid #ffffff22}
+.rem-row{display:flex;gap:10px;align-items:center;padding:7px 8px;border-radius:10px;background:color-mix(in srgb,var(--on) 2%,transparent)}
+.rem-row.fired{background:color-mix(in srgb,var(--alert) 6%,transparent);box-shadow:inset 3px 0 0 var(--alert)}
+.rem-row.focus{outline:1px solid color-mix(in srgb,var(--on) 13%,transparent)}
 .rem-text{font-size:13.5px;color:var(--ink);overflow-wrap:anywhere}
 .rem-sub{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
-.rem-check{color:#e5ce8c}
-.rem-tag{display:inline-block;padding:0 6px;border-radius:999px;border:1px solid #ffffff1f;font-size:11px;color:var(--muted)}
-.rem-tag.fired{color:#f0b4a8;border-color:#f0b4a840}
+.rem-check{color:var(--warn)}
+.rem-tag{display:inline-block;padding:0 6px;border-radius:999px;border:1px solid color-mix(in srgb,var(--on) 12%,transparent);font-size:11px;color:var(--muted)}
+.rem-tag.fired{color:var(--alert);border-color:color-mix(in srgb,var(--alert) 25%,transparent)}
 .rem-fired-text{font-size:12.5px;color:var(--ink);opacity:.85}
-.rem-error{font-size:12px;color:#f0b4a8}
+.rem-error{font-size:12px;color:var(--alert)}
 .rem-empty{margin:0;font-size:13px;color:var(--muted)}
 .rem-strip{padding:2px 2px 16px}
-.rem-strip-track{position:relative;height:10px;border-radius:6px;background:#ffffff0c}
-.rem-strip-past{position:absolute;left:0;top:0;bottom:0;border-radius:6px 0 0 6px;background:#ffffff0d}
+.rem-strip-track{position:relative;height:10px;border-radius:6px;background:color-mix(in srgb,var(--on) 5%,transparent)}
+.rem-strip-past{position:absolute;left:0;top:0;bottom:0;border-radius:6px 0 0 6px;background:color-mix(in srgb,var(--on) 5%,transparent)}
 .rem-strip-now{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:var(--green,#4fb286);border-radius:1px}
-.rem-strip-dot{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:#c9b8ef;box-shadow:0 0 0 2px var(--bg,#151917)}
-.rem-strip-dot.past{background:#8a8f8c}.rem-strip-dot.fired{background:#f0b4a8}
+.rem-strip-dot{position:absolute;top:50%;width:12px;height:12px;margin:-6px 0 0 -6px;border-radius:50%;background:var(--violet);box-shadow:0 0 0 2px var(--bg,var(--panel))}
+.rem-strip-dot.past{background:var(--muted)}.rem-strip-dot.fired{background:var(--alert)}
 .rem-strip-hour{position:absolute;top:14px;transform:translateX(-50%);font-size:10px;color:var(--muted);white-space:nowrap}
 .rem-strip-hour.start{transform:none}.rem-strip-hour.end{transform:translateX(-100%)}
-.rem-edit{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px;border-radius:10px;background:#ffffff08}
+.rem-edit{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px;border-radius:10px;background:color-mix(in srgb,var(--on) 3%,transparent)}
 .rem-edit input[type=text]{flex:1 1 220px;min-width:0}
 .rem-edit input{min-height:30px}
 .rem-more summary{cursor:pointer;font-size:12.5px;color:var(--muted)}

@@ -17,7 +17,7 @@
 #home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary{display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px;white-space:nowrap;list-style:none;cursor:pointer}
 #home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary::-webkit-details-marker{display:none}
 #home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary:hover,#home .chat-sticky-header>:is(.chat-project-context,.important-panel)[open]>summary{color:var(--ink);border-color:var(--muted)}
-#home .chat-sticky-header>.important-panel>summary{border-color:#e8bc6540;color:#e8bc65}
+#home .chat-sticky-header>.important-panel>summary{border-color:color-mix(in srgb,var(--warn) 25%,transparent);color:var(--warn)}
 #home .chat-sticky-header>.important-panel>summary::before{content:'★';font-size:11px}
 #home .chat-sticky-header>:is(.chat-project-context,.important-panel)>:is(.chat-context-body,.important-list){position:absolute;top:calc(100% + 6px);right:0;z-index:20;width:min(460px,calc(100vw - 120px));max-height:50vh;overflow:auto;margin:0;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:0 12px 32px #0008;box-sizing:border-box}
 @media(max-width:700px){#home .chat-sticky-header>.chat-project-context{margin-left:0}}
@@ -41,10 +41,10 @@
 #home .chat-heading .chat-project-badge{flex:0 1 auto;max-width:220px;min-height:24px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;background:transparent;color:var(--muted);font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #home .chat-heading .chat-project-badge:hover{color:var(--ink);border-color:var(--muted)}
 #home .chat-heading .chat-title-label{display:block;flex:0 1 auto;min-width:0;min-height:28px;padding:2px 6px;border:0;border-radius:6px;background:transparent;color:var(--ink);font-size:15px;font-weight:600;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}
-#home .chat-heading .chat-title-label:hover:not(:disabled){background:#ffffff0d}
+#home .chat-heading .chat-title-label:hover:not(:disabled){background:color-mix(in srgb,var(--on) 5%,transparent)}
 #home .chat-heading .chat-title-label:disabled{cursor:default;opacity:1;color:var(--muted)}
 #home .chat-heading .chat-heading-more{order:10;margin-left:auto;opacity:1;pointer-events:auto;display:grid;place-items:center;width:30px;height:28px;min-height:28px;padding:0;border:0;border-radius:6px;background:transparent;color:var(--muted)}
-#home .chat-heading .chat-heading-more:hover{color:var(--ink);background:#ffffff0d}
+#home .chat-heading .chat-heading-more:hover{color:var(--ink);background:color-mix(in srgb,var(--on) 5%,transparent)}
 #home .chat-heading .chat-heading-more[hidden]{display:none}
 #home .chat-heading #project-git-open{display:inline-flex;align-items:center;gap:5px}
 
@@ -65,7 +65,7 @@
 /* --- Navigation rail: optional expanded mode with section names. --- */
 body>aside .rail-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 body>aside .rail-expand{display:grid;place-items:center;width:44px;height:36px;min-height:36px;margin-top:12px;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted)}
-body>aside .rail-expand:hover{color:var(--ink);background:#ffffff0d}
+body>aside .rail-expand:hover{color:var(--ink);background:color-mix(in srgb,var(--on) 5%,transparent)}
 @media(min-width:701px){
  body.rail-expanded{padding-left:200px}
  body.rail-expanded>aside{width:200px}
@@ -80,9 +80,9 @@ body>aside .rail-expand:hover{color:var(--ink);background:#ffffff0d}
 /* --- Project list: new chat is the primary action; project add is a header icon. --- */
 .project-sidebar-head-actions{display:flex;align-items:center;gap:2px}
 .project-sidebar-head .project-add{display:grid;place-items:center;width:30px;height:30px;min-height:30px;padding:0;border-radius:6px;color:var(--muted)}
-.project-sidebar-head .project-add:hover{color:var(--ink);background:#ffffff0d}
-.project-sidebar>button.project-new-chat-main{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;font-size:13px;font-weight:600;border:1px solid #d0f59640;background:#d0f59614;color:var(--green);border-radius:10px}
-.project-sidebar>button.project-new-chat-main:hover{background:#d0f59624}
+.project-sidebar-head .project-add:hover{color:var(--ink);background:color-mix(in srgb,var(--on) 5%,transparent)}
+.project-sidebar>button.project-new-chat-main{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;font-size:13px;font-weight:600;border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--green);border-radius:10px}
+.project-sidebar>button.project-new-chat-main:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}
 .project-new-chat-main>span{flex:1;text-align:left}
 .project-new-chat-main>kbd{font:inherit;font-size:11px;font-weight:400;color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:0 5px}
 /* Last activity sits at the end of the row; the «…» menu takes its place on hover. */
@@ -97,11 +97,11 @@ body>aside .rail-expand:hover{color:var(--ink);background:#ffffff0d}
 /* --- Materials: preview lines and an icon action. --- */
 .context-item>.context-preview{grid-column:1 / -1;margin:0;color:var(--muted);font-size:13px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .context-item>button.context-ask{display:grid;place-items:center;width:36px;height:36px;min-height:36px;padding:0;border-radius:8px;color:var(--muted)}
-.context-item>button.context-ask:hover{color:var(--green);border-color:#d0f59660}
+.context-item>button.context-ask:hover{color:var(--green);border-color:color-mix(in srgb,var(--accent) 38%,transparent)}
 
 /* --- Team: initials, header actions, save strip only with unsaved edits. --- */
 .team-member summary{display:flex;align-items:center;gap:12px}
-.team-avatar{flex:0 0 32px;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#2c3a2a;color:var(--green);font-size:12px;font-weight:600;letter-spacing:.02em}
+.team-avatar{flex:0 0 32px;display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--hover);color:var(--green);font-size:12px;font-weight:600;letter-spacing:.02em}
 #team-form:not(.is-dirty) #team-save{display:none}
 #team-form.is-dirty .ux-save-strip{position:sticky;bottom:12px;z-index:5;box-shadow:0 8px 24px #0007}
 #team .ux-filters>button{flex:0 0 auto;margin:0;align-self:center}
@@ -111,8 +111,8 @@ body>aside .rail-expand:hover{color:var(--ink);background:#ffffff0d}
 .ux-filters.is-empty:not(:has(>button)){display:none}
 
 /* --- File pickers look and size like the neighbouring buttons. --- */
-label.file-label{display:inline-flex;align-items:center;min-height:38px;padding:8px 12px;border:1px solid #414847;border-radius:9px;background:#252b2a;color:var(--ink);font-size:14px;font-weight:400;line-height:1.45;vertical-align:middle}
-label.file-label:hover{background:#2e3533}
+label.file-label{display:inline-flex;align-items:center;min-height:38px;padding:8px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);color:var(--ink);font-size:14px;font-weight:400;line-height:1.45;vertical-align:middle}
+label.file-label:hover{background:var(--hover)}
 
 /* --- «Словарь и команды»: the undo action names what it reverts. --- */
 #learning .learning-undo{display:inline-flex;align-items:center;gap:6px;font-size:13px}
@@ -126,7 +126,7 @@ label.file-label:hover{background:#2e3533}
 #settings .settings-start[hidden]{display:none}
 
 /* --- Top bar status: short label, full text in a popover. --- */
-.chrome-status-details{position:fixed;z-index:80;width:min(360px,calc(100vw - 16px));padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:#232b27;box-shadow:0 12px 32px #0008}
+.chrome-status-details{position:fixed;z-index:80;width:min(360px,calc(100vw - 16px));padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);box-shadow:0 12px 32px #0008}
 .chrome-status-details p{margin:0 0 10px;font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
 .chrome-status-details button{min-height:32px;padding:5px 10px;font-size:13px}
 
@@ -146,7 +146,7 @@ label.file-label:hover{background:#2e3533}
 /* --- Subprojects: nested groups under their parent, with a guide line. --- */
 /* Tree: one dashed line runs down from the folder icon; each chat, subfolder and button gets a dashed
    connector that starts a little off the line (no corner) and ends exactly at its field. The last child masks the line below its connector. */
-.project-sidebar-tree{--tree-line:#535c59;--tree-x:12px;--tree-indent:24px;--tree-mid:17px;--tree-gap:0px;--tree-bg:#161b19}
+.project-sidebar-tree{--tree-line:#535c59;--tree-x:12px;--tree-indent:24px;--tree-mid:17px;--tree-gap:0px;--tree-bg:var(--panel)}
 .project-subfolders:empty{display:none}
 .project-subfolders{margin:0;padding:0;border:0}
 .project-sidebar-group{position:relative}
@@ -190,12 +190,12 @@ label.file-label:hover{background:#2e3533}
 .company-tab{display:inline-flex;align-items:center;gap:8px}
 .company-tab>span:last-child{overflow:hidden;text-overflow:ellipsis}
 .company-tab>.company-icon{flex:0 0 20px;width:20px;height:20px;border-radius:5px;object-fit:cover}
-.company-tab>span.company-icon{display:grid;place-items:center;background:#2c3a2a;color:var(--green);font-size:11px;font-weight:600;line-height:1}
+.company-tab>span.company-icon{display:grid;place-items:center;background:var(--hover);color:var(--green);font-size:11px;font-weight:600;line-height:1}
 .company-tab:not([aria-current])>.company-icon{opacity:.8}
 /* Team card: how the person appears in each service */
 .team-accounts{display:flex;flex-direction:column;gap:8px;margin-top:4px}
 .team-accounts-title{font-size:12px;color:var(--muted)}
-.team-account{display:flex;align-items:flex-start;gap:12px;padding:8px 10px;border:1px solid #ffffff12;border-radius:8px}
+.team-account{display:flex;align-items:flex-start;gap:12px;padding:8px 10px;border:1px solid color-mix(in srgb,var(--on) 7%,transparent);border-radius:8px}
 .team-account-service{flex:0 0 84px;font-size:13px;font-weight:600}
 .team-account-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
 .team-account dl{display:grid;grid-template-columns:84px 1fr;gap:2px 10px;margin:0;font-size:12px;min-width:0}
@@ -210,37 +210,37 @@ label.file-label:hover{background:#2e3533}
 .team-account-tools button{min-height:26px;padding:2px 8px;font-size:12px}
 .team-avatar.has-photo{padding:0;overflow:hidden;background:none}.team-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
 .project-icon-row{display:flex;align-items:center;gap:10px}.project-icon-preview{width:32px;height:32px;border-radius:7px;object-fit:cover}.project-icon-row .small{margin:0;overflow-wrap:anywhere}.project-icon-box .actions{margin-top:8px}
-.ux-company-row button.danger{color:#f0b4a8;border-color:#f0b4a840}.ux-company-row button.danger:hover{background:#f0b4a814;border-color:#f0b4a880}
+.ux-company-row button.danger{color:var(--alert);border-color:color-mix(in srgb,var(--alert) 25%,transparent)}.ux-company-row button.danger:hover{background:color-mix(in srgb,var(--alert) 8%,transparent);border-color:color-mix(in srgb,var(--alert) 50%,transparent)}
 /* Rule: «Удалить» is a red trash-can icon button everywhere (AGENTS.md → «Interface rules»). */
 button.delete-button,.material-delete.delete-button{--delete:#ff7b6b;display:inline-grid;place-items:center;flex:0 0 auto;width:32px;height:32px;min-height:32px;padding:0!important;border:1px solid #ff7b6b40;border-radius:8px;background:#ff7b6b0d;color:var(--delete)}
 button.delete-button:hover,button.delete-button:focus-visible{border-color:#ff7b6b99;background:#ff7b6b1f;color:#ff9c8f}
 button.delete-button:disabled{opacity:.5}
 button.delete-button svg{width:16px;height:16px}
-.material-delete.delete-button.confirm{width:auto;padding:0 10px!important;color:#ffd7ce;background:#402b28;border-color:#8c5349}
+.material-delete.delete-button.confirm{width:auto;padding:0 10px!important;color:#ffd7ce;background:var(--hover);border-color:#8c5349}
 /* Team card: photo — one block like the service rows: picture, where it came from, actions; choices open below. */
-.team-photo{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid #ffffff12;border-radius:12px;background:#ffffff04}
+.team-photo{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border:1px solid color-mix(in srgb,var(--on) 7%,transparent);border-radius:12px;background:color-mix(in srgb,var(--on) 2%,transparent)}
 .team-photo-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 .team-photo-head>div:not(.team-photo-tools){display:flex;flex-direction:column;gap:2px;min-width:120px;flex:1}
 .team-photo-head strong{font-size:14px}
-.team-photo-current{display:grid;place-items:center;flex:0 0 56px;width:56px;height:56px;border-radius:50%;overflow:hidden;background:#2b3431;font-size:18px;font-weight:600;box-shadow:0 0 0 2px #ffffff14}
+.team-photo-current{display:grid;place-items:center;flex:0 0 56px;width:56px;height:56px;border-radius:50%;overflow:hidden;background:var(--hover);font-size:18px;font-weight:600;box-shadow:0 0 0 2px color-mix(in srgb,var(--on) 8%,transparent)}
 .team-photo-current img{width:100%;height:100%;object-fit:cover}
 .team-photo-tools{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}.team-photo-tools button{min-height:30px;padding:4px 12px;font-size:12px}
-.team-photo-choices{display:flex;gap:10px;flex-wrap:wrap;padding-top:10px;border-top:1px solid #ffffff0d}
-.team-photo-choice{display:flex;flex-direction:column;align-items:center;gap:6px;width:84px;padding:10px 6px 8px;border:1px solid #ffffff14;border-radius:12px;background:#ffffff05;font-size:11px;color:var(--muted);cursor:pointer}
-.team-photo-choice:hover{border-color:#ffffff30;color:var(--ink)}
+.team-photo-choices{display:flex;gap:10px;flex-wrap:wrap;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--on) 5%,transparent)}
+.team-photo-choice{display:flex;flex-direction:column;align-items:center;gap:6px;width:84px;padding:10px 6px 8px;border:1px solid color-mix(in srgb,var(--on) 8%,transparent);border-radius:12px;background:color-mix(in srgb,var(--on) 2%,transparent);font-size:11px;color:var(--muted);cursor:pointer}
+.team-photo-choice:hover{border-color:color-mix(in srgb,var(--on) 19%,transparent);color:var(--ink)}
 .team-photo-choice img{width:48px;height:48px;border-radius:50%;object-fit:cover}
-.team-photo-choice[aria-pressed="true"]{border-color:#d0f59699;background:#d0f59610;color:var(--green)}
+.team-photo-choice[aria-pressed="true"]{border-color:color-mix(in srgb,var(--accent) 60%,transparent);background:color-mix(in srgb,var(--accent) 6%,transparent);color:var(--green)}
 /* Team card: projects picker */
 .team-projects{position:relative;margin-top:6px}
-.team-project-field{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:40px;padding:4px 8px;border:1px solid #414847;border-radius:8px;background:#121616}
+.team-project-field{display:flex;flex-wrap:wrap;gap:6px;align-items:center;min-height:40px;padding:4px 8px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
 .team-project-field:focus-within{border-color:var(--green)}
 .team-project-field input{flex:1;min-width:140px;border:0;background:transparent;padding:6px 2px;outline:none}
-.team-project-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 4px 2px 10px;border-radius:999px;background:#d0f59614;border:1px solid #d0f59640;color:var(--ink);font-size:13px}
+.team-project-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 4px 2px 10px;border-radius:999px;background:color-mix(in srgb,var(--accent) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent) 25%,transparent);color:var(--ink);font-size:13px}
 .team-project-chip button{width:20px;height:20px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--muted);line-height:1}
-.team-project-chip button:hover{color:var(--ink);background:#ffffff14}
-.team-project-options{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 4px);display:flex;flex-direction:column;padding:4px;border:1px solid var(--line);border-radius:10px;background:#232b27;box-shadow:0 12px 28px #0008;max-height:260px;overflow:auto}
+.team-project-chip button:hover{color:var(--ink);background:color-mix(in srgb,var(--on) 8%,transparent)}
+.team-project-options{position:absolute;z-index:20;left:0;right:0;top:calc(100% + 4px);display:flex;flex-direction:column;padding:4px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);box-shadow:0 12px 28px #0008;max-height:260px;overflow:auto}
 .team-project-options button{text-align:left;min-height:32px;padding:6px 10px;border:0;border-radius:6px;background:transparent;font-size:13px}
-.team-project-options button:hover,.team-project-options button:focus-visible{background:#ffffff10}
+.team-project-options button:hover,.team-project-options button:focus-visible{background:color-mix(in srgb,var(--on) 6%,transparent)}
 .team-project-free{color:var(--green)}
 /* Team card: birthday */
 .team-birthday{display:flex;flex-direction:column;gap:4px;margin-top:6px}
@@ -266,7 +266,7 @@ input,textarea,select,[contenteditable]:not([contenteditable="false"]),pre,code,
 .project-edit-dialog form>h2{padding:20px 24px 14px;border-bottom:1px solid var(--line)}
 .project-editor-body{display:flex;flex-direction:column;gap:18px;padding:18px 24px 22px;overflow:auto;min-height:0;flex:1}
 .project-editor-footer{display:flex;align-items:center;gap:12px;padding:14px 24px;border-top:1px solid var(--line);background:var(--panel)}
-.project-editor-footer [role=status]{flex:1;margin:0;color:#f0b4a8;font-size:13px}
+.project-editor-footer [role=status]{flex:1;margin:0;color:var(--alert);font-size:13px}
 .project-editor-footer .project-editor-actions{margin-left:auto}
 .project-edit-dialog .project-folder-row{display:flex;flex-direction:column;align-items:stretch;gap:8px;font-size:13px}
 .project-folder-list{display:flex;flex-direction:column;gap:4px}
@@ -318,3 +318,22 @@ input,textarea,select,[contenteditable]:not([contenteditable="false"]),pre,code,
 .team-removed{padding:10px 14px}.team-removed>summary{cursor:pointer;color:var(--muted);font-size:13px}.team-removed .small{margin:8px 0 6px}
 .team-removed-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}.team-removed-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;border-top:1px solid var(--line);font-size:13px}.team-removed-list li:first-child{border-top:0}
 .team-removed-list button{min-height:28px;padding:2px 10px;font-size:12px}
+
+/* «Оформление»: theme chips, preset tiles with a small preview, accent colour, text size. */
+.appearance-modes,.appearance-sizes{display:flex;flex-wrap:wrap;gap:6px}
+.appearance-chip{min-height:30px;padding:4px 12px;border-radius:999px;font-size:13px}
+.appearance-chip.active{background:color-mix(in srgb,var(--accent) 16%,transparent);border-color:color-mix(in srgb,var(--accent) 50%,transparent);color:var(--accent)}
+.appearance-presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-top:14px}
+.appearance-presets-title{grid-column:1/-1;margin:0 0 -2px}
+.appearance-tile{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding:6px;min-height:0;border-radius:12px;background:transparent;text-align:left}
+.appearance-tile.active{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.appearance-preview{display:block;height:64px;border-radius:8px;position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--on) 10%,transparent)}
+.appearance-preview-panel{position:absolute;left:12px;right:12px;top:14px;bottom:14px;border-radius:6px;border-left:3px solid}
+.appearance-preview-line{position:absolute;left:12px;top:12px;width:40%;height:4px;border-radius:2px;opacity:.7}
+.appearance-preview-dot{position:absolute;right:10px;bottom:10px;width:12px;height:12px;border-radius:50%}
+.appearance-tile-name{font-size:12.5px;padding:0 2px}
+.appearance-accent{display:flex;align-items:center;gap:10px;margin-top:14px}
+.appearance-accent label{display:flex;align-items:center;gap:10px;margin:0}
+.appearance-accent input[type=color]{width:40px;height:30px;padding:2px;border-radius:8px;cursor:pointer}
+.appearance-size{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:14px}
+.appearance-size-label{font-size:13px;color:var(--muted)}

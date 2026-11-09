@@ -1,12 +1,12 @@
-.run-card{display:flex;flex-direction:column;gap:10px;width:640px;max-width:100%;box-sizing:border-box;margin:8px 0;padding:14px 16px;border:1px solid #d0f59650;border-radius:12px;background:#ffffff04}
-.run-card[data-state="done"]{border-color:#c9ed9d40}
+.run-card{display:flex;flex-direction:column;gap:10px;width:640px;max-width:100%;box-sizing:border-box;margin:8px 0;padding:14px 16px;border:1px solid color-mix(in srgb,var(--accent) 31%,transparent);border-radius:12px;background:color-mix(in srgb,var(--on) 2%,transparent)}
+.run-card[data-state="done"]{border-color:color-mix(in srgb,var(--ok) 25%,transparent)}
 .run-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .run-kind{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--green)}
 .run-key{font-size:12px;color:var(--green);text-decoration:none}
 .run-version{font-size:12px;color:var(--muted);margin-right:auto}
 .run-title{margin:0;font-size:15px;line-height:1.4}
 .run-summary{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
-.run-progress{height:6px;border-radius:3px;background:#ffffff10;overflow:hidden}.run-progress span{display:block;height:100%;background:var(--green);transition:width .3s}
+.run-progress{height:6px;border-radius:3px;background:color-mix(in srgb,var(--on) 6%,transparent);overflow:hidden}.run-progress span{display:block;height:100%;background:var(--green);transition:width .3s}
 .run-steps{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:8px}
 .run-step{font-size:14px;line-height:1.45}
 .run-step::marker{color:var(--muted)}
@@ -14,11 +14,11 @@
 .run-step-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .run-step-title{font-weight:500}
 .run-step-details,.run-step-check,.run-step-note,.run-step-result{margin:3px 0 0;font-size:13px;color:var(--muted)}
-.run-step-note{color:#e8bc65}
+.run-step-note{color:var(--warn)}
 .run-step-result{white-space:pre-wrap;max-height:120px;overflow:auto;padding:6px 8px;border-radius:6px;background:#0000002e}
 .run-step .kit-actions{margin-top:6px}
 .run-questions{font-size:13px;color:var(--muted)}.run-questions ul{margin:4px 0 0;padding-left:18px}
-.run-actions{padding-top:4px;border-top:1px solid #ffffff10}
+.run-actions{padding-top:4px;border-top:1px solid color-mix(in srgb,var(--on) 6%,transparent)}
 .run-agent{min-height:32px;margin-left:auto;font-size:13px}
 @media(prefers-reduced-motion:reduce){.run-progress span{transition:none}}
 
