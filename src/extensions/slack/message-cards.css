@@ -1,6 +1,32 @@
-.slack-message-list{display:grid;gap:8px;margin:12px 0}.slack-message-card{border:1px solid #ffffff16;border-radius:12px;padding:12px 14px;min-width:0;background:#ffffff03}.slack-message-card header{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px}.slack-message-card header strong{font-size:13px}.slack-message-card time,.slack-message-card a{font-size:11px;color:var(--muted,#a7b1ac)}.slack-message-card a{margin-left:auto}.slack-message-card p{white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.55;margin:8px 0 0}.slack-message-list details>summary{padding:8px 0;font-size:12px;cursor:pointer}.slack-message-list details>section{margin-top:8px}
-.slack-message-card header{margin:0;padding:0;border:0;letter-spacing:normal;text-transform:none;max-width:none}
-
-.slack-message-card a.slack-inline-link{margin:0;font-size:inherit;color:var(--green,#d0f596);text-decoration:underline;text-decoration-color:#d0f59655}.slack-files{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.slack-file{display:inline-flex;align-items:center;gap:8px;border:1px solid #ffffff1c;border-radius:9px;padding:4px 6px 4px 10px;font-size:12px;color:var(--muted,#a7b1ac)}.slack-file button{padding:3px 9px;font-size:11px}
-.slack-message-card .slack-reply-open{margin-left:8px;min-height:26px;padding:2px 10px;font-size:12px}
-.slack-message-card .kit-draft{margin-top:8px}
+/* Slack messages: a quiet feed — avatar, name, channel and time, the text; actions show on hover. */
+.slack-feed{display:flex;flex-direction:column;margin:10px 0;min-width:0}
+.slack-msg{position:relative;display:grid;grid-template-columns:30px minmax(0,1fr);gap:10px;padding:10px 6px;border-radius:10px;min-width:0}
+.slack-msg+.slack-msg,.slack-more>.slack-msg{border-top:1px solid #ffffff0d}
+.slack-msg:hover{background:#ffffff05}
+.slack-msg.mentioned{background:#ffd07d0a}
+.slack-msg>.kit-person,.slack-face{margin-top:1px}
+.slack-face{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#ffffff12;font-size:12px;font-weight:600}
+.slack-main{min-width:0}
+.slack-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0 0 3px;padding-right:120px}
+.slack-author{font-size:13.5px;font-weight:600;color:var(--ink)}
+.slack-channel{font-size:12px;color:var(--muted,#a7b1ac)}
+.slack-head time{font-size:12px;color:var(--muted,#a7b1ac)}
+.slack-head .kit-chip{font-size:11px}
+.slack-text{font-size:13.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;color:#dfe5df;user-select:text}
+.slack-text .slack-link{display:inline-flex;align-items:center;max-width:100%;padding:0 7px;margin:1px 0;border-radius:6px;background:#d0f59612;color:var(--green,#d0f596);text-decoration:none;font-size:13px;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+.slack-text .slack-link:hover{background:#d0f59622}
+.slack-text .slack-mention{color:#a9d3ff;font-weight:500}
+.slack-tools{position:absolute;top:6px;right:6px;display:flex;gap:2px;opacity:0;transition:opacity .12s}
+.slack-msg:hover .slack-tools,.slack-msg:focus-within .slack-tools{opacity:1}
+.slack-tool{display:inline-flex;align-items:center;gap:5px;min-height:28px;padding:0 8px;border:1px solid var(--line,#ffffff1c);border-radius:7px;background:var(--panel,#1b201f);color:var(--ink);font-size:12px}
+.slack-tool:hover{background:#ffffff10}
+.slack-files{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.slack-file{display:inline-flex;align-items:center;gap:8px;border:1px solid #ffffff1c;border-radius:9px;padding:4px 6px 4px 10px;font-size:12px;color:var(--muted,#a7b1ac)}
+.slack-file button{padding:3px 9px;font-size:11px}
+.slack-main .kit-draft{margin-top:8px}
+.slack-more>summary{list-style:none;cursor:pointer;margin:4px 0 0;padding:8px 6px;border-top:1px solid #ffffff0d;font-size:12.5px;color:var(--muted,#a7b1ac)}
+.slack-more>summary::-webkit-details-marker{display:none}
+.slack-more>summary::before{content:'▸ ';}
+.slack-more[open]>summary::before{content:'▾ '}
+.slack-more>summary:hover{color:var(--ink)}
+@media (hover:none){.slack-tools{opacity:1}}
