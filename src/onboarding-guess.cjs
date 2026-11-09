@@ -143,7 +143,9 @@ function appNames(e) {
   if (e.platform === 'darwin') return [...new Set(['/Applications', '/Applications/Utilities', path.join(e.home, 'Applications')].flatMap(dir => e.list(dir).filter(n => n.endsWith('.app')).map(strip)))];
   if (e.platform === 'win32') {
     const dirs = [e.env.ProgramFiles, e.env['ProgramFiles(x86)'], e.env.LOCALAPPDATA && path.join(e.env.LOCALAPPDATA, 'Programs'),
-      e.env.APPDATA && path.join(e.env.APPDATA, 'Microsoft/Windows/Start Menu/Programs'), e.env.ProgramData && path.join(e.env.ProgramData, 'Microsoft/Windows/Start Menu/Programs')].filter(Boolean);
+      e.env.APPDATA && path.join(e.env.APPDATA, 'Microsoft/Windows/Start Menu/Programs'), e.env.ProgramData && path.join(e.env.ProgramData, 'Microsoft/Windows/Start Menu/Programs'),
+      // Per-user installs (messengers, meeting apps) live in the profile, not in Program Files.
+      e.env.LOCALAPPDATA, e.env.APPDATA].filter(Boolean);
     return [...new Set(dirs.flatMap(dir => e.list(dir).map(strip)))];
   }
   return [...new Set(['/usr/share/applications', path.join(e.home, '.local/share/applications'), '/var/lib/flatpak/exports/share/applications', '/var/lib/snapd/desktop/applications'].flatMap(dir => e.list(dir).filter(n => n.endsWith('.desktop')).map(n => strip(n).split('.').at(-1))))];

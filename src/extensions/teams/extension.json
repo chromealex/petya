@@ -23,5 +23,6 @@
     "meeting-source": "meeting-source.cjs",
     "video-meeting": "video-meeting.cjs",
     "meeting-recording": "meeting-recording.cjs"
-  }
+  },
+  "desktop": {"apps": ["Microsoft Teams", "Teams", "Microsoft Teams classic"]}
 }

@@ -13,5 +13,6 @@
   ],
   "settings": false,
   "id": "blender",
-  "feature": "feature.cjs"
+  "feature": "feature.cjs",
+  "desktop": {"apps": ["Blender", "Blender Foundation"], "required": true}
 }

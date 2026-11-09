@@ -16,5 +16,6 @@
   "feature": "feature.cjs",
   "results": {
     "layoutProposal": "renderLayoutProposal"
-  }
+  },
+  "desktop": {"apps": ["Unity Hub", "Unity"], "required": true}
 }

@@ -111,7 +111,9 @@
     const connects=serviceFlags?item.name:(e?.connects||'');
     return {...item,category,enabled,connects,connected,needsConnection:enabled&&connected===false,origin:e?.origin||'bundled',version:e?.version||'',author:e?.author||'',restart:e?.restart||'',
      description:e?.description||descriptions[item.id]||'',examples:e?.examples||groups.moduleExamples?.[item.id]||[],
-     settings:item.service||!!e?.settings};
+     settings:item.service||!!e?.settings,
+     // The program this app works with: found on the computer, and whether the app is useless without it.
+     desktop:e?.desktop?{apps:e.desktop.apps,required:!!e.desktop.required,found:e.desktopFound||''}:null};
    });
   }
   const stateOf=item=>item.needsConnection?'connect':item.enabled?'added':'';
@@ -191,6 +193,8 @@
    const text=make('span','','app-tile-text');text.append(make('strong',item.name),make('span',item.description,'app-tile-description'));
    main.append(icon(item),text);main.setAttribute('aria-label',item.name);main.setAttribute('aria-description',item.description);
    const foot=make('div','','app-tile-foot'),s=status(item);if(s)foot.append(s);
+   if(item.desktop&&!item.enabled&&(item.desktop.found||item.desktop.required)){const here=!!item.desktop.found,badge=make('span',here?'Есть на компьютере':'Нет на компьютере','app-desktop');badge.dataset.here=String(here);
+    badge.title=here?item.desktop.found:item.desktop.apps[0];foot.append(badge);}
    if(item.origin!=='bundled'){const o=make('span',ORIGIN_NAMES[item.origin],'app-origin');o.dataset.origin=item.origin;foot.append(o);}
    const bytes=!item.enabled&&weights.apps[item.id]?.install;
    if(bytes){const w=make('span','≈ '+size(bytes),'app-weight');w.title='Вес загрузки: ≈ '+size(bytes);foot.append(w);}
@@ -210,16 +214,20 @@
 
   function section(group,members,shown,{addAll=true}={}){
    const sec=make('section','','app-catalog-group');sec.dataset.category=group.id;sec.style.setProperty('--hue',group.hue??200);
-   const header=make('div','','app-catalog-group-head'),label=make('div'),missing=members.filter(i=>!i.enabled);
+   const header=make('div','','app-catalog-group-head'),label=make('div');
+   // «Добавить всю категорию» leaves out apps whose program is not on this computer (Blender without Blender).
+   const notHere=i=>i.desktop?.required&&!i.desktop.found,unadded=members.filter(i=>!i.enabled),missing=unadded.filter(i=>!notHere(i)),absent=unadded.filter(notHere);
    const h=make('h3',group.name);label.append(h);
    const meta=make('p',group.description||'');meta.className='app-catalog-group-description';if(group.description)label.append(meta);
    header.append(label);
    if(addAll&&missing.length){
-    const bytes=installBytes(missing),b=button(missing.length<members.length?'Добавить остальные ('+missing.length+')':'Добавить всю категорию','app-catalog-add-all');
+    const bytes=installBytes(missing),b=button(absent.length?'Добавить подходящие ('+missing.length+')':missing.length<members.length?'Добавить остальные ('+missing.length+')':'Добавить всю категорию','app-catalog-add-all');
     if(bytes){b.append(make('span',' · ≈ '+size(bytes),'app-catalog-add-weight'));b.title='Вес загрузки: ≈ '+size(bytes);
      if(weights.available!==null&&bytes+weights.reserve>weights.available)b.title+='. Не хватит места: свободно '+size(weights.available);}
     b.onclick=()=>busy(b,()=>addMany(missing));header.append(b);
-   }else if(addAll&&members.length)header.append(make('span','Всё добавлено','app-catalog-all-added'));
+   }else if(addAll&&members.length&&!absent.length)header.append(make('span','Всё добавлено','app-catalog-all-added'));
+   if(addAll&&absent.length){const note=make('p','','app-catalog-group-description app-catalog-absent');note.append(make('span','Без программ, которых нет на компьютере:'),document.createTextNode(' '));
+    const names=make('span',absent.map(i=>i.desktop.apps[0]).filter((v,i,a)=>a.indexOf(v)===i).join(', '));names.dataset.noI18n='';note.append(names);label.append(note);}
    const grid=make('div','','app-grid');for(const item of shown)grid.append(tile(item));
    sec.append(header,grid);return sec;
   }
@@ -240,12 +248,29 @@
     const b=entry(group.id,group.name,members.filter(i=>i.enabled).length+'/'+members.length);b.style.setProperty('--hue',group.hue??200);b.prepend(make('span','','app-rail-swatch'));}
   }
 
+  // «Нашёл на компьютере»: apps for programs installed here that are not added yet; dismissed per set of apps.
+  const DISMISS='petya.catalog.desktopDismissed';
+  function suggestFromComputer(all){
+   const found=all.filter(i=>!i.enabled&&i.desktop?.found);if(!found.length)return;
+   const key=found.map(i=>i.id).sort().join(',');let dismissed='';try{dismissed=localStorage.getItem(DISMISS)||'';}catch{}
+   if(dismissed===key)return;
+   const box=make('div','','app-catalog-suggest'),text=make('div','','app-catalog-suggest-text');
+   const programs=make('span',found.map(i=>i.desktop.found).filter((v,i,a)=>a.indexOf(v)===i).join(', '));programs.dataset.noI18n='';
+   text.append(make('strong','Нашёл на компьютере:'),document.createTextNode(' '),programs);
+   const apps=make('span','','app-catalog-suggest-apps');apps.append(make('span','Добавить их приложения:'),document.createTextNode(' '));
+   found.forEach((item,i)=>{if(i)apps.append(document.createTextNode(', '));apps.append(make('span',item.name));});
+   text.append(make('br'),apps);
+   const add=button('Добавить ('+found.length+')','app-catalog-add-all',()=>busy(add,()=>addMany(found)));
+   const close=button('×','app-catalog-suggest-close',()=>{try{localStorage.setItem(DISMISS,key);}catch{}box.remove();});close.setAttribute('aria-label','Скрыть');
+   box.append(text,add,close);content.append(box);
+  }
   function draw(){
    const keep=content.scrollTop,all=items(),q=lower(input.value.trim());
    if(filter==='connect'&&!all.some(i=>i.needsConnection)||filter==='external'&&!all.some(i=>i.origin!=='bundled'))filter='all';
    paintRail(all);content.replaceChildren();
    const match=q?all.filter(i=>haystack(i).includes(q)):all;
    const scope=q?'all':filter;
+   if(!q&&scope==='all')suggestFromComputer(all);
    if(q){const n=make('p','','app-catalog-found');n.textContent=match.length?'Найдено: '+match.length:'';content.append(n);}
    for(const group of categories){
     if(!['all','added','connect','external'].includes(scope)&&scope!==group.id)continue;

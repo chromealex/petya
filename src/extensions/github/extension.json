@@ -13,5 +13,6 @@
   "scripts": [
     ["settings.js", "notifications.js"]
   ],
-  "results": {}
+  "results": {},
+  "desktop": {"apps": ["GitHub Desktop"]}
 }

@@ -86,6 +86,7 @@ function validate(dir,{external=false,expectId}={}){
    for(const name of [].concat(value))if(!/^[a-z][a-z0-9-]*\.cjs$/.test(name)||!fs.existsSync(path.join(dir,name)))throw Error('Invalid capability provider '+d.id+'/'+name);
   }
  }
+ if(d.desktop!==undefined&&!require('./desktop-apps.cjs').valid(d.desktop))throw Error('Invalid extension desktop '+d.id+': {"apps": ["Program name"], "required": true|false}');
  if(d.connects!==undefined&&!(typeof d.connects==='string'&&d.connects.trim()))throw Error('Invalid extension connects '+d.id);
  if(d.connectsKeys!==undefined&&!(Array.isArray(d.connectsKeys)&&d.connectsKeys.every(k=>/^[A-Za-z][\w-]*$/.test(k))))throw Error('Invalid extension connectsKeys '+d.id);
  if(d.results!==undefined&&!(d.results&&typeof d.results==='object'&&!Array.isArray(d.results)&&Object.entries(d.results).every(([k,v])=>/^[A-Za-z][\w-]{0,63}$/.test(k)&&/^[A-Za-z_$][\w$]{0,63}$/.test(v))))throw Error('Invalid extension results '+d.id);

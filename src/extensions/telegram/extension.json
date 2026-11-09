@@ -17,5 +17,6 @@
       "chat-clarification.js"
     ]
   ],
-  "id": "telegram"
+  "id": "telegram",
+  "desktop": {"apps": ["Telegram", "Telegram Desktop"]}
 }

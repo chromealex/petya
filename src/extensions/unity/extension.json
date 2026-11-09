@@ -18,5 +18,6 @@
   "service": "unity",
   "settings": true,
   "id": "unity",
-  "feature": "desktop.cjs"
+  "feature": "desktop.cjs",
+  "desktop": {"apps": ["Unity Hub", "Unity"], "required": true}
 }

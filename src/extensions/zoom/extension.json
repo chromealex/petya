@@ -22,5 +22,6 @@
     "meeting-source": "meeting-source.cjs",
     "video-meeting": "video-meeting.cjs",
     "meeting-recording": "meeting-recording.cjs"
-  }
+  },
+  "desktop": {"apps": ["zoom.us", "Zoom"]}
 }

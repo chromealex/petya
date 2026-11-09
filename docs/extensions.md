@@ -74,6 +74,7 @@ extension (refused). Everything the extension needs is inside its folder; there 
 | `markup` | `"settings.html"` | Static HTML inserted into the settings form (no scripts run from it). Prefer `settings.js`. |
 | `connects` | string | The service it needs («Sentry», «GitHub»). The catalog shows «Подключить» until `offer.ready(settings)` is true (or one of `connectsKeys` is filled). |
 | `connectsKeys` | `[settingKey]` | Without an offer: settings whose presence means «connected». |
+| `desktop` | `{apps, required?}` | The desktop program the app works with, by install names (`["Blender", "Blender Foundation"]`; a name matches with a version suffix too). When the program is installed the catalog suggests the app («Нашёл на компьютере») and marks the tile; with `required: true` «Добавить всю категорию» leaves the app out while the program is missing (`src/desktop-apps.cjs`). |
 | `uses` | `[kind]` | Cross-app kinds its cards call (section 9). Fills «Работает вместе с». |
 | `provides` | `{kind: "file.cjs" \| [files]}` | Kinds it serves to other apps (section 9). |
 | `downloads` | `[{id, name, bytes \| {darwin, win32}, approx?, optional?, requires?}]` | What adding it downloads (section 11). |

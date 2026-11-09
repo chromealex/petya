@@ -1301,3 +1301,11 @@ blockquote.growth-learned{margin:6px 0;padding:8px 12px;border-left:3px solid va
 .extension-development-problems:empty{display:none}
 .app-catalog-install{display:inline-flex;align-items:center;gap:7px}
 @media(max-width:1100px){.app-catalog-install-text{display:none}.app-catalog-install{padding:7px 10px}}
+/* App catalog: apps for programs found on this computer, and apps whose program is missing. */
+.app-catalog-suggest{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding:12px 14px;border:1px solid #4b6a3e;border-radius:13px;background:#1f2b1d}
+.app-catalog-suggest-text{flex:1;min-width:0;font-size:13px;line-height:1.5;color:#dfe8d6}
+.app-catalog-suggest-apps{color:var(--muted)}
+.app-catalog-suggest-close{flex:none;min-height:0;padding:4px 9px;border:0;background:none;color:var(--muted);font-size:16px}
+.app-catalog-absent{color:#c9a98b}
+.app-desktop{font-size:11px;padding:1px 7px;border-radius:999px;background:#253224;color:#acc093}
+.app-desktop[data-here=false]{background:#33281f;color:#d8b493}

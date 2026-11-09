@@ -7800,6 +7800,14 @@
   "В папке разработки нет расширения.": "The development folder has no extension.",
   "Папка расширения": "Extension folder",
   "Архив расширения": "Extension archive",
-  "Папка разработки расширения": "Extension development folder"
+  "Папка разработки расширения": "Extension development folder",
+  "Без программ, которых нет на компьютере:": "Without the programs not on this computer:",
+  "Добавить (": "Add (",
+  "Добавить их приложения:": "Add their apps:",
+  "Есть на компьютере": "On this computer",
+  "Нашёл на компьютере:": "Found on this computer:",
+  "Нет на компьютере": "Not on this computer",
+  "Скрыть": "Hide",
+  "Добавить подходящие (": "Add the suitable ones ("
  }
 }
