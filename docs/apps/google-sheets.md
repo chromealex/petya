@@ -65,11 +65,16 @@ await ws.consent(s,'docs',{account:key,write:false,onDone:r=>…})   // incremen
 await ws.token(s,'docs',{mode:'account',account:key,write})        // access token; refresh is done by the mail client
 await ws.token(s,'docs',{mode:'service',credential:json,write})     // service-account JWT grant, cached per key and scope
 ws.serviceEmail(json); ws.parseKey(json); ws.configured(s)          // address to share with; key validation; OAuth client imported?
+// A product may be a list: ['drive','docs'] needs both (accounts/chosen/token/consent ask for every scope at once).
+ws.parseLink(text)        // {kind:'document'|'spreadsheet'|'presentation'|'form'|'drawing'|'file'|'folder', id, url} | null
+ws.kindOf(mime); ws.MIME_OF[kind]; ws.fileUrl(kind,id)              // Drive MIME types ↔ kinds; the editor link of a file
+ws.docText(documentsGetAnswer)       // {title, blocks:[heading|p|li|table with heading trail], text (Markdown), truncated}
 ```
 
 Scopes are per product: a write scope covers reading (`spreadsheets` ⊃ `spreadsheets.readonly`), but `drive.file`
 does not mean reading Drive. Consent keeps already granted scopes (`include_granted_scopes`), so Gmail, Calendar,
-Sheets, Docs and Drive accumulate on one account. Each app keeps its own settings (which path, which account, its own
+Sheets, Docs and Drive accumulate on one account. «Google Диск» (docs/apps/google-drive.md) is the first app on Drive
+and Docs. Each app keeps its own settings (which path, which account, its own
 service-account key secret) and passes them in; the module names no app.
 
 ## Verified
