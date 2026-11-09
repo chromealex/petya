@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  actions: write
 jobs:
   windows:
     runs-on: windows-latest
@@ -43,4 +44,6 @@ jobs:
           tag="${{ steps.version.outputs.tag }}"
           notes=$(awk -v v="## ${tag#v}" 'index($0,v)==1{f=1;print;next} f&&/^## /{exit} f' docs/HISTORY.md)
           if gh release view "$tag" >/dev/null 2>&1; then gh release upload "$tag" Petya-Setup.exe --clobber
-          else gh release create "$tag" Petya-Setup.exe --target "$GITHUB_SHA" --title "Петя ${tag#v}" --notes "${notes:-Petya ${tag#v}}"; fi
+          else gh release create "$tag" Petya-Setup.exe --target "$GITHUB_SHA" --title "Петя ${tag#v}" --notes "${notes:-Petya ${tag#v}}"
+            # A new release is announced in Slack and Telegram (.github/workflows/announce.yml); a re-upload is not.
+            gh workflow run announce.yml --ref "$GITHUB_REF_NAME" -f kind=app -f id="${tag#v}"; fi

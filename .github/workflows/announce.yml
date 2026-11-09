@@ -1,0 +1,40 @@
+name: Announce
+# Posts releases to Slack #jw-petya and Telegram @aipetya (scripts/announce.cjs):
+#  - an app release: started by the Release workflow once it publishes a new v<version> release;
+#  - a model release (andromeda-dN and other non-v tags): when the release is published;
+#  - by hand: Actions → Announce → kind (app|model) and id (version or tag).
+# Needs the repository secrets SLACK_BOT_TOKEN and TELEGRAM_BOT_TOKEN; a channel without its token is skipped.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      kind:
+        description: 'app or model'
+        required: true
+        default: app
+      id:
+        description: 'Version (0.12.3) for app, tag (andromeda-d9) for model'
+        required: true
+permissions:
+  contents: read
+jobs:
+  post:
+    if: github.event_name == 'workflow_dispatch' || !startsWith(github.event.release.tag_name, 'v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Post to Slack and Telegram
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL: jw-petya
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT: '@aipetya'
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [ "${{ github.event_name }}" = release ]; then node scripts/announce.cjs model "${{ github.event.release.tag_name }}"
+          else node scripts/announce.cjs "${{ inputs.kind }}" "${{ inputs.id }}"; fi
