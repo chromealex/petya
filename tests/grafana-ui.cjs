@@ -82,6 +82,12 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
   await js("(()=>{const c=document.querySelector('[data-extension=grafana]');c.hidden=false;const d=c.querySelector('details');if(d)d.open=true;document.dispatchEvent(new CustomEvent('petya-extension-open',{detail:'grafana'}));})()");
   assert.equal(await wait("/Grafana подключена \\(версия 11\\.3\\.0\\)\\. Дашбордов: 4\\./.test(document.querySelector('[data-extension=grafana] [role=status]')?.textContent||'')",200),true,'connection check');
   assert.equal(await js("document.querySelector('[data-extension=grafana] [name=grafanaToken]').type"),'password');
+  // «Открыть сервисные аккаунты» follows the address: a pasted dashboard link keeps its organization.
+  assert.equal(await js("document.querySelector('[data-extension=grafana] .grafana-token-help a').href"),server.url.replace(/\/$/,'')+'/org/serviceaccounts');
+  const keep=await js("document.querySelector('[data-extension=grafana] [name=grafanaUrl]').value");
+  await js("(()=>{const i=document.querySelector('[data-extension=grafana] [name=grafanaUrl]');i.value='https://dashboards.example.net/d/uz-kyx4Zk/home?orgId=2';i.dispatchEvent(new Event('input'));})()");
+  assert.equal(await js("document.querySelector('[data-extension=grafana] .grafana-token-help a').href"),'https://dashboards.example.net/org/serviceaccounts?orgId=2');
+  await js("(()=>{const i=document.querySelector('[data-extension=grafana] [name=grafanaUrl]');i.value="+JSON.stringify(keep)+";i.dispatchEvent(new Event('input'));})()");
   assert.equal(await js("document.querySelector('[data-extension=grafana] [name=grafanaUrl]').value"),server.url);
   await js("[...document.querySelectorAll('[data-extension=grafana] button')].find(b=>b.textContent==='Сопоставить панели с метриками').click()");
   assert.equal(await wait("document.querySelectorAll('[data-extension=grafana] select[data-metric]').length===7",200),true,'a row per metric');

@@ -13,7 +13,15 @@
  const render=el('input');render.type='checkbox';const renderLabel=el('label','check');renderLabel.append(render,document.createTextNode('Картинки панелей, которые Петя не рисует сам (нужен плагин Grafana Image Renderer)'));
  const save=el('button','primary','Сохранить и проверить');save.type='button';
  const status=el('p','small');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
- const help=el('p','small','Токен: Grafana → Administration → Users and access → Service accounts → «Add service account» с ролью Viewer → «Add service account token». Петя только читает дашборды и выполняет запросы их панелей; дайте аккаунту доступ к нужным папкам.');
+ // Where the token comes from: a link to this Grafana's service accounts page, in the organization of the pasted link
+ // (a token belongs to one organization, so ?orgId= from a dashboard link matters).
+ const tokenHelp=el('p','small grafana-token-help');const tokenLink=el('a',null,'Открыть сервисные аккаунты');tokenLink.target='_blank';tokenLink.rel='noopener';
+ tokenHelp.append(document.createTextNode('Токен создаёт администратор организации в Grafana: «Add service account» с ролью Viewer, затем «Add service account token» — получится строка glsa_…. Если у вас нет прав администратора, попросите того, кто ведёт Grafana. '),tokenLink);
+ const serviceAccounts=()=>{let u;try{u=new URL(url.value.trim());}catch{return '';}if(!/^https?:$/.test(u.protocol))return '';
+  const base=u.pathname.split(/\/(?:d|d-solo|dashboards|explore|org|admin|alerting|login)(?:\/|$)/)[0].replace(/\/+$/,'');const org=/^\d{1,6}$/.test(u.searchParams.get('orgId')||'')?'?orgId='+u.searchParams.get('orgId'):'';
+  return u.origin+base+'/org/serviceaccounts'+org;};
+ const syncTokenLink=()=>{const href=serviceAccounts();tokenLink.hidden=!href;if(href)tokenLink.href=href;};url.addEventListener('input',syncTokenLink);
+ const help=el('p','small','Петя только читает дашборды и выполняет запросы их панелей; дайте сервисному аккаунту доступ к нужным папкам.');
  // Mapping panels to game metrics.
  const mapBox=el('div','grafana-mapping');mapBox.style.cssText='display:flex;flex-direction:column;gap:6px;margin:6px 0 10px';
  const propose=el('button',null,'Сопоставить панели с метриками');propose.type='button';
@@ -21,7 +29,7 @@
  const currency=el('select');currency.name='grafanaCurrency';for(const c of ['USD','EUR','RUB']){const o=el('option',null,c);o.value=c;o.setAttribute('data-no-i18n','');currency.append(o);}
  const mapStatus=el('p','small');mapStatus.setAttribute('role','status');mapStatus.setAttribute('aria-live','polite');
  card.append(el('h2',null,'Grafana'),el('p',null,'Дашборды Grafana в чате: графики, плитки и таблицы панелей. Только чтение.'),
-  field('Адрес Grafana',url,'Можно вставить ссылку на любой дашборд — Петя возьмёт адрес из неё, вместе с префиксом пути.'),field('Токен сервисного аккаунта',token),clearLabel,
+  field('Адрес Grafana',url,'Можно вставить ссылку на любой дашборд — Петя возьмёт адрес из неё, вместе с префиксом пути.'),field('Токен сервисного аккаунта',token),tokenHelp,clearLabel,
   field('Папка по умолчанию',folder,'Её дашборды идут первыми в списке и выигрывают при совпадении названий.'),folders,renderLabel,save,status,help,
   el('h3',null,'Метрики игры из Grafana'),el('p','small','Выберите панели с DAU, новыми пользователями, выручкой и ретеншном — «Метрики игры» покажут их рядом с AppMetrica. Петя предложит панели по названиям и запросам, вы проверите и сохраните.'),
   propose,mapBox,field('Валюта выручки, если у панели нет денежной единицы',currency),saveMap,mapStatus);
@@ -60,7 +68,7 @@
  }
  async function load(){
   const state=await call('status');
-  url.value=state.url||'';folder.value=state.folder||'';render.checked=!!state.render;currency.value=state.currency||'USD';saved=state.map||{};metrics=state.metrics||[];renderMap();
+  url.value=state.url||'';folder.value=state.folder||'';render.checked=!!state.render;currency.value=state.currency||'USD';saved=state.map||{};metrics=state.metrics||[];renderMap();syncTokenLink();
   if(!state.url||!state.hasToken){status.textContent='Укажите адрес Grafana и токен сервисного аккаунта.';return;}
   status.textContent='Проверяю подключение…';
   const t=await call('test');

@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.12.4 — where the Grafana token comes from
+
+- Grafana settings explain who creates the service account token and how, with a link to this Grafana's service accounts page. The link uses the organization from a pasted dashboard link (`?orgId=`).
+
 ## 0.12.3 — Petya knows which colleague is you
 
 - «Команда» has «Это я» on each card (one card at most) and an «это вы» mark next to the name. Without a mark Petya finds your card himself by your Jira email or your full name.
