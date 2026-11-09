@@ -14,7 +14,7 @@ runtime, packaging) the group is marked stable.
 ## Layout
 
 ```
-andromeda/group.json       current set (R1-A1-D9), optional parts, published versions per part (rollback choices in the app)
+andromeda/group.json       current set (R1-A1-D10), optional parts, published versions per part (rollback choices in the app)
 andromeda/D1/              model.json (role, base, hashes, evaluation, status), NOTES.md, adapter files
 andromeda/R1/, A1/         model.json; weights only when the part has an adapter
 ```
@@ -29,7 +29,7 @@ project folder.
 
 | Group | Version | Status | Parts |
 |---|---|---|---|
-| Andromeda | R1-A1-D9 | experimental | R1, A1: Qwen3.5-9B-4bit @ 8b2b98c without adapter; D9: D8 plus its four weak correction families (54 new 39 vs D1 24, 25 exact; v22 35/42 vs 33; familiar 796/801 vs 787). D8, D7 and D1 stay published for rollback. |
+| Andromeda | R1-A1-D10 | experimental | R1, A1: Qwen3.5-9B-4bit @ 8b2b98c without adapter; D10: D9 plus its weak correction families (54 new 46 vs D1 24, 30 exact; v22 36/42 vs 33; familiar 797/801 vs 787). D9, D8, D7 and D1 stay published for rollback. |
 
 ### Part history
 
@@ -43,4 +43,5 @@ project folder.
 | D6 | rejected | D1/D3 blends (recipe only): best λ0.3 new 23/54, v22 30/42, familiar 791/801 |
 | D7 | rollback | D3 plus familiar rehearsal: new 37/54, v22 34/42, familiar 795/801 |
 | D8 | rollback | D7 plus five weak families: new 39/54, v22 35/42, familiar 795/801 |
-| D9 | in the group | D8 plus four weak families: new 39/54 (25 exact), v22 35/42, familiar 796/801 |
+| D9 | rollback | D8 plus four weak families: new 39/54 (25 exact), v22 35/42, familiar 796/801 |
+| D10 | in the group | D9 plus open-recipient, code, cancel, permission: new 46/54 (30 exact), v22 36/42, familiar 797/801 |
