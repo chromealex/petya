@@ -64,6 +64,9 @@ jobs:
           python-version: '3.12'
       - run: npm ci --no-audit --no-fund
         if: steps.secrets.outputs.enabled == 'true'
+      - name: Electron runtime
+        if: steps.secrets.outputs.enabled == 'true'
+        run: test -d node_modules/electron/dist/Electron.app || node node_modules/electron/install.js
       - name: Speech runtime (whisper.cpp with Metal and the base model)
         if: steps.secrets.outputs.enabled == 'true'
         run: scripts/setup-whisper-mac.sh
