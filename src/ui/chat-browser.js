@@ -27,18 +27,41 @@
   needAction.type='button';needAction.onclick=()=>call('act',current).catch(e=>notice(e.message,true));
   const needClose=button('Скрыть подсказку','M6 6l12 12M18 6L6 18',()=>call('dismiss',current).then(paint).catch(()=>{}));needClose.classList.add('chat-browser-attention-close');
   need.append(needText,needAction,needClose);need.hidden=true;need.setAttribute('role','status');
-  bar.append(back,forward,reload,address,external);root.append(bar,need,surface,status);
-  return {root,bar,address,back,forward,reload,surface,status,need,needText,needAction,url:'',loading:false};
+  bar.append(back,forward,reload,address,external);
+  // Tabs: one per page; «+» opens a new one, × closes it (the last one closes the browser).
+  const strip=el('div','chat-browser-tabs');strip.setAttribute('role','tablist');strip.setAttribute('aria-label','Вкладки браузера');
+  root.append(strip,bar,need,surface,status);
+  return {root,strip,bar,address,back,forward,reload,surface,status,need,needText,needAction,url:'',loading:false,tabsKey:''};
  }
  function paint(state){
   if(!ui||!state||(state.topicId&&state.topicId!==current))return;
-  ui.url=state.url||'';ui.loading=!!state.loading;if(document.activeElement!==ui.address)ui.address.value=ui.url;
+  ui.url=state.url||'';ui.loading=!!state.loading;
+  // Another tab in front: its address replaces whatever was being typed.
+  const switched=state.active&&state.active!==ui.activeTab;if(state.active)ui.activeTab=state.active;
+  if(switched||document.activeElement!==ui.address)ui.address.value=ui.url;
   ui.back.disabled=!state.canBack;ui.forward.disabled=!state.canForward;
   ui.reload.title=state.loading?'Остановить':'Обновить';ui.reload.classList.toggle('loading',!!state.loading);
   ui.need.hidden=!state.attention;ui.needText.textContent=state.attention?.message||'';ui.needAction.textContent=state.attention?.action||'';ui.needAction.hidden=!state.attention?.action;
+  paintTabs(state);
   ui.status.textContent=state.error?'Не удалось открыть страницу: '+state.error:'';ui.status.hidden=!state.error;
   const box=window.resultKit?.panelBox();if(box){const t=box.querySelector('.kit-panel-title'),sub=box.querySelector('.kit-panel-subtitle');if(t)t.textContent=state.title||'Браузер';if(sub){sub.textContent=state.url?new URL(state.url).host:'';sub.hidden=!state.url;}}
  }
+ const host=url=>{try{return new URL(url).host.replace(/^www\./,'');}catch{return '';}};
+ function paintTabs(state){
+  if(!Array.isArray(state.tabs))return;
+  const sig=JSON.stringify([state.active,state.tabs]);if(sig===ui.tabsKey)return;ui.tabsKey=sig;
+  const items=state.tabs.map(tab=>{
+   const item=el('div','chat-browser-tab'+(tab.id===state.active?' active':'')+(tab.loading?' loading':''));
+   const pick=el('button','chat-browser-tab-title',tab.title||host(tab.url)||'Новая вкладка');pick.type='button';pick.title=(tab.title?tab.title+'\n':'')+(tab.url||'');
+   pick.setAttribute('role','tab');pick.setAttribute('aria-selected',String(tab.id===state.active));
+   pick.onclick=()=>{if(tab.id!==state.active)call('selectTab',current,tab.id).then(paint).then(sync).catch(e=>notice(e.message,true));};
+   pick.onauxclick=e=>{if(e.button===1)closeTab(tab.id);};
+   const x=button('Закрыть вкладку','M6 6l12 12M18 6L6 18',()=>closeTab(tab.id));x.classList.add('chat-browser-tab-close');
+   item.append(pick,x);return item;});
+  const add=button('Новая вкладка','M12 5v14M5 12h14',()=>call('newTab',current,'').then(paint).then(()=>{sync();ui?.address.focus();}).catch(e=>notice(e.message,true)));add.classList.add('chat-browser-tab-add');
+  ui.strip.replaceChildren(...items,add);
+ }
+ async function closeTab(tabId){const state=await call('closeTab',current,tabId).catch(e=>{notice(e.message,true);return null;});if(!state)return;if(!state.open){window.resultKit?.closePanel();return;}paint({...state,topicId:current});sync();}
  // Opens the panel for the current chat (and loads url, if given).
  async function openBrowser(url=''){
   const kit=window.resultKit,id=topic();if(!kit||!id)return;
