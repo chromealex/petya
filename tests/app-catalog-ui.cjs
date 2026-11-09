@@ -46,11 +46,11 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  // Every tile has a distinct icon (stroke svg or the service's own artwork), no checkbox clutter until hover/select.
  assert(await js("[...document.querySelectorAll('.app-tile .app-icon')].every(i=>i.querySelector('svg,img'))"),'every tile has an icon');
  assert.equal(await js("getComputedStyle(document.querySelector('.app-tile-pick')).opacity"),'0');
- // Download weight only where something is downloaded; never «Без загрузок».
+ // Every app not yet added shows its size: «≈» only where a download size is an estimate; never «Без загрузок».
  await wait(`!!${tile('artist')}.querySelector('.app-weight')`);
  assert.match(await js(`${tile('artist')}.querySelector('.app-weight').textContent`),/^≈ 2,2 ГБ$/);
  assert.match(await js("document.querySelector('[data-category=creative] .app-catalog-add-all').textContent"),/≈ 2,2 ГБ/);
- assert.equal(await js(`!!${tile('regex-cron')}.querySelector('.app-weight')`),false,'no weight line for apps without downloads');
+ assert.match(await js(`${tile('regex-cron')}.querySelector('.app-weight')?.textContent||''`),/^\d[\d\s ,]* (КБ|МБ)$/,'an app without downloads shows its own exact size');
  assert.equal(await js("document.querySelector('.app-catalog').textContent.includes('Без загрузок')"),false);
  await shot('petya-catalog-wide');
 
@@ -127,7 +127,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const catalog=await js("window.petya.feature('extensionUI','catalog')");
  for(const id of missing.slice(0,2)){const e=catalog.find(x=>x.id===id);if(e&&!e.service)assert(e.installed,id+' saved as added');}
  const left=missing.length-2;
- assert.equal(await js(`${dev}.querySelector('.app-catalog-add-all').textContent`),'Добавить остальные ('+left+')');
+ assert.match(await js(`${dev}.querySelector('.app-catalog-add-all').textContent`),new RegExp('^Добавить остальные \\('+left+'\\)( · ≈? ?[\\d\\s ,]+ (КБ|МБ|ГБ))?$'),'the rest, with their size');
  // Muted offers come back when their app is added.
  await js("window.petya.saveSettings({extensionOffersMuted:JSON.stringify(['dependencies','pull-requests'])})");
  await js(`${dev}.querySelector('.app-catalog-add-all').click()`);
