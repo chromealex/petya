@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),{SlackRequest}=require('../src/slack-request.cjs'),{Clarifications}=require('../src/features/clarifications.cjs');
+const assert=require('node:assert/strict'),{SlackRequest}=require('../src/extensions/slack/team-request.cjs'),{Clarifications}=require('../src/features/clarifications.cjs');
 (async()=>{
  let posts=0,reads=0,token='token',topic={id:'a'},outcome='timeout',messages=[];const state={};
  const c=new Clarifications({scope:()=>token+topic.id});

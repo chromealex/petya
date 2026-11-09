@@ -149,7 +149,7 @@ function create(s,{providers=load(),now=Date.now}={}){
  return {review,apply,applyAll,providers:()=>providers.map(p=>({id:p.id,extension:p.extension,name:p.name,ready:ready(p)}))};
 }
 
-// The pipeline of the running app, for main-process flows that are not features (e.g. src/slack-request.cjs).
+// The pipeline of the running app, for main-process flows that are not features (e.g. src/extensions/slack/team-request.cjs).
 // Before the feature is set up (tests, early start) a review simply finds nothing.
 let bound=null;
 async function review(input){try{return bound?await bound.review(input):empty(draft(input));}catch{return empty(draft(input));}}

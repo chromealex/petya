@@ -97,13 +97,13 @@ textarea programmatically? Dispatch `input` so it re-reviews.
 
 Question-panel confirmations (main process): await the review with a budget, append `confirmation(review)` to the
 question, and when `applyAll` changes something offer «Применить правки», which shows **a new confirmation** with
-the edited text (applying is never sending). See `src/slack-request.cjs`.
+the edited text (applying is never sending). See `src/extensions/slack/team-request.cjs`.
 
 ## Where it is wired
 
 | Flow | Where | service · audience |
 | --- | --- | --- |
-| Slack «Попроси команду …» (and share-message → Slack) | `src/slack-request.cjs` (question panel) | slack · public / team (private channel) |
+| Slack «Попроси команду …» (and share-message → Slack) | `src/extensions/slack/team-request.cjs` (question panel) | slack · public / team (private channel) |
 | Slack reply in a thread | `src/extensions/slack/message-cards.js` | slack · team |
 | Slack report sharing | `src/ui/report-share.js` | slack · team |
 | Discord compose and FAQ replies (and share-message → Discord) | `src/extensions/discord/discord-cards.js` | discord · public |

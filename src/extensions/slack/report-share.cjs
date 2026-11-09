@@ -1,5 +1,5 @@
 const {randomUUID,createHash}=require('node:crypto');
-const {listChannels,findChannel}=require('./slack-channel-route.cjs');
+const {listChannels,findChannel}=require('./channel-route.cjs');
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 function sourceFooter(report){return 'Источник отчёта: Jira · '+report.project+'\nДанные проверены: '+new Date(report.at).toLocaleString('ru-RU')+'\n'+(report.sources||[]).filter(s=>{try{return new URL(s.url).protocol==='https:';}catch{return false;}}).map(s=>s.title+': '+s.url).join('\n');}
 class ReportShare{
@@ -68,7 +68,7 @@ class ReportShare{
    row.status='sent';row.ts=result.ts;row.url='https://app.slack.com/archives/'+channel+'/p'+result.ts.replace('.','');return this.finish(row);
   }finally{this.busy=false;}
  }
- finish(row){let warning='';const topic=this.dialogue.state?.topics?.find(t=>t.id===row.topicId&&t.projectId===row.projectId&&t.workReport?.id===row.reportId);if(topic){require('./action-evidence.cjs').recordReceipt(topic,{id:row.id,action:'send',service:'slack',status:row.status==='sent'?'confirmed':row.status==='rejected'?'rejected':'unknown',channelName:row.name,channel:row.channel,at:row.at});try{this.dialogue.persist();}catch{warning=' Не удалось сохранить подтверждение в диалоге.';}}try{this.save();}catch{warning=' Не удалось обновить локальную историю; после перезапуска проверьте канал перед дальнейшими действиями.';}return {...this.receipt(row),warning};}
+ finish(row){let warning='';const topic=this.dialogue.state?.topics?.find(t=>t.id===row.topicId&&t.projectId===row.projectId&&t.workReport?.id===row.reportId);if(topic){require('../../action-evidence.cjs').recordReceipt(topic,{id:row.id,action:'send',service:'slack',status:row.status==='sent'?'confirmed':row.status==='rejected'?'rejected':'unknown',channelName:row.name,channel:row.channel,at:row.at});try{this.dialogue.persist();}catch{warning=' Не удалось сохранить подтверждение в диалоге.';}}try{this.save();}catch{warning=' Не удалось обновить локальную историю; после перезапуска проверьте канал перед дальнейшими действиями.';}return {...this.receipt(row),warning};}
  receipt(row,duplicate=false){return {id:row.id,status:row.status,channel:row.channel,name:row.name,project:row.project,url:row.url||'https://app.slack.com/archives/'+row.channel,text:row.status==='sent'?(duplicate?'Этот отчёт уже отправлен':'Отчёт отправлен')+' в #'+row.name+'.':row.status==='rejected'?'Slack отклонил сообщение: '+(row.error||'отправка отменена')+'. Можно исправить причину и повторить.':'Slack не подтвердил отправку в #'+row.name+'. Повтор заблокирован, чтобы не создать дубль. Проверьте канал.'};}
 }
 module.exports={ReportShare,sourceFooter};

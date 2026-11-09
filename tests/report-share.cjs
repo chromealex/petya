@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {ReportShare,sourceFooter}=require('../src/report-share.cjs');
+const {ReportShare,sourceFooter}=require('../src/extensions/slack/report-share.cjs');
 function fixture(state={}){
  const report={id:'r1',project:'BW',site:'https://jira.fixture.invalid',at:1700000000000,text:'BW: 2 задачи. <@U123>',sources:[{title:'Jira',url:'https://jira.fixture.invalid/issues/?jql=BW'}]};
  let topic={id:'t1',workReport:report},settings={slackToken:'token',jiraUrl:report.site},enabled=true,clock=0,mode='ok',hook=null,saveFailure=false,saved,team='T1',binding='C1';

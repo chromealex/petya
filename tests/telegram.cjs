@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {TelegramSource,factory}=require('../src/telegram.cjs');const {ContextStore,DAY}=require('../src/context-store.cjs');
+const assert=require('node:assert/strict');const {TelegramSource,factory}=require('../src/extensions/telegram/source.cjs');const {ContextStore,DAY}=require('../src/context-store.cjs');
 (async()=>{
  const now=Date.now();let saved={},on=true,login,reads=0,history=[],sessionWrites=[];
  const store=new ContextStore({save:rows=>history=rows,now:()=>now});

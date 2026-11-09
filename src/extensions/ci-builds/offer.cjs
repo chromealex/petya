@@ -1,7 +1,7 @@
 // When to offer «Сборки» to someone who has not added or connected it.
 // Neighbours: build-size (APK/AAB/IPA size), dependencies (package versions), git (local status/commit),
 // pull-requests (PR checks are shown there), unity (local editor builds), and Petya's own Slack build flows:
-// «почему упал билд» / «что с билдом» without a CI name are read from Slack threads (slack-log.cjs,
+// «почему упал билд» / «что с билдом» without a CI name are read from Slack threads (the Slack app's logs.cjs,
 // build-question.cjs) and repair is build-repair.cjs, so those are never answered with an offer.
 const CI_NAME=/github actions|unity (?:cloud build|build automation)|(?:^|[^\p{L}])(?:ci|ci\/cd)(?=$|[^\p{L}])/iu;
 module.exports={

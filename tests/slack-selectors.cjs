@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
-const { resolveChannels, matches } = require('../src/slack.cjs');
+const { resolveChannels, matches } = require('../src/extensions/slack/channels.cjs');
 const { checkConnection } = require('../src/connections.cjs');
-const { SlackContext } = require('../src/slack-context.cjs');
+const { SlackContext } = require('../src/extensions/slack/sync.cjs');
 (async () => {
   assert(matches('jw-dev', ['jw-*'])); assert(!matches('xjw-dev', ['jw-*'])); assert(!matches('jwXdev', ['jw.*']));
   const ids = Array.from({length: 25}, (_, i) => 'C' + i);

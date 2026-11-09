@@ -1,7 +1,57 @@
-const path=require('node:path');const {maxSize,isVideo}=require('./attachments.cjs');
+// Pictures and videos from messages Petya keeps of a service (synced threads and chats), which the chat can attach
+// and inspect («разбери скриншот из …»). Each messenger app provides its own:
+//   "provides": { "media-source": "<file>.cjs" }
+// exporting {id, name, candidates(items, settings) → [{contextId, messageId, name, size, title, at, url, …}],
+//   allowed?(services, rows) → rows, fingerprint?(settings) → any, async download(services, row) → {name, bytes} |
+//   {filePath, cleanup?}}. `items` are the context memory's records; a source answers only its own. `allowed` drops
+// rows the current connection may not read (e.g. channels not chosen for the company); a changed `fingerprint`
+// between listing and download refuses the import. Only sources of added apps count.
+const {isVideo}=require('./attachments.cjs');
+const KIND='media-source';
 const supported=name=>/\.[a-z0-9_+-]{1,16}$/i.test(name||'');
-function candidates(items,settings,tg={}){const rows=[];for(const item of items){if(item.source==='Telegram'&&settings.module_telegram!=='false'&&String(item.telegramAccount)===tg.userId&&(tg.selected||[]).some(c=>c.id===item.telegramChat)){for(const m of item.messages||[])if(m.media&&supported(m.media.name))rows.push({service:'telegram',contextId:item.id,messageId:m.id,chatId:item.telegramChat,name:m.media.name,size:m.media.size,title:item.title,at:m.at,url:item.url});}
- if(item.source==='Slack'&&settings.module_slack!=='false'){for(const m of item.messages||[])for(const f of m.files||[])if(supported(f.name)&&!f.is_external&&f.mode!=='external')rows.push({service:'slack',contextId:item.id,messageId:m.ts,fileId:f.id,channel:item.channel,name:f.name,size:f.size,title:item.title,at:m.at,url:item.url});}}
- return rows.sort((a,b)=>b.at-a.at).slice(0,80).map(r=>({...r,id:Buffer.from(JSON.stringify([r.service,r.contextId,r.messageId,r.fileId||''])).toString('base64url')}));}
-async function downloadSlack(file,token,fetcher=fetch){if(file.is_external||file.mode==='external')throw Error('Прикрепите внешний файл вручную.');const name=path.basename(file.name||'');if(!supported(name))throw Error('Неподдерживаемое медиа.');const max=maxSize(name);if(Number(file.size)>max)throw Error('Вложение слишком большое.');const u=new URL(file.url_private_download||file.url_private||'');if(u.protocol!=='https:'||u.hostname!=='files.slack.com'||u.port||u.username||u.password)throw Error('Недопустимый адрес файла Slack.');const response=await fetcher(u.href,{headers:{Authorization:'Bearer '+token},redirect:'error',signal:AbortSignal.timeout(isVideo(name)?3600000:60000)});if(!response.ok)throw Error('Slack не отдал файл. Проверьте доступ files:read.');if(Number(response.headers.get('content-length'))>max){await response.body?.cancel();throw Error('Вложение слишком большое.');}const reader=response.body?.getReader();if(!reader)throw Error('Файл пуст.');const chunks=[];let size=0,temp,output;try{if(isVideo(name)){temp=await require('./temp-media.cjs').temporaryMedia(name);output=await require('node:fs/promises').open(temp.filePath,'w',0o600);}for(;;){const {done,value}=await reader.read();if(done)break;size+=value.length;if(size>max)throw Error('Вложение слишком большое.');if(output){let offset=0;while(offset<value.length){const r=await output.write(value,offset,value.length-offset);offset+=r.bytesWritten;}}else chunks.push(Buffer.from(value));}await output?.close();output=null;if(!size)throw Error('Файл пуст.');return temp?{name,...temp}:{name,bytes:Buffer.concat(chunks)};}catch(error){await output?.close();await temp?.cleanup();throw error;}finally{await reader.cancel();}}
-module.exports={candidates,downloadSlack,supported};
+const registry=()=>require('./extension-registry.cjs');
+function load(dir){
+ const build=()=>require('./features/app-links.cjs').scan(dir).filter(x=>x.kind===KIND).flatMap(({provider:p,...x})=>{
+  if(!p||typeof p.id!=='string'||typeof p.candidates!=='function'||typeof p.download!=='function'){
+   const error=Error('Invalid media source '+x.extension+'/'+x.file);
+   if(x.origin&&x.origin!=='bundled'){registry().report(registry().entry(x.extension),error,x.file);return [];}
+   throw error;
+  }
+  return [{id:p.id,setting:x.setting,source:p}];
+ }).sort((a,b)=>a.id.localeCompare(b.id));
+ return dir?build():registry().cached(KIND,build);
+}
+const added=(x,settings)=>!x.setting||settings?.[x.setting]==='true';
+// The newest 80 media of the added sources, each with a stable id.
+function candidates(items,settings,{sources}={}){
+ const rows=[];
+ for(const x of (sources||load()).filter(x=>added(x,settings))){let found=[];try{found=x.source.candidates(items,settings)||[];}catch{found=[];}for(const r of found)if(supported(r.name))rows.push({...r,service:x.id});}
+ return rows.sort((a,b)=>b.at-a.at).slice(0,80).map(r=>({...r,id:Buffer.from(JSON.stringify([r.service,r.contextId,r.messageId,r.fileId||''])).toString('base64url')}));
+}
+function create(s,{sources}={}){
+ const all=()=>(sources||load()).filter(x=>added(x,s.settings));
+ const list=()=>candidates(s.memory.prune(),s.settings,{sources:all()});
+ const fingerprint=()=>JSON.stringify(all().map(x=>[x.id,x.source.fingerprint?.(s.settings)]));
+ async function allowed(service){
+  let rows=list().filter(r=>!service||r.service===service);
+  for(const x of all())if(typeof x.source.allowed==='function'&&rows.some(r=>r.service===x.id)){const own=await x.source.allowed(s,rows.filter(r=>r.service===x.id));rows=rows.filter(r=>r.service!==x.id||own.includes(r));}
+  return rows;
+ }
+ async function download(id,check){
+  const row=list().find(r=>r.id===id);if(!row)throw Error('Вложение устарело. Обновите список источников.');
+  const x=all().find(x=>x.id===row.service);if(!x)throw Error('Вложение устарело. Обновите список источников.');
+  const file=await x.source.download(s,row);check?.();return {row,file};
+ }
+ return {list,allowed,download,fingerprint};
+}
+// «Посмотри скриншот из <service>»: the one matching picture or video is attached and inspected; several are offered
+// as a choice; none is said. Called by the apps' chat routes («media» stage, src/features/chat-routes.cjs).
+async function turn(s,command,{service,name}){
+ if(!/(?:посмотри|разбери|проверь|объясни).*(?:скрин|картин|изображени|видео|ролик)/iu.test(command))return null;
+ const wantVideo=/(?:видео|ролик)/iu.test(command),wantImage=/(?:скрин|картин|изображени)/iu.test(command);
+ const rows=(await s.allowedMedia(service)).filter(r=>wantVideo&&!wantImage?isVideo(r.name):wantImage&&!wantVideo?!isVideo(r.name):true);
+ if(!rows.length)return {handled:true,text:'В сохранённых сообщениях нет подходящих медиа. Обновите выбранные чаты '+name+' или прикрепите файл.'};
+ if(rows.length>1)return {handled:true,text:'Какое вложение разобрать?',mediaChoices:rows.map(r=>({id:r.id,label:r.title+' · '+r.name+' · '+new Date(r.at).toLocaleString('ru-RU')})),mediaQuestion:command};
+ const added=await s.importMedia(rows[0].id);return s.inspectAttachments([added.id],command);
+}
+module.exports={KIND,load,candidates,create,turn,supported};

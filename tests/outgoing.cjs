@@ -86,7 +86,7 @@ const outgoing=require('../src/features/outgoing.cjs');
  assert.deepEqual((await outgoing.review({text:'x'})).findings,[]);
 
  // --- Slack «Попроси команду»: the confirmation shows findings; nothing changes without the user ---
- const {SlackRequest}=require('../src/slack-request.cjs');
+ const {SlackRequest}=require('../src/extensions/slack/team-request.cjs');
  const {InputRequired}=require('../src/input-required.cjs');
  const posted=[];
  const channels=[{id:'C1',name:'jw-bw-dev',is_member:true,is_private:false}];

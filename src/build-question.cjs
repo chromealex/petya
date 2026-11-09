@@ -1,5 +1,5 @@
 const {randomUUID,createHash}=require('node:crypto');
-const {threadURL}=require('./slack-log.cjs');
+const {threadURL}=require('./extensions/slack/logs.cjs');
 const {buildIds}=require('./build-watch.cjs');
 const hash=x=>createHash('sha256').update(x).digest('hex');
 const clean=s=>String(s||'').trim().replace(/^петя[\s,!:—-]+/iu,'');

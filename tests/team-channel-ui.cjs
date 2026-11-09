@@ -2,7 +2,7 @@
 process.env.PETYA_SMOKE_TEST='1';
 const assert=require('node:assert/strict');
 let calls=[];
-require('../src/slack-team.cjs').SlackTeam.prototype.collect=async function(command){
+require('../src/extensions/slack/roster.cjs').SlackTeam.prototype.collect=async function(command){
  calls.push(command);
  if(calls.length===1)throw Object.assign(Error('Directory limit'),{code:'SLACK_CHANNEL_LOOKUP_REQUIRED'});
  return [{member:require('../src/team.cjs').validate([{name:'Тестовый коллега',slackId:'UTEST'}])[0],source:'Slack',evidence:'Тестовый коллега'}];

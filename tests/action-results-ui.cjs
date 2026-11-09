@@ -2,7 +2,7 @@ process.env.PETYA_SMOKE_TEST='1';
 const assert=require('node:assert/strict');
 const {Client}=require('@modelcontextprotocol/sdk/client/index.js'),{StreamableHTTPClientTransport}=require('@modelcontextprotocol/sdk/client/streamableHttp.js');
 const mcp=require('../src/mcp.cjs'),start=mcp.startMcp;let endpoint;mcp.startMcp=async(...args)=>endpoint=await start(...args);
-const {SlackRequest}=require('../src/slack-request.cjs');const turn=SlackRequest.prototype.turn;let posts=0;
+const {SlackRequest}=require('../src/extensions/slack/team-request.cjs');const turn=SlackRequest.prototype.turn;let posts=0;
 SlackRequest.prototype.turn=function(...args){this.enabled=()=>true;this.settings=()=>({slackToken:'test'});this.request=async(url,opts)=>{if(url.includes('conversations.list'))return {ok:true,channels:[{id:'C1',name:'exact'}]};if(url.includes('conversations.history'))return {ok:true,messages:[{ts:'1234567890.123456'}]};if(url.endsWith('chat.postMessage')){posts++;return {ok:true,channel:'C1',ts:'1234567890.123456'};}throw Error('Unexpected API');};return turn.apply(this,args);};
 require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const js=code=>win.webContents.executeJavaScript(code),wait=async code=>{for(let i=0;i<150;i++){if(await js(code))return;await new Promise(r=>setTimeout(r,50));}throw Error('Timeout '+code);};

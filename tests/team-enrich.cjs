@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}=require('../src/team-enrich.cjs');const {TeamFill}=require('../src/team-fill.cjs');
+const assert=require('node:assert/strict');const {jiraWork,enrich}=require('../src/team-enrich.cjs');const {slackProfiles}=require('../src/extensions/slack/profiles.cjs');const {TeamFill}=require('../src/team-fill.cjs');
 (async()=>{
  // Slack profile titles and Jira components/labels fill empty role and responsibilities, never overwrite
  const profiles=(await slackProfiles({slackToken:'x'},async url=>{assert.match(url,/users\.list/);return {ok:true,members:[

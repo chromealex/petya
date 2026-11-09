@@ -52,7 +52,7 @@ module.exports={name:'clarifications',Clarifications,register,setup(s){
  };
  const clarifications=new Clarifications({scope,context,resolve(result){
   if(!result?.question)return null;
-  const owner=result.teamFillReply?s.teamFill:result.slackRequestReply||result.slackRequestChoices?s.slackRequest:null;
+  const owner=result.teamFillReply?s.teamFill:result.slackRequestReply||result.slackRequestChoices?s.slack?.request:null;
   if(owner){const resume=answer=>owner.turn(answer,true);resume.cancel=()=>owner.turn('отмена',true);return resume;}
   return null;
  },record(command,result){

@@ -1,4 +1,4 @@
-// Attachments: files, media from Slack/Telegram and attachment IPC.
+// Attachments: files, media kept from services' messages and attachment IPC.
 // Extracted from main.cjs: shared state comes through ctx (live getters/setters).
 module.exports=ctx=>{
   const attachments=new (require('./attachments.cjs').Attachments)({saved:ctx.dialogue.state.composerFiles||[],savePending:files=>{ctx.dialogue.state.composerFiles=files;ctx.dialogue.persist();},scope:()=>ctx.dialogue.active()?.id||'draft:'+ctx.dialogue.state.activeProjectId,unknown:(bytes,name)=>ctx.formatReader.read(bytes,name,{resume:ctx.formatReader.pending?.name===name&&ctx.formatReader.pending.resume}),pdf:bytes=>require('./pdf-reader.cjs').readPDF(bytes),image:bytes=>require('./image-reader.cjs').readImage(bytes),video:async(bytes,name)=>{const snapshot={...ctx.settings};let ready=false;return require('./video-reader.cjs').readVideo(bytes,name,{transcribe:async wav=>{if(!ready){await ctx.speech.ensure(snapshot);ready=true;}const form=new FormData();form.append('file',new Blob([wav],{type:'audio/wav'}),'video.wav');form.append('language','auto');form.append('response_format','json');const response=await ctx.speech.run(snapshot,target=>ctx.request(ctx.core.localEndpoint(target),{method:'POST',body:form}));if(typeof response?.text!=='string')throw Error('Whisper не вернул расшифровку.');return response.text;}});}});
@@ -7,17 +7,13 @@ module.exports=ctx=>{
     const item = attachments.pending.get(id);
     return item?.owner === attachments.scope() ? scenes.get(item) : null;
   };
-  const mediaSources=require('./media-sources.cjs');
-  const mediaList=()=>mediaSources.candidates(ctx.memory.prune(),ctx.settings,JSON.parse(ctx.settings.telegramCredential||'{}'));
-  const allowedMedia=async(service)=>{let rows=mediaList().filter(r=>!service||r.service===service);if(rows.some(r=>r.service==='slack')){const channels=await require('./slack.cjs').resolveChannels(ctx.settings.slackChannels,ctx.settings.slackToken,ctx.request);rows=rows.filter(r=>r.service!=='slack'||channels.includes(r.channel));}return rows;};
+  // Media kept from services' messages (media-source, src/media-sources.cjs): listed, then downloaded on request.
+  const media=()=>require('./media-sources.cjs').create(ctx.services);
+  const allowedMedia=service=>media().allowed(service);
   ctx.handle('attachmentSources',async()=>(await allowedMedia()).map(({fileId,messageId,channel,chatId,contextId,...r})=>r));
   const importMedia=async id=>{
-    const fingerprint=()=>JSON.stringify([ctx.settings.module_slack,ctx.settings.module_telegram,ctx.settings.slackToken,ctx.settings.slackCredential,ctx.settings.slackChannels,ctx.settings.telegramCredential]);const before=fingerprint();const check=()=>{if(before!==fingerprint()||!mediaList().some(r=>r.id===id))throw Error('Источник изменился. Обновите список медиа.');};
-    const row=mediaList().find(r=>r.id===id);if(!row)throw Error('Вложение устарело. Обновите список источников.');let file;
-    if(row.service==='telegram')file=await ctx.telegramSource.download(row.chatId,row.messageId);
-    else {ctx.modules.assertEnabled(ctx.settings,'slack');const allowed=await require('./slack.cjs').resolveChannels(ctx.settings.slackChannels,ctx.settings.slackToken,ctx.request);if(!allowed.includes(row.channel))throw Error('Этот канал не выбран для текущей компании.');const item=ctx.memory.prune().find(c=>c.id===row.contextId);if(!item)throw Error('Контекст удалён.');const root=item.id.split(':').at(-1);let cursor='',found;
-      for(let page=0;page<10;page++){const r=await ctx.request('https://slack.com/api/conversations.replies?'+new URLSearchParams({channel:row.channel,ts:root,limit:'100',...cursor?{cursor}:{}}),{headers:{Authorization:'Bearer '+ctx.settings.slackToken}});if(!r.ok)throw Error('Slack не отдал обсуждение.');found=r.messages?.find(m=>m.ts===row.messageId)?.files?.find(f=>f.id===row.fileId);if(found)break;cursor=r.response_metadata?.next_cursor||'';if(!cursor)break;}if(!found)throw Error('Вложение больше не доступно в этом сообщении.');const token=ctx.settings.slackCredential?(await ctx.serviceOAuth.slack.token(ctx.settings.slackCredential)).accessToken:ctx.settings.slackToken;file=await mediaSources.downloadSlack(found,token);
-    }
+    const source=media(),before=source.fingerprint();const check=()=>{if(before!==source.fingerprint()||!source.list().some(r=>r.id===id))throw Error('Источник изменился. Обновите список медиа.');};
+    const {row,file}=await source.download(id);
     let added;try{check();added=file.filePath?await attachments.addVideoFile(file.filePath):await attachments.add(file.name,file.bytes);}finally{await file.cleanup?.();}try{check();}catch(e){attachments.remove(added.id);throw e;}const stored=attachments.pending.get(added.id);stored.source={service:row.service,chat:row.title,url:row.url,at:row.at,contextText:ctx.memory.prune().find(c=>c.id===row.contextId)?.text.slice(-5000)||''};return added;
   };
   ctx.handle('attachmentImport',importMedia);

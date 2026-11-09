@@ -1,6 +1,6 @@
 const {randomUUID,createHash}=require('node:crypto');
 const {hasLog}=require('./build-repair-sources.cjs');
-const {threadURL}=require('./slack-log.cjs');
+const {threadURL}=require('./extensions/slack/logs.cjs');
 const {promptFor}=require('./agents.cjs');
 const plain=s=>String(s||'').trim().replace(/^петя[\s,!:—-]+/iu,'');
 function isRepair(text){return /^(?:пожалуйста[, ]+)?(?:снова\s+)?(?:почини|поправь|исправь|пофикси|починить|исправить)\s+(?:(?:этот|эту|падающий|падающую|сломанный|сломанную)\s+)*(?:билд|сборк[ау])(?=$|[\s,.!?])/iu.test(plain(text));}

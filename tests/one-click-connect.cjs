@@ -1,7 +1,7 @@
 // One-click connections: Telegram by a QR code (with a two-step password after the scan) and Google Play by
 // signing in with Google; the Telegram app credentials survive a disconnect so reconnecting is one click again.
 const assert=require('node:assert/strict');
-const {TelegramSource,qrSvg}=require('../src/telegram.cjs');
+const {TelegramSource,qrSvg}=require('../src/extensions/telegram/source.cjs');
 const play=require('../src/extensions/google-play/client.cjs');
 const {Api}=require('../src/vendor/telegram/client.cjs');
 (async()=>{

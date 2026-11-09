@@ -8,7 +8,7 @@
 //    to the chat or a repair source in the topic;
 //  - build-question.cjs: «спроси/узнай, что с билдом», «что с этим билдом», and a bare «что с билдом / как там
 //    сборка» that names no CI target (it asks the people of the Slack thread);
-//  - slack-log.cjs / review-assistant.cjs: anything said in a Slack thread chat (topic.slackSource / slackLog),
+//  - the Slack app's logs.cjs / review-assistant.cjs: anything said in a Slack thread chat (topic.slackSource / slackLog),
 //    a request that names Slack, «следи за билдом», «статус билдов», «сравни с прошлым падением».
 // «что с билдом на андроид», «почему упала сборка», «последние сборки», «статус CI» are answered here.
 const kit=require('../app-kit.cjs');

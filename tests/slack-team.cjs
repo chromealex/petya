@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {SlackTeam,requestKind}=require('../src/slack-team.cjs');
+const {SlackTeam,requestKind}=require('../src/extensions/slack/roster.cjs');
 const {TeamFill}=require('../src/team-fill.cjs');
 (async()=>{
  assert(requestKind('Петя, заполни команду').generic);assert(requestKind('заполни команду из Слака').explicit);

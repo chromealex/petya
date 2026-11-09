@@ -2,7 +2,7 @@ const fs=require('node:fs'),path=require('node:path'),load=require('node:module'
 process.env.PETYA_SMOKE_TEST='1';
 const {Dialogue}=load('./src/dialogue.cjs'),original=Dialogue.prototype.active;let dialogue;
 Dialogue.prototype.active=function(...args){dialogue=this;return original.apply(this,args);};
-const {ReportShare}=load('./src/report-share.cjs'),openShare=ReportShare.prototype.open;let pages=0,posts=0;
+const {ReportShare}=load('./src/extensions/slack/report-share.cjs'),openShare=ReportShare.prototype.open;let pages=0,posts=0;
 ReportShare.prototype.open=function(...args){this.enabled=()=>true;this.settings=()=>({slackToken:'fixture',jiraUrl:'https://fixture.atlassian.net'});this.request=async url=>{
  if(url.endsWith('/auth.test'))return {ok:true,team_id:'T1',team:'Fixture'};
  if(url.includes('conversations.list')){pages++;return {ok:true,channels:pages>3?[{id:'C1',name:'exact-channel'}]:[],response_metadata:{next_cursor:'p'+pages}};}

@@ -1,10 +1,10 @@
 const {randomUUID,createHash}=require('node:crypto');
-const {chooseChannels,listChannels,findChannel}=require('./slack-channel-route.cjs');
+const {chooseChannels,listChannels,findChannel}=require('./channel-route.cjs');
 const hash=s=>createHash('sha256').update(s).digest('hex');
 const clean=s=>String(s||'').trim().replace(/^петя[\s,:.!?—-]*/iu,'').replace(/[.!?]+$/,'').trim();
 function parse(command){
  const value=clean(command).replace(/^попроси\s+/iu,'');if(value===clean(command))return null;
- const group=require('./team-roles.cjs').addressed(value);
+ const group=require('../../team-roles.cjs').addressed(value);
  const exact=/^(команду|(?:в\s+(?:канале\s+)?)?#[\p{L}\p{N}_-]+)\s+(.+)$/iu.exec(value);
  if(!group&&!exact)return null;
  const literal=!!exact?.[1].includes('#');
@@ -32,7 +32,7 @@ class SlackRequest {
   try{
    if(!this.enabled()||!(this.settings().slackToken||this.settings().slackCredential))throw Error('Подключите Slack и включите его модуль.');
    const scope=this.scope(),topic=this.context(),account=this.account(),token=this.settings().slackToken||'';
-   const check=()=>{require('./answer-cancel.cjs').check();if(scope!==this.scope())throw Error('Проект, тема или подключение изменились. Повторите поручение.');};
+   const check=()=>{require('../../answer-cancel.cjs').check();if(scope!==this.scope())throw Error('Проект, тема или подключение изменились. Повторите поручение.');};
    const request=async(...args)=>{check();const result=await this.request(...args);check();return result;};
    let all;try{all=lookupTarget?[await findChannel(request,token,lookupTarget)]:await listChannels(request,token,{target:task.literal?task.target:''});}catch(error){if(error.code==='SLACK_CHANNEL_LOOKUP_REQUIRED')return this.ask(task,error.channels||[],'В какой канал отправить поручение? Введите точное название или ссылку.',true);if(lookupTarget&&!/изменились/u.test(error.message))return this.ask(task,[],error.message,true);throw error;}
    if(lookupTarget)selected=all[0];
@@ -47,7 +47,7 @@ class SlackRequest {
    const legacyKey=hash(JSON.stringify([account,channel.id,thread_ts,task.text.toLowerCase().replace(/\s+/g,' ')]));
    const old=this.state.slackRequests.find(r=>(r.key===key||!Array.isArray(r.recipients)&&r.key===legacyKey)&&(r.status==='unknown'||r.status==='sending'||r.status==='sent'&&this.now()-r.at<900000));
    if(old)return this.receipt(old,true);
-   const recipients=task.recipientRole?await require('./slack-recipients.cjs').resolveRecipients({role:task.recipientRole,channel,topic,settings:this.settings(),request,token}):[];
+   const recipients=task.recipientRole?await require('./recipients.cjs').resolveRecipients({role:task.recipientRole,channel,topic,settings:this.settings(),request,token}):[];
    check();
    const send=async()=>{
    check();
@@ -69,18 +69,18 @@ class SlackRequest {
    // The draft passes the outgoing pipeline (src/features/outgoing.cjs) before the confirmation: findings are
    // shown under the text; it changes only when the user chooses «Применить правки», which shows the edited text
    // for a new confirmation. A slow or failing check only means no findings.
-   const outgoing=require('./features/outgoing.cjs');
+   const outgoing=require('../../features/outgoing.cjs');
    const review=await this.reviewDraft(task.text,channel,thread_ts);
    check();
    const fixed=review?outgoing.applyAll(task.text,review.findings):null;
    const canFix=!!fixed?.applied.length&&!!fixed.text.trim()&&fixed.text!==task.text;
    const notes=review?outgoing.confirmation(review):'';
-   return require('./input-required.cjs').ask({text:'Отправить в #'+channel.name+(thread_ts?' · ответ в треде':'')+'?\n'+(recipients.length?'Упоминания: '+recipients.map(r=>r.name).join(', ')+'\n':'')+task.text+(notes?'\n\n'+notes:''),label:'Отправка сообщения',options:canFix?['Отправить','Применить правки','Отмена']:['Отправить','Отмена'],strictChoices:true},async answer=>{
+   return require('../../input-required.cjs').ask({text:'Отправить в #'+channel.name+(thread_ts?' · ответ в треде':'')+'?\n'+(recipients.length?'Упоминания: '+recipients.map(r=>r.name).join(', ')+'\n':'')+task.text+(notes?'\n\n'+notes:''),label:'Отправка сообщения',options:canFix?['Отправить','Применить правки','Отмена']:['Отправить','Отмена'],strictChoices:true},async answer=>{
     if(canFix&&String(answer||'').trim().toLowerCase()==='применить правки')return confirm({...task,text:fixed.text});
     if(this.busy)throw Error('Дождитесь завершения отправки.');this.busy=true;try{return await send();}finally{this.busy=false;}});
    };
    return await confirm(task);
-  }catch(e){if(e instanceof require('./input-required.cjs').InputRequired)throw e;return this.reply(e.message,{error:true});}finally{this.busy=false;}
+  }catch(e){if(e instanceof require('../../input-required.cjs').InputRequired)throw e;return this.reply(e.message,{error:true});}finally{this.busy=false;}
  }
  // Findings of the outgoing pipeline for a draft, or null: never longer than `reviewBudget`, never throws.
  async reviewDraft(text,channel,thread_ts){
@@ -93,7 +93,7 @@ class SlackRequest {
  ask(task,options,reason,lookup=false){options=options.filter(c=>!c.is_archived&&/^[CG][A-Z0-9]+$/.test(c.id)).slice(0,8);this.pending={task,options,lookup,scope:this.scope(),at:this.now()};return this.reply(reason||'Куда отправить поручение?',{question:true,slackRequestReply:true,...lookup||!options.length?{clarificationInput:{label:'Канал Slack',placeholder:'#название или ссылка',submit:'Продолжить'}}:{},slackRequestChoices:options.map(c=>({id:c.id,label:'#'+c.name}))});}
  async verify(id,authorize=()=>{}){
   const row=this.state.slackRequests.find(r=>r.id===id),scope=this.scope();
-  const check=()=>{authorize();require('./answer-cancel.cjs').check();if(!row||row.account!==this.account()||row.topicId!==this.context().id||row.projectId!==this.context().projectId||(row.version||0)!==(this.context().versionIndex||0)||scope!==this.scope()||!this.enabled())throw Error('Чат или подключение Slack изменились. Проверка недоступна.');};
+  const check=()=>{authorize();require('../../answer-cancel.cjs').check();if(!row||row.account!==this.account()||row.topicId!==this.context().id||row.projectId!==this.context().projectId||(row.version||0)!==(this.context().versionIndex||0)||scope!==this.scope()||!this.enabled())throw Error('Чат или подключение Slack изменились. Проверка недоступна.');};
   check();const url=new URL('https://slack.com/api/'+(row.thread_ts?'conversations.replies':'conversations.history'));
   url.searchParams.set('channel',row.channel);url.searchParams.set('limit','15');url.searchParams.set('oldest',row.ts||String(Math.max(0,row.at/1000-60)));url.searchParams.set('inclusive','true');if(row.thread_ts)url.searchParams.set('ts',row.thread_ts);
   const result=await this.request(url.href,{headers:{Authorization:'Bearer '+(this.settings().slackToken||'')}});check();

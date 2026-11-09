@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path'),{createHash}=require('node:crypto');
 const {Client}=require('@modelcontextprotocol/sdk/client/index.js'),{StreamableHTTPClientTransport}=require('@modelcontextprotocol/sdk/client/streamableHttp.js');
-const {Dialogue}=require('../src/dialogue.cjs'),{Attachments}=require('../src/attachments.cjs'),{SlackRequest}=require('../src/slack-request.cjs'),{startMcp}=require('../src/mcp.cjs');
+const {Dialogue}=require('../src/dialogue.cjs'),{Attachments}=require('../src/attachments.cjs'),{SlackRequest}=require('../src/extensions/slack/team-request.cjs'),{startMcp}=require('../src/mcp.cjs');
 (async()=>{
  const directory=await fs.realpath(await fs.mkdtemp(path.join(os.tmpdir(),'petya-result-mcp-'))),file=path.join(directory,'result.txt');await fs.writeFile(file,'expected');
  const d=new Dialogue({save(){}}),a={id:'a',projectId:'general',jiraProject:'TEST',messages:[],at:Date.now()},b={id:'b',projectId:'private',messages:[],at:Date.now()};d.state.projects.push({id:'private'});d.state.topics.push(a,b);d.state.activeId='a';

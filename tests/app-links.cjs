@@ -138,7 +138,7 @@ const links=require('../src/features/app-links.cjs');
  assert.match((await reg.run('code-fix','coder',{text:'Падает вход после обновления'})).ask,/^Как программист, исправь в коде проекта: /);
  live.settings.module_jira='false';assert.deepEqual(reg.available('task-tracker').map(p=>p.id),['asana']);
  // The Slack request is understood by the team request flow and never names a channel by itself.
- assert.deepEqual(require('../src/slack-request.cjs').parse('Попроси команду посмотреть упавшую сборку main #12'),{target:'',literal:false,recipientRole:'',text:'Коллеги, просьба: посмотреть упавшую сборку main #12'});
+ assert.deepEqual(require('../src/extensions/slack/team-request.cjs').parse('Попроси команду посмотреть упавшую сборку main #12'),{target:'',literal:false,recipientRole:'',text:'Коллеги, просьба: посмотреть упавшую сборку main #12'});
  assert.equal(require('../src/extensions/coder/intent.cjs').isCoding('Как программист, исправь в коде проекта: Падает вход после обновления'),true);
  console.log('App links: declarations, readiness and context filters, stable order, run with re-check, unknown kinds/providers, no write on listing, Jira/Asana/Slack/Programmer requests passed');
 })().catch(e=>{console.error(e);process.exit(1);});

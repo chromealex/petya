@@ -16,8 +16,8 @@ registry. Sources only read; sending stays in each app's own confirmed flow (`sh
 | Mattermost | `src/extensions/mattermost/messenger-source.cjs` | REST API v4 with the user's token, the channels chosen in its settings | yes | yes (server search, chosen channels only) | yes |
 | VK Teams | `src/extensions/vk-teams/messenger-source.cjs` | what the bot received (Bot API events kept locally, see `docs/apps/vk-teams.md`) | yes (a message and its replies) | yes (words, over received messages) | — |
 | Discord | `src/extensions/discord/messenger-source.cjs` | REST v10 with the bot token, the chosen text/announcement channels | — | — (bots cannot search) | — |
-| Slack | `src/extensions/slack/messenger-source.cjs` | **memory only**: threads synced by `src/slack-context.cjs` into the context memory | yes | yes (words, memory) | — |
-| Telegram | `src/extensions/telegram/messenger-source.cjs` | **memory only**: chats synced by `src/telegram.cjs` | — | yes (words, memory) | — |
+| Slack | `src/extensions/slack/messenger-source.cjs` | **memory only**: threads synced by `src/extensions/slack/sync.cjs` into the context memory | yes | yes (words, memory) | — |
+| Telegram | `src/extensions/telegram/messenger-source.cjs` | **memory only**: chats synced by `src/extensions/telegram/source.cjs` | — | yes (words, memory) | — |
 
 - Contract test: `node tests/messenger-sources.cjs`; apps: `node tests/mattermost.cjs`, `node tests/vk-teams.cjs`.
 
@@ -104,11 +104,11 @@ message that does not exist is dropped; its quote is the model's verbatim part o
 
 ## Slack and Telegram
 
-Their cores (`src/slack-*.cjs`, `src/telegram*.cjs`) are unchanged. The two sources are small adapters over the
+Their services (`src/extensions/slack/*.cjs`, `src/extensions/telegram/source.cjs`) live in the same apps. The two sources are small adapters over the
 context memory those cores already fill (Slack threads `slack:<channel>:<root ts>`, Telegram chats
 `telegram:<account>:<chat>`), so they see exactly what Petya has synced, nothing more, and make no network calls. A
 live Slack reader (`conversations.history` / `conversations.replies` / `search.messages`) would replace the adapter's
-functions one by one, but needs the Slack rate-limit queue of `src/slack-context.cjs` (about one call per minute per
+functions one by one, but needs the Slack rate-limit queue of `src/extensions/slack/sync.cjs` (about one call per minute per
 method) — do it there, not in the adapter. Telegram's MTProto client runs only inside `TelegramSource`; a live
 reader would be a method there (`getMessages` per selected chat).
 

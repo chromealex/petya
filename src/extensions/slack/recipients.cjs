@@ -1,5 +1,5 @@
-const {roles,projectMatch}=require('./team-roles.cjs');
-const team=require('./team.cjs');
+const {roles,projectMatch}=require('../../team-roles.cjs');
+const team=require('../../team.cjs');
 async function resolveRecipients({role,channel,topic,settings,request,token}){
  const api=async(method,args={})=>{const d=await request('https://slack.com/api/'+method+'?'+new URLSearchParams(args),{headers:{Authorization:'Bearer '+token}});if(!d?.ok)throw Error('Не удалось проверить получателей в Slack: '+(d?.error||'неполный ответ')+'. Сообщение не отправлено.');return d;};
  async function pages(method,args){let cursor='',rows=[];const seen=new Set();for(let i=0;i<50;i++){const d=await api(method,{...args,limit:'200',...cursor?{cursor}:{}});if(!Array.isArray(d.members))throw Error('Slack вернул неполный состав. Сообщение не отправлено.');rows.push(...d.members);cursor=String(d.response_metadata?.next_cursor||'').trim();if(!cursor){if(d.has_more)throw Error('Slack вернул неполный состав.');return rows;}if(seen.has(cursor))throw Error('Slack повторил страницу участников.');seen.add(cursor);}throw Error('Состав слишком большой. Уточните рабочий канал.');}

@@ -1,5 +1,5 @@
-const {resolveChannels}=require('./slack.cjs');
-const team=require('./team.cjs');
+const {resolveChannels}=require('./channels.cjs');
+const team=require('../../team.cjs');
 function requestKind(command) {
  const text=String(command).trim().replace(/^петя[\s,:.!?—-]*/iu,'');
  if(/(?:не\s+(?:из|через|по)|без)\s+(?:slack|слака?)(?=$|[\s,.!])/iu.test(text))return {explicit:false,generic:false,channels:[]};
@@ -31,7 +31,7 @@ class SlackTeam {
    if(!data?.ok)throw Error('Slack: '+String(data?.error||'empty_response')+(data?.error==='missing_scope'?'. Переподключите Slack с правами users:read, channels:read и groups:read.':''));
    return data;
   };
-  const routing=require('./slack-channel-route.cjs');
+  const routing=require('./channel-route.cjs');
   const target=kind.channels.length===1?kind.channels[0]:'';
   const literal=/#/.test(command)||/^[CG][A-Z0-9]+$/.test(target)||target.includes('-')||target.startsWith('https://');
   let channels;
@@ -42,7 +42,7 @@ class SlackTeam {
   }
   else {
    const all=await routing.listChannels(request,s.slackToken||'');
-   const allowed=kind.channels.length||this.context().projectChannels?.length?all:all.filter(c=>require('./slack.cjs').selectors(selection).some(p=>p===c.id||require('./slack.cjs').matches(c.name,[p])));
+   const allowed=kind.channels.length||this.context().projectChannels?.length?all:all.filter(c=>require('./channels.cjs').selectors(selection).some(p=>p===c.id||require('./channels.cjs').matches(c.name,[p])));
    const choice=routing.chooseChannels(allowed,{target,literal,topic:this.context()});
    if(!choice.channels){const options=(choice.options||[]).slice(0,8);const e=Error(choice.reason+' '+options.map((c,i)=>(i+1)+': '+c.name).join('; ')+'. Назовите канал или номер варианта.');e.teamChannels=true;e.channelOptions=options;throw e;}
    channels=choice.channels.map(c=>c.id);

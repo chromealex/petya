@@ -1,5 +1,6 @@
 // Extracted from setupHandlers() in main.cjs. `ctx` gives live access to the shared state of main.cjs:
-// agents, allowedMedia, analyzeMaterials, attachments, buildQuestion, buildRepair, chatJobs, checkProgress, companies, companyId, computer, computerApproval, computerIntent, computerLock, core, dailyBrief, dialogue, dictionary, dictionaryScope, draftAnswers, executeSkill, gitWorkspace, importMedia, inspectAttachments, instructionSkills, learning, localImages, mail (the «Почта» app), modules, pendingWeb, projectMemory, randomUUID, request, requestProgress, runReview, runWeb, saveSettings, searchCommand, serviceAccess, settings, slackLogs, slackRequest, taskDuplicates, taskProgress, teamFill, telegramSource, text, undoLast, voicePreparation, voicePreparationKey, workSkills
+// agents, allowedMedia, analyzeMaterials, attachments, buildQuestion, buildRepair, chatJobs, checkProgress, companies, companyId, computer, computerApproval, computerIntent, computerLock, core, dailyBrief, dialogue, dictionary, dictionaryScope, draftAnswers, executeSkill, gitWorkspace, importMedia, inspectAttachments, instructionSkills, learning, localImages, mail (the «Почта» app), modules, pendingWeb, projectMemory, randomUUID, request, requestProgress, runReview, runWeb, saveSettings, searchCommand, serviceAccess, settings, taskDuplicates, taskProgress, teamFill, text, undoLast, voicePreparation, voicePreparationKey, workSkills
+// Service apps answer at fixed stages of this pipeline through chat routes (src/features/chat-routes.cjs, `stage`).
 module.exports=ctx=>{let restating=0;const route=(async(command,choice,background=false)=>{
     // Label replies produced by shortcut handlers before the model, so misrouting is visible in the chat.
     const via=(source,reply)=>{if(reply&&typeof reply==='object'&&!reply.by){reply.by=source;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&!last.by&&last.text===reply.text){last.by=source;ctx.dialogue.persist();}}return reply;};
@@ -34,7 +35,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
       if(fix?.refine){d.rememberAction(original,'Понял, переделываю: «'+fix.from+'» — '+fix.refine+'.');return redo(fix.from+'\nУточнение: '+fix.refine);}
       if(fix?.from&&fix.to){ctx.learning.putRule(fix);d.rememberAction(original,'Запомнил: «'+fix.from+'» — это «'+fix.to+'»'+(fix.scope?' в проекте '+fix.scope:'')+'. Делаю.');return redo(fix.to);}
     }
-    const people=await ctx.jiraSlackPeople?.turn(original);if(people)return people;
+    const routes=require('./features/chat-routes.cjs'),at=(stage,extra={})=>routes.run(ctx,stage,original,{choice,background,via,...extra});
+    const people=await at('people');if(people)return people;
 
     // A complex request for agents: subtasks run as parallel background chats of this project.
     // Explicit («раздай агентам») runs at once; a request over several areas gets an offer first
@@ -49,7 +51,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     if(!choice&&!ctx.dialogue.active()?.agentOf){
       const team=require('./agent-team.cjs'),explicit=team.agentRequest(original);
       if(explicit||team.complexRequest(original)||ctx.agentTeam.offers.has(ctx.dialogue.active()?.id)||/агент/iu.test(original)){
-        // One workflow Petya already has (filling the team directory from Jira and Slack) is not split into parts.
+        // One workflow Petya already has (filling the team directory from its sources) is not split into parts.
         if(!/агент/iu.test(original)&&!ctx.agentTeam.offers.has(ctx.dialogue.active()?.id)){teamChecked=true;const filled=await ctx.teamIntent?.turn(original);if(filled)return via('заполнение команды',filled);}
         let topic=ctx.dialogue.active();if(!topic){topic={id:ctx.randomUUID(),projectId:ctx.dialogue.state.activeProjectId||'general',title:original.slice(0,80),kind:'chat',messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;delete ctx.dialogue.state.newChat;}
         const reply=explicit?await ctx.agentTeam.turn(original,topic):await ctx.agentTeam.offer(original,topic);
@@ -74,7 +76,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     // «Сделай скилл: …»: Petya writes a skill for himself (src/features/skill-packages.cjs).
     if(!choice&&!background){const made=await ctx.skillPackages?.turn(original);if(made)return made;}
     if(!choice){const important=ctx.highlights?.turn(original);if(important)return important;}
-    if(!choice){const screen=await ctx.slackScreen?.turn(original);if(screen)return screen;}
+    if(!choice){const screen=await at('screen');if(screen)return screen;}
     if(!choice){const discovered=await ctx.contextDiscovery?.turn(original);if(discovered)return discovered;}
     if(!choice){const address=ctx.address?.turn(original);if(address)return address;}
     if(!choice){const task=ctx.chatTasks?.turn(original);if(task)return task;}
@@ -144,44 +146,28 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     }
     if(!choice){const presence=require('./ui/conversation-input.js').ConversationInput.presenceReply(original);if(presence)return via('шаблон: присутствие',presence);}
     if(!choice){const catalog=require('./project-catalog.cjs').projectCatalogReply(original,{projects:ctx.projectMemory.state.projects,activeId:ctx.projectMemory.active()?.id,settings:ctx.settings});if(catalog)return via('каталог проектов',catalog);}
-    if(!choice){const remembered=await ctx.projectMemory.turn(original);if(remembered)return via('память проектов',remembered);const sent=await ctx.slackRequest.turn(original);if(sent)return via('Slack',sent);}
+    if(!choice){const remembered=await ctx.projectMemory.turn(original);if(remembered)return via('память проектов',remembered);const sent=await at('send');if(sent)return sent;}
     if(!choice){try{const controlled=require('./computer-control.cjs').parseCommand(original)||require('./computer-intent.cjs').candidate(original)?(step('Работаю с приложениями на компьютере'),await ctx.computerLock(async()=>await ctx.computer.command(original)||await ctx.computerIntent.turn(original))):null;if(controlled){if(controlled.question)return require('./input-required.cjs').ask({text:controlled.text,label:'Приложение и действие'},answer=>pipeline(original+'\nУточнение: '+answer,undefined,background));if(controlled.telegramContacts||require('./computer-intent.cjs').direct(original)?.intent==='contact_search')return via('управление компьютером',require('./extensions/telegram/contact-result.cjs').remember(ctx.dialogue,original,controlled,false,ctx.settings));return via('управление компьютером',controlled);}}catch(error){if(error.code==='COMPUTER_PERMISSION_REQUIRED'){const approval=ctx.computerApproval.request(original,error.action);return error.action?.type==='search'&&error.action.service==='telegram'?require('./extensions/telegram/contact-result.cjs').offer(approval,ctx.settings,false):approval;}throw error;}}
     if(!choice){const filled=await ctx.teamFill.turn(original);if(filled)return via('заполнение команды',filled);}
-    if(!choice){const digest=await ctx.slackDigest.turn(original);if(digest){if(digest.text&&!digest.messages){ctx.dialogue.rememberAction(original,digest.text);const topic=ctx.dialogue.active(),last=topic?.messages?.at(-1);if(last?.role==='assistant'){last.by=digest.by;if(digest.sources?.length)last.sources=digest.sources;ctx.dialogue.persist();}return {...digest,topicId:topic?.id,topicTitle:topic?.title,messages:topic?.messages};}return digest;}}
+    if(!choice){const digest=await at('digest');if(digest)return digest;}
     if(!choice&&!ctx.learning.preview(original).matched&&!ctx.attachments.list().length&&(!ctx.dialogue.active()?.attachments?.length||require('./service-access.cjs').detect(original,null).length)){const offer=await ctx.serviceAccess.offer(original.replace(/^петя[\s,:.!?-]*/iu,''),ctx.dialogue.active());if(offer)return offer;}
-    if(!choice&&/(?:посмотри|разбери|проверь|объясни).*(?:скрин|картин|изображени|видео|ролик)/iu.test(original)&&/(?:телеграм|telegram|тг|slack|слак)/iu.test(original)){
-      const service=/(?:slack|слак)/iu.test(original)?'slack':'telegram';const wantVideo=/(?:видео|ролик)/iu.test(original),wantImage=/(?:скрин|картин|изображени)/iu.test(original);const rows=(await ctx.allowedMedia(service)).filter(r=>wantVideo&&!wantImage?require('./attachments.cjs').isVideo(r.name):wantImage&&!wantVideo?!require('./attachments.cjs').isVideo(r.name):true);
-      if(!rows.length)return {handled:true,text:'В сохранённых сообщениях нет подходящих медиа. Обновите выбранные чаты '+(service==='slack'?'Slack':'Telegram')+' или прикрепите файл.'};
-      if(rows.length>1)return {handled:true,text:'Какое вложение разобрать?',mediaChoices:rows.map(r=>({id:r.id,label:r.title+' · '+r.name+' · '+new Date(r.at).toLocaleString('ru-RU')})),mediaQuestion:original};
-      const added=await ctx.importMedia(rows[0].id);return ctx.inspectAttachments([added.id],original);
-    }
-    if(!choice&&require('./capabilities.cjs').PHRASES.telegramSync.test(original)){const result=await ctx.telegramSource.sync();if(/^обнови/iu.test(original))return {handled:true,text:result.message};return ctx.dialogue.turn(original,undefined,'chat');}
+    if(!choice){const media=await at('media');if(media)return media;}
+    if(!choice){const synced=await at('sync');if(synced)return synced;}
     if(!choice){ctx.dialogue.prune();if(require('./build-repair.cjs').isRepair(original)&&ctx.attachments.list().length){const files=ctx.attachments.take(ctx.attachments.list().map(a=>a.id)),previousTopic=ctx.dialogue.active();const topic={repairSource:previousTopic?.repairSource,slackSource:previousTopic?.slackSource,reviewScope:previousTopic?.reviewScope,jiraProject:previousTopic?.jiraProject,id:ctx.randomUUID(),title:'Исправление сборки: '+files.map(a=>a.name).join(', ').slice(0,60),kind:'chat',attachments:files,messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;ctx.dialogue.persist();for(const file of files)ctx.attachments.remove(file.id);}const repairResult=await ctx.buildRepair.turn(original);if(repairResult)return repairResult;const questionResult=await ctx.buildQuestion.turn(original);if(questionResult)return questionResult;if(ctx.attachments.list().length&&require('./review-assistant.cjs').isCorrection(original))return ctx.inspectAttachments(ctx.attachments.list().map(a=>a.id),original);const reviewed=await ctx.runReview(original);if(reviewed)return reviewed;}
 
     const references=require('./context-reference.cjs');
     const contextual=!choice&&references.isContextReference(original);
-    let contextualSlack=false;
+    let contextualService=false;
     if(contextual){
-      const files=ctx.attachments.list();const target=references.referenceTarget({pending:files.length,topic:ctx.dialogue.active(),slack:ctx.modules.enabled(ctx.settings,'slack')});
+      const files=ctx.attachments.list();const target=references.referenceTarget({pending:files.length,topic:ctx.dialogue.active(),service:routes.has(ctx,'reference')});
       if(target==='attachments')return ctx.inspectAttachments(files.map(a=>a.id),original);
       if(target==='topic')return ctx.dialogue.turn(original,undefined,'chat');
       if(target==='clarify')return require('./input-required.cjs').ask({text:'Что именно посмотреть? Прикрепите файл или уточните источник.',label:'Источник и задача',files:true},answer=>pipeline(original+'\n'+answer,undefined,background));
-      contextualSlack=true;
+      contextualService=true;
     }
 
-    if(contextualSlack||!choice&&!ctx.attachments.list().length&&(!ctx.dialogue.active()?.attachments?.length||ctx.dialogue.active()?.slackLog||/slack|слак/iu.test(original))&&require('./slack-log.cjs').isLogQuestion(original)){
-      ctx.modules.assertEnabled(ctx.settings,'slack');
-      try { const found=await ctx.slackLogs.collect({contextual:contextualSlack});const topic={id:ctx.randomUUID(),title:(contextualSlack?'Обсуждение Slack: ':'Лог Slack: ')+found.title.slice(0,60),kind:'chat',attachments:found.attachments,messages:[],at:Date.now(),reviewScope:require('./review-assistant.cjs').sourceScope(ctx.dialogue,found.url),slackLog:true,slackSource:{url:found.url,viewId:found.viewId,evidence:found.evidence||[],at:found.at}};
-        ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;ctx.dialogue.persist();
-        const question=contextualSlack?original+' Разбери это обсуждение: кратко объясни, что происходит и что заслуживает внимания. Если есть ошибка, объясни её по приведённым данным. Если непонятно, что интересует пользователя, задай конкретный уточняющий вопрос. Не предполагай, что речь обязательно о падении сборки.':original+' Объясни причину падения сборки по этому логу: приведи точную строку ошибки, отдели первопричину от последствий, предложи проверку или исправление. Если данных недостаточно, скажи, какой фрагмент нужен. Не выдумывай причину.';
-        topic.messages.push({role:'user',text:original,at:Date.now()});ctx.dialogue.persist();
-        let answer,error=false;try{answer=await ctx.analyzeMaterials(topic,question);}catch(e){answer=e.message;error=true;}
-        if(!ctx.dialogue.state.topics.includes(topic))return {handled:true,text:'Тема удалена; результат не сохранён.'};
-        answer=(contextualSlack?'Последнее просмотренное обсуждение (':'Последнее просмотренное обсуждение с логом (')+new Date(found.at).toLocaleString('ru-RU')+'). '+answer+(found.notes.length?'\n'+found.notes.join('\n'):'');
-        const sources=found.url?[{title:'Тред Slack',url:found.url}]:[];
-        topic.messages.push({role:'assistant',text:answer,sources,usedMaterials:error?[]:require('./chat-attribution.cjs').fileRefs(topic.attachments,answer),at:Date.now()});ctx.dialogue.persist();return {handled:true,text:answer,error,sources,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
-      }catch(e){return {handled:true,text:e.message,error:true};}
-    }
+    // A service's open discussion (a contextual reference, or a question about the thread being read).
+    {const discussed=await at('reference',{contextual:contextualService});if(discussed)return discussed;if(contextualService)return require('./input-required.cjs').ask({text:'Что именно посмотреть? Прикрепите файл или уточните источник.',label:'Источник и задача',files:true},answer=>pipeline(original+'\n'+answer,undefined,background));}
 
     if(!choice&&/^(?:посмотри|разбери|объясни|изучи) (?:вот )?(?:это|вложени[яе]|файл|скриншот)/iu.test(original)){const pending=ctx.attachments.list();if(pending.length)return ctx.inspectAttachments(pending.map(a=>a.id),original);if(!ctx.dialogue.active()?.attachments?.length)return require('./input-required.cjs').ask({text:'Какой файл разобрать? Прикрепите его здесь — исходный запрос сохранён.',label:'Файл или пояснение',files:true},answer=>pipeline(original+'\n'+answer,undefined,background));}
     if(!choice){if(ctx.pendingWeb&&/^продолжи(?:ть)? поиск[.!?]*$/iu.test(original))return ctx.runWeb(ctx.pendingWeb.original,ctx.pendingWeb.search,true);const search=ctx.searchCommand(original,ctx.dialogue.active());if(search){step('Ищу в интернете: «'+String(search.query||original).slice(0,80)+'»');return ctx.runWeb(original,search);}}
@@ -237,8 +223,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
         if(info.remote_host||info.remote_model||/cloud/i.test(ctx.settings.model))throw Error('Нужна локальная модель.');
         step('Выбираю, чем ответить');
         preparedTopicRoute ||= ctx.dialogue.prepareRoute(value);
-        const response=await ctx.request(base.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(semantic.routingRequest(ctx.settings.model,value,{company:ctx.companies.get(ctx.companyId).name,topic:ctx.dialogue.active(),recipes,tools,capabilities:restating?[]:require('./capabilities.cjs').CATALOG}))});
-        route=semantic.parseRoute(response,recipes,restating?[]:require('./capabilities.cjs').CATALOG,tools);
+        const response=await ctx.request(base.href,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(semantic.routingRequest(ctx.settings.model,value,{company:ctx.companies.get(ctx.companyId).name,topic:ctx.dialogue.active(),recipes,tools,capabilities:restating?[]:require('./capabilities.cjs').catalog(ctx.settings)}))});
+        route=semantic.parseRoute(response,recipes,restating?[]:require('./capabilities.cjs').catalog(ctx.settings),tools);
         // An unsure tool router must not answer for the conversation: the dialogue model sees the whole
         // history and asks its own question when the request is really unclear («Приведи пример команды»).
         // An app's own question about its choices (which of its rules) stays.
@@ -298,7 +284,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     return reply;
   };
   // When a correction changed the request, the recorded question keeps what was actually said.
-  // Petya never switches chats himself. When a step answered in another chat (a Slack log, an app's own chat, a skill
+  // Petya never switches chats himself. When a step answered in another chat (a service's discussion, an app's own chat, a skill
   // chat, a project), the open chat gets the request and the answer, with a button to that chat; only the «+» button,
   // the chat list and such buttons switch chats.
   function stay(result,owner,project,command,startedAt){
@@ -323,7 +309,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
       const access=require('./service-access.cjs');
       const service=error.petyaService;
       if(!reason||!Object.hasOwn(access.services,service)||typeof command!=='string'||choice||owner!==ctx.dialogue.active()||project!==ctx.dialogue.state.activeProjectId||company!==ctx.companyId)throw error;
-      if(service==='slack'&&reason&&ctx.slackScreen&&require('./features/slack-screen.cjs').reading(command))return ctx.slackScreen.run(command);
+      // A service app may answer another way (e.g. from the service's open window).
+      const instead=await require('./features/chat-routes.cjs').failure(ctx,service,command,reason);if(instead)return instead;
       const name=access.services[service].name,text=name+' · '+reason.message;
       ctx.dialogue.rememberAction(command,text);
       const chat=ctx.dialogue.active(),message=chat.messages.at(-1);

@@ -312,6 +312,33 @@ served by a dedicated registry next to app links. Two exist:
   commands move to the app's action once when it is added, otherwise to «Выполнить команду в чате». Example:
   `src/extensions/jira/voice-action.cjs` (`{id:'bugs', label:'Проверить баги в Jira', legacy:'bugs', run:(_, {output})
   => ({ask: output, kind: 'bugs'})}`), `src/extensions/google-play/voice-action.cjs`.
+- `chat-route` (`src/features/chat-routes.cjs`): `{id, stage?, order?, by?, ready?(settings), async turn(services,
+  command, {stage, choice, background, contextual}) → result | null, failure?(services, {service, command, reason})}` —
+  service-specific handling inside Petya's request pipeline (`src/converse.cjs`), at a fixed `stage`: `people` (first),
+  `screen`, `send` (after project memory), `digest` (after the team fill), `media`, `sync`, `reference` (a context
+  reference «посмотри, что не так» with nothing attached, `contextual: true`, or a question about a service's open
+  discussion). The first route of a stage that answers wins; `by` labels its answer; `failure` may answer a request
+  that failed because its service was unreachable. Slack: `route-people/screen/send/digest/media/reference.cjs`;
+  Telegram: `route-media/sync.cjs`. Only routes of added apps run — without the app its requests reach the offer.
+- `answer-context` (`src/features/chat-routes.cjs`): `{id, key, legacy?, clarify?, matches(command, topic), async
+  rows(services, command, topic) → {rows, stop?}}` — saved service data the local model answers from when the question
+  is about that service: `rows` go into the model's reference data under `key`, `stop` answers instead of the model
+  (nothing saved, no model), `clarify` is the question when the model did not understand; a chat that matched once keeps
+  it (`topic.answerContexts`, `legacy` = the topic flag older chats have). Telegram: `answer-context.cjs`
+  (`telegramContext`).
+- `media-source` (`src/media-sources.cjs`): `{id, name, candidates(items, settings), allowed?(services, rows),
+  fingerprint?(settings), async download(services, row)}` — pictures and videos kept from a service's messages, listed
+  in «Вложения из сервисов» and attached on request; `media-sources.turn(services, command, {service, name})` is the
+  shared «разбери скриншот из …» flow for a `media` route. Slack and Telegram provide one.
+- `team-source` (`src/team-sources.cjs`): `{id, name, order?, ready(settings), scope?(settings, topic), roster?(services,
+  command), profiles?(services, wanted), screen?(services)}` — where «Заполни команду» takes people besides Jira and the
+  user's words: a channel's members, profile titles and contacts (deactivated accounts drop out), the service's window
+  when its API is limited. Slack: `team-source.cjs`.
+- `capability` (`src/capabilities.cjs`): `{id, says, examples, accepts(text), services?, owns?}` adds an entry to the
+  local model's tool router while the app is added; `{id, extends:'<entry id>', says?, examples?, accepts}` widens an
+  entry of Petya's own (its `says` is appended). `services` are names a restatement may use; `owns` marks requests that
+  are Petya's own, never an offer of another app. Slack: `capability.cjs` (`slack-digest`), `capability-log.cjs`
+  (widens `build`), `capability-context.cjs`; Telegram: `capability.cjs` (`telegram-sync`).
 
 A source counts only while its extension is added; an installed extension may provide one, and a broken installed
 source is skipped and reported. A new source kind is a core change: add it to `REGISTRIES` in `app-links.cjs` and
@@ -330,10 +357,10 @@ had (bundled apps today; the shapes are checked like the others):
   back empty); `keepsClarify` keeps the router's own question about them. Example: «Почта» `mail`
   (`src/extensions/mail/route-tool.cjs`: rules as choices, order 40), «Google Play» `anr` (order 20) — with both added the
   prompt is the text Petya's core had.
-- `chat-route` (`src/features/chat-routes.cjs`): `{id, order?, ready?(settings), async turn(services, command)}` tried at
-  a fixed point of the request pipeline (`src/converse.cjs`: after the web search shortcut, before undo, the daily
-  summary, learned commands and the tool router), so a handler that moves out of the core keeps its place; unlike
-  `feature.turn`, which goes before Petya's handlers. Example: «Почта»'s mail rules (`src/extensions/mail/chat-route.cjs`).
+- `chat-route` without a `stage` (stage `app`, see the `chat-route` entry above): tried after the web search shortcut,
+  before undo, the daily summary, learned commands and the tool router, so a handler that moves out of the core keeps
+  its place; unlike `feature.turn`, which goes before Petya's handlers. Example: «Почта»'s mail rules
+  (`src/extensions/mail/chat-route.cjs`).
 - `dialogue-kind` (`src/features/dialogue-kinds.cjs`): a chat subject an app reads data for, answered in the open chat
   like Petya's bugs and tasks — `{id, title, by, label, service?, router?, routerNote?, detect?(text), read(services,
   command, topic, context)}`: the new chat's title, the answer's signature, the retry label (saved on the message as
@@ -365,6 +392,25 @@ Petya's own modules; the other registries count an app while its switch is `"tru
   (`src/features/extension-replies.cjs`). Prefer `feature.turn`.
 - `result.cjs` — `{id, extract?(result), describe(message, topic, services)}` for chat results the user can select and
   act on (`src/features/chat-results.cjs`); `change.cjs` — edits through chat changes. Rare; read the Jira ones.
+- **Service apps** (bundled apps with `service`, like Slack and Telegram) bring their whole service in `feature.cjs`:
+  - background work through `services.serviceJobs.add({id, tick?(), status?(), busy?(), changed?(previous, next), reset?(),
+    clear?()})` (`src/features/service-jobs.cjs`): `tick` runs in Petya's background round, `status` is shown under
+    «Контекст на неделю» (by job id, in `background-status`), `busy` holds a company switch, `changed` sees every
+    settings save (true = its source changed: watchers derived from it reset), `clear` runs on «Очистить материалы»;
+  - feature fields the core reads: `secrets` (keep the old keys — saved connections keep working), `publicFlags(settings)`
+    → the `has…` flags the window sees instead of secrets, `limits` (longer settings, e.g. a saved session),
+    `validate(next, input, {previous, internal})` (the settings before the save, and whether Petya itself saves), `serviceName` (named to the model as a connected service while its
+    module is on), `projectBinding: {kind, verify(services, value)}` (a project's binding of this kind, e.g. a channel,
+    checked by the app — `src/project-memory.cjs`);
+  - renderer registries in the app's scripts: `window.addConnectionCard(def)` (`connection-check` above) with the
+    extra fields `connectLabel?, savedOnly?, checkedOk?, manualTitle?, tokenButton?, decorate?(parts), after?(parts)`
+    (the sign-in button's name, the hint under it, any check without a failure counts as connected, the manual token
+    part's title and a button opening it, help added before / after the card's parts are arranged); `window.petyaTeamIdentities.register({service, title, field?, order?, link?(panel,
+    open, api)})` — its row in «В сервисах» on the cards of «Команда» (`src/ui/team.js`; `field` is the person attribute
+    kept with the record while the app is off); `window.petyaLinkOpeners.push(url => bool)` — open its links in the
+    service's own program (`src/ui/chat-browser.js`); `window.petyaContextRefreshers.push({id, label, button?, run})` —
+    «Обновить …» under «Сохранённые обсуждения» and when a task lacks context (`src/ui/app.js`).
+  Examples: `src/extensions/slack` (feature, settings card and connection-check, team row, link opener, report panel), `src/extensions/telegram`.
 
 ## 11. Downloads
 
@@ -408,6 +454,7 @@ warns about free space. Model downloads keep their own approval. Apps without do
   (mail rules live only in «Почта»), `tests/core-mail-guard.cjs`, `tests/core-notion-guard.cjs`,
   `tests/core-google-play-guard.cjs` (Gmail / Outlook, Notion and Google Play live only in their apps; the shared scan
   `tests/core-guard-scan.cjs` allows only the service-module tables and word lists, each with its reason),
+  `tests/core-slack-telegram-guard.cjs` (Slack and Telegram live in their apps; core files load none of their code),
   `tests/interface-language.cjs` (translations).
 - Finally `npm test` and the smoke test
   (`xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci`).

@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict');
 const {ProjectMemory}=require('../src/project-memory.cjs');
-const {chooseChannels}=require('../src/slack-channel-route.cjs');
+const {chooseChannels}=require('../src/extensions/slack/channel-route.cjs');
 (async()=>{
  let topic={},stored,account='one',scope='company-a',clock=0;
  const p=new ProjectMemory({save:s=>stored=structuredClone(s),topic:()=>topic,switchProject:p=>topic=p?{id:p.id,projectMemoryId:p.id}:{},scope:()=>scope,slackAccount:()=>account,now:()=>clock,verify:async(kind,value)=>{if(value==='bad')throw Error('unavailable');return kind==='slack'?{id:value==='other'?'C2':'C1',name:value}:kind==='jira'?{key:value,site:'site'}:kind==='member'?{id:value,name:value}:{kind:'local',value};}});

@@ -1,5 +1,5 @@
-const { DAY } = require('./context-store.cjs');
-const { selectors: channels, channelId, matches } = require('./slack.cjs');
+const { DAY } = require('../../context-store.cjs');
+const { selectors: channels, channelId, matches } = require('./channels.cjs');
 class SlackContext {
   constructor({ settings, request, store, now = Date.now }) { Object.assign(this, { settings, request, store, now }); this.queue = []; this.next = {}; this.epoch = 0; this.running = false; this.status = { message: 'Slack ещё не обновлялся', pending: 0 }; }
   reset() { this.epoch++; this.queue = []; this.next = {}; this.status = { message: 'Настройки Slack изменены', pending: 0 }; }

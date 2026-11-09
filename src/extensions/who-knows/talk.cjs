@@ -1,5 +1,5 @@
 // Conversation evidence for «Кто знает» from what Petya already keeps (read-only, no new Slack scopes): Slack threads
-// synced into the context memory (src/slack-context.cjs) and recorded meetings with speakers (src/meeting-talk.cjs).
+// synced into the context memory (src/extensions/slack/sync.cjs) and recorded meetings with speakers (src/meeting-talk.cjs).
 const {isSound}=require('../../meeting-talk.cjs');
 const one=v=>String(v||'').replace(/\s+/g,' ').trim();
 // A short quote around the first match, so the card shows what was said.

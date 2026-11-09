@@ -15,8 +15,6 @@ function renderModules(settings) {
     const nav = document.querySelector(`[data-view="${id === 'ai' ? 'agents' : id}"]`);
     if (nav) { nav.hidden = !active; if (!active && nav.classList.contains('active')) view('home'); }
   }
-  for (const name of ['slackAutoSync','slackInterval']) $('settings-form').elements[name].closest('label').hidden = !moduleEnabled('slack');
-  const sync = document.getElementById('sync-slack'); if (sync) sync.hidden = !moduleEnabled('slack');
   document.dispatchEvent(new Event('petya-modules-changed'));
 }
 for (const [id, title] of optionalModules) {
