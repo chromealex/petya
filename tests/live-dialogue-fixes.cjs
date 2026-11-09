@@ -17,7 +17,7 @@ const {explicitCalculation}=require('../src/explicit-calculation.cjs');const {Di
  // Live check 2026-11-04: a shell command is not the team; git status stays short; Ollama 500 retries with a smaller context.
  const route=require('../src/work-query-route.cjs');
  assert.equal(route.classify('Приведи пример команды',{}),null);assert.equal(route.classify('Какая команда для запуска docker?',{}),null);assert.equal(route.classify('Покажи загрузку команды',{}).kind,'workload');
- const git=require('../src/git-workspace.cjs').summary({name:'BW',branch:'rc',files:Array.from({length:5000},(_,i)=>({status:' M',path:'f'+i}))});
+ const git=require('../src/extensions/git/workspace.cjs').summary({name:'BW',branch:'rc',files:Array.from({length:5000},(_,i)=>({status:' M',path:'f'+i}))});
  assert(git.length<1000);assert.match(git,/Изменено файлов: 5000/);assert.match(git,/и ещё 4985/);
  {const {localAnswer}=require('../src/dialogue-answer.cjs');const calls=[];const r=await localAnswer({model:'m',command:'Что такое Docker?',topic:{messages:[]},uncertain:()=>false,clarify:()=>'?',request:async o=>{calls.push(o);if(calls.length===1){const e=Error('HTTP 500');e.status=500;e.detail='{"error":"model requires more system memory"}';throw e;}return {message:{content:JSON.stringify({understood:true,answer:'Контейнеры.'})}};}});
   assert.equal(r,'Контейнеры.');assert.equal(calls[1].options.num_ctx,4096);

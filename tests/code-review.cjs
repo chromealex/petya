@@ -11,7 +11,7 @@ const diff=require('../src/extensions/code-review/diff.cjs');
 const checks=require('../src/extensions/code-review/checks.cjs');
 const review=require('../src/extensions/code-review/review.cjs');
 const offer=require('../src/extensions/code-review/offer.cjs');
-const {GitWorkspace}=require('../src/git-workspace.cjs');
+const {GitWorkspace}=require('../src/extensions/git/workspace.cjs');
 const {InputRequired}=require('../src/input-required.cjs');
 
 // Fake secrets are built at run time, never written in the source.

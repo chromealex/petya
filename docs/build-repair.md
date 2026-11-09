@@ -1,5 +1,7 @@
 # Fixing a Failing Build
 
+_Owned by «Сборки» (`src/extensions/ci-builds/build-repair.cjs`, see docs/apps/ci-builds.md); works while the app is added._
+
 Commands: «почини билд» (fix the build), «поправь падающую сборку APP-123» (fix the failing build APP-123), «пофикси билд кодексом» (fix the build with Codex). An explicitly named executor takes priority; otherwise the existing rules for Claude/Codex availability, limits and project selection apply. When limits are unknown or the project is ambiguous, Petya offers a choice through the regular agents panel.
 
 ## Finding the material

@@ -70,9 +70,6 @@
  const installProgress = item => put(item.id,item);
  window.petyaEvents.onExtensionInstall(installProgress);
  window.petya.feature('extensionReplies','progress').then(items=>items.forEach(installProgress)).catch(()=>{});
- const unityProgress = item => { if(item)put(item.id,item); };
- window.petyaEvents.onUnityProgress(unityProgress);
- window.petya.feature('unity','status').then(unityProgress).catch(()=>{});
  const reportShareProgress = item => {if(item)put(item.id,item);};
  window.petyaEvents.onReportShareProgress(reportShareProgress);
  window.petya.reportShareProgress().then(items=>items.forEach(reportShareProgress)).catch(()=>{});
@@ -83,9 +80,6 @@
  window.petyaEvents.onChatChange(changeProgress);
  window.petya.feature('chatChanges','progress').then(items=>items.forEach(changeProgress)).catch(()=>{});
  window.petya.feature('actionResults','progress').then(items=>items.forEach(changeProgress)).catch(()=>{});
- const motionProgress = item => { if (item) put(item.id,item); };
- window.petyaEvents.onMotionProgress(motionProgress);
- window.petya.feature('blenderMotion','status').then(motionProgress).catch(()=>{});
  document.addEventListener('petya-ui-notification',event=>{const {id,...data}=event.detail;put(id,data);});
  window.petyaEvents.onWindowShown(()=>checkUpdates(false));setTimeout(()=>checkUpdates(false),2000);draw();
 })();

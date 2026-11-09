@@ -1,7 +1,7 @@
 process.env.GIT_CONFIG_GLOBAL=require('node:os').devNull;process.env.GIT_CONFIG_NOSYSTEM='1';
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
 const {execFile}=require('node:child_process'),{promisify}=require('node:util');const exec=promisify(execFile);
-const {GitWorkspace,commandRoute,parseStatus}=require('../src/git-workspace.cjs');
+const {GitWorkspace,commandRoute,parseStatus}=require('../src/extensions/git/workspace.cjs');
 const run=(root,args)=>exec('git',['-C',root,...args],{env:{...process.env,GIT_CONFIG_NOSYSTEM:'1',GIT_TERMINAL_PROMPT:'0'}});
 (async()=>{const base=await fs.mkdtemp(path.join(os.tmpdir(),'petya-git-test-'));try{
  const root=path.join(base,'repo'),bare=path.join(base,'remote.git'),other=path.join(base,'other');await fs.mkdir(root);await run(root,['init','-b','main']);await run(root,['config','user.name','Petya Test']);await run(root,['config','user.email','test@example.invalid']);await run(root,['config','commit.gpgsign','false']);await run(root,['config','core.autocrlf','false']);

@@ -1,12 +1,12 @@
 const assert=require('node:assert/strict');
 const {ReviewAssistant,signatures,evidence}=require('../src/review-assistant.cjs');
-const {BuildWatch,terminal,buildIds}=require('../src/build-watch.cjs');
+const {BuildWatch,terminal,buildIds}=require('../src/extensions/ci-builds/build-watch.cjs');
 (async()=>{
  let now=1700000000000;const current={id:'new',title:'Android release',at:now,kind:'chat',messages:[],attachments:[{name:'new.log',text:'Android build 123\nError: Cannot find module ./modules.cjs'}],slackSource:{url:'https://app.slack.com/archives/C123/p1700000000000000'}};
  const previous={id:'old',title:'Android old',at:now-1000,kind:'chat',messages:[],attachments:[{name:'old.log',text:'Android build 122\nError: Cannot find module ./modules.cjs'}]};
  const ios={id:'ios',title:'iOS release',at:now-500,kind:'chat',messages:[],attachments:[{name:'ios.log',text:'iOS build 23\nError: code signing failed'}]};
  const state={lessons:[],watches:[]},dialogue={state:{topics:[previous,ios,current],activeId:'new'},active(){return this.state.topics.find(t=>t.id===this.state.activeId)},persist(){},select(id){this.state.activeId=id;}};
- let calls=[],opened=[];const review=new ReviewAssistant({dialogue,store:{prune:()=>[]},slack:()=>({collect:async()=>{throw Error('No live view')}}),analyze:async(t,q)=>{calls.push({t,q});return 'analysis'},state,save:()=>{},enabled:()=>true,open:async u=>opened.push(u),now:()=>now,watch:{start:async(t,id)=>({build:id,expires:now+86400000}),stop:()=>1}});
+ let calls=[],opened=[];const review=new ReviewAssistant({dialogue,store:{prune:()=>[]},slack:()=>({collect:async()=>{throw Error('No live view')}}),analyze:async(t,q)=>{calls.push({t,q});return 'analysis'},state,save:()=>{},enabled:()=>true,open:async u=>opened.push(u),now:()=>now,watch:{buildIds,start:async(t,id)=>({build:id,expires:now+86400000}),stop:()=>1}});
  assert.equal((await review.turn('Покажи, откуда ты это взял')).evidence[0].text,'Error: Cannot find module ./modules.cjs');assert.equal(opened.length,1);
  await review.turn('Сравни с прошлым падением');assert.match(calls.at(-1).t.attachments[1].text,/122/);
  await review.turn('Запомни: у нас это чинится вот так — добавить modules.cjs в сборку');assert.equal(state.lessons.length,0);await review.turn('для проекта Peter');assert.equal(state.lessons.length,1);assert.equal(review.matchingLessons(current).length,1);assert.equal(review.matchingLessons({...current,reviewScope:'Other'}).length,0);

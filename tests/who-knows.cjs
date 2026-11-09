@@ -10,7 +10,7 @@ const git=require('../src/extensions/who-knows/git.cjs');
 const jira=require('../src/extensions/who-knows/jira.cjs');
 const app=require('../src/extensions/who-knows/feature.cjs');
 const offer=require('../src/extensions/who-knows/offer.cjs');
-const {GitWorkspace}=require('../src/git-workspace.cjs');
+const {GitWorkspace}=require('../src/extensions/git/workspace.cjs');
 const DAY=86400000,NOW=Date.UTC(2026,10,9,12);
 
 // --- fixture repository ------------------------------------------------------------------------------------

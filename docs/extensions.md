@@ -306,6 +306,35 @@ served by a dedicated registry next to app links. Two exist:
   commands move to the app's action once when it is added, otherwise to «Выполнить команду в чате». Example:
   `src/extensions/jira/voice-action.cjs` (`{id:'bugs', label:'Проверить баги в Jira', legacy:'bugs', run:(_, {output})
   => ({ask: output, kind: 'bugs'})}`), `src/extensions/google-play/voice-action.cjs`.
+- `chat-route` (`src/features/chat-routes.cjs`): `{id, stage, order?, handlesOff?, foreground?, capability?, resume?,
+  route?(text), async run(services, route, {text, pipeline, background}) → turn result | null}` — an app's own chat
+  handling at a fixed point of Petya's pipeline (`src/converse.cjs`), for requests that must be checked exactly where
+  Petya's own handler used to run rather than first like `feature.turn`. `stage` is `'commands'` (after the chat
+  extension replies, before the attachment and Slack flows) or `'builds'` (right before the Slack log review); inside
+  a stage `order` (default 100), then id. `route(text)` is synchronous and pure (the request it takes, or null); without
+  it `run` is asked for every request and returns null to pass. `foreground: true` keeps what `route` takes out of
+  background chat jobs (`src/chat-jobs.cjs`); `capability: {id, says, examples, reads?(route), accepts?(text)}` is an
+  entry of the meaning router (`src/capabilities.cjs`, listed where Petya's own app entries used to be);
+  `resume: {kind, answer(services, restart) → (answer) → turn}` continues a saved clarification of that
+  `restart.kind` after a restart. A route counts while its app is added, or always with `handlesOff` (the app then
+  answers «включите …» itself). Examples: Git (`src/extensions/git/chat-route.cjs`: stage `commands`, foreground,
+  `git-read` capability, `git-input` clarifications), Unity Editor (`src/extensions/unity/chat-route.cjs`,
+  `handlesOff`), «Сборки» (`src/extensions/ci-builds/chat-route.cjs`: stage `builds`, `repair-input`).
+- `project-detector` (`src/features/project-detectors.cjs`): `{id, name?, async detect(dir) → bool, async icon?(project,
+  {root, load, skip}) → {value, file} | null, async rank?(root) → (async (file, value) → value) | null, async
+  versions?(root) → [text]}` — a kind of project the app knows (a game engine's project, a platform's app), so Petya's
+  generic project code names none: the project icon (`src/project-icon.cjs`: the kind's own icon first, found one or
+  two folders down; the kind's ranking of images in the generic search) and the versions a project declares (the Git
+  app's «какая версия проекта»). Detectors read only the project's own files, so bundled ones apply whether or not
+  their app is added (an installed one only while added); one that throws is skipped. Example:
+  `src/extensions/unity/project-detector.cjs` (ProjectSettings.asset, the player icon by GUID, bundleVersion).
+
+Per-company state an app keeps (a feature's `setup` runs for each company) follows **the company lifecycle**
+(`src/features/lifecycle.cjs`), not hard-coded resets in the core: `lifecycle.on(event, fn, s.companyId)` in `setup`,
+with the events `settings-saved {before, after}`, `project-switched {project}`, `topic-removed {id}`,
+`contexts-cleared {}` (the user cleared the context: forget what you keep of this company) and `company-closing
+{companyId}`, after which the company's listeners are dropped (they subscribe again when it opens). Listeners of
+another company are never called; one that throws stops nothing. Example: `src/extensions/ci-builds/build-flows.cjs`.
 
 A source counts only while its extension is added; an installed extension may provide one, and a broken installed
 source is skipped and reported. A new source kind is a core change: add it to `REGISTRIES` in `app-links.cjs` and
@@ -360,7 +389,9 @@ warns about free space. Model downloads keep their own approval. Apps without do
   (`tests/extension-places-ui.cjs` shows how).
 - Guards: `tests/extension-ui.cjs` (descriptors), `tests/core-meeting-guard.cjs` (the core and other apps never name
   a meeting service), `tests/core-reminders-guard.cjs` (reminders live only in their app), `tests/core-mail-rules-guard.cjs`
-  (mail rules live only in «Почта»),
+  (mail rules live only in «Почта»), `tests/core-git-guard.cjs`, `tests/core-ci-builds-guard.cjs`, `tests/core-unity-guard.cjs` (Git,
+  the build flows and Unity Editor live only in their apps; `tests/core-guard-kit.cjs` is the shared scan),
+  `tests/core-registries.cjs` (chat routes, lifecycle, project detectors),
   `tests/interface-language.cjs` (translations).
 - Finally `npm test` and the smoke test
   (`xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci`).

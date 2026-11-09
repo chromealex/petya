@@ -1,5 +1,5 @@
 const {createHash,randomUUID}=require('node:crypto');
-const {threadURL}=require('./slack-log.cjs');
+const {threadURL}=require('../../slack-log.cjs');
 const hash=text=>createHash('sha256').update(text).digest('hex');
 function messageText(m){return [m.text,...(m.attachments||[]).flatMap(a=>[a.title,a.text,a.fallback]),...(m.blocks||[]).flatMap(b=>[b.text?.text,...(b.fields||[]).map(f=>f.text)])].filter(Boolean).join('\n').slice(0,30000);}
 function buildIds(text){return [...new Set([...text.matchAll(/(?:build|билд(?:ом|а)?|сборк[а-иу]|pipeline)\s*(?:#|№|id\s*[:=]?\s*)?([\w.-]*\d[\w.-]*)/giu)].map(m=>m[1]))];}
@@ -7,6 +7,8 @@ function terminal(m,build){if(!m.bot_id&&m.subtype!=='bot_message')return '';con
 class BuildWatch {
  constructor({state,save,request,settings,enabled,notify,now=Date.now}){Object.assign(this,{state,save,request,settings,enabled,notify,now});this.busy=false;this.next=0;this.epoch=0;}
  reset(){this.epoch++;}
+ // Build numbers named in a text («билд 123», «pipeline #45»), for the Slack review flow that starts a watch.
+ buildIds(text){return buildIds(String(text||''));}
  async page(url,cursor=''){const u=new URL(threadURL(url)||'invalid'),p=u.pathname.split('/'),digits=p[3].slice(1);const query={channel:p[2],ts:digits.slice(0,-6)+'.'+digits.slice(-6),limit:'15',...cursor?{cursor}:{}};const data=await this.request('https://slack.com/api/conversations.replies?'+new URLSearchParams(query),{headers:{Authorization:'Bearer '+(this.settings().slackToken||'')}});if(!data.ok)throw Error(data.error||'Slack недоступен');if(data.has_more&&!data.response_metadata?.next_cursor)throw Error('Slack не вернул курсор следующей страницы');return data;}
  async start(topic,build){if(!this.enabled())throw Error('Включите Slack и подключите аккаунт.');if(!threadURL(topic?.slackSource?.url))throw Error('Не удалось определить ссылку на тред. Сначала откройте и разберите нужный тред Slack.');if(!build||build.length>100)throw Error('Укажите номер билда: «следи за билдом 123».');const existing=this.state.watches.find(w=>w.url===topic.slackSource.url&&w.build===build&&w.status==='watching');if(existing)return existing;if(this.state.watches.filter(w=>w.status==='watching').length>=10)throw Error('Уже отслеживаются десять билдов. Остановите ненужные наблюдения.');
  const row={id:randomUUID(),topicId:topic.id,url:topic.slackSource.url,build,status:'watching',account:hash(this.settings().slackCredential||this.settings().slackToken||''),at:this.now(),expires:this.now()+86400000,seen:{},results:{},baseline:true,cursor:'',pages:0,lastPoll:0,error:''};this.state.watches.push(row);this.save();return row;}

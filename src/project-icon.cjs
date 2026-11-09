@@ -1,5 +1,5 @@
-// Project icon from the project's folders: a quick look at the usual places, then a bounded search
-// for app icons (Xcode AppIcon, Android launcher, Unity player icon, app-icon/logo/favicon files).
+// Project icon from the project's folders: the icon of a project kind an app knows (project detectors), a quick
+// look at the usual places, then a bounded search for app icons (Xcode AppIcon, Android launcher, app-icon/logo/favicon).
 const fs=require('node:fs/promises'),path=require('node:path');
 const cache=new Map();
 const TTL=10*60000,MAX_DEPTH=7,MAX_ENTRIES=5000,MAX_BYTES=2*1024*1024;
@@ -33,42 +33,10 @@ async function load(file,root,nativeImage){
  }catch{return '';}
 }
 
-// Unity: the default player icon is referenced by GUID in ProjectSettings.asset.
-async function unityIconGuid(root){
- try{const text=await fs.readFile(path.join(root,'ProjectSettings','ProjectSettings.asset'),'utf8');return text.match(/m_BuildTargetIcons:[\s\S]*?m_Icon:\s*\{fileID:\s*\d+,\s*guid:\s*([0-9a-f]{32})/)?.[1]||'';}catch{return '';}
-}
-
-async function isUnity(root){try{await fs.access(path.join(root,'ProjectSettings','ProjectSettings.asset'));return true;}catch{return false;}}
-// A repository often holds the Unity game one or two folders down («Client/», «Game/») next to tools with their
-// own «icon.png». The game's player icon (its GUID from ProjectSettings) is the project's icon then.
-async function unityRoots(root){
- const out=[],queue=[[root,0]];
- while(queue.length&&out.length<4){
-  const [dir,depth]=queue.shift();
-  if(await isUnity(dir)){out.push(dir);continue;}
-  if(depth>=2)continue;let items;try{items=await fs.readdir(dir,{withFileTypes:true});}catch{continue;}
-  for(const item of items)if(item.isDirectory()&&!SKIP.has(item.name)&&!item.name.startsWith('.'))queue.push([path.join(dir,item.name),depth+1]);
- }
- return out;
-}
-async function unityPlayerIcon(project,root,nativeImage){
- const guid=await unityIconGuid(project);if(!guid)return null;
- // Folders named like icons are looked at first; at most 4000 .meta files are read.
- const queue=[[path.join(project,'Assets'),0]];let entries=0,reads=0;
- while(queue.length&&entries<40000&&reads<4000){
-  const [dir,depth]=queue.shift();let items;try{items=await fs.readdir(dir,{withFileTypes:true});}catch{continue;}
-  for(const item of items){
-   if(++entries>40000)break;const full=path.join(dir,item.name);
-   if(item.isDirectory()){if(depth<8&&!SKIP.has(item.name)&&!item.name.startsWith('.')){const next=[full,depth+1];if(/icon/i.test(item.name))queue.unshift(next);else queue.push(next);}continue;}
-   if(!item.isFile()||!IMAGE.test(item.name))continue;
-   reads++;let meta='';try{meta=await fs.readFile(full+'.meta','utf8');}catch{}
-   if(meta.includes('guid: '+guid)){const value=await load(full,root,nativeImage);if(value)return {value,file:full};}
-  }
- }
- return null;
-}
+// Project kinds the apps know (src/features/project-detectors.cjs): their own icon and how they rank images.
+const detectors=()=>require('./features/project-detectors.cjs');
 async function search(root,nativeImage){
- const unityGuid=await unityIconGuid(root),unity=await isUnity(root),found=[],queue=[[root,0]];let entries=0;
+ const rank=await detectors().ranker(root),found=[],queue=[[root,0]];let entries=0;
  while(queue.length&&entries<MAX_ENTRIES){
   const [dir,depth]=queue.shift();let items;try{items=await fs.readdir(dir,{withFileTypes:true});}catch{continue;}
   for(const item of items){
@@ -77,9 +45,8 @@ async function search(root,nativeImage){
    if(item.isDirectory()){if(depth<MAX_DEPTH&&!SKIP.has(item.name)&&!item.name.startsWith('.')||item.name==='.github'&&depth<MAX_DEPTH)queue.push([full,depth+1]);continue;}
    if(!item.isFile()||!IMAGE.test(item.name))continue;
    const relative=path.relative(root,full);let value=score(relative);
-   if(unityGuid&&value<100){try{const meta=await fs.readFile(full+'.meta','utf8');if(meta.includes('guid: '+unityGuid))value=100;}catch{}}
-   // A Unity project: its player icon, or an app icon by its usual name; everything else is game art.
-   if(unity&&value<85)value=0;
+   // A detected project kind ranks its own way (a game engine's player icon wins, the rest of its art is no icon).
+   if(rank)value=await rank(full,value);
    if(value)found.push({full,value,depth});
   }
  }
@@ -95,7 +62,7 @@ async function projectIconInfo(folder,nativeImage){
  let info={value:'',file:''};
  try{
   const root=await fs.realpath(folder);
-  for(const project of await unityRoots(root)){const found=await unityPlayerIcon(project,root,nativeImage);if(found){info=found;break;}}
+  {const found=await detectors().icon(root,{load:file=>load(file,root,nativeImage),skip:SKIP});if(found)info=found;}
   if(!info.value)quick:for(const dir of QUICK_DIRS)for(const name of QUICK_NAMES){const file=path.join(root,dir,name),value=await load(file,root,nativeImage);if(value){info={value,file};break quick;}}
   if(!info.value){const found=await search(root,nativeImage);if(found)info=found;}
  }catch{}

@@ -1,5 +1,5 @@
 // Extracted from setupHandlers() in main.cjs. `ctx` gives live access to the shared state of main.cjs:
-// agents, allowedMedia, analyzeMaterials, attachments, buildQuestion, buildRepair, chatJobs, checkProgress, companies, companyId, computer, computerApproval, computerIntent, computerLock, core, dailyBrief, dialogue, dictionary, dictionaryScope, draftAnswers, executeSkill, gitWorkspace, importMedia, inspectAttachments, instructionSkills, learning, localImages, mail (the «Почта» app), modules, pendingWeb, projectMemory, randomUUID, request, requestProgress, runReview, runWeb, saveSettings, searchCommand, serviceAccess, settings, slackLogs, slackRequest, taskDuplicates, taskProgress, teamFill, telegramSource, text, undoLast, voicePreparation, voicePreparationKey, workSkills
+// agents, allowedMedia, analyzeMaterials, attachments, chatJobs, checkProgress, companies, companyId, computer, computerApproval, computerIntent, computerLock, core, dailyBrief, dialogue, dictionary, dictionaryScope, draftAnswers, executeSkill, importMedia, inspectAttachments, instructionSkills, learning, localImages, mail (the «Почта» app), modules, pendingWeb, projectMemory, randomUUID, request, requestProgress, runReview, runWeb, saveSettings, searchCommand, serviceAccess, settings, slackLogs, slackRequest, taskDuplicates, taskProgress, teamFill, telegramSource, text, undoLast, voicePreparation, voicePreparationKey, workSkills
 module.exports=ctx=>{let restating=0;const route=(async(command,choice,background=false)=>{
     // Label replies produced by shortcut handlers before the model, so misrouting is visible in the chat.
     const via=(source,reply)=>{if(reply&&typeof reply==='object'&&!reply.by){reply.by=source;const last=ctx.dialogue.active()?.messages?.at(-1);if(last?.role==='assistant'&&!last.by&&last.text===reply.text){last.by=source;ctx.dialogue.persist();}}return reply;};
@@ -85,19 +85,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
       const visual = await ctx.extensionReplies?.turn(original);
       if (visual) return visual;
     }
-    const gitRoute=!choice?require('./git-workspace.cjs').commandRoute(original):null;
-    if(gitRoute){
-      if(gitRoute.action==='clarify')return require('./input-required.cjs').ask({text:gitRoute.question,label:'Параметры Git',restart:{kind:'git-input',prefix:gitRoute.input?.prefix||'',suffix:gitRoute.input?.suffix||''}},answer=>pipeline((gitRoute.input?.prefix||'')+answer+(gitRoute.input?.suffix||''),undefined,background));
-      if(gitRoute.action==='help')return {handled:true,text:'Git: «статус гита», «покажи diff», «история коммитов», «добавь в коммит путь/файл», «сделай коммит: описание», «создай ветку feature/name», «переключись на ветку main», «git fetch», «git pull», «git push». Git автоматически определяется по папкам текущего проекта. Панель открывается кнопкой Git в чате.'};
-      ctx.dialogue.rememberAction(original,'Выполняю Git…');const topic=ctx.dialogue.active(),message=topic.messages.at(-1);
-      try{ctx.requestProgress.report('Выполняю Git: '+gitRoute.action);const result=gitRoute.action==='init'?await ctx.gitWorkspace.init(null,(await ctx.gitWorkspace.discover()).projectId):await ctx.gitWorkspace.execute(gitRoute);message.text=result.text;const card=require('./features/chat-results.cjs').extract({git:{action:gitRoute.action,...result}});if(card)message.extensionData={...message.extensionData,...card};}catch(error){message.text=error.message;message.error=!error.gitDiscovery;if(error.gitDiscovery){message.gitDiscovery=error.gitDiscovery;message.question=true;}}
-      if(!ctx.dialogue.state.topics.includes(topic))return {handled:true,text:message.text,error:!!message.error};
-      ctx.dialogue.persist();return {handled:true,text:message.text,error:!!message.error,question:!!message.question,gitDiscovery:message.gitDiscovery,gitCommand:original,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
-    }
-    if(!choice&&!ctx.attachments.list().length){
-      const prefab=await ctx.unity?.turn(original);
-      if(prefab)return prefab;
-    }
+    // Apps' own chat handling at this point of the pipeline: chat routes (src/features/chat-routes.cjs).
+    if(!choice){const routed=await require('./features/chat-routes.cjs').turn(ctx,'commands',original,{pipeline,background});if(routed)return routed;}
     const drawing=!choice?require('./local-images.cjs').imagePrompt(original):null;
     if(drawing!==null){
       if(!drawing)return require('./input-required.cjs').ask({restart:{kind:'drawing-input'},text:'Что нарисовать?',label:'Описание картинки',placeholder:'Например: кот-космонавт на Луне'},answer=>pipeline('Нарисуй '+answer,undefined,background));
@@ -156,7 +145,8 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
       const added=await ctx.importMedia(rows[0].id);return ctx.inspectAttachments([added.id],original);
     }
     if(!choice&&require('./capabilities.cjs').PHRASES.telegramSync.test(original)){const result=await ctx.telegramSource.sync();if(/^обнови/iu.test(original))return {handled:true,text:result.message};return ctx.dialogue.turn(original,undefined,'chat');}
-    if(!choice){ctx.dialogue.prune();if(require('./build-repair.cjs').isRepair(original)&&ctx.attachments.list().length){const files=ctx.attachments.take(ctx.attachments.list().map(a=>a.id)),previousTopic=ctx.dialogue.active();const topic={repairSource:previousTopic?.repairSource,slackSource:previousTopic?.slackSource,reviewScope:previousTopic?.reviewScope,jiraProject:previousTopic?.jiraProject,id:ctx.randomUUID(),title:'Исправление сборки: '+files.map(a=>a.name).join(', ').slice(0,60),kind:'chat',attachments:files,messages:[],at:Date.now()};ctx.dialogue.state.topics.push(topic);ctx.dialogue.state.activeId=topic.id;ctx.dialogue.persist();for(const file of files)ctx.attachments.remove(file.id);}const repairResult=await ctx.buildRepair.turn(original);if(repairResult)return repairResult;const questionResult=await ctx.buildQuestion.turn(original);if(questionResult)return questionResult;if(ctx.attachments.list().length&&require('./review-assistant.cjs').isCorrection(original))return ctx.inspectAttachments(ctx.attachments.list().map(a=>a.id),original);const reviewed=await ctx.runReview(original);if(reviewed)return reviewed;}
+    // Apps' flows that come right before the Slack log review: chat routes of stage 'builds' (src/features/chat-routes.cjs).
+    if(!choice){ctx.dialogue.prune();const routed=await require('./features/chat-routes.cjs').turn(ctx,'builds',original,{pipeline,background});if(routed)return routed;if(ctx.attachments.list().length&&require('./review-assistant.cjs').isCorrection(original))return ctx.inspectAttachments(ctx.attachments.list().map(a=>a.id),original);const reviewed=await ctx.runReview(original);if(reviewed)return reviewed;}
 
     const references=require('./context-reference.cjs');
     const contextual=!choice&&references.isContextReference(original);

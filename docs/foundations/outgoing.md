@@ -116,7 +116,7 @@ the edited text (applying is never sending). See `src/slack-request.cjs`.
 | Newcomer welcome message («Онбординг новичка»; sent through share-message) | `src/extensions/onboarding/onboarding-cards.js` | messenger · direct |
 | Interview invitation («Найм»; the event through «Календарь»'s own confirmation) | `src/extensions/hiring/hiring-cards.js` | calendar · direct |
 
-Not wired: Telegram (Petya only reads it), build questions to Slack (`src/build-question.cjs`, a fixed template, not a
+Not wired: Telegram (Petya only reads it), build questions to Slack (`src/extensions/ci-builds/build-question.cjs`, a fixed template, not a
 user draft), Jira comments (task tracker, not a message to people; can be added the same way).
 
 ## Tests

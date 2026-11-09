@@ -2,7 +2,7 @@ process.env.GIT_CONFIG_GLOBAL=require('node:os').devNull;process.env.GIT_CONFIG_
 // «Посмотри версию в гите» must reach git (tag, describe, manifests) instead of the model.
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
 const {execFile}=require('node:child_process'),{promisify}=require('node:util');const exec=promisify(execFile);
-const {GitWorkspace,commandRoute}=require('../src/git-workspace.cjs');
+const {GitWorkspace,commandRoute}=require('../src/extensions/git/workspace.cjs');
 const run=(root,args)=>exec('git',['-C',root,...args],{env:{...process.env,GIT_CONFIG_NOSYSTEM:'1',GIT_TERMINAL_PROMPT:'0'}});
 (async()=>{
  for(const t of ['Посмотри версию в гите','Какая версия проекта?','Какой последний тег?','Посмотри версию игры'])assert.equal(commandRoute(t)?.action,'version',t);

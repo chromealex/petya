@@ -1,15 +1,7 @@
-// Git and local projects: workspace, discovery, status, commands and local project links.
-// Extracted from main.cjs: shared state comes through ctx (live getters/setters).
+// Local projects: a working project's local folder (connect, refresh, disconnect) whose documentation and files
+// Petya reads as context (src/local-project.cjs). Extracted from main.cjs: shared state comes through ctx (live
+// getters). Repositories in a project's folders belong to the Git app (src/extensions/git).
 module.exports=ctx=>{
-  const gitWorkspace=new (require('./git-workspace.cjs').GitWorkspace)({context:()=>{
-    const p=ctx.dialogue.state.projects.find(p=>p.id===ctx.dialogue.state.activeProjectId);
-    return p&&p.id!=='general'?{id:p.id,name:p.name,folders:require('./project-folders.cjs').projectFolders(p,ctx.projectMemory.get(p.memoryId))}:null;
-  }});
-  ctx.handle('gitDiscover',()=>gitWorkspace.discover());
-  ctx.handle('gitSelect',(root,projectId)=>gitWorkspace.select(root,projectId));
-  ctx.handle('gitInit',(folder,projectId)=>gitWorkspace.init(folder,projectId));
-  ctx.handle('gitStatus',()=>gitWorkspace.status());
-  ctx.handle('gitExecute',input=>gitWorkspace.execute(input));
   ctx.handle('localProjectStatus',()=>({projects:ctx.projectMemory.state.projects.map(p=>({id:p.id,name:p.name,folder:p.localFolder||''})),activeId:ctx.projectMemory.active()?.id||''}));
   ctx.handle('localProjectConnect',async id=>{
     const project=ctx.projectMemory.get(id);if(!project)throw Error('Сначала выберите рабочий проект.');
@@ -23,5 +15,4 @@ module.exports=ctx=>{
   });
   ctx.handle('localProjectDisconnect',id=>{const next=structuredClone(ctx.projectMemory.state),project=next.projects.find(p=>p.id===id);if(!project)throw Error('Проект не найден.');delete project.localFolder;ctx.projectMemory.commit(next);return true;});
   ctx.handle('localProjectRefresh',async id=>{const project=ctx.projectMemory.get(id);if(!project?.localFolder)throw Error('Подключите папку проекта.');return require('./local-project.cjs').readProject(project.localFolder);});
-  return {gitWorkspace};
 };

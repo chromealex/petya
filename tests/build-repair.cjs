@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict');
-const {BuildRepair,isRepair,outcome}=require('../src/build-repair.cjs');
-const {RepairSources,hasLog,jiraLog}=require('../src/build-repair-sources.cjs');
+const {BuildRepair,isRepair,outcome}=require('../src/extensions/ci-builds/build-repair.cjs');
+const {RepairSources,hasLog,jiraLog}=require('../src/extensions/ci-builds/build-repair-sources.cjs');
 const {adf}=require('../src/core.cjs');
 (async()=>{
  assert(isRepair('Петя, почини падающую сборку в APP-12'));assert(isRepair('поправь билд'));assert(!isRepair('почему билд падает'));assert(!isRepair('не исправляй сборку'));assert(!hasLog('Build failed'));assert(hasLog('Error: Cannot find module ./modules.cjs'));assert(!outcome('Я всё починил'));assert.equal(outcome('{"repair_status":"blocked","summary":"Нет доступа","checks":[]}').status,'blocked');

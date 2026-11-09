@@ -1,7 +1,7 @@
-const {adfText}=require('./history.cjs');
-const {adf}=require('./core.cjs');
-const {allowed}=require('./jira-routing.cjs');
-const {threadURL,downloadLog,excerpt}=require('./slack-log.cjs');
+const {adfText}=require('../../history.cjs');
+const {adf}=require('../../core.cjs');
+const {allowed}=require('../../jira-routing.cjs');
+const {threadURL,downloadLog,excerpt}=require('../../slack-log.cjs');
 const failure=/(?:билд|сборк|build)[\s\S]{0,120}(?:пада|упал|не работа|не собира|failed|broken)|(?:пада|не работа)[\s\S]{0,80}(?:билд|сборк|build)/iu;
 const hasLog=text=>/(?:error\s*[:\[]\s*\S.{8}|fatal\s*:\s*\S.{8}|exception\s*:\s*\S.{8}|Caused by:\s*\S.{8}|Cannot find module\s+\S|error [A-Z]+\d+:|undefined reference to|No such file or directory)/iu.test(text||'');
 const logFile=f=>/\.(?:log|txt|out)$/iu.test(f.name||f.filename||'');

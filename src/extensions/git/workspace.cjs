@@ -9,11 +9,12 @@ const actions=new Set([...reads,'stage','unstage','commit','createBranch','switc
 function redact(s){return String(s||'').replace(/(https?:\/\/)[^\s/@]+@/g,'$1[скрыто]@').replace(/\x1b\[[0-9;]*m/g,'').slice(0,16000);}
 function parseStatus(raw){const parts=raw.split('\0'),files=[];for(let i=0;i<parts.length;i++){const row=parts[i];if(!row)continue;const status=row.slice(0,2),file={path:row.slice(3),status,staged:![' ','?'].includes(status[0]),unstaged:status[1]!==' ',conflict:/U/.test(status)||['AA','DD'].includes(status)};if(/[RC]/.test(status))file.oldPath=parts[++i];files.push(file);}return files;}
 // Read requests in conversational form; never infer a write from a question.
-// Version numbers declared in common project manifests (Node, Unity), read-only.
+// Version numbers declared in project manifests (package.json here, other kinds through project detectors), read-only.
 async function manifestVersions(root){
  const fs=require('node:fs/promises'),path=require('node:path'),found=[];
  try{const p=JSON.parse(await fs.readFile(path.join(root,'package.json'),'utf8'));if(typeof p.version==='string')found.push('Версия в package.json: '+p.version);}catch{}
- try{const u=await fs.readFile(path.join(root,'ProjectSettings','ProjectSettings.asset'),'utf8');const m=u.match(/^\s*bundleVersion:\s*(.+)$/m);if(m)found.push('Версия Unity (bundleVersion): '+m[1].trim());}catch{}
+ // Versions other project kinds declare, read by the apps that know them (src/features/project-detectors.cjs).
+ found.push(...await require('../../features/project-detectors.cjs').versions(root));
  return found;
 }
 function conversationalRead(value){
@@ -43,7 +44,7 @@ function conversationalRead(value){
 function commandRoute(value){
  const s=String(value||'').trim().replace(/^петя[\s,:.!—-]*/iu,'');
  if(/^(?:git init|создай (?:git|гит|репозиторий git)(?: для проекта)?)[.!?]*$/iu.test(s))return {action:'init'};
- const natural=require('./git-intent.cjs').naturalGit(s);if(natural)return natural;
+ const natural=require('./intent.cjs').naturalGit(s);if(natural)return natural;
  const read=conversationalRead(s);if(read)return read;
  const exact=[[/^(?:git status|статус (?:git|гита)|покажи (?:статус|изменения) (?:git|гита))[.!?]*$/iu,'status'],[/^(?:git diff|покажи (?:git )?diff|покажи дифф)[.!?]*$/iu,'diff'],[/^(?:git log|история (?:git|гита|коммитов)|покажи историю коммитов)[.!?]*$/iu,'log'],[/^(?:git branch|ветки (?:git|гита)|покажи ветки)[.!?]*$/iu,'branches'],[/^(?:git fetch|сделай fetch)[.!?]*$/iu,'fetch'],[/^(?:git pull|сделай pull|сделай пулл|подтяни изменения из гита)[.!?]*$/iu,'pull'],[/^(?:git push|сделай push|сделай пуш|запушь(?: изменения)?)[.!?]*$/iu,'push']];
  for(const [re,action]of exact)if(re.test(s))return {action};

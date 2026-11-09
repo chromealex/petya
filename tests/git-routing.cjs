@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {commandRoute}=require('../src/git-workspace.cjs');const {eligible}=require('../src/chat-jobs.cjs');
+const {commandRoute}=require('../src/extensions/git/workspace.cjs');const {eligible}=require('../src/chat-jobs.cjs');
 const status=['А можешь сейчас посмотреть гит?','Можешь, пожалуйста, посмотреть git?','А сейчас можешь гит посмотреть','А сейчас можешь гит посмотреть?','Петя, а сейчас можешь гит посмотреть?','Посмотри гит','Можешь посмотреть git?','Проверь репозиторий','Гит посмотри','Теперь проверь состояние гита','Можешь проверить репозиторий проекта?','Покажи статус репозитория','Что сейчас в гите?','Какие изменения в гите?','А теперь покажи git пожалуйста'];
 for(const text of status){assert.equal(commandRoute(text)?.action,'status',text);assert.equal(eligible(text),false,text+' must use foreground Git handler');}
 for(const [text,action] of [['Какая сейчас ветка?','branches'],['На какой мы ветке?','branches'],['Покажи последний коммит','log'],['Можешь показать гит?','status'],['git push','push'],['создай git для проекта','init'],['сделай коммит: исправление','commit']]){assert.equal(commandRoute(text)?.action,action,text);assert.equal(eligible(text),false,text);}

@@ -19,5 +19,6 @@
   "settings": true,
   "id": "unity",
   "feature": "desktop.cjs",
+  "provides": {"chat-route": "chat-route.cjs", "project-detector": "project-detector.cjs"},
   "desktop": {"apps": ["Unity Hub", "Unity"], "required": true}
 }

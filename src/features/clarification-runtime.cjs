@@ -42,9 +42,8 @@ module.exports=function runtime(s,session){
   }finally{active.delete(topic.id);session.save?.();}
  };
  const restore=descriptor=>{
-  if(descriptor?.kind==='git-input')return answer=>s.chatJobs.converse((descriptor.prefix||'')+answer+(descriptor.suffix||''));
+  const routed=require('./chat-routes.cjs').resume(s,descriptor);if(routed)return routed;
   if(descriptor?.kind==='drawing-input')return answer=>s.chatJobs.converse('Нарисуй '+answer);
-  if(descriptor?.kind==='repair-input')return answer=>s.buildRepair.turn(descriptor.command+' '+answer);
   return null;
  };
  session.save=()=>{d.state.pendingClarifications=[...session.pending].map(([id,row])=>({id,scope:row.scope,owner:row.owner,command:row.command,spec:row.spec,at:row.at,expiresAt:row.expiresAt}));d.persist();};

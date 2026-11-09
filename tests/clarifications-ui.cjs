@@ -1,7 +1,7 @@
 process.env.PETYA_SMOKE_TEST='1';
 const assert=require('node:assert/strict');
 let runs=[];
-const {GitWorkspace}=require('../src/git-workspace.cjs');
+const {GitWorkspace}=require('../src/extensions/git/workspace.cjs');
 GitWorkspace.prototype.execute=async function(input){runs.push(input);return {text:'Ветка создана: '+input.branch};};
 require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const js=code=>win.webContents.executeJavaScript(code),wait=async code=>{for(let i=0;i<100;i++){if(await js(code))return;await new Promise(r=>setTimeout(r,60));}throw Error('Timeout '+code);};

@@ -4,8 +4,11 @@
   "description": "Изменения по файлам, diff и коммит прямо в чате; push — отдельной кнопкой",
   "category": "dev",
   "settings": false,
+  "feature": "feature.cjs",
+  "provides": {"chat-route": "chat-route.cjs"},
   "scripts": [
-    ["git-cards.js", "message-format.js"]
+    ["git-cards.js", "message-format.js"],
+    ["git-panel.js", "project-sidebar.js"]
   ],
   "results": {
     "gitState": "renderGitState"
