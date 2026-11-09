@@ -45,3 +45,4 @@ project folder.
 | D8 | rollback | D7 plus five weak families: new 39/54, v22 35/42, familiar 795/801 |
 | D9 | rollback | D8 plus four weak families: new 39/54 (25 exact), v22 35/42, familiar 796/801 |
 | D10 | in the group | D9 plus open-recipient, code, cancel, permission: new 46/54 (30 exact), v22 36/42, familiar 797/801 |
+| D11 | rejected | D10 on quote, cancel, code, two-recipients: new 41/54 (33 exact), v22 36/42, familiar 798/801 |
