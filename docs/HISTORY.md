@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.12.1 — a meeting keeps recording when you switch company
+
+- The company can be switched during a meeting: the recording goes on in the background for its own company, whose tab shows a red dot; another company sees it and can stop it, and starts no recording of its own meanwhile. Recognition waits until the recording company is open again and uses its speech settings and memory.
+
 ## 0.12.0 — retro, ADR, funnels, purchases; Unity connects itself
 
 - **New apps**: retro, ADR (architecture decisions), doc freshness, funnels, in-app purchases, «объясни график»; search sources, export to Google Docs and Sheets, messengers wired into the apps that read chats.
