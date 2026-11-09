@@ -8,6 +8,25 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.13.0 — onboarding, hiring, GDD, screen recording to bug, balance simulation
+
+- **Team apps**:
+  - **Onboarding**: a two-week plan for a newcomer with the docs, people, starter tasks and accesses they need.
+  - **Hiring**: candidates, interview questions, and feedback that quotes the interviewers. No scores or rankings.
+  - **Performance review**: facts with links, and an explicit note of what data is missing.
+- **Docs apps**:
+  - **Game design document**: numbers cited from configs by file and line; written only after you see the changes.
+  - **Wiki from discussions**: verbatim quotes from the thread; can update a page that already exists.
+  - **What changed in a document**: compares versions from git, Confluence or Google Docs.
+- **Computer apps**:
+  - **Screen recording → bug**: you pick the window; the game log is attached; the bug is filed in Jira only after you confirm.
+  - **Clipboard history**: off by default; skips passwords.
+  - **Downloads cleanup**: removes files to the trash only, with undo.
+- **Gamedev and documents**:
+  - **Balance simulation**: player progression by your current configs.
+  - **PDF contracts**: terms with quotes and page numbers; deadlines become reminders.
+  - **Live-ops event ideas**: each idea with evidence and its cost in game currency.
+
 ## 0.12.2 — «Важное» as a popover, steadier materials, «Реализовать» fixed
 
 - «Важное» opens as a popover (it was cut off inside the header); each mark has «Убрать», and there is «Убрать все»; the star on a message removes its mark.
