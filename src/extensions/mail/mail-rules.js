@@ -7,8 +7,8 @@
  function summary(k,rule,accounts){
   const chips=k.el('div','mail-rule-chips');
   const names=rule.allAccounts?['все аккаунты']:(rule.accounts||[]).map(id=>accounts.find(a=>a.id===id)?.name||'отключённый аккаунт');
-  for(const text of [rule.unread?'непрочитанные':'все письма','за '+rule.days+' дн.',rule.skipPromotions?'без рассылок':'с рассылками',...names])chips.append(k.chip({label:text}));
-  if(rule.priority?.length){const c=k.chip({label:'важные: '+rule.priority.join(', ')});c.dataset.noI18n='';chips.append(c);}
+  for(const text of [rule.unread?'непрочитанные':'все письма',rule.days+' '+(window.t||String)('дн.'),rule.skipPromotions?'без рассылок':'с рассылками',...names])chips.append(k.chip({label:text}));
+  if(rule.priority?.length){const c=k.chip({label:(window.t||String)('важные:')+' '+rule.priority.join(', ')});c.dataset.noI18n='';chips.append(c);}
   return chips;
  }
  function form(k,api,rule,accounts,done){
