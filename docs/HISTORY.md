@@ -8,6 +8,15 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.17.0 — apps own their interface: mail rules, voice-command actions, the birthday field, the daily summary, the quick start
+
+- «Почтовые правила» are a tab of the «Почта» app on «Навыки»: each rule with what it reads, on/off, «Проверить сейчас», editing, delete with «Отменить». Your rules and an unfinished teaching moved there by themselves, with their «Развитие» points. The tab is there while «Почта» is added.
+- Voice-command actions come from apps: «Проверить баги в Jira» while Jira is added, «Проверить ANR в Google Play» while Google Play is. Your commands with these actions keep working; without the app such a command runs its text as a chat command.
+- The «День рождения» field on «Команда» cards belongs to the «Дни рождения» app, which is now in the catalog: it also answers «у кого день рождения на этой неделе?» and «когда день рождения у Маши?». Teams that already had birthdays got the app added; the dates stay on the cards even without it.
+- The Slack part of «Что у нас сегодня?» comes from Slack: there when Slack is added.
+- «С чего начать» in «Настройки» shows the services that ask to be there (Slack, Jira, Notion, Почта, as before).
+- For app authors: person fields on «Команда» (`ui.personFields`), voice-command actions (`voice-action`), summary sections (`summary-section`), «Развитие» points (`growth-source`) and `quickStart` (docs/extensions.md).
+
 ## 0.16.0 — apps add their own pages and tabs; reminders belong to the «Напоминания» app
 
 - An app can add an item to the left menu with a page of its own, and tabs on Petya's pages («Навыки», «Команда», «Материалы», «Настройки», «История», «Агенты») or on another app's page. Turning the app off or removing it takes them away at once; an open page goes back to the previous one.
