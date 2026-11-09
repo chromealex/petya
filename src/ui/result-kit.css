@@ -104,6 +104,17 @@ button.kit-chip{cursor:pointer}button.kit-chip:hover{color:var(--ink);border-col
 .kit-panel-browser .kit-panel-body{padding:0;overflow:hidden;display:flex}
 .chat-browser{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
 .chat-browser-bar{display:flex;align-items:center;gap:4px;padding:6px 8px;border-bottom:1px solid var(--line)}
+/* Tabs of the chat's browser: a strip above the toolbar, the active tab joins the toolbar. */
+.chat-browser-tabs{display:flex;align-items:flex-end;gap:2px;padding:6px 8px 0;overflow-x:auto;overflow-y:hidden;flex:none;background:#151819;border-bottom:1px solid var(--line)}
+.chat-browser-tab{display:flex;align-items:center;flex:0 1 180px;min-width:72px;height:30px;padding:0 2px 0 0;border:1px solid transparent;border-bottom:0;border-radius:8px 8px 0 0;color:var(--muted);margin-bottom:-1px}
+.chat-browser-tab:hover{background:#ffffff08;color:var(--ink)}
+.chat-browser-tab.active{background:var(--panel);border-color:var(--line);color:var(--ink)}
+.chat-browser-tab-title{flex:1;min-width:0;height:100%;padding:0 6px 0 10px;border:0;background:transparent;color:inherit;font-size:12px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:0}
+.chat-browser-tab.loading .chat-browser-tab-title{font-style:italic;opacity:.8}
+.chat-browser-tab .chat-browser-tab-close{width:20px;height:20px;border-radius:5px;flex:none;opacity:.55}
+.chat-browser-tab:hover .chat-browser-tab-close,.chat-browser-tab.active .chat-browser-tab-close{opacity:1}
+.chat-browser-tab-close svg{width:12px;height:12px}
+.chat-browser-tabs .chat-browser-tab-add{flex:none;width:26px;height:26px;margin:0 0 3px 2px}
 .chat-browser-tool{display:grid;place-items:center;width:30px;height:30px;padding:0;border:0;border-radius:7px;background:transparent;color:var(--muted)}
 .chat-browser-tool:hover:not(:disabled){background:#ffffff10;color:var(--ink)}.chat-browser-tool:disabled{opacity:.35}
 .chat-browser-tool.loading svg{animation:chat-browser-spin 1s linear infinite}@keyframes chat-browser-spin{to{transform:rotate(360deg)}}
