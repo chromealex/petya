@@ -7,7 +7,7 @@ const when=require('./when.cjs');
 const MIN=60000,HOUR=60*MIN,DAY=24*HOUR;
 const EVENT_DAYS=30,MAX_ITEMS=300,ERROR_NOTICE=3;
 
-function load(file){try{const d=JSON.parse(fs.readFileSync(file,'utf8'));return {items:Array.isArray(d.items)?d.items:[],trash:Array.isArray(d.trash)?d.trash:[]};}catch{return {items:[],trash:[]};}}
+function load(file){try{const d=JSON.parse(fs.readFileSync(file,'utf8'));return {items:Array.isArray(d.items)?d.items:[],trash:Array.isArray(d.trash)?d.trash:[],...d.note&&typeof d.note==='object'?{note:d.note}:{}};}catch{return {items:[],trash:[]};}}
 function save(file,data){
  fs.mkdirSync(path.dirname(file),{recursive:true,mode:0o700});
  fs.writeFileSync(file+'.tmp',JSON.stringify({version:1,...data}),{mode:0o600});fs.renameSync(file+'.tmp',file);
@@ -154,6 +154,22 @@ function create({s,file,now=()=>Date.now(),triggers,publish=()=>{},post=()=>{},s
   if(!stems.length)return open;
   return open.filter(i=>{const own=i.text.toLocaleLowerCase('ru').replace(/ё/g,'е').split(/[^\p{L}\p{N}]+/u);return stems.every(st=>own.some(w=>w.startsWith(st)));});
  }
- return {add,tick,fire,done,snooze,edit,remove,restore,checkNow,list:rows,items,notices,history,search,view:id=>view(find(id),now()),reload(){data=load(file);},file};
+ // Reminders brought from elsewhere (Petya's core before 0.15, see migrate.cjs): time reminders, the same id is never
+ // added twice. rows: [{id, text, at, status:'active'|'done', original?, topicId?, projectId?, repeat?}].
+ function adopt(list){
+  let added=0;const t=now();
+  for(const r of list){
+   if(!r||data.items.some(i=>i.id===r.id))continue;
+   const clean=String(r.text||'').replace(/\s+/g,' ').trim().slice(0,300);if(!clean||!Number.isFinite(r.at))continue;
+   const item={id:typeof r.id==='string'&&r.id?r.id:randomUUID(),text:clean,original:String(r.original||'').slice(0,500),topicId:r.topicId||'',projectId:r.projectId||'',createdAt:Number.isFinite(r.createdAt)?r.createdAt:t,kind:'time',at:r.at,status:r.status==='done'?'done':'active'};
+   if(r.repeat)item.repeat=r.repeat;
+   if(item.status==='done'){item.firedAt=r.at;item.doneAt=r.at;}
+   data.items.push(item);added++;
+  }
+  if(added)persist();return added;
+ }
+ // A one-time note kept with the reminders (e.g. «reminders moved here»): shown once in the notification center.
+ const note=value=>{if(value!==undefined){data.note=value;persist();}return data.note||null;};
+ return {add,adopt,note,tick,fire,done,snooze,edit,remove,restore,checkNow,list:rows,items,notices,history,search,view:id=>view(find(id),now()),reload(){data=load(file);},file};
 }
 module.exports={create,view,load};

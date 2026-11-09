@@ -1,6 +1,7 @@
 const growth=require('./growth.cjs');
 const {randomUUID}=require('node:crypto');
-const ACTIONS=['reminder','answer','bugs','anr'];
+// `command` runs the filled-in output as a chat request of its own (an app added to Petya may answer it).
+const ACTIONS=['command','answer','bugs','anr'];
 const clean=s=>String(s||'').trim().replace(/[.!?]+$/u,'').replace(/\s+/g,' ');
 const escape=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 function compile(pattern){
@@ -30,12 +31,13 @@ function validate(input){
  if(!name||name.length>100||!patterns.length||patterns.length>20||patterns.some(p=>p.length>500))throw new Error('Нужны название до 100 символов и 1–20 фраз до 500 символов.');
  if(!ACTIONS.includes(input.action))throw new Error('Выберите доступное действие.');
  const output=String(input.output||'').trim();if(output.length>4000)throw new Error('Текст слишком длинный.');
- for(const p of patterns){const {names}=compile(p);if(input.action==='reminder'&&(!names.includes('delay')||!names.includes('message')))throw new Error('Для напоминания в каждой фразе нужны {delay} и {message}.');for(const m of output.matchAll(/\{([a-z]+)\}/g))if(!names.includes(m[1]))throw new Error('В ответе есть переменная, которой нет во фразе.');}
- if(input.action!=='reminder'&&!output)throw new Error('Укажите текст ответа или запрос к сервису.');
+ for(const p of patterns){const {names}=compile(p);for(const m of output.matchAll(/\{([a-z]+)\}/g))if(!names.includes(m[1]))throw new Error('В ответе есть переменная, которой нет во фразе.');}
+ if(!output)throw new Error('Укажите текст ответа или запрос к сервису.');
  return {id:typeof input.id==='string'&&input.id?input.id:randomUUID(),name,patterns:[...new Set(patterns)],action:input.action,output,enabled:input.enabled!==false};
 }
 class Learning{
- constructor({state={version:1,skills:[],reminders:[]},save=()=>{},notify=()=>{},now=Date.now}){if(state.version!==1||!Array.isArray(state.skills)||!Array.isArray(state.reminders))throw new Error('Неизвестный формат обучения.');this.state=structuredClone(state);this.state.dictionary ||= [];this.state.recipes ||= [];this.state.undoLog ||= [];growth.initialize(this.state);this.save=save;this.notify=notify;this.now=now;}
+ // Fields Petya no longer owns stay in the state untouched until the app that owns them now takes them (`take`).
+ constructor({state={version:1,skills:[]},save=()=>{},notify=()=>{},now=Date.now}){if(state.version!==1||!Array.isArray(state.skills))throw new Error('Неизвестный формат обучения.');this.state=structuredClone(state);this.state.dictionary ||= [];this.state.recipes ||= [];this.state.undoLog ||= [];growth.initialize(this.state);this.save=save;this.notify=notify;this.now=now;}
  commit(next){this.save(next);this.state=next;}
  list(){return structuredClone(this.state);}
  commitUser(next,collection,id,label){
@@ -50,9 +52,9 @@ class Learning{
  undoInfo(){const op=[...this.state.undoLog].reverse().find(o=>!o.undone);return op?{id:op.id,label:op.label,at:op.at}:null;}
  undo(id){
   const next=this.list(),op=next.undoLog.find(o=>o.id===id&&!o.undone);if(!op||this.undoInfo()?.id!==id)throw new Error('Последнее действие изменилось. Обновите список.');
+  if(!Array.isArray(next[op.collection]))throw new Error('Это действие больше нельзя отменить здесь.');
   const current=next[op.collection].find(r=>r.id===op.itemId)||null;
   if(JSON.stringify(current)!==JSON.stringify(op.after))throw new Error('Данные уже изменились после действия. Автоматическая отмена невозможна.');
-  if(op.collection==='reminders'&&op.before?.state==='pending'&&op.before.due<=this.now())throw new Error('Время напоминания уже прошло; отмену нельзя откатить.');
   next[op.collection]=next[op.collection].filter(r=>r.id!==op.itemId);
   if(op.before)next[op.collection].push(op.before);
   op.undone=true;this.commit(next);return 'Отменено: '+op.label+'.';
@@ -66,14 +68,15 @@ class Learning{
  preview(command,draft){const skills=draft?[validate(draft)]:this.state.skills.filter(s=>s.enabled);const found=[];
   for(const skill of skills){for(const pattern of skill.patterns){const c=compile(pattern),m=c.regex.exec(clean(command));if(!m)continue;const slots=Object.fromEntries(c.names.map((n,i)=>[n,m[i+1]]));found.push({skill:skill.name,id:skill.id,action:skill.action,slots,output:skill.output.replace(/\{([a-z]+)\}/g,(_,key)=>slots[key]||'')});break;}}
   if(found.length!==1)return {matched:false,...found.length?{error:'Совпало несколько навыков: '+found.map(f=>f.skill).join(', ')+'. Уточните их фразы в разделе «Обучение».',ambiguous:true}:{}};
-  const result=found[0];if(result.action==='reminder'){result.delay=duration(result.slots.delay);if(!result.delay)result.error='Укажите время от 1 секунды до 365 дней, например «10 минут» или «1 час 20 минут». Повторите фразу целиком с этим временем.';}
-  return {matched:true,...result};
+  return {matched:true,...found[0]};
  }
  execute(command){const p=this.preview(command);if(!p.matched&&!p.error)return null;if(p.error)return {handled:true,error:true,text:p.error};
-  if(p.action==='reminder'){const next=this.list();if(next.reminders.filter(r=>r.state==='pending').length>=500)throw new Error('Слишком много активных напоминаний.');const reminder={id:randomUUID(),text:p.slots.message,due:this.now()+p.delay,state:'pending',skill:p.skill};next.reminders=next.reminders.filter(r=>r.state==='pending'||r.due>this.now()-30*86400000);next.reminders.push(reminder);this.commitUser(next,'reminders',reminder.id,'напоминание «'+reminder.text+'»');return {handled:true,text:'Напомню '+new Date(reminder.due).toLocaleString('ru-RU')+': '+reminder.text,reminderId:reminder.id};}
-  if(p.action==='answer')return {handled:true,text:p.output};return {query:p.output,kind:p.action};
+  if(p.action==='answer')return {handled:true,text:p.output};if(p.action==='command')return {command:p.output};return {query:p.output,kind:p.action};
  }
- cancel(id){const next=this.list(),r=next.reminders.find(r=>r.id===id);if(!r||r.state!=='pending')throw new Error('Напоминание уже завершено.');r.state='cancelled';this.commitUser(next,'reminders',id,'отмена напоминания «'+r.text+'»');}
- tick(){const due=this.state.reminders.filter(r=>r.state==='pending'&&r.due<=this.now());for(const r of due){const next=this.list();next.reminders.find(v=>v.id===r.id).state='delivered';this.commit(next);this.notify('Напоминание: '+r.text);}}
+ // An app that took over a kind of learned command rewrites it in place: same id, its growth is kept, no undo entry.
+ replaceSkill(id,patch){const next=this.list(),index=next.skills.findIndex(s=>s.id===id);if(index<0)return null;const before=next.skills[index],after=validate({...before,...patch,id});next.skills[index]=after;growth.record(next,'skills',after,before,this.now());this.commit(next);return after;}
+ // Hands a field Petya no longer owns (kept from older versions) to the app that owns it now, once: the value is
+ // removed from the state together with its undo entries. Returns undefined when there is nothing to take.
+ take(key){if(typeof key!=='string'||!/^[a-z][\w-]{0,40}$/i.test(key)||['version','skills','dictionary','recipes','undoLog','growth'].includes(key)||!(key in this.state))return undefined;const next=this.list(),value=next[key];delete next[key];next.undoLog=(next.undoLog||[]).filter(o=>o.collection!==key);this.commit(next);return value;}
 }
 module.exports={Learning,validate,duration};

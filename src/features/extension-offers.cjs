@@ -31,7 +31,7 @@ function load(dir){
 // Asking or telling Petya to show, check or count something: the request needs data the extension would bring.
 const REQUEST=/(?:^|[\s,.!?«"])(?:покажи|показать|выведи|сколько|какие|какой|какая|что с |что там|что по |проверь|глянь|посмотри|найди|сравни|разбери|собери|дай|открой|запусти|перезапусти|последн\p{L}*|топ\b|список|почему (?:упал|упала|упало|не собрал))/iu;
 // Talking about something without wanting it now: no offer at all.
-const QUIET=/^(?:а\s+)?(?:не\s+(?:надо|нужно|показывай|подключай)|что такое|как (?:подключить|настроить|работает)|объясни,? что такое|запомни|напомни)/iu;
+const QUIET=/^(?:а\s+)?(?:не\s+(?:надо|нужно|показывай|подключай)|что такое|как (?:подключить|настроить|работает)|объясни,? что такое|запомни)/iu;
 const any=(list,text)=>(list||[]).some(r=>r.test(text));
 const count=(list,text)=>(list||[]).filter(r=>r.test(text)).length;
 

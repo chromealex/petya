@@ -1,0 +1,9 @@
+.notes-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.notes-list li{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line);border-radius:10px}
+.notes-list li.done .notes-text{color:var(--muted);text-decoration:line-through}
+.notes-mark{flex:0 0 10px;width:10px;height:10px;border-radius:50%;background:#e5ce8c}
+.notes-list li.done .notes-mark{background:#c9ed9d}
+.notes-progress{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-bottom:10px}
+.notes-bar{display:block;height:100%;background:#c9ed9d}
+.notes-tip{display:grid;gap:6px;justify-items:start;padding:12px 14px;border:1px solid var(--line);border-radius:12px;max-width:620px}
+.notes-tip p{margin:0}

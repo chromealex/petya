@@ -340,17 +340,19 @@ module.exports = async (win, workspace) => {
   await win.webContents.executeJavaScript(`(async()=>{
     await learningNav.onclick();
     if($('learning').hidden)throw new Error('Learning navigation unavailable');
-    editLearning();$('learn-name').value='Проверочный таймер';$('learn-patterns').value='через {delay} сообщи: {message}';$('learn-example').value='через 2 минуты сообщи: проверить почту';
+    // A learned voice command runs as a chat request of its own; here the «Напоминания» app answers it.
+    editLearning();$('learn-name').value='Проверочный таймер';$('learn-action').value='command';$('learn-patterns').value='через {delay} сообщи: {message}';$('learn-output').value='Напомни через {delay}: {message}';$('learn-example').value='через 2 минуты сообщи: проверить почту';
     await $('learn-test').onclick();
-    if(!$('learn-result').textContent.includes('120'))throw new Error('Training preview failed');
-    if((await window.petya.learningList()).reminders.length)throw new Error('Preview created reminder');
+    if(!$('learn-result').textContent.includes('Напомни через 2 минуты: проверить почту'))throw new Error('Training preview failed');
     await $('learn-form').onsubmit({preventDefault(){}});
     if(!(await window.petya.learningList()).skills.length)throw new Error('Training not saved');
+    await window.extensionHost.open('reminders',{stay:true});
+    const before=(await window.petya.feature('reminders','list')).length;
     await processCommand('через 2 минуты сообщи: проверить почту');
+    const made=(await window.petya.feature('reminders','list')).filter(r=>r.text==='Проверить почту');
+    if(made.length!==1||(await window.petya.feature('reminders','list')).length!==before+1||!dialogueMessages.textContent.includes('Напомню'))throw new Error('Trained phrase not executed by the reminders app');
+    await window.petya.feature('reminders','remove',made[0].id);await window.extensionHost.remove('reminders');
     const learned=await window.petya.learningList();
-    if(learned.reminders.length!==1||!dialogueMessages.textContent.includes('Напомню'))throw new Error('Trained phrase not executed');
-    await window.petya.reminderCancel(learned.reminders[0].id);await refreshLearning();
-    if(!$('learn-reminders').textContent.includes('нет'))throw new Error('Cancel failed');
     await window.petya.learningDelete(learned.skills[0].id);
   })()`);
 

@@ -9,7 +9,7 @@ const when=require('../src/extensions/reminders/when.cjs');
 const feature=require('../src/extensions/reminders/feature.cjs');
 const offer=require('../src/extensions/reminders/offer.cjs');
 const registry=require('../src/extensions/reminders/triggers.cjs');
-const MIN=60000,HOUR=60*MIN;
+const MIN=60000,HOUR=60*MIN,DAY=24*HOUR;
 const T0=new Date(2026,10,9,14,20).getTime(); // Monday 9 November 2026, 14:20
 
 // --- when.cjs ------------------------------------------------------------------------------------------------------
@@ -62,8 +62,9 @@ const T0=new Date(2026,10,9,14,20).getTime(); // Monday 9 November 2026, 14:20
 {
  const offers=require('../src/features/extension-offers.cjs');const all=offers.load();
  const offered=t=>{const d=offers.decide(offers.candidates(t,{offers:all,settings:{}}));return d?.one?.offer.id||null;};
- for(const t of ['какие у меня напоминания','поставь напоминание на завтра','покажи мои напоминания'])assert.equal(offered(t),'reminders',t);
- for(const t of ['напомни в 16:00 позвонить','напомни Ивану про отчёт','дни рождения','поставь встречу в 16:00','проверяй почту каждые 5 минут'])assert.notEqual(offered(t),'reminders',t);
+ // Petya's core has no reminders: «напомни …» for the user is offered the app; for a colleague or a recall it is not.
+ for(const t of ['какие у меня напоминания','поставь напоминание на завтра','покажи мои напоминания','напомни в 16:00 позвонить','напомни мне через 2 часа проверить почту','напоминай по будням в 9:30 пить воду'])assert.equal(offered(t),'reminders',t);
+ for(const t of ['напомни Ивану про отчёт','напомни, что мы обсуждали','напомни, как зовут дизайнера','дни рождения','поставь встречу в 16:00','проверяй почту каждые 5 минут'])assert.notEqual(offered(t),'reminders',t);
  assert.equal(offer.ready({extension_reminders:'true'}),true);
 }
 
@@ -238,6 +239,38 @@ async function say(s,text,answers=[]){
  fs.writeFileSync(path.join(tmp,'x','t.cjs'),"module.exports={id:'bad'};");delete require.cache[path.join(tmp,'x','t.cjs')];
  assert.throws(()=>registry.load(tmp),/Invalid reminder trigger/);
 
+ // --- the reminders Petya's core kept before 0.15 move here once (migrate.cjs) ---------------------------------------
+ {
+  const {Learning}=require('../src/learning.cjs');const {migrate}=require('../src/extensions/reminders/migrate.cjs');const service=require('../src/extensions/reminders/service.cjs');
+  // Seconds and spans of several parts, as the moved voice commands say them.
+  assert.equal(when.parse('через 10 секунд: тест',T0).at,T0+10000);assert.equal(when.parse('через 1 час 20 минут: созвон',T0).at,T0+80*MIN);
+  assert.equal(when.parse('через час и 15 минут позвонить',T0).rest,'позвонить');assert.match(when.parse('через 400 дней x',T0).error,/год/);
+  let clock=T0;const dir=fs.mkdtempSync(path.join(os.tmpdir(),'petya-rem-migrate-'));
+  const state={version:1,skills:[{id:'k1',name:'Таймер',action:'reminder',patterns:['таймер на {delay} — {message}'],output:'',enabled:true},{id:'k2',name:'Ответ',action:'answer',patterns:['привет'],output:'Здравствуйте',enabled:true}],
+   reminders:[{id:'r1',text:'Позвонить в банк',due:T0+2*HOUR,state:'pending',skill:'Таймер'},{id:'r2',text:'Выпить воды',due:T0-HOUR,state:'pending'},{id:'r3',text:'Старое',due:T0-2*HOUR,state:'delivered'},{id:'r4',text:'Отменённое',due:T0+HOUR,state:'cancelled'}]};
+  let saved=null,patch=null;const learning=new Learning({state,now:()=>clock,save:s=>{saved=s;}});
+  const s={learning,settings:{},saveSettings(p){patch=p;Object.assign(this.settings,p);}};
+  const svc=service.create({s,file:path.join(dir,'reminders.json'),now:()=>clock,triggers:{get:()=>null,ready:()=>false}});
+  const result=migrate(s,svc);
+  assert.deepEqual(result,{moved:2,commands:1,added:true});assert.deepEqual(patch,{extension_reminders:'true'},'the app is added: nothing stops firing');
+  const items=svc.items();assert.deepEqual(items.filter(i=>i.status==='active').map(i=>[i.id,i.text,i.at]),[['r1','Позвонить в банк',T0+2*HOUR],['r2','Выпить воды',T0-HOUR]]);
+  assert.equal(items.find(i=>i.id==='r3').status,'done','delivered ones stay in the journal');assert.equal(items.some(i=>i.id==='r4'),false,'cancelled ones are dropped');
+  assert.equal(saved.reminders,undefined,'Petya no longer keeps them');assert.equal(learning.list().skills.find(k=>k.id==='k1').action,'command');
+  assert.deepEqual(learning.execute('таймер на 5 минут — чай'),{command:'Напомни через 5 минут: чай'},'the learned command asks the app');
+  assert.equal(feature.route('Напомни через 5 минут: чай').type,'create');
+  assert.equal(svc.note().kind,'migrated');assert.equal(svc.note().added,true);
+  // The overdue one fires as missed on the next tick, into the «Напоминания» chat.
+  const fired=await svc.tick();assert.deepEqual(fired,['r2']);
+  // Once: a restart migrates nothing again; a fresh service reads the same store.
+  assert.equal(migrate(s,svc),null);const again=service.create({s,file:path.join(dir,'reminders.json'),now:()=>clock,triggers:{get:()=>null,ready:()=>false}});assert.equal(again.items().length,3);
+  // Nothing to move: the app is not added by itself.
+  const plain={learning:new Learning({state:{version:1,skills:[]}}),settings:{},saveSettings(){throw Error('must not add');}};assert.equal(migrate(plain,again),null);
+  // Only history: moved quietly, the app is not added.
+  const history={learning:new Learning({state:{version:1,skills:[],reminders:[{id:'h1',text:'Было',due:T0-DAY,state:'delivered'}]}}),settings:{},saveSettings(){throw Error('must not add');}};
+  const quiet=service.create({s:history,file:path.join(dir,'h.json'),now:()=>clock,triggers:{get:()=>null,ready:()=>false}});assert.deepEqual(migrate(history,quiet),{moved:0,commands:0,added:false});assert.equal(quiet.note(),null);assert.equal(quiet.items()[0].status,'done');
+  fs.rmSync(dir,{recursive:true,force:true});
+ }
+
  fs.rmSync(root,{recursive:true,force:true});fs.rmSync(tmp,{recursive:true,force:true});
- console.log('Reminders: time parsing on a fake clock, routing and near-misses, offers, persistence, firing into the chat with a notification, missed and repeating reminders, clarifications, list/move/edit/delete/undo, Jira backoff and errors, Slack without users:read, presence, calendar meeting move, CI build, trigger registry passed');
+ console.log('Reminders: core reminders migrated once (time, text, voice commands, app added), time parsing on a fake clock, routing and near-misses, offers, persistence, firing into the chat with a notification, missed and repeating reminders, clarifications, list/move/edit/delete/undo, Jira backoff and errors, Slack without users:read, presence, calendar meeting move, CI build, trigger registry passed');
 })().catch(e=>{console.error(e);process.exit(1);});

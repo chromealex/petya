@@ -78,6 +78,7 @@ extension (refused). Everything the extension needs is inside its folder; there 
 | `uses` | `[kind]` | Cross-app kinds its cards call (section 9). Fills «Работает вместе с». |
 | `provides` | `{kind: "file.cjs" \| [files]}` | Kinds it serves to other apps (section 9). |
 | `downloads` | `[{id, name, bytes \| {darwin, win32}, approx?, optional?, requires?}]` | What adding it downloads (section 11). |
+| `ui` | `{pages: [...], tabs: [...]}` | Its own items in Petya's interface: a page in the left rail, tabs on Petya's or other apps' pages (section 8a). |
 
 `registry.validate()` checks all of this; bundled errors throw at startup (a bug), external errors refuse the
 extension and show a notification with the reason.
@@ -189,6 +190,55 @@ them on save, `publicSettings()` returns them empty; show «сохранён» f
 credential adapters (Atlassian, Google, Microsoft, GitHub) instead of asking for the same token twice. No
 extension-specific code in the application shell. Example: `src/extensions/layout/settings.js`.
 
+## 8a. Pages in the rail and tabs on pages (`ui`)
+
+An app can add its own interface to Petya's window, not only cards in the chat:
+
+```json
+"scripts": [["notes-ui.js", "message-format.js"]],
+"ui": {
+  "pages": [{"id": "notes", "title": "Заметки", "icon": "page-icon.svg", "after": "team", "render": "renderNotesPage"}],
+  "tabs":  [{"page": "learning", "title": "Подсказки", "render": "renderNotesTips", "order": 10},
+            {"page": "team", "title": "Заметки о команде", "render": "renderNotesTeam"}]
+}
+```
+
+- **`pages`** (up to 4): an item in the left rail with its own page. `id` is `a-z0-9-` (the page is `#ext-<id>`,
+  the rail button `data-view="ext-<id>"`), `title` a Russian name up to 40 characters (translated like any interface
+  text), `icon` a 24×24 monochrome stroke SVG in `currentColor` from the app's folder (validated like `icon.svg`; the
+  app's own icon when omitted; never a brand logo). Position: `after` — the rail item it follows (`home`, `growth`,
+  `sources`, `team`, `agents`, `history`, `settings`, `learning`, or another app's page id) — or `group` — the end of a
+  rail group: `assistant` (Ассистент, Развитие), `work` (Материалы, Команда, Агенты, История; the default), `setup`
+  (Настройки, Навыки). The page has the title as its heading; the renderer fills the rest.
+- **`tabs`** (up to 8): a tab on a page — Petya's `learning` («Навыки»; `skills` is the same page), `team`, `sources`
+  («Материалы»), `settings`, `history`, `agents`, `growth`, or another app's page id. `order` (0–1000, default 100) sorts
+  sections and app-only tabs. A page without tabs of its own gets a first tab named like the page for its own content.
+- **One tab per name.** Tabs whose titles look the same (case-insensitive, after translation) are one tab: Petya's own
+  content of that name first, then one section per app in a stable order (`order`, then the app's name), each under a
+  small header with the app's icon and name when the tab has more than one contributor. «Подсказки» from one app and
+  «подсказки» from another are one tab with two sections.
+- **Renderers** are window functions from the app's `scripts` (the same files and loading as cards; bundled and
+  installed apps alike, installed ones through `petya-ext://`): `render(container, api)` with `api = {extension, page,
+  container, kit, feature(method, …args), onShow(fn)}` — `feature` calls the app's own IPC
+  (`window.petya.feature(<feature name>, …)`), `onShow(fn)` runs `fn` each time the page or tab is shown again, to
+  refresh. Build with `window.resultKit` and follow the card rules (section 7): no `innerHTML` from data,
+  `data-no-i18n` on content, `window.petyaLocale` for numbers and dates. A renderer may return a promise.
+- **Live.** Places follow the catalog switch: adding the app adds them at once, turning it off or removing it removes
+  its rail item and its sections; an empty tab disappears; a page that was open goes back to the page before it. They
+  come back after a window reload. A development reload (`rev`) draws them again.
+- **Validation.** The shape is checked with the descriptor (`registry.validate`; a bundled error throws at startup,
+  an installed extension is refused). In the window: a tab on an unknown page is skipped and a page id that another
+  app already took (or a Petya section id) is refused — the first app keeps it — each with a clear `[extensions]`
+  error in the dev console (and a notification for installed apps). The review dialog of an installed extension lists
+  «Пункты меню слева» and «Вкладки на страницах».
+- **Core pages use the same tab host** (`src/ui/page-tabs.js`, `window.petyaTabs`): «Навыки» (Сценарии, Исправления
+  фраз, Команды) and «Настройки» (Сервисы, Голос и модели, Приложение) declare their tabs with `petyaTabs.core(page,
+  tabs, {fallback, host, onSelect})` and mark their content with `data-page-tab`; apps' sections go through
+  `petyaTabs.add`. Do not build a page's tabs by hand.
+- Example: `tests/fixtures/extensions/ui-notes` (a rail page, a tab on «Навыки» and one on «Команда») and `ui-tips` (a tab
+  sharing the name, a tab on the other app's page); test `tests/extension-places-ui.cjs`. Bundled: «Напоминания» shows
+  its list on «Навыки» → «Напоминания».
+
 ## 9. Cross-app kinds
 
 One app offers a capability; other apps' cards use it without knowing who provides it
@@ -277,8 +327,12 @@ warns about free space. Model downloads keep their own approval. Apps without do
   `timeout 120 xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/<id>-ui.cjs`.
 - **Offers** — rows in `tests/extension-offers-matrix.cjs` (section 5).
 - **All app UI tests** — add the test to the list in `tests/apps-ui.sh` and run it.
+- **Pages and tabs** (`ui`, section 8a): assert the rail item's place, the page or tab content, `onShow`, and that it
+  goes away when the app is turned off; look at screenshots in the wide and the compact rail
+  (`tests/extension-places-ui.cjs` shows how).
 - Guards: `tests/extension-ui.cjs` (descriptors), `tests/core-meeting-guard.cjs` (the core and other apps never name
-  a meeting service), `tests/interface-language.cjs` (translations).
+  a meeting service), `tests/core-reminders-guard.cjs` (reminders live only in their app),
+  `tests/interface-language.cjs` (translations).
 - Finally `npm test` and the smoke test
   (`xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci`).
 
@@ -293,7 +347,7 @@ with Petya's rights (files, network, saved connections); its renderer scripts ru
 trust decision, made in a review dialog that states this plainly. What Petya does enforce:
 
 - the review dialog lists name, id, version, author, category, files and size, what it connects to, provides and
-  uses, downloads and whether it has main-process code; nothing is copied into `<userData>/extensions/` until
+  uses, the rail items and tabs it adds, downloads and whether it has main-process code; nothing is copied into `<userData>/extensions/` until
   «Установить» is pressed with the confirmation box checked (the IPC itself refuses without `confirmed === true`);
 - the package path always comes from the system file dialog, never from the page;
 - archives: stored or deflated only, ≤ 20 MB packed, ≤ 50 MB / 1000 files unpacked, no encryption, no absolute or
@@ -416,6 +470,8 @@ plus `offer.cjs`, `word-cards.css` and `icon.svg` in the same folder. Its tests:
 - [ ] `offer.cjs`: precise names/topics, known near-misses in `avoid`, `ready` = added and connected; matrix rows.
 - [ ] Cards: resultKit only, a real visualization, status chip, actions, no `innerHTML` from data, `data-no-i18n`
       on content, `petyaLocale`, ~620px.
+- [ ] Pages and tabs (`ui`): declared in extension.json, renderers in `scripts`, `onShow` refreshes, gone when the app
+      is off; screenshots in the wide and the compact rail.
 - [ ] Every side effect behind an explicit confirmation; destructive ones undoable or asked; red trash for delete.
 - [ ] Long work in the notification center; missing input as a clarification before side effects.
 - [ ] Other apps' actions through `k.links`; own capabilities through `provides`; several services → source kind.

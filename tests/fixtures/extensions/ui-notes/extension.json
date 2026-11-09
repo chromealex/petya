@@ -1,0 +1,20 @@
+{
+  "id": "ui-notes",
+  "name": "Заметки на полях",
+  "version": "1.0.0",
+  "author": "Петя · пример",
+  "description": "Пример приложения со своей страницей в меню слева и вкладками на страницах Пети",
+  "category": "docs",
+  "icon": "icon.svg",
+  "setting": "extension_ui-notes",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [["notes-ui.js", "message-format.js"]],
+  "ui": {
+    "pages": [{"id": "notes", "title": "Заметки", "icon": "page-icon.svg", "after": "team", "render": "renderNotesPage"}],
+    "tabs": [
+      {"page": "learning", "title": "Подсказки", "render": "renderNotesTips", "order": 10},
+      {"page": "team", "title": "Заметки о команде", "render": "renderNotesTeam"}
+    ]
+  }
+}

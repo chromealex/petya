@@ -318,3 +318,17 @@ input,textarea,select,[contenteditable]:not([contenteditable="false"]),pre,code,
 .team-removed{padding:10px 14px}.team-removed>summary{cursor:pointer;color:var(--muted);font-size:13px}.team-removed .small{margin:8px 0 6px}
 .team-removed-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}.team-removed-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;border-top:1px solid var(--line);font-size:13px}.team-removed-list li:first-child{border-top:0}
 .team-removed-list button{min-height:28px;padding:2px 10px;font-size:12px}
+
+/* Page tabs shared by Petya and apps (page-tabs.js): one tab per name; inside, one section per app under a small
+   header with its icon and name (shown when a tab has more than one contributor). Pages apps add to the rail. */
+.page-tab-off{display:none!important}
+.page-tab-panel{display:grid;gap:22px;margin-top:4px}.page-tab-panel[hidden],.page-tab-section[hidden]{display:none}
+.page-tab-section{display:grid;gap:10px;min-width:0}
+.page-tab-owner{display:flex;align-items:center;gap:8px;margin:0;padding:0 0 6px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:600;letter-spacing:.2px}
+.page-tab-owner[hidden]{display:none}
+.page-tab-owner-icon{display:grid;place-items:center;flex:0 0 22px;width:22px;height:22px;border-radius:7px;background:#ffffff0f;color:var(--ink);font-size:11px}
+.page-tab-owner-icon svg{width:15px;height:15px;display:block}
+.page-tab-body{display:grid;gap:14px;min-width:0}
+.page-tabs-host{min-width:0}
+.ext-page-body{display:grid;gap:16px;min-width:0}
+body>aside .nav-icon-box{display:block;width:18px;height:18px}

@@ -1,4 +1,4 @@
-// Learning: dictionary rules, undo, daily brief, learned skills and reminders.
+// Learning: dictionary rules, undo, daily brief and learned skills.
 // Extracted from main.cjs: shared state comes through ctx (live getters/setters).
 module.exports=ctx=>{
   const dictionary=require('./personal-dictionary.cjs');
@@ -10,13 +10,13 @@ module.exports=ctx=>{
     return keys.length===1?keys[0]:keys.length>1?'':ctx.dialogue.active()?.jiraProject||'';
   };
   const undoLast=id=>{
-    const info=ctx.learning.undoInfo();if(!info)return {handled:true,text:'Нет локального действия для отмены. Поддерживаются напоминания, навыки и правила словаря.'};
+    const info=ctx.learning.undoInfo();if(!info)return {handled:true,text:'Нет локального действия для отмены. Поддерживаются навыки и правила словаря.'};
     const external=Math.max(0,...ctx.agents.records.map(r=>r.at||0),...ctx.workspace.history.flatMap(r=>[r.at||0,...(r.operations||[]).map(o=>o.at||0)]));
     if(external>=info.at)return {handled:true,text:'После этого локального действия Петя передавал или менял задачу. Отозвать выполненную работу автоматически нельзя. Изменения Jira можно проверить в разделе «История».',openHistory:true};
     return {handled:true,text:ctx.learning.undo(id||info.id)};
   };
   ctx.handle('undoInfo',()=>ctx.learning.undoInfo());ctx.handle('undoLast',undoLast);
-  const dailyBrief=()=>require('./daily-brief.cjs').dailyBrief({records:ctx.agents.records,jira:ctx.workspace.history,reminders:ctx.learning.list().reminders,contexts:ctx.memory.prune(),slackEnabled:ctx.modules.enabled(ctx.settings,'slack')});
+  const dailyBrief=()=>require('./daily-brief.cjs').dailyBrief({records:ctx.agents.records,jira:ctx.workspace.history,contexts:ctx.memory.prune(),slackEnabled:ctx.modules.enabled(ctx.settings,'slack')});
   ctx.handle('dailyBrief',dailyBrief);
   // Knowledge from the chat kept elsewhere counts too: recurring commands.
   const extra=()=>(ctx.recurring?.list()||[]).map(r=>({key:'recurring:'+r.id,title:r.command,points:15,at:r.createdAt||null,source:'Повторяющаяся команда из чата',learned:'Сам делаю «'+r.command+'» '+r.schedule+' и пишу результат в чат «По расписанию».'}));
@@ -25,12 +25,5 @@ module.exports=ctx=>{
   ctx.handle('learningSave',skill=>ctx.learning.put(skill));
   ctx.handle('learningDelete',id=>ctx.learning.remove(id));
   ctx.handle('learningTest',(command,draft)=>ctx.learning.preview(ctx.text(command,4000),draft));
-  ctx.handle('reminderCancel',id=>ctx.learning.cancel(id));
-  const checkReminders=()=>{try{ctx.learning.tick();}catch(error){console.error('Reminder delivery:',error.message);}};
-  if(!ctx.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){
-    const timer=setInterval(checkReminders,1000);timer.unref();checkReminders();
-    require('electron').powerMonitor.on('resume',checkReminders);
-    ctx.app.on('will-quit',()=>clearInterval(timer));
-  }
   return {dailyBrief,dictionary,dictionaryScope,undoLast};
 };

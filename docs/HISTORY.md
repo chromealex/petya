@@ -8,6 +8,15 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.15.0 — apps add their own pages and tabs; reminders belong to the «Напоминания» app
+
+- An app can add an item to the left menu with a page of its own, and tabs on Petya's pages («Навыки», «Команда», «Материалы», «Настройки», «История», «Агенты») or on another app's page. Turning the app off or removing it takes them away at once; an open page goes back to the previous one.
+- Tabs with the same name from several apps are one tab, with a small header per app inside.
+- The install review of a third-party app lists the menu items and tabs it adds.
+- Reminders live only in the «Напоминания» app now: its list is on «Навыки» → «Напоминания». Your old reminders and voice commands that set them moved there by themselves (the app was added if you had any), nothing was lost.
+- «Напомни …» without the app offers to add it. Voice commands can now run any chat command («Выполнить команду в чате»).
+- «Напоминания» understand seconds and times like «через 1 час 20 минут».
+
 ## 0.14.4 — «Собери дашборд» adds what it needs and asks for a page for the rest
 
 - «Собери дашборд»: a catalog app that would show a part and needs nothing connected is added on the spot («Добавил приложение «Отзывы в сторах»»); for one that needs a connection the reply names it.

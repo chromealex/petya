@@ -210,8 +210,10 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
       const sharedRules=(ctx.projectShare?.sharedRules()||[]).filter(r=>!ownKeys.has(ctx.dictionary.key(r.from)+'|'+ctx.dictionary.key(r.scope||'')));
       const resolved=ctx.dictionary.applyRules(original,[...ownRules,...sharedRules],ctx.dictionaryScope(original));value=resolved.text;applied=resolved.rules;
       const {actionRequest}=require('./dialogue.cjs');
-      if(applied.length&&((actionRequest(value)&&!actionRequest(original))||(ctx.learning.preview(value).action==='reminder'&&!ctx.learning.preview(original).matched)))return {handled:true,text:'По вашему правилу это означает: «'+value+'». Чтобы выполнить действие, произнесите эту команду целиком.',appliedRules:applied};
+      if(applied.length&&((actionRequest(value)&&!actionRequest(original))||(ctx.learning.preview(value).action==='command'&&!ctx.learning.preview(original).matched)))return {handled:true,text:'По вашему правилу это означает: «'+value+'». Чтобы выполнить действие, произнесите эту команду целиком.',appliedRules:applied};
       const result=ctx.learning.execute(value);
+      // A learned command runs as a request of its own: whoever handles that request (an added app, Petya) answers it.
+      if(result?.command){const reply=await pipeline(result.command,undefined,background);const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user'&&m.text===result.command);if(m){m.originalText=original;ctx.dialogue.persist();}return reply&&typeof reply==='object'?{...reply,appliedRules:applied}:reply;}
       if(result?.query){const offer=await ctx.serviceAccess.offer(result.query,ctx.dialogue.active());if(offer)return {...offer,appliedRules:applied};const reply=await ctx.dialogue.turn(result.query,undefined,result.kind);const m=[...(ctx.dialogue.active()?.messages||[])].reverse().find(m=>m.role==='user');if(m){m.originalText=original;ctx.dialogue.persist();}return {...reply,appliedRules:applied};}
       if(result){ctx.dialogue.rememberAction(original,result.text);const topic=ctx.dialogue.active();return {...result,topicId:topic.id,topicTitle:topic.title,messages:topic.messages,appliedRules:applied};}
     }

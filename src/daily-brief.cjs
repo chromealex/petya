@@ -1,9 +1,6 @@
-function dailyBrief({records,reminders,contexts,jira=[],slackEnabled=false,now=Date.now()}){
- const start=new Date(now);start.setHours(0,0,0,0);const end=new Date(start);end.setDate(end.getDate()+1);
+function dailyBrief({records,contexts,jira=[],slackEnabled=false,now=Date.now()}){
+ const start=new Date(now);start.setHours(0,0,0,0);
  const lines=['## Сегодня, '+new Date(now).toLocaleDateString('ru-RU')+'\n\nСводка по сохранённым данным Пети.'];
- const upcoming=reminders.filter(r=>r.state==='pending'&&r.due<end.getTime()).sort((a,b)=>a.due-b.due);
- lines.push('\n### Напоминания\n\nНапоминания: '+(upcoming.length?upcoming.length:'нет')+'.');
- for(const r of upcoming.slice(0,8))lines.push((r.due<now?'Просрочено: ':new Date(r.due).toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'})+': ')+r.text);
  const tasks=records.filter(r=>r.state!=='expired'&&!(r.executionState==='completed')).sort((a,b)=>b.at-a.at);
  lines.push('\n### Поручения\n\nНезавершённые или ожидающие поручения: '+tasks.length+'.');
  const states={routing:'нужен исполнитель','project-required':'нужен проект',failed:'ошибка',unknown:'передача не подтверждена',submitted:'передано; завершение не подтверждено',ready:'ожидает передачи',inProgress:'в работе',needsAttention:'нужно решение',interrupted:'прервано'};

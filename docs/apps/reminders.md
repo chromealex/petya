@@ -25,14 +25,40 @@ Files: `src/extensions/reminders/`.
   card and a link to the context (Jira issue, build, meeting), a system notification, and the notification center
   item `reminder:<id>` with «Открыть чат», «Отложить на 10 мин», «Готово» (`reminder-notifications.js`; fired and not
   marked reminders are restored after a reload through the `notices` IPC).
+- **Tab on «Навыки»** (`extension.json` `ui.tabs`, `renderReminderTab` in `reminder-cards.js`): «Навыки» →
+  «Напоминания» shows the same list card, read again from `list` whenever the tab is shown; «Новое напоминание…» goes
+  to the chat with «Напомни » in the composer. The tab is there only while the app is added (docs/extensions.md §8a).
 - **Card** (`reminderCard`): the confirmation shows how Petya understood the time (in words and as an absolute date)
   with «Изменить» (inline text and date/time editor) and the red trash delete with «Отменить»; the list is grouped
   «Сработали / Сегодня / Позже / По событию», each row with a trigger icon, the time or the event and «проверю в HH:MM»,
   the last check error; a strip of today's hours shows where today's reminders fall. Rows refresh from the live state
   (`window.petya.feature('reminders','list')`).
-- Without the app, «напомни …» goes on to Petya's other handlers as before (recurring commands, the dialogue). With
-  it, near-misses stay with Petya: «напомни Ивану про отчёт» (a message to a colleague, polite-reminder skill),
+- **The only reminders in Petya.** Petya's core has none of its own (since 0.15; `tests/core-reminders-guard.cjs`).
+  Without the app, «напомни в 16:00 позвонить», «напоминай по будням в 9:30 …» get the offer to add it
+  (`offer.cjs`, resumed after adding); recurring commands no longer take «напоминай». With the app, near-misses stay
+  with Petya: «напомни Ивану про отчёт» (a message to a colleague, polite-reminder skill),
   «напомни, что мы обсуждали вчера», «напомни, как зовут…», «напомни, когда у нас релиз» (a question).
+
+## Moved from Petya's core (0.15)
+Before 0.15 Petya's core had its own reminders: learned voice commands with the action «Поставить напоминание»
+(`{delay}`, `{message}`), stored in the learning state (`learned-skills.json`, `reminders: [{id, text, due, state,
+skill}]`), checked every second, shown as a card «Напоминания» on «Навыки» with «Отменить». They overlapped with this app
+(time reminders, one store per company) but had no repeat, no chat, no events and no list in the chat. Now:
+- `migrate.cjs` runs once when the app is set up for a company (bundled apps are set up whether or not they are added):
+  `learning.take('reminders')` hands the old list over and drops its undo entries; pending reminders become this app's
+  time reminders with the same id, text and time (they fire into the «Напоминания» chat; an overdue one fires once as
+  «Пропущенное напоминание»), delivered ones become done reminders (the journal sees them), cancelled ones are
+  dropped; learned commands with the old action become «Выполнить команду в чате» with «Напомни через {delay}:
+  {message}» (`learning.replaceSkill`: same id, growth kept), which this app answers. `when.cjs` reads seconds and
+  spans of several parts («через 1 час 20 минут») for them.
+- **Choice: migrate on startup and add the app.** When anything still active moved (a pending reminder or a learned
+  command), the app is added in that company (`extension_reminders`), because it is local — no network, no downloads,
+  nothing to connect — and that is the only way nothing is lost: the reminders keep firing on time, the list is on
+  «Навыки» → «Напоминания» and the learned phrases keep working. A notice that only offered the app would leave
+  reminders silent until the user acted, and one missed while waiting is lost. A one-time notification says where they
+  went (and that the app was added), with «Открыть» to the tab (`notices` → `noteSeen`). Only history (delivered
+  reminders) moves quietly and does not add the app. The user can remove the app afterwards like any other.
+- The core daily brief («Что у нас сегодня?») no longer lists reminders; the journal shows them (`journal-source`).
 
 ## Reminder triggers (`reminder-trigger`)
 An app declares `"provides": {"reminder-trigger": "<file>.cjs"}`; the registry is `triggers.cjs` (scanned through
@@ -74,6 +100,7 @@ No real credentials here. Everything is tested with stubs and a fake clock: `nod
 routing and near-misses, offers, persistence across a restart, firing into the chat with a notification, missed and
 repeating reminders, clarifications, list/move/edit/delete/undo, Jira backoff and errors, Slack without users:read,
 presence, calendar meeting move, CI build, the registry). UI: `tests/reminders-ui.cjs` (real backend of the smoke
-company, screenshot `petya-reminders.png`). To verify live: Jira status polling on a real site, Slack users.getPresence
+company, screenshot `petya-reminders.png`); the «Навыки» tab in `tests/extension-places-ui.cjs`
+(`petya-places-reminders-tab.png`); the migration in `tests/reminders.cjs`. To verify live: Jira status polling on a real site, Slack users.getPresence
 with a users:read token (and the missing_scope answer of a token without it), Google/Outlook event reads, GitHub runs,
 system notifications on macOS/Windows.

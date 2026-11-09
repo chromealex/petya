@@ -2,7 +2,7 @@
 
 The switcher on the left shows the current company. «Управление компаниями» (Manage companies) lets you add a company or rename the current one. The existing installation becomes «Компанией 1» (Company 1): data is not moved or overwritten. New profiles receive only the addresses and names of local models and the speech recognition paths; work connections must be configured separately.
 
-The following are stored separately for each company: service settings and tokens, team, context, dialogs and attachments, Jira and assignment history, training, reminders, build watches and browser cookies. Switching company restarts the same app instance, without additional builds. The selection is kept between launches. The shared Claude/Codex apps and their accounts do not change; information about their limits remains shared.
+The following are stored separately for each company: service settings and tokens, team, context, dialogs and attachments, Jira and assignment history, training, app data (reminders, journal), build watches and browser cookies. Switching company restarts the same app instance, without additional builds. The selection is kept between launches. The shared Claude/Codex apps and their accounts do not change; information about their limits remains shared.
 
 Before switching, save changes to the team and connections, finish the request and stop listening. External work of agents already started continues. Background checks and timers of inactive companies are paused until you return to them; overdue reminders are processed on return. Conversations and materials are saved to the selected company: Petya does not automatically determine the organization of an open Slack window or the current meeting.
 
