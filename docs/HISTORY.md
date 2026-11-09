@@ -8,6 +8,11 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.11.3 — project settings tidy-up
+
+- Project settings in one column, with tree lines, chips and spinners.
+- A Unity game's icon is found in a subfolder of the project too.
+
 ## 0.11.2 — meetings go to their company, «её задачи»
 
 - **A meeting is recorded in its company.** When a Zoom meeting starts, Petya reads who is in it and compares the names with each company's «Команда» (full names, «Имя на встречах», aliases, email names). If clearly more of another company's people are there, he switches to that company before recording and says so. No known names, a tie, or one company only — the meeting is recorded in the open company as before. On Windows Zoom's window does not give the names yet, so there it stays as before.
