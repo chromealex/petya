@@ -13510,7 +13510,7 @@
   "Открыть сервисные аккаунты": "Open service accounts",
   "Петя только читает дашборды и выполняет запросы их панелей; дайте сервисному аккаунту доступ к нужным папкам.": "Petya only reads dashboards and runs their panels' queries; give the service account access to the folders you need.",
   "Токен создаёт администратор организации в Grafana: «Add service account» с ролью Viewer, затем «Add service account token» — получится строка glsa_…. Если у вас нет прав администратора, попросите того, кто ведёт Grafana.": "An organization admin creates the token in Grafana: «Add service account» with the Viewer role, then «Add service account token» — you get a glsa_… string. If you are not an admin, ask whoever runs your Grafana.",
-  "ПЕТЯ / 0.14.4": "PETYA / 0.14.4",
+  "ПЕТЯ / 0.14.5": "PETYA / 0.14.5",
   "! Приглашаем вас на этап «": "! We invite you to the «",
   "! Рады, что ты с нами": "! Glad to have you with us",
   "# Перформанс-ревью ·": "# Performance review ·",
@@ -15016,6 +15016,15 @@
   "Расширение «Метрики игры» не добавлено.": "The “Game metrics” extension is not added.",
   "выручка за месяц": "revenue this month",
   "основные метрики за неделю": "key metrics this week",
-  "— потом повторите вопрос.": "— then ask again."
+  "— потом повторите вопрос.": "— then ask again.",
+  "Google Play подключён.": "Google Play is connected.",
+  "Gmail подключён.": "Gmail is connected.",
+  "Outlook подключён.": "Outlook is connected.",
+  "Доступ выдан.": "Access granted.",
+  "Не удалось подключить.": "Could not connect.",
+  "Недопустимый ответ авторизации.": "Invalid authorization response.",
+  "Нажмите «Подключить» в Пете ещё раз.": "Press «Connect» in Petya again.",
+  "Можно вернуться в Петю — эта вкладка закроется сама.": "You can go back to Petya — this tab will close by itself.",
+  "Можно вернуться в Петю и закрыть эту вкладку.": "You can go back to Petya and close this tab."
  }
 }

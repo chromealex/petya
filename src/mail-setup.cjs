@@ -2,7 +2,7 @@
 // Extracted from main.cjs: shared state comes through ctx (live getters/setters).
 module.exports=ctx=>{
   const clientDefaults=require('./integration-clients.cjs').load();
-  const mailOptions=key=>({load:()=>JSON.parse(ctx.settings[key]||'{}'),save:value=>ctx.saveSettings({[key]:JSON.stringify(value)},true),enabled:()=>ctx.modules.enabled(ctx.settings,'gmail'),open:url=>require('electron').shell.openExternal(url)});
+  const mailOptions=key=>({load:()=>JSON.parse(ctx.settings[key]||'{}'),save:value=>{ctx.saveSettings({[key]:JSON.stringify(value)},true);ctx.show?.();},enabled:()=>ctx.modules.enabled(ctx.settings,'gmail'),open:url=>require('electron').shell.openExternal(url)});
   const gmail=new (require('./mail-accounts.cjs').MailAccounts)({google:mailOptions('gmailCredential'),microsoft:mailOptions('microsoftCredential')});
   for(const [provider,manager] of [['google',gmail.google],['microsoft',gmail.microsoft]])if(clientDefaults[provider]&&!manager.status().configured)manager.importClient(clientDefaults[provider]);
   ctx.handle('microsoftConfigure',id=>{gmail.microsoft.importClient(require('./outlook.cjs').clientConfig({client_id:id}));return gmail.status();});

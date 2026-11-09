@@ -8,6 +8,11 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.14.5 — a sign-in page in Petya's look that closes itself
+
+- After signing in through the browser (Gmail, Outlook, Google Play) the tab shows a page in Petya's look — a check mark, «Google Play подключён.», «Можно вернуться в Петю — эта вкладка закроется сама» — and closes when the browser allows it; Petya's window comes to the front. A failed sign-in shows the same page with a red cross and the reason.
+- Settings no longer have the «Подключения выбранной компании» card: it had no settings, only an explanation that is on the «Компании» screen.
+
 ## 0.14.4 — «Собери дашборд» adds what it needs and asks for a page for the rest
 
 - «Собери дашборд»: a catalog app that would show a part and needs nothing connected is added on the spot («Добавил приложение «Отзывы в сторах»»); for one that needs a connection the reply names it.
