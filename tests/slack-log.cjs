@@ -20,5 +20,12 @@ const {ContextStore}=require('../src/context-store.cjs');
  await assert.rejects(()=>downloadLog({...file,size:3000000},'secret',fetcher),/2 МБ/);assert.equal(calls,1);
  await assert.rejects(()=>downloadLog(file,'secret',async()=>new Response('<html>login',{headers:{'content-type':'text/html'}})),/страницу входа/);
  assert.match(excerpt('padding\n'.repeat(10000)+'Error: actual root cause'),/actual root cause/);
+ // One open channel scrolled many times stays one entry in «Материалы», with the latest visible text.
+ {const {ContextStore}=require('../src/context-store.cjs');const st=new ContextStore({save:()=>{}});let v={text:'a',thread:true,title:'jw-bw-dev (Channel) - Slack'};
+  const r=new SlackLogs({store:st,now:()=>Date.now(),settings:()=>({}),read:async()=>v,request:async()=>({ok:true}),token:async()=>''});
+  for(const text of ['первая версия','вторая версия','третья версия']){v={...v,text};await r.observe();}
+  const views=st.items.filter(x=>x.opened);assert.equal(views.length,1,'one entry per open discussion');assert.equal(views[0].text,'третья версия');
+  const old=new ContextStore({save:()=>{}});const at=Date.now();old.put([1,2,3].map(i=>({id:'slack-view:'+i,source:'Slack',opened:true,title:'jw-bw-dev',text:'v'+i,at:at-i*1000})));
+  new SlackLogs({store:old,settings:()=>({}),request:async()=>({}),token:async()=>''});assert.deepEqual(old.items.map(x=>x.text),['v1'],'older copies are removed on start');}
  console.log('Slack log tests passed');
 })().catch(e=>{console.error(e);process.exitCode=1});

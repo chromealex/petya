@@ -59,10 +59,10 @@ function setup(s){
     return {id:d.id,title:d.title,projectId:d.projectId,shared:d.shared?{folder:d.shared.folder}:null,fromChat:d.fromChat||'',demo:!!d.demo,start:state().dashboardStart[d.projectId]===d.id,
       // Reading order (the small window, screen readers): top to bottom, left to right.
       widgets:[...d.widgets].sort((a,b)=>(a.pos?a.pos.y:1e9)-(b.pos?b.pos.y:1e9)||(a.pos?.x||0)-(b.pos?.x||0)).map(w=>{const hit=w.source.kind==='snapshot'?{data:w.data,text:w.text,at:w.at}:c.get(cacheKey(d,w))||{};
-        return {id:w.id,title:w.title,size:w.size,pos:w.pos||null,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,
+        return {id:w.id,title:w.title,size:w.size,pos:w.pos||null,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,...(w.source.kind==='web'?{url:w.source.url}:{}),
           data:hit.data||null,text:hit.text||'',at:hit.at||0,error:hit.error||'',count:hit.count??null,loading:running.has(cacheKey(d,w))};})};
   }
-  const describe=src=>src.kind==='extension'?(plugins.get(src.extension)?.d.name||src.extension)+' · «'+src.command+'»':src.kind==='provider'?(providers.find(p=>p.type===src.provider)?.name||src.provider)+' · «'+src.query+'»':src.kind==='jira'?'Jira · '+src.jql:'Снимок карточки, не обновляется';
+  const describe=src=>src.kind==='extension'?(plugins.get(src.extension)?.d.name||src.extension)+' · «'+src.command+'»':src.kind==='provider'?(providers.find(p=>p.type===src.provider)?.name||src.provider)+' · «'+src.query+'»':src.kind==='jira'?'Jira · '+src.jql:src.kind==='anr'?'Google Play · ANR':src.kind==='web'?'Страница · '+(()=>{try{return new URL(src.url).host;}catch{return src.url;}})():'Снимок карточки, не обновляется';
   const summary=d=>({id:d.id,title:d.title,projectId:d.projectId,shared:!!d.shared,folder:d.shared?.folder||'',widgets:d.widgets.length,start:state().dashboardStart[d.projectId]===d.id,fromChat:d.fromChat||''});
 
   // --- Refresh ---------------------------------------------------------------------------------------------------
@@ -85,6 +85,17 @@ function setup(s){
   async function load(d,w){
     const src=w.source,box=sandbox(d);
     if(src.kind==='jira')return jira.load(box.s,src,box.topic);
+    // ANR: the Google Play reader, the same card as in the chat (src/extensions/google-play/result.cjs).
+    // A web page, read in the chat browser's session (src/dashboard-web.cjs).
+    if(src.kind==='web')return require('../dashboard-web.cjs').load(box.s,src);
+    if(src.kind==='anr'){
+      if(!playReady())throw Error('Подключите Google Play Console в каталоге приложений.');
+      const result=await s.googlePlay.read(src.query,box.topic);
+      if(result?.question)throw Error(result.question+' Напишите в чате «ANR <приложение>» и добавьте карточку на дашборд.');
+      const data=require('../extensions/google-play/result.cjs').extract(result);
+      if(!data)throw Error(String(result?.text||'Google Play не вернул данные ANR.').slice(0,400));
+      return {data,text:''};
+    }
     if(src.kind==='extension'){
       const entry=plugins.get(src.extension);
       if(!entry||!installed(src.extension))throw Error('Расширение «'+(entry?.d.name||src.extension)+'» не добавлено.');
@@ -191,7 +202,16 @@ function setup(s){
     if(jira.connected(s))for(const w of jira.presets)rows.push({title:w.title,phrase:w.phrase,source:{kind:'jira',jql:jira.jqlFor(w.phrase,jira.projectsOf(s,{projectMemoryId:project(projectId)?.memoryId}))},app:'Jira'});
     return rows;
   }
+  const playReady=()=>!!s.googlePlay&&s.settings.module_googleplay!=='false'&&!!s.settings.googlePlayCredential;
+  const ANR=require('../extensions/crashes/query.cjs').ANR;
+  // A phrase no added app takes: which catalog app would, and what it needs («добавьте …» / «подключите …»).
+  function hint(phrase){
+    if(ANR.test(phrase))return 'подключите Google Play Console';
+    for(const [id,{d,mod}] of plugins)if(!installed(id))try{if(mod.dashboard.accepts(phrase))return 'добавьте «'+d.name+'» в каталоге';}catch{}
+    return '';
+  }
   function widgetFor(phrase,projectId){
+    if(ANR.test(phrase)&&playReady())return model.widget({title:'ANR',size:'auto',source:{kind:'anr',query:phrase}});
     for(const [id,{d,mod}] of plugins)if(installed(id)&&mod.dashboard.accepts(phrase))return model.widget({title:cap(phrase),size:mod.dashboard.size||'auto',source:{kind:'extension',extension:id,command:phrase}});
     if(jira.connected(s)){const jql=jira.jqlFor(phrase,jira.projectsOf(s,{projectMemoryId:project(projectId)?.memoryId}));if(jql)return model.widget({title:jira.titleFor(phrase),size:'auto',source:{kind:'jira',jql}});}
     for(const p of providers)if(installed(p.type)||p.service&&s.modules?.enabled?.(s.settings,p.type))try{if(p.matches?.(phrase,{settings:s.settings,topic:null}))return model.widget({title:cap(phrase),size:'auto',source:{kind:'provider',provider:p.type,query:phrase}});}catch{}
@@ -204,20 +224,51 @@ function setup(s){
     for(const part of parts){const w=widgetFor(part,d.projectId);if(w)add(d,w);else missed.push(part);}
     return {d,missed};
   }
+  // The catalog app that would show a phrase and is not added yet: adding it needs no setup, so it is added.
+  const addable=phrase=>{for(const [id,{d,mod}] of plugins)if(!installed(id))try{if(mod.dashboard.accepts(phrase))return {id,name:d.name,setting:d.setting};}catch{}return null;};
+  function enable(apps){
+    const patch={};for(const a of apps)if(a.setting)patch[a.setting]='true';if(!Object.keys(patch).length)return;
+    s.saveSettings(patch);try{const w=s.win;if(w&&!w.isDestroyed())w.webContents.send('extension-runtime',{type:'changed'});}catch{}
+  }
+  const web=url=>{try{const u=new URL(String(url||'').trim());return ['https:','http:'].includes(u.protocol)?u.href:'';}catch{return '';}};
+  function finish(command,d,missed,added=[]){
+    let text,dashboard=null;
+    const notes=missed.map(m=>'«'+m+'»'+(ANR.test(m)&&!playReady()?' — подключите Google Play Console (Каталог приложений → Google Play Console → «Подключить»), и я добавлю ANR':''));
+    const plus=added.length?' Добавил '+(added.length===1?'приложение':'приложения')+' '+added.map(a=>'«'+a.name+'»').join(', ')+'.':'';
+    if(!d.widgets.length)text='Не собрал дашборд: нет источников для '+notes.join('; ')+'.'+plus;
+    else{const saved=commit(d);dashboard={id:saved.id,title:saved.title};refresh(saved.id).catch(()=>{});
+      text='Собрал дашборд «'+saved.title+'»: '+saved.widgets.map(w=>w.title).join(', ')+'.'+plus+(missed.length?' Без: '+notes.join('; ')+'.':'')+' Он в списке проекта слева.';}
+    s.dialogue.rememberAction(command,text);
+    const t=s.dialogue.active(),message=t.messages.at(-1);if(dashboard)message.dashboard=dashboard;s.dialogue.persist();
+    return {handled:true,text,topicId:t.id,topicTitle:t.title,messages:t.messages,...(dashboard?{dashboard}:{})};
+  }
+  // «Собери дашборд: …». What an added app shows becomes a widget; an app that would show it is added right away;
+  // ANR needs Google Play (connected in the catalog); for what no app shows Petya asks for a page and reads it in
+  // the chat browser, where the person signs in.
   function turn(command){
     if(!model.wantsDashboard(command))return null;
     const topic=s.dialogue.active();
     const projectId=topic?.projectId||s.dialogue.state.activeProjectId||'general';
-    let text,dashboard=null;
-    try{
-      const {d,missed}=compose(command,projectId);
-      if(!d.widgets.length)text='Не нашёл источников для: '+missed.map(m=>'«'+m+'»').join(', ')+'. Подключите приложения (Jira, Крэши, Отзывы, Сборки…) в каталоге или сделайте дашборд из чата с карточками.';
-      else{const saved=commit(d);dashboard={id:saved.id,title:saved.title};refresh(saved.id).catch(()=>{});
-        text='Собрал дашборд «'+saved.title+'»: '+saved.widgets.map(w=>w.title).join(', ')+'.'+(missed.length?' Не нашёл источника для: '+missed.map(m=>'«'+m+'»').join(', ')+'.':'')+' Он в списке проекта слева.';}
-    }catch(e){text=e.message;}
-    s.dialogue.rememberAction(command,text);
-    const t=s.dialogue.active(),message=t.messages.at(-1);if(dashboard)message.dashboard=dashboard;s.dialogue.persist();
-    return {handled:true,text,topicId:t.id,topicTitle:t.title,messages:t.messages,...(dashboard?{dashboard}:{})};
+    let composed;
+    try{composed=compose(command,projectId);}catch(e){s.dialogue.rememberAction(command,e.message);const t=s.dialogue.active();return {handled:true,text:e.message,topicId:t.id,topicTitle:t.title,messages:t.messages};}
+    const apps=[...new Map(composed.missed.map(addable).filter(Boolean).map(a=>[a.id,a])).values()];
+    if(apps.length){enable(apps);composed=compose(command,projectId);}
+    const {d,missed}=composed;
+    const pages=missed.filter(m=>!ANR.test(m));
+    if(!pages.length)return finish(command,d,missed,apps);
+    const list=pages.map(m=>'«'+m+'»').join(', ');
+    return require('../input-required.cjs').ask({
+      text:(d.widgets.length?'Собрал: '+d.widgets.map(w=>w.title).join(', ')+'. ':'')+'Для '+list+' в Пете нет приложения. Пришлите ссылку на страницу, где это видно (например, дашборд сервиса аналитики), — я открою её в браузере рядом с чатом, вы войдёте, и виджет будет брать данные оттуда. Или соберу без этого.',
+      label:'Ссылка на страницу',placeholder:'https://…',options:['Собрать без этого']},
+     answer=>{
+      const url=web(answer);
+      if(!url)return finish(command,d,missed,apps);
+      for(const m of pages)add(d,model.widget({title:cap(m),size:'auto',source:{kind:'web',url,query:m}}));
+      const out=finish(command,d,missed.filter(m=>!pages.includes(m)),apps);
+      // The page opens next to the chat: the person signs in there once, the widget reads it in the same session.
+      const chat=s.dialogue.active()?.id;if(chat&&s.chatBrowser)s.chatBrowser.attend(chat,{url,message:'Войдите, если сайт попросит, — виджет дашборда будет брать данные с этой страницы.'}).catch(()=>{});
+      return out;
+     });
   }
 
   // --- IPC -------------------------------------------------------------------------------------------------------
@@ -239,7 +290,7 @@ function setup(s){
       add(d,w);const saved=commit(d);refresh(saved.id).catch(()=>{});return {dashboard:summary(saved),widget:w.title,live:w.source.kind!=='snapshot'};
     },
     create:(title,projectId)=>summary(commit(model.dashboard({title:String(title||'').trim()||'Дашборд',projectId:projectId||s.dialogue.state.activeProjectId||'general',widgets:[]}))),
-    compose:(description,projectId,title='')=>{const {d,missed}=compose('собери дашборд: '+String(description||''),projectId);if(!d.widgets.length)throw Error('Не нашёл источников для: '+missed.map(m=>'«'+m+'»').join(', ')+'.');if(title)d.title=String(title).trim().slice(0,model.LIMIT.title)||d.title;const saved=commit(d);refresh(saved.id).catch(()=>{});return {dashboard:summary(saved),missed};},
+    compose:(description,projectId,title='')=>{const {d,missed}=compose('собери дашборд: '+String(description||''),projectId);if(!d.widgets.length)throw Error('Не нашёл источников для: '+missed.map(m=>{const h=hint(m);return '«'+m+'»'+(h?' — '+h:'');}).join('; ')+'.');if(title)d.title=String(title).trim().slice(0,model.LIMIT.title)||d.title;const saved=commit(d);refresh(saved.id).catch(()=>{});return {dashboard:summary(saved),missed};},
     // Adds widgets from a description to an existing dashboard («Добавить: крэши за неделю»).
     addFrom:(id,description)=>{const d=own(id),parts=model.phrases('собери дашборд: '+String(description||'')).parts,missed=[];
       for(const part of parts){const w=widgetFor(part,d.projectId);if(w)add(d,w);else missed.push(part);}

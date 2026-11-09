@@ -10,7 +10,11 @@ meetings, charts. A widget keeps its **source**, not only its data, so it refres
 - **From one card**: «•••» → «В дашборд…» on an answer, then a dashboard of the project or «Новый дашборд».
   The card shows at once; its source refreshes it afterwards.
 - **By description**: «Собери дашборд «Релиз»: баги спринта, крэши за неделю, отзывы в сторах». Each phrase goes
-  to the first source that accepts it; phrases without a source are named in the reply.
+  to the first source that accepts it. A catalog app that would show a phrase but is not added yet is added on the
+  spot (adding needs no setup). ANR needs the Google Play connection; Petya says so. For a phrase no app shows
+  («метрики из Wombyte») Petya asks for the page where it is visible: the page opens in the chat browser, the person
+  signs in there, and a *web* widget reads the page in that session (`src/dashboard-web.cjs`, figures picked by the
+  local model). A sign-in page is reported, never filled in.
 - **On the dashboard**: «Добавить виджет» — a phrase, or one of the ready widgets of connected apps.
 
 - **Example**: «Пример аналитики» (on the start screen of a project without dashboards, in «Добавить виджет» and on

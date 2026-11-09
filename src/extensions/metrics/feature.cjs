@@ -100,4 +100,10 @@ async function turn(s,command){
  try{return await metricsTurn(s,text);}
  catch(e){return kit.failure(s,command,BY,e);}
 }
-module.exports={name:'gameMetrics',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,metricsTurn,summary,reset:()=>{override=null;},useSources:x=>{override=x;}};
+// Dashboards (src/features/dashboards.cjs): metrics requests refresh there by themselves.
+// «метрики из Wombyte»: a service the metrics sources do not include is not this app's (the dashboard reads it from
+// the service's page instead); «из AppMetrica», «из Grafana» or no service named are.
+const OWN=/^(?:appmetrica|app\s?metrica|аппметрик\p{L}*|апметрик\p{L}*|grafana|графан\p{L}*|проект\p{L}*|игр\p{L}*|приложени\p{L}*|стор\p{L}*|google|гугл\p{L}*|apple|эпл)$/iu;
+const foreign=text=>{const m=String(text||'').match(/(?:^|[\s(])из\s+([\p{L}\d][\p{L}\d.\-]*)/iu);return !!m&&!OWN.test(m[1]);};
+const dashboard={accepts:text=>query.about(String(text||''))&&!foreign(text),widgets:[{title:'Метрики за неделю',command:'метрики за неделю'}]};
+module.exports={name:'gameMetrics',dashboard,defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,metricsTurn,summary,reset:()=>{override=null;},useSources:x=>{override=x;}};

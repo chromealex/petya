@@ -130,5 +130,7 @@ function validate(next){
  if(next.anomaliesMuted!==undefined){try{if(!Array.isArray(JSON.parse(next.anomaliesMuted)))throw 0;}catch{next.anomaliesMuted='[]';}}
  if(next.anomaliesLast!==undefined&&!/^(?:\d{4}-\d{2}-\d{2})?$/.test(next.anomaliesLast))next.anomaliesLast='';
 }
-module.exports={name:'anomalies',defaults:{['extension_'+ID]:'false',anomaliesDaily:'09:00',anomaliesSensitivity:'normal',anomaliesMuted:'[]',anomaliesLast:''},
+// Dashboards (src/features/dashboards.cjs): «аномалии» is a read-only card that refreshes there.
+const dashboard={accepts:text=>!!intent(String(text||'')),widgets:[{title:'Аномалии за вчера',command:'аномалии за вчера'}]};
+module.exports={name:'anomalies',dashboard,defaults:{['extension_'+ID]:'false',anomaliesDaily:'09:00',anomaliesSensitivity:'normal',anomaliesMuted:'[]',anomaliesLast:''},
  validate,setup,turn,intent,check,summary,daily,due,SOURCE_APPS,cache};

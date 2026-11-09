@@ -3,6 +3,8 @@
 //   {kind:'extension', extension, command}   — a read-only request an extension accepts (`dashboard.accepts`)
 //   {kind:'provider', provider, query, selected} — a chat-reply provider's read (e.g. Jira charts)
 //   {kind:'jira', jql}                        — Jira issues by JQL (src/extensions/jira/dashboard.cjs)
+//   {kind:'anr', query}                       — Google Play ANR of an app (the Google Play connection)
+//   {kind:'web', url, query}                  — a web page read in the chat browser's session (signed in there)
 //   {kind:'snapshot'}                         — a card as it was; never refreshed
 // Personal dashboards live in the company's dialogue state; shared ones are files in a project's git
 // (`.petya/dashboards/<slug>.json`, definitions only — the data is never written there). See docs/dashboards.md.
@@ -11,7 +13,7 @@ const {randomUUID}=require('node:crypto');
 // 'auto': the layout chooses (two or three in a row, the row always full); the others are fixed spans.
 const SIZES=['auto','s','m','l','w'];
 const EVERY=[0,5,15,60,240,1440];
-const KINDS=['extension','provider','jira','snapshot'];
+const KINDS=['extension','provider','jira','anr','web','snapshot'];
 const LIMIT={dashboards:100,widgets:40,title:120,command:1000,jql:2000};
 const DIR=path.join('.petya','dashboards');
 const text=(value,max)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max);
@@ -20,6 +22,8 @@ function source(value){
   const kind=KINDS.includes(value?.kind)?value.kind:'snapshot';
   if(kind==='extension'){const extension=text(value.extension,64),command=text(value.command,LIMIT.command);if(!/^[a-z0-9-]+$/.test(extension)||!command)throw Error('Источник виджета указан неверно.');return {kind,extension,command};}
   if(kind==='provider'){const provider=text(value.provider,64),query=text(value.query,LIMIT.command);if(!/^[a-z0-9-]+$/.test(provider)||!query)throw Error('Источник виджета указан неверно.');return {kind,provider,query,...(value.selected?{selected:text(value.selected,100)}:{})};}
+  if(kind==='web'){let url='';try{const u=new URL(String(value.url||''));if(u.protocol==='https:'||u.protocol==='http:')url=u.href;}catch{}if(!url)throw Error('Нужна ссылка на страницу (https://…).');return {kind,url:url.slice(0,2000),query:text(value.query,LIMIT.command)};}
+  if(kind==='anr')return {kind,query:text(value.query,LIMIT.command)||'ANR'};
   if(kind==='jira'){const jql=text(value.jql,LIMIT.jql);if(!jql)throw Error('Укажите запрос JQL.');return {kind,jql};}
   return {kind};
 }

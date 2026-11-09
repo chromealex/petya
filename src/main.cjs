@@ -529,6 +529,8 @@ function setupHandlers() {
     get checkProgress(){return checkProgress;},
     get companies(){return companies;},
     get companyId(){return companyId;},
+    // The Google Play reader (ANR), for dashboard widgets (src/features/dashboards.cjs).
+    get googlePlay(){return googlePlay;},
     // The open company and whether it is being switched: a meeting recorder outlives its company (src/meeting-carry.cjs).
     currentCompanyId:()=>profileState().companyId,companySwitching:()=>switchingCompany,
     switchCompany:id=>requestCompanySwitch(id),

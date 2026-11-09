@@ -40,7 +40,7 @@ assert.equal(jira.jqlFor('JQL: project = X ORDER BY rank',[]),'project = X ORDER
  const dialogue={state:{topics:[topic],projects:[{id:'general',name:'Общее'},{id:'p1',name:'BW',memoryId:'m1'}],activeProjectId:'p1',activeId:'t1'},
   active(){return this.state.topics.find(t=>t.id===this.state.activeId);},persist(){persisted++;},
   rememberAction(command,text){remembered++;const t=this.active();t.messages.push({role:'user',text:command,at:Date.now()},{role:'assistant',text,at:Date.now()});}};
- const s={dialogue,settings:{extension_crashes:'true',extension_storeReviews:'false'},dataRoot:root,win:null,modules:{assertEnabled(){},enabled(){return false;}},
+ const s={dialogue,settings:{extension_crashes:'true',extension_storeReviews:'false'},dataRoot:root,win:null,modules:{assertEnabled(){},enabled(){return false;}},saveSettings(patch){Object.assign(this.settings,patch);},
   projectShare:{folders:id=>id==='p1'?[repo]:[]},projectMemory:{get:()=>null}};
  const feature=require('../src/features/dashboards.cjs').setup(s),ipc=feature.ipc;
  try{
@@ -78,11 +78,32 @@ assert.equal(jira.jqlFor('JQL: project = X ORDER BY rank',[]),'project = X ORDER
   // Start screen of the project.
   ipc.start('p1',d.id);assert.equal(ipc.startOf('p1').id,d.id);assert(ipc.list('p1').find(x=>x.id===d.id).start);
   // «Собери дашборд»: phrases → sources; what has no source is named.
-  const reply=feature.dashboards.turn('Собери дашборд «Релиз»: крэши за неделю, отзывы в сторах');
-  assert.match(reply.text,/Собрал дашборд «Релиз»: Крэши за неделю\. Не нашёл источника для: «отзывы в сторах»/);
+  // An app that shows a part is added right away; for what no app shows Petya asks for a page (or builds without it).
+  let asked;try{feature.dashboards.turn('Собери дашборд «Релиз»: крэши за неделю, отзывы в сторах, погода на марсе');}catch(e){asked=e;}
+  assert.equal(asked?.name,'InputRequired');assert.match(asked.spec.text,/«погода на марсе» в Пете нет приложения/);assert.equal(s.settings['extension_store-reviews'],'true','the reviews app is added');
+  const reply=asked.resume('Собрать без этого');
+  assert.match(reply.text,/Собрал дашборд «Релиз»: Крэши за неделю, Отзывы в сторах\. Добавил приложение «[^»]+»\. Без: «погода на марсе»/);
   assert.equal(topic.messages.at(-1).dashboard.id,reply.dashboard.id);
   assert.equal(feature.dashboards.turn('что умеет дашборд'),null);
   assert.throws(()=>ipc.compose('погода на марсе','p1'),/Не нашёл/);
+  // A phrase nothing added can show says what would: an app to add, Google Play to connect.
+  const hints=feature.dashboards.turn('Собери дашборд: аномалии, ANR');
+  assert.match(hints.text,/Добавил приложение «Аномалии»/);assert.match(hints.text,/«ANR» — подключите Google Play Console/);
+  // A page from the answer becomes a web widget read in the chat browser's session; the page opens next to the chat.
+  let attended='';s.chatBrowser={attend:async(id,o)=>{attended=o.url;return true;},WEB:'petya-web-search'};
+  let ask2;try{feature.dashboards.turn('Собери дашборд: основные метрики проекта (из wombyte)');}catch(e){ask2=e;}
+  assert.equal(ask2?.name,'InputRequired','an unknown service is asked about, not given to «Метрики игры»');
+  const viaWeb=ask2.resume('https://app.wombyte.com/dashboard');const wd=ipc.get(viaWeb.dashboard.id);
+  assert.equal(wd.widgets[0].kind,'web');assert.match(wd.widgets[0].describe,/app\.wombyte\.com/);assert.equal(attended,'https://app.wombyte.com/dashboard');
+  const web=require('../src/dashboard-web.cjs');
+  await assert.rejects(web.load({settings:{}},{url:'https://x.io/d',query:'DAU'},{read:async()=>({url:'https://x.io/login',password:true,text:''})}),/Нужно войти на x\.io/);
+  assert.match((await web.load({settings:{}},{url:'https://x.io/d',query:'DAU'},{read:async()=>({url:'https://x.io/d',text:'DAU 12 500\nRetention D1 38%'})})).text,/DAU 12 500/);
+  ipc.remove(wd.id);
+  // With Google Play connected ANR is a widget of its own, filled by the Google Play reader.
+  s.settings.googlePlayCredential='x';s.googlePlay={read:async()=>({title:'ANR · Game',data:{app:'apps/game',date:{year:2026,month:11,day:8},rate:0.004,perceived:0.003,week:{},rows:[]}})};
+  const anr=ipc.get(ipc.compose('ANR','p1').dashboard.id);assert.equal(anr.widgets[0].kind,'anr');
+  const filled=await ipc.refresh(anr.id,anr.widgets[0].id);assert.equal(filled.widgets[0].data.playVitals.app,'Game');
+  ipc.remove(anr.id);delete s.settings.googlePlayCredential;
   // Share: the definition goes to .petya/dashboards, the snapshot stays personal; the start screen follows.
   const out=ipc.share(d.id,0);
   const file=path.join(repo,'.petya','dashboards','relize.json');
