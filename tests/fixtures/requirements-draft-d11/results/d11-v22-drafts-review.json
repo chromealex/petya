@@ -1,0 +1,57 @@
+{
+ "v22-new-cancel-one": {
+  "passed": false,
+  "reason": "Clarification that values may change lost.",
+  "answer_sha256": "5a7cd000c51600f1b6fe40d3626fa8ea74949beb8ab00f6321081de1e3b238ea"
+ },
+ "v22-new-cancel-two": {
+  "passed": false,
+  "reason": "Inverted.",
+  "answer_sha256": "8c37b7389a4352e2231eaa8f3b1586fb535d08a5edea41f792d3d3b204536a75"
+ },
+ "v22-new-two-recipients": {
+  "passed": false,
+  "reason": "«Без пояснения» lost.",
+  "answer_sha256": "98adbfbd0331b8b43174e4e898f3b75656acb6c900c5af12cbf8d7ccadeeaac6"
+ },
+ "v22-new-revoke-send": {
+  "passed": false,
+  "reason": "«Дату не добавлять» lost.",
+  "answer_sha256": "76a5f6760dc619ffe585e55db0ada426dc27a2d3d73e848e6c776f1ccc23aad4"
+ },
+ "v22-new-restore-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "40384728549e2077da4dfa392380af62b9e6414ba57bf125aa59e8d6d35e2e02"
+ },
+ "v22-new-code-item": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "7ec9f6e73e8a8a14bc94396846999dd684aacc28c6233b7601668db9e81d0fde"
+ },
+ "v22-new-open-duration": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "2613cfbbac23ac6f8dedad711d427973a7cd074b7ad65dfd51618afef4540704"
+ },
+ "v22-new-exact-name": {
+  "passed": true,
+  "reason": "Exact literals and zeros, no extra ban.",
+  "answer_sha256": "adde27a4fbb32568f2c56f9ffea05af144f7922a34a7f250faf1497cbf2f256d"
+ },
+ "v22-new-add-separate": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "ea34b73b7f5426c1b8c131fb7327ba02a9a99795613ddc6c7010b28a292007c7"
+ },
+ "v22-new-quote": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "623b7ac18dc9bfdb4bc8941223fb6077b4ab76a99fb1ebae99488547a6b90b41"
+ },
+ "v22-new-recipient-open": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "d6c81ac3f00222de765219202d0ebd0d5e42694f5f01f76ff24a6c7eb1d2d23f"
+ }
+}

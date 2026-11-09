@@ -1,0 +1,51 @@
+{
+  "part": "Andromeda D11",
+  "adapter_sha256": "1b1bd4ea7b3eefe84fabd332d363f3fb15656663d7168ec4cae0bfbd431b274f",
+  "parent": "D10",
+  "steps": 921,
+  "learning_rate": 5e-07,
+  "generated_holdout": {
+    "D11": 41,
+    "D10": 46,
+    "D1": 24,
+    "total": 54,
+    "exact": 33,
+    "lost_D10": [
+      "d2-hold-add-field-30",
+      "d2-hold-code-35",
+      "d2-hold-permission-1",
+      "d2-hold-permission-37",
+      "d2-hold-two-recipients-29"
+    ],
+    "gained_vs_D10": []
+  },
+  "v22": {
+    "checks": {
+      "D11": 28,
+      "D10": 28,
+      "total": 30
+    },
+    "drafts": {
+      "D11": 8,
+      "D10": 8,
+      "total": 12,
+      "lost_D10": [
+        "v22-new-two-recipients"
+      ],
+      "gained_vs_D10": [
+        "v22-new-quote"
+      ]
+    }
+  },
+  "familiar": {
+    "D11": 798,
+    "D10": 797,
+    "D1": 787,
+    "total": 801,
+    "gained_vs_D10": [
+      "fresh-cancel-first"
+    ]
+  },
+  "gate": "failed: 41/54 new against D10's 46 (permissions turned into «Получатель — X» again, «без пояснения» lost); equal on v22, +1 familiar",
+  "decision": "rejected; D10 stays the group's D (R1-A1-D10)"
+}

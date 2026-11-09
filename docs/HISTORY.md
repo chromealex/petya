@@ -17,6 +17,11 @@ OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 - «Напомни …» without the app offers to add it. Voice commands can now run any chat command («Выполнить команду в чате»).
 - «Напоминания» understand seconds and times like «через 1 час 20 минут».
 
+## 0.14.5 — a sign-in page in Petya's look that closes itself
+
+- After signing in through the browser (Gmail, Outlook, Google Play) the tab shows a page in Petya's look — a check mark, «Google Play подключён.», «Можно вернуться в Петю — эта вкладка закроется сама» — and closes when the browser allows it; Petya's window comes to the front. A failed sign-in shows the same page with a red cross and the reason.
+- Settings no longer have the «Подключения выбранной компании» card: it had no settings, only an explanation that is on the «Компании» screen.
+
 ## 0.14.4 — «Собери дашборд» adds what it needs and asks for a page for the rest
 
 - «Собери дашборд»: a catalog app that would show a part and needs nothing connected is added on the spot («Добавил приложение «Отзывы в сторах»»); for one that needs a connection the reply names it.

@@ -13,13 +13,13 @@ async function login({client,open,request,timeout=300000}){
  const http=require('node:http'),{randomBytes,createHash}=require('node:crypto');
  const state=randomBytes(32).toString('base64url'),verifier=randomBytes(32).toString('base64url');let redirect,done,fail;
  const result=new Promise((resolve,reject)=>{done=resolve;fail=reject;});
- const server=http.createServer(async(req,res)=>{res.setHeader('Content-Type','text/plain; charset=utf-8');const u=new URL(req.url,'http://127.0.0.1');
-  if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state){res.writeHead(400);res.end('Недопустимый ответ авторизации.');return;}
+ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,'http://127.0.0.1');
+  if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state){require('./oauth-page.cjs').reply(res,{status:400,ok:false,title:'Недопустимый ответ авторизации.',text:'Нажмите «Подключить» в Пете ещё раз.',close:false});return;}
   try{if(u.searchParams.has('error')||!u.searchParams.get('code'))throw new Error('Вход отменён в Google.');
    const tokens=await request('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...client,grant_type:'authorization_code',code:u.searchParams.get('code'),redirect_uri:redirect,code_verifier:verifier}).toString()});
    if(!tokens.refresh_token||!String(tokens.scope||'').split(' ').includes(SCOPE))throw new Error('Google не дал постоянный доступ к отчётам Google Play.');
-   res.end('Google Play подключён. Вернитесь в Петю.');done({type:'oauth',client,refresh_token:tokens.refresh_token});
-  }catch(e){res.end(e.message);fail(e);}
+   require('./oauth-page.cjs').reply(res,{title:'Google Play подключён.'});done({type:'oauth',client,refresh_token:tokens.refresh_token});
+  }catch(e){require('./oauth-page.cjs').reply(res,{ok:false,title:'Не удалось подключить.',text:e.message,close:false});fail(e);}
  });
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
  redirect='http://127.0.0.1:'+server.address().port+'/callback';

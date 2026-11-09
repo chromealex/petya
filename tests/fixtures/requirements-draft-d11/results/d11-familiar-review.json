@@ -1,0 +1,67 @@
+{
+ "v18-code-lifetime": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "81f051a917eccb945dec7a284de863f846db12c43a0dcb2ae75a52ac3158fed7"
+ },
+ "v20-only-one-recipient": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "c105866027c8e942876750ca3514370f284482bec31546269a4729800309b5a6"
+ },
+ "v21-previous-draft-quote": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "a515c7af52460b9222682be49a693a2e1d16f39c55cb0167e3008eb4380dadba"
+ },
+ "fresh-cancel-first": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "b1c7fe4ad3f177e93e5fbeaedcf2515c031e61dffde971a08b87d68ad7b280ab"
+ },
+ "fresh-revoke-transmit": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "3e113d16b68c38c93048efbdd84f760f393e8972cfa77d01cf92c9e69b98f279"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "8a41e589b61e8f16d3c331d6eea1e2d0cb72d1b963938825d595f9468e8b52dc"
+ },
+ "fresh-copy-scope": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "4a225bc4b572cc70d1a2088999ba4ffc5c7d04d728e456250fc5ba0d7a58b819"
+ },
+ "fresh-add-not-replace": {
+  "passed": false,
+  "reason": "Summary mixes English: «Поля locations».",
+  "answer_sha256": "fe889ae9c24fe093ccb4468616c621c6997a32ecd8184c868b233364cf1e4b08"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Inverted: forbids another badge, while a new code may issue one.",
+  "answer_sha256": "870819dba69b49df6a103d3256e9cc5691dae83035e539cd9772d467dcd8f28f"
+ },
+ "fresh-duration-open": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "e846b6c1258c24166b6cd8a412f28e19cb88f905790357a90793223994b8e1a0"
+ },
+ "fresh-exact-caption": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "30960d69f4ba814eed46720086a9ecd954067199e5937356f3353ed304f9fdbd"
+ },
+ "fresh-quoted-instruction": {
+  "passed": false,
+  "reason": "Typo «преподаателю».",
+  "answer_sha256": "37ed1ea8bd65feb9634f08b5d3049d4a66902f1bc34442c8d92c78665e04254a"
+ },
+ "fresh-recipient-pending": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "5c1f1c3e72a8b337b40cadc2b388e4764715cadcbc6e6c8e39925f6a15f089df"
+ }
+}

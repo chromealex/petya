@@ -1,0 +1,107 @@
+{
+ "d2-hold-permission-1": {
+  "passed": false,
+  "reason": "Permission turned into an order: «Получатель — нотариус».",
+  "answer_sha256": "d397dcbf0e5e6cad8602693b5f80846bdfb25dea55d88896ea02890131db8609"
+ },
+ "d2-hold-two-recipients-2": {
+  "passed": false,
+  "reason": "«Без пояснения» (no comment) lost.",
+  "answer_sha256": "90e574c9e637454a711ad1ef08a705f0b30e9362ddc2c7046ab28ad42b59cb17"
+ },
+ "d2-hold-cancel-one-9": {
+  "passed": false,
+  "reason": "Invents «назначение dock_slot».",
+  "answer_sha256": "ac0840d2c19c71dd833de959bbc33aff08896fac4eba7ce558552e3754229df1"
+ },
+ "d2-hold-permission-10": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "c46b4b3e8fb6060eaa81d42465d8877dd1e89b26d09eb110045749c33b0a0bb1"
+ },
+ "d2-hold-quote-15": {
+  "passed": false,
+  "reason": "Summary «Включить цитату в описи» suggests adding a quote that is already there.",
+  "answer_sha256": "6242f61108bc6bab3cdd1257c145a44ea2776a8fe51623fa2f826db4f3792d51"
+ },
+ "d2-hold-code-17": {
+  "passed": false,
+  "reason": "Grammar: «по нему же коду».",
+  "answer_sha256": "e43c61ab6f72b5e27b5a173ba391526da0647f1f00b7b89bf09de9bec3aac60d"
+ },
+ "d2-hold-quote-24": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "519728ef2787f308ee8fe3e26fb8eb4d7c91a592af5a6fd1fb335a7b82332632"
+ },
+ "d2-hold-code-26": {
+  "passed": false,
+  "reason": "Lost requirement: the next issue goes by a new code.",
+  "answer_sha256": "3ffbae196fb7e267e5acb670ad4fa57593dcce40537d3847f41e67c5cc609055"
+ },
+ "d2-hold-cancel-one-27": {
+  "passed": false,
+  "reason": "«Назначение dock_slot» changes the meaning.",
+  "answer_sha256": "24f4bf129f79de648cbe73e04baa68c3de4259ee470ed36f656e65486016febf"
+ },
+ "d2-hold-two-recipients-29": {
+  "passed": false,
+  "reason": "«Без пояснения» lost.",
+  "answer_sha256": "470839861f419f32143228a6c80bc94405ffad5b24e514b761f8332410967135"
+ },
+ "d2-hold-add-field-30": {
+  "passed": false,
+  "reason": "Typo «добавть».",
+  "answer_sha256": "b5b8ed5f9f4d92a0cdbae82b334f045ae3c74c3a7d49d489e1f7a56b596b7781"
+ },
+ "d2-hold-quote-33": {
+  "passed": false,
+  "reason": "Summary «Копия анкеты» is wrong.",
+  "answer_sha256": "05904288c26f3023e0bf21bc52da56e5a3879d0856ae64a5af23ea9a86917ce3"
+ },
+ "d2-hold-open-recipient-34": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "850b90da911c018feba816c72829b856f99802077c3b6fe9f977cd83df9b0135"
+ },
+ "d2-hold-code-35": {
+  "passed": false,
+  "reason": "Invents the unapproved 515-second lifetime; open question lost.",
+  "answer_sha256": "3d99daca4ebe6f05778cadb2481e9576800f48825a1e89b7fc1dce6d8b7c8af0"
+ },
+ "d2-hold-permission-37": {
+  "passed": false,
+  "reason": "Permission turned into an order: «Получатель — архивариус».",
+  "answer_sha256": "5a1241703f44c5f91ef974b2800d3c47c867efa4b3dca0ca54229685a2833384"
+ },
+ "d2-hold-two-recipients-38": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "feaa5c433957c27e9af5ce7f0bad719139ea7f95bde10e2381d0257599fd10d0"
+ },
+ "d2-hold-quote-42": {
+  "passed": false,
+  "reason": "Invented «норму слова «отмени» не менять».",
+  "answer_sha256": "66275a194a74632a9c160253250f1a2ae47c29f68567f7f5d949e8990342a565"
+ },
+ "d2-hold-open-recipient-43": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "127e753e31a5b776bf1b0a72fd91d174b89eac7ed18a183e90dd421ead553d2f"
+ },
+ "d2-hold-code-44": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "c37e0bf1d0acf2915b5b2288306bdf1e50167bdd58890ff22e5377edb56a5385"
+ },
+ "d2-hold-permission-46": {
+  "passed": true,
+  "reason": "Field, no version, ban lifted.",
+  "answer_sha256": "82e2411619b5a265ec9624e312899db99d09da17eaf3abc0a48878225f7b53fd"
+ },
+ "d2-hold-code-53": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "e8132dab72ceee5af2f0a67f792236e9f99afbfa531dac509fe6c90db60d5d34"
+ }
+}

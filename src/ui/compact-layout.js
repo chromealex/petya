@@ -82,7 +82,6 @@
  help('#companies>p:not(.intro):not([id])','Как работают профили компаний');
  help('#team>p.small','Как заполнить сведения о команде');
  help('#history>p.small','Хранение истории и откат');
- help('#settings>article[aria-label] > p','Какие настройки разделены по компаниям');
  help('.notion-setup','Пошаговая настройка Notion');
  const attachment=document.getElementById('attachment-pick')?.closest('article');
  if(attachment)fold([attachment.querySelector(':scope>p')],'Форматы файлов и ограничения');
