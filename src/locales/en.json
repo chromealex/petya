@@ -7808,6 +7808,13 @@
   "Нашёл на компьютере:": "Found on this computer:",
   "Нет на компьютере": "Not on this computer",
   "Скрыть": "Hide",
-  "Добавить подходящие (": "Add the suitable ones ("
+  "Добавить подходящие (": "Add the suitable ones (",
+  "· размер ≈": "· size ≈",
+  "Добавить ·": "Add ·",
+  "Не хватит места: свободно": "Not enough space: free",
+  "При установке": "When installed",
+  "Размер при установке:": "Size when installed:",
+  "Размер при установке: ≈": "Size when installed: ≈",
+  "Само приложение": "The app itself"
  }
 }
