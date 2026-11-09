@@ -45,7 +45,7 @@
   if(Array.isArray(data.recording))recordingIds=new Set(data.recording);marks();
   setBusy(false);
   const name=data.companies.find(c=>c.id===current).name;
-  $('company-name').value=name;$('connections-company').textContent='Подключения компании «'+name+'»';
+  $('company-name').value=name;
   tabs.querySelector('[aria-current]')?.scrollIntoView({block:'nearest',inline:'nearest'});
  }
  function marks(){

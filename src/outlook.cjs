@@ -15,15 +15,15 @@ class Outlook{
  async start({scopes=[],email=''}={}){this.check();this.stop();const generation=this.generation,client=this.load().client;if(!client)throw Error('Сначала импортируйте Application ID Microsoft в дополнительных настройках почты.');
   const requested=[...new Set([...SCOPES.split(' '),...scopes])].join(' ');
   const state=randomBytes(32).toString('base64url'),verifier=randomBytes(32).toString('base64url');let consumed=false;
-  const server=http.createServer(async(req,res)=>{res.setHeader('Content-Type','text/plain; charset=utf-8');res.setHeader('Cache-Control','no-store');const u=new URL(req.url,'http://127.0.0.1');
-   if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state||consumed){res.writeHead(400);res.end('Недопустимый ответ авторизации.');return;}
+  const server=http.createServer(async(req,res)=>{res.setHeader('Cache-Control','no-store');const u=new URL(req.url,'http://127.0.0.1');
+   if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state||consumed){require('./oauth-page.cjs').reply(res,{status:400,ok:false,title:'Недопустимый ответ авторизации.',text:'Нажмите «Подключить» в Пете ещё раз.',close:false});return;}
    consumed=true;
    try{if(u.searchParams.has('error')||!u.searchParams.get('code'))throw Error('Вход отменён в Microsoft.');const tokens=await this.token({grant_type:'authorization_code',code:u.searchParams.get('code'),redirect_uri:redirect,code_verifier:verifier,scope:requested});
     if(generation!==this.generation)throw Error('Вход отменён.');this.check();if(!tokens.access_token||!tokens.refresh_token||!String(tokens.scope||'').split(' ').some(s=>s===SCOPE||s==='https://graph.microsoft.com/'+SCOPE))throw Error('Microsoft не предоставил постоянный доступ к чтению Outlook.');
     const profile=await this.json('https://graph.microsoft.com/v1.0/me?$select=mail,userPrincipalName',{headers:{Authorization:'Bearer '+tokens.access_token}});
     if(generation!==this.generation)throw Error('Вход отменён.');if(typeof (profile.mail||profile.userPrincipalName)!=='string'||!(profile.mail||profile.userPrincipalName).includes('@'))throw Error('Не удалось определить адрес Outlook.');
-    this.save({client,email:(profile.mail||profile.userPrincipalName),tokens:{access_token:tokens.access_token,refresh_token:tokens.refresh_token,expiresAt:Date.now()+Number(tokens.expires_in||3600)*1000,scope:String(tokens.scope||''),...scopes.length?{scopes:requested}:{}}});this.lastError='';res.end(scopes.length?'Доступ выдан. Вернитесь в Петю.':'Outlook подключён. Вернитесь в Петю.');
-   }catch(e){this.lastError=e.message;res.end(e.message);}finally{if(generation===this.generation)this.stop();}
+    this.save({client,email:(profile.mail||profile.userPrincipalName),tokens:{access_token:tokens.access_token,refresh_token:tokens.refresh_token,expiresAt:Date.now()+Number(tokens.expires_in||3600)*1000,scope:String(tokens.scope||''),...scopes.length?{scopes:requested}:{}}});this.lastError='';require('./oauth-page.cjs').reply(res,{title:scopes.length?'Доступ выдан.':'Outlook подключён.'});
+   }catch(e){this.lastError=e.message;require('./oauth-page.cjs').reply(res,{ok:false,title:'Не удалось подключить.',text:e.message,close:false});}finally{if(generation===this.generation)this.stop();}
   });
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'localhost',resolve);});
   if(generation!==this.generation){server.close();throw Error('Вход отменён.');}

@@ -441,7 +441,7 @@ function setupHandlers() {
     topic.webQuery=result.query;topic.at=Date.now();topic.messages.push({role:'user',text:original,at:Date.now()},{role:'assistant',text:result.text,sources:result.sources,at:Date.now()});dialogue.state.activeId=topic.id;dialogue.persist();return {handled:true,...result,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
   };
   handle('webSearchContinue',()=>{if(!pendingWeb)throw Error('Нет поиска для продолжения.');return runWeb(pendingWeb.original,pendingWeb.search,true);});
-  const {mailSkill,clientDefaults,mailAccounts}=require('./mail-setup.cjs')({get app(){return app;},get core(){return core;},get fs(){return fs;},get handle(){return handle;},get learning(){return learning;},get modules(){return modules;},get request(){return request;},get saveSettings(){return saveSettings;},get settings(){return settings;},get win(){return win;}});
+  const {mailSkill,clientDefaults,mailAccounts}=require('./mail-setup.cjs')({get app(){return app;},get core(){return core;},get fs(){return fs;},get handle(){return handle;},get learning(){return learning;},get modules(){return modules;},get request(){return request;},get saveSettings(){return saveSettings;},get settings(){return settings;},get show(){return show;},get win(){return win;}});
   const {dailyBrief,dictionary,dictionaryScope,undoLast}=require('./learning-setup.cjs')({get recurring(){return services.recurring;},get agents(){return agents;},get app(){return app;},get dialogue(){return dialogue;},get handle(){return handle;},get learning(){return learning;},get memory(){return memory;},get modules(){return modules;},get settings(){return settings;},get smoke(){return smoke;},get text(){return text;},get workspace(){return workspace;}});
   const projectFile=path.join(dataRoot,'project-memory.json');
   const projectState=fs.existsSync(projectFile)?JSON.parse(safeStorage.decryptString(Buffer.from(JSON.parse(fs.readFileSync(projectFile,'utf8')).encrypted,'base64'))):undefined;
@@ -617,6 +617,7 @@ function setupHandlers() {
     const play=require('./google-play.cjs'),client=require('./integration-clients.cjs').load().google;
     const credential=await play.login({client:client&&{client_id:client.client_id,client_secret:client.client_secret},open:url=>require('electron').shell.openExternal(url),request});
     const saved=saveSettings({googlePlayCredential:JSON.stringify(credential),module_googleplay:'true'},true);
+    show(); // the person comes back from the browser: Petya's window is in front
     let apps=null;try{apps=(await googlePlay.apps()).length;}catch{}
     return {...saved,playApps:apps};
   });
