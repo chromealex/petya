@@ -4844,7 +4844,6 @@
   "Убрать связь с": "Remove the link with",
   "Утвердить": "Approve",
   "Утверждаю план": "Approving the plan",
-  "Уточните проект в разделе «Claude и Codex».": "Specify the project in “Claude and Codex”.",
   "Уточните, если знаете:": "Clarify if you know:",
   "Часть изменений в коммите": "Some of the changes are in the commit",
   "Чат агента": "Agent chat",
@@ -12755,6 +12754,7 @@
   "тредов с такими словами": "threads with these words",
   "чатах": "chats",
   "чатах бота": "the bot's chats",
-  "чате": "chat"
+  "чате": "chat",
+  "Уточните проект в разделе «Агенты».": "Specify the project in “Agents”."
  }
 }
