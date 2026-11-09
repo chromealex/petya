@@ -1,0 +1,17 @@
+{
+  "id": "doc-diff",
+  "name": "Что изменилось в документе",
+  "description": "Сравнивает версии документа — историю страницы Confluence, ревизии Google Документа или git-историю Markdown — и показывает изменённые разделы с правками по словам, кто и когда их внёс, и короткую сводку только по настоящим правкам",
+  "category": "docs",
+  "icon": "icon.svg",
+  "examples": ["Что поменяли в GDD за неделю?","Сравни спеку лиг с прошлой версией","Что изменилось в README за месяц?","Кто менял спеку матчмейкинга?"],
+  "setting": "extension_doc-diff",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["diff-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "docDiffCard": "renderDocDiffCard"
+  }
+}

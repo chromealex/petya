@@ -6,6 +6,9 @@ answer «кто в отпуске», «когда Маша вернётся», �
 (`docs/apps/absences.md`), «Встречи 1:1» (`docs/apps/one-on-one.md`), the capacity of «Планирование спринта»
 (`docs/apps/sprint-planning.md`), «Онбординг новичка» (members, absences) and «Перформанс-ревью» (1:1 notes and
 follow-ups of the person asked about).
+`src/features/people.cjs` (one line in `src/features.cjs`), implementation in `src/people/`. Consumers: «Вики из обсуждений» (`find` for a page's owner, `docs/apps/wiki-author.md`), «Отсутствия»
+(`docs/apps/absences.md`), «Встречи 1:1» (`docs/apps/one-on-one.md`) and the capacity of «Планирование спринта»
+(`docs/apps/sprint-planning.md`).
 
 ## The team list is «Команда»
 There is no second list. `members()` is `team.members(settings)` with a `key` per person: the Jira account id, else the

@@ -1,0 +1,17 @@
+{
+  "id": "gdd",
+  "name": "Геймдизайн-документ",
+  "description": "Пишет и обновляет разделы GDD по чату, сводкам встреч, эпикам Jira и конфигам игры: каждое число со ссылкой на файл и строку, остальное помечено «уточнить»; записывает в GDD (Markdown, Confluence или Google Документ) только после проверки разницы; показывает, каких систем в GDD нет",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Опиши систему лиг в GDD","Обнови раздел экономики по текущим конфигам","Чего не хватает в GDD?","GDD лежит в docs/gdd.md"],
+  "setting": "extension_gdd",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["gdd-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "gddCard": "renderGddCard"
+  }
+}

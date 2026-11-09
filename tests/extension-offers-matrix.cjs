@@ -35,6 +35,9 @@ const own={
  standup:['собери стендап','что вчера делала команда','у кого блокеры','настрой стендап на 10:30'],
  adr:['запиши решение: переходим на Addressables','оформи ADR про переход на Addressables','какие решения принимали про сеть','противоречит ли это решению про сеть','какие архитектурные решения у нас есть'],
  'doc-freshness':['проверь свежесть документации','какая документация устарела','найди устаревшую документацию','что в README устарело'],
+ gdd:['опиши систему лиг в GDD','обнови раздел экономики по текущим конфигам','чего не хватает в GDD','распиши в геймдизайн-документе механику сундуков'],
+ 'wiki-author':['оформи в вики итоги треда про матчмейкинг','перенеси в Confluence итоги встречи про релиз 2.3','задокументируй в Notion обсуждение про оплату в Китае'],
+ 'doc-diff':['что поменяли в GDD за неделю','сравни спеку лиг с прошлой версией','какие правки в документе за месяц','история изменений спеки матчмейкинга'],
  retro:['подготовь ретро','что пошло не так в спринте','ретроспектива спринта','подведи итоги спринта','проведём ретро'],
  'ad-revenue':['сколько заработали на рекламе вчера','eCPM по сетям','какой формат приносит больше','упала выручка с rewarded','выручка с рекламы за неделю'],
  competitors:['что нового у конкурентов','добавь в конкуренты Clash of Clans','у кого вырос рейтинг','какие механики добавили в обновлениях'],
@@ -128,6 +131,12 @@ const not={
  adr:['реши уравнение','запиши решение уравнения','какие решения приняли на встрече','что решили на встрече','прими решение за меня','курс ADR Яндекса','помоги решить задачу по математике'],
  // Documentation freshness: outdated packages, deprecated APIs, writing or finding docs and news are not it.
  'doc-freshness':['какие пакеты устарели','устаревшие зависимости','найди устаревшие API в коде','обнови документацию','найди документацию по Unity','свежие новости','напиши документацию'],
+ // GDD: what changed in it, stale docs, ADRs, balance against configs and definitions are not it.
+ gdd:['что поменяли в GDD за неделю','проверь свежесть документации','запиши решение: переходим на Addressables','сверь баланс с конфигами','что такое GDD','что поменялось в балансе с прошлой версии','обнови документацию'],
+ // Wiki pages from discussions: ADRs, searching the wiki, the meeting summary itself and sending messages are not it.
+ 'wiki-author':['оформи ADR про матчмейкинг','запиши решение: переходим на Addressables','найди в Confluence про лиги','сводка встречи','что решили на встрече','отправь в слак итоги треда','перескажи тред про релиз в Mattermost'],
+ // Document versions: code history, balance and configs, the Drive's recent files, stale docs and ADRs are not it.
+ 'doc-diff':['что изменилось в коде','что изменилось в коде за неделю','что поменялось в балансе с прошлой версии','что нового в гугл диске','проверь свежесть документации','какая документация устарела','какие решения принимали про сеть','сравни размер этих двух apk','что поменялось в конфигах'],
  // Retro: retro styles, «ретроград», planning the next sprint, a failed build and a meeting summary are not it.
  retro:['ретро музыка','ретро-стиль в пиксель-арте','ретроград Меркурий','включи ретро игры','спланируй спринт','почему упала сборка','что пошло не так с билдом','сводка встречи','что такое ретроспектива'],
  teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке','что нового в VK Teams','перескажи тред в вк тимс'],
@@ -232,7 +241,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review','gdd','wiki-author','doc-diff'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

@@ -95,6 +95,10 @@ message that does not exist is dropped; its quote is the model's verbatim part o
   collecting reads `reg.thread(id, {id: rootId, channel})` — the root (the question) and the replies in time order;
   each reply's `author.name` maps to a team member, `text` is split by the existing `split()`. A Slack thread link
   still wins; no messenger thread configured → no change.
+- **«Вики из обсуждений»** (`src/extensions/wiki-author/feature.cjs`, [wiki-author.md](../apps/wiki-author.md)): a
+  pasted message link is tried with each ready source's `thread`; otherwise `searchAll` (31 days, memory sources
+  included) with the topic's words, grouped by thread; the chosen thread is read whole with `thread`. Quotes on the page
+  are checked with `verbatim`.
 - **Digests elsewhere** (a morning brief, a channel digest app): `reg.list()` → `reg.channels(id)` →
   `reg.messages(id, {channel, days})` → `require('../../messenger-digest.cjs').digest(s, {...})` for the same card data.
 

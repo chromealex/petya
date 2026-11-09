@@ -1,0 +1,18 @@
+{
+  "id": "wiki-author",
+  "name": "Вики из обсуждений",
+  "description": "Оформляет итоги треда из Slack, Mattermost или Telegram или итоги встречи в вики-страницу с дословными цитатами, ссылками и ответственным из «Команды»; сначала ищет страницу на ту же тему и предлагает обновить её; публикует в Confluence, Notion или Google Документы только после подтверждения",
+  "category": "docs",
+  "icon": "icon.svg",
+  "examples": ["Оформи в вики итоги треда про матчмейкинг","Перенеси в Confluence итоги встречи про релиз 2.3","Задокументируй в Notion обсуждение про оплату в Китае"],
+  "uses": ["document-export"],
+  "setting": "extension_wiki-author",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["wiki-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "wikiCard": "renderWikiCard"
+  }
+}

@@ -1,0 +1,25 @@
+.wiki-card{width:620px;max-width:100%;margin:12px 0}
+.wiki-body{display:flex;flex-direction:column;gap:9px;min-width:0}
+.wiki-head{font-size:12.5px;font-weight:600;color:var(--ink)}
+.wiki-muted{font-size:11.5px;color:var(--muted);margin:0}
+.wiki-mode{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12.5px;color:var(--ink)}
+.wiki-mode-label{font-size:11px;color:#86c2ff;text-transform:uppercase;letter-spacing:.04em}
+.wiki-thread{display:flex;flex-direction:column;gap:8px;padding:10px 12px 8px;border-radius:8px;background:#ffffff05}
+.wiki-track{position:relative;height:24px;margin:0 10px}
+.wiki-track::before{content:'';position:absolute;left:0;right:0;top:11px;height:2px;border-radius:2px;background:#ffffff1c}
+.wiki-dot{position:absolute;top:0;width:24px;height:24px;margin-left:-12px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#10161b;text-decoration:none;border:2px solid var(--bg,#151a1f);box-sizing:border-box}
+.wiki-legend{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11.5px;color:var(--muted);flex-wrap:wrap}
+.wiki-people{display:flex;gap:10px;flex-wrap:wrap}
+.wiki-person{display:inline-flex;align-items:center;gap:4px;color:var(--ink)}
+.wiki-person i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.wiki-chips{display:flex;gap:6px;flex-wrap:wrap}
+.wiki-diff{margin:0;padding:8px 10px;border-radius:8px;background:#ffffff05;border:1px solid var(--line);font-size:12.5px;line-height:1.55;color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow:auto}
+.wiki-diff .wiki-eq{color:#cfd6dc}
+.wiki-diff ins{text-decoration:none;background:#c9ed9d2e;color:#dff5c4;border-radius:3px}
+.wiki-diff del{background:#f0b4a826;color:#f0b4a8;text-decoration:line-through;border-radius:3px}
+.wiki-text{width:100%;box-sizing:border-box;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;line-height:1.5;color:var(--ink);background:#0000002a;border:1px solid var(--line);border-radius:8px;padding:9px 11px;resize:vertical}
+.wiki-text:read-only{opacity:.85}
+.wiki-dest{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.wiki-dest-btn{font-size:12px;padding:4px 10px;border-radius:14px}
+.wiki-dest-btn[aria-pressed="true"]{background:#86c2ff26;border-color:#86c2ff;color:var(--ink)}
+.wiki-parent{width:100%;box-sizing:border-box;font-size:12.5px;padding:6px 10px;border-radius:7px;border:1px solid var(--line);background:#0000002a;color:var(--ink)}
