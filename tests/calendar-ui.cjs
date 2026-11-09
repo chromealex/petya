@@ -45,7 +45,10 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js("document.querySelectorAll('.cal-card img').length"),0,'event titles are never HTML');
  assert.equal(await js("document.querySelectorAll('.cal-event.declined').length"),1);
  assert.equal(await js("document.querySelector('.cal-allday-chip').textContent"),'Конференция DevDays');
- assert.equal(await js("document.querySelector('.cal-join').href"),'https://meet.google.com/abc-defg-hij');
+ // Which events have room for «Подключиться» depends on the hour the test runs (the running event takes a column), so
+ // check that join links come only from the events' own links.
+ const joins=await js("[...document.querySelectorAll('.cal-card')[0].querySelectorAll('.cal-join')].map(a=>a.href)");
+ assert.ok(joins.length>=1&&joins.every(h=>['https://meet.google.com/abc-defg-hij','https://meet.google.com/xyz','https://us02web.zoom.us/j/1112223334?pwd=x'].includes(h)),'join links: '+joins.join(' '));
  assert.equal(await js("document.querySelectorAll('.cal-free').length"),1);
  assert.equal(await js("document.querySelectorAll('.cal-now').length"),1,'«сейчас» line: the running event keeps the current hour on the timeline');
  // Overlapping 11:30–12:30 and 12:00–12:45 are side by side.
