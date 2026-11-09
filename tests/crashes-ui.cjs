@@ -49,15 +49,15 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await wait("document.querySelectorAll('.crash-card').length===2");
  const first="document.querySelectorAll('.crash-card')[0]",second="document.querySelectorAll('.crash-card')[1]";
  assert.equal(await js(first+".dataset.sources"),'3');
- assert.equal(await js(first+".querySelector('.crash-tile .crash-value').textContent"),'9');
+ assert.equal(await js(first+".querySelector('.crash-tile .kit-kpi-value').textContent"),'9');
  // Per-source strip: three sources, shares, counts; a click asks for that source only.
  assert.deepEqual(await js("[..."+first+".querySelectorAll('.crash-src')].map(x=>x.dataset.source)"),['sentry','crashlytics','google-play']);
  assert.match(await js(first+".querySelector('.crash-src[data-source=crashlytics] .crash-src-nums').textContent"),/^2 крэша · 945 событий$/);
  // The chart: split by source by default (three colours per day), «По крэшам» switches to the issue split.
  assert.equal(await js(first+".querySelector('.crash-chart').dataset.mode"),'source');
- assert.equal(await js(first+".querySelectorAll('.crash-col')[4].querySelectorAll('.crash-seg').length"),3,'three sources that day');
- assert.deepEqual(await js("[..."+first+".querySelectorAll('.crash-col')[4].querySelectorAll('.crash-seg')].map(s=>s.dataset.series)"),['sentry','crashlytics','google-play']);
- assert.equal(await js(first+".querySelectorAll('.crash-legend li').length"),3);
+ assert.equal(await js(first+".querySelectorAll('.kit-bars-col')[4].querySelectorAll('.kit-bars-seg').length"),3,'three sources that day');
+ assert.deepEqual(await js("[..."+first+".querySelectorAll('.kit-bars-col')[4].querySelectorAll('.kit-bars-seg')].map(s=>s.dataset.series)"),['sentry','crashlytics','google-play']);
+ assert.equal(await js(first+".querySelectorAll('.kit-legend li').length"),3);
  assert.equal(await js(first+".querySelector('.crash-toggle [data-mode=source]').getAttribute('aria-pressed')"),'true');
  const sourceShot=await require('./card-shot.cjs')(win,'.crash-card','petya-crashes',{width:700});
  await js("document.getElementById('card-shot').querySelectorAll('.kit-more').forEach(d=>d.setAttribute('open',''));document.getElementById('card-shot').scrollTop=document.getElementById('card-shot').scrollHeight");
@@ -66,9 +66,9 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("const b=document.getElementById('card-shot');b.scrollTop=0;[...b.querySelectorAll('.crash-card')].forEach(c=>document.querySelector('.message-list,#messages,main')?.append(c));b.remove()");
  await js(first+".querySelector('.crash-toggle [data-mode=issue]').click()");
  assert.equal(await js(first+".querySelector('.crash-chart').dataset.mode"),'issue');
- assert.equal(await js(first+".querySelectorAll('.crash-col')[6].querySelectorAll('.crash-seg').length"),5,'five issues and the rest that day (one is zero)');
- assert.equal(await js(first+".querySelectorAll('.crash-legend li').length"),6);
- assert.equal(await js(first+".querySelectorAll('.crash-legend li .crash-source').length"),5,'the issue legend names the source of each issue');
+ assert.equal(await js(first+".querySelectorAll('.kit-bars-col')[6].querySelectorAll('.kit-bars-seg').length"),5,'five issues and the rest that day (one is zero)');
+ assert.equal(await js(first+".querySelectorAll('.kit-legend li').length"),6);
+ assert.equal(await js(first+".querySelectorAll('.kit-legend li .crash-source').length"),5,'the issue legend names the source of each issue');
  // Rows grouped by source with chips; titles are text, never HTML; «Решено» only where the source resolves.
  assert.deepEqual(await js("[..."+first+".querySelectorAll('.crash-group')].map(g=>g.dataset.source)"),['sentry','crashlytics','google-play']);
  assert.equal(await js(first+".querySelectorAll('.crash-row').length"),9);
@@ -88,10 +88,10 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js(first+".querySelector('.crash-row[data-source=crashlytics] .kit-link[data-provider=coder]').click()");
  await wait("window.__asked.length===2");
  assert.match((await js('window.__asked'))[1][0],/^Исправь баг в коде — крэш из Firebase Crashlytics: java\.lang\.NullPointerException в BattleScene\.kt:214/);
- // One source: no strip, no toggle, crash-free tile, «Открыть список в Sentry».
- assert.equal(await js(second+".querySelectorAll('.crash-src').length"),0);assert.equal(await js(second+".querySelectorAll('.crash-toggle').length"),0);
+ // One source: no strip, the chart is one series («Всего») with «По крэшам» on demand, crash-free tile, «Открыть список в Sentry».
+ assert.equal(await js(second+".querySelectorAll('.crash-src').length"),0);assert.equal(await js(second+".querySelector('.crash-chart').dataset.mode"),'total');assert.deepEqual(await js("[..."+second+".querySelectorAll('.crash-toggle button')].map(b=>b.textContent)"),['Всего','По крэшам']);
  assert.match(await js(second+".querySelectorAll('.crash-tile')[3].textContent"),/98,71%crash-free сессийпользователей: 97,12%/);
- assert.equal(await js(second+".querySelectorAll('.crash-col.outside').length"),2,'days before the release are dimmed');
+ assert.equal(await js(second+".querySelectorAll('.kit-bars-col.outside').length"),2,'days before the release are dimmed');
  assert.ok(await js("[..."+second+".querySelectorAll(':scope>.kit-actions button')].some(b=>b.textContent==='Открыть список в Sentry')"));
 
  // End to end through the real main process with a fake Sentry: «Sentry» settings, a chat request, resolve/undo.
@@ -125,7 +125,8 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
   await wait("[...document.querySelectorAll('.crash-card .crash-title')].some(t=>t.textContent==='NullReferenceException in live build')",300);
   const live="[...document.querySelectorAll('.crash-card')].find(c=>c.querySelector('.crash-title')?.textContent==='NullReferenceException in live build')";
   assert.match(await js(live+".closest('[data-extension-presentation]')?.textContent||''"),/За неделю: 1 крэш/);
-  assert.equal(await js(live+".querySelector('.crash-row .crash-source').textContent"),'Sentry');
+  // One source: its name is in the card header, not repeated on every row.
+  assert.equal(await js(live+".querySelectorAll('.crash-row .crash-source').length"),0);assert.match(await js(live+".querySelector('.kit-key').textContent"),/Sentry/);
   assert.equal(await js(live+".querySelectorAll('.crash-new').length"),1);
   assert.deepEqual(writes,[],'reading never writes');
   // Settings cards: «Sentry» loads projects; «Крэши» lists sources; «Firebase Crashlytics» explains the export.

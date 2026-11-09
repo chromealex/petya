@@ -53,7 +53,7 @@ async function check(s,{days=1,now=new Date(),readers}={}){
  }
  const r=engine.detect(data.series,{days:list,yesterday,sensitivity,mutes:mutes(s.settings)});
  const sources=[...new Map(data.series.map(x=>[x.kind+':'+x.source,{kind:x.kind,id:x.source,name:x.sourceName}])).values()];
- return {mode:days>1?'week':'day',day:yesterday,from:list[0],to:yesterday,items:r.items.slice(0,30),more:Math.max(0,r.items.length-30),hidden:r.hidden,
+ return {mode:days>1?'week':'day',day:yesterday,from:list[0],to:yesterday,items:r.items.slice(0,30),more:Math.max(0,r.items.length-30),hidden:r.hidden,watched:r.watched.slice(0,8),
   notes:[...data.notes.map(n=>({...n,text:String(n.text||'').slice(0,300)})),...r.notes].slice(0,12),sources,kinds:data.kinds,sensitivity,at:now.toISOString()};
 }
 function summary(card){

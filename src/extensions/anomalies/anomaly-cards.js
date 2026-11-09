@@ -16,6 +16,7 @@
   if(cur){try{return v.toLocaleString(locale(),{style:'currency',currency:cur,maximumFractionDigits:0});}catch{/* unknown currency */}}
   return Math.round(v).toLocaleString(locale());
  }
+ const plural=(n,f)=>f[n%10===1&&n%100!==11?0:n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?1:2];
  const dayText=d=>new Date(d+'T12:00:00Z').toLocaleDateString(locale(),{day:'numeric',month:'short',timeZone:'UTC'});
 
  // Sparkline 200×48: band, line with gaps, baseline days, the anomalous point.
@@ -63,11 +64,41 @@
   return li;
  }
 
+ // Sparkline 110×30 for a pulse tile: the band and the line, the last day as a dot.
+ function mini(x){
+  const W=110,H=30,P=3,s=x.spark,vals=s.values,nums=vals.filter(v=>v!==null);if(!nums.length)return null;
+  const lo=Math.min(...nums,s.band[0]),hi=Math.max(...nums,s.band[1]),span=hi-lo||1;
+  const X=i=>P+i*(W-2*P)/Math.max(1,vals.length-1),Y=v=>H-P-(v-lo)/span*(H-2*P);
+  const root=svg('svg',{viewBox:'0 0 '+W+' '+H,width:W,height:H,class:'an-mini','aria-hidden':'true'});
+  const top=Y(Math.min(hi,s.band[1])),bottom=Y(Math.max(lo,s.band[0]));
+  root.append(svg('rect',{x:P,y:top,width:W-2*P,height:Math.max(1,bottom-top),class:'an-band',rx:2}));
+  let d='',pen=false;vals.forEach((v,i)=>{if(v===null){pen=false;return;}d+=(pen?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ';pen=true;});
+  root.append(svg('path',{d:d.trim(),class:'an-line'}));
+  const i=s.index;if(vals[i]!==null)root.append(svg('circle',{cx:X(i),cy:Y(vals[i]),r:2.8,class:'an-point '+(x.bad===true?'bad':x.bad===false?'good':'calm')}));
+  return root;
+ }
+ // The pulse: what was checked yesterday — value, how far from the usual, the last five weeks in a band.
+ function pulse(k,card){
+  const rows=card.watched||[];if(!rows.length)return null;
+  const grid=k.el('div','an-pulse kit-kpis');
+  for(const x of rows){
+   const tile=k.el('div','an-tile kit-kpi'+(x.bad===true?' alert':x.bad===false?' good':''));
+   const head=k.el('div','an-tile-head');head.append(k.el('span','an-tile-label',x.label));if(rows.some(o=>o!==x&&o.label===x.label))head.append(raw(k.el('span','an-tile-source',x.sourceName)));
+   const num=raw(k.el('div','an-tile-value kit-kpi-value',value(x.value,x.unit)));
+   const change=x.change===null||x.change===undefined?'':(x.change<0?'−':'+')+Math.abs(Math.round(x.change*100))+'%';
+   const diff=k.el('div','an-tile-diff');if(change)diff.append(raw(k.el('span','an-tile-change'+(x.bad===true?' bad':x.bad===false?' good':''),change)),k.el('span','an-tile-sep','·'));diff.append(k.el('span',null,'обычно'),raw(k.el('span','an-tile-usual',value(x.median,x.unit))));
+   tile.title=x.label+' · '+x.sourceName+'\n'+(window.t?window.t('Обычный диапазон'):'Обычный диапазон')+': '+value(Math.max(0,x.band[0]),x.unit)+'–'+value(x.band[1],x.unit);
+   tile.append(head,num,diff);const m=mini(x);if(m)tile.append(m);grid.append(tile);
+  }
+  return grid;
+ }
  window.renderAnomalies=(parent,card)=>{
   const k=window.resultKit;if(!k||!card||!Array.isArray(card.items)||parent.querySelector('.an-card'))return;
   const body=k.el('div','an-body');
   if(card.items.length){const list=k.el('ul','an-list');for(const x of card.items)list.append(item(k,x,card));body.append(list);}
-  else if(card.sources?.length)body.append(k.el('p','an-calm',card.mode==='week'?'За неделю всё в пределах обычного.':'Вчера всё в пределах обычного.'));
+  else if(card.sources?.length){const calm=k.el('div','an-calm');const mark=k.el('span','an-calm-mark');mark.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+   calm.append(mark,k.el('div','an-calm-text',card.mode==='week'?'За неделю всё в пределах обычного':'Вчера всё в пределах обычного'),k.el('div','an-calm-sub',(card.watched?.length?'Проверил '+card.watched.length+' '+plural(card.watched.length,['показатель','показателя','показателей'])+': ':'')+'ничего не выбивается из привычных значений'));body.append(calm);}
+  const p=pulse(k,card);if(p)body.append(p);
   const missing=(card.notes||[]).filter(n=>n.missing),other=(card.notes||[]).filter(n=>!n.missing);
   if(missing.length||other.length){
    const box=k.el('div','an-notes');

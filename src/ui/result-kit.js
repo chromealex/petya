@@ -112,6 +112,48 @@
   bar.append(switcher);wrap.append(bar,body);paint();parent.append(wrap);return wrap;
  }
  // Collapse a long list of nodes behind «Показать ещё».
+ // --- KPI tiles and bar charts, shared by the apps' cards -----------------------------------------------------
+ // kpi(value,label,{note,tone:'alert'|'good'|'',title}): a stat tile — the number is the chart.
+ function kpi(value,label,{note='',tone='',title=''}={}){
+  const box=el('div','kit-kpi'+(tone?' '+tone:''));box.append(el('span','kit-kpi-value',value),el('span','kit-kpi-label',label));
+  if(note)box.append(el('span','kit-kpi-note',note));if(title)box.title=title;return box;
+ }
+ // bars({labels, series:[{id,label,color,values}], threshold:{value,label}, max, text(i)->tooltip, inside(i)->bool,
+ //  height}): thin rounded bars (stacked when several series) over a hairline baseline, with a tooltip that follows
+ //  the pointer and the first / middle / last labels under the plot. Returns {root, draw(series)}.
+ function bars({labels,series,threshold=null,max=null,text=()=>'',inside=()=>true,height=88,ariaLabel=''}){
+  const root=el('div','kit-bars');root.style.setProperty('--kit-bars-h',height+'px');
+  const plot=el('div','kit-bars-plot'),cols=el('div','kit-bars-cols'),tip=el('div','kit-bars-tip');tip.hidden=true;tip.setAttribute('role','status');
+  cols.setAttribute('role','list');if(ariaLabel)cols.setAttribute('aria-label',ariaLabel);
+  plot.append(cols);
+  if(threshold){const line=el('div','kit-bars-threshold');line.append(el('span',null,threshold.label));plot.append(line);root.threshold=line;}
+  plot.append(tip);
+  // One slot per column under the plot; the first, middle and last carry text, so each date sits under its bar.
+  const axis=el('div','kit-bars-axis');
+  const n=labels.length;const marks=new Set(n>2?[0,Math.floor((n-1)/2),n-1]:[0,n-1]);
+  labels.forEach((label,i)=>{const s=el('span',null,marks.has(i)?label:'');if(i===0)s.classList.add('first');if(i===n-1)s.classList.add('last');axis.append(s);});
+  root.append(plot,axis);
+  let current=series;
+  function draw(next){
+   current=next||current;const totals=labels.map((_,i)=>current.reduce((s,x)=>s+(x.values[i]||0),0));
+   const top=Math.max(max||0,...totals,threshold?threshold.value*1.2:0)||1;
+   if(root.threshold)root.threshold.style.bottom=(100*threshold.value/top)+'%';
+   cols.replaceChildren();
+   labels.forEach((label,i)=>{
+    const col=el('div','kit-bars-col'+(inside(i)?'':' outside'));col.tabIndex=0;col.setAttribute('role','listitem');
+    const stack=el('span','kit-bars-stack');stack.style.height=(totals[i]?Math.max(3,100*totals[i]/top):0)+'%';
+    for(const s of current){const v=s.values[i]||0;if(!v)continue;const seg=el('span','kit-bars-seg');seg.style.flexGrow=String(v/totals[i]);seg.style.background=s.color;seg.dataset.series=s.id||'';stack.append(seg);}
+    if(threshold&&totals[i]>=threshold.value)col.classList.add('over');
+    col.append(stack);const t=text(i,totals[i]);col.setAttribute('aria-label',t||label);
+    const show=()=>{if(!t)return;tip.textContent=t;tip.hidden=false;const r=col.getBoundingClientRect(),p=plot.getBoundingClientRect();tip.style.left=Math.max(0,Math.min(p.width-tip.offsetWidth,r.left-p.left+r.width/2-tip.offsetWidth/2))+'px';};
+    const hide=()=>{tip.hidden=true;};col.onpointerenter=col.onfocus=show;col.onpointerleave=col.onblur=hide;
+    cols.append(col);
+   });
+  }
+  draw();root.draw=draw;return root;
+ }
+ // legend([{label,color,node?}]): a legend row for ≥2 series; one series needs none.
+ function legend(items){const ul=el('ul','kit-legend');for(const it of items){const li=el('li');const dot=el('i');dot.style.background=it.color;li.append(dot,it.node||el('span',null,it.label));if(it.title)li.title=it.title;ul.append(li);}return ul;}
  function collapse(nodes,limit,label='Показать ещё'){
   const box=el('div','kit-stack');nodes.slice(0,limit).forEach(n=>box.append(n));
   if(nodes.length>limit){const more=el('details','kit-more');more.append(el('summary',null,label+' · '+(nodes.length-limit)));nodes.slice(limit).forEach(n=>more.append(n));box.append(more);}
@@ -349,5 +391,5 @@
   for(const url of links){const u=new URL(url),key=u.host+u.pathname;const a=el('a','kit-link-button',LINK_LABELS.find(([r])=>r.test(key))?.[1]||'Открыть '+u.host);a.href=url;a.target='_blank';a.rel='noopener';row.append(a);}
   target.append(row);return target;
  }
- window.resultKit={linkText,panelBox:()=>side?.box||null,el,safeUrl,links,availableLinks,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam,outgoingReview,applyFinding};
+ window.resultKit={kpi,bars,legend,linkText,panelBox:()=>side?.box||null,el,safeUrl,links,availableLinks,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam,outgoingReview,applyFinding};
 })();
