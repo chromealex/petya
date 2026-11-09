@@ -36,12 +36,18 @@ function announcement(version){
  const text=fs.readFileSync(file,'utf8').trim(),m=/^#\s+(.+)\n+([\s\S]*)$/.exec(text);
  return m?{title:m[1].trim(),body:m[2].trim()}:{title:'',body:text};
 }
+// Does the release carry the macOS image (the Mac build needs its signing secrets)? Unknown → Windows only.
+async function hasMac(version){
+ if(dry&&!process.env.GH_TOKEN)return false;
+ try{const r=await fetch('https://api.github.com/repos/'+repo+'/releases/tags/v'+version,{headers:{Accept:'application/vnd.github+json','User-Agent':'petya-announce',...process.env.GH_TOKEN?{Authorization:'Bearer '+process.env.GH_TOKEN}:{}},signal:AbortSignal.timeout(10000)});
+  return r.ok&&(await r.json()).assets?.some(a=>/\.dmg$/i.test(a.name));}catch{return false;}
+}
 async function appPost(version){
  const {title,body}=announcement(version);
  const dir=path.join(root,'docs/screenshots',version);
  const shots=fs.existsSync(dir)?fs.readdirSync(dir).filter(f=>/\.(png|jpe?g)$/i.test(f)).sort().slice(0,MAX_SHOTS).map(f=>path.join(dir,f)):[];
  const url='https://github.com/'+repo+'/releases/tag/v'+version;
- return {heading:'Петя '+version+(title?' — '+title:''),body,shots,link:{text:'Скачать для Windows',url}};
+ return {heading:'Петя '+version+(title?' — '+title:''),body,shots,link:{text:'Скачать для '+(await hasMac(version)?'macOS и Windows':'Windows'),url}};
 }
 async function modelPost(tag){
  const headers={Accept:'application/vnd.github+json','User-Agent':'petya-announce',...process.env.GH_TOKEN?{Authorization:'Bearer '+process.env.GH_TOKEN}:{}};

@@ -32,6 +32,18 @@ if identity != '-':
         raise SystemExit('A unique valid Developer ID Application certificate with its private key is required. '
                          'Install it in Keychain; if several exist, set PETYA_SIGNING_IDENTITY to its SHA-1 fingerprint.')
     identity = hashes.pop()
+# A release build (PETYA_RELEASE_SIGN=1, the Release workflow) is notarized by Apple: every binary gets the hardened
+# runtime and a secure timestamp, and the app keeps the entitlements Electron and the microphone need under it.
+release = os.environ.get('PETYA_RELEASE_SIGN') == '1'
+entitlements = root / 'scripts/entitlements.mac.plist'
+def sign(path, deep=False):
+    command = ['codesign', '--force'] + (['--deep'] if deep else []) + ['--sign', identity]
+    if release:
+        command += ['--options', 'runtime', '--timestamp', '--entitlements', str(entitlements)]
+    subprocess.run(command + [str(path)], check=True)
+def macho(path):
+    with path.open('rb') as stream:
+        return stream.read(4) in (b'\xcf\xfa\xed\xfe', b'\xce\xfa\xed\xfe', b'\xca\xfe\xba\xbe', b'\xbe\xba\xfe\xca')
 staging = pathlib.Path(tempfile.mkdtemp(prefix='petya-package-'))
 atexit.register(shutil.rmtree, staging, ignore_errors=True)
 output = staging / 'Petya.app'
@@ -43,11 +55,11 @@ app_dir.mkdir()
 for name in ('assets',):
     shutil.copytree(root / name, app_dir / name)
 subprocess.run(['xcrun', 'swiftc', '-module-cache-path', str(staging / 'swift-cache'), str(root / 'native/claude-send.swift'), '-o', str(app_dir / 'assets/claude-send')], check=True)
-subprocess.run(['codesign', '--force', '--sign', identity, str(app_dir / 'assets/claude-send')], check=True)
+sign(str(app_dir / 'assets/claude-send'))
 subprocess.run(['xcrun', 'swiftc', '-module-cache-path', str(staging / 'swift-cache'), str(root / 'native/slack-view.swift'), '-o', str(app_dir / 'assets/native/slack-view')], check=True)
-subprocess.run(['codesign', '--force', '--sign', identity, str(app_dir / 'assets/native/slack-view')], check=True)
+sign(str(app_dir / 'assets/native/slack-view'))
 subprocess.run(['xcrun', 'swiftc', '-module-cache-path', str(staging / 'swift-cache'), str(root / 'native/watch-macos.swift'), '-o', str(app_dir / 'assets/native/watch-macos')], check=True)
-subprocess.run(['codesign', '--force', '--sign', identity, str(app_dir / 'assets/native/watch-macos')], check=True)
+sign(str(app_dir / 'assets/native/watch-macos'))
 # Capture UI and application code after native compilation to minimize concurrent-edit races.
 shutil.copytree(root / 'src', app_dir / 'src')
 # Copy the exact production dependency tree, including nested versions.
@@ -74,7 +86,7 @@ for binary in (voice / 'whisper-build/bin').iterdir():
     for old in dict.fromkeys(paths):
         subprocess.run(['install_name_tool', '-delete_rpath', old, str(binary)], check=True)
     subprocess.run(['install_name_tool', '-add_rpath', '@loader_path', str(binary)], check=True)
-    subprocess.run(['codesign', '--force', '--sign', identity, str(binary)], check=True)
+    sign(str(binary))
 package = json.loads((root / 'package.json').read_text())
 (app_dir / 'package.json').write_text(json.dumps({key: package[key] for key in ('name', 'version', 'main', 'description')}))
 info_path = output / 'Contents/Info.plist'
@@ -89,7 +101,12 @@ with info_path.open('wb') as stream:
     plistlib.dump(info, stream)
 # Sign with the selected persistent certificate, including nested helpers.
 subprocess.run(['xattr', '-cr', str(output)], check=True)
-subprocess.run(['codesign', '--force', '--deep', '--sign', identity, str(output)], check=True)
+# Notarization rejects any unsigned binary, also outside the bundle's standard places (the app's own folder).
+if release:
+    for file in sorted(app_dir.rglob('*')):
+        if file.is_file() and not file.is_symlink() and macho(file):
+            sign(file)
+sign(output, deep=True)
 subprocess.run(['codesign', '--verify', '--deep', '--strict', str(output)], check=True)
 # Verify the bundled server and model before publishing the archive.
 with socket.socket() as probe:
