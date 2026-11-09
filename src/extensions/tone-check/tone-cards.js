@@ -16,7 +16,7 @@
   findings.forEach((f,i)=>{
    if(!f.span||f.done||f.span.start<at)return;
    if(f.span.start>at)box.append(document.createTextNode(text.slice(at,f.span.start)));
-   const m=k.el('mark','tc-mark',text.slice(f.span.start,f.span.end));m.dataset.severity=f.severity;m.title=f.message;
+   const m=k.el('mark','tc-mark',text.slice(f.span.start,f.span.end));m.dataset.severity=f.severity;m.title=(window.t||String)(f.message);
    const n=k.el('sup','tc-num',String(i+1));m.append(n);box.append(m);at=f.span.end;
   });
   if(at<text.length)box.append(document.createTextNode(text.slice(at)));

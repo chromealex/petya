@@ -65,10 +65,12 @@
   return node;
  }
  function card({app,initial,color,key,href,status,title,subtitle,meta=[],chips=[],actions=[],side,presentation,body,className=''}){
-  const node=el('section','kit-card '+className);
+  // [data-i18n]: interface text even inside a chat message (see i18n.js); content passed in stays as the card marks it.
+  const node=el('section','kit-card '+className);node.dataset.i18n='';
   if(presentation){node.dataset.resultPresentation=presentation;node.tabIndex=0;node.onclick=event=>{if(event.target.closest('button,a,input,textarea,select,summary'))return;window.chatResultsApi?.select(presentation);};}
   const head=el('div','kit-card-head');
-  if(app){const badge=el('span','kit-app',initial||app[0]);badge.style.background=color||'#3a4440';badge.title=app;badge.setAttribute('aria-label',app);head.append(badge);}
+  // The badge letter follows the app name in the interface language («Проверка тона» → T for «Tone check»).
+  if(app){const shown=window.t?window.t(app):app,letter=!initial||/[А-Яа-яЁё]/.test(initial)&&shown!==app&&!/[А-Яа-яЁё]/.test(shown)?Array.from(shown)[0]:initial;const badge=el('span','kit-app',letter||app[0]);badge.style.background=color||'#3a4440';badge.title=app;badge.setAttribute('aria-label',app);head.append(badge);}
   if(key){const url=safeUrl(href);const link=el(url?'a':'span','kit-key',key);if(url){link.href=url;link.target='_blank';link.rel='noopener';}head.append(link);}
   if(status)head.append(status instanceof Node?status:chip(status));
   if(subtitle)head.append(el('span','kit-subtitle',subtitle));
@@ -100,7 +102,7 @@
 
  // --- Lists: cards / table / board, remembered per list kind ---------------------------------------
  function views(parent,{id,label,items,modes,initial='cards',limit=5}){
-  const wrap=el('div','kit-list');const bar=el('div','kit-list-bar');const body=el('div','kit-list-body');
+  const wrap=el('div','kit-list');wrap.dataset.i18n='';const bar=el('div','kit-list-bar');const body=el('div','kit-list-body');
   const available=Object.keys(modes);let mode=store.get('view-'+id,initial);if(!available.includes(mode))mode=available[0];
   const names={cards:'Карточки',table:'Таблица',board:'Доска'};
   if(label)bar.append(el('span','kit-list-label',label));

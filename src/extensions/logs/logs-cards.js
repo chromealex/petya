@@ -17,6 +17,8 @@
  const LANG={logql:'LogQL',kql:'KQL',text:'текст'};
  function span(spec){
   const ms=new Date(spec.range.to)-new Date(spec.range.from),m=Math.round(ms/60e3),h=Math.round(ms/3600e3);
+  // English is composed here: Russian plural forms do not map one to one onto English ones.
+  if(window.petyaLanguage&&window.petyaLanguage!=='ru'){const n=m<60?[m,'minute']:h<48?[h,'hour']:[Math.round(h/24),'day'];return 'past '+n[0]+' '+n[1]+(n[0]===1?'':'s');}
   if(m<60)return 'за '+m+' '+plural(m,['минуту','минуты','минут']);
   if(h<48)return 'за '+h+' '+plural(h,['час','часа','часов']);
   const d=Math.round(h/24);return 'за '+d+' '+plural(d,['день','дня','дней']);

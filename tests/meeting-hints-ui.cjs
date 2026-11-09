@@ -24,7 +24,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js("document.querySelectorAll('.mh-card')[1].querySelector('.mh-mode.on').dataset.mode"),'off');
  assert.equal(await js("document.querySelectorAll('.mh-card img').length"),0,'hint text is never HTML');
  assert.equal(await js("document.querySelectorAll('.mh-card')[0].querySelectorAll('.mh-hint').length"),3);
- assert.match(await js("document.querySelector('.mh-hint.kind-decision .mh-head').textContent"),/(?:Это уже решали|Already decided on) (?:3 октября|October 3)/,'chat cards sit in .message-content, which the interface translation skips');
+ assert.match(await js("document.querySelector('.mh-hint.kind-decision .mh-head').textContent"),process.env.PETYA_INTERFACE_LANGUAGE==='en'?/^Already decided on October 3/:/^Это уже решали 3 октября/,'a chat card is interface text: translated with the interface, unlike the message around it');
  assert.ok(await js("[...document.querySelectorAll('.mh-card')[0].querySelectorAll('.kit-actions button')].some(b=>['Снова показывать всё','Show everything again'].includes(b.textContent))"));
  assert.equal(await js("document.querySelectorAll('.mh-card')[1].querySelector('.mh-timeline')"),null,'no meeting → no timeline');
  const card=await require('./card-shot.cjs')(win,'.mh-card','petya-meeting-hints');

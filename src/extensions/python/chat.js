@@ -26,7 +26,7 @@
   again.onclick=()=>window.resultKit?.ask('Пересчитай с другими параметрами: ');
   const table=last.ok?parseTable(last.stdout):null;
   if(table){
-   const wrap=el('div','python-table');const t=el('table');const head=el('tr');const numeric=table.head.map((_,i)=>table.rows.every(r=>/^-?[\d\s.,]+%?$/.test(r[i].trim())));table.head.forEach((h,i)=>head.append(el('th',numeric[i]?'num':'',h)));const thead=el('thead');thead.append(head);const body=el('tbody');
+   const wrap=el('div','python-table');wrap.dataset.noI18n='';const t=el('table');const head=el('tr');const numeric=table.head.map((_,i)=>table.rows.every(r=>/^-?[\d\s.,]+%?$/.test(r[i].trim())));table.head.forEach((h,i)=>head.append(el('th',numeric[i]?'num':'',h)));const thead=el('thead');thead.append(head);const body=el('tbody');
    for(const r of table.rows.slice(0,50)){const tr=el('tr');for(const c of r){const td=el('td',/^-?[\d\s.,]+%?$/.test(c.trim())?'num':'',c);tr.append(td);}body.append(tr);}
    t.append(thead,body);wrap.append(t);box.append(wrap);
    const bar=el('div','python-bar');const n=table.rows.length,word=n%10===1&&n%100!==11?'строка':[2,3,4].includes(n%10)&&![12,13,14].includes(n%100)?'строки':'строк';bar.append(el('span','python-meta',n+' '+word+(n>50?' · показаны первые 50':'')));

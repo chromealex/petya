@@ -6,7 +6,7 @@
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('file-search-cards.css',document.currentScript.src).href;document.head.append(style);
  const call=(method,...args)=>window.petya.feature('fileSearch',method,...args);
  const locale=()=>window.petyaLocale||'ru-RU';
- const megabytes=n=>Math.round((Number(n)||0)/1e6).toLocaleString(locale())+' МБ';
+ const megabytes=n=>Math.round((Number(n)||0)/1e6).toLocaleString(locale())+' '+(window.t||String)('МБ');
  const finder=c=>(c.platform||window.petyaPlatform)==='win32'?'Показать в Проводнике':(c.platform||window.petyaPlatform)==='darwin'?'Показать в Finder':'Показать в папке';
  // Badge colour by file kind (the label is the extension itself).
  const TINT={slides:'#e0a96d',pdf:'#e08a7a',doc:'#7aa7e0',sheet:'#8cc79a',code:'#b59ad8',markdown:'#9fb7c9',text:'#a9b0aa'};

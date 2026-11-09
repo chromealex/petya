@@ -7,14 +7,18 @@
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('sql-cards.css',document.currentScript.src).href;document.head.append(style);
  const locale=()=>window.petyaLocale||'ru-RU';
  const fmt=(v,d=1)=>Number(v).toLocaleString(locale(),{maximumFractionDigits:d});
- const plural=(n,[a,b,c])=>{const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
+ // Units and plural forms follow the interface language: the numbers sit in [data-no-i18n] nodes with their units.
+ const english=()=>!!window.petyaLanguage&&window.petyaLanguage!=='ru';
+ const tr=text=>(window.t||String)(text);
+ const unit=(ru,en)=>english()?en:ru;
+ const plural=(n,[a,b,c])=>{if(english())return tr(Math.abs(n)===1?a:c);const x=Math.abs(n)%100,y=x%10;return x>10&&x<20?c:y===1?a:y>=2&&y<=4?b:c;};
  const raw=node=>{node.setAttribute('data-no-i18n','');return node;};
  const feature=(method,...args)=>window.petya.feature('sqlWords',method,...args);
  const GB=1024**3;
  const COLORS=['#86c2ff','#c9ed9d','#e5ce8c','#f0b4a8','#c9a8f0'];
  const KINDS={clickhouse:'ClickHouse',postgres:'PostgreSQL',bigquery:'BigQuery',mysql:'MySQL'};
- function bytes(n){if(n>=GB)return fmt(n/GB,n<10*GB?2:1)+' ГБ';if(n>=1024**2)return fmt(n/1024**2)+' МБ';if(n>=1024)return fmt(n/1024)+' КБ';return fmt(n,0)+' Б';}
- function count(n){if(n>=1e9)return fmt(n/1e9)+' млрд';if(n>=1e6)return fmt(n/1e6)+' млн';if(n>=1e4)return fmt(n/1e3,0)+' тыс.';return fmt(n,0);}
+ function bytes(n){if(n>=GB)return fmt(n/GB,n<10*GB?2:1)+' '+unit('ГБ','GB');if(n>=1024**2)return fmt(n/1024**2)+' '+unit('МБ','MB');if(n>=1024)return fmt(n/1024)+' '+unit('КБ','KB');return fmt(n,0)+' '+unit('Б','B');}
+ function count(n){if(n>=1e9)return fmt(n/1e9)+unit(' млрд','B');if(n>=1e6)return fmt(n/1e6)+unit(' млн','M');if(n>=1e4)return fmt(n/1e3,0)+unit(' тыс.','K');return fmt(n,0);}
  const svg=(tag,attrs={})=>{const n=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,String(v));return n;};
 
  // SQL with keywords, strings, numbers and comments marked (spans with text only).
@@ -44,7 +48,7 @@
   }else if(e.kind==='rows'){
    label.append(k.el('span',null,c.connection.dialect==='postgres'?'Оценка планировщика ≈ ':'Прочитает ≈ '),raw(k.el('b',null,count(e.value)+' '+plural(Math.round(e.value),['строка','строки','строк']))));
    // ClickHouse: the share of the tables' rows it reads; the planner's PostgreSQL estimate has no such reference.
-   if(e.of){label.append(k.el('span','sql-cost-limit','из ≈ '+count(e.of)+' в '+plural(e.tables||1,['таблице','таблицах','таблицах'])));share=Math.min(1,e.value/e.of);}
+   if(e.of){label.append(k.el('span','sql-cost-limit',tr('из ≈')+' '+count(e.of)+' '+plural(e.tables||1,['в таблице','в таблицах','в таблицах'])));share=Math.min(1,e.value/e.of);}
    else if(e.tables)label.append(k.el('span','sql-cost-limit',e.tables+' '+plural(e.tables,['таблица','таблицы','таблиц'])));
   }else{
    label.append(k.el('span','sql-cost-unknown','Стоимость заранее не известна'));
@@ -53,7 +57,7 @@
   box.append(label);
   if(share!==null){
    tone=share>1?'alert':share>0.5?'progress':'done';
-   const bar=k.el('div','sql-gauge');bar.setAttribute('role','img');bar.setAttribute('aria-label',label.textContent);
+   const bar=k.el('div','sql-gauge');bar.setAttribute('role','img');bar.setAttribute('aria-label',[...label.childNodes].map(n=>n.textContent.trim()).filter(Boolean).join(' '));
    const fill=k.el('div','sql-gauge-fill tone-'+tone);fill.style.width=Math.max(2,Math.min(100,share*100))+'%';bar.append(fill);box.append(bar);
   }
   return box;
@@ -115,7 +119,7 @@
    if(rows.length>10){const more=k.el('details','sql-more');more.append(k.el('summary',null,'Показать все строки · '+rows.length));const all=k.table(columns,rows.slice(10));raw(all);all.classList.add('selectable');more.append(all);box.append(more);}
   }
   if(!r.rows.length)box.append(k.el('p','sql-empty','Запрос выполнен, строк нет.'));
-  const meta=[r.total+(r.truncated?'+':'')+' '+plural(r.total,['строка','строки','строк']),fmt(r.elapsedMs/1000,2)+' с',r.bytesRead?'прочитано '+bytes(r.bytesRead):'',r.kept<r.total?'в карточке первые '+r.kept:''].filter(Boolean);
+  const meta=[r.total+(r.truncated?'+':'')+' '+plural(r.total,['строка','строки','строк']),fmt(r.elapsedMs/1000,2)+' '+unit('с','s'),r.bytesRead?'прочитано '+bytes(r.bytesRead):'',r.kept<r.total?'в карточке первые '+r.kept:''].filter(Boolean);
   box.append(k.el('small','sql-meta',meta.join(' · ')));
   return box;
  }

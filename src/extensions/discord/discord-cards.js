@@ -191,7 +191,7 @@
  window.renderDiscordCompose=(parent,d)=>{
   const k=window.resultKit;if(!k||!d||parent.querySelector('.discord-compose'))return;
   const body=k.el('div','dc-body');
-  const target=k.el('div','dc-target');target.append(k.el('span','dc-section','Канал'),raw(k.chip({label:'#'+d.channel.name,title:'Сообщение уйдёт только в этот канал'})));
+  const target=k.el('div','dc-target');target.append(k.el('span','dc-section','Канал'),raw(k.chip({label:'#'+d.channel.name,title:(window.t||String)('Сообщение уйдёт только в этот канал')})));
   body.append(target);
   const status={label:d.sent?'отправлено':'не отправлено',tone:d.sent?'done':'progress'};
   if(d.sent){body.append(sentLine(k,d.sent));}

@@ -33,13 +33,13 @@
   const card=el('section','coder-card');card.dataset.coderRun=run.id;
   const head=el('div','coder-head');
   head.append(el('strong',null,'Программист · '+(STATES[run.state]||run.state)));
-  if(run.branch)head.append(el('span',null,run.repo+' → '+run.branch));
+  if(run.branch){const where=el('span',null,run.repo+' → '+run.branch);where.dataset.noI18n='';head.append(where);}
   if(run.files?.length)head.append(el('span',null,run.files.length+' файл(ов), +'+(run.added||0)+' −'+(run.removed||0)));
   if(run.model)head.append(el('span',null,run.model));
   card.append(head);
   if(run.files?.length){
    const list=el('ul','coder-files');
-   for(const f of run.files.slice(0,40)){const li=el('li');li.append(el('span','coder-add','+'+f.added),el('span','coder-del','−'+f.removed),el('span',null,f.path));list.append(li);}
+   for(const f of run.files.slice(0,40)){const li=el('li');const path=el('span',null,f.path);path.dataset.noI18n='';li.append(el('span','coder-add','+'+f.added),el('span','coder-del','−'+f.removed),path);list.append(li);}
    card.append(list);
   }
   if(run.verification){
