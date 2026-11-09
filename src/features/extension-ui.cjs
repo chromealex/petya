@@ -17,14 +17,34 @@ require('electron').ipcMain?.on('petya:extension-ui-bootstrap',event=>{event.ret
 // Download sizes for this platform: what adding the app downloads (minus what is already here) and what it may
 // download on request. Presence comes from the app's optional downloads.cjs ({present(services)} → ids).
 const bytesOf=(item,platform=process.platform)=>typeof item.bytes==='object'?(item.bytes[platform]??Math.max(...Object.values(item.bytes))):item.bytes;
+// The app's own files (code, cards, icons, bundled data): recursive, symlinks skipped, cached per directory and its
+// newest change.
+const ownCache=new Map();
+function ownBytes(dir){
+ let total=0,newest=0;const stack=[dir];let seen=0;
+ while(stack.length&&seen<5000){
+  const at=stack.pop();let list=[];try{list=fs.readdirSync(at,{withFileTypes:true});}catch{continue;}
+  for(const e of list){seen++;const f=path.join(at,e.name);if(e.isSymbolicLink())continue;
+   if(e.isDirectory()){if(e.name!=='node_modules'&&!e.name.startsWith('.'))stack.push(f);continue;}
+   try{const st=fs.statSync(f);total+=st.size;newest=Math.max(newest,st.mtimeMs);}catch{/* removed meanwhile */}}
+ }
+ return {total,newest};
+}
+function own(d){
+ const hit=ownCache.get(d.dir);let mtime=0;try{mtime=fs.statSync(d.dir).mtimeMs;}catch{return 0;}
+ if(hit&&hit.mtime===mtime)return hit.bytes;
+ const bytes=ownBytes(d.dir).total;ownCache.set(d.dir,{mtime,bytes});return bytes;
+}
 async function sizes(services,{platform=process.platform,timeout=4000,free}={}){
  const out={};
+ // Every app has its own size; bundled apps' files already come with Petya (`bundled`), external ones are copied.
+ for(const d of descriptors())if(d.dir)out[d.id]={own:own(d),bundled:d.origin==='bundled'||!d.origin,items:[],install:0,optional:0,approx:false};
  await Promise.all(descriptors().filter(d=>d.downloads?.length).map(async d=>{
   let present=[];const file=path.join(d.dir,'downloads.cjs');
   const module=fs.existsSync(file)?registry.load(registry.entry(d.id),file):null;
   if(module)present=await Promise.race([Promise.resolve().then(()=>module.present(services)).catch(()=>[]),new Promise(r=>setTimeout(()=>r([]),timeout))]);
   const items=d.downloads.map(item=>({id:item.id,name:item.name,bytes:bytesOf(item,platform),approx:!!item.approx,optional:!!item.optional,requires:item.requires||'',present:present.includes(item.id)}));
-  out[d.id]={items,install:items.filter(i=>!i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),optional:items.filter(i=>i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),approx:items.some(i=>i.approx)};
+  out[d.id]={...out[d.id],items,install:items.filter(i=>!i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),optional:items.filter(i=>i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),approx:items.some(i=>i.approx)};
  }));
  let available=null;try{available=(free||(()=>require('../disk-space.cjs').inspectSpace(require('node:os').homedir(),0).available))();}catch{available=null;}
  return {apps:out,available,reserve:512*1024**2};

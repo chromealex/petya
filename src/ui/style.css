@@ -1229,6 +1229,9 @@ blockquote.growth-learned{margin:6px 0;padding:8px 12px;border-left:3px solid va
 .app-details-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:13px;padding:3px 0}
 .app-details-row>span:first-child{min-width:0}
 .app-details-state{color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.app-details-total{border-top:1px solid var(--line);margin-top:4px;padding-top:6px;font-weight:600}
+.app-details-total .app-details-state{color:var(--ink)}
+.app-add-weight{font-weight:400;opacity:.75;font-variant-numeric:tabular-nums}
 .app-details-state[data-state=added]{color:var(--green)}.app-details-state[data-state=connect]{color:#efc878}
 .app-details-state small{font-size:12px}
 .app-details-note{margin:0 0 4px;font-size:12px}
