@@ -12156,6 +12156,13 @@
   "При установке": "When installed",
   "Размер при установке:": "Size when installed:",
   "Размер при установке: ≈": "Size when installed: ≈",
-  "Само приложение": "The app itself"
+  "Само приложение": "The app itself",
+  "Дождитесь завершения запросов в чатах.": "Wait until the chat requests finish.",
+  "Перезапускаюсь…": "Restarting…",
+  "Удалить все компании": "Delete all companies",
+  "Удалить все компании и начать заново": "Delete all companies and start over",
+  "Чаты, подключения, команды, задачи и обучение всех компаний переместятся в Корзину. Скачанные модели, установленные приложения и язык интерфейса останутся. Петя перезапустится и начнёт знакомство с начала.": "Chats, connections, teams, tasks and learning of all companies go to the Trash. Downloaded models, installed apps and the interface language stay. Petya restarts and begins the introduction from the start.",
+  "Удалить всё": "Delete everything",
+  "Удалить все компании?": "Delete all companies?"
  }
 }
