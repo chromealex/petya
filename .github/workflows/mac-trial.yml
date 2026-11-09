@@ -13,6 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: npm ci --no-audit --no-fund
+      - run: test -d node_modules/electron/dist/Electron.app || node node_modules/electron/install.js
       - run: scripts/setup-whisper-mac.sh
       - run: python3 scripts/build.py --mac
         env: {PETYA_SIGNING_IDENTITY: '-', PETYA_RELEASE_SIGN: '1'}
