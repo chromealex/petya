@@ -1,3 +1,11 @@
+/* One scrollbar everywhere, the one of the chat: a thin thumb on a transparent track, no arrows. Elements set no
+   scrollbar styles of their own (a hidden scrollbar, e.g. the chat timeline, is the only exception). */
+*{scrollbar-width:thin;scrollbar-color:#66716b transparent}
+::-webkit-scrollbar{width:6px;height:6px;background:transparent}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent;border:0}
+::-webkit-scrollbar-thumb{background:#66716b;border-radius:999px;border:0}
+::-webkit-scrollbar-thumb:hover{background:#89958e}
+::-webkit-scrollbar-button{display:none;width:0;height:0}
 :root{color-scheme:dark;--bg:#111415;--panel:#1b1f20;--line:#303637;--ink:#f0f2ed;--muted:#969e9a;--green:#d0f596}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button{border:1px solid #414847;border-radius:9px;padding:10px 16px;color:var(--ink);background:#252b2a;cursor:pointer;transition:background .15s}button:hover{background:#35403a}button:disabled{opacity:.5;cursor:wait}button.primary{background:var(--green);color:#172216;border-color:var(--green);font-weight:650}button.primary:hover{background:#e0ffb6}button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--green);outline-offset:3px}[hidden]{display:none!important}aside{position:fixed;width:222px;inset:0 auto 0 0;border-right:1px solid var(--line);padding:30px 22px;background:#171a1b;display:flex;flex-direction:column}.brand{display:flex;align-items:center;gap:10px;font-size:25px;font-weight:700;letter-spacing:-1px}.logo{display:block;width:44px;height:44px;object-fit:contain;flex-shrink:0}.beta{font-size:9px;letter-spacing:1px;color:var(--muted);margin-left:auto}.tagline{color:var(--muted);margin:25px 0 42px;font-size:13px}nav{display:grid;gap:8px}.nav{border:0;background:none;text-align:left;color:var(--muted)}.nav.active{background:#2c342c;color:var(--green)}.aside-bottom{margin-top:auto;color:#c3ccc1;font-size:11px}.aside-bottom p{color:var(--muted)}.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:5px}main{margin-left:222px;padding:26px 40px;max-width:1400px}header{display:flex;align-items:center;justify-content:space-between;font-size:10px;letter-spacing:1.5px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:22px}.pill{font-size:11px;letter-spacing:0;border:1px solid var(--line);border-radius:20px;padding:5px 12px}.pill.live{color:var(--green);border-color:#647f4e}.hero{padding:43px 0 25px}h1{font-size:42px;line-height:1.12;letter-spacing:-1.8px;font-weight:550;margin:16px 0}h2{font-size:19px;font-weight:550;letter-spacing:-.3px;margin:8px 0 18px}p{color:var(--muted)}.hero>p{font-size:16px;line-height:1.7}.eyebrow{color:var(--muted);font-size:10px;letter-spacing:1.5px;font-weight:600}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:20px}.small,.hero>p.small{font-size:11px;line-height:1.6}.grid{display:grid;grid-template-columns:1.15fr 1fr;gap:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:23px;margin-bottom:18px}.card p{font-size:13px}.stat{font-size:42px;line-height:1.5;color:var(--green)}.stat span{font-size:12px;color:var(--muted);margin-left:10px}textarea,input,select{width:100%;border:1px solid #414847;background:#121616;border-radius:8px;color:var(--ink);padding:11px;resize:vertical}textarea{line-height:1.6}textarea+button{margin-top:12px}label{display:block;font-size:12px;color:#adb6ae;margin-bottom:14px}label input,label textarea,label select{margin-top:6px}.row{display:flex;gap:15px}.grow{flex:1;min-width:0}.between{justify-content:space-between;align-items:center}.intro{max-width:630px;margin-bottom:25px}.view>h1{margin-top:35px}#notice{position:sticky;top:12px;z-index:2;border:1px solid #637b50;background:#2b3825;border-radius:9px;padding:12px 16px;margin-top:16px;white-space:pre-wrap}#notice.error{background:#402b28;border-color:#8c5349;color:#ffd7ce}.choice{display:block;width:100%;text-align:left;margin:9px 0;padding:14px}.choice strong{display:block}.choice span{display:block;color:var(--muted);font-size:12px;margin-top:5px}.transcript{padding:15px 0}.transcript p{font-size:12px}.check{display:flex;gap:8px;align-items:center}.check input{width:auto;margin:0}.file-label{position:relative;border:1px solid #414847;padding:10px 16px;border-radius:9px;margin:0;cursor:pointer}.file-label input{position:absolute;inset:0;opacity:0;cursor:pointer}.quiet{background:none;font-size:12px}.context-item{border-bottom:1px solid var(--line);padding:16px 0}.context-item strong{font-size:15px}.context-item p{margin:6px 0;white-space:pre-wrap;overflow-wrap:anywhere}.context-item .small{color:#acc093}footer{display:flex;justify-content:space-between;gap:20px;color:#69736d;font-size:10px;letter-spacing:1px;border-top:1px solid var(--line);margin-top:40px;padding:18px 0}footer span{letter-spacing:0}@media(max-width:1000px){aside{width:185px;padding:24px 16px}main{margin-left:185px;padding:24px}.grid{grid-template-columns:1fr}h1{font-size:36px}}
 
 .history-entry{margin-top:20px}.history-task{margin-bottom:0}.history-preview{margin-top:20px;padding:20px;border:1px solid #61cba8;border-radius:12px}.history-diff{margin:12px 0;padding:12px;background:#101c18;border-radius:8px}.history-diff pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;max-height:200px;overflow:auto;margin:6px 0}.history-operation{margin-top:16px;border-top:1px solid #33483f;padding-top:14px}.history-operation summary{cursor:pointer}.danger{background:#893c38;color:#fff}#history>.small{margin-bottom:24px}
@@ -294,7 +302,7 @@ body{padding-top:var(--chrome-height);background:radial-gradient(ellipse at 15% 
 .app-chrome nav{-webkit-app-region:drag}
 html[data-platform="darwin"] .app-chrome{padding-left:96px}
 html[data-platform="win32"] .app-chrome{padding-right:160px}
-#company-tabs{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:thin;padding:6px 3px}
+#company-tabs{display:flex;align-items:center;gap:6px;flex:1;min-width:0;overflow-x:auto;padding:6px 3px}
 .company-tab{flex:0 0 auto;max-width:220px;min-height:36px;padding:8px 14px;background:transparent;border-color:transparent;border-radius:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .company-tab:hover{background:#ffffff0c;color:var(--ink)}
 .company-tab[aria-current]{background:#d0f59616;border-color:#d0f59640;color:var(--green);box-shadow:inset 0 -2px var(--green)}
@@ -354,7 +362,7 @@ body>aside .nav>span{min-width:0;overflow-wrap:normal}
 .chat-heading{padding:16px 20px;border-bottom:1px solid #ffffff12;flex-shrink:0}
 .chat-heading h2{font-size:20px;margin:0 0 10px;overflow-wrap:anywhere}
 .chat-heading .topic-controls{gap:8px;margin:0}.chat-heading select{max-width:280px;margin:0}
-.chat-feed{flex:1;min-height:100px;overflow-y:auto;padding:20px;scrollbar-width:thin}
+.chat-feed{flex:1;min-height:100px;overflow-y:auto;padding:20px}
 .chat-welcome{padding:40px 10px;text-align:center;color:var(--muted)}.chat-welcome h2{color:var(--text);font-size:26px}
 .chat-feed .dialogue-messages{display:flex;flex-direction:column;margin:0;gap:16px}
 .chat-feed .message-user{align-self:flex-end;max-width:85%;border-radius:16px 16px 4px 16px;background:#30432a}
@@ -643,12 +651,7 @@ body>aside .nav[data-view="growth"]{position:relative}.growth-nav-ring{position:
 .project-menu-icon svg{width:100%;height:100%}
 
 /* The transcript uses all remaining height; only the scrollbar thumb is painted. */
-#home .chat-feed{flex:1 1 0;align-self:stretch;min-height:0;max-height:none;scrollbar-width:thin;scrollbar-color:#66716b transparent}
-#home .chat-feed::-webkit-scrollbar{width:6px;background:transparent}
-#home .chat-feed::-webkit-scrollbar-track,#home .chat-feed::-webkit-scrollbar-corner{background:transparent;border:0}
-#home .chat-feed::-webkit-scrollbar-thumb{background:#66716b;border-radius:999px;border:0}
-#home .chat-feed::-webkit-scrollbar-thumb:hover{background:#89958e}
-#home .chat-feed::-webkit-scrollbar-button{display:none;width:0;height:0}
+#home .chat-feed{flex:1 1 0;align-self:stretch;min-height:0;max-height:none}
 
 /* Full dark surface is the scroll viewport, including the area behind the composer. */
 #home .chat-shell{isolation:isolate;overflow:hidden}
@@ -697,7 +700,7 @@ details[open]>:not(summary){animation:ui-expand var(--motion-enter) var(--motion
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
 
 /* Anchor the services flyout to the viewport, never above or below the window. */
-body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height:calc(100dvh - 16px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#66716b transparent;z-index:40}
+body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height:calc(100dvh - 16px);overflow-y:auto;overscroll-behavior:contain;z-index:40}
 
 .project-folder-row .project-folder-remove{display:inline-flex;align-items:center;justify-content:center;flex:0 0 28px;width:28px;height:28px;min-height:28px;padding:0;border:0;background:transparent;color:var(--muted)}
 .project-folder-row .project-folder-remove:hover{background:#ffffff0c;color:var(--ink)}
@@ -725,7 +728,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .notification-bell{position:relative;display:grid;place-items:center;width:36px;height:36px;flex-shrink:0;padding:0;background:transparent;border:0;-webkit-app-region:no-drag}
 .notification-count{position:absolute;right:0;top:0;min-width:13px;height:13px;line-height:13px;text-align:center;border-radius:8px;background:var(--green);color:#182117;font-size:9px;padding:0 3px}
 .notification-bell.is-working{color:var(--green)}
-.notification-center{position:fixed;z-index:2100;width:min(380px,calc(100vw - 16px));overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 16px 40px #0006;scrollbar-width:thin;-webkit-app-region:no-drag}
+.notification-center{position:fixed;z-index:2100;width:min(380px,calc(100vw - 16px));overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;box-shadow:0 16px 40px #0006;-webkit-app-region:no-drag}
 .notification-center:not([hidden]){animation:ui-arrive var(--motion-enter) var(--motion-ease) both}
 .notification-head,.notification-item-title{display:flex;align-items:center;gap:8px}.notification-head{margin-bottom:12px}.notification-head strong,.notification-item-title strong{flex:1;min-width:0;overflow-wrap:anywhere}
 .notification-head button,.notification-item-title button{padding:4px 7px;border:0;background:transparent;font-size:12px}
@@ -734,7 +737,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .notification-actions{display:flex;gap:8px;flex-wrap:wrap}.notification-actions button{font-size:12px;padding:6px 10px}.notification-item[data-kind=error] .notification-item-title{color:#ffb2a7}.notification-item[data-kind=attention] .notification-item-title{color:#edce8f}.notification-empty{font-size:13px;text-align:center;margin:24px 0}
 
 /* Clarification choices stay attached to the composer while history scrolls. */
-#home .chat-composer>.clarification-list.actions{width:100%;max-width:none;max-height:min(34dvh,280px);overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;margin:0 0 10px;padding:0 0 10px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;gap:4px;align-items:stretch;flex-direction:column;flex-wrap:nowrap}
+#home .chat-composer>.clarification-list.actions{width:100%;max-width:none;max-height:min(34dvh,280px);overflow-y:auto;overscroll-behavior:contain;margin:0 0 10px;padding:0 0 10px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;gap:4px;align-items:stretch;flex-direction:column;flex-wrap:nowrap}
 #home .chat-composer>.clarification-list:empty{display:none}
 .clarification-prompt{flex-shrink:0;margin:0 4px 6px;color:var(--ink);font-size:13px;line-height:1.5}
 #home .chat-composer .clarification-option{flex-shrink:0;padding:8px 10px;font-size:13px}
@@ -806,12 +809,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 
 .project-sidebar-project > button:first-child { display:flex; align-items:center; text-overflow:clip }
 .project-sidebar-project:not(:hover):not(:focus-within) > :is(.project-new-chat,.project-more) { position:absolute }
-.project-sidebar-tree { overflow-x:hidden; scrollbar-width:auto; scrollbar-color:auto }
-.project-sidebar-tree::-webkit-scrollbar { width:6px; background:transparent }
-.project-sidebar-tree::-webkit-scrollbar-track,.project-sidebar-tree::-webkit-scrollbar-corner { background:transparent; border:0 }
-.project-sidebar-tree::-webkit-scrollbar-thumb { background:#526059; border-radius:8px }
-.project-sidebar-tree::-webkit-scrollbar-thumb:hover { background:#86948c }
-.project-sidebar-tree::-webkit-scrollbar-button { display:none }
+.project-sidebar-tree { overflow-x:hidden }
 .chat-version-nav { display:inline-flex;align-items:center;gap:4px;color:var(--muted);font-size:11px }
 .chat-version-nav:empty { display:none }
 .chat-version-nav button,.chat-heading>button,.composer-voice-settings,.message-meta>button { padding:3px 6px;background:transparent;border:0;color:var(--muted);font-size:12px }
@@ -992,7 +990,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 .clarification-history>summary{display:inline-flex;align-items:center;min-height:28px;padding:0;cursor:pointer}
 .git-advanced{margin:0;padding:0;border:0;background:transparent}.git-advanced>summary{padding:6px 0;font-size:12px;color:var(--muted)}.git-advanced .actions{padding-top:8px}
 #git-card>pre:empty{display:none}
-.git-file-list{scrollbar-width:thin;scrollbar-color:#647069 transparent}.git-file-list::-webkit-scrollbar{width:6px}.git-file-list::-webkit-scrollbar-track{background:transparent}.git-file-list::-webkit-scrollbar-thumb{background:#647069;border-radius:8px}
+
 .clarification-input.choices-only{align-items:center;gap:6px;padding:0 0 10px}
 .clarification-input.choices-only>button{font-size:12px;line-height:18px;min-height:30px;padding:6px 10px;border-radius:8px;background:transparent}
 .clarification-input.choices-only>button:first-child{background:#d2f79b18;border-color:#d2f79b55;color:var(--green)}
@@ -1010,7 +1008,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 
 .chat-question .approval-buttons{flex-wrap:wrap;justify-content:flex-end;max-width:100%}
 .chat-question.many-choices .approval-question{flex-basis:100%}
-.chat-question.many-choices .approval-buttons{width:100%;max-height:28vh;overflow:auto;justify-content:flex-start;scrollbar-width:thin}
+.chat-question.many-choices .approval-buttons{width:100%;max-height:28vh;overflow:auto;justify-content:flex-start}
 
 .chat-question .approval-buttons>button{max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:left}
 
@@ -1020,7 +1018,7 @@ body>aside .sidebar-services-popup{position:fixed;top:8px;bottom:auto;max-height
 
 .chat-question.choice-list{align-items:stretch}
 .chat-question.choice-list .approval-question{flex-basis:100%}
-.chat-question.choice-list .approval-buttons{width:100%;display:flex;flex-direction:column;align-items:stretch;gap:4px;max-height:28vh;overflow:auto;scrollbar-width:thin}
+.chat-question.choice-list .approval-buttons{width:100%;display:flex;flex-direction:column;align-items:stretch;gap:4px;max-height:28vh;overflow:auto}
 .chat-question.choice-list .approval-buttons>button{width:100%;text-align:left;flex-shrink:0;padding:8px 10px}
 
 .message-assistant>.message-steps{display:block;margin:0 0 12px;color:var(--muted);font-size:12px}.answer-stream-preview .message-content{min-height:1.5em}
