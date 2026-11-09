@@ -57,6 +57,7 @@ const own={
  'release-checklist':['готов ли релиз 1.5','чек-лист релиза','что мешает выпустить версию 2.0','можно ли выпускать 1.5','релизный чек-лист'],
  anomalies:['что необычного вчера','есть аномалии за неделю?','покажи аномалии','что необычного в метриках','какие аномалии вчера'],
  mentor:['что мне автоматизировать?','что я делаю руками','где я теряю время','покажи, что мне стоит автоматизировать'],
+ 'google-drive':['найди в гугл диске план релиза','последние файлы в Google Drive','открой Google Docs','найди презентацию про Китай в гугл диске','прочитай https://docs.google.com/document/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/edit','сохрани это в Google Docs'],
  'google-sheets':['что в гугл таблице баланса','открой Google Sheets','найди лучника в гугл таблице','покажи https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/edit#gid=0'],
  'config-balance':['сверь баланс с конфигами','что поменялось в балансе с прошлой версии','проверь конфиги юнитов','почему урон лучника в игре не как в таблице'],
  'tone-check':['как это звучит: КТО СЛОМАЛ БИЛД?!','смягчи сообщение: опять забыли обновить доку','проверь тон ответа игроку','не слишком резко: ревью нужно до пятницы, без вариантов','перепиши помягче: опять забыли обновить доку'],
@@ -155,6 +156,8 @@ const not={
  'release-checklist':['напиши патчноут к версии 1.5','новые крэши после релиза 1.4.2','плохие отзывы после обновления','когда релиз?','чек-лист переезда','статус CI','готов ли отчёт'],
  // Unusual days in the data: weather, gifts, ad revenue drops (the ad app's view) and plain metrics are not it.
  anomalies:['аномальная жара','необычный подарок','придумай необычное имя','упала выручка с рекламы','аномалии eCPM','DAU за неделю','какие крэши за неделю','странный сон'],
+ // Google Drive by name or a Docs/Slides/Drive link only: spreadsheets, the computer's disk, local files, «search everything» and other Google products are not it.
+ 'google-drive':['что в гугл таблице баланса','покажи https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/edit#gid=0','чем забит диск','сколько места на диске','найди скрипт сохранения','документы про монетизацию','найди везде про релиз','что у меня сегодня в календаре','сохрани файл на диск','крэши в Google Play','найди документ про онбординг'],
  // Google Sheets by name or link only: tables in answers, Excel/CSV files, reconciling with configs and localization are not it.
  'google-sheets':['таблица умножения','сделай таблицу сравнения тарифов','открой csv с продажами','сверь баланс в гугл таблице с конфигами','что не переведено в локализации','что в таблице'],
  // Game balance against configs only: CI/server configs, Petya's settings and money balance are not it.
@@ -190,7 +193,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

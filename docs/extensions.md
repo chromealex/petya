@@ -193,7 +193,8 @@ extension-specific code in the application shell. Example: `src/extensions/layou
 One app offers a capability; other apps' cards use it without knowing who provides it
 (`src/features/app-links.cjs`, details in `docs/apps/cross-integrations.md`).
 
-- Kinds: `video-meeting`, `task-tracker`, `share-message`, `code-fix`, `meeting-recording`.
+- Kinds: `video-meeting`, `task-tracker`, `share-message`, `code-fix`, `meeting-recording`, `spreadsheet-export`,
+  `document-export`.
 - **Consume**: declare `"uses":[kind]`, put `k.links(kind, payload, {context, label})` into the card actions. It shows
   nothing without a ready provider, one button for one, a menu for several. Never hard-code «В задачу Jira» or
   «Отдать Программисту».

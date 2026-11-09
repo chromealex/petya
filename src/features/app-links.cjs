@@ -13,7 +13,7 @@
 // providers whose own flows confirm (Jira, Slack, the Programmer) return a prepared chat request instead of writing.
 const fs=require('node:fs');
 const path=require('node:path');
-const KINDS=['video-meeting','task-tracker','share-message','code-fix','meeting-recording','spreadsheet-export'];
+const KINDS=['video-meeting','task-tracker','share-message','code-fix','meeting-recording','spreadsheet-export','document-export'];
 // Capabilities served by their own registries (sources polled or read by their apps), not offered as card buttons:
 // see each registry module (meeting-sources, crash-sources, metrics/support/ad sources in their apps).
 const REGISTRIES=['meeting-source','support-source','ad-source','metrics-source','crash-source','reminder-trigger','journal-source','release-check','query-source','meeting-listener','outgoing-check','notification-policy','index-collection','log-source','ua-source','monitor-source','activity-classifier','mail-record'];
