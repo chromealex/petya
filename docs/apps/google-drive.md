@@ -2,7 +2,9 @@
 
 Category: docs. Directory: `src/extensions/google-drive/`. Connects: Google (shared connection
 `src/google-workspace.cjs`, see [google-sheets.md](google-sheets.md#shared-google-connection-for-other-google-apps-srcgoogle-workspacecjs)).
-Provides the cross-app kind `document-export` and the index collection `google-drive`.
+Provides the cross-app kind `document-export`, the index collection `google-drive` and the search source
+`google-drive` of «Поиск по всему» (`search-source.cjs`: name and full-text search through this app's service; up to
+three Google Docs found by their text alone are read for the snippet; see [search-all.md](search-all.md)).
 
 ## What it does
 
@@ -40,7 +42,8 @@ Provides the cross-app kind `document-export` and the index collection `google-d
   настройки».
 - **`document-export`** (cross-app kind): another card hands `{title, text (Markdown), app?}`; the provider keeps it
   in memory for 2 h and sends «Сохрани в Google Документы «…» · #id» to the chat; the same confirmation card follows.
-  No card uses it yet; good candidates: «Поиск по всему» answers, meeting summaries, patch notes, standups.
+  Used by the meeting summary, the «Поиск по всему» answer and the «Дневник дня» week report («Сохранить в Google
+  Docs», `tests/document-export-ui.cjs`); other candidates: patch notes, standups.
 - **Dashboard**: recent files and searches are read-only (`dashboard.accepts`); widget «Недавние файлы Google Диска».
 - **Service for other apps** `services.googleDrive`: `ready()`, `who()`, `parseLink`, `search(text, {kind, size})`,
   `document(id)` (outline blocks and text).

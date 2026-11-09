@@ -1,0 +1,19 @@
+{
+  "id": "funnels",
+  "name": "Воронки",
+  "description": "Воронка событий игры: туториал, онбординг, путь от установки до первой покупки или свои шаги — конверсия и отвал между шагами, время между ними, сравнение по платформам, странам и версиям; данные из AppMetrica или таблицы событий в базе",
+  "category": "analytics",
+  "icon": "icon.svg",
+  "connects": "AppMetrica или база с событиями",
+  "uses": ["spreadsheet-export"],
+  "setting": "extension_funnels",
+  "settings": false,
+  "feature": "feature.cjs",
+  "examples": ["Воронка туториала", "Где отваливаются игроки на онбординге?", "Воронка от установки до первой покупки", "Воронка: tutorial_start → level_3 → purchase по платформам"],
+  "scripts": [
+    ["funnel-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "funnelCard": "renderFunnelCard"
+  }
+}

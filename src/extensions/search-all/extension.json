@@ -5,6 +5,7 @@
   "category": "docs",
   "icon": "icon.svg",
   "examples": ["Найди везде про матчмейкинг","Где обсуждали оплату в Китае?","Поиск по всему: лиги","Ответь по найденному"],
+  "uses": ["document-export"],
   "setting": "extension_search-all",
   "settings": false,
   "feature": "feature.cjs",

@@ -16,6 +16,11 @@ Sources, all read-only:
 - **Slack** — messages Petya already keeps in its context memory (`slack-context.cjs`); no new API calls or scopes.
 - **Meetings** — recorded meeting speech with a speaker name (`meeting-talk.cjs`); the user's own microphone is not
   counted.
+- **Messengers** (optional) — every connected `messenger-source` that can search and does not read Petya's memory
+  (Mattermost, VK Teams; [messengers.md](../foundations/messengers.md)): the subject is searched over 31 days (≤ 200
+  messages, 8 s per messenger); a message whose text matches the subject's words gives its author (by name, matched to
+  «Команда») a point; bots are skipped. Each messenger is its own chip on the card («ошибка» with the reason when it
+  fails). With no messenger connected nothing changes: no chip, no `chat` part, the same score.
 
 People are matched to «Команда» by email (also emails of linked accounts), Jira account ID, Slack user ID and by
 name in either alphabet (`team-match.cjs`); identities that match nobody stay as separate people marked
@@ -26,9 +31,10 @@ name in either alphabet (`team-match.cjs`); identities that match nobody stay as
 - Code: per commit in the subject's files `1 + lg(1 + changed lines)`; a commit found only by its message counts 1.
 - Jira: assignee 3, reporter 1, each comment 1 (up to 3 per issue).
 - Slack and meetings: 1 per message or speech segment (up to 3 per thread or meeting).
+- Messengers: 1 per message on the subject (up to 3 per thread); the thread is the evidence link.
 - Every point is multiplied by recency: half the weight every 120 days.
 
-The total is the sum of the four parts; the card shows the split as a stacked bar. «Кто последний трогал …» ranks by
+The total is the sum of the parts as the card shows them (each part rounded to 0.1 first); the card shows the split as a stacked bar. «Кто последний трогал …» ranks by
 the latest commit instead and names it in the reply.
 
 The local model only turns the subject into extra search words (English names as code writes them); its words are
@@ -73,7 +79,9 @@ When none of the sources is available the reply is a question saying what to con
 - With stubs/fixtures (`node tests/who-knows.cjs`): a real git repository created in a temp folder (authors, dates,
   renames, a Cyrillic author name, an identifier used in another file, a GitHub remote), a stubbed Jira search
   (`s.workspace.api`), Slack and meeting memory items, team matching, scores, ranking, last-touch mode, Jira failure,
-  model words, no sources → question.
-- UI (`tests/who-knows-ui.cjs`, screenshots `petya-who-knows.png`, `petya-who-knows-list.png` in the temp folder).
+  model words, no sources → question; messengers stubbed through the registry (points, evidence, a failing one, a
+  memory-only one skipped, only a messenger connected, none connected → unchanged card).
+- UI (`tests/who-knows-ui.cjs`, screenshots `petya-who-knows.png`, `petya-who-knows-list.png`,
+  `petya-who-knows-chat.png` in the temp folder).
 - Not verified live: Jira Cloud `search/jql` with real data and `text ~` on Cyrillic, Slack share flow end to end,
   calendar flow from the composer.

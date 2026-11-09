@@ -180,10 +180,14 @@ async function request(url,{timeoutMs,...o}={}){
   assert.throws(()=>app.validate({vkTeamsToken:'короткий'}),/токен бота/);
   app.validate({vkTeamsApi:'',vkTeamsToken:TOKEN});
   // Background sync while settings are closed: one notification per new error, one for the recovery, none when quiet.
-  const published=[],quiet=app.background(s,x=>published.push(x));
+  // The error also goes to the notification policy as a system notification tagged `vk-teams` (once); the recovery
+  // stays in the center.
+  const popups=[];class Popup{constructor(o){Object.assign(this,o);}show(){popups.push([this.petyaSource,this.title,this.body]);}static isSupported(){return true;}}
+  const published=[],quiet=app.background({...s,smoke:false},x=>published.push(x),{electron:{Notification:Popup}});
   let st2=store.read(dataRoot);st2.syncedAt=0;store.write(dataRoot,st2);
   down=true;await quiet();await quiet();down=false;await quiet();await quiet();
   assert.deepEqual(published.map(x=>[x.id,x.kind]),[['vk-teams-sync','error'],['vk-teams-sync','success']]);
+  assert.equal(popups.length,1);assert.deepEqual(popups[0].slice(0,2),['vk-teams','Петя · VK Teams']);assert.match(popups[0][2],/^Не удалось получить сообщения бота: /);
   await app.background({...s,settings:{...settings,'extension_vk-teams':'false'}},x=>published.push(x))();
   assert.equal(published.length,2,'not added → no sync, no notification');
   app.teardown();

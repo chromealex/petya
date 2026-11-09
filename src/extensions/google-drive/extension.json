@@ -17,6 +17,7 @@
     "driveCard": "renderDriveCard"
   },
   "provides": {
+    "search-source": "search-source.cjs",
     "document-export": "document-export.cjs",
     "index-collection": "collection.cjs"
   }

@@ -173,6 +173,57 @@ const rowOf=(card,name)=>card.people.find(p=>p.name===name);
  // Switching it off.
  assert.match((await app.turn(sch.s,'выключи стендап',{now:NOW})).text,/Больше не готовлю/);assert.deepEqual(app.due(sch.s,new Date('2026-11-13T10:31:00Z')),[]);
 
+ // --- A messenger thread (messenger-source) instead of Slack: optional -----------------------------------------------
+ {
+  const M=require('../src/features/messenger-sources.cjs');
+  const ROOT={id:'p100',channel:{id:'c1',name:'standup'},author:{id:'lead',name:'Лид'},text:'Стендап! Вчера / сегодня / блокеры',at:'2026-11-12T10:30:00Z',url:'https://chat.example.com/studio/pl/p100',replies:3};
+  const reads=[];
+  const chat={id:'chatx',name:'ЧатИкс',names:[/чатикс\p{L}*/iu],ready:()=>true,
+   async channels(){return [{id:'c1',name:'standup'},{id:'c2',name:'general'}];},
+   async messages(s2,{channel}){reads.push(['messages',channel]);return {messages:channel==='c1'?[ROOT,{id:'p90',channel:{id:'c1',name:'standup'},author:{id:'u1',name:'Маша Петрова'},text:'доброе утро',at:'2026-11-12T09:00:00Z'}]:[]};},
+   async thread(s2,{id,channel}){reads.push(['thread',channel,id]);return {messages:[ROOT,
+    {id:'p101',thread:'p100',channel:{id:'c1'},author:{id:'u1',name:'Маша Петрова'},text:'Вчера: экран магазина GAME-51\nСегодня: кланы GAME-70\nБлокеры: нет',at:'2026-11-12T10:31:00Z'},
+    {id:'p102',thread:'p100',channel:{id:'c1'},author:{id:'u5',name:'Подрядчик Пётр'},text:'Вчера: ревью. Сегодня: релиз',at:'2026-11-12T10:32:00Z'},
+    {id:'p103',thread:'p100',channel:{id:'c1'},author:{id:'b',name:'bot'},bot:true,text:'Напоминание',at:'2026-11-12T10:33:00Z'},
+    {id:'p50',thread:'p100',channel:{id:'c1'},author:{id:'u2',name:'Олег Смирнов'},text:'Вчера: старый ответ',at:'2026-11-10T10:00:00Z'}]};}};
+  const realChats=app.chatSources.messengers;
+  app.chatSources.messengers=s2=>M.create(s2,{now:()=>+NOW,sources:[{id:'chatx',extension:'chatx',setting:'',name:'ЧатИкс',source:chat}]});
+  const cm=fixture();
+  // Configuring: the channel, then the root message, both chosen from what the messenger shows; nothing is sent.
+  let q1;try{await app.turn(cm.s,'настрой стендап на 10:30 в треде чатикса',{now:NOW});}catch(e){q1=e;}
+  assert.ok(q1 instanceof InputRequired);assert.deepEqual(q1.spec.options,['standup','general']);assert.equal(q1.spec.strictChoices,true);
+  let q2;try{await q1.resume('standup');}catch(e){q2=e;}
+  assert.ok(q2 instanceof InputRequired,'then the thread');assert.equal(q2.spec.options.length,2);assert.match(q2.spec.options[0],/^1\. .+ · Лид: Стендап! Вчера/);
+  assert.equal((await q2.resume('нет такого')).error,true);
+  const done=await q2.resume(q2.spec.options[0]);
+  assert.match(done.text,/ответы читаю из треда «Стендап! Вчера \/ сегодня \/ блокеры» в ЧатИкс · standup/);assert.match(done.text,/в мессенджер ничего не отправляю сам\.$/);
+  assert.deepEqual(app.setup({...cm.s,smoke:true}).ipc.schedule().messenger,{source:'chatx',name:'ЧатИкс',channel:'standup',title:'Стендап! Вчера / сегодня / блокеры'});
+  // Collecting: replies after the root and after the last standup, people matched to «Команда» by name.
+  const mc=(await app.turn(cm.s,'собери стендап',{now:NOW,git:cm.git})).extensionData.standupCard;
+  assert.deepEqual(reads.at(-1),['thread','c1','p100']);
+  assert.deepEqual(mc.thread,{url:'https://chat.example.com/studio/pl/p100',source:'ЧатИкс',channel:'standup'});
+  assert.deepEqual(mc.sources,{jira:true,git:true,slack:false,chat:'ЧатИкс'});
+  const cmasha=rowOf(mc,'Маша Петрова');
+  assert.equal(cmasha.source,'chat');assert.deepEqual(cmasha.yesterday.map(x=>x.text),['экран магазина GAME-51']);assert.equal(cmasha.noAnswer,false);
+  assert.equal(rowOf(mc,'Олег Смирнов').noAnswer,true,'an answer from before the last standup does not count');
+  assert.equal(rowOf(mc,'Подрядчик Пётр').role,'не в «Команде»');
+  assert.ok(!mc.people.some(p=>p.name==='bot'));
+  assert.equal(mc.totals.answered,2);
+  assert.ok(!cm.calls.some(x=>x.url.hostname==='slack.com'),'Slack is not asked');
+  // A Slack link in the request still wins.
+  const sl=(await app.turn(cm.s,'собери стендап '+THREAD,{now:NOW,git:cm.git})).extensionData.standupCard;
+  assert.deepEqual(sl.thread,{url:THREAD});assert.deepEqual(sl.sources,{jira:true,git:true,slack:true});
+  // The messenger switched off meanwhile: a warning, the card is still built.
+  app.chatSources.messengers=s2=>M.create(s2,{now:()=>+NOW,sources:[{id:'chatx',extension:'chatx',setting:'',name:'ЧатИкс',source:{...chat,ready:()=>false}}]});
+  const off=(await app.turn(cm.s,'собери стендап',{now:NOW,git:cm.git})).extensionData.standupCard;
+  assert.ok(off.warnings.some(w=>/«ЧатИкс» не подключён/.test(w)));assert.equal(off.sources.chat,false);
+  // No messenger named: configuring is exactly as before.
+  app.chatSources.messengers=realChats;
+  const plainConf=fixture();
+  assert.match((await app.turn(plainConf.s,'настрой стендап на 10:30 в треде',{now:NOW})).text,/по будням в 10:30\. Слежу за проектом «Game»\. /);
+  assert.equal(app.setup({...plainConf.s,smoke:true}).ipc.schedule().messenger,undefined);
+ }
+
  // --- Offer ---------------------------------------------------------------------------------------------------------
  assert.equal(offer.ready({extension_standup:'true',module_slack:'true',slackToken:'x'}),true);
  assert.equal(offer.ready({extension_standup:'true'}),false);

@@ -1,7 +1,9 @@
-// «Поиск по всему»: one question searches every source Petya already has at once — Slack (stored threads and, when the
-// token allows, Slack search), Confluence/Notion, Jira, Gmail/Outlook, Telegram, recorded meetings, the project's files
-// and glossary, plus every connected messenger that can search (the `messenger-source` registry: Mattermost, VK Teams,
-// …; docs/foundations/messengers.md) — each with its own time limit, so a slow or failing source only marks itself on the card. Results are
+// «Поиск по всему»: one question searches every source Petya already has at once — the context memory (stored Slack
+// threads, Telegram chats, mail, saved pages, recorded meetings), then the search sources: the app's own (Gmail/Outlook,
+// the project's files, and every connected messenger that can search through the `messenger-source` registry —
+// Mattermost, VK Teams, …; docs/foundations/messengers.md) and those other apps declare as `search-source` providers
+// (Slack search, Confluence/Notion, Jira, the glossary, Google Drive; registry.cjs) — each with its own time limit,
+// so a slow or failing source only marks itself on the card. Results are
 // ranked in code (BM25 + recency, optionally re-ranked by a local embedding model) and shown grouped by source with
 // highlighted snippets. «Ответить по найденному» asks the local model to answer only from the found items, citing them
 // by number; citations that point nowhere are dropped, and an answer without any is not shown as an answer.
@@ -10,13 +12,35 @@ const Q=require('./query.cjs');
 const R=require('./rank.cjs');
 const SRC=require('./sources.cjs');
 const embed=require('./embed.cjs');
+const REG=require('./registry.cjs');
 const ID='search-all',BY='Поиск по всему';
+// Rows the context memory can fill (kindOf in sources.cjs) and the app's own sources; their card order.
 const LABELS={slack:'Slack',confluence:'Confluence',notion:'Notion',jira:'Jira',mail:'Почта',telegram:'Telegram',meetings:'Встречи',files:'Файлы проекта',glossary:'Глоссарий',notes:'Материалы'};
-const ORDER=Object.keys(LABELS);
-const deps={now:()=>Date.now(),timeouts:{remote:8000,files:4500,model:6000},sources:SRC,embed,messengers:s=>s.messengerSources||require('../../features/messenger-sources.cjs').create(s)};
-// Messengers searched through the registry; those that only read Petya's memory (Slack, Telegram) are searched above.
+const RANK={slack:10,confluence:20,notion:30,jira:40,mail:50,telegram:60,meetings:70,files:80,glossary:90,notes:100};
+// Memory-only rows: nothing to connect here, only what Petya has stored.
+const MEMORY_OFF={telegram:'Нет сохранённых чатов Telegram.',meetings:'Нет записанных встреч.'};
+const deps={now:()=>Date.now(),timeouts:{remote:8000,files:4500,model:6000},sources:SRC,embed,messengers:s=>s.messengerSources||require('../../features/messenger-sources.cjs').create(s),registry:null};
+// Messengers searched through the messenger-source registry; those that only read Petya's memory (Slack, Telegram) are
+// searched with the memory.
 function messengers(s){try{return deps.messengers(s).list().filter(x=>x.search&&!x.memory&&!LABELS[x.id]);}catch{return [];}}
+// The app's own search sources, in the registry's shape (registry.cjs). They read through `deps` at call time.
+const CORE=[
+ {id:'mail',label:'Почта',order:50,icon:'mail',ready:(settings,s)=>deps.sources.mailAccounts(s).length>0,off:'Почта не подключена.',search:(s,{words})=>deps.sources.mail(s,words)},
+ // Files: the word search, plus files found by meaning when the semantic index has its file collection on
+ // (docs/foundations/semantic-index.md); a file found both ways is kept once (the index's piece first).
+ {id:'files',label:'Файлы проекта',order:80,icon:'file',timeout:'files',ready:(settings,s)=>deps.sources.projectRoots(s).length>0,off:'У проекта чата нет папки на компьютере.',
+  async search(s,{terms,topic}){const src=deps.sources;const [words,meaning]=await Promise.all([src.files(s,terms),Promise.resolve(src.indexedFiles?.(s,topic)).catch(()=>[]).then(x=>x||[])]);return {...words,items:[...meaning,...words.items||[]]};}},
+ // The messenger-source bridge: one source per connected messenger that can search.
+ {id:'messengers',each:s=>messengers(s).map(m=>({id:m.id,label:m.name,order:200,icon:'chat',messenger:true,ready:()=>true,
+  async search(s2,{own}){
+   const r=await deps.messengers(s2).search(m.id,{query:own.slice(0,4).join(' '),limit:20});
+   return {items:r.messages.map(x=>({source:m.id,id:m.id+':'+x.channel.id+':'+x.id,title:x.channel.name?(m.name+' · '+x.channel.name):m.name,text:x.text,url:x.url,at:Date.parse(x.at)||0,meta:x.author.name,thread:x.channel.id+':'+(x.thread||x.id),messenger:true})),note:r.notes.join(' ')};
+  }}))}
+];
+const registry=s=>(deps.registry||REG.create)(s,{core:CORE});
 const label=(id,card)=>LABELS[id]||card?.sources?.find(x=>x.id===id)?.label||id;
+// The card look of a source the renderer does not know (icon, color), for the answer card.
+const look=(id,card)=>{const x=card?.sources?.find(y=>y.id===id);return {...x?.icon?{icon:x.icon}:{},...x?.color?{color:x.color}:{}};};
 
 const TIMEOUT=Symbol('timeout');
 function limit(promise,ms){let timer;return Promise.race([promise,new Promise(r=>{timer=setTimeout(()=>r(TIMEOUT),ms);})]).finally(()=>clearTimeout(timer));}
@@ -37,15 +61,13 @@ async function search(s,topic){
  const extra=await expand(s,topic);
  const terms=Q.terms(topic,extra);
  const own=terms.filter(t=>!t.extra).map(t=>t.word),words=[...own,...terms.filter(t=>t.extra).map(t=>t.word)].slice(0,8);
- const states=new Map();
- const set=(id,state,patch={})=>states.set(id,{id,label:LABELS[id],state,count:0,...states.get(id),...patch,state});
+ const states=new Map(),looks=new Map();
+ const set=(id,state,patch={})=>states.set(id,{id,label:LABELS[id]||looks.get(id)?.label||id,...looks.get(id)?.look,state,count:0,...states.get(id),...patch,state});
  // Local memory: immediate.
  s.requestProgress?.report('Ищу по Slack, задачам, документам, почте и встречам');
  const mem=src.memory(s,terms);
  let items=[...mem.items];
- for(const id of ['slack','telegram','meetings','jira','confluence','notion','mail','notes'])if(mem.kinds.has(id))set(id,'empty');
- // Remote and disk sources in parallel, each with its own limit.
- const settings=s.settings||{},docs=src.docsConnected(settings);
+ // The search sources in parallel, each with its own limit.
  const tasks=[];
  const run=(ids,ms,fn)=>tasks.push((async()=>{
   let r;try{r=await limit(Promise.resolve().then(fn),ms);}catch(e){for(const id of ids)set(id,mem.kinds.has(id)?'partial':'error',{note:e.message});return;}
@@ -54,28 +76,18 @@ async function search(s,topic){
   for(const id of ids)set(id,r.state==='limited'?(mem.kinds.has(id)?'limited':'off'):states.get(id)?.state==='partial'?'partial':'empty',{note:r.note||'',...r.link?{link:r.link}:{}});
   items.push(...(r.items||[]));
  })());
- if(settings.slackToken||settings.slackCredential)run(['slack'],deps.timeouts.remote,()=>src.slack(s,own));
- else if(!mem.kinds.has('slack'))set('slack','off',{note:'Slack не подключён.'});
- if(s.workspace?.searchDocs&&(docs.confluence||docs.notion))run([...docs.confluence?['confluence']:[],...docs.notion?['notion']:[]],deps.timeouts.remote,()=>src.docs(s,own));
- if(!docs.confluence&&!mem.kinds.has('confluence'))set('confluence','off',{note:'Confluence не подключён.'});
- if(!docs.notion&&!mem.kinds.has('notion'))set('notion','off',{note:'Notion не подключён.'});
- if(s.workspace?.api&&src.jiraConnected(settings))run(['jira'],deps.timeouts.remote,()=>src.jira(s,words));
- else if(!mem.kinds.has('jira'))set('jira','off',{note:'Jira не подключена.'});
- if(src.mailAccounts(s).length)run(['mail'],deps.timeouts.remote,()=>src.mail(s,words));
- else if(!mem.kinds.has('mail'))set('mail','off',{note:'Почта не подключена.'});
- if(!mem.kinds.has('telegram'))set('telegram','off',{note:'Нет сохранённых чатов Telegram.'});
- if(!mem.kinds.has('meetings'))set('meetings','off',{note:'Нет записанных встреч.'});
- // Files: the word search, plus files found by meaning when the semantic index has its file collection on
- // (docs/foundations/semantic-index.md); a file found both ways is kept once (the index's piece first).
- run(['files'],deps.timeouts.files,async()=>{const [words,meaning]=await Promise.all([src.files(s,terms),Promise.resolve(src.indexedFiles?.(s,topic)).catch(()=>[]).then(x=>x||[])]);return {...words,items:[...meaning,...words.items||[]]};});
- run(['glossary'],deps.timeouts.remote,()=>src.glossary(s,terms));
- for(const m of messengers(s)){
-  set(m.id,'empty',{label:m.name});
-  run([m.id],deps.timeouts.remote,async()=>{
-   const r=await deps.messengers(s).search(m.id,{query:own.slice(0,4).join(' '),limit:20});
-   return {items:r.messages.map(x=>({source:m.id,id:m.id+':'+x.channel.id+':'+x.id,title:x.channel.name?(m.name+' · '+x.channel.name):m.name,text:x.text,url:x.url,at:Date.parse(x.at)||0,meta:x.author.name,thread:x.channel.id+':'+(x.thread||x.id),messenger:true})),note:r.notes.join(' ')};
-  });
+ const reg=registry(s),sources=reg.list(),query={topic,terms,own,words};
+ // How the card draws rows it does not know (Google Drive, messengers): label, icon, color, «в …».
+ for(const x of sources)for(const p of x.parts||[{id:x.id,label:x.label}])looks.set(p.id,{label:p.label,look:{...x.icon?{icon:x.icon}:{},...x.color?{color:x.color}:{},...x.in?{in:x.in}:{},...x.messenger?{messenger:true}:{}}});
+ for(const id of ['slack','telegram','meetings','jira','confluence','notion','mail','notes'])if(mem.kinds.has(id))set(id,'empty');
+ for(const x of sources){
+  const on=reg.ready(x);
+  for(const p of x.parts||[{id:x.id}])if(!on.includes(p.id)&&!mem.kinds.has(p.id))set(p.id,'off',{note:reg.offNote(x,p.id)});
+  if(!on.length)continue;
+  if(!LABELS[x.id]&&!x.parts)set(x.id,'empty');
+  run(on,x.timeout==='files'?deps.timeouts.files:deps.timeouts.remote,()=>x.search(s,query));
  }
+ for(const [id,note] of Object.entries(MEMORY_OFF))if(!mem.kinds.has(id))set(id,'off',{note});
  if(tasks.length)s.requestProgress?.report('Жду ответа источников');
  await Promise.all(tasks);
  // One copy of each item (Slack search and stored threads can return the same message).
@@ -91,7 +103,9 @@ async function search(s,topic){
   titleMarks:R.snippet(i.title,terms,{size:400}).marks,url:i.url||'',at:i.at||0,meta:i.meta||'',score:i.score,...i.path?{path:i.path,line:i.line||0}:{},context:R.snippet(i.text||i.title,terms,{size:700}).snippet};});
  for(const i of out){const st=states.get(i.source);if(!st||['empty','off'].includes(st.state))set(i.source,'ok');states.get(i.source).count++;}
  for(const [id,st] of states)if(st.state==='partial'&&!st.count)set(id,'error');
- const list=[...ORDER,...[...states.keys()].filter(id=>!ORDER.includes(id))].filter(id=>states.has(id)&&!(id==='notes'&&!states.get(id).count)).map(id=>states.get(id));
+ // Card order: the memory rows and every source's own order; the rest as they came.
+ const order=id=>RANK[id]??sources.find(x=>x.id===id||x.parts?.some(p=>p.id===id))?.order??1000;
+ const list=[...states.keys()].filter(id=>!(id==='notes'&&!states.get(id).count)).sort((a,b)=>order(a)-order(b)).map(id=>states.get(id));
  return {id:require('node:crypto').randomUUID(),query:topic,terms:own,extra:terms.filter(t=>t.extra).map(t=>t.word),sources:list,items:out,embed:model,at:now};
 }
 
@@ -102,8 +116,7 @@ function summary(card){
 }
 // Whether there is anything to search at all.
 function anything(s){
- const st=s.settings||{},docs=SRC.docsConnected(st);
- return SRC.memoryItems(s).length>0||!!(st.slackToken||st.slackCredential)||docs.confluence||docs.notion||SRC.jiraConnected(st)||SRC.mailAccounts(s).length>0||SRC.projectRoots(s).length>0||messengers(s).length>0;
+ return SRC.memoryItems(s).length>0||registry(s).any();
 }
 
 async function searchTurn(s,text){
@@ -125,7 +138,8 @@ const ANSWER_SCHEMA={type:'object',properties:{answer:{type:'string'},found:{typ
 async function answerTurn(s,text){
  const card=lastCard(s);
  if(!card)return kit.reply(s,text,{by:BY,question:true,text:'Сначала найдите: например, «найди везде про матчмейкинг» — потом отвечу по найденному.'});
- const only=Q.named(text).filter(id=>card.items.some(i=>i.source===id));
+ let more=[];try{more=registry(s).named(text);}catch{more=[];}
+ const only=[...new Set([...Q.named(text),...more])].filter(id=>card.items.some(i=>i.source===id));
  const pool=(only.length?card.items.filter(i=>only.includes(i.source)):card.items).slice(0,12);
  if(!pool.length)return kit.reply(s,text,{by:BY,text:'В найденном по «'+card.query+'» ничего нет — отвечать не по чему.'});
  if(!s.settings.model)return kit.reply(s,text,{by:BY,question:true,text:'Чтобы ответить по найденному, выберите локальную модель в настройках.'});
@@ -143,8 +157,8 @@ async function answerTurn(s,text){
  if(!r.found||!used.size){
   return kit.reply(s,text,{by:BY,text:'В найденном нет прямого ответа на «'+card.query+'»'+(answer&&!r.found?': '+answer.replace(/\[[\d,\s]+\]/g,'').slice(0,300):'.')+' Откройте результаты в карточке поиска выше.',data:{searchAllAnswer:{query:card.query,found:false,citations:[]}}});
  }
- const citations=[...used].sort((a,b)=>a-b).map(n=>{const i=pool[n-1];return {n,source:i.source,...i.messenger?{messenger:true,label:label(i.source,card)}:{},title:i.title,url:i.url,at:i.at,meta:i.meta,...i.path?{path:i.path,line:i.line}:{}};});
- return kit.reply(s,text,{by:BY,text:answer.slice(0,4000),data:{searchAllAnswer:{query:card.query,found:true,only,citations}},sources:citations.filter(c=>/^https:\/\//.test(c.url)).map(c=>({title:'['+c.n+'] '+(c.messenger?'':label(c.source,card)+' · ')+c.title,url:c.url}))});
+ const citations=[...used].sort((a,b)=>a-b).map(n=>{const i=pool[n-1];return {n,source:i.source,...i.messenger?{messenger:true}:{},...!LABELS[i.source]?{label:label(i.source,card),...look(i.source,card)}:{},title:i.title,url:i.url,at:i.at,meta:i.meta,...i.path?{path:i.path,line:i.line}:{}};});
+ return kit.reply(s,text,{by:BY,text:answer.slice(0,4000),data:{searchAllAnswer:{query:card.query,found:true,only,citations,text:answer.slice(0,4000)}},sources:citations.filter(c=>/^https:\/\//.test(c.url)).map(c=>({title:'['+c.n+'] '+(c.messenger?'':label(c.source,card)+' · ')+c.title,url:c.url}))});
 }
 
 async function turn(s,command){

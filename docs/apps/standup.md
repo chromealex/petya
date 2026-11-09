@@ -41,6 +41,13 @@ Not triggered: «стенд-ап комедия», «стендап-комик �
   Replies after the root and after the last standup; bots ignored. «Вчера: … Сегодня: … Блокеры: …» markers are
   parsed by code; an answer without markers is split by the local model if one is chosen, otherwise shown as a quote.
   People outside «Команда» who answered are shown with their Slack name. Needs `channels:history` / `groups:history`.
+- A messenger thread (optional, instead of Slack): «настрой стендап на 10:30 в треде маттермоста» names a connected
+  `messenger-source` with threads (Mattermost, VK Teams; [messengers.md](../foundations/messengers.md)); Petya asks
+  for the channel (from the channels the messenger reads) and then for the root message (the channel's last week,
+  strict choices) and saves `{source, channel, id}` per chat project. Collecting reads `thread()` through the
+  registry: replies after the root and after the last standup are answers, bots ignored, authors matched to «Команда»
+  by name, the rest shown as «не в «Команде»». A Slack link in the request still wins; a messenger switched off
+  becomes a warning. Without a messenger configured nothing changes.
 - In thread mode «нет ответа» = no reply in the thread (a Jira draft is still shown); without a thread «нет
   активности» = nothing in Jira or git.
 
@@ -64,5 +71,6 @@ system notification. The schedule never posts to Slack.
 
 ## Verified
 
-Unit (`node tests/standup.cjs`) and UI (`tests/standup-ui.cjs`, screenshots `$TMPDIR/petya-standup.png` and
-`-2.png`) with stubbed Jira, Slack, git and the model. Not verified against live Jira/Slack: no credentials here.
+Unit (`node tests/standup.cjs`) and UI (`tests/standup-ui.cjs`, screenshots `$TMPDIR/petya-standup.png`, `-2.png`
+and `petya-standup-chat.png`) with stubbed Jira, Slack, git, the model and a messenger source (channel and thread
+choice, answers, a Slack link winning, the messenger switched off). Not verified against live Jira/Slack: no credentials here.

@@ -15,7 +15,9 @@ const ABOUT=/закупк\p{L}*\s+(?:\p{L}+\s+)?(?:трафик\p{L}*|польз
 // Neighbours: ad revenue (earnings from ads in our games), starting or stopping campaigns (not supported, writes),
 // marketing in general, store reviews, in-app purchases.
 const AVOID=/заработ\p{L}*|выручк\p{L}*\s+(?:с|от)\s+реклам|e-?cpm|fill[- ]?rate|arpdau|(?:запусти|останови|выключи|отключи|создай|поставь|увеличь|уменьши)\p{L}*\s+(?:\p{L}+\s+)?(?:реклам|кампани|бюджет)|отзыв\p{L}*|покупк\p{L}* в приложении/iu;
-const about=text=>{const t=String(text||'');return !AVOID.test(t)&&ABOUT.test(t)||/roas|роас/iu.test(t)&&ABOUT.test(t);};
+// ROAS with in-app purchases is «Покупки в игре» (it blends purchases, ad revenue and this spend).
+const WITH_PURCHASES=/(?:roas|роас|окупаемост\p{L}*)\s+(?:\p{L}+\s+)?(?:с|с учётом|с учетом|вместе с)\s+(?:покупк|iap|инап)\p{L}*/iu;
+const about=text=>{const t=String(text||'');if(WITH_PURCHASES.test(t))return false;return !AVOID.test(t)&&ABOUT.test(t)||/roas|роас/iu.test(t)&&ABOUT.test(t);};
 
 function validate(next){
  const check=(key,re,name)=>{if(next[key]===undefined)return;const v=String(next[key]||'').trim();if(v&&!re.test(v))throw Error(name+' указан неверно.');next[key]=v;};

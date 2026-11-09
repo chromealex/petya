@@ -23,7 +23,7 @@ with dates; stored per Jira project in `<company data>/extensions/sprint-plannin
 
 Not triggered: «спринт в беге», «бег на 100 метров спринтом», «планы на выходные», «план работ по задаче …»
 (task-runner), «загрузка команды», «кто перегружен», «кто сколько задач», «сколько задач у Маши», «какая скорость
-интернета», «что такое velocity», «какие задачи в спринте», «итоги спринта», «ретро спринта». When the app is added it answers
+интернета», «что такое velocity», «какие задачи в спринте», «итоги спринта», «ретро спринта» (those go to «Ретро», `docs/apps/retro.md`). When the app is added it answers
 «спланируй спринт» instead of the generic «sprint-plan» writing skill (extension turns run first); «/sprint-plan …»
 still runs the skill.
 

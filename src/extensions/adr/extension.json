@@ -1,0 +1,18 @@
+{
+  "id": "adr",
+  "name": "Архитектурные решения",
+  "description": "Оформляет архитектурные решения (ADR) из чата, сводок встреч и поиска по смыслу в docs/adr проекта — только после подтверждения файла; ищет принятые решения и проверяет новые на противоречия с цитатами",
+  "category": "dev",
+  "icon": "icon.svg",
+  "examples": ["Запиши решение: переходим на Addressables для загрузки уровней","Оформи ADR про переход на Addressables","Какие решения принимали про сеть?","Противоречит ли это решению про сеть?"],
+  "uses": ["document-export"],
+  "setting": "extension_adr",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["adr-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "adrCard": "renderAdrCard"
+  }
+}

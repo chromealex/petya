@@ -23,7 +23,7 @@ class People{
   const keys=[m?'m:'+m.name:null,identity.email?'e:'+lower(identity.email):null,'n:'+match.latin(name).replace(/[^a-z0-9]+/g,' ').trim()].filter(Boolean);
   let row=null;for(const k of keys){const r=this.aliases.get(k);if(r){row=r;break;}}
   if(!row){row={name:m?m.name:name,member:!!m,role:m?.role||'',email:m?.email||lower(identity.email)||'',slackId:m?.slackId||m?.accounts?.slack?.id||'',points:{code:0,jira:0,slack:0,meetings:0},
-   files:new Map(),commits:[],issues:new Map(),threads:new Map(),meetings:new Map(),lastCommit:null,lastAt:0};this.rows.set(row,row);}
+   files:new Map(),commits:[],issues:new Map(),threads:new Map(),meetings:new Map(),chats:new Map(),lastCommit:null,lastAt:0};this.rows.set(row,row);}
   else if(m&&!row.member){row.name=m.name;row.member=true;row.role=m.role||'';row.email=m.email||row.email;row.slackId=m.slackId||m.accounts?.slack?.id||row.slackId;}
   for(const k of keys)if(!this.aliases.has(k))this.aliases.set(k,row);
   return row;

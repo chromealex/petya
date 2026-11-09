@@ -28,7 +28,9 @@ Category: personal. No settings card (`settings: false`); added through `extensi
   `{text, by?, data?}` and is shown first in the «Утренняя сводка» chat. The journal registers the plan saved for today.
 - **Card** (`journalCard`): totals tiles, a week of stacked bars (today outlined, days ahead dimmed) with a legend, the
   day's timeline with an icon per source (links to Jira issues, Slack messages), «Перенести на завтра», the plan, the
-  question of the day, notes, and the evening switch. The week card shows the week's totals and main items by day.
+  question of the day, notes, and the evening switch. The week card shows the week's totals and main items by day, and «Сохранить в Google Docs»
+  (`document-export`, only while a provider such as «Google Диск» is connected) hands the report as Markdown: totals,
+  each day's count, the main events with links — never chats or private notes.
 - Near-misses that return null and are never offered: «дневник разработки» (a devlog for players — patch notes),
   «журнал логов», «журнал изменений», «итоги встречи», «итоги спринта», «план релиза», «план на спринт», «что я
   сделал не так», «что у меня завтра в календаре».

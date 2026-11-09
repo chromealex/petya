@@ -57,6 +57,11 @@ Requests (Reporting API, `Authorization: OAuth <token>`, one namespace per reque
 - `GET /stat/v1/data?metrics=ym:u:activeUsers&dimensions=ym:u:appVersion&sort=-ym:u:activeUsers&limit=6` (version chips)
 - Filters: `<ns>:operatingSystemInfo=='android'|'iOS'`, `<ns>:appVersion=='1.4.2'`.
 
+For «Воронки» (`docs/apps/funnels.md`) the source also implements the optional `events` / `journeys` hooks of the
+contract: event names with devices (`GET /stat/v1/data?metrics=ym:ce2:devicesWithEvent&dimensions=ym:ce2:eventLabel`)
+and per-device step times from the Logs API exports (`/logs/v1/export/installations.json`,
+`/logs/v1/export/events.json?event_name=…`; 202 while the export is prepared).
+
 Graceful degradation: revenue refused or all zero → «Выручка недоступна / Нет данных о выручке» note, the rest of
 the card stays; retention refused → a note, no heatmap; 401/429 fail the source with an actionable message.
 AppMetrica's public docs do not describe a retention endpoint: retention is computed from the documented

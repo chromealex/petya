@@ -5,6 +5,14 @@
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('summary-cards.css',document.currentScript.src).href;document.head.append(style);
  const list=(k,title,rows,render)=>{if(!rows?.length)return null;const box=k.el('section','meeting-section');box.append(k.el('h5',null,title+' · '+rows.length));const ul=k.el('ul');for(const row of rows)ul.append(render(row));box.append(ul);return box;};
  const taskText=t=>t.what+(t.who?', исполнитель '+t.who:'')+(t.due?', срок '+t.due:'');
+ // The summary as Markdown for a document: decisions, tasks with assignee and due date, what was left, what was said.
+ function markdown(m){
+  const t=window.t||String,flat=v=>String(v??'').replace(/\s+/g,' ').trim();
+  const section=(title,rows,line)=>rows?.length?['## '+t(title),...rows.map(r=>'- '+line(r)),'']:[];
+  return [...section('Решили',m.decisions,flat),
+   ...section('Задачи',m.tasks,x=>flat(x.what)+(x.who?' — '+flat(x.who):'')+(x.due?' ('+t('срок')+': '+flat(x.due)+')':'')),
+   ...section('Не обсудили',m.notDiscussed,flat),...section('Обсудили',m.discussed,flat)].join('\n').trim();
+ }
  // Whether «Календарь» is added: asked once per window.
  let calendar=null;
  const calendarAdded=()=>calendar||(calendar=(window.petya?.feature?window.petya.feature('extensionUI','catalog'):Promise.resolve([])).then(list=>!!list.find(d=>d.id==='calendar')?.installed).catch(()=>false));
@@ -29,6 +37,8 @@
   if(m.tasks?.length)actions.push(k.links('task-tracker',()=>({title:m.title,tasks:(chosen.size?[...chosen]:m.tasks).map(taskText)}),{primary:true,label:p=>'Создать все: '+p.name}));
   const summary=[m.decisions?.length?'решили — '+m.decisions.slice(0,5).join('; '):'',m.tasks?.length?'задачи — '+m.tasks.slice(0,8).map(taskText).join('; '):''].filter(Boolean).join('. ');
   actions.push(k.links('share-message',{text:'посмотреть сводку встречи «'+m.title+'»'+(summary?': '+summary:'')+'.'}));
+  // The whole summary as a document (document-export: «Google Диск» previews it and creates it only on confirmation).
+  actions.push(k.links('document-export',()=>({title:(window.t||String)('Сводка встречи')+': '+m.title,app:'Встречи',text:markdown(m)}),{label:'Сохранить в Google Docs'}));
   if(m.notDiscussed?.length)actions.push({label:'В повестку следующей',run:()=>k.ask('Запомни повестку следующей встречи: '+m.notDiscussed.join('; '),{send:true})});
   // The next meeting through «Календарь»: the request is put into the composer with the people from the tasks.
   const next=k.el('span','kit-links');actions.push(next);

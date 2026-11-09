@@ -12,8 +12,13 @@ const REVENUE=re(W+'(?:выручк\\p{L}*|доход\\p{L}*|revenue|arpdau|arpu
 const METRICS=re('метрик\\p{L}*\\s+(?:игры|приложения|проекта|продукта|по игре)|продуктов\\p{L}* метрик\\p{L}*|(?:^|[^\\p{L}])kpi(?:[^\\p{L}]|$)|ключев\\p{L}* метрик\\p{L}*');
 // «сравни эту неделю с прошлой» says nothing about the subject: it is a metrics request only when nothing else is named.
 const WEEKS=re('сравни\\p{L}*\\s+(?:эту|текущую|прошлую)\\s+неделю\\s+с\\s+(?:прошлой|позапрошлой)|(?:эта|текущая)\\s+неделя\\s+против\\s+прошлой');
-// Neighbours: team metrics and velocity (Jira), crashes, store reviews, ANR, server metrics, build size.
-const ELSEWHERE=re('метрик\\p{L}*\\s+(?:команд|разработ|спринт|сервер|бэкенд|backend|сайта|кода|ci)|велосити|velocity|спринт\\p{L}*|задач\\p{L}*|тикет\\p{L}*|jira|джир\\p{L}*|'+W+'(?:крэш\\p{L}*|креш\\p{L}*|краш\\p{L}*|crash\\p{L}*|sentry|anr|анр|отзыв\\p{L}*|реклам\\p{L}*|rewarded|interstitial|баннер\\p{L}*|ecpm|ецпм|fill rate|филлрейт\\p{L}*|rps|cpu|latency|grafana|графан\\p{L}*|prometheus|коммит\\p{L}*|документ\\p{L}*|файл\\p{L}*|презентац\\p{L}*|слайд\\p{L}*|pr|пулл?\\p{L}*)'+E+'|сервер\\p{L}*|размер\\p{L}* (?:билда|сборки|apk)|a\\s?/\\s?b|аб[- ]?тест|значим\\p{L}*|srm');
+// Neighbours: team metrics and velocity (Jira), crashes, store reviews, ANR, server metrics, build size, in-app
+// purchases by product and payers, funnels.
+const ELSEWHERE=re('метрик\\p{L}*\\s+(?:команд|разработ|спринт|сервер|бэкенд|backend|сайта|кода|ci)|велосити|velocity|спринт\\p{L}*|задач\\p{L}*|тикет\\p{L}*|jira|джир\\p{L}*|'+W+'(?:крэш\\p{L}*|креш\\p{L}*|краш\\p{L}*|crash\\p{L}*|sentry|anr|анр|отзыв\\p{L}*|реклам\\p{L}*|rewarded|interstitial|баннер\\p{L}*|ecpm|ецпм|fill rate|филлрейт\\p{L}*|rps|cpu|latency|grafana|графан\\p{L}*|prometheus|коммит\\p{L}*|документ\\p{L}*|файл\\p{L}*|презентац\\p{L}*|слайд\\p{L}*|pr|пулл?\\p{L}*)'+E+'|сервер\\p{L}*|размер\\p{L}* (?:билда|сборки|apk)|a\\s?/\\s?b|аб[- ]?тест|значим\\p{L}*|srm'+
+ // In-app purchases by product, payers, ARPPU, refunds and first purchases («Покупки в игре»); funnels («Воронки»).
+ '|внутриигров\\p{L}*|платящ\\p{L}*|плательщик\\p{L}*|'+W+'(?:arppu|арппу|iap|in-app|рефанд\\p{L}*|refunds?)'+E+'|перв\\p{L}* покупк\\p{L}*|покупк\\p{L}* (?:в игре|в приложении)|(?:выручк|продаж|доход)\\p{L}* (?:по|с|от) (?:продукт|товар|пак|набор|оффер)\\p{L}*|возврат\\p{L}* (?:покупок|платежей)|воронк\\p{L}*'+
+ // «What was that dip on the chart» asks for an explanation («Объясни график»), not for the card again.
+ '|(?:что за|объясни\\p{L}*|разбери)\\s+(?:\\p{L}+\\s+){0,2}?(?:провал\\p{L}*|пик\\p{L}*|всплеск\\p{L}*|яма|ям\\p{L}*|скач\\p{L}*|график\\p{L}*)');
 // «Почему упал DAU?» asks for an explanation (the chat model answers from the card), not for the card again.
 const QUIET=/^(?:а\s+)?(?:почему|отчего|из-за чего|что такое|зачем нуж|как (?:подключить|настроить|считается|работает)|объясни)/iu;
 

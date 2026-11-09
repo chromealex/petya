@@ -1,0 +1,17 @@
+{
+  "id": "chart-explain",
+  "name": "Объясни график",
+  "description": "Почему упал или вырос график: по данным карточки Пети или скриншоту (локальная модель для картинок) находит день изменения и сопоставляет его с релизами, инцидентами, крэшами, рекламными кампаниями и праздниками — каждая причина с датой",
+  "category": "analytics",
+  "icon": "icon.svg",
+  "setting": "extension_chart-explain",
+  "settings": false,
+  "feature": "feature.cjs",
+  "examples": ["Почему упал график?", "Почему просел DAU?", "Объясни этот график (со скриншотом)", "Что за провал на графике выручки?"],
+  "scripts": [
+    ["explain-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "chartExplain": "renderChartExplain"
+  }
+}

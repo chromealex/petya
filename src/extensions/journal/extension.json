@@ -5,6 +5,7 @@
   "category": "personal",
   "icon": "icon.svg",
   "examples": ["Что я сегодня сделал?","Итоги недели","План на завтра","Запиши в дневник: договорились с дизайнером о новом меню"],
+  "uses": ["document-export"],
   "setting": "extension_journal",
   "settings": false,
   "feature": "feature.cjs",

@@ -79,6 +79,25 @@ core.tag({source:'assignments'},()=>notify('BW-12: нужно ваше реше�
 assert.equal(shown.at(-1),'BW-12: нужно ваше решение. Результат — в разделе «Агенты».','a decision needed is urgent: shown even when muted');
 assert.equal(core.describe(new FakeNotification({body:'y'})).source,'petya','no tag → petya');
 s.settings.muteAssignments='false';
+// Background notices of apps go through `notify`: «Мониторинг» (state changes, urgent when a service is down) and
+// «VK Teams» (sync alerts) carry their source, so a per-source rule can quiet them; a service down still passes.
+{
+ const muted=new Set(['monitoring','vk-teams']),sent2=[];
+ const pm=core.create({settings:{extension_mute:'true'}},{policies:[policy('mute',5,{decide:(s2,x)=>muted.has(x.source)&&!x.urgent?{action:'summarize',reason:'Без звука'}:null})],send:item=>sent2.push(item),now:()=>2000});
+ core.install({Notification:FakeNotification},x=>pm.route(x));
+ const center=[],before=shown.length;
+ const notice=require('../src/extensions/monitoring/feature.cjs').notice({},{publish:item=>center.push(item),electron:{Notification:FakeNotification}});
+ notice({id:'monitoring:game',service:'game',type:'down',title:'Сервис недоступен',text:'«game» не работает.',kind:'attention',version:'down:1'});
+ notice({id:'monitoring:game',service:'game',type:'recovered',title:'Сервис снова работает',text:'«game» снова отвечает.',kind:'success',version:'recovered:2'});
+ assert.deepEqual(center.map(x=>[x.id,x.version]),[['monitoring:game','down:1'],['monitoring:game','recovered:2']],'the center card is always there');
+ assert.deepEqual(shown.slice(before),['«game» не работает.'],'down is urgent and pops up; the recovery is summarized by the mute rule');
+ assert.deepEqual(pm.summary().map(x=>[x.source,x.policy,x.urgent]),[['monitoring','mute',false]]);
+ assert.equal(core.notify({smoke:true},{source:'monitoring',title:'x',body:'y'},{electron:{Notification:FakeNotification}}),false,'nothing in smoke tests');
+ assert.equal(core.notify({},{source:'vk-teams',title:'Петя · VK Teams',body:'Не удалось получить сообщения бота: 401'},{electron:{Notification:FakeNotification}}),true);
+ assert.equal(shown.at(-1),'Не удалось получить сообщения бота: 401','a failure is urgent by its words');
+ assert.equal(pm.decide(n('Сообщения бота снова обновляются.',{petyaSource:'vk-teams'})).action,'summarize');
+ core.install({Notification:FakeNotification},x=>p.route(x));
+}
 // The focus app's old module still installs the same single wrapper (replacing the gate).
 assert.equal(hold.install({Notification:FakeNotification},()=>true),true);
 notify('held by the replaced gate');assert.notEqual(shown.at(-1),'held by the replaced gate');

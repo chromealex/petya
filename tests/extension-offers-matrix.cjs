@@ -33,6 +33,9 @@ const own={
  support:['что жалуются в поддержку','тикеты про оплату за неделю','ответь на тикет 1234','покажи тикеты в Zendesk'],
  'sprint-planning':['спланируй спринт','что влезет в следующий спринт','какая у нас скорость','кто перегружен в спринте','velocity команды'],
  standup:['собери стендап','что вчера делала команда','у кого блокеры','настрой стендап на 10:30'],
+ adr:['запиши решение: переходим на Addressables','оформи ADR про переход на Addressables','какие решения принимали про сеть','противоречит ли это решению про сеть','какие архитектурные решения у нас есть'],
+ 'doc-freshness':['проверь свежесть документации','какая документация устарела','найди устаревшую документацию','что в README устарело'],
+ retro:['подготовь ретро','что пошло не так в спринте','ретроспектива спринта','подведи итоги спринта','проведём ретро'],
  'ad-revenue':['сколько заработали на рекламе вчера','eCPM по сетям','какой формат приносит больше','упала выручка с rewarded','выручка с рекламы за неделю'],
  competitors:['что нового у конкурентов','добавь в конкуренты Clash of Clans','у кого вырос рейтинг','какие механики добавили в обновлениях'],
  'who-knows':['кто разбирается в сетевом коде','к кому идти по магазину','кто писал PlayerController','кто последний трогал инвентарь','кого спросить про матчмейкинг'],
@@ -74,6 +77,9 @@ const own={
  'time-tracking':['на что ушёл день','сколько я сидел в Unity на этой неделе','время по задачам','куда ушло время на этой неделе','запиши время в Jira'],
  absences:['кто в отпуске на этой неделе','кто у нас на больничном','отпуска команды','график отпусков','когда Маша вернётся из отпуска'],
  'one-on-one':['подготовь 1:1 с Олегом','запиши итоги 1:1 с Машей','что обсудить на встрече один на один','что я обещал на 1:1','повестка на one-on-one с Ваней'],
+ funnels:['воронка туториала','где отваливаются игроки на онбординге','воронка от установки до первой покупки','на каком шаге туториала уходят игроки','покажи воронку онбординга по странам'],
+ iap:['покупки в игре за неделю','какие паки покупают лучше','конверсия в платящих за месяц','ARPPU за месяц','рефанды за месяц','ROAS с покупками за неделю','выручка по продуктам'],
+ 'chart-explain':['почему упал график','объясни этот график','что за провал на графике выручки','почему вырос график установок'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -115,9 +121,15 @@ const not={
  'sprint-planning':['спринт в беге','планы на выходные','план работ по задаче','загрузка команды','кто перегружен','какая скорость интернета'],
  // Standup: comedy, getting up, meeting summaries and the meeting in the calendar are not it.
  standup:['стенд-ап комедия','встань','сводка встречи','во сколько стендап','сходим на стендап шоу'],
+ // Architecture decisions: equations, a meeting's decisions, deciding for the user and ADR in finance are not it.
+ adr:['реши уравнение','запиши решение уравнения','какие решения приняли на встрече','что решили на встрече','прими решение за меня','курс ADR Яндекса','помоги решить задачу по математике'],
+ // Documentation freshness: outdated packages, deprecated APIs, writing or finding docs and news are not it.
+ 'doc-freshness':['какие пакеты устарели','устаревшие зависимости','найди устаревшие API в коде','обнови документацию','найди документацию по Unity','свежие новости','напиши документацию'],
+ // Retro: retro styles, «ретроград», planning the next sprint, a failed build and a meeting summary are not it.
+ retro:['ретро музыка','ретро-стиль в пиксель-арте','ретроград Меркурий','включи ретро игры','спланируй спринт','почему упала сборка','что пошло не так с билдом','сводка встречи','что такое ретроспектива'],
  teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке','что нового в VK Teams','перескажи тред в вк тимс'],
  // Ad revenue is earnings from ads shown in our games: buying users, turning ads off and purchases are not it.
- 'ad-revenue':['что необычного вчера','есть аномалии за неделю?','реклама игры','маркетинговые кампании','запусти рекламу в TikTok','сколько потратили на рекламу','отключи рекламу','покупки в приложении','выручка от покупок в приложении','падение продаж за неделю'],
+ 'ad-revenue':['покупки в игре за неделю','ROAS с покупками за неделю','что необычного вчера','есть аномалии за неделю?','реклама игры','маркетинговые кампании','запусти рекламу в TikTok','сколько потратили на рекламу','отключи рекламу','покупки в приложении','выручка от покупок в приложении','падение продаж за неделю'],
  // Competitor games: a contest, a chess opponent, devices and our own store rating are not it.
  competitors:['конкурс','конкурс рисунков','конкурент в шахматах','сравни iPad и iPhone','отзывы в App Store за неделю','конкурентные преимущества'],
  // A person search only: factual «кто знает» questions, «кто ты», roles and the team directory are not it.
@@ -125,7 +137,7 @@ const not={
  // The project's own words only: general definitions, other products' glossaries and localization files as such are not it.
  glossary:['что такое REST','глоссарий Unity','проверь локализацию','что не переведено в локализации','купи билет в терминале','термины договора аренды'],
  // Team metrics and velocity are Jira's, crashes / reviews / ANR other apps', server metrics nobody's here.
- metrics:['что необычного вчера','есть аномалии за неделю?','метрики команды','велосити команды','крэши за неделю','отзывы за неделю','ANR за неделю','метрики сервера','подключи AppMetrica','что на дашборде лиг','DAU в графане'],
+ metrics:['ARPPU за месяц','выручка по продуктам','конверсия в платящих за месяц','воронка туториала','почему упал график','что необычного вчера','есть аномалии за неделю?','метрики команды','велосити команды','крэши за неделю','отзывы за неделю','ANR за неделю','метрики сервера','подключи AppMetrica','что на дашборде лиг','DAU в графане'],
  // Grafana by name, a dashboard link or dashboards as the subject: not game metrics words (those stay «Метрики игры»'s
  // until panels are mapped), not Grafana being down, not «нарисуй график» (charts) and not PromQL without Grafana.
  grafana:['DAU за неделю','ретеншн D1 D7 D30','метрики игры за месяц','графана не открывается','не могу войти в графану','нарисуй график продаж','rate(http_requests_total[5m]) в prometheus','покажи лиги за неделю'],
@@ -186,7 +198,13 @@ const not={
  absences:['отпуск в Турции','куда поехать в отпуск','сколько дней отпуска осталось','как оформить отпуск','я в отпуске','хочу в отпуск на море','что у меня сегодня в календаре','спланируй спринт','ёмкость спринта с учётом отпусков','кто перегружен'],
  // Games and sports, scores, scale, promises about tasks and other meetings' prep or summaries are not 1:1s.
  'one-on-one':['1 на 1 в игре','бой один на один','счёт 1:1','масштаб 1:1','мои обещания','мои обещания по задачам','подготовь встречу с заказчиком','сводка встречи','что решили на встрече','подготовь вопросы к собеседованию'],
- monitoring:['мониторинг конкурентов','мониторинг упоминаний бренда','второй монитор не работает','настрой яркость монитора','аптайм компьютера','поставь алерт в календаре','логи сервиса api за последний час','что с подами в kubernetes','почему падает контейнер postgres','что запущено в докере','адрес офиса','IP моего компьютера','проверь, отвечает ли staging','какие эндпоинты в openapi проекта','что нового у конкурентов','метрики команды']
+ monitoring:['мониторинг конкурентов','мониторинг упоминаний бренда','второй монитор не работает','настрой яркость монитора','аптайм компьютера','поставь алерт в календаре','логи сервиса api за последний час','что с подами в kubernetes','почему падает контейнер postgres','что запущено в докере','адрес офиса','IP моего компьютера','проверь, отвечает ли staging','какие эндпоинты в openapi проекта','что нового у конкурентов','метрики команды'],
+ // A sales or marketing funnel, other meanings of «воронка» and plain metrics are not game-events funnels.
+ funnels:['воронка продаж','маркетинговая воронка сайта','покажи воронку лидов в CRM','воронка сделок в амоцрм','воронка от взрыва','где мы теряем время','DAU за неделю','ретеншн D1 D7 D30','выручка с рекламы за неделю','сколько новых игроков вчера'],
+ // Game revenue and ARPDAU, ad revenue, UA spend and plain ROAS, funnels, personal subscriptions, shopping and a named database are not in-app purchases.
+ iap:['выручка за неделю','ARPDAU за неделю','DAU за неделю','как выручка после ивента','выручка с рекламы за неделю','сколько заработали на рекламе вчера','сколько потратили на закупку трафика','какой ROAS за неделю','воронка от установки до первой покупки','какие у меня подписки','список покупок','сколько платящих в BigQuery за вчера','отзывы в App Store за неделю','что такое ARPPU','как настроить IAP в Unity'],
+ // A failed build or server, a crashing game, «график отпусков», drawing a chart and plain metrics requests are not «why did it move».
+ 'chart-explain':['почему упала сборка','почему падает игра','почему лежит api','график отпусков','нарисуй график продаж','DAU за неделю','что такое DAU','что на дашборде лиг','почему упали тесты','график дежурств на неделю'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -205,7 +223,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

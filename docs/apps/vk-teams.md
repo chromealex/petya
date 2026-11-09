@@ -17,7 +17,9 @@ asks first) deletes the file.
 
 The queue is read on demand (at most every 30 s when a card asks) and every 5 minutes while the app is added and
 connected (`setup` timer, stopped in `teardown`), so events are not lost between requests. A sync failure is
-announced once in the notification center (`vk-teams-sync`), the recovery once too; a failing service with stored
+announced once in the notification center (`vk-teams-sync`) and as a system notification through the notification
+policy (source `vk-teams`, [notifications-policy.md](../foundations/notifications-policy.md)), the recovery once too
+(center only); a failing service with stored
 messages still answers from them with a note. A new token (another bot) starts a new store. Do not connect the same bot
 to another program: whoever asks the queue first takes the events.
 

@@ -6,6 +6,7 @@
   "icon": "icon.svg",
   "examples": ["На что ушёл день?","Сколько я сидел в Unity на этой неделе?","Время по задачам за неделю","Запиши время в Jira"],
   "connects": "учёт активности",
+  "uses": ["spreadsheet-export"],
   "setting": "extension_time-tracking",
   "settings": true,
   "feature": "feature.cjs",

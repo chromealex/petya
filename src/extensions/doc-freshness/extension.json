@@ -1,0 +1,19 @@
+{
+  "id": "doc-freshness",
+  "name": "Свежесть документации",
+  "description": "Находит в Markdown проекта, Confluence и Google Документах упоминания файлов, кода, настроек и версий, которых больше нет или которые изменились после правки документа, — строка документа рядом с изменением в git; задачи и правки только по кнопке",
+  "category": "docs",
+  "icon": "icon.svg",
+  "examples": ["Проверь свежесть документации","Какая документация устарела?","Найди устаревшие места в README","Включи еженедельную проверку документации"],
+  "uses": ["task-tracker", "code-fix"],
+  "setting": "extension_doc-freshness",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["fresh-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "freshnessCard": "renderFreshnessCard"
+  }
+}

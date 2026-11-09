@@ -1,0 +1,19 @@
+{
+  "id": "retro",
+  "name": "Ретро",
+  "description": "Факты спринта из Jira, CI, мониторинга, встреч и чатов со ссылками на источники, черновики «хорошо / плохо / попробовать», голоса команды и задачи — только через трекер после подтверждения",
+  "category": "team",
+  "icon": "icon.svg",
+  "examples": ["Подготовь ретро","Что пошло не так в спринте?","Ретро по спринту 14","Подведи итоги спринта"],
+  "connects": "Jira",
+  "uses": ["task-tracker", "share-message"],
+  "setting": "extension_retro",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["retro-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "retroCard": "renderRetroCard"
+  }
+}
