@@ -20,7 +20,7 @@ const own={
  calendar:['что у меня сегодня в календаре','найди час с Машей и Олегом на этой неделе','когда я свободен в пятницу','поставь встречу с Олегом в четверг в 15:00'],
  'ci-builds':['статус CI','последние сборки в GitHub Actions','что с билдом на андроид в CI'],
  'pull-requests':['какие PR ждут моего ревью','мои пулл-реквесты','что в PR 123'],
- 'disk-usage':['чем забит диск','сколько места свободно на диске','что можно почистить на диске'],
+ 'disk-usage':['чем забит диск','сколько места свободно на диске','что можно почистить на диске','очисти диск'],
  dependencies:['какие пакеты устарели','есть ли уязвимости в зависимостях','npm audit'],
  'build-size':['почему билд вырос','сравни размер этих двух apk','из чего состоит ipa'],
  localization:['что не переведено в локализации','проверь локализацию','недостающие ключи на немецкий'],
@@ -35,6 +35,9 @@ const own={
  standup:['собери стендап','что вчера делала команда','у кого блокеры','настрой стендап на 10:30'],
  adr:['запиши решение: переходим на Addressables','оформи ADR про переход на Addressables','какие решения принимали про сеть','противоречит ли это решению про сеть','какие архитектурные решения у нас есть'],
  'doc-freshness':['проверь свежесть документации','какая документация устарела','найди устаревшую документацию','что в README устарело'],
+ gdd:['опиши систему лиг в GDD','обнови раздел экономики по текущим конфигам','чего не хватает в GDD','распиши в геймдизайн-документе механику сундуков'],
+ 'wiki-author':['оформи в вики итоги треда про матчмейкинг','перенеси в Confluence итоги встречи про релиз 2.3','задокументируй в Notion обсуждение про оплату в Китае'],
+ 'doc-diff':['что поменяли в GDD за неделю','сравни спеку лиг с прошлой версией','какие правки в документе за месяц','история изменений спеки матчмейкинга'],
  retro:['подготовь ретро','что пошло не так в спринте','ретроспектива спринта','подведи итоги спринта','проведём ретро'],
  'ad-revenue':['сколько заработали на рекламе вчера','eCPM по сетям','какой формат приносит больше','упала выручка с rewarded','выручка с рекламы за неделю'],
  competitors:['что нового у конкурентов','добавь в конкуренты Clash of Clans','у кого вырос рейтинг','какие механики добавили в обновлениях'],
@@ -80,6 +83,15 @@ const own={
  funnels:['воронка туториала','где отваливаются игроки на онбординге','воронка от установки до первой покупки','на каком шаге туториала уходят игроки','покажи воронку онбординга по странам'],
  iap:['покупки в игре за неделю','какие паки покупают лучше','конверсия в платящих за месяц','ARPPU за месяц','рефанды за месяц','ROAS с покупками за неделю','выручка по продуктам'],
  'chart-explain':['почему упал график','объясни этот график','что за провал на графике выручки','почему вырос график установок'],
+ onboarding:['подготовь онбординг для Ани, она бэкенд','план онбординга нового сотрудника','онбординг нового сотрудника','к нам выходит новый бэкендер, подготовь план адаптации','составь план онбординга для Димы'],
+ hiring:['добавь кандидата Анна Иванова на бэкенд','подготовь вопросы к собеседованию','покажи воронку найма','сводка по кандидату Анна','запиши заметки интервью с Анной: уверенно проектирует API'],
+ 'perf-review':['собери материалы для ревью Олега за полгода','подготовь перформанс-ревью Маши','перф-ревью Ивана за квартал','подготовь performance review для Олега'],
+ 'screen-bug':['запиши баг','запиши экран','запиши видео бага','сними экран для бага'],
+ clipboard:['что я копировал про API ключ','вставь третье скопированное','скопируй последнюю ссылку из буфера в Jira задачу BW-12','покажи историю буфера'],
+ 'tidy-downloads':['разбери загрузки','что можно удалить из загрузок','дубликаты в загрузках','наведи порядок в папке загрузок'],
+ 'balance-sim':['сколько дней до 10 уровня у игрока без доната','что будет с экономикой, если поднять награду за победу на 20%','симулируй прогрессию по текущим конфигам','смоделируй экономику игры на 60 дней'],
+ 'pdf-contracts':['разбери этот договор','какие штрафы в договоре','сравни две версии договора','договор в PDF'],
+ 'event-ideas':['какой ивент провести в декабре','идеи ивентов на Хэллоуин для Бразилии','запланируй ивент на Новый год','придумай ивент к Новому году'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -91,10 +103,11 @@ const not={
  crashlytics:['Firebase Analytics за неделю','настрой Firebase Remote Config','Firebase Auth не пускает','ANR в Crashlytics','упала сборка в Firebase App Distribution'],
  'google-play':['ANR в Google Play','ANR за неделю','отзывы в Google Play','жалобы игроков в Google Play','зависания в гугл плей','упала сборка'],
  'store-reviews':['сделай код-ревью','ревью PR #42','перфоманс-ревью','отзыв о кандидате','фидбэк по встрече'],
- calendar:['сводка встречи','что решили на встрече','срок задачи','календарь отпусков','дни рождения'],
+ calendar:['сводка встречи','что решили на встрече','срок задачи','календарь отпусков','дни рождения','какой ивент провести в декабре','идеи ивентов на Хэллоуин'],
  'pull-requests':['отзывы в App Store','задачи на ревью в Jira'],
  'ci-builds':['готов ли релиз 1.5','почини билд','размер сборки','сколько весит билд'],
- 'disk-usage':['место встречи','свободное место в спринте','диск в Google Drive'],
+ // The Downloads folder named on its own is «Уборка загрузок».
+ 'disk-usage':['место встречи','свободное место в спринте','диск в Google Drive','разбери загрузки','что можно удалить из загрузок','дубликаты в загрузках'],
  dependencies:['зависимости между задачами','эмоциональная зависимость','от чего зависит дедлайн'],
  'build-size':['размер команды','размер экрана','сборка упала'],
  localization:['переведи эту фразу','перевод денег','перевести задачу в другой статус'],
@@ -125,6 +138,12 @@ const not={
  adr:['реши уравнение','запиши решение уравнения','какие решения приняли на встрече','что решили на встрече','прими решение за меня','курс ADR Яндекса','помоги решить задачу по математике'],
  // Documentation freshness: outdated packages, deprecated APIs, writing or finding docs and news are not it.
  'doc-freshness':['какие пакеты устарели','устаревшие зависимости','найди устаревшие API в коде','обнови документацию','найди документацию по Unity','свежие новости','напиши документацию'],
+ // GDD: what changed in it, stale docs, ADRs, balance against configs and definitions are not it.
+ gdd:['что поменяли в GDD за неделю','проверь свежесть документации','запиши решение: переходим на Addressables','сверь баланс с конфигами','что такое GDD','что поменялось в балансе с прошлой версии','обнови документацию'],
+ // Wiki pages from discussions: ADRs, searching the wiki, the meeting summary itself and sending messages are not it.
+ 'wiki-author':['оформи ADR про матчмейкинг','запиши решение: переходим на Addressables','найди в Confluence про лиги','сводка встречи','что решили на встрече','отправь в слак итоги треда','перескажи тред про релиз в Mattermost'],
+ // Document versions: code history, balance and configs, the Drive's recent files, stale docs and ADRs are not it.
+ 'doc-diff':['что изменилось в коде','что изменилось в коде за неделю','что поменялось в балансе с прошлой версии','что нового в гугл диске','проверь свежесть документации','какая документация устарела','какие решения принимали про сеть','сравни размер этих двух apk','что поменялось в конфигах'],
  // Retro: retro styles, «ретроград», planning the next sprint, a failed build and a meeting summary are not it.
  retro:['ретро музыка','ретро-стиль в пиксель-арте','ретроград Меркурий','включи ретро игры','спланируй спринт','почему упала сборка','что пошло не так с билдом','сводка встречи','что такое ретроспектива'],
  teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке','что нового в VK Teams','перескажи тред в вк тимс'],
@@ -157,7 +176,7 @@ const not={
  docker:['docker-образ для Python','место на диске','контейнер в Unity UI','перезапусти компьютер','контейнер с грузом пришёл'],
  zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи'],
  // A plain screenshot is Petya's computer control; store screenshots and bugs in code belong to others.
- 'screenshot-task':['сделай скриншот','скриншоты стора','баг в коде','заведи баг в Jira'],
+ 'screenshot-task':['сделай скриншот','скриншоты стора','баг в коде','заведи баг в Jira','запиши баг','запиши экран','запиши видео бага'],
  // Subscribing to channels, signing, extending a sprint, prices and followers are not paid subscriptions.
  subscriptions:['подпишись на канал релизов','подпиши договор','отпишись от рассылки','продли спринт','сколько стоит Unity Pro','сколько у меня подписчиков','забронируй переговорку'],
  // The clock, focus sessions, the journal of what was done, build and meeting durations, money are not time tracking.
@@ -205,6 +224,26 @@ const not={
  iap:['выручка за неделю','ARPDAU за неделю','DAU за неделю','как выручка после ивента','выручка с рекламы за неделю','сколько заработали на рекламе вчера','сколько потратили на закупку трафика','какой ROAS за неделю','воронка от установки до первой покупки','какие у меня подписки','список покупок','сколько платящих в BigQuery за вчера','отзывы в App Store за неделю','что такое ARPPU','как настроить IAP в Unity'],
  // A failed build or server, a crashing game, «график отпусков», drawing a chart and plain metrics requests are not «why did it move».
  'chart-explain':['почему упала сборка','почему падает игра','почему лежит api','график отпусков','нарисуй график продаж','DAU за неделю','что такое DAU','что на дашборде лиг','почему упали тесты','график дежурств на неделю'],
+ // A tutorial or onboarding of players is «Воронки» or nobody; finding a page about onboarding is the knowledge search.
+ onboarding:['онбординг в игре','воронка онбординга','где отваливаются игроки на онбординге','найди в Notion страницу про онбординг','что такое онбординг','онбординг пользователей в приложении','туториал для новичков','подготовь 1:1 с Олегом'],
+ // Hiring units, workers or heroes is a game; a candidate of science, store reviews and ranking talk are not the pipeline.
+ hiring:['найм юнитов','найм юнитов в казарме','нанять героев в таверне','найми рабочих в игре','кандидат наук','отзывы в App Store','подготовь 1:1 с Олегом','ревью кода'],
+ // Code review stays with «Код-ревью», PRs with «Pull requests», a 1:1 with «Встречи 1:1».
+ 'perf-review':['сделай код-ревью','ревью кода','ревью PR #42','какие PR ждут моего ревью','отзывы в App Store','подготовь 1:1 с Олегом','что обсудить на встрече один на один','что такое перформанс-ревью','проверь мои изменения перед PR'],
+ // Meetings are recorded by Petya's meeting recorder, screenshots by «Скриншот → задача»; the journal, decisions,
+ // worklogs and voice notes are other «запиши …».
+ 'screen-bug':['запиши встречу','запиши встречу в Zoom','скриншот в задачу','сделай баг из скриншота','заведи баг по этому экрану','запиши в дневник: идея с картой','запиши решение: переходим на Addressables','запиши время в Jira','запиши голосовое','запиши звонок'],
+ // Graphics and network buffers, a buffer zone, how to copy at all and screenshots are not the clipboard history.
+ clipboard:['буфер кадра в Unity','что такое буфер обмена','как скопировать текст','размер буфера сокета','буферная зона','скрин в задачу','скопируй файл в папку','запиши баг'],
+ // The whole disk stays «Место на диске»; store installs, loading time and uploads are not the Downloads folder.
+ 'tidy-downloads':['очисти диск','чем забит диск','освободи место на диске','загрузки приложения за неделю','скорость загрузки','время загрузки уровня','загрузи файл в Google Drive','сколько загрузок у игры в сторе'],
+ // Reconciling and validating configs and their history stay with «Конфиги и баланс»; metrics, money balance and levels
+ // outside games are not a simulation.
+ 'balance-sim':['сверь баланс с конфигами','что поменялось в балансе с прошлой версии','проверь конфиги юнитов','почему урон лучника в игре не как в таблице','какой у меня баланс на карте','DAU за неделю','ретеншн D1 D7 D30','сколько дней до отпуска','какой уровень английского нужен','баланс работы и жизни'],
+ // «Договор» about agreements with a colleague, writing a contract, «договорились» and other documents are not a PDF contract.
+ 'pdf-contracts':['у нас с Олегом договор: он ревьюит по пятницам','мы договорились с Машей о встрече','договор с коллегой о дежурствах','напиши договор на разработку','составь договор аренды','разбери отчёт','подпиши договор','найди документ про онбординг'],
+ // An event in the calendar stays with the calendar; events in code, analytics events and funnels are not live-ops.
+ 'event-ideas':['поставь ивент в календаре на завтра','какие ивенты в календаре','создай ивент в календаре с Олегом','UnityEvent не вызывается','воронка ивентов туториала','что у меня сегодня в календаре','что нового у конкурентов','какие механики добавили в обновлениях'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -223,7 +262,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review','gdd','wiki-author','doc-diff','screen-bug','clipboard','balance-sim','pdf-contracts','event-ideas'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

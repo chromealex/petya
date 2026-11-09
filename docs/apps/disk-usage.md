@@ -35,9 +35,10 @@ the known number of categories, then done/partial/error. `disk-notifications.js`
 the state through the `progress` ipc.
 
 ## Phrases
-«чем забит диск», «сколько места свободно», «что можно почистить», «освободи место», «сколько свободного места на маке».
+«чем забит диск», «сколько места свободно», «что можно почистить», «освободи место», «очисти диск», «сколько свободного места на маке».
 Near-misses (return null / no offer): «место встречи…», «свободное место в спринте», «диск в Google Drive», «сколько места в машине»,
-«что можно почистить в коде».
+«что можно почистить в коде». A request that names the Downloads folder («разбери загрузки», «что можно удалить из загрузок»)
+is «Уборка загрузок» ([tidy-downloads.md](tidy-downloads.md)), which reuses this app's walk and Trash cleanup.
 When no Unity roots are known, Petya asks once through the shared question panel («Где лежат проекты Unity?», option «Без Unity») and resumes the scan.
 
 ## Verified

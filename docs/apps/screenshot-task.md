@@ -33,6 +33,8 @@ Category: computer. Local; settings card for the global shortcut (`screenshotTas
    - Asana: `POST https://app.asana.com/api/1.0/attachments`, multipart `parent` = task gid, `file` (Petya's Asana OAuth).
 
 Nothing is created or uploaded without a press: the tracker's own confirmation, then «Прикрепить…».
+`attach.upload` takes the file's media type (`type`, PNG by default, ≤ 20 MB; other types ≤ 100 MB): «Запись экрана → баг»
+uploads its video and log excerpt through it ([screen-bug.md](screen-bug.md)).
 
 ## Shortcut
 Registered with Electron `globalShortcut` while the app is added (re-checked every 3 s and on settings changes), released

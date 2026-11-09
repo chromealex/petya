@@ -1,0 +1,11 @@
+{
+ "upgrades": [
+  { "id": "sword_1", "name": "Меч 1", "price": 300, "currency": "gold" },
+  { "id": "sword_2", "name": "Меч 2", "price": 600, "currency": "gold" },
+  { "id": "sword_3", "name": "Меч 3", "price": 1200, "currency": "gold" },
+  { "id": "sword_4", "name": "Меч 4", "price": 2400, "currency": "gold" },
+  { "id": "sword_5", "name": "Меч 5", "price": 4800, "currency": "gold" },
+  { "id": "sword_6", "name": "Меч 6", "price": 9600, "currency": "gold" },
+  { "id": "skin_dragon", "name": "Скин «Дракон»", "price": 500, "currency": "gems" }
+ ]
+}

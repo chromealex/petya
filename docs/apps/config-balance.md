@@ -54,6 +54,9 @@ coder's `isCoding`), remap/confirm/override persistence, a named table, the shee
 and that no project file changes. UI `tests/config-balance-ui.cjs` with card data computed by the feature
 (screenshots `petya-config-balance*.png`).
 
+The reader (`files.cjs` `scan`) is also used by «Геймдизайн-документ» (`docs/apps/gdd.md`) for config values with
+`file:line` and for the systems a GDD may lack.
+
 Needs live checking: real Unity projects (large `.asset` counts, prefab-embedded ScriptableObjects, `stripped`
 documents, multi-line plain scalars), real balance sheets (merged headers, several header rows), the Programmer
 applying the change list to `.asset` files without reserializing them, git on large repositories.

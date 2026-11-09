@@ -3,6 +3,10 @@
 One local record per colleague of «Команда» — absences, 1:1 notes, agreed follow-ups, an anniversary — for apps that
 answer «кто в отпуске», «когда Маша вернётся», «подготовь 1:1 с Олегом», «что я обещал Маше». Core feature
 `src/features/people.cjs` (one line in `src/features.cjs`), implementation in `src/people/`. Consumers: «Отсутствия»
+(`docs/apps/absences.md`), «Встречи 1:1» (`docs/apps/one-on-one.md`), the capacity of «Планирование спринта»
+(`docs/apps/sprint-planning.md`), «Онбординг новичка» (members, absences) and «Перформанс-ревью» (1:1 notes and
+follow-ups of the person asked about).
+`src/features/people.cjs` (one line in `src/features.cjs`), implementation in `src/people/`. Consumers: «Вики из обсуждений» (`find` for a page's owner, `docs/apps/wiki-author.md`), «Отсутствия»
 (`docs/apps/absences.md`), «Встречи 1:1» (`docs/apps/one-on-one.md`) and the capacity of «Планирование спринта»
 (`docs/apps/sprint-planning.md`).
 
@@ -26,9 +30,10 @@ finds the colleague(s) named anywhere in a phrase. The same module parses a type
 - **Local**: `<company data>/people/people.json` (folder 0700, file 0600), encrypted with Electron `safeStorage` when
   available (`status().encrypted`); without the keychain an encrypted file reads as empty, never as an error. Per
   company (the company's data folder). Nothing is sent anywhere.
-- **Private notes**: 1:1 notes and follow-ups are returned only by `notes()` / `followups()`. Only «Встречи 1:1» calls
-  them, in a turn where the user asked about that person; they are not part of `team.context()` (the model's team
-  reference), «Команда», other apps' prompts or requests to Claude/Codex. The 1:1 app's reply texts carry counts, not
+- **Private notes**: 1:1 notes and follow-ups are returned only by `notes()` / `followups()`. Only «Встречи 1:1» and
+  «Перформанс-ревью» (`docs/apps/perf-review.md`) call them, in a turn where the user asked about that person in that
+  chat; they are not part of `team.context()` (the model's team reference), «Команда», other apps' prompts or requests
+  to Claude/Codex. «Онбординг новичка» reads only members and absences. The 1:1 app's reply texts carry counts, not
   note text; its local model call (agenda questions) happens only in a prep turn the user asked for.
 - **Wipe**: `wipe('notes')` deletes notes and follow-ups (absences stay; «Встречи 1:1» settings), `wipe()` deletes the
   folder («Отсутствия» settings), `forget(member)` one record. Both settings buttons ask first.

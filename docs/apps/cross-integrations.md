@@ -59,14 +59,16 @@ to the chat (`k.ask(…, {send:true})`), `{text}` shows a toast, `{settings: '<e
 | `video-meeting` | `zoom` (Zoom extension, order 10) | The user's Zoom **personal meeting room** link: the saved `zoomPersonalLink`, a personal-room link found in plain-text Zoom data on the computer, or `{needLink, text, placeholder, field}` so the card asks to paste it once (validated `https://…zoom.us/j/<digits>[?pwd=…]`, then remembered). Ready when the Zoom desktop app is installed (`/Applications/zoom.us.app`, `%APPDATA%\Zoom\bin\Zoom.exe`) or a link is saved. No Zoom API, no OAuth. The same room serves every meeting; the choice says so. `recognizeLink` tells Zoom links apart. Only while «Zoom» is added. |
 | | `google-meet` («Google Meet», order 20) | `{native:true}`; `prepareEvent` adds `conferenceData.createRequest` (`hangoutsMeet`) and `conferenceDataVersion=1`. Ready with a Google account that has calendar access (and «Календарь» added); fits Google calendars. See [google-meet.md](google-meet.md). |
 | | `teams` («Microsoft Teams», order 30) | `{native:true}`; `prepareEvent` adds `isOnlineMeeting`, `onlineMeetingProvider:"teamsForBusiness"`. Ready with a Microsoft **work or school** account with `Calendars.ReadWrite`; fits Outlook calendars of such an account, never personal ones. See [teams.md](teams.md). |
-| `task-tracker` | `jira`, `asana` | A chat request «Создай задачу в Jira/Asana: …» (or «Создай задачи … по встрече «…»:» with a list); those flows choose the project, preview and create only after confirmation. |
+| `task-tracker` | `jira`, `asana` | A chat request «Создай задачу в Jira/Asana: …» (or «Создай задачи … по встрече «…»:» with a list); those flows choose the project, preview and create only after confirmation. A comment on an existing issue (`{issue, comment}`, context `{comment:true}`) is Jira only: the calling card already showed the exact text and issue, and the provider posts `/rest/api/3/issue/{key}/comment` on that press after re-checking the connection; Asana's `fits` refuses it. |
 | `share-message` | `slack` | «Попроси команду …» for the team request flow: a channel only from the project's confirmed bindings, otherwise a question with concrete channels, then a preview with «Отправить». Never a guessed channel. |
 | | `mattermost`, `vk-teams` | «Отправь в Mattermost: …» / «Отправь в VK Teams: …»: the app asks which of its chosen channels (Mattermost) or of the chats its bot is in (VK Teams), then shows a compose card with the exact text and channel; only «Отправить» posts. See [mattermost.md](mattermost.md), [vk-teams.md](vk-teams.md). |
 | `code-fix` | `coder` | The problem as a coding request for «Программист» (own branch, diff for review). |
 | `meeting-recording` | `zoom` (Zoom extension) | Petya's local recording (system audio, optional microphone) of a **Zoom** meeting: `when:'now'` starts it during the meeting, `when:'schedule'` stores a timer (`meetingRecordingSchedule`, at most 8) that, from the event time, starts the recording as soon as the Zoom meeting source sees the meeting, and reports in a cancellable notification. Fits Zoom links only. Ready unless `meetingAutoRecord` is `off`. |
 | | `google-meet`, `teams` | The same for Meet / Teams links (`googleMeetRecordingSchedule`, `teamsRecordingSchedule`): the scheduled recording starts when that app's meeting source sees the call. The timer is the shared core module `src/meeting-schedule.cjs` (each app passes its own key, name and `detect`). |
 | `spreadsheet-export` | `google-sheets` («Google Таблицы») | The card's table `{title, sheet?, app?, header, rows}` (≤2000 × 40) as a chat request «Выгрузи в Google Таблицы «…» · N строк · #id»; the export card asks where (new spreadsheet, new tab, existing tab with the exact cell diff) and writes only on «Выгрузить». Ready when Sheets access is granted; without write permission it answers `{settings:'google-sheets'}`. See [google-sheets.md](google-sheets.md). |
+| `document-export` | `google-drive` («Google Диск») | The card's text `{title, text (Markdown), app?}` as a chat request «Сохрани в Google Документы «…» · #id»; the confirmation card previews the document, lets the user fix the title and creates the Google Doc only on «Создать документ» (`drive.file`). Ready when Drive access is granted; without «Разрешить создавать документы» it answers `{settings:'google-drive'}`. Used by the ADR draft card («Архитектурные решения», [adr.md](adr.md)) and the wiki page draft («Вики из обсуждений», [wiki-author.md](wiki-author.md)). See [google-drive.md](google-drive.md). |
 | `document-export` | `google-drive` («Google Диск») | The card's text `{title, text (Markdown), app?}` as a chat request «Сохрани в Google Документы «…» · #id»; the confirmation card previews the document, lets the user fix the title and creates the Google Doc only on «Создать документ» (`drive.file`). Ready when Drive access is granted; without «Разрешить создавать документы» it answers `{settings:'google-drive'}`. Used by the ADR draft card («Архитектурные решения», [adr.md](adr.md)). See [google-drive.md](google-drive.md). |
+| `reminder` | `reminders` («Напоминания») | A date from a card `{date: 'YYYY-MM-DD', time?: 'HH:MM' (10:00), text}` as the chat request «Напомни 1 декабря 2026 в 10:00: …», which «Напоминания» parses and confirms like any other reminder; a date that has passed is refused with a toast. Used by the deadlines of «Договоры в PDF» ([pdf-contracts.md](pdf-contracts.md)). |
 
 Not provided: **Telegram** `share-message` — Petya reads Telegram but has no confirmed sending flow; adding one needs
 its own chat selection and preview. «Программист» has no offer file, so a missing `code-fix` shows nothing (no
@@ -85,18 +87,30 @@ offer).
 | Meeting summary | per task and «Создать все» | | summary | | |
 | Retro («Ретро»), «Попробовать» | per item and «Создать задачи из «Попробовать»» | | «Отправить на голосование» | | |
 | Documentation freshness, per finding | «Создать задачу» | «Предложить правку» without an exact line fix | | | |
+| Screen recording → bug («Запись экрана → баг»), report | ✓ (bug; video and log attached after creation) | | | | |
+| Clipboard history («История буфера»), link → issue | comment «Добавить в KEY» (Jira) | | | | |
+| Event ideas («Идеи для ивентов»), plan card | «Создать задачу» (then the event is kept in the project's plan) | | | | |
 | Calendar, confirm step | | | | ✓ + known rooms, typed link | |
+| «Онбординг новичка», welcome message | | | after the outgoing review | | |
 | Calendar, created meeting / timeline | | | | | «Петя запишет встречу» / «Записать Петей» |
 
 «Выгрузить в Google Таблицы» (`spreadsheet-export`): sprint plan, game metrics (daily series), A/B-test groups, the
-config-balance report and its version diff, and «Учёт времени» (next to «Скачать CSV»: the CSV's rows, read from the
+config-balance report and its version diff, the balance simulation («Симуляция баланса»: p10/p50/p90 per day of the level
+and the main currency, before and after a «what if»), and «Учёт времени» (next to «Скачать CSV»: the CSV's rows, read from the
 app only when pressed — `k.links` accepts an async payload function for that).
+
+«Напомнить» (`reminder`, shown only while «Напоминания» is added): each future deadline of a contract read by «Договоры в
+PDF» (the end of the term, the last day to refuse renewal, payment dates).
 
 «Сохранить в Google Docs» (`document-export`, shown only while «Google Диск» is added and connected; the card's text as
 Markdown): the meeting summary (decisions, tasks with assignee and due date, not discussed, discussed), the «Поиск по
 всему» answer (the answer and its numbered sources with links; answer cards saved before the answer text was kept
 show no button) and the «Дневник дня» week report (totals, days, the week's main events with links; chats and private
 notes stay out). UI: `tests/document-export-ui.cjs` (screenshots `petya-document-export-*.png`). «Конфиги и баланс» also uses `code-fix` for «Применить в конфиги».
+
+«Перформанс-ревью» uses `document-export` for the review draft (Markdown with the facts and gaps). «Найм» hands an
+interview to «Календарь» the same way as below: «Отправить приглашение» puts a calendar request with the candidate's
+address and the chosen slot into the chat, and only the calendar's own «Поставить встречу» creates the event.
 
 The meeting summary also gets «Назначить следующую встречу» when «Календарь» is added: a calendar request with the
 people from the tasks is put into the composer.

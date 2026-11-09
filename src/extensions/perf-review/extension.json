@@ -1,0 +1,19 @@
+{
+  "id": "perf-review",
+  "name": "Перформанс-ревью",
+  "description": "Материалы для ревью коллеги за период: задачи и инциденты из Jira, PR и код-ревью из GitHub, решения встреч, итоги и договорённости 1:1 — у каждого пункта черновика ссылка на факт, пробелы названы прямо, без догадок",
+  "category": "team",
+  "icon": "icon.svg",
+  "examples": ["Собери материалы для ревью Олега за полгода","Подготовь перформанс-ревью Маши за квартал","Перф-ревью Ивана за год"],
+  "connects": "Jira",
+  "uses": ["document-export"],
+  "setting": "extension_perf-review",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["review-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "perfReviewCard": "renderPerfReviewCard"
+  }
+}
