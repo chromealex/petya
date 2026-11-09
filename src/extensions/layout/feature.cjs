@@ -7,7 +7,7 @@ const sessions=new WeakMap();
 function setup(s,request=fetch,dependencies={}){
  const proposals=new Map();let operation=null;
  const active=()=>s.dialogue.active();
- const dialog=()=>dependencies.dialog||require('electron').dialog;
+ const dialog=()=>dependencies.dialog||require('../../app-dialog.cjs').dialog();
  function scope(){const t=active();return JSON.stringify([s.companyId,t?.id,t?.projectId,t?.versionIndex,s.settings.unityUrl,s.settings.unityToken,s.settings.layoutFigmaToken,s.settings.layoutZeplinToken]);}
  function available(provider){
   const t=active(),p=s.dialogue.state.projects.find(p=>p.id===t?.projectId);

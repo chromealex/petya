@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('petyaEvents', {
   onChatBrowser: callback => ipcRenderer.on('chat-browser', (_,state) => callback(state)),
   onDashboards: callback => ipcRenderer.on('dashboards', (_,state) => callback(state)),
   onDashboardOpen: callback => ipcRenderer.on('dashboard-open', (_,id) => callback(id)),
+  onAppDialog: callback => ipcRenderer.on('app-dialog', (_,request) => callback(request)),
   onModelRuntime: callback => ipcRenderer.on('model-runtime-progress', (_,state) => callback(state)),
   onModelParts: callback => ipcRenderer.on('model-parts-progress', (_,state) => callback(state)),
   onPythonProgress: callback => ipcRenderer.on('python-progress', (_,state) => callback(state)),

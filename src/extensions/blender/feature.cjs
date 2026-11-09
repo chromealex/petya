@@ -6,7 +6,7 @@ const { animationMode, animationEdits } = require('./animation.cjs');
 
 const sessions = new WeakMap();
 
-function setup(s, dialog = () => require('electron').dialog) {
+function setup(s, dialog = () => require('../../app-dialog.cjs').dialog()) {
   const requests = new AsyncLocalStorage();
   const files = new Map();
   let operation = null;

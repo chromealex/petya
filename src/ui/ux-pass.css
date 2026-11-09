@@ -296,3 +296,15 @@ input,textarea,select,[contenteditable]:not([contenteditable="false"]),pre,code,
  -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px))}
 #workspace-card .decompose-progress.live[data-stage=assigning]>summary::before,#workspace-card .decompose-progress.live[data-stage=starting]>summary::before{--ring:var(--work)}
 .dash-ghost.loading svg,.dash-tool.loading svg,.chat-browser-tool.loading svg{will-change:transform;transform-origin:50% 50%}
+/* Petya's own dialogs (src/ui/app-dialog.js) instead of the system ones. */
+.app-dialog{width:min(420px,calc(100vw - 32px));padding:26px 24px 20px;border:1px solid var(--line);border-radius:16px;background:var(--panel);color:var(--ink);box-shadow:0 30px 80px -20px #000c;text-align:center}
+.app-dialog[open]{display:flex;flex-direction:column;align-items:center;gap:14px}
+.app-dialog::backdrop{background:#0009;backdrop-filter:blur(2px)}
+.app-dialog-face{width:56px;height:56px;object-fit:contain}
+.app-dialog-text{display:grid;gap:6px}
+.app-dialog-title{margin:0;font-size:16px;line-height:1.35;font-weight:650;letter-spacing:-.1px;overflow-wrap:anywhere}
+.app-dialog-detail{margin:0;font-size:13px;line-height:1.45;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}
+.app-dialog-actions{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;width:100%;margin-top:6px}
+.app-dialog-actions button{min-height:38px;border-radius:10px;font-size:14px}
+.app-dialog-actions .app-dialog-danger{background:#e5484d;border-color:#e5484d;color:#fff}
+.app-dialog-actions .app-dialog-danger:hover{background:#f2555a}

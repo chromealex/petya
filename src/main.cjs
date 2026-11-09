@@ -630,13 +630,13 @@ function setupHandlers() {
   handle('companyIconRefresh',async(force=false)=>{await require('./company-icon.cjs').refreshCompanyIcon({companies,companyId,force:!!force,settings,request,nativeImage:require('electron').nativeImage,download:async(url,options={})=>{const response=await fetch(url,{headers:options.headers,redirect:'error',signal:AbortSignal.timeout(15000)});if(!response.ok)throw Error('HTTP '+response.status);return new Uint8Array(await response.arrayBuffer());},
     getSources:options=>require('electron').desktopCapturer.getSources(options),screenAllowed:()=>process.platform!=='darwin'||require('electron').systemPreferences.getMediaAccessStatus('screen')==='granted',atlassianToken:credential=>atlassianOAuth.token(credential)});return {...companies.list(),activeId:companyId};});
   handle('companyRemove',async id=>{const {t}=require('./interface-language.cjs'),c=companies.get(id);
-    const answer=await require('electron').dialog.showMessageBox(win,{type:'warning',buttons:[t('Удалить'),t('Отмена')],defaultId:1,cancelId:1,message:t('Удалить компанию «')+c.name+t('»?'),detail:t('Её чаты, подключения, команда, задачи и обучение переместятся в Корзину. Восстановить можно оттуда.')});
+    const answer=await require('./app-dialog.cjs').showMessageBox(win,{type:'warning',buttons:[t('Удалить'),t('Отмена')],defaultId:1,cancelId:1,message:t('Удалить компанию «')+c.name+t('»?'),detail:t('Её чаты, подключения, команда, задачи и обучение переместятся в Корзину. Восстановить можно оттуда.')});
     if(answer.response!==0)return {...companies.list(),activeId:companyId,cancelled:true};
     const {dir}=companies.remove(id);try{await require('electron').shell.trashItem(dir);}catch{fs.rmSync(dir,{recursive:true,force:true});}
     refreshTrayMenu();return {...companies.list(),activeId:companyId};});
   handle('companyRemoveAll',async()=>{const {t}=require('./interface-language.cjs');
     if(chatJobs.any()||dialogue.running.size)throw Error('Дождитесь завершения запросов в чатах.');
-    const answer=await require('electron').dialog.showMessageBox(win,{type:'warning',buttons:[t('Удалить всё'),t('Отмена')],defaultId:1,cancelId:1,message:t('Удалить все компании?'),detail:t('Чаты, подключения, команды, задачи и обучение всех компаний переместятся в Корзину. Скачанные модели, установленные приложения и язык интерфейса останутся. Петя перезапустится и начнёт знакомство с начала.')});
+    const answer=await require('./app-dialog.cjs').showMessageBox(win,{type:'warning',buttons:[t('Удалить всё'),t('Отмена')],defaultId:1,cancelId:1,message:t('Удалить все компании?'),detail:t('Чаты, подключения, команды, задачи и обучение всех компаний переместятся в Корзину. Скачанные модели, установленные приложения и язык интерфейса останутся. Петя перезапустится и начнёт знакомство с начала.')});
     if(answer.response!==0)return {cancelled:true};
     require('./company-reset.cjs').request(app.getPath('userData'));
     app.relaunch({args:process.argv.slice(1).filter(arg=>arg!=='--hidden')});setImmediate(()=>app.quit());return {restarting:true};});

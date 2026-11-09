@@ -42,7 +42,7 @@ function setup(s) {
         check();
         if (needsApproval(bytes,s.settings)) {
           const size = Number.isSafeInteger(bytes) && bytes >= 0 ? Math.ceil(bytes/1048576)+' МиБ' : 'размер неизвестен';
-          const result = await require('electron').dialog.showMessageBox(s.win,{message:'Скачать расширение «'+p.name+'»?',
+          const result = await require('../app-dialog.cjs').showMessageBox(s.win,{message:'Скачать расширение «'+p.name+'»?',
             detail:size,buttons:['Отмена','Скачать'],defaultId:0,cancelId:0});
           check();
           if (result.response !== 1) return false;

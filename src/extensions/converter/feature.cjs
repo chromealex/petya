@@ -20,7 +20,7 @@ const deps={
  platform:()=>process.platform,
  showItem:p=>require('electron').shell.showItemInFolder(p),
  chooseFolder:async win=>{const r=await require('electron').dialog.showOpenDialog(win,{title:require('../../interface-language.cjs').t('Куда сохранить результаты?'),properties:['openDirectory','createDirectory']});return r.canceled?'':r.filePaths[0]||'';},
- confirm:async(win,text,detail,button)=>{const {t}=require('../../interface-language.cjs');return (await require('electron').dialog.showMessageBox(win,{message:t(text),detail:t(detail),buttons:[t('Отмена'),t(button)],defaultId:0,cancelId:0})).response===1;},
+ confirm:async(win,text,detail,button)=>{const {t}=require('../../interface-language.cjs');return (await require('../../app-dialog.cjs').showMessageBox(win,{message:t(text),detail:t(detail),buttons:[t('Отмена'),t(button)],defaultId:0,cancelId:0})).response===1;},
  thumbnail:async file=>{const {nativeImage}=require('electron');let img=null;
   try{img=await nativeImage.createThumbnailFromPath(file,{width:112,height:112});}catch{/* not on Linux, or no Quick Look */}
   if(!img||img.isEmpty()){const raw=nativeImage.createFromPath(file);if(!raw.isEmpty())img=raw.resize(raw.getSize().width>=raw.getSize().height?{width:112}:{height:112});}

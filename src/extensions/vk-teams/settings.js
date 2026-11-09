@@ -40,7 +40,7 @@
   }
   if(state.chats.length){
    const forget=el('button',null,'Забыть полученные сообщения');forget.type='button';
-   const go=async()=>{if(!confirm((window.t||String)('Удалить полученные ботом сообщения с этого компьютера? В VK Teams они останутся.')))return;render(await call('forget'));status.textContent='Полученные сообщения удалены.';};
+   const go=async()=>{if(!await window.petyaConfirm((window.t||String)('Удалить полученные ботом сообщения с этого компьютера? В VK Teams они останутся.')))return;render(await call('forget'));status.textContent='Полученные сообщения удалены.';};
    if(typeof window.asDeleteButton==='function')window.asDeleteButton(forget,'Забыть полученные сообщения');
    forget.onclick=()=>go().catch(e=>{status.textContent=e.message;});list.append(forget);
   }
