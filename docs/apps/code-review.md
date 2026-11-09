@@ -78,6 +78,14 @@ Actions: «Исправить» (`k.links('code-fix')`, the visible comments wit
 the review body. The main process accepts only reviews it made itself in this company within 6 hours, once per
 review; progress and the result go to the notification center (`code-review`). «Скрыть нит-пики» is remembered.
 
+## Dashboards
+Every request the app takes only reads, so it can be a dashboard widget (`dashboard` in `feature.cjs`, see
+docs/dashboards.md): «•••» → «В дашборд…» on a review card, «Добавить виджет» → «Ревью моих изменений», or a phrase
+such as «ревью PR #12» in «Собери дашборд». The widget repeats the request on its interval. The model's review is
+kept per company, model and exact diff (last 20), so an unchanged diff is not sent to the model again and the
+refresh announces nothing; a new commit or edit gets a fresh review. Comments still reach a PR only from the card's
+confirmed button. «Какие PR ждут моего ревью» stays with «Pull requests» (its own widgets).
+
 ## Verified
 
 Stubs only: `node tests/code-review.cjs` (a fixture git repository in a temp folder with a feature branch,
