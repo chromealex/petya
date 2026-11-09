@@ -27,6 +27,20 @@ async function login({client,open,request,timeout=300000}){
  try{await open('https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:client.client_id,redirect_uri:redirect,response_type:'code',scope:SCOPE,state,code_challenge:createHash('sha256').update(verifier).digest('base64url'),code_challenge_method:'S256',access_type:'offline',prompt:'consent select_account'}));return await result;}
  finally{clearTimeout(timer);server.close();}
 }
+// Google's 403 says why in its body: the reporting API is off in the OAuth client's Google Cloud project, or the
+// signed-in account (or service account) has no access to apps in Play Console. Say which, instead of «HTTP 403».
+function explain(error){
+ if(error?.status!==403&&error?.status!==401)return error;
+ let body={};try{body=JSON.parse(error.detail||'{}').error||{};}catch{}
+ const text=String(body.message||error.detail||''),reasons=(body.details||[]).map(d=>d.reason||'').join(' ');
+ let message;
+ if(/SERVICE_DISABLED|has not been used in project|is disabled/i.test(reasons+' '+text)){
+  const project=/project (\d+)/.exec(text)?.[1];
+  message='В Google Cloud не включён Google Play Developer Reporting API'+(project?' (проект '+project+')':'')+'. Включите его: '+('https://console.cloud.google.com/apis/library/playdeveloperreporting.googleapis.com'+(project?'?project='+project:''))+' — и через пару минут нажмите «Проверить».';
+ }else if(error.status===401)message='Google не принял вход в Google Play. Нажмите «Отключить» и подключите заново.';
+ else message='У аккаунта нет доступа к отчётам Google Play. В Play Console → «Пользователи и разрешения» пригласите этот аккаунт (или сервисный аккаунт) с правом «Просмотр информации о приложении» и подождите до суток'+(text?'. Ответ Google: '+text.slice(0,200):'.');
+ const out=new Error(message);out.status=error.status;out.detail=error.detail;return out;
+}
 class GooglePlay {
  constructor({settings,request}){this.settings=settings;this.request=request;}
  async token(){
@@ -37,7 +51,7 @@ class GooglePlay {
   const token=await require('./google-service-account.cjs').token(c,SCOPE,this.request);
   this.cached={key:s.googlePlayCredential,token,until:Date.now()+3000000};return token;
  }
- async api(route,body){const token=await this.token();return this.request(ROOT+route,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...body?{body:JSON.stringify(body)}:{}});}
+ async api(route,body){const token=await this.token();try{return await this.request(ROOT+route,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...body?{body:JSON.stringify(body)}:{}});}catch(error){throw explain(error);}}
  async apps(){let pageToken;const all=[];for(let page=0;page<100;page++){const result=await this.api('apps:search?'+new URLSearchParams({pageSize:100,...pageToken?{pageToken}:{}}));all.push(...result.apps||[]);pageToken=result.nextPageToken;if(!pageToken)return all.map(a=>({id:a.name,label:a.displayName||a.packageName||a.name,packageName:a.packageName||a.name.replace(/^apps\//,'')}));}throw new Error('Слишком много приложений Google Play.');}
  // Android vitals errors (the «Крэши» crash source, src/extensions/google-play/crash-source.cjs).
  // The last complete day of a DAILY metric set (America/Los_Angeles calendar date), or null.
@@ -94,4 +108,4 @@ class GooglePlay {
   return {text:`${app.label}${topic.versionCode?' · versionCode '+topic.versionCode:''}: последние доступные данные за ${fmt(latest.startTime)}, часовой пояс Google Play — Лос-Анджелес. ANR: ${value(rate)}; заметные пользователям ANR: ${value(perceived)}. Средневзвешенный показатель заметных ANR за 7 дней: ${value(week)}. Это доля пользователей, а не число зависаний.`,title:'ANR · '+app.label,sources,data:{app:app.id,date:fmt(latest.startTime),versionCode:topic.versionCode||null,rate,perceived,week,at:Date.now(),rows}};
  }
 }
-module.exports={GooglePlay,credential,metric,login,SCOPE,date,day,fmt};
+module.exports={GooglePlay,explain,credential,metric,login,SCOPE,date,day,fmt};

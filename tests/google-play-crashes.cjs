@@ -110,10 +110,10 @@ module.exports=(async()=>{
  const stale=await crashes.crashesTurn(s,'крэши в Google Play за неделю',NOW);
  assert.equal(find(calls,'/errorCountMetricSet:query').length,0);assert.equal(stale.extensionData.crashCard.totals.issues,2);
  assert.match(stale.extensionData.crashCard.notes[0].text,/пока не сообщает дневные данные для Bunker Wars, Other Game/);
- // Errors keep their words.
+ // Errors keep their words; a 403 says what access is missing (src/google-play.cjs explain).
  ({s,calls}=services({'apps:search':()=>{throw Object.assign(Error('Сервис вернул HTTP 403'),{status:403});}}));
  const denied=await crashes.turn(s,'крэши в Google Play за неделю');
- assert.equal(denied.error,true);assert.match(denied.text,/^Крэши · Сервис вернул HTTP 403/);
+ assert.equal(denied.error,true);assert.match(denied.text,/^Крэши · У аккаунта нет доступа к отчётам Google Play/);
 
  // Routing: Google Play with crashes is not the ANR card; ANR stays there.
  const dialogue=require('../src/dialogue.cjs');

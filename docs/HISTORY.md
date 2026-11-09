@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.14.2 — Google Play says why it refused
+
+- Instead of «Сервис вернул HTTP 403» the Google Play connection says what is missing: the Google Play Developer Reporting API turned off in the Google Cloud project (with the link to turn it on), or no access to the apps in Play Console (who to invite and with which permission). An expired sign-in asks to reconnect.
+
 ## 0.14.1 — the macOS download passes Apple's check
 
 - The release build signs every binary inside the app with the Developer ID, the hardened runtime and a timestamp, inside out — Electron's framework libraries and helpers included — so `Petya.dmg` passes notarization and opens on any Apple Silicon Mac without a warning.
