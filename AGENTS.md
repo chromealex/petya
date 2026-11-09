@@ -14,6 +14,13 @@
 - Requests in other languages are rewritten into Russian by the local model before routing (`src/command-language.cjs`, called from `src/converse.cjs`); the chat keeps the user's own words (`routedText` holds the rewrite). New shortcut handlers match Russian phrasing only — do not add English or other-language patterns next to Russian ones. The wake word is accepted as «Петя» or Latin «Petya».
 - Window-level UI tests run in Russian (`PETYA_SMOKE_TEST`); set `PETYA_INTERFACE_LANGUAGE=en` to check the English interface (`npm run test:interface-language-ui`). Adding a language means a new `src/locales/<code>.json` and its code in `SUPPORTED` in `src/ui/i18n-core.js`.
 
+# Versions and releases
+
+- Every change that reaches `main` raises the version: a fix or small change is a patch (`0.10.0` → `0.10.1`), a new feature or app a minor (`0.10.1` → `0.11.0`). Run `node scripts/bump-version.cjs patch|minor` — it updates `package.json`, `package-lock.json`, the window footer, its English string, the Codex client info and the README badge together (the list is `scripts/version-places.cjs`).
+- In the same commit add a section at the top of `docs/HISTORY.md`: `## x.y.z — what changed`, then short bullets for people, not commit messages. The release notes are taken from this section. `tests/version.cjs` (part of `npm test`) fails until the version matches everywhere and the section is there.
+- Several agents merging at once: bump on top of the current `main` right before merging; if someone else took the number, take the next one.
+- A release is the tag `v<version>` on `main` (`git tag v0.10.1 && git push origin v0.10.1`, or run the Release workflow): GitHub Actions builds `Petya-Setup.exe` and publishes the release with that HISTORY section. The macOS build stays local (`python3 scripts/build.py --mac`, see Builds).
+
 # Builds
 
 - The user requires exactly one current build per platform: `/Users/aleksandrfeer/Projects/Peter/Petya.app` for macOS and `/Users/aleksandrfeer/Projects/Peter/Petya-Setup.exe` for Windows.

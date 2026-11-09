@@ -1,6 +1,6 @@
 # Petya — feature history by version
 
-Detailed notes for versions 0.2–0.9.1. Project overview: [README](../README.md).
+Detailed notes for versions 0.2–0.10.0. Project overview: [README](../README.md).
 
 
 
@@ -8,7 +8,18 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
-## Next — 100 built-in skills, team from Jira and Slack
+## 0.10.0 — app catalog, dashboards, agent board, English interface
+
+- **App catalog**: 80+ apps by category with tiles, details and examples; apps install from a folder or a .zip without rebuilding (`docs/extensions.md`).
+- **Dashboards**: any data card goes onto a dashboard that refreshes itself; widgets are arranged freely.
+- **Agent board**: what Petya, the Programmer, Claude and Codex are working on, with real statuses.
+- **Interface in English**: the system language by default, Russian or English in settings; requests in other languages are understood.
+- **Meetings without Zoom in the core**: any call or none at all; Zoom, Google Meet and Teams are apps.
+- **Programmer** and «Выполнить» on tasks: code written in a separate branch with tests, or by Claude and Codex under a plan.
+- **Tasks to people**: assignees by role and workload, one send to Jira or Asana, «Blocks» links.
+- **Chat browser**, relative times, project sharing through git, deleting companies, an introduction on first launch, a smaller Petya.app (the larger speech model downloads on first launch).
+- Details of the earlier changes in this version follow.
+
 
 **Meetings without Zoom in the core.** Petya records meetings, not one app: «Слушать встречу» works with no meeting app at all (system audio and the microphone until the user stops it), «Запись встреч» in settings holds the start mode and the microphone, transcripts are «Встреча», the team field is «Имя на встречах». Meeting apps plug in as meeting sources (`src/features/meeting-sources.cjs`); «Zoom» became such an extension (`src/extensions/zoom`, [apps/zoom.md](apps/zoom.md)): Zoom window detection, speaker names, the personal room for the calendar and scheduled recordings. It is off for new users and added automatically for those who recorded Zoom meetings; old settings migrate once (`src/meeting-migration.cjs`). `tests/core-meeting-guard.cjs` keeps Zoom out of the core and other extensions.
 
