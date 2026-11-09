@@ -1,0 +1,46 @@
+.rtsl-card{width:620px;max-width:100%;margin:12px 0}
+.rtsl-body{display:flex;flex-direction:column;gap:12px;min-width:0}
+.rtsl-top{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap}
+.rtsl-preview{display:flex;flex-direction:column;gap:8px;min-width:0}
+.rtsl-canvas{border-radius:8px;overflow:hidden;outline:1px solid var(--line,#ffffff1f);line-height:0;align-self:flex-start;max-width:100%}
+.rtsl-canvas canvas{display:block;max-width:100%;height:auto;image-rendering:pixelated}
+.rtsl-legend{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:11.5px;color:var(--muted);max-width:360px}
+.rtsl-legend li{display:flex;align-items:center;gap:5px}
+.rtsl-swatch{width:10px;height:10px;border-radius:2px;outline:1px solid #0004;display:inline-block}
+.rtsl-gem{background:#f2cf55;transform:rotate(45deg) scale(.8);outline-color:#5a4310}
+.rtsl-side{flex:1 1 180px;min-width:180px;display:flex;flex-direction:column;gap:6px}
+.rtsl-card h5{margin:4px 0 0;font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.rtsl-roster,.rtsl-paths,.rtsl-wins,.rtsl-issues ul,.rtsl-projects{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.rtsl-roster li{display:flex;align-items:center;gap:8px;min-width:0;font-size:13px}
+.rtsl-dot{flex:none;width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;box-shadow:0 0 0 2px #0006}
+.rtsl-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;color:var(--ink)}
+.rtsl-team{margin-left:auto;color:var(--muted);font-size:11.5px;white-space:nowrap}
+.rtsl-paths li,.rtsl-wins li{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;font-size:12px}
+.rtsl-pair{color:var(--muted);font-variant-numeric:tabular-nums;min-width:28px}
+.rtsl-track{height:6px;border-radius:3px;background:#ffffff12;overflow:hidden}
+.rtsl-fill{display:block;height:100%;border-radius:3px;background:#86a8e0}
+.rtsl-fill.win{background:#c9ed9d}
+.rtsl-num{font-variant-numeric:tabular-nums;color:var(--ink);min-width:32px;text-align:right}
+.rtsl-issues li{display:flex;align-items:baseline;gap:8px;font-size:12.5px;min-width:0}
+.rtsl-issues li span:not(.rtsl-mark){min-width:0;overflow-wrap:anywhere}
+.rtsl-issues li small{color:var(--muted);margin-left:auto}
+.rtsl-mark{flex:none;font-size:10.5px;font-weight:600;padding:1px 6px;border-radius:4px;background:#e5ce8c33;color:#e5ce8c}
+.rtsl-issues li.error .rtsl-mark{background:#f0b4a833;color:#f0b4a8}
+.rtsl-ok{margin:0;font-size:12.5px;color:#c9ed9d}
+.rtsl-bad{margin:0;font-size:12.5px;color:#f0b4a8}
+.rtsl-muted{margin:0;font-size:12px;color:var(--muted)}
+.rtsl-balance{display:flex;flex-direction:column;gap:6px;max-width:420px}
+.rtsl-running{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.rtsl-running[hidden]{display:none}
+.rtsl-spinner{width:12px;height:12px;border-radius:50%;border:2px solid #ffffff30;border-top-color:#e5ce8c;animation:rtsl-spin .9s linear infinite}
+@keyframes rtsl-spin{to{transform:rotate(360deg)}}
+.rtsl-projects li{display:flex;align-items:center;gap:10px;padding:6px 8px;border-radius:8px;background:#ffffff06;min-width:0}
+.rtsl-projects li.current{outline:1px solid #c9ed9d55}
+.rtsl-project-text{display:flex;flex-direction:column;min-width:0;flex:1}
+.rtsl-project-text strong{font-size:13px;color:var(--ink)}
+.rtsl-project-text small{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rtsl-maps{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.rtsl-current{font-size:11.5px;color:#c9ed9d;white-space:nowrap}
+.rtsl-steps{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.rtsl-gone{opacity:.7}
+@media (prefers-reduced-motion:reduce){.rtsl-spinner{animation:none}}

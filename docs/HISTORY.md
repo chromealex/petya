@@ -8,6 +8,14 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.13.0 — «Генератор уровней»: RTS maps from a phrase
+
+- New app «Генератор уровней» (gamedev): «сгенерируй карту 2 на 2 с рекой посередине», «сделай симметричную карту для 4 игроков, побольше руды». Petya drives the RTS engine through its own MCP server rtsmcp and shows the map as a picture with starts and deposits, path lengths between starts and the engine's validation.
+- Edits in plain words on the draft — «сделай реку шире», «добавь ещё 2 месторождения у центра», «убери лес у центра», «больше руды» — with «Отменить правку»; «Ещё вариант» tries the next seed.
+- «Проверить баланс» plays bot matches on the map: win rate per start and match length. Runs in the background, can be cancelled.
+- «Сохранить в проект» writes the map into the project folder and its game.json only after you confirm, and never overwrites an existing map without a second confirmation. «Открыть в редакторе» starts the engine's editor with the project.
+- «Покажи мои RTS-проекты»: the project is chosen once per Petya project. An engine you already have (settings, PATH, ~/RTSEngine) is used as is; otherwise the ready build (macOS Apple Silicon ~43 MB, Windows ~53 MB) downloads with a checksum check, progress and «Отменить», and «Обновить» appears when a newer build is published.
+
 ## 0.12.3 — Petya knows which colleague is you
 
 - «Команда» has «Это я» on each card (one card at most) and an «это вы» mark next to the name. Without a mark Petya finds your card himself by your Jira email or your full name.

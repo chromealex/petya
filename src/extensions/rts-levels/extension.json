@@ -1,0 +1,22 @@
+{
+  "id": "rts-levels",
+  "name": "Генератор уровней",
+  "description": "Карты для вашего RTS-движка по описанию: игроки и команды, река, симметрия, ресурсы. Генерирует через rtsmcp, проверяет, рисует превью и гоняет ботов на баланс; в проект пишет только после подтверждения",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Сгенерируй карту 2 на 2 с рекой посередине", "Сделай симметричную карту для 4 игроков, побольше руды", "Покажи мои RTS-проекты", "Сделай реку шире", "Добавь ещё 2 месторождения у центра"],
+  "setting": "extension_rts-levels",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["rts-levels-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"],
+    ["rts-levels-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "rtsLevels": "renderRtsLevels"
+  },
+  "downloads": [
+    {"id": "engine", "name": "Движок RTS: rtsmcp и редактор (если не установлен)", "bytes": {"darwin": 43055202, "win32": 52901579}, "approx": true}
+  ]
+}
