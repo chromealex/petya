@@ -16,7 +16,12 @@ module.exports=ctx=>{
     return {handled:true,text:ctx.learning.undo(id||info.id)};
   };
   ctx.handle('undoInfo',()=>ctx.learning.undoInfo());ctx.handle('undoLast',undoLast);
-  const dailyBrief=()=>require('./daily-brief.cjs').dailyBrief({records:ctx.agents.records,jira:ctx.workspace.history,contexts:ctx.memory.prune(),slackEnabled:ctx.modules.enabled(ctx.settings,'slack')});
+  // «Что у нас сегодня?»: Petya's own sections and those of added apps (summary-section, src/summary-sections.cjs).
+  const dailyBrief=async()=>{
+    const now=Date.now(),from=new Date(now).setHours(0,0,0,0);
+    let sections=[];try{sections=ctx.services?await require('./summary-sections.cjs').collect(ctx.services,{from,to:now,now}):[];}catch(e){console.error('Daily brief sections:',e.message);}
+    return require('./daily-brief.cjs').dailyBrief({records:ctx.agents.records,jira:ctx.workspace.history,sections,now});
+  };
   ctx.handle('dailyBrief',dailyBrief);
   // Knowledge from the chat kept elsewhere counts too: recurring commands, and what apps keep themselves (growth-source).
   const extra=()=>[...(ctx.recurring?.list()||[]).map(r=>({key:'recurring:'+r.id,title:r.command,points:15,at:r.createdAt||null,source:'Повторяющаяся команда из чата',learned:'Сам делаю «'+r.command+'» '+r.schedule+' и пишу результат в чат «По расписанию».'})),...(ctx.services?require('./growth-sources.cjs').items(ctx.services):[])];

@@ -920,6 +920,9 @@
   "Напомни через {delay}: {message}"
  ],
  "strings": {
+  "Обсуждения доступны в разделе «Материалы».": "The discussions are in «Materials».",
+  "Раздел сводки дня": "Daily summary section",
+  "Сохранённых записей за сегодня:": "Records saved today:",
   "(завтра)": "(tomorrow)",
   "(сегодня)": "(today)",
   "(через": "(in",

@@ -291,6 +291,12 @@ served by a dedicated registry next to app links. Two exist:
   knowledge an app keeps itself that counts on «Развитие» like learned phrases (`key` = `growth.key(kind, content)`,
   so the same content never earns twice and points earned before the app owned the knowledge stay); «Почта» reports
   its mail rules (`src/extensions/mail/growth-source.cjs`).
+- `summary-section` (`src/summary-sections.cjs`): `{id, title, order?, ready?(settings), async collect(services, {from,
+  to, now}) → {lines} | null}` — a section of the daily summary «Что у нас сегодня?» (`src/daily-brief.cjs`), after
+  Petya's own sections, in `order`. The contract follows the journal's `journal-source` (declared through `provides`,
+  `ready`, `collect` for a period, a time limit, a failure shown as «Не удалось прочитать» without hiding the others),
+  but a section is a heading with a few lines of text, not timeline items. Counts only while its app is added. Slack
+  provides one (`src/extensions/slack/summary-section.cjs`: the Slack records Petya saved today).
 - `voice-action` (`src/voice-actions.cjs`): `{id, label, help?, order?, legacy?, ready?(settings), async run(services,
   {output, command, slots}) → {ask, kind?} | turn result}` — what a learned voice command («Мои голосовые команды» on
   «Навыки») can do besides Petya's own «Выполнить команду в чате» and «Ответить заданным текстом». The command stores

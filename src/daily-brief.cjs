@@ -1,4 +1,6 @@
-function dailyBrief({records,contexts,jira=[],slackEnabled=false,now=Date.now()}){
+// «Что у нас сегодня?»: Petya's own sections (tasks handed over, Jira issues Petya created) and the sections added apps
+// contribute (`sections`, collected by src/summary-sections.cjs: [{title, lines, error?}]), in their order.
+function dailyBrief({records,jira=[],sections=[],now=Date.now()}){
  const start=new Date(now);start.setHours(0,0,0,0);
  const lines=['## Сегодня, '+new Date(now).toLocaleDateString('ru-RU')+'\n\nСводка по сохранённым данным Пети.'];
  const tasks=records.filter(r=>r.state!=='expired'&&!(r.executionState==='completed')).sort((a,b)=>b.at-a.at);
@@ -7,9 +9,7 @@ function dailyBrief({records,contexts,jira=[],slackEnabled=false,now=Date.now()}
  for(const r of tasks.slice(0,8))lines.push(((r.keys||[]).join(', ')||r.command||'Поручение')+' — '+(states[r.executionState||r.state]||r.state)+', запись от '+new Date(r.checkedAt||r.at).toLocaleString('ru-RU'));
  const created=jira.filter(r=>!r.retentionExpired&&r.at>=start.getTime()&&r.at<=now).flatMap(r=>(r.rows||[]).filter(v=>v.key&&v.state!=='deleted').map(v=>({key:v.key,title:v.title||v.snapshot?.summary||'',at:r.at})));
  lines.push('\n### Jira\n\nСозданные Петей сегодня задачи Jira: '+created.length+'.');for(const r of created.slice(0,8))lines.push(r.key+' · '+r.title+' (это запись о создании, не текущий статус Jira)');
- const messages=slackEnabled?contexts.filter(c=>/slack/iu.test(c.source||'')).flatMap(c=>c.messages?.map(m=>({at:m.at,title:c.title,text:m.text}))||[{at:c.at,title:c.title,text:c.text}]).filter(c=>c.at>=start.getTime()&&c.at<=now).sort((a,b)=>b.at-a.at):[];
- lines.push('\n### Slack\n\nСохранённых записей за сегодня: '+messages.length+'.');
- if(messages.length)lines.push('Обсуждения доступны в разделе «Материалы».');
+ for(const section of sections)lines.push('\n### '+section.title+'\n\n'+(section.error?'Не удалось прочитать: '+section.error:section.lines.join('\n\n')));
  lines.push('Это не полная сводка почты и календаря: эти источники пока не подключены к сценарию.');
  return {handled:true,text:lines.join('\n\n')};
 }
