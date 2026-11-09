@@ -1,0 +1,22 @@
+{
+  "id": "vk-teams",
+  "name": "VK Teams",
+  "description": "Рабочие чаты VK Teams через бота: сводка с точными цитатами, пересказ треда, поиск по полученному; сообщение в чат — только после вашего подтверждения",
+  "category": "comms",
+  "icon": "icon.svg",
+  "examples": ["Что нового в VK Teams?","Что писали в чате «Релизы» в вк тимс за неделю","Перескажи тред про оплату в VK Teams","Найди в VK Teams про сборку","Отправь в VK Teams в чат «Релизы»: билд 2.3 готов"],
+  "connects": "VK Teams (бот)",
+  "uses": ["task-tracker"],
+  "provides": {"share-message": "share-message.cjs", "messenger-source": "messenger-source.cjs"},
+  "setting": "extension_vk-teams",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["vk-teams-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "vkTeamsCard": "renderVkTeamsCard",
+    "vkTeamsCompose": "renderVkTeamsCompose"
+  }
+}

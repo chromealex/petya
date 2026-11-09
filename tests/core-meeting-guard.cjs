@@ -56,10 +56,13 @@ const VIDEO_ALLOWED={
 };
 const videoFiles=[];
 for(const e of fs.readdirSync(path.join(root,'src'),{withFileTypes:true}))if(e.isFile()&&/\.(?:cjs|js|ps1)$/.test(e.name))videoFiles.push('src/'+e.name);
-{const all=files.length;files.length=0;walk('src/features',f=>/\.cjs$/.test(f));walk('src/ui',()=>true);walk('src/extensions',f=>!/^src\/extensions\/(?:google-meet|teams)\//.test(f)&&/\.(?:cjs|js|json|html|css)$/.test(f));videoFiles.push(...files);files.length=all;}
+{const all=files.length;files.length=0;walk('src/features',f=>/\.cjs$/.test(f));walk('src/ui',()=>true);walk('src/extensions',f=>!/^src\/extensions\/(?:google-meet|teams|vk-teams)\//.test(f)&&/\.(?:cjs|js|json|html|css)$/.test(f));videoFiles.push(...files);files.length=all;}
+// VK Teams is another product (a messenger, src/extensions/vk-teams, which names Microsoft Teams only to avoid it):
+// its names, also as written in regular expressions, are not Microsoft Teams.
+const VK_TEAMS=/(?:vk|вк)(?:\\s\*|\\s|[\s-])*(?:teams|тимс(?:\\p\{L\}\*|\p{L}*))|vk-teams|vkTeams|вктимс/giu;
 const videoProblems=[];
 for(const file of videoFiles){
- const text=fs.readFileSync(path.join(root,file),'utf8');if(!VIDEO.test(text)&&!VIDEO_WORDS.test(text))continue;
+ const text=fs.readFileSync(path.join(root,file),'utf8').replace(VK_TEAMS,'');if(!VIDEO.test(text)&&!VIDEO_WORDS.test(text))continue;
  if(VIDEO_ALLOWED[file])continue;
  text.split(/\r?\n/).forEach((line,i)=>{if(VIDEO.test(line)||VIDEO_WORDS.test(line))videoProblems.push(file+':'+(i+1)+': '+line.trim().slice(0,140));});
 }

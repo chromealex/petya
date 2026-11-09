@@ -1,0 +1,64 @@
+/* The shared messenger card (same rules in vk-teams-cards.css). */
+.mattermost-card,.vk-teams-card{width:620px;max-width:100%;margin:12px 0;box-sizing:border-box}
+.ms-body{display:flex;flex-direction:column;gap:14px;min-width:0}
+.ms-section{font-size:12px;color:var(--muted)}
+.ms-section-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:4px}
+.ms-max{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ms-note{margin:0;font-size:13px;color:var(--muted)}
+.ms-channels{display:flex;flex-wrap:wrap;gap:6px}
+.ms-channel{display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:2px 6px 2px 10px;border-radius:13px;border:1px solid var(--line,#ffffff1a);background:#ffffff06;color:var(--ink);font-size:12.5px;cursor:pointer}
+.ms-channel:hover,.ms-channel:focus-visible{border-color:#ffffff40}
+.ms-channel.quiet{color:var(--muted)}
+.ms-channel-name{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ms-count{min-width:18px;padding:0 6px;border-radius:9px;font-size:11px;line-height:18px;text-align:center;font-variant-numeric:tabular-nums;color:var(--muted);background:#ffffff0d}
+.ms-top{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:18px;align-items:start}
+.ms-top>:only-child{grid-column:1/-1;max-width:420px}
+.ms-activity,.ms-authors{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ms-plot{display:flex;align-items:flex-end;gap:3px;height:76px;border-bottom:1px solid var(--line,#ffffff1a)}
+.ms-col{flex:1;min-width:4px;height:100%;padding:0;border:0;background:transparent;display:flex;align-items:flex-end;cursor:default;border-radius:0}
+.ms-col:hover .ms-bar-col,.ms-col:focus-visible .ms-bar-col{filter:brightness(1.25)}
+.ms-col:focus-visible{outline:1px solid var(--green);outline-offset:1px}
+.ms-bar-col{display:block;width:100%;min-height:0;border-radius:3px 3px 0 0;background:#8fb3e6b3}
+.ms-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.ms-tip{font-size:12px;color:var(--muted);min-height:16px}
+.ms-author{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(40px,1fr) 30px;gap:8px;align-items:center;font-size:12.5px}
+.ms-author-name{display:flex;align-items:center;gap:6px;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ms-dot{flex:none;width:7px;height:7px;border-radius:50%;background:#ffffff33}
+.ms-dot.online{background:#c9ed9d}.ms-dot.away{background:#e5ce8c}.ms-dot.dnd{background:#f0b4a8}
+.ms-track{display:block;height:7px;border-radius:4px;background:#ffffff0a;overflow:hidden}
+.ms-fill{display:block;height:100%;border-radius:4px;background:#8fb3e6b3}
+.ms-n{font-size:12px;color:var(--muted);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ms-themes,.ms-threads,.ms-results,.ms-points,.ms-thread-card{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ms-theme{display:flex;flex-direction:column;gap:4px;padding-bottom:4px}
+.ms-theme-head{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(50px,.8fr) 104px;gap:8px;align-items:center;font-size:13px}
+.ms-theme-title{color:var(--ink);overflow-wrap:anywhere}
+.ms-quote{margin:0 0 0 2px;padding:2px 0 2px 10px;border-left:2px solid #ffffff1f;font-size:12.5px;line-height:1.45;color:var(--muted);overflow-wrap:anywhere;white-space:pre-line}
+.ms-quote-text{font-style:italic;color:var(--ink)}
+.ms-quote-meta{font-size:11.5px;white-space:nowrap}
+.ms-link{color:var(--green);text-decoration:none}
+.ms-link:hover{text-decoration:underline}
+.ms-thread{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:8px;background:#ffffff05}
+.ms-thread-text{display:flex;flex-direction:column;gap:2px;font-size:13px;line-height:1.45;overflow-wrap:anywhere;min-width:0}
+.ms-thread-title{color:var(--ink);text-decoration:none}
+a.ms-thread-title:hover{text-decoration:underline}
+.ms-thread button,.ms-row-actions button{min-height:26px;padding:2px 10px;font-size:12.5px;flex:none}
+.ms-root .ms-quote{border-left-color:#8fb3e6;font-size:13.5px}
+.ms-span{font-size:12px;color:var(--muted)}
+.ms-summary{margin:0;font-size:13.5px;line-height:1.5;overflow-wrap:anywhere}
+.ms-point{display:flex;flex-direction:column;gap:3px;padding:7px 10px;border-radius:8px;background:#ffffff05}
+.ms-point-head{display:flex;gap:8px;align-items:baseline;font-size:13px}
+.ms-point-head .kit-chip{min-height:20px;padding:1px 7px;font-size:11px;flex:none}
+.ms-point-text{overflow-wrap:anywhere}
+.ms-result{display:flex;flex-direction:column;gap:2px;padding:6px 10px;border-radius:8px;background:#ffffff05;font-size:13px;line-height:1.45}
+.ms-result-text{overflow-wrap:anywhere;white-space:pre-line}
+.ms-result mark{background:#e5ce8c40;color:inherit;border-radius:2px}
+.ms-query{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ms-sent{margin:0;padding:6px 10px;border-radius:8px;background:#c9ed9d0d;font-size:12.5px;line-height:1.45;color:var(--muted);white-space:pre-wrap;overflow-wrap:anywhere}
+.ms-sent b{font-weight:500;color:#c9ed9d}
+.ms-row-actions{margin-top:0}
+.ms-editor .kit-actions{align-items:center}
+.ms-counter{margin-left:auto;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ms-counter.over{color:#f0b4a8}
+.ms-target{display:flex;align-items:center;gap:8px}
+.ms-footnote{font-size:11.5px}
+@media(max-width:560px){.ms-top{grid-template-columns:1fr}.ms-theme-head{grid-template-columns:minmax(0,1fr) 90px}.ms-theme-head .ms-track{display:none}}

@@ -215,7 +215,10 @@ served by a dedicated registry next to app links. Two exist:
 - `crash-source` (`src/features/crash-sources.cjs`, `docs/apps/crashes.md`): `{id?, name?, color?, names?,
   standalone?, service?, ready(settings), issues(services, query), release?, crashFree?, resolve?, reopen?,
   issueUrl?}`, read by «Крэши» (`src/extensions/sentry`, `crashlytics`, `google-play` are sources; the crashes app
-  shows them together).
+  shows them together);
+- `messenger-source` (`src/features/messenger-sources.cjs`, `docs/foundations/messengers.md`): `{id, name, names?,
+  memory?, ready(settings), channels, messages, thread?, search?, presence?}`, read by «Mattermost», «VK Teams» and
+  «Поиск по всему» (Slack, Telegram, Discord, Mattermost and VK Teams are sources).
 
 A source counts only while its extension is added; an installed extension may provide one, and a broken installed
 source is skipped and reported. A new source kind is a core change: add it to `REGISTRIES` in `app-links.cjs` and

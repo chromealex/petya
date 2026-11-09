@@ -6,6 +6,7 @@
   "examples": ["Что писали в Telegram-чате команды?","Напиши Полине в Telegram, что билд готов","Найди в Telegram сообщение про релиз"],
   "setting": "module_telegram",
   "service": "telegram",
+  "provides": {"messenger-source": "messenger-source.cjs"},
   "settings": true,
   "scripts": [
     [
