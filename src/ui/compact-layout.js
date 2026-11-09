@@ -40,7 +40,7 @@
  expand.innerHTML='<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5v14 M9 12h11 M15 7l5 5-5 5"/></svg><span class="rail-label">Скрыть подписи</span>';
  try{document.body.classList.toggle('rail-expanded',localStorage.getItem('petya-rail-expanded')==='true');}catch{}
  expand.title='Показать подписи';expand.onclick=()=>{const on=document.body.classList.toggle('rail-expanded');try{localStorage.setItem('petya-rail-expanded',String(on));}catch{}syncExpand();};syncExpand();
- document.querySelector('body>aside .aside-bottom')?.before(expand);
+ (document.querySelector('body>aside .nav[data-view="growth"]')||document.querySelector('body>aside .aside-bottom'))?.before(expand);
  const tooltip=document.createElement('div');tooltip.className='sidebar-tooltip';tooltip.id='sidebar-tooltip';tooltip.setAttribute('role','tooltip');tooltip.hidden=true;document.body.append(tooltip);
  let tooltipTarget=null;
  const hideTooltip=()=>{tooltip.hidden=true;tooltipTarget?.removeAttribute('aria-describedby');tooltipTarget=null;};

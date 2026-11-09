@@ -64,7 +64,7 @@
 
 /* --- Navigation rail: optional expanded mode with section names. --- */
 body>aside .rail-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-body>aside .rail-expand{display:grid;place-items:center;width:44px;height:36px;min-height:36px;margin-top:12px;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted)}
+body>aside .rail-expand{display:grid;place-items:center;width:44px;height:36px;min-height:36px;margin-top:auto;padding:0;border:0;border-radius:10px;background:transparent;color:var(--muted)}
 body>aside .rail-expand:hover{color:var(--ink);background:#ffffff0d}
 @media(min-width:701px){
  body.rail-expanded{padding-left:200px}
