@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {SlackLogs,isLogQuestion,downloadLog,threadURL,excerpt}=require('../src/slack-log.cjs');
+const {SlackLogs,isLogQuestion,downloadLog,threadURL,excerpt}=require('../src/extensions/slack/logs.cjs');
 const {ContextStore}=require('../src/context-store.cjs');
 (async()=>{
  assert(isLogQuestion('почему билд падает в этом логе'));assert(isLogQuestion('разбери лог в слаке'));assert(!isLogQuestion('сколько багов по последней версии'));

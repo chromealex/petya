@@ -1,5 +1,9 @@
 (()=>{
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('message-cards.css',document.currentScript.src).href;document.head.append(style);
+ // Slack message links in the chat open in the Slack app (open.cjs), not in the chat's browser.
+ (window.petyaLinkOpeners||=[]).push(url=>{if(!((url.hostname==='slack.com'||url.hostname.endsWith('.slack.com'))&&url.pathname.startsWith('/archives/')))return false;window.petya.feature('slack','open',url.href).catch(err=>window.notice?.(err.message,true));return true;});
+ // Reading the open Slack window reports in the notification center (screen.cjs); the state survives a reload.
+ window.petya.feature('slack','screenStatus').then(item=>{if(item?.id)document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail:item}));}).catch(()=>{});
  const el=(tag,className,text)=>{const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined&&text!==null)n.textContent=text;return n;};
  const icon=d=>'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+d+'"/></svg>';
  // Messages that mention the user come first and are marked, so «what needs me» is visible at a glance.
@@ -7,7 +11,7 @@
  const mentions=item=>!!me?.length&&(item.parts||[{text:item.text}]).some(p=>/^@/.test(String(p.text||'').trim())&&me.some(n=>String(p.text).toLowerCase().includes(n)));
  // People by name: the team knows Slack IDs (src/ui/result-kit.js → loadTeam); unknown IDs stay as they are.
  const kit=()=>window.resultKit;
- const asked=new Map();// Slack ID → name from Slack itself (src/features/slack-open.cjs → names)
+ const asked=new Map();// Slack ID → name from Slack itself (open.cjs → names)
  const who=id=>kit()?.person?.(id)?.name||asked.get(id)||'';
  const isId=v=>/^[UWB][A-Z0-9]{6,}$/.test(String(v||''));
  const authorName=item=>isId(item.author)?who(item.author)||'Участник Slack':String(item.author||'Автор не указан');
@@ -43,7 +47,7 @@
   const rest=p.replace(/\/$/,'');return host+(rest&&rest!=='/'?(rest.length>24?'/…'+rest.slice(-16):rest):'');
  }
  const isSlackMessage=href=>{try{const u=new URL(href);return (u.hostname==='slack.com'||u.hostname.endsWith('.slack.com'))&&u.pathname.startsWith('/archives/');}catch{return false;}};
- const openInSlack=href=>window.petya.feature('slackOpen','open',href).catch(e=>window.resultKit?.toast?.(e.message,{error:true}));
+ const openInSlack=href=>window.petya.feature('slack','open',href).catch(e=>window.resultKit?.toast?.(e.message,{error:true}));
  function body(item){
   const box=el('div','slack-text');
   const parts=Array.isArray(item.parts)&&item.parts.length?item.parts.map(p=>p.link?{...p,text:p.text&&!/^https?:\/\//.test(p.text)&&!/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(p.text)?p.text:''}:p):parse(item.text);
@@ -113,7 +117,7 @@
   // Names from the team arrive a moment later; IDs the team does not know are asked from Slack. Redraw once known.
   const ids=()=>[...new Set(items.flatMap(i=>[i.author,...String(i.text||'').match(/[UWB][A-Z0-9]{8,}/g)||[]]).filter(v=>isId(v)&&!who(v)))];
   Promise.resolve(kit()?.loadTeam?.()).then(async()=>{
-   if(ids().length){try{const found=await window.petya.feature('slackOpen','names',ids());for(const [id,p] of Object.entries(found||{}))if(p?.name)asked.set(id,p.name);}catch{}}
+   if(ids().length){try{const found=await window.petya.feature('slack','names',ids());for(const [id,p] of Object.entries(found||{}))if(p?.name)asked.set(id,p.name);}catch{}}
    if(list.isConnected&&items.some(i=>isId(i.author)||/[UWB][A-Z0-9]{8,}/.test(i.text||'')))draw();}).catch(()=>{});
  };
 })();

@@ -1,5 +1,5 @@
 const {createHash,randomUUID}=require('node:crypto');
-const {threadURL}=require('../../slack-log.cjs');
+const {threadURL}=require('../../extensions/slack/logs.cjs');
 const hash=text=>createHash('sha256').update(text).digest('hex');
 function messageText(m){return [m.text,...(m.attachments||[]).flatMap(a=>[a.title,a.text,a.fallback]),...(m.blocks||[]).flatMap(b=>[b.text?.text,...(b.fields||[]).map(f=>f.text)])].filter(Boolean).join('\n').slice(0,30000);}
 function buildIds(text){return [...new Set([...text.matchAll(/(?:build|билд(?:ом|а)?|сборк[а-иу]|pipeline)\s*(?:#|№|id\s*[:=]?\s*)?([\w.-]*\d[\w.-]*)/giu)].map(m=>m[1]))];}

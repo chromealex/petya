@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const { ContextStore, retention, DAY } = require('../src/context-store.cjs');
-const { SlackContext, channels } = require('../src/slack-context.cjs');
+const { SlackContext, channels } = require('../src/extensions/slack/sync.cjs');
 const { MeetingMonitor } = require('../src/meeting-monitor.cjs');
 const { candidates } = require('../src/core.cjs');
 (async () => {

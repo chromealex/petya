@@ -16,7 +16,7 @@ async function turn(command,s){
  }
  const wanted=[...people.values()].map(p=>({name:p.displayName,email:p.emailAddress||''}));
  s.requestProgress?.report('Ищу должности этих людей в профилях Slack');
- const slack=wanted.length?await require('../../team-enrich.cjs').slackProfiles(s.settings,s.request,wanted):{profiles:[],complete:true};
+ const slack=wanted.length?await require('./profiles.cjs').slackProfiles(s.settings,s.request,wanted):{profiles:[],complete:true};
  const lines=wanted.map(p=>{
   const byEmail=p.email?slack.profiles.filter(x=>norm(x.email)===norm(p.email)):[];
   const found=byEmail.length?byEmail:slack.profiles.filter(x=>x.names.includes(norm(p.name)));

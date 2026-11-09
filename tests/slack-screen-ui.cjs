@@ -1,13 +1,15 @@
 const fs=require('node:fs'),path=require('node:path'),load=require('node:module').createRequire(path.resolve(__dirname,'../package.json'));
 process.env.PETYA_SMOKE_TEST='1';
+// The Slack app owns these requests: it is added from the start.
+load('./src/modules.cjs').defaults.module_slack='true';
 const {Dialogue}=load('./src/dialogue.cjs'),active=Dialogue.prototype.active;let dialogue;
 Dialogue.prototype.active=function(...args){dialogue=this;return active.apply(this,args);};
 const {ComputerControl}=load('./src/computer-control.cjs');let reads=0;
 ComputerControl.prototype.status=function(){return {mode:this.session?'desktop':'off',accessGranted:true,supported:true};};
 ComputerControl.prototype.start=async function(){this.session={mode:'desktop'};return this.status();};
 ComputerControl.prototype.execute=async function(action){if(!this.session)throw Object.assign(Error('Permission'),{code:'COMPUTER_PERMISSION_REQUIRED',action});if(action.type!=='focus'||action.name!=='Slack')throw Error('Unexpected action');return {};};
-load('./src/slack-log.cjs').readDesktop=async()=>{reads++;return {title:'Slack · team',text:'Сборка готова.'};};
-Object.defineProperty(load('./src/slack-digest.cjs').SlackDigest.prototype,'summarize',{get(){return async()=> 'Сборка готова.';},set(){},configurable:true});
+load('./src/extensions/slack/logs.cjs').readDesktop=async()=>{reads++;return {title:'Slack · team',text:'Сборка готова.'};};
+Object.defineProperty(load('./src/extensions/slack/digest.cjs').SlackDigest.prototype,'summarize',{get(){return async()=> 'Сборка готова.';},set(){},configurable:true});
 const key=load.resolve('./tests/smoke.cjs');require.cache[key]={id:key,filename:key,loaded:true,exports:async win=>{
  const js=s=>win.webContents.executeJavaScript(s),sleep=n=>new Promise(r=>setTimeout(r,n));
  const wait=async s=>{for(let i=0;i<120;i++){if(await js(s))return;await sleep(100);}throw Error('Timeout '+s);};

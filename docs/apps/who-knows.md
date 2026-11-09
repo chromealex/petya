@@ -13,7 +13,7 @@ Sources, all read-only:
 - **Jira** — issues that mention the subject (`POST /rest/api/3/search/jql`, `text ~ "…"` with a trailing wildcard
   for Russian stems, limited to the projects chosen in Jira settings, updated in the last two years): assignee,
   reporter and commenters (`fields=comment`). Through the shared Jira connection (`s.workspace.api`).
-- **Slack** — messages Petya already keeps in its context memory (`slack-context.cjs`); no new API calls or scopes.
+- **Slack** — messages Petya already keeps in its context memory (`src/extensions/slack/sync.cjs`); no new API calls or scopes.
 - **Meetings** — recorded meeting speech with a speaker name (`meeting-talk.cjs`); the user's own microphone is not
   counted.
 - **Messengers** (optional) — every connected `messenger-source` that can search and does not read Petya's memory

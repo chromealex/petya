@@ -25,7 +25,7 @@ function nameReply(command='',topic,userName=''){
  if(/^(?:а\s+)?(?:как меня зовут|ты помнишь,? как меня зовут|как ты меня называешь)[?.!]*$/iu.test(text)){const name=topic?.preferredName||String(userName||'').trim();return name?'Тебя зовут '+name+'.':null;}
  return null;
 }
-async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',supplementalContext='',settings={},skills=[],chooseKnowledgeModel,request,recover,clarify,uncertain,telegram=false}) {
+async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',supplementalContext='',settings={},skills=[],chooseKnowledgeModel,request,recover,clarify,uncertain,clarifyService=''}) {
  // Record which path produced the answer (shown under the message) so wrong routing is visible.
  const mark=(source,value)=>{if(topic)topic.answeredBy=source;return value;};
  const capability=require('./capabilities-reply.cjs').answer(command,topic,settings,skills);if(capability)return mark('шаблон: возможности',capability.text);
@@ -75,7 +75,7 @@ async function localAnswer({model,command='',topic,teamMembers=[],teamNotes='',s
   if(parsed.understood&&repeat.repeated(answer,topic)){if(!repeatRetry){repeatRetry=true;modelOverrides={...modelOverrides,think:false,options:{temperature:1,top_p:0.95,repeat_penalty:1.3,num_ctx:lowMemory?4096:16384,num_predict:lowMemory?1024:2048}};attempt--;continue;}return mark('защита от повторов',repeat.fallback(topic));}
   const choices=Array.isArray(parsed.clarificationOptions)?[...new Set(parsed.clarificationOptions.filter(v=>typeof v==='string').map(v=>v.trim().slice(0,160)).filter(Boolean))].slice(0,4):[];
   if(parsed.understood&&choices.length>=2)return mark('модель '+(modelOverrides.model||model),{text:answer,question:true,clarificationOptions:choices});
-  if(!parsed.understood||uncertain(answer))return mark('уточнение',telegram?'Уточните, что найти в сохранённых сообщениях Telegram.':clarify());
+  if(!parsed.understood||uncertain(answer))return mark('уточнение',clarifyService||clarify());
   return mark('модель '+(modelOverrides.model||model),answer);
  }
 }

@@ -1,5 +1,5 @@
 // Telegram as a `messenger-source` (docs/foundations/messengers.md), read from what Petya already keeps: the chats the
-// user selected, synced into the context memory by src/telegram.cjs (one memory item per chat, the last 100 messages
+// user selected, synced into the context memory by source.cjs (one memory item per chat, the last 100 messages
 // of the retained window). No Telegram call is made here; the Telegram core is unchanged. Telegram has no threads in
 // this data: a reply is marked by its «Ответ на #id» prefix. `memory: true` — «Поиск по всему» searches the memory
 // itself.

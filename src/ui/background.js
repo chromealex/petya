@@ -13,9 +13,12 @@ function localCaptureProgress(state){
 }
 window.petyaEvents.onLocalMeeting(localCaptureProgress);
 window.petya.feature('meetingMemory','captureStatus').then(localCaptureProgress).catch(()=>{});
+// Background status: the meeting recorder, then each service app's background job (src/features/service-jobs.cjs)
+// that reports a status, by job id. A job that saved something new (`updatedAt`) refreshes the materials.
+const backgroundJobs = state => Object.entries(state || {}).filter(([key, value]) => key !== 'error' && value && typeof value === 'object' && typeof value.message === 'string');
 function renderBackground(state) {
   if (state.error) $('background-status').textContent = state.error;
-  else $('background-status').textContent = `${localMeetingStatus?.message || 'Встреча не записывается'} · ${state.slack?.message || 'Slack не обновлялся'}${state.slack?.pending ? ' · осталось запросов: ' + state.slack.pending : ''}`;
+  else $('background-status').textContent = [localMeetingStatus?.message || 'Встреча не записывается', ...backgroundJobs(state).map(([, job]) => job.message + (job.pending ? ' · осталось запросов: ' + job.pending : ''))].join(' · ');
 }
-window.petyaEvents.onBackground(state => { renderBackground(state); if (state.slack?.updatedAt) refreshContexts().catch(e => notice(e.message, true)); });
+window.petyaEvents.onBackground(state => { renderBackground(state); if (backgroundJobs(state).some(([, job]) => job.updatedAt)) refreshContexts().catch(e => notice(e.message, true)); });
 window.petya.backgroundStatus().then(renderBackground).catch(e => notice(e.message, true));

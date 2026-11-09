@@ -3,10 +3,23 @@
   "description": "Личный аккаунт и обсуждения",
   "category": "comms",
   "icon": "icon.svg",
-  "examples": ["Что писали в Telegram-чате команды?","Напиши Полине в Telegram, что билд готов","Найди в Telegram сообщение про релиз"],
+  "examples": [
+    "Что писали в Telegram-чате команды?",
+    "Напиши Полине в Telegram, что билд готов",
+    "Найди в Telegram сообщение про релиз"
+  ],
   "setting": "module_telegram",
   "service": "telegram",
-  "provides": {"messenger-source": "messenger-source.cjs"},
+  "provides": {
+    "messenger-source": "messenger-source.cjs",
+    "chat-route": [
+      "route-media.cjs",
+      "route-sync.cjs"
+    ],
+    "answer-context": "answer-context.cjs",
+    "media-source": "media-source.cjs",
+    "capability": "capability.cjs"
+  },
   "settings": true,
   "scripts": [
     [
@@ -19,5 +32,11 @@
     ]
   ],
   "id": "telegram",
-  "desktop": {"apps": ["Telegram", "Telegram Desktop"]}
+  "desktop": {
+    "apps": [
+      "Telegram",
+      "Telegram Desktop"
+    ]
+  },
+  "feature": "feature.cjs"
 }

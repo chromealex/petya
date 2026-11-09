@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {question,SlackDigest}=require('../src/slack-digest.cjs');
+const assert=require('node:assert/strict');const {question,SlackDigest}=require('../src/extensions/slack/digest.cjs');
 (async()=>{
  for(const t of ['Что нового в Slack?','Петя, что пишут в слаке','Какие новости в Slack за неделю?','Сделай сводку по слаку','Что мне писали в Slack?'])assert(question(t),t);
  for(const t of ['Отправь в Slack отчёт','Почему упал билд, посмотри лог в слаке','Как подключить Slack?','Что такое Slack?'])assert.equal(question(t),null,t);

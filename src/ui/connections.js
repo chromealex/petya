@@ -8,7 +8,7 @@ async function connectCloudService(name, status, button, form, options = {}) {
   const cancel=connectionNode('button','Отменить');cancel.type='button';cancel.onclick=()=>{cancelled=true;};status.after(cancel);
   try {
     const login=await window.petya.serviceOAuthStart(name);
-    status.textContent='Сверьте код '+login.code+' в браузере и разрешите доступ '+(options.title||({slack:'Slack',asana:'Asana'})[name])+'.';
+    status.textContent='Сверьте код '+login.code+' в браузере и разрешите доступ '+(options.title||({asana:'Asana'})[name]||name)+'.';
     const deadline=Date.now()+600000;
     while(!cancelled && Date.now()<deadline) {
       await new Promise(r=>setTimeout(r,2000));if(cancelled)break;
@@ -25,7 +25,7 @@ async function connectCloudService(name, status, button, form, options = {}) {
       await window.petya.serviceOAuthClaim(name,site.id);
       document.dispatchEvent(new CustomEvent('petya-connection-checked',{detail:{service:name,ok:true}}));
       if(form.elements[name+'Token']){form.elements[name+'Token'].value='';form.elements['clear_'+name+'Token'].checked=false;}
-      status.textContent='Подключено · '+site.name+(name==='asana'?'. Откройте раздел Asana для работы с задачами.':name==='slack'?'. Укажите каналы или маску jw-* в настройках.':options.connected?'. '+options.connected:'.');
+      status.textContent='Подключено · '+site.name+(name==='asana'?'. Откройте раздел Asana для работы с задачами.':options.connected?'. '+options.connected:'.');
       status.className='connection-status connected';return;
     }
     status.textContent=cancelled?'Подключение отменено.':'Время входа истекло. Повторите подключение.';
@@ -35,7 +35,7 @@ async function connectCloudService(name, status, button, form, options = {}) {
 const connectionDefinitions = [
   { id: 'whisper', title: 'whisper.cpp', description: 'Распознавание речи на вашем компьютере', field: 'whisperUrl', fields: ['whisperUrl', 'whisperBinary', 'whisperModel', 'whisperVocabulary'] },
   { id: 'ollama', title: 'Ollama', description: 'Понимание команд и декомпозиция', field: 'ollamaUrl', fields: ['ollamaUrl', 'model'] },
-  { id: 'slack', title: 'Slack', description: 'Обсуждения команды', field: 'slackToken', flag: 'hasSlackToken', fields: ['slackToken', 'slackChannels'], oauth: true }
+
 ];
 const connectionCards = new Map();
 function connectionNode(tag, text, cls) { const n = document.createElement(tag); if (text) n.textContent = text; if (cls) n.className = cls; return n; }
@@ -51,9 +51,15 @@ function connectionStatus(def, settings) {
 }
 // A service card an app owns (its settings.js, loaded after this file): the same card as Petya's own services, from
 // its markup already in the form and a definition {id, title, description, field, flag?, fields, oauth?, guideLabel?,
-// placeholder?: {saved, empty}, connected?}; «Сохранить и проверить» goes to the app's connection-check. A card with
+// placeholder?: {saved, empty}, connected?, connectLabel?, savedOnly?, checkedOk?, manualTitle?, tokenButton?,
+// decorate?(parts), after?(parts)}; «Сохранить и проверить» goes to the app's connection-check. `connectLabel` names
+// the sign-in button, `savedOnly` the hint under it, `checkedOk` counts any check without a failure as connected,
+// `manualTitle` / `tokenButton` name the manual token part and a button that opens it; `decorate` adds help to the card
+// before its parts are arranged, `after` once they are; `parts` = {card, status, controls, content, field, form, manual}
+// A card with its own sign-in adds
 // its own sign-in adds {login?: {label, run(status, button, form)}, logout?: {label, run(status)}, hint?, manual?: [field
-// names folded into «Ручное подключение по токену»], status?(settings), checked?(result)} (Jira: Atlassian sign-in).
+// names folded into «Ручное подключение по токену»], status?(settings), checked?(result)} (Jira: Atlassian sign-in)
+.
 window.addConnectionCard = def => {
   setupConnection(def, $('settings-form'));
   return window.petya.settings().then(settings => connectionStatus(def, settings)).catch(e => notice(e.message, true));
@@ -77,14 +83,14 @@ function setupConnection(def, form) {
       controls.append(disconnect);
     }
     if(def.oauth) {
-      connect.textContent=def.id==='slack'?'Через приложение Slack':'Подключить '+def.title;
+      connect.textContent=def.connectLabel||'Подключить '+def.title;
       connect.onclick=()=>connectCloudService(def.id,status,connect,form,def);
       const disconnect=connectionNode('button','Отключить '+def.title);disconnect.type='button';
       disconnect.onclick=run(async()=>{await window.petya.serviceOAuthDisconnect(def.id);status.textContent=def.title+' отключён';status.className='connection-status';});controls.append(disconnect);
     }
     const verify = connectionNode('button', 'Сохранить и проверить', 'primary'); verify.type = 'button';
     const savedOnly = connectionNode('p', def.oauth || def.login ? 'Нажмите «Подключить» и разрешите доступ в браузере. Создавать приложение и копировать ключи не нужно. Токены обновляются автоматически.' : 'Запустите локальный сервер, затем проверьте доступ.', 'small');
-    if(def.id === 'slack') savedOnly.textContent='Подключите Slack через приложение или укажите API-токен.';
+    if(def.savedOnly) savedOnly.textContent=def.savedOnly;
     if(def.hint) savedOnly.textContent=def.hint;
     verify.onclick = run(async () => {
       verify.disabled = true; connect.disabled = true; status.textContent = 'Проверяю доступ…'; status.className = 'connection-status';
@@ -93,7 +99,7 @@ function setupConnection(def, form) {
       try {
         const result = await window.petya.connectService(def.id, input);
         await def.checked?.(result);
-        if (!result.reason) document.dispatchEvent(new CustomEvent('petya-connection-checked',{detail:{service:def.id,ok:!!result.ready||def.id==='slack'}}));
+        if (!result.reason) document.dispatchEvent(new CustomEvent('petya-connection-checked',{detail:{service:def.id,ok:!!result.ready||!!def.checkedOk}}));
         // Do not overwrite unsaved fields from another service.
         for (const key of def.fields) if (key.endsWith('Token')) { form.elements[key].value = ''; form.elements['clear_' + key].checked = false; }
         status.textContent = result.reason ? result.message : (result.ready ? 'Подключено · ' : 'Требуется настройка · ') + result.message;
@@ -107,26 +113,7 @@ function setupConnection(def, form) {
       } catch (e) { status.textContent = 'Подключение не подтверждено · ' + e.message; status.className = 'connection-status error'; }
       finally { verify.disabled = false; connect.disabled = false; }
     });
-    if (def.id === 'slack') {
-      const help = connectionNode('details', '', 'slack-setup');
-      help.append(connectionNode('summary', 'Как получить токен и настроить права'));
-      const steps = connectionNode('ol');
-      [
-        'Нажмите «Открыть настройки сервиса», выберите своё приложение Slack и откройте OAuth & Permissions → User Token Scopes.',
-        'Добавьте channels:read и groups:read — эти права нужны для названий каналов, масок jw-* и выбора всех каналов через *.',
-        'Нажмите Reinstall to Workspace и подтвердите новые права. Одного добавления прав в настройках недостаточно: нужна повторная авторизация.',
-        'Скопируйте User OAuth Token в поле OAuth token ниже и нажмите «Сохранить и проверить». Маску jw-* или * оставьте в поле каналов.'
-      ].forEach(text => steps.append(connectionNode('li', text)));
-      help.append(steps, connectionNode('p', 'Ошибка missing_scope означает, что токену не хватает прав. Для чтения сообщений также нужны channels:history / groups:history, а для личных и групповых переписок — im:history / mpim:history. Если Slack требует согласование новых прав, обратитесь к администратору рабочего пространства.', 'small'));
-      help.append(connectionNode('p', 'Нужен User OAuth Token из OAuth & Permissions конкретного приложения. Токен из Your App Configuration Tokens предназначен для управления приложениями, действует 12 часов и не подходит для чтения переписок. Если у OAuth-токена включена ротация, требуется автоматическое обновление; используйте основной вход через браузер — там Петя обновляет токены автоматически.', 'small'));
-      const links = connectionNode('div', '', 'actions');
-      for (const [key, title] of [['slackPublicRead', 'Право channels:read ↗'], ['slackPrivateRead', 'Право groups:read ↗'], ['slackOAuth', 'Повторная авторизация ↗'], ['slackTokens', 'Какой токен нужен ↗']]) {
-        const link = connectionNode('button', title); link.type = 'button';
-        link.onclick = run(() => window.petya.connectionGuide(key)); links.append(link);
-      }
-      help.append(links);
-      card.append(help);
-    }
+    def.decorate?.({ card, status, controls, content, field, form });
     if (def.id === 'ollama') {
       connect.hidden = true; guide.hidden = true;
       content.querySelector('summary').textContent = 'Дополнительные настройки';
@@ -188,35 +175,23 @@ function setupConnection(def, form) {
         finally { start.disabled = false; }
       }); controls.append(start);
     }
+    let manual=null;
     if(def.oauth || def.manual) {
-      const manual=document.createElement('details');manual.append(connectionNode('summary','Ручное подключение по токену'));
+      manual=document.createElement('details');manual.append(connectionNode('summary','Ручное подключение по токену'));
       for(const key of def.manual||[def.id+'Token','clear_'+def.id+'Token']) {
         const node=content.querySelector('[name="'+key+'"]')?.closest('label');if(node)manual.append(node);
       }
-      const oldHelp=content.querySelector('.connection-help') || card.querySelector('.slack-setup');if(oldHelp)manual.append(oldHelp);
+      const oldHelp=content.querySelector('.connection-help') || card.querySelector('.connection-help');if(oldHelp)manual.append(oldHelp);
       manual.append(guide);content.append(manual);card.append(savedOnly);
-      if(def.id==='slack') {
-        manual.querySelector('summary').textContent='API-токен Slack';
-        const tokenButton=connectionNode('button','По API-токену');tokenButton.type='button';tokenButton.dataset.slackAuth='token';
+      if(def.manualTitle) manual.querySelector('summary').textContent=def.manualTitle;
+      if(def.tokenButton) {
+        const tokenButton=connectionNode('button',def.tokenButton);tokenButton.type='button';tokenButton.dataset.tokenAuth=def.id;
         tokenButton.onclick=()=>{content.open=true;manual.open=true;field.focus();field.scrollIntoView({block:'center',behavior:'smooth'});};
         controls.append(tokenButton);
       }
     } else controls.append(guide);
     content.append(verify); controls.append(connect); card.append(description, status, controls, content);
-    if (def.id === 'slack') {
-      const shortcuts = connectionNode('div', '', 'slack-shortcuts');shortcuts.hidden=true;
-      shortcuts.append(connectionNode('p','Slack сообщил, что подключению не хватает прав. Откройте инструкцию или повторите подключение через приложение.','small'));
-      const instructions=connectionNode('button','Как настроить права');instructions.type='button';
-      instructions.onclick=()=>{
-        const help=card.querySelector('.slack-setup');
-        for(let parent=help;parent&&parent!==card;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;
-        help.scrollIntoView({block:'nearest',behavior:'smooth'});
-      };
-      shortcuts.append(instructions);card.insertBefore(shortcuts,controls);
-      const updateScopeHelp=()=>{shortcuts.hidden=!(status.classList.contains('error')&&/\bmissing_scope\b/i.test(status.textContent));};
-      new MutationObserver(updateScopeHelp).observe(status,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['class']});
-      updateScopeHelp();
-    }
+    def.after?.({ card, status, controls, content, field, form, manual });
     const setupHelp = card.querySelector('.ollama-setup'); if (setupHelp) card.insertBefore(setupHelp, content);
     connectionCards.set(def.id, { card, status, content });
     card.querySelectorAll('input,textarea,select').forEach(e => { const invalidate = () => { status.textContent = 'Настройки изменены · сохраните и проверьте'; status.className = 'connection-status'; }; e.addEventListener('input', invalidate); e.addEventListener('change', invalidate); });

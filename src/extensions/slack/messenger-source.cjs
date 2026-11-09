@@ -1,5 +1,5 @@
 // Slack as a `messenger-source` (docs/foundations/messengers.md), read from what Petya already keeps: the Slack threads
-// synced into the context memory by src/slack-context.cjs (one memory item per thread, `slack:<channel>:<root ts>`).
+// synced into the context memory by sync.cjs (one memory item per thread, `slack:<channel>:<root ts>`).
 // No Slack call is made here and nothing in the Slack core changes; what is not synced is not seen. `memory: true` —
 // «Поиск по всему» searches the memory (and Slack's own search) itself.
 const modules=require('../../modules.cjs');

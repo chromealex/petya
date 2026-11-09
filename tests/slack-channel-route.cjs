@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {chooseChannels}=require('../src/slack-channel-route.cjs');
+const assert=require('node:assert/strict');const {chooseChannels}=require('../src/extensions/slack/channel-route.cjs');
 const channels=[{id:'CBW',name:'jw-bw-dev'},{id:'CMW',name:'jw-mw-dev'},{id:'CQA',name:'jw-bw-qa'}];
 assert.deepEqual(chooseChannels(channels,{target:'разработка',topic:{jiraProject:'BW'}}).channels.map(c=>c.id),['CBW']);
 assert.deepEqual(chooseChannels(channels,{target:'разработка',topic:{jiraProject:'MW'}}).channels.map(c=>c.id),['CMW']);

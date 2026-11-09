@@ -1,4 +1,10 @@
+// «Подготовить сообщение команде» under a work report: the Slack app's panel to post it to a channel (report-share.cjs).
 (()=>{
+ const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('report-share.css',document.currentScript.src).href;document.head.append(style);
+ // Channel lookups report in the notification center, also after the window reopens.
+ const progress=item=>{if(item?.id)document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail:item}));};
+ window.petyaEvents?.onReportShareProgress?.(progress);
+ window.petya.reportShareProgress?.().then(items=>(items||[]).forEach(progress)).catch(()=>{});
  const panel=document.createElement('article');panel.className='card';panel.id='report-share';panel.hidden=true;
  panel.innerHTML=`<button id="report-share-dismiss" type="button" aria-label="Закрыть сообщение команде">×</button><h2>Сообщение команде</h2><p id="report-share-scope"></p><form id="report-share-form"><label>Найти канал<input id="report-share-filter" type="search" placeholder="#название или ссылка на канал"></label><button id="report-share-find" type="button">Найти канал</button><p id="report-share-channel-hint" class="small"></p><label>Куда отправить<select id="report-share-channel" required aria-label="Канал отчёта"></select></label><p class="small">Связанные с проектом каналы отмечены в списке. Выберите точный канал; сообщение будет опубликовано в нём отдельным постом.</p><label>Текст сообщения<textarea id="report-share-text" rows="10" maxlength="16000" required></textarea></label><p class="small">В конце сообщения будут добавлены источники исходного отчёта:</p><pre id="report-share-footer" class="small"></pre><div class="actions"><button id="report-share-send" class="primary" type="submit">Отправить в выбранный канал</button><button id="report-share-cancel" type="button">Закрыть</button></div></form><p id="report-share-result" role="status"></p><div id="report-share-receipts"></div>`;
  $('home').append(panel);let current=null,epoch=0,busy=false;

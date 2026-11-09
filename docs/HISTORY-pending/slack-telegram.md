@@ -1,0 +1,3 @@
+- Slack and Telegram are fully apps: the Slack connection card, background sync, «Попроси команду …», «Что нового в Slack?», reading the Slack window, Slack threads with logs, sharing reports and the Slack row on «Команда» come with the Slack app; the Telegram login, sync, media and answers from saved chats come with the Telegram app.
+- Without the app added, a request about Slack or Telegram offers to add the app instead of answering by itself.
+- Saved Slack and Telegram connections, synced messages, sent requests and team member IDs stay as they were.

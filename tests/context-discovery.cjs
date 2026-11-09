@@ -30,11 +30,11 @@ const slack=(id,channel,text,user='alex')=>({id,channel,text,user,at:now,source:
  for(const follow of ['а почему?','посмотри это','нет, другое','проверь что не так','проверь почту'])assert.equal(await service.turn(follow),null);
  state.topics=[];state.activeId='';let refreshed=false;
  s.memory.prune=()=>refreshed?[slack('fresh','C1','Проверь ошибку входа')]:[];
- s.slackSync={start:async()=>{refreshed=true;}};
+ s.slack={sync:{start:async()=>{refreshed=true;}}};
  assert.match((await service.turn('посмотри что не так')).text,/Slack/);
  assert(refreshed);assert.equal(s.dialogue.active().attachments[0].contextId,'fresh');
  state.topics=[];state.activeId='';refreshed=false;
- s.slackSync.start=async()=>{throw Error('offline');};
+ s.slack.sync.start=async()=>{throw Error('offline');};
  assert.match((await service.turn('посмотри что не так')).text,/offline/);
  s.modules.enabled=()=>false;
  s.memory.prune=()=>[slack('disabled','C1','Проверь ошибку входа')];

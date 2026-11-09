@@ -27,7 +27,11 @@ walk('src/ui',f=>/\.(?:js|html|css)$/.test(f));
 const MOVED={'src/jira-insights.cjs':'insights.cjs','src/jira-issue.cjs':'issue.cjs','src/jira-options.cjs':'options.cjs','src/jira-routing.cjs':'routing.cjs',
  'src/jira-selection.cjs':'selection.cjs','src/jira-setup.cjs':'setup.cjs','src/team-jira.cjs':'team-search.cjs','src/team-jira-roster.cjs':'team-roster.cjs',
  'src/task-duplicates.cjs':'duplicates.cjs','src/task-metrics.cjs':'metrics.cjs','src/atlassian-oauth.cjs':'atlassian-oauth.cjs',
- 'src/features/jira-slack-people.cjs':'slack-people.cjs','src/ui/task-metrics.js':'task-metrics.js'};
+ 'src/ui/task-metrics.js':'task-metrics.js'};
+// «Люди из Jira с должностями из Slack» belongs to the Slack app (src/extensions/slack/jira-people.cjs): it reads Jira
+// through the shared workspace and joins Slack profiles there.
+assert.ok(!fs.existsSync(path.join(root,'src/features/jira-slack-people.cjs')),'src/features/jira-slack-people.cjs moved to the Slack app');
+assert.ok(fs.existsSync(path.join(root,'src/extensions/slack/jira-people.cjs')),'src/extensions/slack/jira-people.cjs exists');
 for(const [old,now] of Object.entries(MOVED)){assert.ok(!fs.existsSync(path.join(root,old)),old+' is the Jira app\'s');assert.ok(fs.existsSync(path.join(root,'src/extensions/jira',now)),'src/extensions/jira/'+now+' exists');}
 for(const old of ['src/asana.cjs','src/asana-setup.cjs','src/ui/asana.js'])assert.ok(!fs.existsSync(path.join(root,old)),old+' is the Asana app\'s');
 for(const now of ['asana.cjs','asana-page.js','feature.cjs'])assert.ok(fs.existsSync(path.join(root,'src/extensions/asana',now)),'src/extensions/asana/'+now+' exists');
@@ -38,7 +42,6 @@ const OWNED=[
  [/teamJiraSearch|Найти человека в Jira|jiraLink\(/,'the Jira people search on «Команда» (src/extensions/jira/team-field.js)'],
  [/connectAtlassian|atlassianConnected|Подключить Jira и Confluence|Отключить Atlassian/,'the Atlassian sign-in card (src/extensions/jira/settings.js)'],
  [/asanaProjects\(|asanaTasks\(|asanaPreview\(|Открыть задачи Asana/,'the Asana page (src/extensions/asana/asana-page.js)'],
- [/jiraSlackPeople|Люди из Jira/,'Jira people with Slack titles (src/extensions/jira/slack-people.cjs)'],
  [/class AtlassianOAuth|requireConfluence|api\.atlassian\.com\/ex\//,'the Atlassian adapter (src/extensions/jira/atlassian-oauth.cjs)']
 ];
 // Generic plumbing that names these only as IPC channel names (the preload's list of calls the renderer may make).
@@ -59,7 +62,7 @@ const REMAINING={
  'src/agents.cjs':{why:'agents re-check the Jira project of a delegated issue',lines:/extensions\/jira\/routing\.cjs/},
  'src/learning-setup.cjs':{why:'learning names Jira project keys in global phrases',lines:/extensions\/jira\/routing\.cjs/},
  'src/project-catalog.cjs':{why:'the project catalogue lists Jira projects',lines:/extensions\/jira\/selection\.cjs/},
- 'src/slack-setup.cjs':{why:'the team fill falls back to Jira assignees',lines:/extensions\/jira\/team-roster\.cjs/},
+ 'src/team-fill-setup.cjs':{why:'the team fill falls back to Jira assignees',lines:/extensions\/jira\/team-roster\.cjs/},
  'src/features/dashboards.cjs':{why:'dashboards build Jira JQL widgets',lines:/extensions\/jira\/dashboard\.cjs/},
  'src/features/assignment.cjs':{why:'team load and task assignment read Asana (with Jira, src/workload.cjs)',lines:/extensions\/asana\/asana\.cjs/}
 };

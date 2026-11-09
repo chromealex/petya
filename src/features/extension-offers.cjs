@@ -69,13 +69,13 @@ function setup(s){
  const prune=()=>{for(const [k,v]of pending)if(Date.now()-v.at>30*60000)pending.delete(k);};
  const keep=(o,command,topicId,direct)=>{prune();const id=randomUUID();pending.set(id,{id,ext:o.id,command,topicId,direct,at:Date.now()});return {id,ext:o.id,name:o.name,pitch:o.pitch,connect:o.connect||'install',...o.service?{service:o.service}:{}};};
  const services=command=>{try{return require('../service-access.cjs').detect(command,null);}catch{return [];}};
- // Requests Petya's own handlers answer (Jira, team, Slack digest, sums, weather) are never taken over by an offer.
+ // Requests Petya's own handlers answer (Jira, team, an added app's own requests, sums, weather) are never taken over by an offer.
  // work-query-route classifies ordinary talk as {kind:'chat'}: only other kinds count as owned.
  function ownedByPetya(command,topic){
   try{
    if(require('../dialogue.cjs').intent(command)!=='chat')return true;
    const route=require('../work-query-route.cjs').classify(command,topic||{});if(route&&route.kind!=='chat')return true;
-   if(require('../explicit-calculation.cjs').explicitCalculation(command)!==null||require('../team-fill.cjs').isTeamFill(command)||require('../slack-digest.cjs').question(command))return true;
+   if(require('../explicit-calculation.cjs').explicitCalculation(command)!==null||require('../team-fill.cjs').isTeamFill(command)||require('../capabilities.cjs').owned(command,s.settings))return true;
    const fresh=require('./fresh-data.cjs');return !!fresh.weatherQuestion(command)||!!fresh.rateQuestion(command);
   }catch{return false;}
  }

@@ -67,7 +67,7 @@ A failed Mac build does not hold the Windows release back: re-run the failed job
 | `src/*-setup.cjs` | groups of main-process services and their IPC handlers (agents, attachments, chats and projects, computer control, connections, dictation, Git, Jira, learning, mail, Ollama, skills, Slack, Telegram, voice, Asana); each takes a `ctx` with live getters for the state it shares with `main.cjs` |
 | `src/dialogue*.cjs`, `src/answer-*.cjs` | dialogue, model request, answer parsing and guards |
 | `src/*-routing.cjs`, `src/work-*.cjs` | intent detection and work scenarios (Jira, team) |
-| `src/slack*.cjs`, `src/telegram.cjs`, … | integrations (mail, Notion, Google Play: their apps in `src/extensions/`) |
+| `src/asana*.cjs`, … | integrations (mail, Notion, Google Play, Slack, Telegram: their apps in `src/extensions/`) |
 | `src/ui/` | renderer UI (no Node.js access) |
 | `oauth/` | OAuth gateway and app registration ([REGISTRATION.md](../oauth/REGISTRATION.md)) |
 | `native/` | native macOS helpers (Swift) |

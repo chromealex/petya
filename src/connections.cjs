@@ -1,7 +1,6 @@
-const { resolveChannels } = require('./slack.cjs');
 const { localEndpoint } = require('./core.cjs');
 const guides = Object.freeze({ asana: 'https://app.asana.com/0/my-apps', slackTokens: 'https://docs.slack.dev/authentication/tokens/', slackPublicRead: 'https://docs.slack.dev/reference/scopes/channels.read/', slackPrivateRead: 'https://docs.slack.dev/reference/scopes/groups.read/', slackOAuth: 'https://docs.slack.dev/authentication/installing-with-oauth/', slack: 'https://api.slack.com/apps', jira: 'https://id.atlassian.com/manage-profile/security/api-tokens', confluence: 'https://id.atlassian.com/manage-profile/security/api-tokens', ollama: 'https://ollama.com/download', whisper: 'https://github.com/ggml-org/whisper.cpp/tree/master/examples/server' });
-const fields = Object.freeze({ asana: [], slack: ['slackToken', 'slackChannels'], jira: ['jiraUrl', 'jiraEmail', 'jiraToken', 'jiraProjects', 'jiraProject', 'jiraIssueType', 'jiraBoardId', 'jiraVersionId', 'confluenceSpace'], confluence: ['jiraUrl', 'jiraEmail', 'jiraToken', 'confluenceSpace'], ollama: ['ollamaUrl', 'model'], whisper: ['whisperUrl', 'whisperBinary', 'whisperModel'] });
+const fields = Object.freeze({ asana: [], jira: ['jiraUrl', 'jiraEmail', 'jiraToken', 'jiraProjects', 'jiraProject', 'jiraIssueType', 'jiraBoardId', 'jiraVersionId', 'confluenceSpace'], confluence: ['jiraUrl', 'jiraEmail', 'jiraToken', 'confluenceSpace'], ollama: ['ollamaUrl', 'model'], whisper: ['whisperUrl', 'whisperBinary', 'whisperModel'] });
 // Cards apps own (connection-check, src/features/connection-checks.cjs) bring their fields, check and guide link.
 const app = service => require('./features/connection-checks.cjs').find(service);
 const fieldsOf = service => Object.hasOwn(fields, service) ? fields[service] : app(service)?.fields;
@@ -21,14 +20,6 @@ async function checkConnection(service, s, request) {
     const r = await call('https://app.asana.com/api/1.0/workspaces/'+s.asanaWorkspace+'?opt_fields=name');
     if (!r.data?.gid) throw new Error('Asana вернула неожиданный ответ.');
     return {ready:true,message:'Asana · '+r.data.name+'. Доступ к рабочему пространству проверен.'};
-  }
-  if (service === 'slack') {
-    const headers = { Authorization: 'Bearer ' + (s.slackCredential ? '' : need(s.slackToken, 'Slack token')) };
-    const data = await call('https://slack.com/api/auth.test', headers, { method: 'POST' });
-    if (!data.ok) throw new Error('Slack: ' + data.error);
-    const channels = (s.slackChannels || '').trim() ? await resolveChannels(s.slackChannels, s.slackToken, request) : [];
-    for (const channel of channels.slice(0, 1)) { const history = await call('https://slack.com/api/conversations.history?' + new URLSearchParams({ channel, limit: 1 }), headers); if (!history.ok) throw new Error(`Нет доступа к ${channel}: ${history.error}`); }
-    return { message: `${data.team || 'Slack'} · ${data.user || 'авторизация проверена'}. ${channels.length ? `Найдено каналов/переписок: ${channels.length}. Чтение первого проверено; остальные проверяются при загрузке.` : 'Укажите каналы для загрузки обсуждений.'}`, ready: !!channels.length };
   }
   if (service === 'jira' || service === 'confluence') {
     const site = new URL(need(s.jiraUrl, 'адрес Atlassian'));

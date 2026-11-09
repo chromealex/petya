@@ -1,0 +1,3 @@
+/* The «Сообщение команде» panel under a work report (report-share.js). */
+#report-share-footer{white-space:pre-wrap;overflow-wrap:anywhere;font-family:inherit}
+#report-share{width:100%;max-width:800px;box-sizing:border-box;margin:12px 0}#report-share-dismiss{float:right;width:26px;height:26px;display:grid;place-items:center;padding:0}#report-share-filter{margin-bottom:0}#report-share-find{padding:5px 10px;margin-bottom:8px}#report-share-channel-hint:empty{display:none}

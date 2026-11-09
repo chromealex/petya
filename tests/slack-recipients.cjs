@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict');
-const {parse,SlackRequest}=require('../src/slack-request.cjs');
+const {parse,SlackRequest}=require('../src/extensions/slack/team-request.cjs');
 const {roles}=require('../src/team-roles.cjs');
-const {resolveRecipients}=require('../src/slack-recipients.cjs');
+const {resolveRecipients}=require('../src/extensions/slack/recipients.cjs');
 function fixture(){
  const users=[
   {id:'U1',real_name:'Client One',profile:{title:'Client developer'}},

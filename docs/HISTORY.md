@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.17.8 — Slack and Telegram live in their apps
+
+- Slack and Telegram left Petya's core for their apps: chat routes (digest, people, reference, screen, send, media, sync), service jobs, media and team sources, capabilities and the connection cards. «Люди из Jira с должностями из Slack» is the Slack app's. Nothing changes in use.
+
 ## 0.17.7 — Jira and Asana live in their apps
 
 - Jira and Asana left Petya's core for their apps: Jira's bugs, settings card and «Команда» row go through the shared registries, the Asana page lives in its app, and sign-in goes through a neutral broker. Nothing changes in use.

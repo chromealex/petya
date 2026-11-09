@@ -28,7 +28,7 @@ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
  assert.equal(await routes.turn({settings:{extension_d:'true'}},'дельта',{routes:short}),null,'not ready');
  assert.equal(await routes.turn({settings:{extension_d:'true',dReady:'true'}},'дельта',{stage:'commands',routes:short}),null,'another stage');
  // The bundled routes load and validate.
- assert.deepEqual(routes.load().map(x=>x.id).sort(),['ci-builds','git','mail','unity']);
+ assert.deepEqual(routes.load().map(x=>x.id).sort(),['ci-builds','git','mail','slack-digest','slack-media','slack-people','slack-reference','slack-screen','slack-send','telegram-media','telegram-sync','unity']);
 
  // --- Lifecycle: listeners of the event's company only, a throwing listener stops nothing, drop.
  const lifecycle=require('../src/features/lifecycle.cjs');const seen=[];
