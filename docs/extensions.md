@@ -78,7 +78,7 @@ extension (refused). Everything the extension needs is inside its folder; there 
 | `uses` | `[kind]` | Cross-app kinds its cards call (section 9). Fills «Работает вместе с». |
 | `provides` | `{kind: "file.cjs" \| [files]}` | Kinds it serves to other apps (section 9). |
 | `downloads` | `[{id, name, bytes \| {darwin, win32}, approx?, optional?, requires?}]` | What adding it downloads (section 11). |
-| `ui` | `{pages: [...], tabs: [...]}` | Its own items in Petya's interface: a page in the left rail, tabs on Petya's or other apps' pages (section 8a). |
+| `ui` | `{pages: [...], tabs: [...], personFields: [...]}` | Its own items in Petya's interface: a page in the left rail, tabs on Petya's or other apps' pages, fields on the cards of «Команда» (section 8a). |
 
 `registry.validate()` checks all of this; bundled errors throw at startup (a bug), external errors refuse the
 extension and show a notification with the reason.
@@ -231,6 +231,15 @@ An app can add its own interface to Petya's window, not only cards in the chat:
   app already took (or a Petya section id) is refused — the first app keeps it — each with a clear `[extensions]`
   error in the dev console (and a notification for installed apps). The review dialog of an installed extension lists
   «Пункты меню слева» and «Вкладки на страницах».
+- **`personFields`** (up to 4): a field on every card of «Команда» — `{key, title, render, order?}`, drawn by
+  `src/ui/person-fields.js` after the card's own fields and before its photo and services (sorted by `order`, then app
+  name). The value lives in the person record: under `key` when it is an attribute the record keeps but the page does
+  not show (`birthday`, filled by Slack profiles and read by «Люди»), otherwise in the person's `fields` map
+  (`{key: text}`, up to 16 short strings). Either way it is saved with the team and kept while the app is off — only the
+  field goes. A key the page shows itself (`name`, `role`, …) is refused with an `[extensions]` error. The renderer gets
+  `render(container, {extension, key, value, set(value), person, kit, feature})`; `set` marks the team as changed. The
+  review dialog lists «Поля на карточках «Команды»». Example: «Дни рождения» declares
+  `{"key": "birthday", "title": "День рождения", "render": "renderBirthdayField"}` (`src/extensions/birthdays`).
 - **Core pages use the same tab host** (`src/ui/page-tabs.js`, `window.petyaTabs`): «Навыки» (Сценарии, Исправления
   фраз, Команды) and «Настройки» (Сервисы, Голос и модели, Приложение) declare their tabs with `petyaTabs.core(page,
   tabs, {fallback, host, onSelect})` and mark their content with `data-page-tab`; apps' sections go through

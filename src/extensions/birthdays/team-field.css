@@ -1,0 +1,6 @@
+/* «День рождения» on the cards of «Команда» (team-field.js) */
+.team-birthday{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.team-birthday-row{display:flex;gap:6px;align-items:center}
+.team-birthday-row input[type=date]{flex:1;min-width:0;color-scheme:dark;cursor:pointer;padding:8px 10px}
+.team-birthday-row button{min-height:32px;padding:3px 10px;font-size:12px}
+.team-birthday-note{color:var(--muted)}

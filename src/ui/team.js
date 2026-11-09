@@ -1,8 +1,8 @@
 (() => {
- const list=$('team-list'),form=$('team-form'),status=$('team-status');let loaded=false,dirty=false;
+ const list=$('team-list'),form=$('team-form'),status=$('team-status');let loaded=false,dirty=false,attributes=[];
  // The save strip appears only with unsaved edits.
  const setDirty=value=>{dirty=value;form.classList.toggle('is-dirty',value);};
- const fields=[['me','Это я',4],['name','Имя',120],['aliases','Как вы называете человека',240],['role','Роль',160],['projects','Проекты',400],['responsibilities','За что отвечает',1600],['email','Email',254],['phone','Телефон',40],['birthday','День рождения',10],['slackId','Slack member ID (необязательно)',80],['jiraId','Jira',160],['jiraName','Имя в Jira',200],['meetingName','Имя на встречах',240]];
+ const fields=[['me','Это я',4],['name','Имя',120],['aliases','Как вы называете человека',240],['role','Роль',160],['projects','Проекты',400],['responsibilities','За что отвечает',1600],['email','Email',254],['phone','Телефон',40],['slackId','Slack member ID (необязательно)',80],['jiraId','Jira',160],['jiraName','Имя в Jira',200],['meetingName','Имя на встречах',240]];
  // Names seen in meetings: the list for «Имя на встречах» and the automatic match as each card's hint.
  let meetingNames=[];
  window.paintMeetingNames=()=>{let list=document.getElementById('team-meeting-names');if(!list){list=document.createElement('datalist');list.id='team-meeting-names';document.body.append(list);}
@@ -30,8 +30,6 @@
    if(['name','role','projects'].includes(key))input.addEventListener('input',updateSummary);
    if(key==='email')input.type='email';
    if(key==='phone'){input.type='tel';input.placeholder='+7 900 000-00-00';}
-   // Birthday: shown as ДД.ММ(.ГГГГ); saved as ISO by the main process.
-   if(key==='birthday'){input.type='hidden';wrap.append(birthdayPicker(input));}
    if(key==='aliases')input.placeholder=member.aliasHint?'Например: '+member.aliasHint:'Как вы зовёте человека в разговоре';
    // «Имя на встречах»: empty means Petya matches the name himself (shown as a hint); a chosen one wins. Names seen
    // in meetings are offered in the list.
@@ -47,36 +45,20 @@
     wrap.append(box,document.createTextNode('Это я'));wrap.title='Петя будет знать, что это вы, и говорить вам «ты»';}
    wrap.append(input);editor.append(wrap);
   }
+  // Stored person attributes this page does not show (filled by services, shown by apps) and apps' own `fields`
+  // stay in the card as they are, so saving the team keeps them; apps draw their fields before the anchor
+  // (person-fields.js, extension.json "personFields").
+  for(const key of attributes)if(!fields.some(([k])=>k===key)&&!editor.querySelector('[data-field="'+key+'"]')){const kept=document.createElement('input');kept.type='hidden';kept.dataset.field=key;kept.dataset.kept='true';kept.value=member[key]||'';editor.append(kept);}
+  const own=document.createElement('input');own.type='hidden';own.dataset.field='fields';own.value=JSON.stringify(member.fields&&typeof member.fields==='object'?member.fields:{});editor.append(own);
+  const anchor=document.createElement('span');anchor.className='team-person-fields-anchor';anchor.hidden=true;editor.append(anchor);
   addAccounts(editor,member);
+  window.petyaPersonFields?.mount(card,{editor,anchor});
   window.paintMeetingNames?.();
   updateSummary();
   const actions=document.createElement('div');actions.className='actions team-member-wide';
   // A removed person goes to «Удалённые»: a team refresh does not add them back or update them (src/team-removed.cjs).
   const remove=window.deleteButton('Удалить участника');remove.onclick=()=>{const value=key=>editor.querySelector('[data-field="'+key+'"]')?.value.trim()||'';if(value('name'))window.teamRemovedNow?.({...Object.fromEntries([...editor.querySelectorAll('[data-field]')].map(e=>[e.dataset.field,e.value])),at:Date.now()});setDirty(true);card.remove();status.textContent='Изменения не сохранены.';};
   actions.append(remove);editor.append(actions);details.append(summary,editor);card.append(details);list.append(card);return card;
- }
- // Birthday: a date with a calendar; the stored value (ISO, or «--MM-DD» when Slack gave no year) is in the
- // hidden input, the line under it says the date in words and the age.
- function birthdayPicker(store){
-  const box=document.createElement('div');box.className='team-birthday';const date=document.createElement('input');date.type='date';date.setAttribute('aria-label','День рождения');
-  const today=new Date(),start=new Date(today.getFullYear(),today.getMonth(),today.getDate()),iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');date.max=iso(today);date.min='1930-01-01';
-  const note=document.createElement('span');note.className='small team-birthday-note';
-  const clear=document.createElement('button');clear.type='button';clear.className='quiet';clear.textContent='Очистить';
-  const locale=window.petyaLocale||'ru-RU';
-  const paint=()=>{const v=store.value,full=/^\d{4}-\d{2}-\d{2}$/.test(v),partial=/^--\d{2}-\d{2}$/.test(v);date.value=full?v:'';clear.hidden=!v;
-   if(full){const d=new Date(v+'T12:00:00'),next=new Date(today.getFullYear(),d.getMonth(),d.getDate());if(next<start)next.setFullYear(today.getFullYear()+1);
-    const age=next.getFullYear()-d.getFullYear(),days=Math.round((next-start)/86400000);
-    note.textContent=d.toLocaleDateString(locale,{day:'numeric',month:'long',year:'numeric'})+' · '+(days===0?'сегодня исполняется '+age:'исполнится '+age+(days===1?' завтра':' через '+days+' дн.'));}
-   else if(partial){const [,m,d]=/^--(\d{2})-(\d{2})$/.exec(v);note.textContent=new Date(2000,Number(m)-1,Number(d)).toLocaleDateString(locale,{day:'numeric',month:'long'})+' · год неизвестен — выберите дату в календаре';}
-   else note.textContent='Не указан — нажмите, чтобы выбрать в календаре';};
-  date.addEventListener('change',e=>{e.stopPropagation();if(date.value){store.value=date.value;store.dispatchEvent(new Event('input',{bubbles:true}));}paint();});
-  // A click anywhere in the field opens the calendar.
-  date.addEventListener('click',()=>{try{date.showPicker();}catch{}});
-  // Only day and month known: the calendar opens on that day (the year is to be picked).
-  date.addEventListener('focus',()=>{const m=/^--(\d{2})-(\d{2})$/.exec(store.value);if(m&&!date.value)date.value='1990-'+m[1]+'-'+m[2];});
-  date.addEventListener('blur',()=>{if(/^--/.test(store.value))paint();});
-  clear.onclick=()=>{store.value='';store.dispatchEvent(new Event('input',{bubbles:true}));paint();};
-  const row=document.createElement('div');row.className='team-birthday-row';row.append(date,clear);box.append(row,note);setTimeout(paint,0);return box;
  }
  // Projects: chips chosen from Petya's projects and the Jira projects; typing filters the list.
  let projectChoices=null;
@@ -232,7 +214,7 @@
   removedBox.append(summary,hint,ul);
  }
  window.teamRemovedNow=row=>{gone.unshift(row);paintRemoved();};
- async function load(force=false){const data=await window.petya.teamList();if(dirty&&!force){status.textContent='Команда обновлена. Обновите список перед сохранением ручных правок.';$('team-save').disabled=true;return;}stored=data.removed||[];gone=[];paintRemoved();list.replaceChildren();data.members.forEach(add);window.paintTeamLoad?.();$('team-notes').value=data.notes;loaded=true;setDirty(false);$('team-save').disabled=false;$('team-add').disabled=false;status.textContent=data.members.length?'Участников: '+data.members.length:'Добавьте коллег, чтобы Петя знал, кто за что отвечает.';}
+ async function load(force=false){const data=await window.petya.teamList();attributes=Array.isArray(data.attributes)?data.attributes:attributes;if(dirty&&!force){status.textContent='Команда обновлена. Обновите список перед сохранением ручных правок.';$('team-save').disabled=true;return;}stored=data.removed||[];gone=[];paintRemoved();list.replaceChildren();data.members.forEach(add);window.paintTeamLoad?.();$('team-notes').value=data.notes;loaded=true;setDirty(false);$('team-save').disabled=false;$('team-add').disabled=false;status.textContent=data.members.length?'Участников: '+data.members.length:'Добавьте коллег, чтобы Петя знал, кто за что отвечает.';}
  document.querySelector('[data-view="team"]').addEventListener('click',run(async()=>{if(!loaded)await load();refreshLoad().catch(()=>{});}));
  $('team-add').onclick=()=>{if(list.children.length>=100){notice('Можно добавить до 100 участников.',true);return;}setDirty(true);add().querySelector('[data-field="name"]').focus();status.textContent='Изменения не сохранены.';};
  form.addEventListener('input',()=>{setDirty(true);status.textContent='Изменения не сохранены.';});

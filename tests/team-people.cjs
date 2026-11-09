@@ -36,8 +36,9 @@ assert.equal(russian('Konstantin Shishlov'),'Константин Шишлов')
   assert.equal(require('../src/team.cjs').validate([{name:'X',photo:ms[0].photo}])[0].photo,ms[0].photo);assert.equal(require('../src/team.cjs').validate([{name:'X',photo:'javascript:1'}])[0].photo,undefined);}
  // Birthdays plugin: once a day from 9:00, a note in the «Дни рождения» chat.
  {const os=require('node:os'),fs=require('node:fs'),path=require('node:path');const root=fs.mkdtempSync(path.join(os.tmpdir(),'petya-bd-'));
-  const st={projects:[{id:'general',name:'Общее'}],topics:[]};const bs={smoke:true,dataRoot:root,settings:{teamMembers:JSON.stringify([{name:'Лев Силаев',birthday:'12.05'},{name:'Полина',birthday:'1995-05-13'}])},dialogue:{state:st,persist(){}}};
+  const st={projects:[{id:'general',name:'Общее'}],topics:[]};const bs={smoke:true,dataRoot:root,settings:{teamMembers:JSON.stringify([{name:'Лев Силаев',birthday:'12.05'},{name:'Полина',birthday:'1995-05-13'}])},saveSettings(patch){Object.assign(this.settings,patch);},dialogue:{state:st,persist(){}}};
   const {birthdays}=require('../src/extensions/birthdays/feature.cjs').setup(bs);
+  assert.equal(bs.settings.extension_birthdays,'true','a team with birthdays gets the app added (it always ran before 0.16)');
   assert.equal(birthdays.run(new Date(2026,4,12,8)),null,'not before 9');const msg=birthdays.run(new Date(2026,4,12,9,5));assert.match(msg,/Сегодня день рождения: Лев Силаев/);assert.match(msg,/Завтра: Полина \(31\)/);
   assert.equal(birthdays.run(new Date(2026,4,12,15)),null,'once a day');assert.equal(st.topics[0].title,'Дни рождения');fs.rmSync(root,{recursive:true,force:true});}
  console.log('Team people: one card across alphabets, Russian names, deactivated accounts dropped, service accounts kept, saved duplicates joined, photos, birthdays passed');

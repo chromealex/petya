@@ -242,12 +242,6 @@ button.delete-button svg{width:16px;height:16px}
 .team-project-options button{text-align:left;min-height:32px;padding:6px 10px;border:0;border-radius:6px;background:transparent;font-size:13px}
 .team-project-options button:hover,.team-project-options button:focus-visible{background:color-mix(in srgb,var(--on) 6%,transparent)}
 .team-project-free{color:var(--green)}
-/* Team card: birthday */
-.team-birthday{display:flex;flex-direction:column;gap:4px;margin-top:6px}
-.team-birthday-row{display:flex;gap:6px;align-items:center}
-.team-birthday-row input[type=date]{flex:1;min-width:0;color-scheme:dark;cursor:pointer}
-.team-birthday-row button{min-height:32px;padding:3px 10px;font-size:12px}
-.team-birthday-note{color:var(--muted)}
 .team-account-main dl{cursor:default}
 /* User messages: the time stays at the right edge; the actions appear to its left on hover. */
 #home .chat-feed .message-user .message-meta>time{order:99}
@@ -350,3 +344,6 @@ input,textarea,select,[contenteditable]:not([contenteditable="false"]),pre,code,
 .page-tabs-host{min-width:0}
 .ext-page-body{display:grid;gap:16px;min-width:0}
 body>aside .nav-icon-box{display:block;width:18px;height:18px}
+/* App fields on the cards of «Команда» (person-fields.js): a labelled item like the card's own fields */
+.team-person-field{display:flex;flex-direction:column;margin:0}
+.team-person-field-title{font-size:13px;color:var(--muted)}

@@ -78,7 +78,34 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("editLearning();{const f=$('learn-form');(f.closest('details')||f).classList.add('never-shown')}");await refreshed();
  assert.deepEqual(await options(),['command','answer']);
 
+ // «Дни рождения»: the field on «Команда» cards comes from the app; the date stays in the record without it.
+ const members=()=>js("window.petya.teamList().then(d=>d.members.map(m=>[m.name,m.birthday]))");
+ await js("window.petya.teamSave({members:[{name:'Маша Иванова',role:'QA',projects:'Puzzle',birthday:'1996-05-14'},{name:'Олег Петров',role:'Android',birthday:'--05-20'}],notes:'',removed:[]})");
+ await js("window.extensionHost.remove('birthdays').catch(()=>{})");await settle();
+ await js("view('team');document.dispatchEvent(new Event('petya-team-updated'))");
+ await wait("document.querySelectorAll('#team-list .team-member').length===2");
+ assert.equal(await js("document.querySelectorAll('#team-list .team-person-field').length"),0,'no birthday field without the app');
+ assert.equal(await js("document.querySelector('#team-list [data-field=\"birthday\"]').dataset.kept"),'true','kept as it is');
+ await js("document.querySelector('#team-list [data-field=\"role\"]').value='QA lead';document.querySelector('#team-list [data-field=\"role\"]').dispatchEvent(new Event('input',{bubbles:true}))");
+ await js("window.saveTeamNow()");
+ assert.deepEqual(await members(),[['Маша Иванова','1996-05-14'],['Олег Петров','--05-20']],'saving the team without the app loses no date');
+ await js("window.extensionHost.open('birthdays',{stay:true})");await settle();
+ await wait("document.querySelectorAll('#team-list .team-person-field[data-person-field=\"birthday\"]').length===2");
+ assert.equal(await js("document.querySelector('#team-list .team-person-field input[type=date]').value"),'1996-05-14');
+ assert.match(await js("document.querySelector('#team-list .team-birthday-note').textContent"),en?/1996/:/1996/);
+ assert.equal(await js("(()=>{const f=document.querySelector('#team-list .team-person-field'),card=f.closest('.team-member'),phone=card.querySelector('[data-field=\"phone\"]'),photo=card.querySelector('.team-photo');return !!(phone.compareDocumentPosition(f)&Node.DOCUMENT_POSITION_FOLLOWING)&&!!(f.compareDocumentPosition(photo)&Node.DOCUMENT_POSITION_FOLLOWING);})()"),true,'after the card\'s own fields, before the photo');
+ await js("document.querySelectorAll('#team-list .team-member details').forEach((d,i)=>d.open=i===0);document.querySelector('#team-list .team-person-field').scrollIntoView({block:'center'})");
+ await shot('team-birthday',{rail:'wide'});await shot('team-birthday-compact',{rail:'compact'});await shot('team-birthday-narrow',{rail:'compact',size:[760,860]});
+ // Picking a date marks the team changed and saves it in the record.
+ await js("{const d=document.querySelectorAll('#team-list .team-person-field input[type=date]')[1];d.value='1990-05-20';d.dispatchEvent(new Event('change',{bubbles:true}));}");
+ assert.equal(await js("document.getElementById('team-form').classList.contains('is-dirty')"),true);
+ await js("window.saveTeamNow()");
+ assert.deepEqual((await members())[1],['Олег Петров','1990-05-20']);
+ await js("window.extensionHost.remove('birthdays')");await settle();
+ assert.equal(await js("document.querySelectorAll('#team-list .team-person-field').length"),0,'the field goes with the app');
+ assert.equal(await js("document.querySelectorAll('#team-list [data-field=\"birthday\"]')[1].value"),'1990-05-20');
+
  console.log('Screenshots:',shots.join(' '));
- console.log('Apps own UI: mail rules tab, voice-command actions passed');
+ console.log('Apps own UI: mail rules tab, voice-command actions, birthday field passed');
 }};
 require('../src/main.cjs');

@@ -72,13 +72,14 @@ const UI_GROUPS=['assistant','work','setup'];
 const UI_ID=/^[a-z][a-z0-9-]{0,39}$/,UI_RENDER=/^[A-Za-z_$][\w$]{0,63}$/;
 function validateUi(d,dir){
  const ui=d.ui,where='extension '+d.id+': ui';
- if(!ui||typeof ui!=='object'||Array.isArray(ui)||Object.keys(ui).some(k=>!['pages','tabs'].includes(k)))throw Error(where+' is {"pages": [...], "tabs": [...]}');
+ if(!ui||typeof ui!=='object'||Array.isArray(ui)||Object.keys(ui).some(k=>!['pages','tabs','personFields'].includes(k)))throw Error(where+' is {"pages": [...], "tabs": [...], "personFields": [...]}');
  const title=(value,at)=>{if(typeof value!=='string'||!value.trim()||value.length>40)throw Error(where+at+'.title: a Russian name up to 40 characters');};
  const render=(value,at)=>{if(typeof value!=='string'||!UI_RENDER.test(value))throw Error(where+at+'.render: the name of a window function from "scripts"');};
  if(!d.scripts.length)throw Error(where+': renderers come from "scripts", none declared');
- const pages=ui.pages===undefined?[]:ui.pages,tabs=ui.tabs===undefined?[]:ui.tabs;
+ const pages=ui.pages===undefined?[]:ui.pages,tabs=ui.tabs===undefined?[]:ui.tabs,fields=ui.personFields===undefined?[]:ui.personFields;
  if(!Array.isArray(pages)||pages.length>4)throw Error(where+'.pages: a list of up to 4 pages');
  if(!Array.isArray(tabs)||tabs.length>8)throw Error(where+'.tabs: a list of up to 8 tabs');
+ if(!Array.isArray(fields)||fields.length>4)throw Error(where+'.personFields: a list of up to 4 fields');
  const ids=new Set();
  pages.forEach((p,i)=>{
   const at='.pages['+i+']';
@@ -96,6 +97,16 @@ function validateUi(d,dir){
   if(!UI_ID.test(t.page||''))throw Error(where+at+'.page: the id of a page («learning», «team», another app\'s page)');
   title(t.title,at);render(t.render,at);
   if(t.order!==undefined&&!(Number.isInteger(t.order)&&t.order>=0&&t.order<=1000))throw Error(where+at+'.order: an integer 0–1000');
+ });
+ // Person fields: a field on every card of «Команда» (src/ui/person-fields.js); `key` is where the value is kept in the
+ // person record.
+ const keys=new Set();
+ fields.forEach((f,i)=>{
+  const at='.personFields['+i+']';
+  if(!f||typeof f!=='object'||Object.keys(f).some(k=>!['key','title','render','order'].includes(k)))throw Error(where+at+': {key, title, render, order?}');
+  if(typeof f.key!=='string'||!/^[a-z][A-Za-z0-9]{0,30}$/.test(f.key)||keys.has(f.key))throw Error(where+at+'.key: a unique camelCase name of latin letters and digits');
+  keys.add(f.key);title(f.title,at);render(f.render,at);
+  if(f.order!==undefined&&!(Number.isInteger(f.order)&&f.order>=0&&f.order<=1000))throw Error(where+at+'.order: an integer 0–1000');
  });
 }
 
