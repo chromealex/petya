@@ -1,0 +1,18 @@
+{
+  "id": "balance-sim",
+  "name": "Симуляция баланса",
+  "description": "Симуляция прогрессии и экономики игры по текущим конфигам: награды, цены и кривая опыта из ScriptableObject, JSON и CSV, тысячи игроков методом Монте-Карло — сколько дней до уровня, разброс валюты по дням и что будет, если поменять награду или цену",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Сколько дней до 10 уровня у игрока без доната?", "Что будет с экономикой, если поднять награду за победу на 20%?", "Симулируй прогрессию по текущим конфигам", "За сколько дней игрок накопит 5000 золота?"],
+  "uses": ["spreadsheet-export"],
+  "setting": "extension_balance-sim",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["sim-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "simCard": "renderSimCard"
+  }
+}
