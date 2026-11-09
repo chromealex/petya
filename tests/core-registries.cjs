@@ -15,13 +15,18 @@ const fs=require('node:fs'),os=require('node:os'),path=require('node:path');
   row('c','extension_c',{id:'c',stage:'builds',handlesOff:true,run:async()=>({handled:true,by:'c'})})
  ];
  const s={settings:{extension_a:'true',extension_b:'true'}};
- assert.equal((await routes.turn(s,'commands','альфа',{routes:fixed})).by,'a','b passed (null), a took it');
+ assert.equal((await routes.turn(s,'альфа',{stage:'commands',routes:fixed})).by,'a','b passed (null), a took it');
  assert.deepEqual(calls,['b','a'],'in order within the stage');
- assert.equal((await routes.turn({settings:{extension_a:'true'}},'commands','бета',{routes:fixed})),null,'b is not added');
- assert.equal((await routes.turn({settings:{}},'builds','что угодно',{routes:fixed})).by,'c','handlesOff and no route: asked for everything');
+ assert.equal((await routes.turn({settings:{extension_a:'true'}},'бета',{stage:'commands',routes:fixed})),null,'b is not added');
+ assert.equal((await routes.turn({settings:{}},'что угодно',{stage:'builds',routes:fixed})).by,'c','handlesOff and no route: asked for everything');
  assert.equal(routes.claims('бета',{routes:fixed}),true);assert.equal(routes.claims('альфа x',{routes:fixed}),true);assert.equal(routes.claims('гамма',{routes:fixed}),false);
  const caps=routes.capabilities({routes:fixed});assert.deepEqual(caps.map(c=>c.id),['b-read']);assert.equal(caps[0].accepts('бета'),true);assert.equal(caps[0].accepts('гамма'),false);
  assert.equal(routes.resume(s,{kind:'b-input',p:'>'},{routes:fixed})('1'),'b:>1');assert.equal(routes.resume(s,{kind:'other'},{routes:fixed}),null);
+ // The short form ({id, ready?, turn(services, command)}) answers at the default stage 'shortcuts'.
+ const short=[row('d','extension_d',{id:'d',ready:st=>st.dReady==='true',turn:async(_s,command)=>command==='дельта'?{handled:true,by:'d'}:null})];
+ assert.equal((await routes.turn({settings:{extension_d:'true',dReady:'true'}},'дельта',{routes:short})).by,'d');
+ assert.equal(await routes.turn({settings:{extension_d:'true'}},'дельта',{routes:short}),null,'not ready');
+ assert.equal(await routes.turn({settings:{extension_d:'true',dReady:'true'}},'дельта',{stage:'commands',routes:short}),null,'another stage');
  // The bundled routes load and validate.
  assert.deepEqual(routes.load().map(x=>x.id).sort(),['ci-builds','git','unity']);
 

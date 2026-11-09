@@ -52,14 +52,46 @@ If meetings themselves ever become an app, the field moves with them as a `perso
 
 ### A. Service modules, connections and the catalog (cross-lane — one generic registry)
 
+**A0 — next round: a shared service registry (L, all lanes).** Every lane left alone the tables that list *every*
+service at once, because moving one row per lane would only fragment them. They should all be replaced by one
+registry built from what each app declares (its descriptor `service`, name, icon, connection check, sign-in, scopes,
+limits, routing words), so adding or removing an app changes none of these files:
+
+| Table that lists every service | file:line |
+|---|---|
+| service modules and their key aliases | `src/modules.cjs` (whole: `optional`, `key`, `migrate`'s `configured`) |
+| services signed in through the browser | `src/service-access.cjs` (the `services` table) |
+| OAuth providers | `src/service-oauth.cjs` (its providers) |
+| module names per project | `src/project-settings.cjs:2` |
+| progress labels per service | `src/request-progress.cjs:9` |
+| settings defaults / secrets / per-service keys in main | `src/main.cjs:62`, `src/main.cjs:65`, `src/main.cjs:349` |
+| agents' services | `src/features/agents.cjs:13` |
+| module names in the renderer | `src/ui/modules.js:1` |
+| catalog descriptions and artwork of modules | `src/ui/app-catalog.js` |
+| the settings sidebar's services | `src/ui/connection-sidebar.js` |
+| browser sign-in in the renderer | `src/ui/service-access.js` |
+| a person's accounts on «Команда» | `src/ui/team.js:84` |
+| connection checks at startup | `src/ui/startup-connections.js` |
+| groups of «Материалы» | `src/ui/materials.js` |
+| mail records fetch per service | `src/mail-records/fetch.cjs` |
+
+Routing word lists that name services (they would take the registry's per-app `names` instead of literals):
+`src/agent-team.cjs:27`, `src/capabilities.cjs:56` (`SERVICES`), `src/chat-jobs.cjs:9`, `src/semantic-tools.cjs:41`,
+`src/work-query-route.cjs:22-23`, `src/personal-tasks.cjs:25`, `src/team-fill.cjs:56` (`NOT_PERSON`),
+`src/onboarding-guess.cjs` (apps, browser profiles, mail domains), `src/features/materials.cjs:7` (`app()`).
+Shape to agree on: `{id, name, icon, module?, settingKeys, secrets, connected(settings), check?(services),
+signIn?: {url, hosts}, oauth?, names: [RegExp], materials?: {group, match(item)}, personAccount?}` declared in the
+app (or a short core list for Petya's own runtime: whisper, ollama, web, meetings). A1–A6 below are the parts of it
+this lane found; C9 and E4–E5 are word lists of it.
+
 | # | file:line | What | Owner | Mechanism | Effort |
 |---|---|---|---|---|---|
 | A1 | `src/modules.cjs:3-4` | the list of service modules (`unity`, `telegram`, `slack`, … `ai`, `googleplay`, `gmail`, `web`) and the `claude`/`codex` → `ai`, `outlook` → `gmail` key aliases | each app (`service` in extension.json) | build `optional` from descriptors with `service`; core modules (`ai`, `web`) stay in a short core list | M (cross-lane) |
 | A2 | `src/project-settings.cjs:2-3` | display names of modules per project; «connected» special-cased for `ai`, `web`, `unity` | apps | descriptor `name` + `offer.connected` | S after A1 |
 | A3 | `src/ui/modules.js:1` | `optionalModules` names in the renderer | apps | from `extensionUI.descriptors` | S after A1 |
 | A4 | `src/ui/app-catalog.js:2,18` | catalog descriptions and artwork of service modules (Unity, Slack, Jira, …) | apps | descriptor `description` / `icon` (Unity already has `icon.svg`) | S after A1 |
-| A5 | `src/ui/startup-connections.js:8-10`, `src/ui/connection-sidebar.js:34`, `src/connections-setup.cjs:19-23` | fixed lists of services checked at startup / shown in the sidebar (incl. `claude`, `codex`, `meetings`, `images`) | apps (+ core for whisper/ollama/meetings) | a «settings-connection» registry: `{id, name, check(services)}` per app | M (cross-lane) |
-| A6 | `src/main.cjs:211` | changing `unityUrl` without a new token clears `unityToken` | unity | a settings hook with `{before, next, input}` (e.g. feature `normalize(next, before, input)` next to `validate`) | S |
+| A5 | `src/ui/startup-connections.js:8-10`, `src/ui/connection-sidebar.js:34`, `src/connections-setup.cjs:19-23` | fixed lists of services checked at startup / shown in the sidebar (incl. `claude`, `codex`, `meetings`, `images`) | apps (+ core for whisper/ollama/meetings) | PR #48's `connection-check` + `window.addConnectionCard`, listed by A0 | M (cross-lane) |
+| A6 | `src/main.cjs:211` | changing `unityUrl` without a new token clears `unityToken` | unity | PR #48's feature hook `validate(next, input)` (plus the previous settings, or `input.unityUrl` vs the saved URL) | S |
 
 ### B. MCP server tools of apps
 
@@ -130,18 +162,24 @@ If meetings themselves ever become an app, the field moves with them as a `perso
 
 ## New generic registries of this round (to reconcile with the other lanes)
 
-- `chat-route` — `src/features/chat-routes.cjs`; `{id, stage: 'commands'|'builds', order?, handlesOff?, foreground?,
-  capability?, resume?, route?(text), run(services, route, {text, pipeline, background})}`. Covers what other lanes may
-  call «dialogue-kind» / «chat-route»: an app's chat handling at a fixed point of `converse.cjs`, its background-job
-  exclusion, its meaning-router entry and its clarification restarts. New stages are added to `STAGES` and asked once
-  in `converse.cjs`.
+- `chat-route` — `src/features/chat-routes.cjs`, **the same file and kind as PR #48 (mail-notion-play)**, merged into one
+  contract: its short form `{id, order?, ready?(settings), turn(services, command)}` (stage `shortcuts`, the default:
+  where PR #48 asks it in `converse.cjs`) and this lane's routed form `{id, stage: 'commands'|'builds'|'shortcuts',
+  order?, ready?, handlesOff?, foreground?, capability?, resume?, route?(text), run(services, route, {text, pipeline,
+  background})}`; the pipeline calls `turn(services, command, {stage, pipeline, background})` — PR #48's
+  `turn(ctx, original)` is the `shortcuts` stage unchanged. When the two PRs meet, keep this file (a superset) and its
+  `docs/extensions.md` entry. PR #48's `dialogue-kind` and `route-tool` are separate (dialogue intents and the tool
+  router's own tools); this lane's `capability` on a chat route is a meaning-router entry restated into the app's own
+  phrasing, not a `route-tool`.
 - `project-detector` — `src/features/project-detectors.cjs`; `{id, detect(dir), icon?, rank?, versions?}`.
 - company lifecycle — `src/features/lifecycle.cjs`; `on(event, fn, companyId)` / `emit` / `drop` with
   `settings-saved`, `project-switched`, `topic-removed`, `contexts-cleared`, `company-closing`. The Slack lane can move
   `slackLogs.reset()` / `slackSync.reset()` and the review state the same way; a `quit` event would cover C2.
-- Still to design (listed above): service modules from descriptors (A1), «settings-connection» (A5), «mcp-tool» (B1),
-  generic result `choices` (C5/C6), «agent-lane» / «agent-runner» (D1/D2), «team-identity» (E4), «attachment-kind»
-  (F1), a settings normalize hook with `{before, input}` (A6).
+- Already made by PR #48 and to be reused here: `connection-check` with `window.addConnectionCard` (covers A5),
+  the feature hooks `validate(next, input)` (covers A6 once it also gets the previous settings), `limits`,
+  `publicFlags`, and `doc-source`.
+- Still to design (listed above): the shared service registry (A0), «mcp-tool» (B1), generic result `choices` (C5/C6),
+  «agent-lane» / «agent-runner» (D1/D2), «team-identity» (E4), «attachment-kind» (F1).
 
 ## Leftovers of the other lanes
 

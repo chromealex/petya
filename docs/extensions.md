@@ -306,20 +306,24 @@ served by a dedicated registry next to app links. Two exist:
   commands move to the app's action once when it is added, otherwise to «Выполнить команду в чате». Example:
   `src/extensions/jira/voice-action.cjs` (`{id:'bugs', label:'Проверить баги в Jira', legacy:'bugs', run:(_, {output})
   => ({ask: output, kind: 'bugs'})}`), `src/extensions/google-play/voice-action.cjs`.
-- `chat-route` (`src/features/chat-routes.cjs`): `{id, stage, order?, handlesOff?, foreground?, capability?, resume?,
-  route?(text), async run(services, route, {text, pipeline, background}) → turn result | null}` — an app's own chat
-  handling at a fixed point of Petya's pipeline (`src/converse.cjs`), for requests that must be checked exactly where
-  Petya's own handler used to run rather than first like `feature.turn`. `stage` is `'commands'` (after the chat
-  extension replies, before the attachment and Slack flows) or `'builds'` (right before the Slack log review); inside
-  a stage `order` (default 100), then id. `route(text)` is synchronous and pure (the request it takes, or null); without
-  it `run` is asked for every request and returns null to pass. `foreground: true` keeps what `route` takes out of
-  background chat jobs (`src/chat-jobs.cjs`); `capability: {id, says, examples, reads?(route), accepts?(text)}` is an
-  entry of the meaning router (`src/capabilities.cjs`, listed where Petya's own app entries used to be);
-  `resume: {kind, answer(services, restart) → (answer) → turn}` continues a saved clarification of that
-  `restart.kind` after a restart. A route counts while its app is added, or always with `handlesOff` (the app then
-  answers «включите …» itself). Examples: Git (`src/extensions/git/chat-route.cjs`: stage `commands`, foreground,
-  `git-read` capability, `git-input` clarifications), Unity Editor (`src/extensions/unity/chat-route.cjs`,
-  `handlesOff`), «Сборки» (`src/extensions/ci-builds/chat-route.cjs`: stage `builds`, `repair-input`).
+- `chat-route` (`src/features/chat-routes.cjs`): an app's own chat handling at a fixed point of Petya's pipeline
+  (`src/converse.cjs`), for requests that must be checked exactly where Petya's own handler used to run rather than
+  first like `feature.turn`. Short form: `{id, order?, ready?(settings), async turn(services, command) → turn result |
+  null}`; routed form: `{id, stage?, order?, ready?, handlesOff?, foreground?, capability?, resume?, route?(text), async
+  run(services, route, {text, pipeline, background}) → turn result | null}`. The pipeline asks `turn(services, command,
+  {stage, pipeline, background})` at each stage: `'commands'` (after the chat extension replies, before the attachment
+  and Slack flows), `'builds'` (right before the Slack log review) and `'shortcuts'` (the default: after the web search
+  shortcut, before Petya's own shortcuts and the tool router); inside a stage `order` (default 100), then id; the first
+  non-null result answers. `route(text)` is synchronous and pure (the request it takes, or null); without it the route
+  is asked for every request and returns null to pass. `foreground: true` keeps what `route` takes out of background
+  chat jobs (`src/chat-jobs.cjs`); `capability: {id, says, examples, reads?(route), accepts?(text)}` is an entry of the
+  meaning router (`src/capabilities.cjs`, listed where Petya's own app entries used to be); `resume: {kind,
+  answer(services, restart) → (answer) → turn}` continues a saved clarification of that `restart.kind` after a
+  restart. A route counts while its app is added (and `ready`), or always with `handlesOff` (the app then answers
+  «включите …» itself). Examples: Git (`src/extensions/git/chat-route.cjs`: stage `commands`, foreground, `git-read`
+  capability, `git-input` clarifications), Unity Editor (`src/extensions/unity/chat-route.cjs`, `handlesOff`),
+  «Сборки» (`src/extensions/ci-builds/chat-route.cjs`: stage `builds`, `repair-input`), «Почта»'s mail rules (short
+  form, stage `shortcuts`, PR #48).
 - `project-detector` (`src/features/project-detectors.cjs`): `{id, name?, async detect(dir) → bool, async icon?(project,
   {root, load, skip}) → {value, file} | null, async rank?(root) → (async (file, value) → value) | null, async
   versions?(root) → [text]}` — a kind of project the app knows (a game engine's project, a platform's app), so Petya's

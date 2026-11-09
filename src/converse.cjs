@@ -86,7 +86,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
       if (visual) return visual;
     }
     // Apps' own chat handling at this point of the pipeline: chat routes (src/features/chat-routes.cjs).
-    if(!choice){const routed=await require('./features/chat-routes.cjs').turn(ctx,'commands',original,{pipeline,background});if(routed)return routed;}
+    if(!choice){const routed=await require('./features/chat-routes.cjs').turn(ctx,original,{stage:'commands',pipeline,background});if(routed)return routed;}
     const drawing=!choice?require('./local-images.cjs').imagePrompt(original):null;
     if(drawing!==null){
       if(!drawing)return require('./input-required.cjs').ask({restart:{kind:'drawing-input'},text:'Что нарисовать?',label:'Описание картинки',placeholder:'Например: кот-космонавт на Луне'},answer=>pipeline('Нарисуй '+answer,undefined,background));
@@ -146,7 +146,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
     }
     if(!choice&&require('./capabilities.cjs').PHRASES.telegramSync.test(original)){const result=await ctx.telegramSource.sync();if(/^обнови/iu.test(original))return {handled:true,text:result.message};return ctx.dialogue.turn(original,undefined,'chat');}
     // Apps' flows that come right before the Slack log review: chat routes of stage 'builds' (src/features/chat-routes.cjs).
-    if(!choice){ctx.dialogue.prune();const routed=await require('./features/chat-routes.cjs').turn(ctx,'builds',original,{pipeline,background});if(routed)return routed;if(ctx.attachments.list().length&&require('./review-assistant.cjs').isCorrection(original))return ctx.inspectAttachments(ctx.attachments.list().map(a=>a.id),original);const reviewed=await ctx.runReview(original);if(reviewed)return reviewed;}
+    if(!choice){ctx.dialogue.prune();const routed=await require('./features/chat-routes.cjs').turn(ctx,original,{stage:'builds',pipeline,background});if(routed)return routed;if(ctx.attachments.list().length&&require('./review-assistant.cjs').isCorrection(original))return ctx.inspectAttachments(ctx.attachments.list().map(a=>a.id),original);const reviewed=await ctx.runReview(original);if(reviewed)return reviewed;}
 
     const references=require('./context-reference.cjs');
     const contextual=!choice&&references.isContextReference(original);
