@@ -51,7 +51,9 @@ notification on the third failure in a row. An event reminder gives up after 30 
 
 `trigger-ci.cjs` belongs to «Сборки» conceptually and can move to `src/extensions/ci-builds/` with a `provides` entry
 there (no code change). Reminders also provide a `journal-source` (`journal-source.cjs`): done/fired reminders for the
-day's timeline, open ones as candidates for tomorrow's plan.
+day's timeline, open ones as candidates for tomorrow's plan, and the cross-app kind `reminder` (`reminder-link.cjs`):
+another app's card button «Напомнить» with `{date, time?, text}` puts «Напомни 1 декабря 2026 в 10:00: …» into the
+chat, which this app parses and confirms as usual (a passed date is refused); used by «Договоры в PDF».
 
 ### Location triggers (planned: Petya's mobile app)
 Location reminders («когда приду домой», «когда уйду с работы», «когда буду у офиса») will come from Petya's mobile

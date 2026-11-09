@@ -17,6 +17,7 @@
   },
   "provides": {
     "reminder-trigger": ["trigger-jira.cjs", "trigger-slack.cjs", "trigger-calendar.cjs", "trigger-ci.cjs"],
+    "reminder": "reminder-link.cjs",
     "journal-source": "journal-source.cjs"
   }
 }

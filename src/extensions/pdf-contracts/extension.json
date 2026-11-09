@@ -1,0 +1,18 @@
+{
+  "id": "pdf-contracts",
+  "name": "Договоры в PDF",
+  "description": "Разбирает прикреплённый договор в PDF: стороны, даты, суммы, оплата, срок и автопродление, расторжение, штрафы, права и лицензии — каждое условие с дословной цитатой и страницей; сравнивает две версии по пунктам, сроки — в напоминания",
+  "category": "docs",
+  "icon": "icon.svg",
+  "examples": ["Разбери этот договор", "Какие штрафы в договоре?", "Когда можно отказаться от продления договора?", "Сравни с прошлой версией договора"],
+  "uses": ["reminder"],
+  "setting": "extension_pdf-contracts",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["contract-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "contractCard": "renderContractCard"
+  }
+}

@@ -67,6 +67,8 @@ to the chat (`k.ask(…, {send:true})`), `{text}` shows a toast, `{settings: '<e
 | | `google-meet`, `teams` | The same for Meet / Teams links (`googleMeetRecordingSchedule`, `teamsRecordingSchedule`): the scheduled recording starts when that app's meeting source sees the call. The timer is the shared core module `src/meeting-schedule.cjs` (each app passes its own key, name and `detect`). |
 | `spreadsheet-export` | `google-sheets` («Google Таблицы») | The card's table `{title, sheet?, app?, header, rows}` (≤2000 × 40) as a chat request «Выгрузи в Google Таблицы «…» · N строк · #id»; the export card asks where (new spreadsheet, new tab, existing tab with the exact cell diff) and writes only on «Выгрузить». Ready when Sheets access is granted; without write permission it answers `{settings:'google-sheets'}`. See [google-sheets.md](google-sheets.md). |
 | `document-export` | `google-drive` («Google Диск») | The card's text `{title, text (Markdown), app?}` as a chat request «Сохрани в Google Документы «…» · #id»; the confirmation card previews the document, lets the user fix the title and creates the Google Doc only on «Создать документ» (`drive.file`). Ready when Drive access is granted; without «Разрешить создавать документы» it answers `{settings:'google-drive'}`. Used by the ADR draft card («Архитектурные решения», [adr.md](adr.md)) and the wiki page draft («Вики из обсуждений», [wiki-author.md](wiki-author.md)). See [google-drive.md](google-drive.md). |
+| `document-export` | `google-drive` («Google Диск») | The card's text `{title, text (Markdown), app?}` as a chat request «Сохрани в Google Документы «…» · #id»; the confirmation card previews the document, lets the user fix the title and creates the Google Doc only on «Создать документ» (`drive.file`). Ready when Drive access is granted; without «Разрешить создавать документы» it answers `{settings:'google-drive'}`. Used by the ADR draft card («Архитектурные решения», [adr.md](adr.md)). See [google-drive.md](google-drive.md). |
+| `reminder` | `reminders` («Напоминания») | A date from a card `{date: 'YYYY-MM-DD', time?: 'HH:MM' (10:00), text}` as the chat request «Напомни 1 декабря 2026 в 10:00: …», which «Напоминания» parses and confirms like any other reminder; a date that has passed is refused with a toast. Used by the deadlines of «Договоры в PDF» ([pdf-contracts.md](pdf-contracts.md)). |
 
 Not provided: **Telegram** `share-message` — Petya reads Telegram but has no confirmed sending flow; adding one needs
 its own chat selection and preview. «Программист» has no offer file, so a missing `code-fix` shows nothing (no
@@ -95,6 +97,9 @@ offer).
 config-balance report and its version diff, the balance simulation («Симуляция баланса»: p10/p50/p90 per day of the level
 and the main currency, before and after a «what if»), and «Учёт времени» (next to «Скачать CSV»: the CSV's rows, read from the
 app only when pressed — `k.links` accepts an async payload function for that).
+
+«Напомнить» (`reminder`, shown only while «Напоминания» is added): each future deadline of a contract read by «Договоры в
+PDF» (the end of the term, the last day to refuse renewal, payment dates).
 
 «Сохранить в Google Docs» (`document-export`, shown only while «Google Диск» is added and connected; the card's text as
 Markdown): the meeting summary (decisions, tasks with assignee and due date, not discussed, discussed), the «Поиск по

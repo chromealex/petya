@@ -90,6 +90,7 @@ const own={
  clipboard:['что я копировал про API ключ','вставь третье скопированное','скопируй последнюю ссылку из буфера в Jira задачу BW-12','покажи историю буфера'],
  'tidy-downloads':['разбери загрузки','что можно удалить из загрузок','дубликаты в загрузках','наведи порядок в папке загрузок'],
  'balance-sim':['сколько дней до 10 уровня у игрока без доната','что будет с экономикой, если поднять награду за победу на 20%','симулируй прогрессию по текущим конфигам','смоделируй экономику игры на 60 дней'],
+ 'pdf-contracts':['разбери этот договор','какие штрафы в договоре','сравни две версии договора','договор в PDF'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -238,6 +239,8 @@ const not={
  // Reconciling and validating configs and their history stay with «Конфиги и баланс»; metrics, money balance and levels
  // outside games are not a simulation.
  'balance-sim':['сверь баланс с конфигами','что поменялось в балансе с прошлой версии','проверь конфиги юнитов','почему урон лучника в игре не как в таблице','какой у меня баланс на карте','DAU за неделю','ретеншн D1 D7 D30','сколько дней до отпуска','какой уровень английского нужен','баланс работы и жизни'],
+ // «Договор» about agreements with a colleague, writing a contract, «договорились» and other documents are not a PDF contract.
+ 'pdf-contracts':['у нас с Олегом договор: он ревьюит по пятницам','мы договорились с Машей о встрече','договор с коллегой о дежурствах','напиши договор на разработку','составь договор аренды','разбери отчёт','подпиши договор','найди документ про онбординг'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -256,7 +259,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review','gdd','wiki-author','doc-diff','screen-bug','clipboard','balance-sim'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review','gdd','wiki-author','doc-diff','screen-bug','clipboard','balance-sim','pdf-contracts'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
