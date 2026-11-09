@@ -16,9 +16,10 @@
 
 # Versions and releases
 
-- Every change that reaches `main` raises the version: a fix or small change is a patch (`0.10.0` → `0.10.1`), a new feature or app a minor (`0.10.1` → `0.11.0`). Run `node scripts/bump-version.cjs patch|minor` — it updates `package.json`, `package-lock.json`, the window footer, its English string, the Codex client info and the README badge together (the list is `scripts/version-places.cjs`).
+- Every change to the app that reaches `main` (src, assets, packaging) raises the version; documentation, tests, training data and CI alone do not: a fix or small change is a patch (`0.10.0` → `0.10.1`), a new feature or app a minor (`0.10.1` → `0.11.0`). Run `node scripts/bump-version.cjs patch|minor` — it updates `package.json`, `package-lock.json`, the window footer, its English string, the Codex client info and the README badge together (the list is `scripts/version-places.cjs`).
 - In the same commit add a section at the top of `docs/HISTORY.md`: `## x.y.z — what changed`, then short bullets for people, not commit messages. The release notes are taken from this section. `tests/version.cjs` (part of `npm test`) fails until the version matches everywhere and the section is there.
 - Several agents merging at once: bump on top of the current `main` right before merging; if someone else took the number, take the next one.
+- Each version also gets a post for the team channels (Slack #jw-petya, Telegram @aipetya), in Russian, for people: `docs/announcements/<version>.md` — `# Заголовок`, then short bullets on what changed for them. A new or changed screen ships its screenshot in `docs/screenshots/<version>/` (up to six PNGs, from the feature's UI test or `tests/card-shot.cjs`; look at it before committing). The Release workflow posts both when it publishes the release (`scripts/announce.cjs`, `.github/workflows/announce.yml`); a model release (`andromeda-dN`) is posted separately when its GitHub release is published, so write its release notes for people too.
 - A release is the tag `v<version>` on `main` (`git tag v0.10.1 && git push origin v0.10.1`, or run the Release workflow): GitHub Actions builds `Petya-Setup.exe` and publishes the release with that HISTORY section. The macOS build stays local (`python3 scripts/build.py --mac`, see Builds).
 
 # Builds
