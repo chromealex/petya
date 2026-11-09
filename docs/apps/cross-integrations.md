@@ -86,6 +86,7 @@ offer).
 | Retro («Ретро»), «Попробовать» | per item and «Создать задачи из «Попробовать»» | | «Отправить на голосование» | | |
 | Documentation freshness, per finding | «Создать задачу» | «Предложить правку» without an exact line fix | | | |
 | Calendar, confirm step | | | | ✓ + known rooms, typed link | |
+| «Онбординг новичка», welcome message | | | after the outgoing review | | |
 | Calendar, created meeting / timeline | | | | | «Петя запишет встречу» / «Записать Петей» |
 
 «Выгрузить в Google Таблицы» (`spreadsheet-export`): sprint plan, game metrics (daily series), A/B-test groups, the
@@ -97,6 +98,10 @@ Markdown): the meeting summary (decisions, tasks with assignee and due date, not
 всему» answer (the answer and its numbered sources with links; answer cards saved before the answer text was kept
 show no button) and the «Дневник дня» week report (totals, days, the week's main events with links; chats and private
 notes stay out). UI: `tests/document-export-ui.cjs` (screenshots `petya-document-export-*.png`). «Конфиги и баланс» also uses `code-fix` for «Применить в конфиги».
+
+«Перформанс-ревью» uses `document-export` for the review draft (Markdown with the facts and gaps). «Найм» hands an
+interview to «Календарь» the same way as below: «Отправить приглашение» puts a calendar request with the candidate's
+address and the chosen slot into the chat, and only the calendar's own «Поставить встречу» creates the event.
 
 The meeting summary also gets «Назначить следующую встречу» when «Календарь» is added: a calendar request with the
 people from the tasks is put into the composer.

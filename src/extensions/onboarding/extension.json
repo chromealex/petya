@@ -1,0 +1,19 @@
+{
+  "id": "onboarding",
+  "name": "Онбординг новичка",
+  "description": "План первых двух недель для нового коллеги: что прочитать, с кем познакомиться, стартовые задачи из Jira и доступы по вашему чек-листу — у каждого пункта источник; прогресс по дням и приветствие только после вашего подтверждения",
+  "category": "team",
+  "icon": "icon.svg",
+  "examples": ["Подготовь онбординг для Ани, она бэкенд","К нам выходит Дима, геймдизайнер, подготовь онбординг","Как идёт онбординг Ани?","Покажи онбординг новичков"],
+  "setting": "extension_onboarding",
+  "settings": true,
+  "feature": "feature.cjs",
+  "uses": ["share-message"],
+  "scripts": [
+    ["onboarding-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "onboardingCard": "renderOnboardingCard"
+  }
+}

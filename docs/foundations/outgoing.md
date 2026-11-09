@@ -113,6 +113,8 @@ the edited text (applying is never sending). See `src/slack-request.cjs`.
 | PR comments | `src/extensions/pull-requests/pr-cards.js` | github · team |
 | Mattermost compose and thread replies (and share-message → Mattermost) | `src/extensions/mattermost/mattermost-cards.js` | mattermost · team |
 | VK Teams compose and thread replies (and share-message → VK Teams) | `src/extensions/vk-teams/vk-teams-cards.js` | vk-teams · team |
+| Newcomer welcome message («Онбординг новичка»; sent through share-message) | `src/extensions/onboarding/onboarding-cards.js` | messenger · direct |
+| Interview invitation («Найм»; the event through «Календарь»'s own confirmation) | `src/extensions/hiring/hiring-cards.js` | calendar · direct |
 
 Not wired: Telegram (Petya only reads it), build questions to Slack (`src/build-question.cjs`, a fixed template, not a
 user draft), Jira comments (task tracker, not a message to people; can be added the same way).

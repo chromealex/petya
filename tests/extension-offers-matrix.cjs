@@ -80,6 +80,9 @@ const own={
  funnels:['воронка туториала','где отваливаются игроки на онбординге','воронка от установки до первой покупки','на каком шаге туториала уходят игроки','покажи воронку онбординга по странам'],
  iap:['покупки в игре за неделю','какие паки покупают лучше','конверсия в платящих за месяц','ARPPU за месяц','рефанды за месяц','ROAS с покупками за неделю','выручка по продуктам'],
  'chart-explain':['почему упал график','объясни этот график','что за провал на графике выручки','почему вырос график установок'],
+ onboarding:['подготовь онбординг для Ани, она бэкенд','план онбординга нового сотрудника','онбординг нового сотрудника','к нам выходит новый бэкендер, подготовь план адаптации','составь план онбординга для Димы'],
+ hiring:['добавь кандидата Анна Иванова на бэкенд','подготовь вопросы к собеседованию','покажи воронку найма','сводка по кандидату Анна','запиши заметки интервью с Анной: уверенно проектирует API'],
+ 'perf-review':['собери материалы для ревью Олега за полгода','подготовь перформанс-ревью Маши','перф-ревью Ивана за квартал','подготовь performance review для Олега'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -205,6 +208,12 @@ const not={
  iap:['выручка за неделю','ARPDAU за неделю','DAU за неделю','как выручка после ивента','выручка с рекламы за неделю','сколько заработали на рекламе вчера','сколько потратили на закупку трафика','какой ROAS за неделю','воронка от установки до первой покупки','какие у меня подписки','список покупок','сколько платящих в BigQuery за вчера','отзывы в App Store за неделю','что такое ARPPU','как настроить IAP в Unity'],
  // A failed build or server, a crashing game, «график отпусков», drawing a chart and plain metrics requests are not «why did it move».
  'chart-explain':['почему упала сборка','почему падает игра','почему лежит api','график отпусков','нарисуй график продаж','DAU за неделю','что такое DAU','что на дашборде лиг','почему упали тесты','график дежурств на неделю'],
+ // A tutorial or onboarding of players is «Воронки» or nobody; finding a page about onboarding is the knowledge search.
+ onboarding:['онбординг в игре','воронка онбординга','где отваливаются игроки на онбординге','найди в Notion страницу про онбординг','что такое онбординг','онбординг пользователей в приложении','туториал для новичков','подготовь 1:1 с Олегом'],
+ // Hiring units, workers or heroes is a game; a candidate of science, store reviews and ranking talk are not the pipeline.
+ hiring:['найм юнитов','найм юнитов в казарме','нанять героев в таверне','найми рабочих в игре','кандидат наук','отзывы в App Store','подготовь 1:1 с Олегом','ревью кода'],
+ // Code review stays with «Код-ревью», PRs with «Pull requests», a 1:1 with «Встречи 1:1».
+ 'perf-review':['сделай код-ревью','ревью кода','ревью PR #42','какие PR ждут моего ревью','отзывы в App Store','подготовь 1:1 с Олегом','что обсудить на встрече один на один','что такое перформанс-ревью','проверь мои изменения перед PR'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -223,7 +232,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
