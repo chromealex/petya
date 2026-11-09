@@ -874,7 +874,8 @@
   "браузер",
   "Время по задачам за",
   "Время по проектам за",
-  "Учёт времени Пети:"
+  "Учёт времени Пети:",
+  "проверь мои изменения"
  ],
  "strings": {
   "# Итоги встречи Выдели решения, открытые вопросы и поручения. Поручения оформи таблицей: действие, ответственный, срок, источник. Не назначай людей и сроки самостоятельно; неизвестные поля отмечай «не указано». Если расшифровки нет, попроси приложить её. Не утверждай, что задачи уже созданы.": "# Meeting summary List decisions, open questions and action items. Format action items as a table: action, owner, due date, source. Do not assign people or due dates yourself; mark unknown fields “not specified”. If there is no transcript, ask me to attach it. Do not claim that tasks have already been created.",
@@ -12147,6 +12148,7 @@
   "Подключение Jira изменилось. Подготовьте запись заново.": "The Jira connection changed. Prepare the log again.",
   "Не выбрано ни одной строки для записи.": "No rows selected to log.",
   "в таблице": "in the table",
-  "в таблицах": "in the tables"
+  "в таблицах": "in the tables",
+  "Ревью моих изменений": "Review my changes"
  }
 }
