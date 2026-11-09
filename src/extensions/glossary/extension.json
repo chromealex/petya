@@ -13,5 +13,8 @@
   ],
   "results": {
     "glossary": "renderGlossary"
+  },
+  "provides": {
+    "search-source": "search-source.cjs"
   }
 }

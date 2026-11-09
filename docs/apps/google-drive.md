@@ -2,7 +2,9 @@
 
 Category: docs. Directory: `src/extensions/google-drive/`. Connects: Google (shared connection
 `src/google-workspace.cjs`, see [google-sheets.md](google-sheets.md#shared-google-connection-for-other-google-apps-srcgoogle-workspacecjs)).
-Provides the cross-app kind `document-export` and the index collection `google-drive`.
+Provides the cross-app kind `document-export`, the index collection `google-drive` and the search source
+`google-drive` of «Поиск по всему» (`search-source.cjs`: name and full-text search through this app's service; up to
+three Google Docs found by their text alone are read for the snippet; see [search-all.md](search-all.md)).
 
 ## What it does
 

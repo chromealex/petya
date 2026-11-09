@@ -16,20 +16,28 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
   mk('telegram','Игроки BW','когда починят матчмейкинг? ищет по 5 минут <img src=x onerror=alert(1)>','матчмейк',{meta:'Player1',at:now-D}),
   mk('mail','Re: матчмейкинг в турнирах','По матчмейкингу в турнирах — ждём данных от аналитики.','матчмейк',{url:'https://mail.google.com/mail/u/0/#all/18c2f',meta:'Олег <oleg@studio.dev>',at:now-6*D}),
   mk('files','Assets/Scripts/Net/Matchmaker.cs','// матчмейкинг по рейтингу, окно 200 MMR','матчмейк',{meta:'строка 3',path:'/tmp/Game/Assets/Scripts/Net/Matchmaker.cs',line:3,at:now-9*D}),
+  mk('google-drive','Матчмейкинг: правила лиг','Лиги и матчмейкинг: окно MMR сужаем до 150 в высших лигах.','матчмейк',{url:'https://docs.google.com/document/d/1AbCdEfGhIjKlMnOpQrStUvWx/edit',meta:'Документ · Олег',at:now-3*D}),
   mk('glossary','Матчмейкинг','Подбор соперников по MMR.\nСинонимы: подбор\nen: Matchmaking','матчмейк',{at:now-10*D}),
   mk('slack','#tournaments','Матчмейкинг для турниров — отдельная очередь с фиксированным окном','матчмейк',{url:'https://team.slack.com/archives/C9/p1761000000000100',meta:'oleg · #tournaments',at:now-12*D}),
   mk('slack','#jw-bw-dev · Матчмейкинг','Матчмейкинг ломается на пиках: очередь растёт до 4 минут','матчмейк',{url:'https://team.slack.com/archives/C1/p1762000000000100',meta:'Олег · #jw-bw-dev',at:now-3*D})];
  const count=id=>items.filter(i=>i.source===id).length;
  const card={id:'s1',query:'матчмейкинг',terms:['матчмейкинг'],extra:['matchmaking','MMR'],embed:'',at:now,items,
-  sources:[{id:'slack',label:'Slack',state:'limited',count:count('slack'),note:'Токен Slack не даёт искать по всему Slack — искал в сохранённой переписке.'},{id:'confluence',label:'Confluence',state:'ok',count:1},{id:'notion',label:'Notion',state:'timeout',count:0,note:'Не ответил за 8 с.'},
+  sources:[{id:'slack',label:'Slack',state:'limited',count:count('slack'),note:'Токен Slack не даёт искать по всему Slack — искал в сохранённой переписке.'},{id:'confluence',label:'Confluence',state:'ok',count:1},{id:'notion',label:'Notion',state:'timeout',count:0,note:'Не ответил за 8 с.'},{id:'google-drive',label:'Google Диск',icon:'drive',color:'#a8d5b0',in:'в Google Диске',state:'ok',count:1},
    {id:'jira',label:'Jira',state:'ok',count:1},{id:'mail',label:'Почта',state:'ok',count:1},{id:'telegram',label:'Telegram',state:'ok',count:1},{id:'meetings',label:'Встречи',state:'ok',count:1},{id:'files',label:'Файлы проекта',state:'ok',count:1},{id:'glossary',label:'Глоссарий',state:'ok',count:1}]};
  const answer={query:'матчмейкинг',found:true,citations:[{n:1,source:'slack',title:'#jw-bw-dev · Матчмейкинг',url:'https://team.slack.com/archives/C1/p1762000100000200',at:now-2*H},{n:2,source:'jira',title:'BW-77 · Матчмейкинг: долгий поиск на пиках',url:'https://studio.atlassian.net/browse/BW-77',at:now-D},{n:4,source:'meetings',title:'Планёрка · 05.11',url:'',at:now-4*D}]};
- await js(`view('home');showDialogueMessages(${JSON.stringify([{role:'user',text:'найди везде про матчмейкинг'},{role:'assistant',text:'Нашёл по «матчмейкинг» 10 результатов.',by:'Поиск по всему',extensionData:{searchAll:card}},{role:'user',text:'Ответь по найденному'},{role:'assistant',text:'На пиках поиск идёт до 4 минут [1, 2]. Решили начать с окна MMR 200 и расширять его [4].',by:'Поиск по всему',extensionData:{searchAllAnswer:answer}}])},'Поиск')`);
+ await js(`view('home');showDialogueMessages(${JSON.stringify([{role:'user',text:'найди везде про матчмейкинг'},{role:'assistant',text:'Нашёл по «матчмейкинг» 11 результатов.',by:'Поиск по всему',extensionData:{searchAll:card}},{role:'user',text:'Ответь по найденному'},{role:'assistant',text:'На пиках поиск идёт до 4 минут [1, 2]. Решили начать с окна MMR 200 и расширять его [4].',by:'Поиск по всему',extensionData:{searchAllAnswer:answer}}])},'Поиск')`);
  for(let i=0;i<200;i++){if(await js("document.querySelectorAll('.sa-card').length===2"))break;await new Promise(r=>setTimeout(r,30));}
  assert.equal(await js("document.querySelectorAll('.sa-card').length"),2);
- assert.equal(await js("document.querySelectorAll('.sa-tab').length"),9,'«Все» and eight sources with results');
- assert.equal(await js("document.querySelectorAll('.sa-seg').length"),8);
- assert.equal(await js("document.querySelectorAll('.sa-card:not(.sa-answer) .sa-row').length"),10);
+ assert.equal(await js("document.querySelectorAll('.sa-tab').length"),10,'«Все» and nine sources with results');
+ assert.equal(await js("document.querySelectorAll('.sa-seg').length"),9);
+ assert.equal(await js("document.querySelectorAll('.sa-card:not(.sa-answer) .sa-row').length"),11);
+ // Another app's search source (Google Drive) brings its own label, icon, color and «в …».
+ assert.equal(await js("document.querySelector('.sa-tab[data-source=\"google-drive\"] span').textContent"),'Google Диск');
+ assert.equal(await js("getComputedStyle(document.querySelector('.sa-row[data-source=\"google-drive\"] .sa-icon')).color"),'rgb(168, 213, 176)');
+ assert.equal(await js("document.querySelector('.sa-row[data-source=\"google-drive\"] .sa-icon path').getAttribute('d').startsWith('M8.5 4h7')"),true,'the drive icon');
+ await js("document.querySelector('.sa-tab[data-source=\"google-drive\"]').click()");
+ assert.equal(await js("document.querySelector('.sa-card:not(.sa-answer) .kit-actions button.primary, .sa-card:not(.sa-answer) button.primary').title"),'Только в Google Диске');
+ await js("document.querySelector('.sa-tab[data-source=\"all\"]').click()");
  assert.equal(await js("document.querySelectorAll('.sa-card img').length"),0,'snippets are text');
  assert.equal(await js("document.querySelector('.sa-row mark').textContent.toLowerCase().startsWith('матчмейк')"),true);
  assert.equal(await js("[...document.querySelectorAll('.sa-state')].map(x=>x.querySelector('span').textContent).join(',')"),'Slack,Notion');

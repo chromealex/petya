@@ -1,15 +1,13 @@
-// «Поиск по всему», sources. Each is read-only and uses what Petya already has; none adds a connection of its own:
+// «Поиск по всему», the app's own (core) sources. Each is read-only and uses what Petya already has:
 // - memory: what Petya keeps in the company's context memory — Slack threads, Telegram chats, mail, Jira/Confluence/
 //   Notion pages the user saved, recorded meeting speech, other materials (per message or speech segment);
-// - slack: Slack's search.messages, when the connected token may search (a user token with search:read); otherwise
-//   the stored Slack context alone answers;
-// - docs: Confluence and Notion through the shared docs search (s.workspace.searchDocs, the «Документы» path);
-// - jira: issues whose text mentions the words (JQL `text ~`, POST /rest/api/3/search/jql) in the chosen projects;
 // - mail: Gmail search (messages.list q=) of every connected Google account and Outlook (Graph /me/messages?$search);
-// - files: a bounded text search in the chat project's folders (skips build/vendor folders, binary and large files);
-// - glossary: accepted terms of the project's glossary.
-// An adapter returns {items:[{source, id, title, text, url, at, meta}], note?, state?}. Timeouts and failures are
-// handled by the caller; each source is reported on the card with its count or why it is missing.
+// - files: a bounded text search in the chat project's folders (skips build/vendor folders, binary and large files),
+//   plus files found by meaning in the semantic index.
+// Sources that belong to other apps (Slack search, Confluence/Notion, Jira, the glossary, Google Drive, …) are
+// declared by those apps as `search-source` providers (registry.cjs). An adapter returns
+// {items:[{source, id, title, text, url, at, meta}], note?, state?}. Timeouts and failures are handled by the caller;
+// each source is reported on the card with its count or why it is missing.
 const fs=require('node:fs');
 const path=require('node:path');
 const Q=require('./query.cjs');
@@ -58,52 +56,6 @@ function memory(s,terms){
   items.push({source:kind,id:kind+':'+m.id,title:one(m.title).slice(0,160)||one(m.source),text:String(m.text||'').slice(0,6000),url:https(m.url),at:Number(m.at)||0,meta:kind==='notes'?one(m.source).slice(0,60):''});
  }
  return {items,kinds};
-}
-
-// Slack search API: only a token allowed to search. Not allowed → a note, the stored context still answers.
-const SLACK_OFF=new Set(['not_allowed_token_type','missing_scope','not_authed','invalid_auth','no_permission','token_revoked','account_inactive']);
-async function slack(s,words){
- const settings=s.settings||{};
- if(!(settings.slackToken||settings.slackCredential))return {state:'off',items:[],note:'Slack не подключён.'};
- const query=words.slice(0,4).join(' ');
- const r=await s.request('https://slack.com/api/search.messages?'+new URLSearchParams({query,count:'20',sort:'score',highlight:'false'}),{headers:{Authorization:'Bearer '+(settings.slackToken||'')},timeoutMs:8000});
- if(!r?.ok){if(SLACK_OFF.has(r?.error))return {state:'limited',items:[],note:'Токен Slack не даёт искать по всему Slack — искал в сохранённой переписке.'};throw Error('Slack: '+(r?.error||'ошибка поиска'));}
- return {items:(r.messages?.matches||[]).filter(m=>m?.text).map(m=>({source:'slack',id:'slack:'+(m.channel?.id||'')+':'+m.ts,title:m.channel?.name?'#'+one(m.channel.name):'Slack',text:String(m.text).slice(0,4000),
-  url:https(m.permalink),at:Math.round(Number(m.ts)*1000)||0,meta:one(m.username||m.user).slice(0,80),ts:String(m.ts||''),thread:(m.channel?.id||'')+':'+(m.thread_ts||m.ts)}))};
-}
-
-function docsConnected(settings){
- const confluence=settings.module_confluence!=='false'&&!!settings.jiraUrl&&!!(settings.atlassianCredential||settings.jiraEmail&&settings.jiraToken);
- const notion=settings.module_notion!=='false'&&!!(settings.notionToken||settings.notionCredential);
- return {confluence,notion};
-}
-async function docs(s,words){
- const r=await s.workspace.searchDocs({title:'',text:''},words.join(' '));
- return {items:(r.docs||[]).slice(0,20).map(d=>({source:String(d.source||'').toLowerCase()==='notion'?'notion':'confluence',id:'doc:'+d.id,title:one(d.title).slice(0,200),text:String(d.text||'').slice(0,8000),
-  url:https(d.url),at:Date.parse(d.updated)||0,meta:''})),note:(r.warnings||[]).filter(w=>!/используется в плане/.test(w)).join(' ')};
-}
-
-function jiraConnected(settings){return settings.module_jira!=='false'&&!!settings.jiraUrl&&!!(settings.atlassianCredential||settings.jiraEmail&&settings.jiraToken);}
-// Jira's document format → plain text (paragraphs, lists, code).
-function adfText(node,depth=0){
- if(!node||depth>30)return '';
- if(typeof node==='string')return node;
- if(node.type==='text')return node.text||'';
- const inner=(node.content||[]).map(n=>adfText(n,depth+1)).join(node.type==='paragraph'||node.type==='heading'?'':' ');
- return ['paragraph','heading','listItem','codeBlock','blockquote'].includes(node.type)?inner+'\n':inner;
-}
-async function jira(s,words){
- const settings={...s.workspace.settings()};
- const keys=String(settings.jiraProjects||settings.jiraProject||'').split(',').map(k=>k.trim()).filter(k=>/^[A-Z][A-Z0-9_]{0,30}$/.test(k));
- const clean=[...new Set(words.map(w=>String(w).replace(/[^\p{L}\p{N}_]/gu,'')).filter(w=>w.length>=2))].slice(0,6);
- if(!clean.length)return {items:[]};
- const quote=v=>'"'+String(v).replace(/["\\]/g,'\\$&')+'"';
- const jql=(keys.length?'project IN ('+keys.map(quote).join(',')+') AND ':'')+'('+clean.map(w=>'text ~ '+quote(/^[а-яё]+$/iu.test(w)&&w.length>=4?w+'*':w)).join(' OR ')+') ORDER BY updated DESC';
- const data=await s.workspace.api('/rest/api/3/search/jql',{method:'POST',body:JSON.stringify({jql,maxResults:25,fields:['summary','status','updated','description','issuetype']})},settings);
- if(!Array.isArray(data?.issues))throw Error('Jira вернула неизвестный ответ на поиск.');
- const site=String(settings.jiraUrl||'').replace(/\/+$/,'');
- return {items:data.issues.map(i=>{const f=i.fields||{};return {source:'jira',id:'jira:'+i.key,title:(i.key?i.key+' · ':'')+one(f.summary).slice(0,200),text:adfText(f.description).slice(0,6000),
-  url:site&&/^[A-Z][A-Z0-9_]*-\d+$/.test(i.key)?site+'/browse/'+i.key:'',at:Date.parse(f.updated)||0,meta:[one(f.issuetype?.name),one(f.status?.name)].filter(Boolean).join(' · ')};}),link:site?site+'/issues/?jql='+encodeURIComponent(jql):''};
 }
 
 function mailAccounts(s){try{return s.mailAccounts?.accounts?.()||[];}catch{return [];}}
@@ -179,18 +131,6 @@ async function files(s,terms,{roots=projectRoots(s),deadline=Date.now()+3500,max
  return {items:out,note:stopped?'Поиск в файлах остановлен по лимиту ('+stopped+'): прочитано '+read+' файлов.':'',read};
 }
 
-// The project's glossary (<company>/extensions/glossary/glossary.json, accepted terms only).
-function glossary(s,terms){
- if(!s.dataRoot)return {state:'off',items:[]};
- let data;try{data=JSON.parse(fs.readFileSync(path.join(s.dataRoot,'extensions','glossary','glossary.json'),'utf8'));}catch{return {state:'off',items:[],note:'Глоссарий проекта пуст.'};}
- const state=s.dialogue?.state||{},topic=s.dialogue?.active?.();
- const id=topic?.projectId||state.activeProjectId||'general';
- const list=data?.projects?.[id]?.terms||[];
- if(!list.length)return {state:'off',items:[],note:'Глоссарий проекта пуст.'};
- const re=Q.pattern(terms);
- return {items:list.filter(t=>{const text=Q.norm([t.term,t.definition,...(t.synonyms||[]),...Object.values(t.translations||{})].join(' '));re.lastIndex=0;return re.test(text);}).map(t=>({source:'glossary',id:'glossary:'+t.id,title:one(t.term).slice(0,80),
-  text:[one(t.definition),(t.synonyms||[]).length?'Синонимы: '+t.synonyms.join(', '):'',Object.entries(t.translations||{}).map(([k,v])=>k+': '+v).join(', ')].filter(Boolean).join('\n').slice(0,2000),url:'',at:Number(t.updatedAt||t.at)||0,meta:''}))};
-}
 // Files found by meaning in the semantic index (s.semanticIndex, collection «files» of «Поиск файлов по смыслу»),
 // limited to the chat project's folders like the word search. Nothing when the index is absent, off or not ready.
 async function indexedFiles(s,question,{roots=projectRoots(s),k=10}={}){
@@ -203,4 +143,4 @@ async function indexedFiles(s,question,{roots=projectRoots(s),k=10}={}){
   return {source:'files',id:'file:'+full,title:path.relative(root,full),text:String(h.text||'').slice(0,1200),url:'',at:Number(h.meta.mtime)||0,meta:where?where+' · по смыслу':'по смыслу',path:full,line:l.line||0};
  });
 }
-module.exports={memory,slack,docs,docsConnected,jira,jiraConnected,mail,mailAccounts,files,indexedFiles,glossary,projectRoots,kindOf,slackLink,adfText,memoryItems};
+module.exports={memory,mail,mailAccounts,files,indexedFiles,projectRoots,kindOf,slackLink,memoryItems};

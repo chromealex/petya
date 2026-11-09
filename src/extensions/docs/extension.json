@@ -10,5 +10,8 @@
   ],
   "results": {
     "docItems": "renderDocItems"
+  },
+  "provides": {
+    "search-source": "search-source.cjs"
   }
 }

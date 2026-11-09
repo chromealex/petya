@@ -62,7 +62,7 @@ const DAY=86400000,NOW=Date.UTC(2026,10,9,12);
   {id:'m2',source:'Микрофон',sessionId:'sess1',title:'Планёрка · 05.11',at:NOW-4*DAY,text:'согласен'},
   {id:'n1',source:'Заметка',title:'Идеи',text:'лиги и сезоны',at:NOW-DAY}];
  const calls=[];let model=[],slackMode='ok',jiraMode='ok',docsMode='ok';
- const s={settings:{'extension_search-all':'false',model:'qwen3:4b',ollamaUrl:'http://127.0.0.1:11434/api/chat',slackToken:'test-token',jiraUrl:'https://studio.atlassian.net',jiraEmail:'me@studio.dev',jiraToken:'t'.repeat(20),jiraProjects:'BW',notionToken:'n'.repeat(20)},
+ const s={settings:{'extension_search-all':'false','extension_glossary':'true',model:'qwen3:4b',ollamaUrl:'http://127.0.0.1:11434/api/chat',slackToken:'test-token',jiraUrl:'https://studio.atlassian.net',jiraEmail:'me@studio.dev',jiraToken:'t'.repeat(20),jiraProjects:'BW',notionToken:'n'.repeat(20)},
   dataRoot:path.join(tmp,'company'),requestProgress:{report(){}},memory:{prune:()=>structuredClone(memory)},
   dialogue:{state:{topics:[topic],projects:[{id:'p1',name:'Game',folders:[project]}],activeProjectId:'p1'},active:()=>topic,persist(){},rememberAction(c,text){topic.messages.push({role:'user',text:c},{role:'assistant',text});}},
   workspace:{settings:()=>s.settings,
@@ -147,6 +147,54 @@ const DAY=86400000,NOW=Date.UTC(2026,10,9,12);
  assert.equal(meaning.embed,'nomic-embed-text:latest');assert.equal(embedded.model,'nomic-embed-text:latest');assert.equal(embedded.input[0],'матчмейкинг');
  assert.match(meaning.items[0].snippet,/турнир/,'the closest by meaning goes first');
  s.request=realRequest;embed.reset();
+
+ // --- Search sources (`search-source`): declared by their apps, counted only while the app is added -----------------------
+ const REG=require('../src/extensions/search-all/registry.cjs');
+ assert.ok(require('../src/features/app-links.cjs').REGISTRIES.includes('search-source'));
+ const declared=REG.load(path.join(__dirname,'..','src','extensions'));
+ assert.deepEqual(declared.map(x=>[x.extension,x.id]).sort((a,b)=>a[0].localeCompare(b[0])),[['docs','docs'],['glossary','glossary'],['google-drive','google-drive'],['jira','jira'],['slack','slack']]);
+ assert.deepEqual(declared.find(x=>x.id==='docs').source.parts.map(p=>p.id),['confluence','notion'],'one docs request answers two rows');
+ assert.equal(REG.valid({id:'x',label:'X',ready(){}}),false,'a source without search is refused');
+ // Google Drive: files by name and full text through the app's service; a document found by its text alone is read.
+ const driveCalls=[];
+ s.googleDrive={search:async(text,o)=>{driveCalls.push(['search',text,o.size]);return [
+   {id:'1AbCdEfGhIjKlMnOpQrStUvWx',name:'Матчмейкинг: правила лиг',kind:'document',url:'https://docs.google.com/document/d/1AbCdEfGhIjKlMnOpQrStUvWx/edit',modified:new Date(NOW-3*DAY).toISOString(),owner:'Олег',editor:''},
+   {id:'1ZyXwVuTsRqPoNmLkJiHgFeDc',name:'Планы на Q4',kind:'document',url:'https://docs.google.com/document/d/1ZyXwVuTsRqPoNmLkJiHgFeDc/edit',modified:new Date(NOW-9*DAY).toISOString(),owner:'',editor:'Маша'},
+   {id:'1FolderFolderFolderFolder',name:'Матчмейкинг',kind:'folder',url:'https://drive.google.com/drive/folders/1FolderFolderFolderFolder',modified:'',owner:''}];},
+  document:async id=>{driveCalls.push(['document',id]);return {text:'Цели квартала. Матчмейкинг: окно MMR сужаем до 150.'};}};
+ const driveOn={'extension_google-drive':'true',googleDriveAuth:'service',googleDriveCredential:'{"client_email":"bot@x.iam.gserviceaccount.com"}'};
+ // Not added: no row at all; added but not connected: an «off» row that says so.
+ model=[{words:[]}];
+ let ids=(await app.turn(s,'найди везде про матчмейкинг')).extensionData.searchAll.sources.map(x=>x.id);
+ assert.ok(!ids.includes('google-drive'));assert.equal(driveCalls.length,0);
+ s.settings['extension_google-drive']='true';model=[{words:[]}];
+ const offDrive=(await app.turn(s,'найди везде про матчмейкинг')).extensionData.searchAll.sources.find(x=>x.id==='google-drive');
+ assert.deepEqual([offDrive.state,offDrive.note,offDrive.label],['off','Google Диск не подключён.','Google Диск']);
+ Object.assign(s.settings,driveOn);model=[{words:[]}];
+ const withDrive=(await app.turn(s,'найди везде про матчмейкинг')).extensionData.searchAll;
+ const dr=withDrive.sources.find(x=>x.id==='google-drive');
+ assert.deepEqual([dr.state,dr.count,dr.label,dr.icon,dr.in],['ok',2,'Google Диск','drive','в Google Диске']);
+ assert.deepEqual(withDrive.sources.map(x=>x.id).slice(0,5),['slack','confluence','notion','google-drive','jira'],'the source\'s own order on the card');
+ assert.deepEqual(driveCalls,[['search','матчмейкинг',15],['document','1ZyXwVuTsRqPoNmLkJiHgFeDc']],'only the document without the words in its name is read');
+ const byText=withDrive.items.find(i=>i.id==='gdrive:1ZyXwVuTsRqPoNmLkJiHgFeDc');
+ assert.match(byText.snippet,/окно MMR сужаем/);assert.equal(byText.meta,'Документ · Маша');assert.equal(byText.url,'https://docs.google.com/document/d/1ZyXwVuTsRqPoNmLkJiHgFeDc/edit');
+ assert.ok(!withDrive.items.some(i=>/Folder/.test(i.id)),'folders are not results');
+ // A follow-up names the source by the provider's own words.
+ model=[body=>{const user=JSON.parse(body.messages[1].content);assert.ok(user.excerpts.length===2&&user.excerpts.every(e=>e.source==='Google Диск'),JSON.stringify(user.excerpts.map(e=>e.source)));return {answer:'Окно MMR сужают до 150 [1].',found:true};}];
+ const onlyDrive=(await app.turn(s,'ответь по найденному в гугл диске')).extensionData.searchAllAnswer;
+ assert.deepEqual(onlyDrive.only,['google-drive']);assert.equal(onlyDrive.citations[0].label,'Google Диск');
+ // A failing Drive marks only itself.
+ s.googleDrive.search=async()=>{throw Error('Google Диск временно ограничил запросы. Повторите через минуту.');};model=[{words:[]}];
+ const driveDown=(await app.turn(s,'найди везде про матчмейкинг')).extensionData.searchAll;
+ assert.equal(driveDown.sources.find(x=>x.id==='google-drive').state,'error');assert.equal(driveDown.sources.find(x=>x.id==='jira').state,'ok');
+ // An app switched off (a core module or an extension) takes its source away, the row too.
+ delete s.googleDrive;for(const k of Object.keys(driveOn))delete s.settings[k];
+ s.settings.module_jira='false';s.settings['extension_glossary']='false';model=[{words:[]}];
+ const jiraBefore=calls.filter(c=>c.jira).length;
+ ids=(await app.turn(s,'найди везде про матчмейкинг')).extensionData.searchAll.sources.map(x=>x.id);
+ assert.ok(!ids.includes('google-drive')&&!ids.includes('glossary')&&!ids.includes('jira'),String(ids));
+ assert.equal(calls.filter(c=>c.jira).length,jiraBefore,'a switched-off Jira is not asked');
+ delete s.settings.module_jira;s.settings['extension_glossary']='true';
 
  // --- «Ответь по найденному» ----------------------------------------------------------------------------------------------
  model=[{words:[]}];

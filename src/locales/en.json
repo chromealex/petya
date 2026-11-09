@@ -12759,6 +12759,11 @@
   "Петя ещё запускается.": "Petya is still starting.",
   "Выключенные сервисы": "Switched-off services",
   "выключен в проекте «": "is switched off in the project «",
-  "выключен в этом проекте": "is switched off in this project"
+  "выключен в этом проекте": "is switched off in this project",
+  "ПЕТЯ / 0.9.1": "PETYA / 0.9.1",
+  "Уточните проект в разделе «Claude и Codex».": "Specify the project in “Claude and Codex”.",
+  "Документ · по смыслу": "Document · by meaning",
+  "Поиск по смыслу в Google Диске не ответил.": "Search by meaning in Google Drive did not respond.",
+  "в Google Диске": "in Google Drive"
  }
 }

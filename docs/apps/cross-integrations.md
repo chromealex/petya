@@ -38,6 +38,9 @@ button for an app that is not added and connected, and nothing is written until 
 - **Reminder triggers** (`"reminder-trigger"`, events «Напоминания» can wait for, see [reminders.md](reminders.md))
   and **journal sources** (`"journal-source"`, what «Дневник дня» knows about a day, see [journal.md](journal.md))
   are declared the same way and served by their apps' own registries.
+- **Search sources** (`"search-source"`) are declared the same way and read by «Поиск по всему»
+  (`src/extensions/search-all/registry.cjs`, see [search-all.md](search-all.md)): Slack search, Confluence/Notion
+  («Документы»), Jira, the glossary and Google Drive; mail, project files and the messenger bridge are the app's own.
 - **Release checks** (`"release-check"`) are declared the same way and read by «Релизный чек-лист»
   (`src/extensions/release-checklist/checks.cjs`, see [release-checklist.md](release-checklist.md)): each provider
   answers named checks (`ci.green`, `crashes.release`, …) for a release; provided by Сборки, Крэши, Отзывы в сторах,

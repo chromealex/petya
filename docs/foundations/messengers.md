@@ -82,7 +82,8 @@ message that does not exist is dropped; its quote is the model's verbatim part o
 
 - **«Mattermost», «VK Teams»** read their own source through the registry (bounds, normalization) and build their
   cards with `src/messenger-digest.cjs`.
-- **«Поиск по всему»** (`src/extensions/search-all/feature.cjs`): every ready source with `search` and without
+- **«Поиск по всему»** (`src/extensions/search-all/feature.cjs`): a core search source on its `search-source`
+  registry (`each()` expands it into one source per messenger): every ready source with `search` and without
   `memory` is searched with the user's words, each under its own name, time limit and state chip; results carry a
   generic chat icon.
 - **«Кто знает»** (not wired yet; `src/extensions/who-knows/feature.cjs` reads Slack from the memory). To count
