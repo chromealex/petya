@@ -13,7 +13,7 @@ function appLink(href,team){
 function setup(s){
   const teams=new Map();
   async function team(){
-    const token=s.settings.slackToken;if(!token)return '';
+    const token=s.settings.slackToken||'';if(!token&&!s.settings.slackCredential)return '';
     if(teams.has(token))return teams.get(token);
     try{const r=await s.request('https://slack.com/api/auth.test',{method:'POST',headers:{Authorization:'Bearer '+token}});const id=r?.ok&&/^[TE][A-Z0-9]+$/.test(r.team_id||'')?r.team_id:'';if(id)teams.set(token,id);return id;}catch{return '';}
   }
@@ -28,9 +28,9 @@ function setup(s){
   // Names for Slack user IDs that cards could not resolve (older cards, people outside «Команда»).
   const people=new Map();
   async function names(ids){
-    const out={},token=s.settings.slackToken;
+    const out={},token=s.settings.slackToken||'';
     for(const id of [...new Set((Array.isArray(ids)?ids:[]).map(String))].filter(v=>/^[UWB][A-Z0-9]{6,}$/.test(v)).slice(0,50)){
-      if(!people.has(id)&&token){try{const r=await s.request('https://slack.com/api/users.info?'+new URLSearchParams({user:id}),{headers:{Authorization:'Bearer '+token}});
+      if(!people.has(id)&&(token||s.settings.slackCredential)){try{const r=await s.request('https://slack.com/api/users.info?'+new URLSearchParams({user:id}),{headers:{Authorization:'Bearer '+token}});
         const p=r?.ok?r.user:null;people.set(id,p?{name:p.profile?.real_name||p.real_name||p.profile?.display_name||p.name||'',photo:p.profile?.image_72||''}:null);}catch{people.set(id,null);}}
       if(people.get(id)?.name)out[id]=people.get(id);
     }

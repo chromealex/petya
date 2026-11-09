@@ -7,7 +7,8 @@ const norm=v=>String(v||'').toLocaleLowerCase().replace(/ё/g,'е').replace(/\s+
 // waiting once when Slack limits requests; then users.lookupByEmail for those with a known e-mail.
 // The result says whether the walk was complete, so the reply never claims «no job title» for an unseen profile.
 async function slackProfiles(settings,request,wanted=[],{wait=ms=>new Promise(r=>setTimeout(r,ms)),maxPages=50}={}){
- const token=settings.slackToken||'';const result={profiles:[],complete:false,limited:false};if(settings.module_slack==='false'||!token)return result;
+ // A Slack connected by sign-in (slackCredential) has no token here: the request pipeline adds it (src/service-oauth.cjs).
+ const token=settings.slackToken||'';const result={profiles:[],complete:false,limited:false};if(settings.module_slack==='false'||!(token||settings.slackCredential))return result;
  const call=async url=>{for(let attempt=0;attempt<2;attempt++){try{return await request(url,{headers:{Authorization:'Bearer '+token}});}catch(e){if(attempt||!(e.status===429||/429|ratelimit|ограничил/iu.test(e.message||'')))throw e;result.limited=true;await wait(Math.min(30,Number(e.retryAfter)||20)*1000);}}};
  result.deleted=[];
  const namesOf=(u,p)=>[p.real_name,u.real_name,p.display_name,p.real_name_normalized,p.display_name_normalized,u.name].filter(Boolean).map(norm);
@@ -20,7 +21,8 @@ async function slackProfiles(settings,request,wanted=[],{wait=ms=>new Promise(r=
  try{
   for(let page=0;page<maxPages;page++){
    const data=await call('https://slack.com/api/users.list?'+new URLSearchParams({limit:'200',...cursor?{cursor}:{}}));
-   if(!data?.ok||!Array.isArray(data.members)){if(data?.error==='ratelimited')result.limited=true;break;}
+   // Any other refusal (missing_scope: the connection may not read profiles) is said in the reply, not swallowed.
+   if(!data?.ok||!Array.isArray(data.members)){if(data?.error==='ratelimited')result.limited=true;else if(data?.error)result.error=data.error==='missing_scope'?'подключению Slack не хватает разрешения users:read (и users:read.email для почты) — переподключите Slack':String(data.error);break;}
    data.members.forEach(add);
    cursor=String(data.response_metadata?.next_cursor||'').trim();
    if(!cursor){result.complete=true;break;}

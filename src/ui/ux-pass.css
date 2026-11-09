@@ -285,6 +285,11 @@ input,textarea,select,[contenteditable]:not([contenteditable="false"]),pre,code,
 .team-project-field input{min-height:0;height:28px;padding:0 4px}
 .team-project-chips{display:contents}
 .team-project-chip{line-height:24px}
+/* The picker sits where a plain field would: same top offset and the same 40px as «Роль» next to it. The inner input
+   must not take the member fields' own margin and padding (that made the picker 4px taller and 2px lower). */
+.team-member-fields .team-projects{margin-top:4px}
+.team-member-fields .team-project-field{min-height:40px;padding:4px 8px 4px 6px}
+.team-member-fields .team-project-field input{margin:0;height:30px;padding:0 4px}
 /* Ring spinners do not rotate their box: a rotating box that sits on half a pixel (a flex row centred on an odd
    height) wobbles. The ring stays put and only its bright arc turns (a conic gradient with an animated angle). */
 @property --spin{syntax:'<angle>';inherits:false;initial-value:0deg}
@@ -308,3 +313,8 @@ input,textarea,select,[contenteditable]:not([contenteditable="false"]),pre,code,
 .app-dialog-actions button{min-height:38px;border-radius:10px;font-size:14px}
 .app-dialog-actions .app-dialog-danger{background:#e5484d;border-color:#e5484d;color:#fff}
 .app-dialog-actions .app-dialog-danger:hover{background:#f2555a}
+
+/* «Удалённые» on the team page: removed people, each with «Вернуть». */
+.team-removed{padding:10px 14px}.team-removed>summary{cursor:pointer;color:var(--muted);font-size:13px}.team-removed .small{margin:8px 0 6px}
+.team-removed-list{list-style:none;margin:0;padding:0;display:grid;gap:4px}.team-removed-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:4px 0;border-top:1px solid var(--line);font-size:13px}.team-removed-list li:first-child{border-top:0}
+.team-removed-list button{min-height:28px;padding:2px 10px;font-size:12px}
