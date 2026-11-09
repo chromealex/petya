@@ -22,3 +22,8 @@ article.important-flash{animation:important-flash 1.4s ease-out}
 .chat-sticky-header>.important-panel{margin:4px 0 8px;padding:8px 10px;border:1px solid #e8bc6540;border-radius:8px;background:var(--panel);max-height:26vh;overflow:auto}
 .important-panel>summary{color:#e8bc65;font-size:12px}
 .important-item{padding:4px 0}.important-text{font-size:12px}
+.important-head{display:flex;align-items:center;gap:10px;padding:0 0 8px;margin-bottom:4px;border-bottom:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.4}.important-head>span{flex:1}
+.important-clear{flex:none;font-size:11px;min-height:24px;padding:2px 9px}
+.important-list .important-remove{font-size:11px;padding:2px 8px;border:1px solid var(--line);border-radius:6px}
+.important-list .important-item:not(:hover) :is(.important-edit,.important-remove){opacity:.6}
+.important-list .important-text{border-left-color:#e8bc65}

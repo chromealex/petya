@@ -14,13 +14,16 @@
   const open=panel.open;panel.replaceChildren();panel.open=open;
   panel.append(el('summary','Важное · '+items.length));
   const list=el('ul',null,'important-list');
+  const head=el('li',null,'important-head');head.append(el('span','Учитывается в ответах Пети. Нажмите на текст, чтобы найти его в чате.'));
+  const clear=el('button','Убрать все','important-clear');clear.type='button';clear.onclick=()=>change(async()=>{let next=state;for(const h of items)next=await api('remove',topicSelect.value,h.id);return next;});
+  if(items.length>1)head.append(clear);list.append(head);
   for(const h of items){const li=el('li',null,'important-item');
    const text=el('button',h.text,'important-text');text.type='button';text.title='Показать в чате';text.onclick=()=>{const node=Number.isInteger(h.messageIndex)&&dialogueMessages.querySelector('[data-message-index="'+h.messageIndex+'"]');if(node){node.scrollIntoView({block:'center',behavior:'smooth'});node.classList.add('important-flash');setTimeout(()=>node.classList.remove('important-flash'),1400);}};
    const scope=el('button',h.scope==='project'?'Проект':'Чат','important-scope');scope.type='button';scope.title=h.scope==='project'?'Учитывается во всех чатах проекта'+(state.projectName?' «'+state.projectName+'»':'')+'. Нажми, чтобы оставить только для этого чата':'Учитывается в этом чате. Нажми, чтобы учитывать во всём проекте';
    scope.onclick=()=>change(()=>api('update',topicSelect.value,h.id,{scope:h.scope==='project'?'chat':'project'}));
    const edit=el('button','✎','important-edit');edit.type='button';edit.title='Изменить';edit.setAttribute('aria-label','Изменить отметку');
    edit.onclick=()=>{const input=el('textarea',null,'important-input');input.value=h.text;input.rows=2;input.maxLength=1000;li.replaceChildren(input);input.focus();const done=save=>{if(save&&input.value.trim()&&input.value.trim()!==h.text)change(()=>api('update',topicSelect.value,h.id,{text:input.value}));else renderPanel();};input.onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();done(true);}if(e.key==='Escape')done(false);};input.onblur=()=>done(true);};
-   const remove=el('button','×','important-remove');remove.type='button';remove.title='Снять отметку';remove.setAttribute('aria-label','Снять отметку');remove.onclick=()=>change(()=>api('remove',topicSelect.value,h.id));
+   const remove=el('button','Убрать','important-remove');remove.type='button';remove.title='Убрать из важного';remove.setAttribute('aria-label','Убрать из важного: '+h.text.slice(0,60));remove.onclick=()=>change(()=>api('remove',topicSelect.value,h.id));
    li.append(text,scope,edit,remove);list.append(li);}
   panel.append(list);
  }
@@ -47,7 +50,10 @@
  async function change(work){const owner=topicSelect.value;++loading;try{const next=await work();if(topicSelect.value!==owner)return;state=next;renderPanel();panel.open=true;mark();}catch(e){notice(e.message,true);}}
  // Whole message: a star in the hover row.
  function install(){const original=window.renderMessage;if(typeof original!=='function'||original.highlights)return;
-  const wrapped=function(message){const node=original(message);const meta=node.querySelector('.message-meta');if(meta&&message?.text){const star=el('button','☆','message-copy important-star');star.type='button';star.title='Отметить сообщение как важное';star.setAttribute('aria-label',star.title);star.onclick=()=>{const index=Number(node.dataset.messageIndex);change(()=>api('add',topicSelect.value,{text:message.text,wholeMessage:true,messageIndex:Number.isInteger(index)?index:null}));};meta.append(star);const menu=node.querySelector('.answer-menu-items');if(menu){const item=el('button','Отметить всё сообщение как важное','important-menu-action');item.type='button';const icon=el('span','☆','message-menu-icon');icon.setAttribute('aria-hidden','true');item.prepend(icon);item.onclick=()=>{node.querySelector('.message-actions-menu').open=false;star.click();};menu.append(item);}}return node;};
+  const wrapped=function(message){const node=original(message);const meta=node.querySelector('.message-meta');if(meta&&message?.text){const star=el('button','☆','message-copy important-star');star.type='button';star.title='Отметить сообщение как важное';star.setAttribute('aria-label',star.title);star.onclick=()=>{const index=Number(node.dataset.messageIndex);
+   // The star toggles: a marked message is unmarked.
+   const whole=String(message.text).replace(/\s+/g,' ').trim().slice(0,1000),marked=[...state.chat,...state.project].find(h=>h.text===message.text||h.text===whole);if(marked)return change(()=>api('remove',topicSelect.value,marked.id));
+   change(()=>api('add',topicSelect.value,{text:message.text,wholeMessage:true,messageIndex:Number.isInteger(index)?index:null}));};meta.append(star);const menu=node.querySelector('.answer-menu-items');if(menu){const item=el('button','Отметить всё сообщение как важное','important-menu-action');item.type='button';const icon=el('span','☆','message-menu-icon');icon.setAttribute('aria-hidden','true');item.prepend(icon);item.onclick=()=>{node.querySelector('.message-actions-menu').open=false;star.click();};menu.append(item);}}return node;};
   wrapped.highlights=true;Object.assign(wrapped,Object.fromEntries(Object.entries(original)));window.renderMessage=wrapped;}
  // Part of a message: select it and press «Важно».
  const float=el('button','★ Важно','important-float');float.type='button';float.hidden=true;document.body.append(float);

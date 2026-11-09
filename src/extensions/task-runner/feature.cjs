@@ -40,7 +40,8 @@ function setup(s){
    kind:/bug|баг|ошибк|дефект/i.test(String(task.type||''))?'bug':'feature',description:String(task.description||'').slice(0,20000),url:/^https:\/\//.test(task.url||'')?task.url:''};
   // An unfinished run for the same task is reopened instead of starting a duplicate.
   const existing=topics().find(t=>!t.archived&&t.taskRun?.task.key===clean.key&&t.taskRun.task.app===clean.app&&!FINAL.has(t.taskRun.state));
-  if(existing){s.dialogue.state.activeId=existing.id;s.dialogue.persist();return {handled:true,text:'Открыл чат выполнения '+clean.key+'.',topicId:existing.id,reopened:true};}
+  // The card opens the chat (selectDialogueTopic): switching here made the card's own action fail with «Чат изменился».
+  if(existing){return {handled:true,text:'Открыл чат выполнения '+clean.key+'.',topicId:existing.id,reopened:true};}
   const source=s.dialogue.active();
   const topic={id:randomUUID(),projectId:source?.projectId||s.dialogue.state.activeProjectId||'general',title:(clean.kind==='bug'?'Исправить ':'Реализовать ')+clean.key+' · '+clean.title.slice(0,60),kind:'chat',messages:[],at:Date.now(),projectMemoryId:source?.projectMemoryId||''};
   topic.messages.push({role:'user',text:(clean.kind==='bug'?'Исправь ':'Реализуй ')+clean.key+': '+clean.title,at:Date.now()});
@@ -48,7 +49,7 @@ function setup(s){
   const plan=await plans.propose(model,clean);
   const localCoder=await codingModel();
   topic.taskRun={id:randomUUID(),task:clean,state:'proposed',version:1,feedback:[],agent:localCoder?'local':'auto',localCoder,plan,startedAt:Date.now()};
-  topics().push(topic);s.dialogue.state.activeId=topic.id;push(topic,topic.taskRun);
+  topics().push(topic);push(topic,topic.taskRun);
   return {handled:true,text:'Составил план работ по '+clean.key+' в отдельном чате.',topicId:topic.id};
  }
 

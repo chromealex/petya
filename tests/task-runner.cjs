@@ -16,11 +16,11 @@ const plans=require('../src/extensions/task-runner/plan.cjs');
  const {taskRunner,ipc}=runner.setup(s);
  const started=await taskRunner.start({app:'jira',key:'MOB-311',title:'Сборка Android падает',type:'Баг',description:'mergeReleaseResources: duplicate ic_logo',url:'https://acme.atlassian.net/browse/MOB-311'});
  const topic=state.topics.find(t=>t.id===started.topicId);
- assert.ok(topic&&topic.id!=='src','a separate chat');assert.equal(state.activeId,topic.id);assert.equal(topic.projectId,'p1');
+ assert.ok(topic&&topic.id!=='src','a separate chat');assert.equal(state.activeId,'src','the card opens the new chat, not the runner: the card action must finish in its own chat');state.activeId=topic.id;assert.equal(topic.projectId,'p1');
  assert.match(topic.title,/^Исправить MOB-311/);assert.equal(topic.taskRun.task.kind,'bug');
  assert.equal(topic.messages.at(-1).extensionData.taskRun.version,1);
  // Same task again reopens the open run.
- state.activeId='src';assert.equal((await taskRunner.start({app:'jira',key:'MOB-311',title:'x'})).reopened,true);assert.equal(state.activeId,topic.id);
+ state.activeId='src';const again=await taskRunner.start({app:'jira',key:'MOB-311',title:'x'});assert.equal(again.reopened,true);assert.equal(again.topicId,topic.id);state.activeId=topic.id;
  // A message while the plan is open revises it.
  modelReply={summary:'Сначала тест.',steps:[{title:'Написать тест на дубликаты'},{title:'Удалить дубликат'},{title:'Проверить сборку'}]};
  const revised=await runner.turn(s,'сначала тест, потом фикс');
