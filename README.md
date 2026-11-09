@@ -14,7 +14,7 @@ runtime, packaging) the group is marked stable.
 ## Layout
 
 ```
-andromeda/group.json       current set (R1-A1-D9), optional parts
+andromeda/group.json       current set (R1-A1-D9), optional parts, published versions per part (rollback choices in the app)
 andromeda/D1/              model.json (role, base, hashes, evaluation, status), NOTES.md, adapter files
 andromeda/R1/, A1/         model.json; weights only when the part has an adapter
 ```

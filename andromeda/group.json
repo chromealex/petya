@@ -9,6 +9,20 @@
   "optional": [
     "A"
   ],
+  "versions": {
+    "R": [
+      "R1"
+    ],
+    "A": [
+      "A1"
+    ],
+    "D": [
+      "D9",
+      "D8",
+      "D7",
+      "D1"
+    ]
+  },
   "status": "experimental",
   "notes": "R picks the function and passes the request to A (answers) or D (requirement drafts).",
   "base": {
