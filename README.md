@@ -13,7 +13,7 @@ Say «Петя» — he hears the meeting, reads Slack and Jira, writes the task
 [![Local models](https://img.shields.io/badge/models-local%20(Ollama%2C%20whisper.cpp)-8957e5)](#privacy)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-[**Download for Windows**](https://github.com/chromealex/petya/releases/latest) · [What's new](docs/HISTORY.md) · [Apps](docs/apps) · [Development](docs/DEVELOPMENT.md)
+[**Download for macOS and Windows**](https://github.com/chromealex/petya/releases/latest) · [What's new](docs/HISTORY.md) · [Apps](docs/apps) · [Development](docs/DEVELOPMENT.md)
 
 </div>
 
@@ -58,7 +58,7 @@ Each app has a page in [docs/apps](docs/apps).
 
 **Windows** — download `Petya-Setup.exe` from the [latest release](https://github.com/chromealex/petya/releases/latest) and run it.
 
-**macOS** — build it yourself for now (see [Development](docs/DEVELOPMENT.md#building)); a signed download is coming.
+**macOS** (Apple Silicon) — download `Petya.dmg` from the [latest release](https://github.com/chromealex/petya/releases/latest), open it and drag Petya into Applications. It is signed and notarized by Apple. On an Intel Mac, build it yourself (see [Development](docs/DEVELOPMENT.md#building)).
 
 On first launch Petya introduces himself, checks the microphone and helps you connect your services. Answers need a local [Ollama](https://ollama.com) model — Petya offers to install one (`qwen3.5:9b` is recommended); a small speech model is built in and a more accurate one downloads in the background on first launch.
 
