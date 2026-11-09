@@ -120,6 +120,9 @@ function sort(a,b){return (ORDER[a.status]-ORDER[b.status])||(b.at-a.at);}
 function board({records=[],topics=[],projects=[],now=Date.now(),keep=7*DAY,limit=60}={}){
  const names=new Map(projects.map(p=>[p.id,text(p.name||p.title,80)]));
  const project=id=>names.get(id)||'';
+ // Chats of archived projects (e.g. old «Автотест Пети …» leftovers) are archived too, even if the chat itself is not.
+ const hidden=new Set(projects.filter(p=>p.archived).map(p=>p.id));
+ topics=topics.filter(t=>!t.archived&&!hidden.has(t.projectId));
  const all=[...petyaTasks(topics,project),...coderTasks(topics,project),...handoffTasks(records,now)]
   .filter(t=>ACTIVE.has(t.status)||now-t.at<=keep);
  const lanes=LANES.map(lane=>{

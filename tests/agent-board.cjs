@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict');
 const {board}=require('../src/agent-board.cjs');
 const DAY=86400000,now=10*DAY;
-const projects=[{id:'p',name:'Bunker Wars'}];
+const projects=[{id:'p',name:'Bunker Wars'},{id:'z',name:'Автотест Пети 05.11',archived:true}];
 const parent={id:'parent',projectId:'p',title:'Сводка',messages:[{role:'assistant',agentPlan:{id:'plan',state:'running',startedAt:now-60000,tasks:[
  {title:'Баги',request:'Какие баги открыты?',state:'running',topicId:'child'},
  {title:'Задача',request:'Создай задачу на релиз',state:'action',label:'Меняет данные — запусти сам, когда проверишь'}]}}],
@@ -12,6 +12,7 @@ const topics=[parent,
  {id:'bg',projectId:'p',title:'Фон',messages:[],chatJob:{state:'queued',command:'Что нового в Slack?',startedAt:now-5000,at:now-5000}},
  {id:'old',projectId:'p',title:'Старый',messages:[],chatJob:{state:'done',label:'Готово',command:'Давно',at:now-9*DAY}},
  {id:'gone',projectId:'p',title:'Архив',archived:true,messages:[],chatJob:{state:'running',command:'x',at:now}},
+ {id:'test',projectId:'z',title:'Автотест',messages:[],chatJob:{state:'attention',label:'Нужно уточнение',command:'Уменьши 2000 на 15%',at:now}},
  {id:'code',projectId:'p',title:'Код',messages:[],codingRuns:[
   {id:'r1',state:'review',title:'Исправить падение',repo:'/Users/a/petya',branch:'petya/fix',files:['a.js','b.js'],at:now-3000},
   {id:'r2',state:'merged',title:'Добавить тест',repo:'/Users/a/petya',branch:'petya/test',at:now-DAY},
@@ -36,6 +37,7 @@ assert.equal(petya[0].title,'Создай задачу на релиз');assert.
 const agent=petya.find(t=>t.open.id==='child');assert.equal(agent.role,'Агент');assert.equal(agent.parent,'Сводка');assert.equal(agent.label,'Обращаюсь к Jira');assert.equal(agent.steps,2);assert.equal(agent.project,'Bunker Wars');
 assert(!petya.some(t=>t.open.id==='old'),'finished tasks older than a week are hidden');
 assert(!petya.some(t=>t.open.id==='gone'),'archived chats are hidden');
+assert(!petya.some(t=>t.open.id==='test'),'chats of archived projects are hidden');
 assert.equal(lane('petya').active,4);
 
 // Programmer: waiting for a decision first, then running; the merged run is done.
