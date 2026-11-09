@@ -1,6 +1,8 @@
 (() => {
  document.documentElement.dataset.platform=window.petyaPlatform;
  let current='',settingsDirty=false,switching=false;
+ // Companies whose meeting is being recorded: a red dot on the tab, also while another company is open.
+ let recordingIds=new Set();
  const tabs=$('company-tabs');
  function setBusy(busy){switching=busy;tabs.querySelectorAll('button').forEach(button=>button.disabled=busy);}
  async function switchCompany(target){
@@ -11,7 +13,7 @@
   try{
    // Nothing to save by hand: pending settings are saved now, team edits are saved before the switch.
    await window.flushSettings?.();if([ 'Изменения не сохранены.',(window.t||String)('Изменения не сохранены.')].includes($('team-status').textContent))await window.saveTeamNow?.();
-   if(mic.active)throw Error('Выключите микрофон перед переключением компании.');if(meeting.active||window.petyaAutoMeetingActive)throw Error('Остановите запись системного звука перед переключением компании.');if(currentDraft||workspaceBusy)throw Error('Завершите или закройте черновик в Ассистенте.');if(planning||draftBusy||agentBusy)throw Error('Дождитесь завершения текущего запроса; статус показан в верхней панели.');
+   if(mic.active)throw Error('Выключите микрофон перед переключением компании.');if(meeting.active)throw Error('Остановите запись системного звука перед переключением компании.');if(currentDraft||workspaceBusy)throw Error('Завершите или закройте черновик в Ассистенте.');if(planning||draftBusy||agentBusy)throw Error('Дождитесь завершения текущего запроса; статус показан в верхней панели.');
    const result=await window.petya.companySwitch(target);
    if(result.switching){notice('Переключаю компанию…');document.querySelectorAll('button,input,textarea,select').forEach(e=>e.disabled=true);}
    else setBusy(false);
@@ -33,17 +35,26 @@
    // Slack workspace icon when available, otherwise the first letter.
    const badge=document.createElement(company.icon?'img':'span');badge.className='company-icon';badge.setAttribute('aria-hidden','true');if(company.icon){badge.src=company.icon;badge.alt='';}else badge.textContent=company.name.trim().slice(0,1).toLocaleUpperCase();
    const label=document.createElement('span');label.textContent=company.name;tab.append(badge,label);
+   const dot=document.createElement('span');dot.className='company-rec';dot.setAttribute('aria-hidden','true');tab.append(dot);
    if(company.id===current)tab.setAttribute('aria-current','true');const row=document.createElement('div');row.className='ux-company-row';const title=document.createElement('strong');title.textContent=company.name;const action=document.createElement('button');action.type='button';action.textContent=company.id===current?'Переименовать':'Переключиться';action.onclick=company.id===current?()=>{renameCard.hidden=false;$('company-name').focus();$('company-name').select();}:run(()=>switchCompany(company.id));row.append(title);if(company.id===current){const active=document.createElement('small');active.textContent='Текущая';row.append(active);}row.append(action);
    // Any company except the current one and the first (its data is the app's own folder) can be removed.
    if(company.id!==current&&company.id!=='default'){const remove=document.createElement('button');remove.type='button';window.asDeleteButton(remove,'Удалить компанию «'+company.name+'»: её данные переместятся в Корзину');remove.onclick=run(async()=>{const next=await window.petya.companyRemove(company.id);render(next);if(!next.cancelled)$('company-status').textContent='Компания «'+company.name+'» удалена, её данные — в Корзине.';});row.append(remove);}
    companyList.append(row);
    tab.onclick=run(()=>switchCompany(company.id));tabs.append(tab);
   }
+  if(Array.isArray(data.recording))recordingIds=new Set(data.recording);marks();
   setBusy(false);
   const name=data.companies.find(c=>c.id===current).name;
   $('company-name').value=name;$('connections-company').textContent='Подключения компании «'+name+'»';
   tabs.querySelector('[aria-current]')?.scrollIntoView({block:'nearest',inline:'nearest'});
  }
+ function marks(){
+  for(const tab of tabs.querySelectorAll('.company-tab')){
+   const on=recordingIds.has(tab.dataset.companyId),name=tab.querySelector('span:not(.company-icon):not(.company-rec)')?.textContent||'';
+   tab.classList.toggle('recording',on);tab.title=on?name+' · '+(window.t||String)('идёт запись встречи'):name;
+  }
+ }
+ window.petyaEvents.onLocalMeeting(state=>{if(!state?.company)return;if(state.busy)recordingIds=new Set([state.company]);else recordingIds.delete(state.company);marks();});
  const companyReady=window.petya.companies().then(render).catch(e=>notice(e.message,true));
  // Pull the company icon (Slack, then Jira) in the background; once a day, and right after Slack or Jira is connected.
  const refreshIcon=force=>companyReady.then(()=>window.petya.companyIconRefresh(force)).then(data=>{if(!switching)render(data);}).catch(()=>{});

@@ -98,6 +98,8 @@ The full specification, the minimal example and the checklist are in `docs/exten
 
 - Chat clarification and permission controls must use the shared question panel in `src/ui/chat-clarification.js` (`createChatQuestion` / `renderClarification`). Keep the question and actions in the composer; use the main composer for free text. Dismiss the panel before resuming or cancelling, report outcomes in chat, and keep only a new unanswered question visible. Test duplicate clicks, follow-up questions, failures, and chat ownership. Do not introduce a second inline input or a separate permission style.
 
+- A meeting recording outlives a company switch (`src/meeting-carry.cjs`): the company that records keeps its recorder in the background, its tab shows a red dot, the open company shows that meeting and can stop it but starts none of its own; recognition waits until the recording company is open again. Never stop a recording or block a company switch because of it; anything a recorder uses of its company goes through `bind.s`, not a captured `s`.
+
 # Interface rules
 - Delete is a red trash-can icon button, everywhere: build it with `window.deleteButton(label, onClick)` or turn an existing button into one with `window.asDeleteButton(button, label)` (`src/ui/delete-button.js`, style `.delete-button` in `ux-pass.css`). The label (e.g. «Удалить участника», «Удалить из очереди») stays as the tooltip and accessible name. No text «Удалить» buttons, no grey «×» for deleting.
 - «Убрать» / «Отвязать» (remove from a selection, unlink, detach a file) is not a delete: keep those as ordinary buttons.

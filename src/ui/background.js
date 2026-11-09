@@ -4,6 +4,8 @@ window.petyaStartAutomaticMeeting=()=>window.petyaStartMeetingRecording();
 window.petyaStopAutomaticMeeting=()=>window.petya.feature('meetingMemory','stopCapture');
 let localMeetingStatus;
 function localCaptureProgress(state){
+ // Another company's meeting recorded in the background has ended: show this company's own recorder again.
+ if(state.elsewhere&&!state.busy){window.petya.feature('meetingMemory','captureStatus').then(next=>{if(!next.elsewhere||next.busy)localCaptureProgress(next);}).catch(()=>{});return;}
  localMeetingStatus=state;
  window.petyaAutoMeetingActive=state.busy;
  document.dispatchEvent(new CustomEvent('petya-voice-input-lock',{detail:{id:'local-meeting',locked:state.busy||state.present}}));
