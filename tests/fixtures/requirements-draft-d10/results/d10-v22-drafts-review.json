@@ -1,0 +1,57 @@
+{
+ "v22-new-cancel-one": {
+  "passed": false,
+  "reason": "Clarification that values may change lost.",
+  "answer_sha256": "5a7cd000c51600f1b6fe40d3626fa8ea74949beb8ab00f6321081de1e3b238ea"
+ },
+ "v22-new-cancel-two": {
+  "passed": false,
+  "reason": "Inverted.",
+  "answer_sha256": "8c37b7389a4352e2231eaa8f3b1586fb535d08a5edea41f792d3d3b204536a75"
+ },
+ "v22-new-two-recipients": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "20aa26ffb935ec0912c7d49aed2a269ed9e6828e2e62c27d4820c6e480eb19e2"
+ },
+ "v22-new-revoke-send": {
+  "passed": false,
+  "reason": "Lost «Дату не добавлять»; summary «Акт» too vague.",
+  "answer_sha256": "87d31afe72c692fd7097b713b0e5361eec51cc0a12fab73f83fcc747dcfe271d"
+ },
+ "v22-new-restore-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "40384728549e2077da4dfa392380af62b9e6414ba57bf125aa59e8d6d35e2e02"
+ },
+ "v22-new-code-item": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "c0b8824bf054994916b930c0c828c8d9f5267fd61faa6c5034d9fbb357c8afba"
+ },
+ "v22-new-open-duration": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "bba53977d7f8f8649276ff52b81b951e49de8244fdcfb0365ab9a3648792d695"
+ },
+ "v22-new-exact-name": {
+  "passed": true,
+  "reason": "Exact literals and zeros, no extra ban.",
+  "answer_sha256": "adde27a4fbb32568f2c56f9ffea05af144f7922a34a7f250faf1497cbf2f256d"
+ },
+ "v22-new-add-separate": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "ea34b73b7f5426c1b8c131fb7327ba02a9a99795613ddc6c7010b28a292007c7"
+ },
+ "v22-new-quote": {
+  "passed": false,
+  "reason": "Invented summary «Загадочная цитата».",
+  "answer_sha256": "6b2e2553e0bddf00893df5b442e619603ba70fa1adfc3f90695e53b0d8570e07"
+ },
+ "v22-new-recipient-open": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "d6c81ac3f00222de765219202d0ebd0d5e42694f5f01f76ff24a6c7eb1d2d23f"
+ }
+}

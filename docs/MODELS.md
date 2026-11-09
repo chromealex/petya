@@ -7,7 +7,7 @@ Petya runs a group of models named after a constellation (Andromeda, Bootes, Cas
 - **A** — answers and conversation; optional, downloaded separately when turned on, otherwise R answers;
 - **D** — requirement drafts (the fine-tuned adapter).
 
-The version names the parts: **Petya Andromeda R1-A1-D9** (since 9 November 2026; D8, D7 and D1 before). Retraining a part raises only its number (D2, R2);
+The version names the parts: **Petya Andromeda R1-A1-D10** (since 9 November 2026; D9, D8, D7 and D1 before). Retraining a part raises only its number (D2, R2);
 a new group name starts when the set of parts or a base model changes; the group is stable once every part passes
 all gates (familiar, held-out, live dialogue, runtime, packaging).
 
@@ -25,7 +25,9 @@ pre-release `andromeda-d7`. On 9 November 2026 the owner made D7 the group's D (
 published for rollback. D8 (D7 continued on its weak correction families) is better still — 39/54, 35/42, 795/801 —
 and became the group's D the same night (R1-A1-D8). D9 (D8 continued on its four remaining weak families) ties D8
 on new dialogues (39/54, but 25 exact against 19) and v22 (35/42) and keeps one more familiar case (796/801), so by the
-"not worse on any set" gate it became the group's D (R1-A1-D9); D8 stays published for rollback.
+"not worse on any set" gate it became the group's D (R1-A1-D9); D8 stays published for rollback. D10 (D9 on its weak
+families — open recipient, code, cancel, permission — while rehearsing D9's) is the best so far: 46/54 (30 exact), 36/42,
+797/801, and became the group's D (R1-A1-D10).
 
 Training keeps here what the next stage needs: data, protocols, scripts, evidence, the training environment in
 `~/.petya-train/env` (recreated from `scripts/train-requirements.txt` when missing; `/tmp` does not survive a restart), the base model in the Hugging Face cache and the parent adapter of the next stage.
@@ -57,6 +59,5 @@ the v22 checks and the 801 familiar cases (`requirements-draft-v22`), the checkp
    it to `group.json` `versions`, and change `components.D`/`version` only when it passes. Copy the evaluation files
    and `summary.json` into `requirements-draft-dN/results` here.
 
-State on 9 November 2026: D9 is the group's D (R1-A1-D9: 39/54 with 25 exact, 35/42, 796/801). D10 (D9 plus
-open-recipient, code, cancel-one, permission, rehearsing D9's four families; 921 presentations, lr 5e-7) is
-training into `~/.petya-train/andromeda-d10`; its parent adapter is `~/.petya-train/andromeda-d9/adapter`.
+State on 9 November 2026: D10 is the group's D (R1-A1-D10: 46/54 with 30 exact, 36/42, 797/801); its adapter is
+`~/.petya-train/andromeda-d10/adapter` on the Mac Studio, the parent for the next stage.

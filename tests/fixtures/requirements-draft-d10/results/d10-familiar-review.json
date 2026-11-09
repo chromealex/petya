@@ -1,0 +1,72 @@
+{
+ "v18-code-lifetime": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "bfd3eb7a962393ee6123b5ea4b9add373c35b7638b80fe9ceb846e1be7dfc8ad"
+ },
+ "v20-only-one-recipient": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "c105866027c8e942876750ca3514370f284482bec31546269a4729800309b5a6"
+ },
+ "v21-previous-draft-quote": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "a515c7af52460b9222682be49a693a2e1d16f39c55cb0167e3008eb4380dadba"
+ },
+ "fresh-cancel-first": {
+  "passed": false,
+  "reason": "Calls form fields «индекс»; invented term, form lost.",
+  "answer_sha256": "c0a3c3d80140ff9a9e06ae626e512ab28a5da3db9e5ec6539b9476c733a8457b"
+ },
+ "fresh-revoke-transmit": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "3e113d16b68c38c93048efbdd84f760f393e8972cfa77d01cf92c9e69b98f279"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1a4f82f08fc53621ecfb096214761358daec1ae18bb04ff8b5969dafe9625154"
+ },
+ "fresh-copy-scope": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "4a225bc4b572cc70d1a2088999ba4ffc5c7d04d728e456250fc5ba0d7a58b819"
+ },
+ "fresh-add-not-replace": {
+  "passed": false,
+  "reason": "Summary mixes English: «Поля locations».",
+  "answer_sha256": "fe889ae9c24fe093ccb4468616c621c6997a32ecd8184c868b233364cf1e4b08"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Inverted: forbids another badge, while a new code may issue one.",
+  "answer_sha256": "870819dba69b49df6a103d3256e9cc5691dae83035e539cd9772d467dcd8f28f"
+ },
+ "fresh-duration-open": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "e846b6c1258c24166b6cd8a412f28e19cb88f905790357a90793223994b8e1a0"
+ },
+ "fresh-exact-caption": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "899e733800fa05fd8a4bf1734aa730b07470c4f0014464704d7bddd8afdf2eb0"
+ },
+ "fresh-quoted-instruction": {
+  "passed": false,
+  "reason": "Typo «отровку».",
+  "answer_sha256": "6d4450c257af72993e6ea794387f808430a21d3521831f352e677a096a1ea743"
+ },
+ "fresh-negative-order": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "370d6fc52350ee44b6d88dc15a722a869919be0fe6a5e6a5152cd8b8124920a4"
+ },
+ "fresh-recipient-pending": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "ceff3a56b01e255491ce186bab9c3be6cc02bd8ece7e5e42b03d5a3dff481649"
+ }
+}

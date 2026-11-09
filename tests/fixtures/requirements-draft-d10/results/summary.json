@@ -1,0 +1,60 @@
+{
+  "part": "Andromeda D10",
+  "adapter_sha256": "a8cf4f8ae0cbb5548aa664229493479ca129d004ca640f06dee0398bdc46ff2b",
+  "parent": "D9",
+  "steps": 921,
+  "learning_rate": 5e-07,
+  "generated_holdout": {
+    "D10": 46,
+    "D9": 39,
+    "D1": 24,
+    "total": 54,
+    "exact": 30,
+    "lost_D9": [
+      "d2-hold-code-17"
+    ],
+    "gained_vs_D9": [
+      "d2-hold-code-35",
+      "d2-hold-code-44",
+      "d2-hold-code-53",
+      "d2-hold-open-recipient-34",
+      "d2-hold-open-recipient-43",
+      "d2-hold-open-recipient-52",
+      "d2-hold-permission-19",
+      "d2-hold-permission-37"
+    ]
+  },
+  "v22": {
+    "checks": {
+      "D10": 28,
+      "D9": 28,
+      "D1": 27,
+      "total": 30
+    },
+    "drafts": {
+      "D10": 8,
+      "D9": 7,
+      "D1": 6,
+      "total": 12,
+      "lost_D9": [
+        "v22-new-quote"
+      ],
+      "gained_vs_D9": [
+        "v22-new-restore-send",
+        "v22-new-two-recipients"
+      ]
+    }
+  },
+  "familiar": {
+    "D10": 797,
+    "D9": 796,
+    "D1": 787,
+    "total": 801,
+    "lost_D9": [],
+    "gained_vs_D9": [
+      "fresh-duration-open"
+    ]
+  },
+  "gate": "passed: better than D9 on new (46 vs 39, 30 exact) and v22 drafts (8 vs 7), equal on v22 checks, +1 familiar",
+  "decision": "D10 is the group's D since 9 November 2026 (R1-A1-D10)"
+}
