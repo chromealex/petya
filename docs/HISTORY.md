@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.14.6 — «Развитие» at the bottom of the side panel
+
+- «Развитие» moved to the bottom of the left rail, above the status dot.
+
 ## 0.14.5 — a sign-in page in Petya's look that closes itself
 
 - After signing in through the browser (Gmail, Outlook, Google Play) the tab shows a page in Petya's look — a check mark, «Google Play подключён.», «Можно вернуться в Петю — эта вкладка закроется сама» — and closes when the browser allows it; Petya's window comes to the front. A failed sign-in shows the same page with a red cross and the reason.
