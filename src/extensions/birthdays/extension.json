@@ -1,8 +1,17 @@
 {
   "id": "birthdays",
   "name": "Дни рождения",
-  "description": "Утром напоминает о днях рождения коллег из «Команды»",
+  "description": "Дни рождения коллег на карточках «Команды»: утром напомнит, у кого сегодня и завтра, и подскажет ближайшие",
+  "category": "team",
+  "icon": "icon.svg",
+  "examples": ["У кого день рождения на этой неделе?", "Когда день рождения у Маши?", "Ближайшие дни рождения в команде"],
+  "setting": "extension_birthdays",
   "settings": false,
   "feature": "feature.cjs",
-  "scripts": []
+  "scripts": [
+    ["team-field.js", "message-format.js"]
+  ],
+  "ui": {
+    "personFields": [{"key": "birthday", "title": "День рождения", "render": "renderBirthdayField"}]
+  }
 }

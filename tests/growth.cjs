@@ -15,6 +15,9 @@ assert.deepEqual(new Learning({state:saved}).growth(),l.growth());
 const legacy=new Learning({state:{version:1,skills:[first],reminders:[]}});assert.equal(legacy.growth().xp,25);assert.equal(legacy.growth().events[0].at,null);
 const fail=new Learning({save:()=>{throw Error('disk');}});assert.throws(()=>fail.put(input));assert.equal(fail.growth().xp,0);
 l.putRule({from:'проект',to:'PETER'});assert.equal(l.growth().xp,35);
-const next=l.list();next.recipes.push({id:'mail',name:'Почта',phrases:['почта'],days:7,unread:true,skipPromotions:true,priority:[],accounts:[],instructions:'Кратко'});l.commitUser(next,'recipes','mail','почта');assert.equal(l.growth().xp,75);assert.equal(l.growth().level.name,'Джун+');
-l.preview('привет');assert.equal(l.growth().xp,75);
+// An app's own knowledge (a growth-source, e.g. a mail rule of «Почта») counts through `extra`.
+const extra=require('../src/growth-sources.cjs').items({settings:{module_gmail:'true'},mail:{rules:()=>[{id:'mail',name:'Почта',phrases:['почта'],days:7,unread:true,skipPromotions:true,priority:[],accounts:[],allAccounts:false,instructions:'Кратко',enabled:true,at:5}]}});
+assert.equal(extra.length,1);assert.equal(l.growth(extra).xp,75);assert.equal(l.growth(extra).level.name,'Джун+');
+assert.deepEqual(require('../src/growth-sources.cjs').items({settings:{module_gmail:'false'},mail:{rules:()=>[{}]}}),[],'only while the app is added');
+l.preview('привет');assert.equal(l.growth(extra).xp,75);
 console.log('Growth: persistence, migration, deduplication, edits, undo and scoring passed');

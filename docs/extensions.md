@@ -78,7 +78,8 @@ extension (refused). Everything the extension needs is inside its folder; there 
 | `uses` | `[kind]` | Cross-app kinds its cards call (section 9). Fills «Работает вместе с». |
 | `provides` | `{kind: "file.cjs" \| [files]}` | Kinds it serves to other apps (section 9). |
 | `downloads` | `[{id, name, bytes \| {darwin, win32}, approx?, optional?, requires?}]` | What adding it downloads (section 11). |
-| `ui` | `{pages: [...], tabs: [...]}` | Its own items in Petya's interface: a page in the left rail, tabs on Petya's or other apps' pages (section 8a). |
+| `ui` | `{pages: [...], tabs: [...], personFields: [...]}` | Its own items in Petya's interface: a page in the left rail, tabs on Petya's or other apps' pages, fields on the cards of «Команда» (section 8a). |
+| `quickStart` | `{"order": 0–1000}` | Bundled service apps: a button in «С чего начать» on «Настройки» → «Сервисы» (first run, nothing added yet), in `order`; the button adds the app and opens its card. Service modules without an app folder declare it in `categories.json` `moduleQuickStart` (`{"notion": 30}`). Today: Slack 10, Jira 20, Notion 30, Почта 40. |
 
 `registry.validate()` checks all of this; bundled errors throw at startup (a bug), external errors refuse the
 extension and show a notification with the reason.
@@ -231,13 +232,22 @@ An app can add its own interface to Petya's window, not only cards in the chat:
   app already took (or a Petya section id) is refused — the first app keeps it — each with a clear `[extensions]`
   error in the dev console (and a notification for installed apps). The review dialog of an installed extension lists
   «Пункты меню слева» and «Вкладки на страницах».
+- **`personFields`** (up to 4): a field on every card of «Команда» — `{key, title, render, order?}`, drawn by
+  `src/ui/person-fields.js` after the card's own fields and before its photo and services (sorted by `order`, then app
+  name). The value lives in the person record: under `key` when it is an attribute the record keeps but the page does
+  not show (`birthday`, filled by Slack profiles and read by «Люди»), otherwise in the person's `fields` map
+  (`{key: text}`, up to 16 short strings). Either way it is saved with the team and kept while the app is off — only the
+  field goes. A key the page shows itself (`name`, `role`, …) is refused with an `[extensions]` error. The renderer gets
+  `render(container, {extension, key, value, set(value), person, kit, feature})`; `set` marks the team as changed. The
+  review dialog lists «Поля на карточках «Команды»». Example: «Дни рождения» declares
+  `{"key": "birthday", "title": "День рождения", "render": "renderBirthdayField"}` (`src/extensions/birthdays`).
 - **Core pages use the same tab host** (`src/ui/page-tabs.js`, `window.petyaTabs`): «Навыки» (Сценарии, Исправления
   фраз, Команды) and «Настройки» (Сервисы, Голос и модели, Приложение) declare their tabs with `petyaTabs.core(page,
   tabs, {fallback, host, onSelect})` and mark their content with `data-page-tab`; apps' sections go through
   `petyaTabs.add`. Do not build a page's tabs by hand.
 - Example: `tests/fixtures/extensions/ui-notes` (a rail page, a tab on «Навыки» and one on «Команда») and `ui-tips` (a tab
   sharing the name, a tab on the other app's page); test `tests/extension-places-ui.cjs`. Bundled: «Напоминания» shows
-  its list on «Навыки» → «Напоминания».
+  its list on «Навыки» → «Напоминания», «Почта» its mail rules on «Навыки» → «Почтовые правила».
 
 ## 9. Cross-app kinds
 
@@ -278,6 +288,24 @@ served by a dedicated registry next to app links. Two exist:
   maxDays?, names?, confirm?, plan?, fetch(services, {start, end, plan?, check})}`, read by «Покупки в игре» (App Store
   Connect and Google Play reports in `src/extensions/iap`, a purchases table of «SQL по словам»); a source with
   `confirm` runs only the plan the user confirmed on the card.
+- `growth-source` (`src/growth-sources.cjs`): `{id, items(services) → [{key, title, learned, points, at, source}]}` —
+  knowledge an app keeps itself that counts on «Развитие» like learned phrases (`key` = `growth.key(kind, content)`,
+  so the same content never earns twice and points earned before the app owned the knowledge stay); «Почта» reports
+  its mail rules (`src/extensions/mail/growth-source.cjs`).
+- `summary-section` (`src/summary-sections.cjs`): `{id, title, order?, ready?(settings), async collect(services, {from,
+  to, now}) → {lines} | null}` — a section of the daily summary «Что у нас сегодня?» (`src/daily-brief.cjs`), after
+  Petya's own sections, in `order`. The contract follows the journal's `journal-source` (declared through `provides`,
+  `ready`, `collect` for a period, a time limit, a failure shown as «Не удалось прочитать» without hiding the others),
+  but a section is a heading with a few lines of text, not timeline items. Counts only while its app is added. Slack
+  provides one (`src/extensions/slack/summary-section.cjs`: the Slack records Petya saved today).
+- `voice-action` (`src/voice-actions.cjs`): `{id, label, help?, order?, legacy?, ready?(settings), async run(services,
+  {output, command, slots}) → {ask, kind?} | turn result}` — what a learned voice command («Мои голосовые команды» on
+  «Навыки») can do besides Petya's own «Выполнить команду в чате» and «Ответить заданным текстом». The command stores
+  `"<app id>:<id>"`; the editor lists only the actions of added (and `ready`) apps; a command whose app is gone runs its
+  filled-in text as a chat command. `legacy` names the action id Petya's core used before the app owned it: such
+  commands move to the app's action once when it is added, otherwise to «Выполнить команду в чате». Example:
+  `src/extensions/jira/voice-action.cjs` (`{id:'bugs', label:'Проверить баги в Jira', legacy:'bugs', run:(_, {output})
+  => ({ask: output, kind: 'bugs'})}`), `src/extensions/google-play/voice-action.cjs`.
 
 A source counts only while its extension is added; an installed extension may provide one, and a broken installed
 source is skipped and reported. A new source kind is a core change: add it to `REGISTRIES` in `app-links.cjs` and
@@ -331,7 +359,8 @@ warns about free space. Model downloads keep their own approval. Apps without do
   goes away when the app is turned off; look at screenshots in the wide and the compact rail
   (`tests/extension-places-ui.cjs` shows how).
 - Guards: `tests/extension-ui.cjs` (descriptors), `tests/core-meeting-guard.cjs` (the core and other apps never name
-  a meeting service), `tests/core-reminders-guard.cjs` (reminders live only in their app),
+  a meeting service), `tests/core-reminders-guard.cjs` (reminders live only in their app), `tests/core-mail-rules-guard.cjs`
+  (mail rules live only in «Почта»),
   `tests/interface-language.cjs` (translations).
 - Finally `npm test` and the smoke test
   (`xvfb-run -a env PETYA_SMOKE_TEST=1 ./node_modules/electron/dist/electron --no-sandbox tests/smoke-ci`).

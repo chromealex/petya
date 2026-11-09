@@ -441,8 +441,8 @@ function setupHandlers() {
     topic.webQuery=result.query;topic.at=Date.now();topic.messages.push({role:'user',text:original,at:Date.now()},{role:'assistant',text:result.text,sources:result.sources,at:Date.now()});dialogue.state.activeId=topic.id;dialogue.persist();return {handled:true,...result,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};
   };
   handle('webSearchContinue',()=>{if(!pendingWeb)throw Error('Нет поиска для продолжения.');return runWeb(pendingWeb.original,pendingWeb.search,true);});
-  const {mailSkill,clientDefaults,mailAccounts}=require('./mail-setup.cjs')({get app(){return app;},get core(){return core;},get fs(){return fs;},get handle(){return handle;},get learning(){return learning;},get modules(){return modules;},get request(){return request;},get saveSettings(){return saveSettings;},get settings(){return settings;},get show(){return show;},get win(){return win;}});
-  const {dailyBrief,dictionary,dictionaryScope,undoLast}=require('./learning-setup.cjs')({get recurring(){return services.recurring;},get agents(){return agents;},get app(){return app;},get dialogue(){return dialogue;},get handle(){return handle;},get learning(){return learning;},get memory(){return memory;},get modules(){return modules;},get settings(){return settings;},get smoke(){return smoke;},get text(){return text;},get workspace(){return workspace;}});
+  const {clientDefaults,mailAccounts}=require('./mail-setup.cjs')({get app(){return app;},get core(){return core;},get fs(){return fs;},get handle(){return handle;},get modules(){return modules;},get request(){return request;},get saveSettings(){return saveSettings;},get settings(){return settings;},get show(){return show;},get win(){return win;}});
+  const {dailyBrief,dictionary,dictionaryScope,undoLast}=require('./learning-setup.cjs')({get recurring(){return services.recurring;},get services(){return services;},get agents(){return agents;},get app(){return app;},get dialogue(){return dialogue;},get handle(){return handle;},get learning(){return learning;},get memory(){return memory;},get modules(){return modules;},get settings(){return settings;},get smoke(){return smoke;},get text(){return text;},get workspace(){return workspace;}});
   const projectFile=path.join(dataRoot,'project-memory.json');
   const projectState=fs.existsSync(projectFile)?JSON.parse(safeStorage.decryptString(Buffer.from(JSON.parse(fs.readFileSync(projectFile,'utf8')).encrypted,'base64'))):undefined;
   const slackAccount=()=>require('node:crypto').createHash('sha256').update(settings.slackCredential||settings.slackToken||'').digest('hex');
@@ -551,7 +551,7 @@ function setupHandlers() {
     get instructionSkills(){return instructionSkills;},
     get learning(){return learning;},
     get localImages(){return localImages;},
-    get mailSkill(){return mailSkill;},get mailAccounts(){return mailAccounts;},
+    get mailAccounts(){return mailAccounts;},
     get modules(){return modules;},
     get pendingWeb(){return pendingWeb;},
     get projectMemory(){return projectMemory;},
@@ -672,7 +672,9 @@ function setupHandlers() {
   // aliasHint: how people usually call this person («Полина, Поля»), shown as the field's placeholder.
   // «Это я» is shown checked on the user's card even before it was marked, when the Jira email or full name says so.
   // `removed`: people deleted from the team by hand; a team refresh does not bring them back (src/team-removed.cjs).
-  handle('teamList',()=>{const me=team.self(settings);return {members:team.members(settings).map(m=>({...m,...me&&m.name===me.name?{me:'true'}:{},aliasHint:require('./name-ru.cjs').hints(m.name).join(', ')})),notes:settings.teamRoles,removed:require('./team-removed.cjs').list(settings)};});
+  handle('teamList',()=>{const me=team.self(settings);return {members:team.members(settings).map(m=>({...m,...me&&m.name===me.name?{me:'true'}:{},aliasHint:require('./name-ru.cjs').hints(m.name).join(', ')})),notes:settings.teamRoles,removed:require('./team-removed.cjs').list(settings),
+    // Every attribute the person record keeps: the page keeps the ones it does not show as they are (apps show some).
+    attributes:Object.keys(team.limits)};});
   handle('teamSave',data=>{if(!data||typeof data.notes!=='string'||data.notes.length>2000)throw Error('Заметки о команде: не более 2000 символов.');const members=team.validate(data.members);saveSettings({teamMembers:JSON.stringify(members),teamRoles:data.notes,teamRemoved:require('./team-removed.cjs').update(settings,data.removed,members)});return {saved:true};});
   handle('settings', publicSettings);
   handle('saveSettings', input => saveSettings(input));

@@ -72,13 +72,14 @@ const UI_GROUPS=['assistant','work','setup'];
 const UI_ID=/^[a-z][a-z0-9-]{0,39}$/,UI_RENDER=/^[A-Za-z_$][\w$]{0,63}$/;
 function validateUi(d,dir){
  const ui=d.ui,where='extension '+d.id+': ui';
- if(!ui||typeof ui!=='object'||Array.isArray(ui)||Object.keys(ui).some(k=>!['pages','tabs'].includes(k)))throw Error(where+' is {"pages": [...], "tabs": [...]}');
+ if(!ui||typeof ui!=='object'||Array.isArray(ui)||Object.keys(ui).some(k=>!['pages','tabs','personFields'].includes(k)))throw Error(where+' is {"pages": [...], "tabs": [...], "personFields": [...]}');
  const title=(value,at)=>{if(typeof value!=='string'||!value.trim()||value.length>40)throw Error(where+at+'.title: a Russian name up to 40 characters');};
  const render=(value,at)=>{if(typeof value!=='string'||!UI_RENDER.test(value))throw Error(where+at+'.render: the name of a window function from "scripts"');};
  if(!d.scripts.length)throw Error(where+': renderers come from "scripts", none declared');
- const pages=ui.pages===undefined?[]:ui.pages,tabs=ui.tabs===undefined?[]:ui.tabs;
+ const pages=ui.pages===undefined?[]:ui.pages,tabs=ui.tabs===undefined?[]:ui.tabs,fields=ui.personFields===undefined?[]:ui.personFields;
  if(!Array.isArray(pages)||pages.length>4)throw Error(where+'.pages: a list of up to 4 pages');
  if(!Array.isArray(tabs)||tabs.length>8)throw Error(where+'.tabs: a list of up to 8 tabs');
+ if(!Array.isArray(fields)||fields.length>4)throw Error(where+'.personFields: a list of up to 4 fields');
  const ids=new Set();
  pages.forEach((p,i)=>{
   const at='.pages['+i+']';
@@ -96,6 +97,16 @@ function validateUi(d,dir){
   if(!UI_ID.test(t.page||''))throw Error(where+at+'.page: the id of a page («learning», «team», another app\'s page)');
   title(t.title,at);render(t.render,at);
   if(t.order!==undefined&&!(Number.isInteger(t.order)&&t.order>=0&&t.order<=1000))throw Error(where+at+'.order: an integer 0–1000');
+ });
+ // Person fields: a field on every card of «Команда» (src/ui/person-fields.js); `key` is where the value is kept in the
+ // person record.
+ const keys=new Set();
+ fields.forEach((f,i)=>{
+  const at='.personFields['+i+']';
+  if(!f||typeof f!=='object'||Object.keys(f).some(k=>!['key','title','render','order'].includes(k)))throw Error(where+at+': {key, title, render, order?}');
+  if(typeof f.key!=='string'||!/^[a-z][A-Za-z0-9]{0,30}$/.test(f.key)||keys.has(f.key))throw Error(where+at+'.key: a unique camelCase name of latin letters and digits');
+  keys.add(f.key);title(f.title,at);render(f.render,at);
+  if(f.order!==undefined&&!(Number.isInteger(f.order)&&f.order>=0&&f.order<=1000))throw Error(where+at+'.order: an integer 0–1000');
  });
 }
 
@@ -127,6 +138,8 @@ function validate(dir,{external=false,expectId}={}){
  if(d.connects!==undefined&&!(typeof d.connects==='string'&&d.connects.trim()))throw Error('Invalid extension connects '+d.id);
  if(d.connectsKeys!==undefined&&!(Array.isArray(d.connectsKeys)&&d.connectsKeys.every(k=>/^[A-Za-z][\w-]*$/.test(k))))throw Error('Invalid extension connectsKeys '+d.id);
  if(d.results!==undefined&&!(d.results&&typeof d.results==='object'&&!Array.isArray(d.results)&&Object.entries(d.results).every(([k,v])=>/^[A-Za-z][\w-]{0,63}$/.test(k)&&/^[A-Za-z_$][\w$]{0,63}$/.test(v))))throw Error('Invalid extension results '+d.id);
+ // «С чего начать» on «Настройки» → «Сервисы» (src/ui/ux-review.js): the app is one of the first services to add.
+ if(d.quickStart!==undefined&&!(d.quickStart&&typeof d.quickStart==='object'&&!Array.isArray(d.quickStart)&&Object.keys(d.quickStart).every(k=>k==='order')&&Number.isInteger(d.quickStart.order)&&d.quickStart.order>=0&&d.quickStart.order<=1000))throw Error('Invalid extension quickStart '+d.id+': {"order": 0–1000}');
  if(d.version!==undefined&&!(typeof d.version==='string'&&/^\d{1,6}(?:\.\d{1,6}){0,3}$/.test(d.version)))throw Error('Invalid extension version '+d.id+': use digits and dots, e.g. 1.2.0');
  if(d.author!==undefined&&!(typeof d.author==='string'&&d.author.trim()&&d.author.length<=120))throw Error('Invalid extension author '+d.id);
  if(d.markup){if(!/^[a-z][a-z0-9-]*\.html$/.test(d.markup))throw Error('Invalid settings template');d.template=fs.readFileSync(path.join(dir,d.markup),'utf8');}

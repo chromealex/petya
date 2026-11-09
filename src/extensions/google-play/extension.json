@@ -12,6 +12,7 @@
     "playVitals": "renderPlayVitals"
   },
   "provides": {
+    "voice-action": "voice-action.cjs",
     "crash-source": "crash-source.cjs"
   }
 }

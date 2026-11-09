@@ -17,7 +17,8 @@ function parseRoute(response,recipes=[],capabilities=[]){
  if(capability&&typeof r.confidence==='number'&&r.confidence>=.85&&typeof r.canonical==='string')return {tool:'capability',id:capability.id,canonical:r.canonical.trim().slice(0,500)};
  if(!r||!names.includes(r.tool)||typeof r.confidence!=='number'||!Number.isFinite(r.confidence)||r.confidence<0||r.confidence>1||typeof r.question!=='string'||typeof r.recipeId!=='string')return null;
  if(r.confidence<.85||r.tool==='clarify')return {tool:'clarify',question:r.question.trim().slice(0,700)||'Уточните, что нужно проверить и в каком сервисе, либо что вы хотите обсудить.'};
- if(r.tool==='mail'&&!recipes.some(s=>s.id===r.recipeId&&s.enabled))return {tool:'clarify',question:'Какой почтовый навык использовать? Настройте его в разделе «Обучение».'};
+ // `mail` runs one of the mail app's rules by id; an unknown id is the app's own question (src/extensions/mail).
+ if(r.tool==='mail'&&!recipes.some(s=>s.id===r.recipeId&&s.enabled))return {tool:'mail',recipeId:''};
  return {tool:r.tool,recipeId:r.recipeId};
 }
 async function dispatch(route,command,handlers){

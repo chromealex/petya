@@ -45,6 +45,14 @@ The service-account token is issued by `src/google-service-account.cjs` (shared 
 not for ANR, freezes or reviews («отзывы/жалобы в Google Play» are «Отзывы в сторах»). Google Play is connected in
 Petya's service settings (`service: 'googleplay'`), so accepting opens that card; it also adds «Крэши».
 
+## Voice-command action
+
+`voice-action.cjs` (`provides.voice-action`, `src/voice-actions.cjs`): «Проверить ANR в Google Play» in the command
+editor on «Навыки», listed while the Google Play connection is added (`module_googleplay`). It asks Petya the command's
+filled-in text with the ANR reader. Commands saved with the core action `anr` before 0.16 move to `google-play:anr`
+once (or to «Выполнить команду в чате» while Google Play is not added). Jira does the same for «Проверить баги в Jira»
+(`src/extensions/jira/voice-action.cjs`, `jira:bugs`). Test: `tests/voice-actions.cjs`.
+
 ## Tests
 
 `node tests/google-play-crashes.cjs` (run by `tests/crashes.cjs`): request shapes (interval, filters, order, page size,

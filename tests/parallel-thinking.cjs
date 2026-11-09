@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict');
 const {Dialogue}=require('../src/dialogue.cjs');
 const {WebSearch}=require('../src/web-search.cjs');
-const {MailSkill,defaults}=require('../src/mail-skill.cjs');
+const {MailRules:MailSkill,defaults}=require('../src/extensions/mail/rules.cjs');
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 (async()=>{
  assert.equal(require('../src/intent-router.cjs').routingRequest('local','test').options.num_ctx,require('../src/semantic-tools.cjs').routingRequest('local','test').options.num_ctx);

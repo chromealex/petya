@@ -1,7 +1,8 @@
 // Places apps add to Petya's own interface, declared in extension.json "ui" (docs/extensions.md §8a):
 //  - pages: an item in the left rail ({id, title, icon?, after? | group?, render}) with a page of its own;
 //  - tabs: a tab on a page of Petya or of another app ({page, title, render, order?}), through the shared tab host
-//    (page-tabs.js), so tabs with one name from several apps are one tab with a section per app.
+//    (page-tabs.js), so tabs with one name from several apps are one tab with a section per app;
+//  - personFields: a field on every card of «Команда» ({key, title, render, order?}), through person-fields.js.
 // Renderers are window functions from the app's "scripts": render(container, api), api = {extension, page,
 // feature(method, …args) → the app's IPC, onShow(fn), kit}. Everything follows the catalog live: adding, removing or
 // turning an app off adds or removes its places at once; a page that was open goes back to the previous one.
@@ -12,7 +13,7 @@
  const GROUPS={assistant:['home','growth'],work:['sources','team','agents','history'],setup:['settings','learning']};
  const TAB_PAGES={learning:'learning',skills:'learning',team:'team',sources:'sources',settings:'settings',history:'history',agents:'agents',growth:'growth'};
  const viewOf=id=>'ext-'+id;
- const rendered=new Map(); // extension id → {rev, pages:[{view, button, section, shows}], tabs:[{handle, page}]}
+ const rendered=new Map(); // extension id → {rev, pages:[{view, button, section, shows}], tabs:[{handle, page}], fields:[handle]}
  const reported=new Set();
  const visits=[];
  document.addEventListener('petya-view',event=>{if(visits.at(-1)!==event.detail)visits.push(event.detail);if(visits.length>30)visits.shift();});
@@ -24,7 +25,7 @@
  }
  // What should be on screen now: pages (the first app to claim an id keeps it) and tabs on pages that exist.
  function plan(entries){
-  const live=entries.filter(e=>e.installed&&e.ui),owners=new Map(),pages=[],tabs=[];
+  const live=entries.filter(e=>e.installed&&e.ui),owners=new Map(),pages=[],tabs=[],fields=[];
   for(const entry of live)for(const page of entry.ui.pages||[]){
    if(RAIL.includes(page.id)||TAB_PAGES[page.id]){problem(entry,'Страница отклонена: id совпадает с разделом Пети',' «'+page.id+'»');continue;}
    const owner=owners.get(page.id);
@@ -36,7 +37,8 @@
    if(!target){problem(entry,'Вкладка пропущена: неизвестная страница',' «'+tab.page+'» (tabs['+index+'] «'+tab.title+'»). Pages: '+[...Object.keys(TAB_PAGES),...owners.keys()].join(', '));return;}
    tabs.push({entry,tab,index,target});
   });
-  return {pages,tabs};
+  for(const entry of live)for(const field of entry.ui.personFields||[])fields.push({entry,field});
+  return {pages,tabs,fields};
  }
  function api(entry,page,shows,container){
   return {extension:entry.id,page,container,kit:window.resultKit,
@@ -85,10 +87,18 @@
   const info=window.petyaTabs.info(target),open=document.body.dataset.view===target&&info?.active===window.petyaTabs.key(tab.title);
   if(open)runShows(entry,shows);
  }
+ // A field on the cards of «Команда»: the renderer gets {value, set, person} besides the usual api.
+ function addField(entry,field,record){
+  if(!window.petyaPersonFields)return;
+  const handle=window.petyaPersonFields.add({owner:entry.id,name:entry.name||entry.id,key:field.key,title:field.title,order:field.order??100,
+   render:(container,args)=>draw(entry,field.render,container,{...api(entry,'team',[],container),...args})});
+  record.fields.push(handle);
+ }
  // Takes an app's places away; an open page of it goes back to the page before it.
  function teardown(id){
   const record=rendered.get(id);if(!record)return;rendered.delete(id);
   for(const t of record.tabs)t.handle.remove();
+  for(const f of record.fields||[])f.remove();
   for(const p of record.pages){
    document.removeEventListener('petya-view',p.listener);
    if(document.body.dataset.view===p.view){const back=[...visits].reverse().find(v=>v!==p.view&&document.getElementById(v)&&!rendered.get(id)?.pages.some(x=>x.view===v))||'home';view(back);}
@@ -101,32 +111,33 @@
   running=(async()=>{
    do{
     again=false;
-    const entries=window.extensionHost?.entries()||[],{pages,tabs}=plan(entries);
+    const entries=window.extensionHost?.entries()||[],{pages,tabs,fields}=plan(entries);
     const want=new Map();
-    for(const p of pages)want.set(p.entry.id,p.entry);for(const t of tabs)want.set(t.entry.id,t.entry);
+    for(const p of pages)want.set(p.entry.id,p.entry);for(const t of tabs)want.set(t.entry.id,t.entry);for(const f of fields)want.set(f.entry.id,f.entry);
     // Something of this app changed (removed, reloaded, a page of another app it used went away): draw it again.
-    const shape=id=>JSON.stringify({rev:want.get(id)?.rev||0,pages:pages.filter(p=>p.entry.id===id).map(p=>p.page),tabs:tabs.filter(t=>t.entry.id===id).map(t=>[t.index,t.target])});
+    const shape=id=>JSON.stringify({rev:want.get(id)?.rev||0,pages:pages.filter(p=>p.entry.id===id).map(p=>p.page),tabs:tabs.filter(t=>t.entry.id===id).map(t=>[t.index,t.target]),fields:fields.filter(f=>f.entry.id===id).map(f=>f.field)});
     for(const id of [...rendered.keys()])if(!want.has(id)||rendered.get(id).shape!==shape(id))teardown(id);
     const fresh=[];
     for(const [id,entry] of want){
      if(rendered.has(id))continue;
-     const record={shape:shape(id),pages:[],tabs:[]};rendered.set(id,record);
+     const record={shape:shape(id),pages:[],tabs:[],fields:[]};rendered.set(id,record);
      try{await window.extensionHost.scripts(id);fresh.push([entry,record]);}catch(e){problem(entry,'Не удалось загрузить скрипты приложения',': '+e.message);}
     }
     // Pages first: tabs may go to another app's page.
     for(const [entry,record] of fresh)for(const p of pages.filter(x=>x.entry===entry))await addPage(entry,p.page,record);
     for(const [entry,record] of fresh)for(const t of tabs.filter(x=>x.entry===entry)){try{await addTab(entry,t.tab,t.target,record);}catch(e){problem(entry,'Вкладка пропущена',': '+e.message);}}
+    for(const [entry,record] of fresh)for(const f of fields.filter(x=>x.entry===entry))addField(entry,f.field,record);
     // Keep the declared order of the rail when pages come and go.
     for(const p of pages){const item=rendered.get(p.entry.id)?.pages.find(x=>x.page.id===p.page.id);if(item)position(item.button,p.page);}
    }while(again);
   })().finally(()=>{running=null;document.dispatchEvent(new Event('petya-extension-places'));});
   return running;
  }
- window.extensionPlaces={sync,rendered:()=>[...rendered.entries()].map(([id,r])=>({id,pages:r.pages.map(p=>p.view),tabs:r.tabs.map(t=>t.target)})),
+ window.extensionPlaces={sync,rendered:()=>[...rendered.entries()].map(([id,r])=>({id,pages:r.pages.map(p=>p.view),tabs:r.tabs.map(t=>t.target),fields:(r.fields||[]).length})),
   // For the review dialog: what an app adds to the menu and to which pages, as people read it.
   describe(ui){
    const names={learning:'Навыки',skills:'Навыки',team:'Команда',sources:'Материалы',settings:'Настройки',history:'История',agents:'Агенты',growth:'Развитие'};
-   return {pages:(ui?.pages||[]).map(p=>p.title),tabs:(ui?.tabs||[]).map(t=>((window.t||String)(names[t.page]||t.page))+' → '+t.title)};
+   return {pages:(ui?.pages||[]).map(p=>p.title),tabs:(ui?.tabs||[]).map(t=>((window.t||String)(names[t.page]||t.page))+' → '+t.title),fields:(ui?.personFields||[]).map(f=>f.title)};
   }};
  document.addEventListener('petya-extensions-changed',()=>{sync().catch(e=>console.error('[extensions] places:',e));});
  window.addEventListener('load',()=>{sync().catch(e=>console.error('[extensions] places:',e));});

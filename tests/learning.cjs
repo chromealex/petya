@@ -15,7 +15,9 @@ assert.throws(()=>l.put({name:'Все',action:'answer',patterns:['{query}'],outp
 assert.throws(()=>l.put({name:'Код',action:'shell',patterns:['test'],output:'rm'}));
 assert.throws(()=>l.put({name:'Пусто',action:'command',patterns:['test {delay}']}),/Укажите текст/);
 assert.throws(()=>l.put({name:'Старое',action:'reminder',patterns:['test {delay} {message}'],output:'x'}),/действие/,'the old core action is gone');
-const reads=make();reads.put({name:'Проверка',action:'bugs',patterns:['статус {query}'],output:'сколько багов в {query}'});assert.deepEqual(reads.execute('статус TEST'),{query:'сколько багов в TEST',kind:'bugs'});
+// An app's action ("<app>:<action>", src/voice-actions.cjs): the filled-in output goes to the app; the old core ids are gone.
+const reads=make();reads.put({name:'Проверка',action:'jira:bugs',patterns:['статус {query}'],output:'сколько багов в {query}'});assert.deepEqual(reads.execute('статус TEST'),{action:'jira:bugs',output:'сколько багов в TEST',slots:{query:'TEST'}});
+for(const old of ['bugs','anr'])assert.throws(()=>make().put({name:'Старое',action:old,patterns:['x {query}'],output:'x {query}'}),/действие/,'«'+old+'» is an app action now');
 reads.put({name:'Ответ',action:'answer',patterns:['кто такой {query}'],output:'Спросите про {query} у команды'});assert.equal(reads.execute('кто такой Петя').text,'Спросите про Петя у команды');
 const fail=new Learning({save:()=>{throw new Error('disk full');}});assert.throws(()=>fail.put(skill));assert.equal(fail.list().skills.length,0);
 

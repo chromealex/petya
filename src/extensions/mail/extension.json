@@ -1,13 +1,24 @@
 {
   "id": "mail",
   "name": "Почта",
-  "description": "Письма карточками: важные сверху, черновик ответа, письмо в задачу",
+  "description": "Письма карточками: важные сверху, черновик ответа, письмо в задачу; почтовые правила — что и как проверять",
   "category": "comms",
+  "setting": "module_gmail",
+  "service": "gmail",
   "settings": false,
+  "quickStart": {"order": 40},
+  "feature": "feature.cjs",
   "scripts": [
-    ["mail-cards.js", "message-format.js"]
+    ["mail-cards.js", "message-format.js"],
+    ["mail-rules.js", "message-format.js"]
   ],
   "results": {
     "mailItems": "renderMailItems"
+  },
+  "ui": {
+    "tabs": [{"page": "learning", "title": "Почтовые правила", "render": "renderMailRules"}]
+  },
+  "provides": {
+    "growth-source": "growth-source.cjs"
   }
 }

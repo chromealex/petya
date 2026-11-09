@@ -13,6 +13,8 @@ function validate(rows){
   if(result.slackId){if(accounts.slack?.id!==result.slackId)accounts.slack={...(accounts.slack&&!accounts.slack.id?accounts.slack:{}),id:result.slackId};}else delete accounts.slack;
   if(result.jiraId){if(accounts.jira?.id!==result.jiraId)accounts.jira={id:result.jiraId};if(result.jiraName)accounts.jira.name=result.jiraName;}else delete accounts.jira;
   if(Object.keys(accounts).length)result.accounts=accounts;
+  // Apps' own fields on the person's card (extension.json "personFields"), kept whichever apps are added.
+  const own=fieldsOf(row.fields);if(Object.keys(own).length)result.fields=own;
   // A small photo (data URL, ~64 px), taken from a service profile; the URL itself is never shown to the page.
   // Where the photo came from: a service, the user's own picture, or «none» (initials, not refilled by refresh).
   if(['slack','jira','custom','none'].includes(row.photoSource))result.photoSource=row.photoSource;
@@ -35,6 +37,14 @@ function accountsOf(value){
   if(clean.image&&!/^https:\/\//.test(clean.image))delete clean.image;
   if(Object.keys(clean).length)out[service]=clean;
  }
+ return out;
+}
+// {key: text} of apps' person fields: camelCase keys that are not the record's own, short strings, at most 16.
+function fieldsOf(value){
+ let raw=value;if(typeof raw==='string'){if(!raw.trim())return {};try{raw=JSON.parse(raw);}catch{return {};}}
+ if(!raw||typeof raw!=='object'||Array.isArray(raw))return {};
+ const out={};
+ for(const [key,v] of Object.entries(raw)){if(Object.keys(out).length>=16)break;if(/^[a-z][A-Za-z0-9]{0,30}$/.test(key)&&!(key in limits)&&!['accounts','photo','photoSource','fields'].includes(key)&&typeof v==='string'&&v.trim())out[key]=v.trim().slice(0,400);}
  return out;
 }
 // Merge service entries: fill what is missing, keep what is there.
@@ -72,4 +82,4 @@ function context(settings,query='',max=16000){
  if(settings.teamRoles)result+=('Дополнительные сведения о команде: '+settings.teamRoles).slice(0,Math.max(0,max-result.length));
  return result;
 }
-module.exports={validate,members,self,context,limits,accountsOf,mergeAccounts,birthday};
+module.exports={validate,members,self,context,limits,accountsOf,mergeAccounts,birthday,fieldsOf};

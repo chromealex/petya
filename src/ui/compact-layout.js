@@ -73,7 +73,7 @@
   nodes[0].before(details);details.append(summary,...nodes);return details;
  }
  function help(selector,title){fold([...document.querySelectorAll(selector)],title);}
- for(const [id,title] of [['learn-form','Создать или изменить навык'],['dictionary-form','Добавить или изменить правило'],['mail-skill-form','Настроить почтовый навык']]){
+ for(const [id,title] of [['learn-form','Создать или изменить навык'],['dictionary-form','Добавить или изменить правило']]){
   const form=document.getElementById(id);if(!form)continue;
   fold([form],title,'compact-editor');
   form.addEventListener('invalid',()=>{form.closest('details').open=true;},true);

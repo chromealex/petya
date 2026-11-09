@@ -42,7 +42,19 @@
  const settingsEmpty=el('p',null,'small');controls.after(settingsEmpty);
  // First run: suggest the common work services right on the «Сервисы» tab instead of an almost empty page.
  const settingsStart=el('article',null,'card settings-start');settingsStart.append(el('h2','С чего начать'),el('p','Подключите рабочие сервисы — Петя будет брать из них контекст и ставить задачи. Остальные приложения — в каталоге.'));
- const startActions=el('div',null,'actions');for(const [id,name] of [['slack','Slack'],['jira','Jira'],['notion','Notion'],['gmail','Почта']])startActions.append(button(name,async()=>{try{await window.enableAppModule?.(id);}catch(e){notice(e.message,true);}}));startActions.append(button('Все приложения…',()=>window.openAppCatalog()));settingsStart.append(startActions);settingsEmpty.after(settingsStart);
+ // The buttons are the apps that declare a quick start (extension.json "quickStart", categories.json "moduleQuickStart" for
+ // service modules without an app folder), in their order; everything else is one click away in the catalog.
+ const startActions=el('div',null,'actions');settingsStart.append(startActions);settingsEmpty.after(settingsStart);
+ const add=run=>async()=>{try{await run();}catch(e){notice(e.message,true);}};
+ let startGroups=null;
+ async function drawStart(){
+  try{startGroups ||= await window.petya.feature('extensionUI','categories');}catch{startGroups={};}
+  const apps=(window.extensionHost?.entries()||[]).filter(e=>e.quickStart).map(e=>({key:e.id,order:e.quickStart.order,name:e.name||e.id,run:()=>e.service?window.enableAppModule(e.service):window.extensionHost.open(e.id)}));
+  const modules=Object.entries(startGroups?.moduleQuickStart||{}).map(([id,order])=>({key:id,order,name:optionalModules.find(([k])=>k===id)?.[1]||id,run:()=>window.enableAppModule(id)}));
+  const items=[...apps,...modules].sort((a,b)=>a.order-b.order||a.key.localeCompare(b.key));
+  startActions.replaceChildren(...items.map(i=>{const b=button(i.name,add(i.run));b.dataset.quickStart=i.key;return b;}),button('Все приложения…',()=>window.openAppCatalog()));
+ }
+ document.addEventListener('petya-extensions-changed',()=>drawStart().catch(()=>{}));drawStart().catch(()=>{});
  const settingsIntro=[...settings.querySelectorAll(':scope>p.intro')],chatExtensions=$('chat-extension-details');
  const filterSettings=()=>{
    const services=group==='services',query=find.value.trim().toLocaleLowerCase();
