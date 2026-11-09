@@ -1,0 +1,19 @@
+{
+  "id": "clipboard",
+  "name": "История буфера",
+  "description": "Помнит, что вы копировали за 7 дней — текст и картинки, только на этом компьютере и зашифровано; пропускает пароли, токены и менеджеры паролей. Найдёт, вернёт в буфер, отправит ссылку в задачу",
+  "category": "computer",
+  "icon": "icon.svg",
+  "examples": ["Что я копировал про API ключ?", "Вставь третье скопированное", "Скопируй последнюю ссылку из буфера в Jira задачу BW-12", "Поставь историю буфера на паузу"],
+  "setting": "extension_clipboard",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["clipboard-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "clipboardHistory": "renderClipboardHistory"
+  },
+  "uses": ["task-tracker"]
+}

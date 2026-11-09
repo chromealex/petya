@@ -1,0 +1,18 @@
+{
+  "id": "tidy-downloads",
+  "name": "Уборка загрузок",
+  "description": "Разбирает папку «Загрузки»: установщики уже установленных программ, дубликаты, распакованные архивы, большие давно не открытые файлы и скриншоты — в Корзину или в папку «Разобрано» только после подтверждения, с возвратом",
+  "category": "computer",
+  "icon": "icon.svg",
+  "examples": ["Разбери загрузки", "Что можно удалить из загрузок?", "Дубликаты в загрузках", "Разбери загрузки: что не открывал 60 дней"],
+  "setting": "extension_tidy-downloads",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["tidy-cards.js", "message-format.js"],
+    ["tidy-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "tidyDownloads": "renderTidyDownloads"
+  }
+}

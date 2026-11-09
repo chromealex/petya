@@ -20,7 +20,7 @@ const own={
  calendar:['что у меня сегодня в календаре','найди час с Машей и Олегом на этой неделе','когда я свободен в пятницу','поставь встречу с Олегом в четверг в 15:00'],
  'ci-builds':['статус CI','последние сборки в GitHub Actions','что с билдом на андроид в CI'],
  'pull-requests':['какие PR ждут моего ревью','мои пулл-реквесты','что в PR 123'],
- 'disk-usage':['чем забит диск','сколько места свободно на диске','что можно почистить на диске'],
+ 'disk-usage':['чем забит диск','сколько места свободно на диске','что можно почистить на диске','очисти диск'],
  dependencies:['какие пакеты устарели','есть ли уязвимости в зависимостях','npm audit'],
  'build-size':['почему билд вырос','сравни размер этих двух apk','из чего состоит ipa'],
  localization:['что не переведено в локализации','проверь локализацию','недостающие ключи на немецкий'],
@@ -86,6 +86,9 @@ const own={
  onboarding:['подготовь онбординг для Ани, она бэкенд','план онбординга нового сотрудника','онбординг нового сотрудника','к нам выходит новый бэкендер, подготовь план адаптации','составь план онбординга для Димы'],
  hiring:['добавь кандидата Анна Иванова на бэкенд','подготовь вопросы к собеседованию','покажи воронку найма','сводка по кандидату Анна','запиши заметки интервью с Анной: уверенно проектирует API'],
  'perf-review':['собери материалы для ревью Олега за полгода','подготовь перформанс-ревью Маши','перф-ревью Ивана за квартал','подготовь performance review для Олега'],
+ 'screen-bug':['запиши баг','запиши экран','запиши видео бага','сними экран для бага'],
+ clipboard:['что я копировал про API ключ','вставь третье скопированное','скопируй последнюю ссылку из буфера в Jira задачу BW-12','покажи историю буфера'],
+ 'tidy-downloads':['разбери загрузки','что можно удалить из загрузок','дубликаты в загрузках','наведи порядок в папке загрузок'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -100,7 +103,8 @@ const not={
  calendar:['сводка встречи','что решили на встрече','срок задачи','календарь отпусков','дни рождения'],
  'pull-requests':['отзывы в App Store','задачи на ревью в Jira'],
  'ci-builds':['готов ли релиз 1.5','почини билд','размер сборки','сколько весит билд'],
- 'disk-usage':['место встречи','свободное место в спринте','диск в Google Drive'],
+ // The Downloads folder named on its own is «Уборка загрузок».
+ 'disk-usage':['место встречи','свободное место в спринте','диск в Google Drive','разбери загрузки','что можно удалить из загрузок','дубликаты в загрузках'],
  dependencies:['зависимости между задачами','эмоциональная зависимость','от чего зависит дедлайн'],
  'build-size':['размер команды','размер экрана','сборка упала'],
  localization:['переведи эту фразу','перевод денег','перевести задачу в другой статус'],
@@ -169,7 +173,7 @@ const not={
  docker:['docker-образ для Python','место на диске','контейнер в Unity UI','перезапусти компьютер','контейнер с грузом пришёл'],
  zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи'],
  // A plain screenshot is Petya's computer control; store screenshots and bugs in code belong to others.
- 'screenshot-task':['сделай скриншот','скриншоты стора','баг в коде','заведи баг в Jira'],
+ 'screenshot-task':['сделай скриншот','скриншоты стора','баг в коде','заведи баг в Jira','запиши баг','запиши экран','запиши видео бага'],
  // Subscribing to channels, signing, extending a sprint, prices and followers are not paid subscriptions.
  subscriptions:['подпишись на канал релизов','подпиши договор','отпишись от рассылки','продли спринт','сколько стоит Unity Pro','сколько у меня подписчиков','забронируй переговорку'],
  // The clock, focus sessions, the journal of what was done, build and meeting durations, money are not time tracking.
@@ -223,6 +227,13 @@ const not={
  hiring:['найм юнитов','найм юнитов в казарме','нанять героев в таверне','найми рабочих в игре','кандидат наук','отзывы в App Store','подготовь 1:1 с Олегом','ревью кода'],
  // Code review stays with «Код-ревью», PRs with «Pull requests», a 1:1 with «Встречи 1:1».
  'perf-review':['сделай код-ревью','ревью кода','ревью PR #42','какие PR ждут моего ревью','отзывы в App Store','подготовь 1:1 с Олегом','что обсудить на встрече один на один','что такое перформанс-ревью','проверь мои изменения перед PR'],
+ // Meetings are recorded by Petya's meeting recorder, screenshots by «Скриншот → задача»; the journal, decisions,
+ // worklogs and voice notes are other «запиши …».
+ 'screen-bug':['запиши встречу','запиши встречу в Zoom','скриншот в задачу','сделай баг из скриншота','заведи баг по этому экрану','запиши в дневник: идея с картой','запиши решение: переходим на Addressables','запиши время в Jira','запиши голосовое','запиши звонок'],
+ // Graphics and network buffers, a buffer zone, how to copy at all and screenshots are not the clipboard history.
+ clipboard:['буфер кадра в Unity','что такое буфер обмена','как скопировать текст','размер буфера сокета','буферная зона','скрин в задачу','скопируй файл в папку','запиши баг'],
+ // The whole disk stays «Место на диске»; store installs, loading time and uploads are not the Downloads folder.
+ 'tidy-downloads':['очисти диск','чем забит диск','освободи место на диске','загрузки приложения за неделю','скорость загрузки','время загрузки уровня','загрузи файл в Google Drive','сколько загрузок у игры в сторе'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -241,7 +252,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review','gdd','wiki-author','doc-diff'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review','gdd','wiki-author','doc-diff','screen-bug','clipboard'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

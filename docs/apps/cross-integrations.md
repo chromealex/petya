@@ -59,7 +59,7 @@ to the chat (`k.ask(…, {send:true})`), `{text}` shows a toast, `{settings: '<e
 | `video-meeting` | `zoom` (Zoom extension, order 10) | The user's Zoom **personal meeting room** link: the saved `zoomPersonalLink`, a personal-room link found in plain-text Zoom data on the computer, or `{needLink, text, placeholder, field}` so the card asks to paste it once (validated `https://…zoom.us/j/<digits>[?pwd=…]`, then remembered). Ready when the Zoom desktop app is installed (`/Applications/zoom.us.app`, `%APPDATA%\Zoom\bin\Zoom.exe`) or a link is saved. No Zoom API, no OAuth. The same room serves every meeting; the choice says so. `recognizeLink` tells Zoom links apart. Only while «Zoom» is added. |
 | | `google-meet` («Google Meet», order 20) | `{native:true}`; `prepareEvent` adds `conferenceData.createRequest` (`hangoutsMeet`) and `conferenceDataVersion=1`. Ready with a Google account that has calendar access (and «Календарь» added); fits Google calendars. See [google-meet.md](google-meet.md). |
 | | `teams` («Microsoft Teams», order 30) | `{native:true}`; `prepareEvent` adds `isOnlineMeeting`, `onlineMeetingProvider:"teamsForBusiness"`. Ready with a Microsoft **work or school** account with `Calendars.ReadWrite`; fits Outlook calendars of such an account, never personal ones. See [teams.md](teams.md). |
-| `task-tracker` | `jira`, `asana` | A chat request «Создай задачу в Jira/Asana: …» (or «Создай задачи … по встрече «…»:» with a list); those flows choose the project, preview and create only after confirmation. |
+| `task-tracker` | `jira`, `asana` | A chat request «Создай задачу в Jira/Asana: …» (or «Создай задачи … по встрече «…»:» with a list); those flows choose the project, preview and create only after confirmation. A comment on an existing issue (`{issue, comment}`, context `{comment:true}`) is Jira only: the calling card already showed the exact text and issue, and the provider posts `/rest/api/3/issue/{key}/comment` on that press after re-checking the connection; Asana's `fits` refuses it. |
 | `share-message` | `slack` | «Попроси команду …» for the team request flow: a channel only from the project's confirmed bindings, otherwise a question with concrete channels, then a preview with «Отправить». Never a guessed channel. |
 | | `mattermost`, `vk-teams` | «Отправь в Mattermost: …» / «Отправь в VK Teams: …»: the app asks which of its chosen channels (Mattermost) or of the chats its bot is in (VK Teams), then shows a compose card with the exact text and channel; only «Отправить» posts. See [mattermost.md](mattermost.md), [vk-teams.md](vk-teams.md). |
 | `code-fix` | `coder` | The problem as a coding request for «Программист» (own branch, diff for review). |
@@ -85,6 +85,8 @@ offer).
 | Meeting summary | per task and «Создать все» | | summary | | |
 | Retro («Ретро»), «Попробовать» | per item and «Создать задачи из «Попробовать»» | | «Отправить на голосование» | | |
 | Documentation freshness, per finding | «Создать задачу» | «Предложить правку» without an exact line fix | | | |
+| Screen recording → bug («Запись экрана → баг»), report | ✓ (bug; video and log attached after creation) | | | | |
+| Clipboard history («История буфера»), link → issue | comment «Добавить в KEY» (Jira) | | | | |
 | Calendar, confirm step | | | | ✓ + known rooms, typed link | |
 | «Онбординг новичка», welcome message | | | after the outgoing review | | |
 | Calendar, created meeting / timeline | | | | | «Петя запишет встречу» / «Записать Петей» |

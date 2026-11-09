@@ -1,0 +1,19 @@
+{
+  "id": "screen-bug",
+  "name": "Запись экрана → баг",
+  "description": "«Запиши баг»: запись выбранного окна игры или экрана до 2 минут с кнопкой «Стоп», лог Unity и сведения о системе, черновик бага по логу и задача в вашем трекере с видео и логом — только после вашего подтверждения",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Запиши баг", "Запиши экран: инвентарь не открывается", "Запиши видео бага", "Останови запись экрана"],
+  "setting": "extension_screen-bug",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["screen-bug-cards.js", "message-format.js"],
+    ["screen-bug-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "screenBug": "renderScreenBug"
+  },
+  "uses": ["task-tracker"]
+}

@@ -34,13 +34,17 @@ function parseTarget(provider,value){
  if(provider==='asana'){const m=v.match(/app\.asana\.com\/0\/\d+\/(\d+)/)||v.match(/^(\d{1,40})$/)||v.match(/\/task\/(\d+)/);if(!m||!ASANA_GID.test(m[1]))throw Error('Укажите ссылку на задачу Asana или её номер (gid).');return m[1];}
  throw Error('Прикрепить картинку можно к задаче Jira или Asana.');
 }
-async function upload(s,{provider,key,file,name}){
+// `type` is the file's media type: a PNG by default (≤ 20 MB); «Запись экрана → баг» uploads its video and log
+// excerpt the same way (≤ 100 MB; Jira Cloud's own limit is set by the site admin, a refusal is reported as is).
+async function upload(s,{provider,key,file,name,type='image/png'}){
  const bytes=fs.readFileSync(file);
- if(!bytes.length||bytes.length>20*1024*1024)throw Error('Картинка пустая или больше 20 МБ.');
+ const image=/^image\//.test(type);
+ if(image&&(!bytes.length||bytes.length>20*1024*1024))throw Error('Картинка пустая или больше 20 МБ.');
+ if(!image&&(!bytes.length||bytes.length>100*1024*1024))throw Error('Файл пустой или больше 100 МБ.');
  const form=new FormData();
  if(provider==='jira'){
   if(!jiraReady(s))throw Error('Подключите Jira в настройках.');
-  form.append('file',new Blob([bytes],{type:'image/png'}),name);
+  form.append('file',new Blob([bytes],{type}),name);
   const basic=!s.settings.atlassianCredential&&s.settings.jiraEmail&&s.settings.jiraToken?{Authorization:'Basic '+Buffer.from(s.settings.jiraEmail+':'+s.settings.jiraToken).toString('base64')}:{};
   const r=await s.request(s.settings.jiraUrl.replace(/\/+$/,'')+'/rest/api/3/issue/'+encodeURIComponent(key)+'/attachments',{method:'POST',headers:{...basic,'X-Atlassian-Token':'no-check'},body:form});
   const a=Array.isArray(r)?r[0]:null;
@@ -49,7 +53,7 @@ async function upload(s,{provider,key,file,name}){
  }
  if(provider==='asana'){
   if(!asanaReady(s))throw Error('Подключите Asana в настройках.');
-  form.append('parent',key);form.append('file',new Blob([bytes],{type:'image/png'}),name);
+  form.append('parent',key);form.append('file',new Blob([bytes],{type}),name);
   const r=await s.request('https://app.asana.com/api/1.0/attachments',{method:'POST',body:form});
   if(!r?.data?.gid)throw Error('Asana не подтвердила вложение.');
   return {provider,key,name:r.data.name||name,url:r.data.parent?.permalink_url||''};

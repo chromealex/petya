@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data: blob:; media-src blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>petya-screen-bug</title>
+<style>
+ html,body{margin:0;height:100%;overflow:hidden;user-select:none;font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#1d2220;color:#eef2ee}
+ body{display:flex;align-items:center;gap:10px;padding:0 10px 0 12px;box-sizing:border-box;-webkit-app-region:drag;border:1px solid #ffffff1f;border-radius:10px}
+ #dot{width:10px;height:10px;border-radius:50%;background:#ff453a;box-shadow:0 0 0 3px #ff453a33;flex:none;animation:pulse 1.4s ease-in-out infinite}
+ #dot.idle{background:#8a918d;box-shadow:none;animation:none}
+ @keyframes pulse{50%{opacity:.35}}
+ #time{font-variant-numeric:tabular-nums;font-weight:600;flex:1;white-space:nowrap}
+ #time small{font-weight:400;color:#a9b1ad}
+ #stop{-webkit-app-region:no-drag;border:0;border-radius:7px;background:#ff453a;color:#fff;font:600 13px inherit;font-family:inherit;padding:6px 12px;cursor:pointer;display:flex;align-items:center;gap:6px}
+ #stop::before{content:'';width:9px;height:9px;background:#fff;border-radius:2px}
+ #stop:disabled{opacity:.6;cursor:default}
+ #stop:focus-visible{outline:2px solid #c9ed9d;outline-offset:2px}
+ video,canvas{display:none}
+</style>
+</head>
+<body>
+<span id="dot" class="idle" aria-hidden="true"></span>
+<span id="time" role="timer" aria-live="off">0:00 <small></small></span>
+<button id="stop" type="button" disabled>Стоп</button>
+<video id="video" muted playsinline></video><canvas id="canvas"></canvas>
+<script>
+// The control window of «Запись экрана → баг»: it records the stream the main process granted for the source the
+// user picked, sends one-second chunks through the preload bridge, keeps the latest frame as a poster and stops at
+// «Стоп», at the cap or when the source goes away. Labels arrive translated in the URL hash (no DOM translator here).
+(()=>{
+ const params=new URLSearchParams(location.hash.slice(1));
+ const label=(k,d)=>params.get(k)||d;
+ const stopButton=document.getElementById('stop'),dot=document.getElementById('dot'),time=document.getElementById('time');
+ stopButton.textContent=label('stop','Стоп');document.title=label('title','petya-screen-bug');
+ const fmt=ms=>{const s=Math.floor(ms/1000);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');};
+ let recorder=null,stream=null,started=0,timer=null,limit=null,poster='',pending=Promise.resolve(),max=120000,ending='';
+ const video=document.getElementById('video'),canvas=document.getElementById('canvas');
+ function grab(){
+  try{if(!video.videoWidth)return;const w=480,h=Math.round(w*video.videoHeight/video.videoWidth);canvas.width=w;canvas.height=h;canvas.getContext('2d').drawImage(video,0,0,w,h);poster=canvas.toDataURL('image/jpeg',0.72);}catch{/* keep the last one */}
+ }
+ window.startRecording=async options=>{
+  max=Math.max(5000,Math.min(120000,Number(options?.max)||120000));
+  try{stream=await navigator.mediaDevices.getDisplayMedia({video:{frameRate:{ideal:30,max:30}},audio:false});}
+  catch(e){await window.petyaRecorder.error((e&&e.message)||'no stream');return;}
+  const type=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(t=>MediaRecorder.isTypeSupported(t));
+  recorder=new MediaRecorder(stream,{mimeType:type,videoBitsPerSecond:Number(options?.bitrate)||2500000});
+  recorder.ondataavailable=e=>{if(!e.data||!e.data.size)return;pending=pending.then(async()=>{const r=await window.petyaRecorder.chunk(await e.data.arrayBuffer());if(r&&r.stop)window.stopRecording('size');}).catch(()=>{});};
+  recorder.onstop=async()=>{clearInterval(timer);clearTimeout(limit);grab();for(const t of stream.getTracks())t.stop();await pending;await window.petyaRecorder.done({duration:Date.now()-started,poster,reason:ending||'stop'});};
+  stream.getVideoTracks()[0].addEventListener('ended',()=>window.stopRecording('ended'));
+  video.srcObject=stream;video.play().catch(()=>{});
+  recorder.start(1000);started=Date.now();dot.classList.remove('idle');stopButton.disabled=false;
+  window.petyaRecorder.started();
+  const total=fmt(max);
+  const paint=()=>{const now=Date.now()-started;time.firstChild.textContent=fmt(now)+' ';time.lastElementChild.textContent=label('of','из')+' '+total;if(now%5000<500)grab();};
+  paint();timer=setInterval(paint,500);
+  limit=setTimeout(()=>window.stopRecording('cap'),max);
+ };
+ window.stopRecording=reason=>{
+  if(!recorder||recorder.state==='inactive')return;
+  ending=ending||reason||'stop';stopButton.disabled=true;dot.classList.add('idle');
+  recorder.stop();
+ };
+ stopButton.addEventListener('click',()=>window.stopRecording('stop'));
+})();
+</script>
+</body>
+</html>
