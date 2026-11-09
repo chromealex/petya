@@ -2,6 +2,9 @@
    full, widgets of a row share its height). Cards drawn inside widgets lose their own frame: the widget is it. */
 #home .chat-shell.showing-dashboard>:not(.dash-screen){display:none!important}
 #home .chat-shell.showing-dashboard::after{display:none}
+/* While a dashboard is on screen it is the selected thing in the sidebar; the chat it hides is not. */
+#home:has(.chat-shell.showing-dashboard) .project-chat-row:has(>.project-sidebar-chat[aria-current=true]){background:transparent}
+#home:has(.chat-shell.showing-dashboard) .project-sidebar .project-sidebar-chat[aria-current=true]{color:inherit;background:transparent}
 .dash-screen{--dash-gap:14px;flex:1;min-height:0;overflow:auto;padding:22px 26px 48px;box-sizing:border-box}
 .dash-screen[hidden]{display:none}
 
@@ -104,7 +107,15 @@
 .dash-open-reply{display:inline-flex;align-items:center;gap:6px;margin:8px 0 0}
 
 /* Sidebar rows */
-.project-dashboards[hidden]{display:none}
+/* «Дашборды» in the sidebar: a section of their own, apart from the chat tree. */
+.sidebar-dashboards{padding:2px 8px 6px;border-bottom:1px solid var(--line);margin-bottom:6px}
+.sidebar-dashboards[hidden]{display:none}
+.sidebar-dashboards-head{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 6px 2px}
+.sidebar-dashboards-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.sidebar-dashboards-add{width:26px;height:26px}
+.sidebar-dashboards-rows{display:flex;flex-direction:column;gap:2px}
+.sidebar-dashboards .project-chat-row{margin:0;border-left:0;border-radius:7px}.sidebar-dashboards .project-sidebar-chat{padding-left:8px}
+.project-dashboard-project{font-size:10.5px;color:var(--muted);flex:none;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .project-dashboard-row .project-sidebar-chat{display:flex;align-items:center;gap:7px}
 .project-dashboard-icon{display:grid;place-items:center;flex:none;color:var(--green);opacity:.85}
 .project-dashboard-icon svg{width:14px;height:14px}

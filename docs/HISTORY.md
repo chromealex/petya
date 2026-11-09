@@ -8,6 +8,11 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.17.1 — dashboard card actions, menus that scroll, dashboards apart from chats
+
+- «Исправить» and the other card actions work on a dashboard widget too; menus scroll instead of squeezing over the card; the hidden dashboard chat is never selected.
+- The sidebar shows dashboards as a section of their own above the chat tree.
+
 ## 0.17.0 — apps own their interface: mail rules, voice-command actions, the birthday field, the daily summary, the quick start
 
 - «Почтовые правила» are a tab of the «Почта» app on «Навыки»: each rule with what it reads, on/off, «Проверить сейчас», editing, delete with «Отменить». Your rules and an unfinished teaching moved there by themselves, with their «Развитие» points. The tab is there while «Почта» is added.

@@ -227,6 +227,19 @@ async function sources(root){
   await assert.rejects(web.load({settings:{}},{url:'https://x.io/d',query:'DAU'},{read:async()=>({url:'https://x.io/login',password:true,text:''})}),/Нужно войти на x\.io/);
   assert.match((await web.load({settings:{}},{url:'https://x.io/d',query:'DAU'},{read:async()=>({url:'https://x.io/d',text:'DAU 12 500\nRetention D1 38%'})})).text,/DAU 12 500/);
   ipc.remove(wd.id);
+  // A card control on a widget («Исправить», a status chip) acts on the widget's own data, not on the open chat.
+  {const jiraResult=require('../src/extensions/jira/result.cjs'),realPerform=jiraResult.perform;let performed=null;
+   jiraResult.perform=async(action,row)=>{performed={action,key:row.item.key};return {handled:true,text:'План',topicId:'plan-1'};};
+   try{
+    const snap=ipc.pin('','t1',3).dashboard;const sd=ipc.get(snap.id);
+    const w=sd.widgets.find(x=>x.kind==='snapshot');
+    // The pinned plain answer carries no cards; give the snapshot Jira items as a card source would.
+    const raw=s.dialogue.state.dashboards.find(x=>x.id===sd.id).widgets.find(x=>x.id===w.id);raw.data={jiraItems:[{key:'BW-9',summary:'Падает',site:'https://x.atlassian.net',type:'Bug',category:'new'}]};
+    const out=await ipc.cardAction(sd.id,w.id,JSON.stringify(['https://x.atlassian.net','BW-9']),'execute');
+    assert.deepEqual(performed,{action:'execute',key:'BW-9'});assert.equal(out.topicId,'plan-1');
+    await assert.rejects(ipc.cardAction(sd.id,w.id,JSON.stringify(['https://x.atlassian.net','BW-404']),'execute'),/Карточка устарела/);
+    ipc.remove(sd.id);
+   }finally{jiraResult.perform=realPerform;}}
   // Share: the definition goes to .petya/dashboards, the snapshot stays personal; the start screen follows.
   const out=ipc.share(d.id,0);
   const file=path.join(repo,'.petya','dashboards','relize.json');

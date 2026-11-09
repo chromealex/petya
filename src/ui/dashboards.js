@@ -22,11 +22,17 @@
  // --- One widget -------------------------------------------------------------------------------------------------
  // Loading without data yet: a calm placeholder of the card's shape, not a line of text.
  const skeleton=()=>{const box=el('div','dash-skeleton');box.setAttribute('aria-label','Загружаю…');for(const width of [72,100,88,56])box.append(Object.assign(el('span'),{style:'width:'+width+'%'}));return box;};
- async function drawBody(body,w){
+ // Cards on a widget act through the dashboard (feature cardAction), not through the open chat: the keys of the
+ // cards drawn in each widget are remembered, and result-kit's quick() asks here first.
+ const cardOwners=new Map();
+ window.dashboardCardAction=(key,actionId,args)=>{const owner=cardOwners.get(key);if(!owner||!document.querySelector('.dash-screen:not([hidden]) [data-result-presentation="'+CSS.escape(key)+'"]'))return null;
+  return call('cardAction',owner.dashboardId,owner.widgetId,key,actionId,args).then(async result=>{if(result?.topicId&&typeof selectDialogueTopic==='function'){close();await selectDialogueTopic(result.topicId);}return result;});};
+ async function drawBody(body,w,d){
   body.replaceChildren();
   if(w.data&&Object.keys(w.data).length){
    const holder=el('div','dash-widget-content');body.append(holder);
    try{await window.extensionHost?.render(holder,{role:'assistant',extensionData:w.data,...w.data});}catch{}
+   if(d)for(const node of holder.querySelectorAll('[data-result-presentation]'))cardOwners.set(node.dataset.resultPresentation,{dashboardId:d.id,widgetId:w.id});
    if(!holder.childElementCount&&w.text)holder.append(el('p','dash-widget-text',w.text));
   }else if(w.text)body.append(el('p','dash-widget-text',w.text));
   // The very first load only: a refresh keeps what is shown and spins in the corner (no text, no shift).
@@ -70,7 +76,7 @@
    if(w.choice.options.length>SHOWN){const find=el('input','dash-choice-find');find.type='search';find.placeholder='Найти приложение: название или пакет';find.setAttribute('aria-label','Найти приложение');find.oninput=()=>draw(find.value);box.append(find);}
    box.append(list);draw();body.append(box);}
   card.append(head,body);
-  const content=el('div');body.append(content);card.drawn=drawBody(content,w).catch(()=>{});
+  const content=el('div');body.append(content);card.drawn=drawBody(content,w,d).catch(()=>{});
   if(!compact){const grip=el('span','dash-resize');grip.title='Потяните, чтобы изменить размер';grip.setAttribute('aria-hidden','true');card.append(grip);}
   return card;
  }
@@ -278,28 +284,38 @@
  // Widgets report their refresh; the open screen and the start dashboard repaint.
  let pending=null;
  window.petyaEvents.onDashboards?.(state=>{
+  if(state.list){changed().catch(()=>{});return;}
   if(state.id===openId&&current){const w=current.widgets.find(x=>x.id===state.widgetId);if(w&&state.loading){w.loading=true;const card=screen.querySelector('.dash-widget[data-id="'+state.widgetId+'"]');card?.classList.add('refreshing');card?.querySelector('.dash-refresh')?.classList.add('loading');}}
   clearTimeout(pending);pending=setTimeout(async()=>{if(openId&&state.id===openId)paint(await call('peek',openId).catch(()=>null));if(start?.dataset.id===state.id)drawStart(true);},150);
  });
 
- // --- Sidebar: the project's dashboards under its chats --------------------------------------------------------
+ // --- Sidebar: «Дашборды», a section of their own above the chat tree -------------------------------------------
+ // A dashboard is its own thing, not a chat: the list of the company's dashboards sits apart from the projects'
+ // chats, with «+» to make an empty one; each row says which project it belongs to.
  let lists=new Map(),loadingLists=null;
  async function loadLists(){loadingLists=loadingLists||call('list','').then(rows=>{lists=new Map();for(const r of rows){if(!lists.has(r.projectId))lists.set(r.projectId,[]);lists.get(r.projectId).push(r);}}).finally(()=>{loadingLists=null;});return loadingLists;}
- function fill(box){
-  const rows=lists.get(box.dataset.project)||[];box.replaceChildren();box.hidden=!rows.length;
-  for(const d of rows){
+ const section=el('section','sidebar-dashboards');section.hidden=true;section.setAttribute('aria-label','Дашборды');
+ const sectionHead=el('div','sidebar-dashboards-head');const sectionTitle=el('span','sidebar-dashboards-title','Дашборды');
+ const addButton=button('Новый дашборд',ICON.plus,async()=>{const title=await ask('Название дашборда','Мой дашборд');if(!title)return;try{const d=await call('create',title,typeof topicSelect!=='undefined'?topicSelect.dataset.projectId||'general':'general');await changed();open(d.id);}catch(e){fail(e);}},'dash-tool sidebar-dashboards-add');
+ sectionHead.append(sectionTitle,addButton);const sectionRows=el('div','sidebar-dashboards-rows');section.append(sectionHead,sectionRows);
+ const projectName=id=>{const p=(window.projectSidebarState?.()||[]).find(x=>x.id===id);return p?p.name:'';};
+ function fillSection(){
+  const rows=[...lists.values()].flat();const live=rows.filter(d=>(window.projectSidebarState?.()||[]).some(p=>p.id===d.projectId&&!p.archived)||!window.projectSidebarState);
+  sectionRows.replaceChildren();
+  for(const d of live){
    const row=el('div','project-chat-row project-dashboard-row'),b=el('button','project-sidebar-chat');b.type='button';b.dataset.dashboard=d.id;
    const ic=el('span','project-dashboard-icon');ic.innerHTML=icon(ICON.grid);
-   b.append(ic,el('span','project-chat-title',d.title));if(d.shared)b.append(el('span','project-dashboard-shared','общий'));
-   b.title=d.title+' · '+d.widgets+' '+(d.widgets===1?'виджет':d.widgets<5&&d.widgets>1?'виджета':'виджетов')+(d.shared?' · общий, '+d.folder+'/.petya':'')+(d.start?' · стартовый экран':'');
-   b.onclick=()=>open(d.id);row.append(b);box.append(row);
+   const name=projectName(d.projectId);
+   b.append(ic,el('span','project-chat-title',d.title));if(d.shared)b.append(el('span','project-dashboard-shared','общий'));if(name&&name!=='Общее')b.append(el('span','project-dashboard-project',name));
+   b.title=d.title+(name?' · '+name:'')+' · '+d.widgets+' '+(d.widgets===1?'виджет':d.widgets<5&&d.widgets>1?'виджета':'виджетов')+(d.shared?' · общий, '+d.folder+'/.petya':'')+(d.start?' · стартовый экран':'');
+   b.onclick=()=>open(d.id);row.append(b);sectionRows.append(row);
   }
-  markSidebar();
+  section.hidden=false;markSidebar();
  }
- window.projectSidebarExtras=(projectId,group)=>{const box=el('div','project-dashboards');box.dataset.project=projectId;box.hidden=true;group.append(box);
-  if(lists.size)fill(box);loadLists().then(()=>{if(box.isConnected)fill(box);}).catch(()=>{});};
+ // The sidebar (src/ui/project-sidebar.js) gives the place for the section once and asks again after each redraw.
+ window.projectSidebarDashboards=(anchor,projects)=>{window.projectSidebarState=()=>projects;if(!section.isConnected)anchor.before(section);if(lists.size)fillSection();loadLists().then(fillSection).catch(()=>{});};
  function markSidebar(){for(const b of document.querySelectorAll('.project-dashboard-row button')){if(b.dataset.dashboard===openId)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');}}
- async function changed(){await loadLists().catch(()=>{});for(const box of document.querySelectorAll('.project-dashboards'))fill(box);refreshHeading();drawStart(true);}
+ async function changed(){await loadLists().catch(()=>{});fillSection();refreshHeading();drawStart(true);}
  window.dashboardsChanged=changed;
 
  // --- Chat header: «Дашборд» -------------------------------------------------------------------------------------
