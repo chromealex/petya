@@ -10,7 +10,7 @@
 .dash-head-title{display:flex;align-items:flex-start;gap:6px;min-width:0}
 .dash-head-names{min-width:0}
 .dash-head h1{margin:0;font-size:26px;line-height:1.2;letter-spacing:-.6px;font-weight:700;cursor:text;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dash-head h1:hover{text-decoration:underline dotted #ffffff40;text-underline-offset:6px}
+.dash-head h1:hover{text-decoration:underline dotted color-mix(in srgb,var(--on) 25%,transparent);text-underline-offset:6px}
 .dash-sub{display:flex;flex-wrap:wrap;align-items:center;gap:4px 0;margin-top:5px;font-size:12.5px;color:var(--muted)}
 .dash-sub>span+span::before{content:"·";margin:0 7px;opacity:.6}
 .dash-sub>.dash-tag+span::before{content:none}
@@ -18,45 +18,45 @@
 .dash-head-tools{display:flex;gap:6px;flex:none;align-items:center}
 .dash-head-tools .dash-ghost,.dash-head-tools .dash-add{display:inline-flex;align-items:center;gap:6px;min-height:34px;padding:0 12px;border-radius:9px;font-size:13px}
 .dash-ghost{border:1px solid var(--line);background:transparent;color:var(--ink)}
-.dash-ghost:hover{background:#ffffff0a}
+.dash-ghost:hover{background:color-mix(in srgb,var(--on) 4%,transparent)}
 .dash-ghost.loading svg,.dash-tool.loading svg{animation:dash-spin 1s linear infinite}@keyframes dash-spin{to{transform:rotate(360deg)}}
 .dash-tool{display:grid;place-items:center;width:32px;height:32px;padding:0;border:0;border-radius:8px;background:transparent;color:var(--muted)}
-.dash-tool:hover{background:#ffffff10;color:var(--ink)}
+.dash-tool:hover{background:color-mix(in srgb,var(--on) 6%,transparent);color:var(--ink)}
 .dash-head-title>.dash-tool{margin-top:1px}
 
-.dash-tag{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.2px;color:var(--muted);background:#ffffff0d}
+.dash-tag{display:inline-flex;align-items:center;height:18px;padding:0 7px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.2px;color:var(--muted);background:color-mix(in srgb,var(--on) 5%,transparent)}
 .dash-tag.demo{color:#ffd07d;background:#ffd07d1a}
 .dash-note{margin:-6px 0 16px;padding:10px 14px;border-radius:12px;background:#ffd07d0d;border:1px solid #ffd07d26;color:#e9dcc0;font-size:12.5px;line-height:1.45}
 
 /* «Добавить виджет» */
-.dash-adder{border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 var(--dash-gap);background:#ffffff04}
+.dash-adder{border:1px solid var(--line);border-radius:14px;padding:14px;margin:0 0 var(--dash-gap);background:color-mix(in srgb,var(--on) 2%,transparent)}
 .dash-adder[hidden]{display:none}
 .dash-adder-form{display:flex;gap:8px}.dash-adder-form input{flex:1;min-width:0}
 .dash-adder .small{margin:12px 0 8px}
 .dash-adder-ready{display:flex;flex-wrap:wrap;gap:6px}
-.dash-chip{font-size:12.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:#ffffff05}
-.dash-chip:hover{background:#ffffff0d}
+.dash-chip{font-size:12.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:color-mix(in srgb,var(--on) 2%,transparent)}
+.dash-chip:hover{background:color-mix(in srgb,var(--on) 5%,transparent)}
 .dash-chip b{font-weight:600;color:var(--green);margin-right:3px}
 .dash-chip.demo b{color:#ffd07d}
 
 /* The grid */
 .dash-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-auto-rows:20px;gap:12px;position:relative}
-.dash-widget{position:relative;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;border-radius:16px;border:1px solid #ffffff0f;
-  background:linear-gradient(180deg,#1c2221 0%,#171c1b 100%);box-shadow:0 1px 0 #ffffff08 inset,0 8px 24px -16px #0009;transition:border-color .15s,box-shadow .15s}
-.dash-widget:hover{border-color:#ffffff1c}
+.dash-widget{position:relative;min-width:0;min-height:0;overflow:hidden;display:flex;flex-direction:column;border-radius:16px;border:1px solid color-mix(in srgb,var(--on) 6%,transparent);
+  background:linear-gradient(180deg,var(--panel) 0%,var(--panel) 100%);box-shadow:0 1px 0 color-mix(in srgb,var(--on) 3%,transparent) inset,0 8px 24px -16px #0009;transition:border-color .15s,box-shadow .15s}
+.dash-widget:hover{border-color:color-mix(in srgb,var(--on) 11%,transparent)}
 /* Narrow: widgets stack in reading order, at their natural height */
 .dash-grid.stacked{grid-template-columns:minmax(0,1fr);grid-auto-rows:auto}
 .dash-grid.stacked>.dash-widget{grid-column:auto!important;grid-row:auto!important;overflow:visible}
 .dash-grid.stacked .dash-resize,.dash-grid.stacked .dash-widget-drag{display:none}
 /* Arranging: column guides, the target cell, the widget in hand */
-.dash-grid.editing{user-select:none;background-image:repeating-linear-gradient(90deg,#ffffff06 0 calc((100% - 132px)/12),transparent calc((100% - 132px)/12) calc((100% - 132px)/12 + 12px));border-radius:16px}
-.dash-ghost-cell{border:2px dashed #d0f59666;border-radius:16px;background:#d0f5960c;pointer-events:none;z-index:0}
+.dash-grid.editing{user-select:none;background-image:repeating-linear-gradient(90deg,color-mix(in srgb,var(--on) 2%,transparent) 0 calc((100% - 132px)/12),transparent calc((100% - 132px)/12) calc((100% - 132px)/12 + 12px));border-radius:16px}
+.dash-ghost-cell{border:2px dashed color-mix(in srgb,var(--accent) 40%,transparent);border-radius:16px;background:color-mix(in srgb,var(--accent) 5%,transparent);pointer-events:none;z-index:0}
 .dash-ghost-cell[hidden]{display:none}
-.dash-widget.dragging{z-index:5;cursor:grabbing;box-shadow:0 24px 48px -12px #000c,0 0 0 1px #d0f59655;opacity:.96}
+.dash-widget.dragging{z-index:5;cursor:grabbing;box-shadow:0 24px 48px -12px #000c,0 0 0 1px color-mix(in srgb,var(--accent) 33%,transparent);opacity:.96}
 .dash-widget.dragging .dash-widget-head{cursor:grabbing}
-.dash-widget.resizing{z-index:4;box-shadow:0 0 0 1px #d0f59666}
+.dash-widget.resizing{z-index:4;box-shadow:0 0 0 1px color-mix(in srgb,var(--accent) 40%,transparent)}
 .dash-resize{position:absolute;right:3px;bottom:3px;width:16px;height:16px;cursor:nwse-resize;opacity:0;transition:opacity .15s;border-radius:0 0 12px 0;
-  background:linear-gradient(135deg,transparent 0 55%,#ffffff40 55% 62%,transparent 62% 72%,#ffffff40 72% 79%,transparent 79%)}
+  background:linear-gradient(135deg,transparent 0 55%,color-mix(in srgb,var(--on) 25%,transparent) 55% 62%,transparent 62% 72%,color-mix(in srgb,var(--on) 25%,transparent) 72% 79%,transparent 79%)}
 .dash-widget:hover .dash-resize,.dash-widget.resizing .dash-resize{opacity:1}
 
 .dash-widget-head{display:flex;align-items:flex-start;gap:8px;padding:14px 12px 4px 16px;margin:0;border:0;letter-spacing:normal;font-size:inherit;color:inherit}
@@ -64,7 +64,7 @@
 .dash-widget-title{margin:0;font-size:14px;font-weight:600;letter-spacing:-.1px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:none}
 .dash-widget-meta{display:flex;align-items:center;gap:6px;margin-top:3px;font-size:11.5px;color:var(--muted);letter-spacing:normal;text-transform:none;white-space:nowrap}
 .dash-widget-loading{color:var(--green)}
-.dash-count{flex:none;margin-top:1px;min-width:26px;height:22px;padding:0 8px;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--bg,#111415);background:var(--green);font-variant-numeric:tabular-nums}
+.dash-count{flex:none;margin-top:1px;min-width:26px;height:22px;padding:0 8px;border-radius:999px;display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--bg,var(--bg));background:var(--green);font-variant-numeric:tabular-nums}
 .dash-widget-drag{display:grid;place-items:center;width:14px;margin:2px -4px 0 -8px;color:var(--muted);opacity:0;cursor:grab;transition:opacity .15s}
 .dash-widget-tools{display:flex;gap:0;flex:none;margin:-4px -2px 0 0;opacity:0;transition:opacity .15s}
 .dash-widget-tools .dash-tool{width:28px;height:28px}
@@ -73,7 +73,7 @@
 
 .dash-widget-body{flex:1;display:flex;flex-direction:column;justify-content:flex-start;min-height:0;padding:8px 16px 16px;overflow:auto}
 .dash-widget-content{min-width:0}
-.dash-widget-text{margin:0;font-size:13px;line-height:1.5;white-space:pre-wrap;user-select:text;color:#d9dfd9}
+.dash-widget-text{margin:0;font-size:13px;line-height:1.5;white-space:pre-wrap;user-select:text;color:var(--ink)}
 .dash-widget-empty{margin:0;font-size:12.5px;color:var(--muted);text-align:center;padding:14px 0}
 .dash-widget-error{margin:0 0 10px;padding:7px 10px;border-radius:8px;font-size:12px;color:#f6c3b8;background:#ff9daf12}
 
@@ -84,17 +84,17 @@
 .dash-widget-content .chart-title{font-size:12px;font-weight:500;color:var(--muted);margin:0 0 8px}
 .dash-widget-content .chart-donut{justify-content:center}
 .dash-widget-content .jira-issue-list{margin:0}
-.dash-widget-content .kit-card{background:#ffffff05;border-color:#ffffff10}
+.dash-widget-content .kit-card{background:color-mix(in srgb,var(--on) 2%,transparent);border-color:color-mix(in srgb,var(--on) 6%,transparent)}
 
 /* Loading placeholder */
 .dash-skeleton{display:grid;gap:10px;padding:6px 0}
-.dash-skeleton span{display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,#ffffff08 0%,#ffffff14 50%,#ffffff08 100%);background-size:200% 100%;animation:dash-shimmer 1.4s ease-in-out infinite}
+.dash-skeleton span{display:block;height:12px;border-radius:6px;background:linear-gradient(90deg,color-mix(in srgb,var(--on) 3%,transparent) 0%,color-mix(in srgb,var(--on) 8%,transparent) 50%,color-mix(in srgb,var(--on) 3%,transparent) 100%);background-size:200% 100%;animation:dash-shimmer 1.4s ease-in-out infinite}
 @keyframes dash-shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
 @media (prefers-reduced-motion:reduce){.dash-skeleton span{animation:none}}
 
 /* Empty dashboard */
-.dash-empty{display:grid;justify-items:center;gap:6px;border:1px dashed #ffffff1c;border-radius:16px;padding:56px 20px;text-align:center;color:var(--muted)}
-.dash-empty-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#d0f59614;color:var(--green);margin-bottom:6px}
+.dash-empty{display:grid;justify-items:center;gap:6px;border:1px dashed color-mix(in srgb,var(--on) 11%,transparent);border-radius:16px;padding:56px 20px;text-align:center;color:var(--muted)}
+.dash-empty-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:color-mix(in srgb,var(--accent) 8%,transparent);color:var(--green);margin-bottom:6px}
 .dash-empty-icon svg{width:22px;height:22px}
 .dash-empty h2{color:var(--ink);margin:0;font-size:18px}
 .dash-empty p{margin:0 0 10px;max-width:420px}
@@ -109,7 +109,7 @@
 .project-dashboard-icon{display:grid;place-items:center;flex:none;color:var(--green);opacity:.85}
 .project-dashboard-icon svg{width:14px;height:14px}
 .project-dashboard-row .project-chat-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.project-dashboard-shared{font-size:10.5px;color:#a9d3ff;flex:none}
+.project-dashboard-shared{font-size:10.5px;color:var(--info);flex:none}
 
 /* Start screen: the project's dashboard under «Чем помочь?» */
 #home .chat-welcome.with-dashboard{max-width:1120px;padding-top:28px}

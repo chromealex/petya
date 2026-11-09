@@ -2,19 +2,19 @@
 .iap-body,.iap-holder{display:flex;flex-direction:column;gap:10px;min-width:0}
 .iap-currencies{display:flex;gap:6px;flex-wrap:wrap}
 .iap-currencies .kit-chip{min-height:22px;font-size:11.5px;padding:1px 9px}
-.iap-currencies .kit-chip[aria-pressed="true"]{color:var(--ink);border-color:#d0f59680;background:#d0f5960f}
+.iap-currencies .kit-chip[aria-pressed="true"]{color:var(--ink);border-color:color-mix(in srgb,var(--accent) 50%,transparent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
 .iap-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.iap-tile{display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:10px;background:#ffffff06;min-width:0}
+.iap-tile{display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:10px;background:color-mix(in srgb,var(--on) 2%,transparent);min-width:0}
 .iap-label{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .iap-value{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .iap-sub{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .iap-daily{display:flex;flex-direction:column;gap:3px}
 .iap-svg{width:100%;height:auto;display:block}
-.iap-svg .axis{stroke:#ffffff1c}
-.iap-svg .bar{fill:#e5ce8c}
-.iap-svg .refund{fill:#f0b4a8}
+.iap-svg .axis{stroke:color-mix(in srgb,var(--on) 11%,transparent)}
+.iap-svg .bar{fill:var(--warn)}
+.iap-svg .refund{fill:var(--alert)}
 .iap-svg .hit{fill:transparent;cursor:crosshair}
-.iap-svg .hit:hover{fill:#ffffff08}
+.iap-svg .hit:hover{fill:color-mix(in srgb,var(--on) 3%,transparent)}
 .iap-svg .tick{fill:var(--muted);font-size:10px}
 .iap-tip{font-size:12px;color:var(--muted);min-height:16px}
 .iap-section{font-size:12px;color:var(--muted);margin-top:2px}
@@ -22,11 +22,11 @@
 .iap-bars li{display:grid;grid-template-columns:minmax(0,190px) 1fr 84px 62px;align-items:center;gap:8px;font-size:12.5px}
 .iap-bars.first li{grid-template-columns:minmax(0,190px) 1fr 104px}
 .iap-name{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.iap-track{height:10px;border-radius:3px;background:#ffffff08;overflow:hidden}
-.iap-bar{display:block;height:100%;border-radius:3px;background:#e5ce8c}
-.iap-bars.first .iap-bar{background:#c9a8f0}
+.iap-track{height:10px;border-radius:3px;background:color-mix(in srgb,var(--on) 3%,transparent);overflow:hidden}
+.iap-bar{display:block;height:100%;border-radius:3px;background:var(--warn)}
+.iap-bars.first .iap-bar{background:var(--violet)}
 .iap-amount{font-variant-numeric:tabular-nums;color:var(--ink);text-align:right;min-width:70px}
-.iap-refund{font-size:11px;color:#f0b4a8;white-space:nowrap}
+.iap-refund{font-size:11px;color:var(--alert);white-space:nowrap}
 .iap-more summary{cursor:pointer;font-size:12px;color:var(--muted);margin:4px 0}
 .iap-blend{display:flex;flex-direction:column;gap:6px}
 .iap-blend-table{border-collapse:separate;border-spacing:8px 2px;font-size:12.5px;font-variant-numeric:tabular-nums;margin-left:-8px}
@@ -37,8 +37,8 @@
 .iap-note b{color:var(--ink);font-weight:500}
 .iap-sources{margin:0;padding:0;list-style:none;font-size:11.5px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
 .iap-sources b{font-weight:500;color:var(--ink)}
-.iap-sources li.failed span{color:#f0b4a8}
-.iap-sql{display:flex;flex-direction:column;gap:6px;padding-top:4px;border-top:1px solid #ffffff10}
+.iap-sources li.failed span{color:var(--alert)}
+.iap-sql{display:flex;flex-direction:column;gap:6px;padding-top:4px;border-top:1px solid color-mix(in srgb,var(--on) 6%,transparent)}
 .iap-what{margin:0;font-size:12.5px;color:var(--muted)}
 .iap-what b{color:var(--ink);font-weight:500}
 .iap-code{margin:0;max-height:200px;overflow:auto;padding:10px 12px;border-radius:8px;background:#00000038;color:var(--ink);font:11px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap;overflow-wrap:anywhere;user-select:text}

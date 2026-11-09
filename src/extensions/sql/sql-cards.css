@@ -4,26 +4,26 @@
 .sql-assume-box{margin:0}
 .sql-assume-box>summary{cursor:pointer;color:var(--muted);font-size:12px}
 .sql-assume{margin:6px 0 0;padding-left:18px;color:var(--muted);font-size:12.5px;line-height:1.45}
-.sql-code{margin:0;padding:10px 12px;border-radius:8px;background:#00000040;border:1px solid var(--line,#ffffff1a);font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto}
-.sql-code .sql-k{color:#86c2ff;font-weight:600}
-.sql-code .sql-s{color:#c9ed9d}
-.sql-code .sql-n{color:#e5ce8c}
-.sql-code .sql-q{color:#c9a8f0}
+.sql-code{margin:0;padding:10px 12px;border-radius:8px;background:#00000040;border:1px solid var(--line,color-mix(in srgb,var(--on) 10%,transparent));font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink);white-space:pre-wrap;word-break:break-word;max-height:260px;overflow:auto}
+.sql-code .sql-k{color:var(--info);font-weight:600}
+.sql-code .sql-s{color:var(--ok)}
+.sql-code .sql-n{color:var(--warn)}
+.sql-code .sql-q{color:var(--violet)}
 .sql-code .sql-c{color:var(--muted);font-style:italic}
 .sql-notes{display:flex;flex-wrap:wrap;gap:6px}
 .sql-cost{display:flex;flex-direction:column;gap:5px}
 .sql-cost-label{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
 .sql-cost-label b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 .sql-cost-limit{margin-left:auto;font-size:11.5px}
-.sql-gauge{height:6px;border-radius:3px;background:#ffffff12;overflow:hidden}
-.sql-gauge-fill{height:100%;border-radius:3px;background:#c9ed9d}
-.sql-gauge-fill.tone-progress{background:#e5ce8c}
-.sql-gauge-fill.tone-alert{background:#f0b4a8}
-.sql-error{margin:0;padding:8px 10px;border-radius:8px;background:#f0b4a81a;color:#f0b4a8;font-size:12.5px}
+.sql-gauge{height:6px;border-radius:3px;background:color-mix(in srgb,var(--on) 7%,transparent);overflow:hidden}
+.sql-gauge-fill{height:100%;border-radius:3px;background:var(--ok)}
+.sql-gauge-fill.tone-progress{background:var(--warn)}
+.sql-gauge-fill.tone-alert{background:var(--alert)}
+.sql-error{margin:0;padding:8px 10px;border-radius:8px;background:color-mix(in srgb,var(--alert) 10%,transparent);color:var(--alert);font-size:12.5px}
 .sql-result{display:flex;flex-direction:column;gap:8px;min-width:0}
-.sql-chart{padding:6px 4px 2px;border-radius:8px;background:#ffffff05}
+.sql-chart{padding:6px 4px 2px;border-radius:8px;background:color-mix(in srgb,var(--on) 2%,transparent)}
 .sql-chart svg{display:block}
-.sql-grid{stroke:#ffffff14;stroke-width:1}
+.sql-grid{stroke:color-mix(in srgb,var(--on) 8%,transparent);stroke-width:1}
 .sql-axis{fill:var(--muted);font-size:10.5px;font-variant-numeric:tabular-nums}
 .sql-legend{display:flex;flex-wrap:wrap;gap:10px;padding:2px 8px 4px;font-size:11.5px;color:var(--muted)}
 .sql-legend span{display:inline-flex;align-items:center;gap:5px}
@@ -31,8 +31,8 @@
 .sql-bars{display:flex;flex-direction:column;gap:4px;padding:4px 0}
 .sql-bar-row{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) auto;gap:8px;align-items:center;font-size:12.5px}
 .sql-bar-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
-.sql-bar-track{height:12px;border-radius:3px;background:#ffffff0a;overflow:hidden}
-.sql-bar-fill{display:block;height:100%;border-radius:3px;background:#86c2ff}
+.sql-bar-track{height:12px;border-radius:3px;background:color-mix(in srgb,var(--on) 4%,transparent);overflow:hidden}
+.sql-bar-fill{display:block;height:100%;border-radius:3px;background:var(--info)}
 .sql-bar-value{color:var(--muted);font-variant-numeric:tabular-nums;min-width:56px;text-align:right}
 .sql-number{display:flex;align-items:baseline;gap:10px;padding:6px 2px}
 .sql-number strong{font-size:34px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1}
@@ -45,16 +45,16 @@
 .sql-empty{margin:0;color:var(--muted);font-size:13px}
 .sql-meta{color:var(--muted);font-size:11.5px}
 .sql-columns{display:flex;flex-direction:column}
-.sql-col{display:grid;grid-template-columns:minmax(0,170px) minmax(0,130px) minmax(0,1fr);gap:10px;align-items:baseline;padding:5px 2px;border-bottom:1px solid var(--line,#ffffff12);font-size:12.5px}
+.sql-col{display:grid;grid-template-columns:minmax(0,170px) minmax(0,130px) minmax(0,1fr);gap:10px;align-items:baseline;padding:5px 2px;border-bottom:1px solid var(--line,color-mix(in srgb,var(--on) 7%,transparent));font-size:12.5px}
 .sql-col:last-child{border-bottom:0}
 .sql-col-name{color:var(--ink);font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden;text-overflow:ellipsis}
-.sql-col-type{color:#e5ce8c;font:11.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sql-col-type{color:var(--warn);font:11.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sql-col-comment{color:var(--muted)}
 .sql-schema .kit-stack,.sql-schema .kit-more{display:flex;flex-direction:column;gap:2px}
 .sql-table-row{display:grid;grid-template-columns:minmax(0,170px) 90px auto;grid-template-rows:auto auto;column-gap:10px;row-gap:2px;align-items:center;width:100%;padding:6px 8px;border:0;border-radius:8px;background:transparent;color:inherit;text-align:left;cursor:pointer;font:inherit}
-.sql-table-row:hover{background:#ffffff0a}
+.sql-table-row:hover{background:color-mix(in srgb,var(--on) 4%,transparent)}
 .sql-table-name{color:var(--ink);font:12.5px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sql-size{height:6px;border-radius:3px;background:#ffffff0d;overflow:hidden}
-.sql-size-fill{display:block;height:100%;background:#86c2ff;border-radius:3px}
+.sql-size{height:6px;border-radius:3px;background:color-mix(in srgb,var(--on) 5%,transparent);overflow:hidden}
+.sql-size-fill{display:block;height:100%;background:var(--info);border-radius:3px}
 .sql-table-facts{font-size:11.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 .sql-table-cols{grid-column:1/-1;font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

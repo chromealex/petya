@@ -1,0 +1,15 @@
+/* Colour tokens of every Petya window (the appearance setting, src/appearance.cjs). Dark is the base; the light
+   values follow; a preset or a custom accent overrides single tokens on <html style>. Stylesheets use only
+   these tokens — `node scripts/theme-tokens.cjs --check` finds literal colours that should be tokens.
+   --on: the colour of translucent overlays (hover tints, dividers): white on dark, black on light. */
+:root{color-scheme:dark;
+ --bg:#111415;--panel:#1b1f20;--panel-2:#232829;--hover:#2a3130;--line:#303637;
+ --ink:#f0f2ed;--muted:#969e9a;--on:#ffffff;
+ --accent:#d0f596;--on-accent:#172216;
+ --ok:#c9ed9d;--warn:#e5ce8c;--alert:#f0b4a8;--info:#86c2ff;--violet:#c9b8ef;
+ }
+:root[data-theme="light"]{color-scheme:light;
+ --bg:#f4f6f3;--panel:#ffffff;--panel-2:#eef1ec;--hover:#e5e9e3;--line:#d3d9d1;
+ --ink:#15201a;--muted:#5b655e;--on:#000000;
+ --accent:#3f7d17;--on-accent:#ffffff;
+ --ok:#2f7a12;--warn:#8a5f00;--alert:#b43a2c;--info:#1f62b4;--violet:#6a4bb8}

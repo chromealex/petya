@@ -3,14 +3,14 @@
 .cmp-card .kit-stack{display:flex;flex-direction:column;gap:8px}
 .cmp-card .kit-more{display:flex;flex-direction:column;gap:8px;margin:0}
 .cmp-card .kit-more>summary{font-size:12px;color:var(--muted);cursor:pointer}
-.cmp-row{display:flex;flex-direction:column;gap:7px;padding:10px 12px;border-radius:10px;background:#ffffff05;border:1px solid transparent}
-.cmp-row.ours{background:#c9ed9d0d;border-color:#c9ed9d2e}
-.cmp-row.marked{border-color:#e5ce8c66}
+.cmp-row{display:flex;flex-direction:column;gap:7px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--on) 2%,transparent);border:1px solid transparent}
+.cmp-row.ours{background:color-mix(in srgb,var(--ok) 5%,transparent);border-color:color-mix(in srgb,var(--ok) 18%,transparent)}
+.cmp-row.marked{border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
 .cmp-row.removed{opacity:.45}
 .cmp-row.removed .cmp-name{text-decoration:line-through}
 .cmp-head{display:grid;grid-template-columns:40px minmax(0,1fr) auto 86px;align-items:center;gap:10px}
-.cmp-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:14px;font-weight:700;color:#10130f;background:hsl(var(--h) 45% 72%);letter-spacing:.02em}
-.cmp-icon.ours{box-shadow:0 0 0 2px #c9ed9d}
+.cmp-icon{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--bg);background:hsl(var(--h) 45% 72%);letter-spacing:.02em}
+.cmp-icon.ours{box-shadow:0 0 0 2px var(--ok)}
 .cmp-titles{display:flex;flex-direction:column;gap:2px;min-width:0}
 .cmp-line{display:flex;align-items:center;gap:6px;min-width:0}
 .cmp-line .kit-chip{min-height:19px;padding:0 7px;font-size:10.5px;flex:none}
@@ -18,40 +18,40 @@
 a.cmp-name:hover{text-decoration:underline}
 .cmp-dev{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .cmp-rating{display:flex;flex-direction:column;align-items:flex-end;gap:1px;font-variant-numeric:tabular-nums}
-.cmp-rating strong{font-size:15px;color:#e5ce8c}
+.cmp-rating strong{font-size:15px;color:var(--warn)}
 .cmp-rating small{font-size:10.5px;color:var(--muted);white-space:nowrap}
-.cmp-delta.up{color:#c9ed9d}.cmp-delta.down{color:#f0b4a8}
+.cmp-delta.up{color:var(--ok)}.cmp-delta.down{color:var(--alert)}
 .cmp-trend{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
 .cmp-trend small{font-size:10px;color:var(--muted);white-space:nowrap}
-.cmp-spark .line{fill:none;stroke:#e5ce8c;stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
-.cmp-spark .dot{fill:#e5ce8c}
+.cmp-spark .line{fill:none;stroke:var(--warn);stroke-width:1.5;stroke-linejoin:round;stroke-linecap:round}
+.cmp-spark .dot{fill:var(--warn)}
 .cmp-meta{display:flex;flex-wrap:wrap;align-items:center;gap:5px 6px;padding-left:50px}
 .cmp-meta .kit-chip{min-height:20px;padding:0 8px;font-size:11px}
 .cmp-fact{font-size:11.5px;color:var(--muted);padding:0 2px}
 .cmp-highlights{margin:0 0 0 50px;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;font-size:12.5px;line-height:1.4;color:var(--ink)}
 .cmp-highlights li{display:flex;gap:6px;align-items:baseline;min-width:0}
 .cmp-highlights q{quotes:"«" "»";overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.cmp-kind{flex:none;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border:1px solid var(--line,#ffffff1f);border-radius:5px;padding:0 5px}
+.cmp-kind{flex:none;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);border:1px solid var(--line,color-mix(in srgb,var(--on) 12%,transparent));border-radius:5px;padding:0 5px}
 .cmp-notes{margin:0 0 0 50px;font-size:12px;color:var(--muted)}
 .cmp-notes>summary{cursor:pointer;color:var(--muted)}
 .cmp-notes>p{margin:6px 0 0;white-space:pre-wrap;color:var(--ink);opacity:.85;max-height:220px;overflow:auto;line-height:1.45}
 .cmp-sources{margin-left:50px;font-size:11px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap}
 .cmp-sources a{color:var(--muted)}
 .cmp-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding-left:50px}
-.cmp-actions button:not(.delete-button){font:inherit;font-size:12px;padding:3px 10px;min-height:24px;border-radius:7px;border:1px solid var(--line,#ffffff1f);background:transparent;color:var(--muted);cursor:pointer}
-.cmp-actions button.primary{color:#10130f;background:#c9ed9d;border-color:#c9ed9d}
-.cmp-actions button:hover:not(:disabled){color:var(--ink);border-color:#ffffff3a}
-.cmp-actions button.primary:hover:not(:disabled){color:#10130f}
+.cmp-actions button:not(.delete-button){font:inherit;font-size:12px;padding:3px 10px;min-height:24px;border-radius:7px;border:1px solid var(--line,color-mix(in srgb,var(--on) 12%,transparent));background:transparent;color:var(--muted);cursor:pointer}
+.cmp-actions button.primary{color:var(--bg);background:var(--ok);border-color:var(--ok)}
+.cmp-actions button:hover:not(:disabled){color:var(--ink);border-color:color-mix(in srgb,var(--on) 23%,transparent)}
+.cmp-actions button.primary:hover:not(:disabled){color:var(--bg)}
 .cmp-actions button:disabled{opacity:.6;cursor:default}
 .cmp-actions .cmp-remove{margin-left:auto}
 .cmp-compare{display:flex;flex-direction:column;gap:5px}
 .cmp-section{font-size:12px;color:var(--muted);margin-bottom:2px}
 .cmp-bar{display:grid;grid-template-columns:minmax(0,1.3fr) 2fr 36px 48px;align-items:center;gap:8px;font-size:12.5px}
 .cmp-bar-name{color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cmp-bar.ours .cmp-bar-name{color:#c9ed9d;font-weight:600}
-.cmp-bar-track{height:8px;border-radius:4px;background:#ffffff0d;overflow:hidden}
-.cmp-bar-track span{display:block;height:100%;border-radius:4px;background:#e5ce8c}
-.cmp-bar.ours .cmp-bar-track span{background:#c9ed9d}
+.cmp-bar.ours .cmp-bar-name{color:var(--ok);font-weight:600}
+.cmp-bar-track{height:8px;border-radius:4px;background:color-mix(in srgb,var(--on) 5%,transparent);overflow:hidden}
+.cmp-bar-track span{display:block;height:100%;border-radius:4px;background:var(--warn)}
+.cmp-bar.ours .cmp-bar-track span{background:var(--ok)}
 .cmp-bar-value{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
 .cmp-bar-count{text-align:right;font-size:11px;color:var(--muted)}
 .cmp-empty{margin:0;font-size:13px;color:var(--muted)}

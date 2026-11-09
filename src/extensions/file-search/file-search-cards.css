@@ -4,26 +4,26 @@
 .fs-body{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .fs-hit{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:10px 10px 10px 8px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--bg) 92%,var(--ink) 3%)}
 .fs-hit.best{border-color:color-mix(in srgb,var(--green) 55%,var(--line))}
-.fs-badge{--tint:#a9b0aa;width:40px;height:48px;border-radius:6px 12px 6px 6px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;box-sizing:border-box;
- font:600 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.03em;color:#1c2321;background:linear-gradient(160deg,var(--tint),color-mix(in srgb,var(--tint) 70%,#000 12%))}
+.fs-badge{--tint:var(--muted);width:40px;height:48px;border-radius:6px 12px 6px 6px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:6px;box-sizing:border-box;
+ font:600 10px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.03em;color:var(--panel);background:linear-gradient(160deg,var(--tint),color-mix(in srgb,var(--tint) 70%,#000 12%))}
 .fs-main{min-width:0;display:flex;flex-direction:column;gap:4px}
 .fs-head{display:flex;align-items:baseline;gap:8px;min-width:0}
 .fs-name{color:var(--ink);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .fs-loc{flex:none;font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 7px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fs-path{font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fs-snippet{margin:2px 0 0;font-size:13px;line-height:1.45;color:var(--ink);opacity:.9;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.fs-snippet mark{background:color-mix(in srgb,#e5ce8c 55%,transparent);color:inherit;border-radius:3px;padding:0 2px}
+.fs-snippet mark{background:color-mix(in srgb,var(--warn) 55%,transparent);color:inherit;border-radius:3px;padding:0 2px}
 .fs-foot{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--muted);margin-top:2px}
 .fs-score{display:inline-flex;align-items:center;gap:6px}
 .fs-score-track{width:84px;height:6px;border-radius:999px;background:color-mix(in srgb,var(--line) 80%,transparent);overflow:hidden}
-.fs-score-fill{display:block;height:100%;border-radius:inherit;background:#c9ed9d}
+.fs-score-fill{display:block;height:100%;border-radius:inherit;background:var(--ok)}
 .fs-score-value{font-variant-numeric:tabular-nums}
 .fs-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .fs-actions button{font-size:12px;padding:4px 10px}
 .fs-empty{margin:4px 0;color:var(--muted);font-size:13px}
 .fs-building{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}
 .fs-building-bar{flex:1;max-width:220px;height:6px;border-radius:999px;background:color-mix(in srgb,var(--line) 80%,transparent);overflow:hidden}
-.fs-building-fill{display:block;height:100%;background:#e5ce8c}
+.fs-building-fill{display:block;height:100%;background:var(--warn)}
 .fs-intro{margin:0;font-size:13px;line-height:1.45;color:var(--ink)}
 .fs-folders{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
 .fs-folders li{display:flex;gap:8px;align-items:center;font-size:12px;padding:6px 8px;border:1px dashed var(--line);border-radius:8px;min-width:0}

@@ -19,6 +19,8 @@ const ALLOWED={
  'src/extensions/files/file-previews.js':{why:'image zoom',lines:/const zoom=el\(|zoom\.(?:type|title|onclick|textContent)|tools\.append\(info,zoom\)/},
  // Page zoom of the main window, so the chat browser's page lines up with its panel.
  'src/features/chat-browser.cjs':{why:'window page zoom',lines:/getZoomFactor\(\)/},
+ // The text size setting is the window's page zoom.
+ 'src/features/appearance.cjs':{why:'text size as page zoom',lines:/ZOOM|zoom factor|setZoomFactor|their zoom/},
  'src/extensions/files/file-previews.css':{why:'image zoom cursor',lines:/cursor:zoom-(?:in|out)/}
 };
 const files=[];

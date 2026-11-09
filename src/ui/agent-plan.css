@@ -16,6 +16,6 @@
 /* Agent chats nested under the chat that started them (left sidebar). */
 .agent-chat-toggle{border:0;background:none;color:var(--muted);font-size:11px;padding:2px 10px;margin-left:30px;text-align:left;cursor:pointer}
 .agent-chat-toggle:hover{color:var(--text,#fff)}
-.agent-chat-running{color:#d0f596}
+.agent-chat-running{color:var(--accent)}
 .agent-chat-list .project-chat-row.agent-chat-row{margin-left:30px}
 .agent-chat-list .agent-chat-row .project-sidebar-chat{padding-left:12px;font-size:.92em}

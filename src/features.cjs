@@ -2,6 +2,7 @@
 // IPC handlers through the shared services object. Add a feature here instead of editing main.cjs.
 module.exports=[
  require('./features/interface-language.cjs'),
+ require('./features/appearance.cjs'),
  require('./features/model-runtime.cjs'),
  require('./features/chat-models.cjs'),
  require('./features/project-instructions.cjs'),

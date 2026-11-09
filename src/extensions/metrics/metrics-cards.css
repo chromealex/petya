@@ -1,35 +1,35 @@
 .metrics-card{width:620px;max-width:100%;margin:12px 0}
 .metrics-body,.metrics-block{display:flex;flex-direction:column;gap:12px;min-width:0}
 .metrics-sources{display:flex;gap:6px;flex-wrap:wrap}
-.metrics-sources .kit-chip[aria-pressed="true"]{color:var(--ink);border-color:#ffffff50}
+.metrics-sources .kit-chip[aria-pressed="true"]{color:var(--ink);border-color:color-mix(in srgb,var(--on) 31%,transparent)}
 .metrics-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px}
-.metrics-tile{display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:10px;background:#ffffff06;min-width:0}
+.metrics-tile{display:flex;flex-direction:column;gap:2px;padding:9px 11px;border-radius:10px;background:color-mix(in srgb,var(--on) 2%,transparent);min-width:0}
 .metrics-label{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .metrics-value{font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .metrics-change{font-size:11.5px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.metrics-change.up{color:#c9ed9d}
-.metrics-change.down{color:#f0b4a8}
+.metrics-change.up{color:var(--ok)}
+.metrics-change.down{color:var(--alert)}
 .metrics-change.flat{color:var(--muted)}
 .metrics-chart{display:flex;flex-direction:column;gap:4px}
 .metrics-svg{width:100%;height:auto;display:block;overflow:visible}
-.metrics-svg .grid{stroke:#ffffff10;stroke-width:1}
+.metrics-svg .grid{stroke:color-mix(in srgb,var(--on) 6%,transparent);stroke-width:1}
 .metrics-svg .tick{fill:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}
-.metrics-svg .outside{fill:#ffffff05}
+.metrics-svg .outside{fill:color-mix(in srgb,var(--on) 2%,transparent)}
 .metrics-svg .line{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
 .metrics-svg .line.previous{stroke-width:1.4;stroke-dasharray:4 4;opacity:.55}
 .metrics-svg .anomaly{fill:none;stroke-width:2}
-.metrics-svg .anomaly.down{stroke:#f0b4a8}
-.metrics-svg .anomaly.up{stroke:#e5ce8c}
-.metrics-svg .guide{stroke:#ffffff40;stroke-width:1}
+.metrics-svg .anomaly.down{stroke:var(--alert)}
+.metrics-svg .anomaly.up{stroke:var(--warn)}
+.metrics-svg .guide{stroke:color-mix(in srgb,var(--on) 25%,transparent);stroke-width:1}
 .metrics-svg .hit{fill:transparent;cursor:crosshair}
 .metrics-tip{font-size:12px;color:var(--muted);min-height:16px}
 .metrics-legend{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;font-size:11.5px;color:var(--muted)}
-.metrics-series{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;border:1px solid #ffffff1a;background:transparent;color:var(--muted);font:inherit;font-size:11.5px;cursor:pointer}
-.metrics-series.on{color:var(--ink);border-color:#ffffff38}
+.metrics-series{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:999px;border:1px solid color-mix(in srgb,var(--on) 10%,transparent);background:transparent;color:var(--muted);font:inherit;font-size:11.5px;cursor:pointer}
+.metrics-series.on{color:var(--ink);border-color:color-mix(in srgb,var(--on) 22%,transparent)}
 .metrics-series:not(.on) i{opacity:.35}
 .metrics-series i,.metrics-anomaly-note i,.metrics-prev-note i{flex:none;width:8px;height:8px;border-radius:50%;display:inline-block}
 .metrics-anomaly-note,.metrics-prev-note{display:inline-flex;align-items:center;gap:5px}
-.metrics-anomaly-note i{border:2px solid #f0b4a8;width:6px;height:6px}
+.metrics-anomaly-note i{border:2px solid var(--alert);width:6px;height:6px}
 .metrics-prev-note i{border-radius:0;height:0;width:12px;border-top:2px dashed var(--muted)}
 .metrics-section{font-size:12px;color:var(--muted);margin-bottom:5px}
 .metrics-heat{width:100%;border-collapse:separate;border-spacing:3px;font-size:12px;font-variant-numeric:tabular-nums}
@@ -37,14 +37,14 @@
 .metrics-heat td{padding:5px 6px;color:var(--ink);white-space:nowrap}
 .metrics-heat td.num{color:var(--muted)}
 .metrics-heat td.heat{text-align:center;border-radius:6px;background:rgba(134,194,255,var(--heat,.1))}
-.metrics-heat td.empty{background:#ffffff05;color:var(--muted)}
+.metrics-heat td.empty{background:color-mix(in srgb,var(--on) 2%,transparent);color:var(--muted)}
 .metrics-comment{margin:0;font-size:13px;line-height:1.4;color:var(--ink)}
 .metrics-notes{margin:0;padding-left:18px;font-size:12px;color:var(--muted)}
-.metrics-failed{margin:0;font-size:12px;color:#f0b4a8}
+.metrics-failed{margin:0;font-size:12px;color:var(--alert)}
 .metrics-filters{display:flex;flex-direction:column;gap:6px}
 .metrics-filter{display:flex;flex-wrap:wrap;gap:5px}
 .metrics-filter .kit-chip{min-height:22px;font-size:11.5px;padding:1px 9px}
-.metrics-filter .kit-chip[aria-pressed="true"]{color:var(--ink);border-color:#d0f59680;background:#d0f5960f}
+.metrics-filter .kit-chip[aria-pressed="true"]{color:var(--ink);border-color:color-mix(in srgb,var(--accent) 50%,transparent);background:color-mix(in srgb,var(--accent) 6%,transparent)}
 @media (max-width:560px){.metrics-tiles{grid-template-columns:repeat(2,1fr)}}
 /* A full-width dashboard widget (src/ui/dashboards.css, container «dash»): the KPI tiles beside the chart, so the
    chart keeps its proportions and its labels their size instead of stretching across the whole row. */

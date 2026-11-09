@@ -8,6 +8,11 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.15.0 — light, dark and system themes
+
+- Settings → «Оформление»: light, dark or as the system, a preset for each mode (Лес, Графит, Океан, Закат; Снег, Бумага, Мята), your own accent colour and the text size. It applies at once to the main window and the dashboard windows.
+- Every screen uses the same theme colours (src/ui/theme.css), so cards of every app follow the chosen theme.
+
 ## 0.14.6 — «Развитие» at the bottom of the side panel
 
 - «Развитие» moved to the bottom of the left rail, above the status dot.
