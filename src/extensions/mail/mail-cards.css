@@ -4,7 +4,7 @@
 .mail-rules{display:flex;flex-direction:column;gap:12px;max-width:760px}
 .mail-rules-intro{margin:0;color:var(--muted)}
 .mail-rule-list{display:flex;flex-direction:column;gap:8px}
-.mail-rule{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#ffffff05}
+.mail-rule{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--on) 2%,transparent)}
 .mail-rule.off{opacity:.7}
 .mail-rule-draft{border-style:dashed}
 .mail-rule-info{display:flex;flex-direction:column;gap:6px;min-width:0;flex:1}
