@@ -54,7 +54,7 @@
    tools.append(more);head.append(tools);
   }
   const body=el('div','dash-widget-body');
-  if(w.error){const err=el('p','dash-widget-error',w.error);body.append(err);}
+  if(w.error){const err=el('p','dash-widget-error');if(kit()?.linkText)kit().linkText(err,w.error);else err.textContent=w.error;body.append(err);}
   card.append(head,body);
   const content=el('div');body.append(content);card.drawn=drawBody(content,w).catch(()=>{});
   if(!compact){const grip=el('span','dash-resize');grip.title='Потяните, чтобы изменить размер';grip.setAttribute('aria-hidden','true');card.append(grip);}

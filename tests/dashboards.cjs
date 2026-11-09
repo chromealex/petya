@@ -132,6 +132,10 @@ async function sources(root){
  assert.equal(feature.dashboards.compose('собери дашборд: основные метрики проекта (из wombyte)','general').d.widgets.length,0,'not given to «Grafana» as a dashboard name');
  reply=feature.dashboards.turn(REQUEST);
  assert.match(reply.text,/для «основные метрики проекта \(из wombyte\)» сопоставьте панели Grafana с метриками \(Настройки → «Grafana» → «Сопоставить панели с метриками»\)/i,reply.text);
+ // «Метрики игры» not added, the wombyte Grafana connected without mapped panels: add the app and map the panels —
+ // not «подключите Grafana».
+ ({s,topic,feature}=make({...GRAFANA,grafanaMetricMap:''}));
+ assert.match(feature.dashboards.advise('основные метрики проекта (из wombyte)')&&(r=>'для «x» '+[r.add&&'добавьте «'+r.add+'»',r.todo].filter(Boolean).join(' и '))(feature.dashboards.advise('основные метрики проекта (из wombyte)')),/добавьте «Метрики игры» и сопоставьте панели Grafana с метриками/);
  // A phrase nobody knows: Petya asks for a page; without one, the generic hint.
  ({feature}=make({}));
  let unknown;try{feature.dashboards.turn('Собери дашборд: погода на марсе');}catch(e){unknown=e;}

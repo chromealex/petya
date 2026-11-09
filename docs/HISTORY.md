@@ -8,6 +8,11 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.16.2 — a button for the link in an error
+
+- An error or a status with a link shows a button for it instead of the raw address: «Включить API в Google Cloud» on the Google Play errors in dashboard widgets, in Settings → «Google Play Console» and in the anomalies card.
+- «основные метрики проекта» with the Grafana connected but no panels mapped: «добавьте «Метрики игры» и сопоставьте панели Grafana с метриками (Настройки → «Grafana» → «Сопоставить панели с метриками»)», not «подключите «AppMetrica» или «Grafana»».
+
 ## 0.16.1 — dashboard widgets that work: «из wombyte» metrics and bare «краши»
 
 - «основные метрики проекта (из wombyte)» is no longer searched as a Grafana dashboard name when the wombyte Grafana has no panels mapped to game metrics: the reply says to map them (Настройки → «Grafana» → «Сопоставить панели с метриками»), and once mapped the widget reads «Метрики игры» from that Grafana.

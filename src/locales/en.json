@@ -13508,7 +13508,7 @@
   "Открыть сервисные аккаунты": "Open service accounts",
   "Петя только читает дашборды и выполняет запросы их панелей; дайте сервисному аккаунту доступ к нужным папкам.": "Petya only reads dashboards and runs their panels' queries; give the service account access to the folders you need.",
   "Токен создаёт администратор организации в Grafana: «Add service account» с ролью Viewer, затем «Add service account token» — получится строка glsa_…. Если у вас нет прав администратора, попросите того, кто ведёт Grafana.": "An organization admin creates the token in Grafana: «Add service account» with the Viewer role, then «Add service account token» — you get a glsa_… string. If you are not an admin, ask whoever runs your Grafana.",
-  "ПЕТЯ / 0.16.1": "PETYA / 0.16.1",
+  "ПЕТЯ / 0.16.2": "PETYA / 0.16.2",
   "! Приглашаем вас на этап «": "! We invite you to the «",
   "! Рады, что ты с нами": "! Glad to have you with us",
   "# Перформанс-ревью ·": "# Performance review ·",
@@ -15069,6 +15069,9 @@
   "При переключении Петя перезапустится. Фоновые проверки работают только в выбранной компании. Уже переданная Claude/Codex работа продолжается в их приложениях.": "Petya will restart when you switch. Background checks work only in the selected company. Work already handed to Claude/Codex continues in their apps.",
   "У каждой компании свои команда, подключения, диалоги, задачи, обучение и данные приложений.": "Each company has its own team, connections, conversations, tasks, training, and app data.",
   "Напомнить можно не позже чем через год.": "A reminder can be set no later than a year from now.",
-  "сопоставьте панели Grafana с метриками (Настройки → «Grafana» → «Сопоставить панели с метриками»)": "map Grafana panels to metrics (Settings → «Grafana» → «Map panels to metrics»)"
+  "сопоставьте панели Grafana с метриками (Настройки → «Grafana» → «Сопоставить панели с метриками»)": "map Grafana panels to metrics (Settings → «Grafana» → «Map panels to metrics»)",
+  "Включить API в Google Cloud": "Enable the API in Google Cloud",
+  "Открыть Google Cloud": "Open Google Cloud",
+  "Открыть Play Console": "Open Play Console"
  }
 }

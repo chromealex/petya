@@ -71,8 +71,8 @@
   const missing=(card.notes||[]).filter(n=>n.missing),other=(card.notes||[]).filter(n=>!n.missing);
   if(missing.length||other.length){
    const box=k.el('div','an-notes');
-   if(missing.length){box.append(k.el('div','an-notes-title','Нет данных — это не аномалия'));const ul=raw(k.el('ul'));for(const n of missing)ul.append(k.el('li',null,n.text));box.append(ul);}
-   if(other.length){const ul=raw(k.el('ul','an-other'));for(const n of other)ul.append(k.el('li',n.error?'error':null,n.text));box.append(ul);}
+   if(missing.length){box.append(k.el('div','an-notes-title','Нет данных — это не аномалия'));const ul=raw(k.el('ul'));for(const n of missing)ul.append(k.linkText?k.linkText(k.el('li'),n.text):k.el('li',null,n.text));box.append(ul);}
+   if(other.length){const ul=raw(k.el('ul','an-other'));for(const n of other)ul.append(k.linkText?k.linkText(k.el('li',n.error?'error':null),n.text):k.el('li',n.error?'error':null,n.text));box.append(ul);}
    body.append(box);
   }
   const SENS={low:'низкая',normal:'обычная',high:'высокая'};

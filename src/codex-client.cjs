@@ -22,7 +22,7 @@ class CodexClient {
           if(m.id!==undefined){this.onEvent('needsAttention',m.params||{});child.stdin.write(JSON.stringify({id:m.id,error:{code:-32601,message:'Петя не подтверждает дополнительные разрешения. Продолжите задачу в Codex.'}})+'\n');}
         }else if(this.pending.has(m.id)){const p=this.pending.get(m.id);this.pending.delete(m.id);clearTimeout(p.timer);m.error?p.reject(new Error(m.error.message)):p.resolve(m.result);}
       });
-      await this.rpc('initialize',{clientInfo:{name:'petya',title:'Петя',version:'0.16.1'}});
+      await this.rpc('initialize',{clientInfo:{name:'petya',title:'Петя',version:'0.16.2'}});
       child.stdin.write(JSON.stringify({method:'initialized',params:{}})+'\n');
     })();
     return this.starting;

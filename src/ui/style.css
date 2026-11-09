@@ -1313,3 +1313,8 @@ blockquote.growth-learned{margin:6px 0;padding:8px 12px;border-left:3px solid va
 .app-catalog-absent{color:#c9a98b}
 .app-desktop{font-size:11px;padding:1px 7px;border-radius:999px;background:var(--hover);color:#acc093}
 .app-desktop[data-here=false]{background:var(--panel-2);color:#d8b493}
+
+/* A link inside a status or an error (result-kit.js linkText): a button under the text. */
+.kit-link-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.kit-link-button{display:inline-flex;align-items:center;min-height:30px;padding:4px 12px;border-radius:8px;border:1px solid color-mix(in srgb,var(--accent) 50%,transparent);background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent);font-size:13px;font-weight:600;text-decoration:none}
+.kit-link-button:hover{background:color-mix(in srgb,var(--accent) 24%,transparent)}

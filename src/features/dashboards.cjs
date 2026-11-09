@@ -249,6 +249,7 @@ function setup(s){
       if(!add&&!missing)continue;
       if(missing&&r.source?.setup)return {phrase,add:add?r.e.d.name:'',offers:add?[r.id]:[],connect:[],where:'',todo:r.source.setup};
       const c=missing&&!r.source?call(r.e.mod.dashboard.connect,s.settings||{},phrase)||{}:{};
+      if(missing&&!r.source&&c.todo)return {phrase,add:add?r.e.d.name:'',offers:add?[r.id]:[],connect:[],where:'',todo:c.todo};
       const connect=!missing?[]:r.source?[r.source.name]:c.names?.length?c.names:[r.e.d.name];
       const where=!missing?'':r.source?(call(r.e.mod.dashboard.connect,s.settings||{},phrase)||{}).where||'':c.where||'';
       return {phrase,add:add?r.e.d.name:'',offers:[...(add?[r.id]:[]),...(!missing?[]:r.source?[r.source.extension].filter(Boolean):c.offers||[])],connect,where};

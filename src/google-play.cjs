@@ -36,7 +36,7 @@ function explain(error){
  let message;
  if(/SERVICE_DISABLED|has not been used in project|is disabled/i.test(reasons+' '+text)){
   const project=/project (\d+)/.exec(text)?.[1];
-  message='В Google Cloud не включён Google Play Developer Reporting API'+(project?' (проект '+project+')':'')+'. Включите его: '+('https://console.cloud.google.com/apis/library/playdeveloperreporting.googleapis.com'+(project?'?project='+project:''))+' — и через пару минут нажмите «Проверить».';
+  message='В Google Cloud не включён Google Play Developer Reporting API'+(project?' (проект '+project+')':'')+'. Включите его и через пару минут нажмите «Проверить»: '+('https://console.cloud.google.com/apis/library/playdeveloperreporting.googleapis.com'+(project?'?project='+project:''));
  }else if(error.status===401)message='Google не принял вход в Google Play. Нажмите «Отключить» и подключите заново.';
  else message='У аккаунта нет доступа к отчётам Google Play. В Play Console → «Пользователи и разрешения» пригласите этот аккаунт (или сервисный аккаунт) с правом «Просмотр информации о приложении» и подождите до суток'+(text?'. Ответ Google: '+text.slice(0,200):'.');
  const out=new Error(message);out.status=error.status;out.detail=error.detail;return out;

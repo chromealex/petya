@@ -215,7 +215,7 @@ const playCard=document.createElement('article');playCard.className='card';playC
 const playTitle=document.createElement('h2');playTitle.textContent='Google Play Console';
 const playHelp=document.createElement('p');playHelp.textContent='Петя читает ANR из Android vitals. Войдите аккаунтом Google, у которого есть доступ к приложениям в Play Console.';
 const playStatus=document.createElement('p');playStatus.className='connection-status';playStatus.textContent='Не подключено';
-const playShow=(text,kind='')=>{playStatus.textContent=text;playStatus.className='connection-status '+kind;};
+const playShow=(text,kind='')=>{if(window.resultKit?.linkText)window.resultKit.linkText(playStatus,text);else playStatus.textContent=text;playStatus.className='connection-status '+kind;};
 const playConnect=document.createElement('button');playConnect.type='button';playConnect.className='primary';playConnect.textContent='Подключить';
 const playDisconnect=document.createElement('button');playDisconnect.type='button';playDisconnect.textContent='Отключить';
 const playOther=document.createElement('details');playOther.innerHTML='<summary>Другой способ — ключ сервисного аккаунта</summary><p class="small">Включите Play Developer Reporting API в Google Cloud, дайте сервисному аккаунту право просмотра приложений в Play Console и выберите его JSON-ключ. Ключ хранится зашифрованным на этом компьютере.</p>';

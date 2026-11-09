@@ -119,6 +119,10 @@ const dashboard={
  connect:(settings,phrase='')=>{
   const reg=list(settingsOnly(settings)),hit=reg.all().find(x=>reg.names(x).some(n=>query.mentions(phrase,n)));
   const pick=hit?[hit]:reg.all().filter(x=>!reg.isReady(x));
+  // A source already connected that only needs a step inside it (Grafana: panels mapped to metrics) says that step.
+  const setup=x=>{try{return x.source.setup?.(settings||{})||'';}catch{return '';}};
+  const todo=pick.map(setup).find(Boolean)||'';
+  if(todo)return {names:[],where:'',offers:[],todo};
   return {names:pick.map(x=>x.name),where:pick.length===1?KNOWN.find(k=>k.id===pick[0].id)?.where||'':'',offers:pick.map(x=>x.extension).filter(Boolean)};
  },
  async load(s,command,{selected}={}){
