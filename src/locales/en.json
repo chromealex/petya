@@ -12762,6 +12762,16 @@
   "выключен в этом проекте": "is switched off in this project",
   "Jira не вернула задачу": "Jira did not return issue",
   "Подключите Jira, чтобы я мог открыть задачу": "Connect Jira so I can open issue",
-  "Ссылка ведёт на другой сайт Jira (": "The link points to another Jira site ("
+  "Ссылка ведёт на другой сайт Jira (": "The link points to another Jira site (",
+  "Google Документ": "Google Doc",
+  "Google Презентация": "Google Slides",
+  "Google Таблица": "Google Sheet",
+  "Google Форма": "Google Form",
+  "Задача #": "Issue #",
+  "Открыть настройки доступа": "Open access settings",
+  "Петя не видит, кто говорит в Zoom: разрешите ему «Универсальный доступ» в настройках macOS.": "Petya can't see who is talking in Zoom: allow it Accessibility in macOS settings.",
+  "Сообщение в Slack": "Slack message",
+  "Это не ссылка на Slack.": "This is not a Slack link.",
+  "участник Slack": "Slack member"
  }
 }

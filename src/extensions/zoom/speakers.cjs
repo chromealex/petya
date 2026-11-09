@@ -27,7 +27,7 @@ function parse(texts=[]){
 }
 class SpeakerTimeline{
  constructor({read:reader=read,every=2000,now=Date.now,keep=()=>{}}={}){Object.assign(this,{reader,every,now,keep});this.samples=[];this.people=new Set();}
- start(){this.stop();const tick=async()=>{if(this.busy)return;this.busy=true;try{const r=await this.reader();const {talking,people}=parse(r.texts||[]);for(const p of people)this.people.add(p);this.samples.push({at:this.now(),talking});if(this.samples.length>20000)this.samples.splice(0,5000);this.last=r;}catch{}finally{this.busy=false;}};
+ start(){this.stop();const tick=async()=>{if(this.busy)return;this.busy=true;try{const r=await this.reader();if(r.trusted===false)this.blind=true;else if(r.trusted)this.blind=false;const {talking,people}=parse(r.texts||[]);for(const p of people)this.people.add(p);this.samples.push({at:this.now(),talking});if(this.samples.length>20000)this.samples.splice(0,5000);this.last=r;}catch{}finally{this.busy=false;}};
   void tick();this.timer=setInterval(tick,this.every);this.timer.unref?.();}
  stop(){if(this.timer)clearInterval(this.timer);this.timer=null;if(this.last)this.keep({at:this.now(),people:[...this.people],texts:(this.last.texts||[]).slice(0,400)});}
  // The name heard most often between `from` and `to` (a little slack on both sides for Zoom's delay).
@@ -35,6 +35,10 @@ class SpeakerTimeline{
   return [...counts].sort((a,b)=>b[1]-a[1])[0]?.[0]||'';}
  // The samples between `from` and `to` as speaking intervals for the meeting source interface: one per name
  // heard in a sample (the recorder picks the name with the most overlap).
- intervals(from,to){const out=[];for(const s of this.samples)if(s.at>=from-1500&&s.at<=to+1500)for(const name of s.talking)out.push({name,start:s.at,end:s.at});return out;}
+ intervals(from,to,{me=[]}={}){const out=[];for(const s of this.samples)if(s.at>=from-1500&&s.at<=to+1500)for(const name of s.talking)out.push({name,start:s.at,end:s.at});
+  // Zoom showed nobody «talking» (it does not always say it): with one other person in the meeting, it is them.
+  if(!out.length){const mine=new Set(me.map(n=>String(n||'').trim().toLowerCase()).filter(Boolean)),others=[...this.people].filter(n=>!mine.has(n.toLowerCase())&&![...mine].some(m=>n.toLowerCase().startsWith(m+' ')||m.startsWith(n.toLowerCase()+' ')));
+   if(others.length===1)out.push({name:others[0],start:from,end:to});}
+  return out;}
 }
 module.exports={read,parse,SpeakerTimeline};

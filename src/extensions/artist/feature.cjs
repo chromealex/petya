@@ -19,7 +19,7 @@ module.exports = {
     if (!['true', 'false'].includes(settings.artistEnabled)) throw Error('Проверьте настройку Художника.');
   },
   setup(s) {
-    const { app, dialog } = require('electron');
+    const { app } = require('electron'), dialog = require('../../app-dialog.cjs').dialog();
     let controller, recheck;
     let state = { phase: 'idle', busy: false };
     function publish(phase, message, percent) {

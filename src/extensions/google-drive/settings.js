@@ -87,7 +87,7 @@
  indexOn.onchange=async()=>{indexOn.disabled=true;try{paint(await call('setIndex',indexOn.checked));status.textContent=indexOn.checked?'Индексирую Google Документы в фоне — ход виден в уведомлениях.':'Индексация Google Документов выключена. Собранный индекс остаётся, пока вы его не сотрёте.';}catch(e){indexOn.checked=!indexOn.checked;status.textContent=e.message;}finally{indexOn.disabled=!state?.connected;}};
  wipeIndex.onclick=async()=>{
   const ask='Стереть индекс Google Документов? Векторы и фрагменты текста удалятся с этого компьютера, индексация выключится. Сами документы не трогаю.';
-  if(!confirm(window.t?window.t(ask):ask))return;
+  if(!await window.petyaConfirm(window.t?window.t(ask):ask))return;
   try{paint(await call('wipeIndex'));status.textContent='Индекс Google Документов стёрт.';}catch(e){status.textContent=e.message;}
  };
  save.onclick=async()=>{

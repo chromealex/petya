@@ -66,7 +66,7 @@
  download.onclick=run(async()=>{await call('prepareModel');say('Загрузка модели началась — прогресс в центре уведомлений.');return call('status');});
  pause.onclick=run(()=>call(pause.dataset.paused==='true'?'resume':'pause'));
  wipe.onclick=run(async()=>{
-  if(!confirm(window.t?window.t('Стереть индекс по смыслу? Все векторы и фрагменты текста удалятся, коллекции выключатся. Сами файлы не трогаю.'):'Стереть индекс по смыслу? Все векторы и фрагменты текста удалятся, коллекции выключатся. Сами файлы не трогаю.'))return call('status');
+  if(!await window.petyaConfirm(window.t?window.t('Стереть индекс по смыслу? Все векторы и фрагменты текста удалятся, коллекции выключатся. Сами файлы не трогаю.'):'Стереть индекс по смыслу? Все векторы и фрагменты текста удалятся, коллекции выключатся. Сами файлы не трогаю.'))return call('status');
   const st=await call('wipe');say('Индекс стёрт.');return st;
  });
  document.addEventListener('petya-extension-open',e=>{if(e.detail==='file-search')refreshState();});

@@ -217,7 +217,7 @@
   try{const r=await call('share',d.id,index);changed();await open(r.id);kit().toast('Сохранено в '+r.folder+'/'+r.file+'. Закоммитьте файл — команда увидит дашборд.'+(r.kept?' Снимков карточек: '+r.kept+' — они остались в личном дашборде.':''),{timeout:12000});}catch(e){fail(e);}
  }
  async function removeDashboard(d){
-  if(!confirm('Удалить дашборд «'+d.title+'»?'+(d.shared?' Файл в папке проекта тоже будет удалён.':'')))return;
+  if(!await window.petyaConfirm('Удалить дашборд «'+d.title+'»?'+(d.shared?' Файл в папке проекта тоже будет удалён.':'')))return;
   try{await call('remove',d.id);close();changed();}catch(e){fail(e);}
  }
  // «Добавить виджет»: a description, or one of the ready ones.

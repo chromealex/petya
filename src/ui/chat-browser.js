@@ -72,6 +72,8 @@
   const a=e.target.closest?.('a[href]');if(!a||e.defaultPrevented||e.metaKey||e.ctrlKey||e.shiftKey||e.button!==0)return;
   if(!a.closest('.chat-feed, #dialogue-messages, .kit-panel-body')||a.closest('.chat-browser'))return;
   let url;try{url=new URL(a.href);}catch{return;}if(!['https:','http:'].includes(url.protocol))return;
+  // A Slack message opens in the Slack app (src/features/slack-open.cjs).
+  if((url.hostname==='slack.com'||url.hostname.endsWith('.slack.com'))&&url.pathname.startsWith('/archives/')){e.preventDefault();window.petya.feature('slackOpen','open',url.href).catch(err=>notice(err.message,true));return;}
   e.preventDefault();openBrowser(url.href).catch(err=>notice(err.message,true));
  },true);
  // A button in the chat header opens this chat's browser.

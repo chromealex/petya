@@ -23,7 +23,7 @@ module.exports={
   name:'unity',defaults:{unityUrl:'http://127.0.0.1:8080/mcp',unityToken:''},
   validate(settings){endpoint(settings.unityUrl);},
   tools,
-  setup(s,dialog=()=>require('electron').dialog){
+  setup(s,dialog=()=>require('../../app-dialog.cjs').dialog()){
     const available=project=>{if(s.settings.module_unity!=='true'||project?.disabledServices?.includes('unity'))throw Error('Включите Unity Editor в каталоге и настройках проекта.');};
     const findResults=new WeakMap();
     const proposals=new Map();

@@ -18,7 +18,7 @@
  const controls=el('div');controls.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px';
  const scan=el('button',null,'Прочитать почту сейчас');scan.type='button';
  const wipe=(window.deleteButton||((label,fn)=>{const b=el('button',null,label);b.type='button';b.onclick=fn;return b;}))('Удалить все записи из почты',async()=>{
-  if(!confirm('Удалить все найденные в почте подписки, чеки, брони и продления? Письма останутся в почте.'))return;
+  if(!await window.petyaConfirm('Удалить все найденные в почте подписки, чеки, брони и продления? Письма останутся в почте.'))return;
   try{await records('wipe');note('Записи удалены.');refresh();}catch(e){note(e.message);}
  });
  controls.append(scan,wipe);

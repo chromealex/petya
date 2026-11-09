@@ -100,7 +100,7 @@
  };
  watch.onchange=async()=>{try{await persist({monitoringWatch:String(watch.checked)},watch.checked?'Буду сообщать о падениях и восстановлении.':'Уведомления мониторинга выключены.');}catch{watch.checked=!watch.checked;}};
  saveMore.onclick=async()=>{try{await persist({monitoringPollMin:poll.value||'2',monitoringAliases:aliases.value},'Сохранено.');}catch{/* shown */}};
- wipe.onclick=async()=>{if(!confirm(window.t?window.t('Удалить историю проверок, алертов и уведомлений мониторинга? Проверки и источники останутся.'):'Удалить историю проверок, алертов и уведомлений мониторинга? Проверки и источники останутся.'))return;try{await call('wipe');status.textContent='История очищена.';}catch(e){status.textContent=e.message;}};
+ wipe.onclick=async()=>{if(!await window.petyaConfirm(window.t?window.t('Удалить историю проверок, алертов и уведомлений мониторинга? Проверки и источники останутся.'):'Удалить историю проверок, алертов и уведомлений мониторинга? Проверки и источники останутся.'))return;try{await call('wipe');status.textContent='История очищена.';}catch(e){status.textContent=e.message;}};
  document.addEventListener('petya-settings-displayed',()=>{for(const f of Object.values(fields))f.token.value='';});
  document.addEventListener('petya-extension-open',e=>{if(e.detail==='monitoring')refresh();});
  window.petyaEvents?.onWindowShown?.(refresh);refresh();

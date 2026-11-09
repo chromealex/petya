@@ -12,7 +12,7 @@
  const state=el('p');state.setAttribute('role','status');
  const controls=el('div');controls.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px';
  const wipe=(window.deleteButton||((text,fn)=>{const b=el('button',null,text);b.type='button';b.onclick=fn;return b;}))('Удалить все записи о коллегах',async()=>{
-  if(!confirm('Удалить все отметки об отсутствиях, заметки 1:1 и договорённости этой компании? «Команда» останется.'))return;
+  if(!await window.petyaConfirm('Удалить все отметки об отсутствиях, заметки 1:1 и договорённости этой компании? «Команда» останется.'))return;
   try{await people('wipe','all');message='Записи удалены.';}catch(e){message=e.message;}refresh();
  });
  controls.append(wipe);

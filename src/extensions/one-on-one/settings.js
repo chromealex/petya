@@ -9,7 +9,7 @@
  const state=el('p');state.setAttribute('role','status');
  const controls=el('div');controls.style.cssText='display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px';
  const wipe=(window.deleteButton||((text,fn)=>{const b=el('button',null,text);b.type='button';b.onclick=fn;return b;}))('Удалить заметки и договорённости 1:1',async()=>{
-  if(!confirm('Удалить все заметки и договорённости со встреч 1:1 этой компании? Отметки об отсутствиях останутся.'))return;
+  if(!await window.petyaConfirm('Удалить все заметки и договорённости со встреч 1:1 этой компании? Отметки об отсутствиях останутся.'))return;
   try{await people('wipe','notes');message='Заметки 1:1 удалены.';}catch(e){message=e.message;}refresh();
  });
  controls.append(wipe);

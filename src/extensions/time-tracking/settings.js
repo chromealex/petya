@@ -25,7 +25,7 @@
  const pauseAll=el('button',null,'Пауза до возобновления');pauseAll.type='button';
  const resume=el('button',null,'Продолжить');resume.type='button';
  const wipe=(window.deleteButton||((label,fn)=>{const b=el('button',null,label);b.type='button';b.onclick=fn;return b;}))('Удалить всю историю активности',async()=>{
-  if(!confirm('Удалить всю историю активности? Это нельзя отменить.'))return;
+  if(!await window.petyaConfirm('Удалить всю историю активности? Это нельзя отменить.'))return;
   try{await activity('wipe');note('История активности удалена.');refresh();}catch(e){note(e.message);}
  });
  controls.append(pause,pauseAll,resume,wipe);
