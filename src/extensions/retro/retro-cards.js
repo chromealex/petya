@@ -93,7 +93,7 @@
    if(!c.drafts[col].length)column.append(k.el('p','retro-empty','Нечего добавить по фактам.'));
    for(const item of c.drafts[col]){
     const row=k.el('div','retro-item');row.dataset.item=item.id;
-    row.append(raw(k.el('p','retro-text',item.text)));
+    row.append(raw(k.el('p','retro-text selectable',item.text)));
     const refs=k.el('div','retro-refs');
     for(const id of item.facts){const f=facts.get(id);if(!f)continue;const ref=k.el('button','retro-ref',id);ref.type='button';ref.title=f.text;ref.onclick=e=>{e.stopPropagation();focus(id);};refs.append(ref);}
     const votes=k.el('div','retro-votes');
@@ -140,7 +140,7 @@
    const row=k.el('div','retro-fact tone-'+f.tone);row.dataset.fact=f.id;
    row.append(k.el('span','retro-fact-id',f.id));
    const main=k.el('div','retro-fact-main');
-   main.append(raw(k.el('span','retro-fact-text',f.text)));
+   main.append(raw(k.el('span','retro-fact-text selectable',f.text)));
    const meta=k.el('div','retro-fact-meta');
    meta.append(k.el('span','retro-kind',KIND[f.kind]||f.kind));
    const url=k.safeUrl?.(f.source.url)||'';
