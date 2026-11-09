@@ -206,7 +206,14 @@
     :button('Добавить','app-tile-action',()=>busy(action,()=>add(item)));
    action.dataset.action=state==='connect'?'connect':state==='added'?'open':'add';
    action.setAttribute('aria-label',action.textContent+': '+item.name);
-   foot.append(action);t.append(main,foot);
+   foot.append(action);
+   // An added app is removed right from its tile (the same as the trash button in its details and settings).
+   if(item.enabled&&item.origin==='bundled'&&window.deleteButton){
+    const remove=window.deleteButton('Удалить «'+item.name+'»');remove.classList.add('app-tile-remove');
+    remove.onclick=event=>{event.stopPropagation();busy(remove,async()=>{await window.removeAddedApp(item.id);await refresh();});};
+    foot.append(remove);
+   }
+   t.append(main,foot);
    if(!item.enabled){
     const pick=make('input','','app-tile-pick');pick.type='checkbox';pick.checked=chosen.has(item.id);pick.setAttribute('aria-label','Выбрать '+item.name);
     pick.onchange=()=>toggle(item,pick.checked);t.append(pick);

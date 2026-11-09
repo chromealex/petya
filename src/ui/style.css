@@ -1198,6 +1198,7 @@ blockquote.growth-learned{margin:6px 0;padding:8px 12px;border-left:3px solid va
 .app-tile-action[data-action=connect]{background:#33301f;border-color:#5e5434;color:#f3d48e;font-weight:600}
 .app-tile-action[data-action=connect]:hover{background:#3e3a25}
 .app-tile-action[data-action=open]{background:transparent}
+.app-tile-foot .app-tile-remove{flex:none;width:30px;height:30px;min-height:0}
 .app-weight{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 .app-status{display:inline-flex;align-items:center;gap:6px;font-size:12px;white-space:nowrap;color:var(--green)}
 .app-status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
