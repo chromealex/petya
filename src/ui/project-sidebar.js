@@ -87,6 +87,8 @@
  const titleSizes=new ResizeObserver(entries=>{for(const {target}of entries)target.classList.toggle('is-truncated',target.scrollWidth>target.clientWidth+1);});
  const agentView=new Map();
  function draw(state){titleSizes.disconnect();list.replaceChildren();
+  // Dashboards are their own section above the chat tree (src/ui/dashboards.js), not rows among the chats.
+  window.projectSidebarDashboards?.(list,state.projects);
   // Subprojects render inside their parent's group, so parents are drawn first.
   const depthOf=p=>{let d=0;for(let n=p,seen=new Set();n?.parentId&&!seen.has(n.id);n=state.projects.find(x=>x.id===n.parentId)){seen.add(n.id);d++;}return d;};
   const groups=new Map();
@@ -107,8 +109,6 @@
     if(unsent){const row=node('div',null,'project-chat-row'),b=button('Новый чат',newChat);b.className='project-sidebar-chat';row.append(b);showDraft(row,b,unsent);group.append(row);}
     const saved=state.projects.find(project=>project.id===p.id)?.savedCount;
     if(saved){const b=button('Сохранённые ответы · '+saved,()=>window.showProjectAnswers(p.id));b.className='project-view-all';group.append(b);}
-    // The project's dashboards (src/ui/dashboards.js).
-    window.projectSidebarExtras?.(p.id,group);
   }
   // Agent chats sit under the chat that started them; an agent whose parent is hidden stays at top level.
   const parents=new Set(rows.map(t=>t.id)),agents=new Map();for(const t of rows)if(t.agentOf&&t.agentOf!==t.id&&parents.has(t.agentOf)){if(!agents.has(t.agentOf))agents.set(t.agentOf,[]);agents.get(t.agentOf).push(t);}
