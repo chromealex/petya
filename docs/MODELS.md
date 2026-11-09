@@ -60,4 +60,6 @@ the v22 checks and the 801 familiar cases (`requirements-draft-v22`), the checkp
    and `summary.json` into `requirements-draft-dN/results` here.
 
 State on 9 November 2026: D10 is the group's D (R1-A1-D10: 46/54 with 30 exact, 36/42, 797/801); its adapter is
-`~/.petya-train/andromeda-d10/adapter` on the Mac Studio, the parent for the next stage.
+`~/.petya-train/andromeda-d10/adapter` on the Mac Studio. D11 (D10 on quote, cancel-one, code, two-recipients,
+rehearsing open-recipient, permission, screen-only, exact-name; dialogues 61–80, the last unused ones) is training
+into `~/.petya-train/andromeda-d11`.
