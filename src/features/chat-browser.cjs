@@ -51,7 +51,8 @@ function setup(s){
  async function open(id,url='',{partition}={}){
   const t=topic(id),target=web(url)||t.browser?.url||DEFAULT;
   const v=view(id,partition);remember(id,{open:true,url:target});
-  if(url||!v.webContents.getURL())await v.webContents.loadURL(web(target)||DEFAULT).catch(()=>{});
+  // A page that does not load says why next to the address bar instead of staying a blank white panel.
+  if(url||!v.webContents.getURL())await v.webContents.loadURL(web(target)||DEFAULT).catch(error=>{if(!/ERR_ABORTED/.test(String(error?.message))&&!v.webContents.isDestroyed())send(id,{error:String(error?.message||error).replace(/^.*?(ERR_[A-Z_]+).*$/s,'$1')});});
   return state(id);
  }
  // Text from the address bar: an address, or a search.

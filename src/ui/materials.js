@@ -27,9 +27,10 @@
   if(url&&/^https:\/\//.test(url)){const b=node('button',null,'Открыть');b.type='button';b.onclick=()=>window.open(url,'_blank');actions.append(b);}
   actions.append(deleteButton(request,label));head.append(info,actions);card.append(head);
   if(text){const details=node('details','material-text'),summary=node('summary',null,warning?'Показать текст':'Прочитать запись'),body=node('div','material-body');details.append(summary,body);
-   const fill=()=>{if(!body.childElementCount&&!body.textContent)for(const part of [].concat(text())){if(part.at){const line=node('p');line.append(node('span','material-time',new Date(part.at).toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'})+' '),...part.who?[node('strong','material-who'+(part.who==='Вы'?' me':''),part.who+': ')]:[],document.createTextNode(part.text));body.append(line);}else body.append(node('p',null,part.text||part));}};
-   if(open.has(key)){details.open=true;fill();}
-   details.ontoggle=()=>{if(details.open){open.add(key);fill();}else open.delete(key);};card.append(details);}
+   // The body is looked up at toggle time: a redraw keeps the card already on screen (morph below), not this one.
+   const fill=body=>{if(!body.childElementCount&&!body.textContent)for(const part of [].concat(text())){if(part.at){const line=node('p');line.append(node('span','material-time',new Date(part.at).toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'})+' '),...part.who?[node('strong','material-who'+(part.who==='Вы'?' me':''),part.who+': ')]:[],document.createTextNode(part.text));body.append(line);}else body.append(node('p',null,part.text||part));}};
+   if(open.has(key)){details.open=true;fill(body);}
+   details.ontoggle=event=>{const d=event.currentTarget;if(d.open){open.add(key);fill(d.querySelector('.material-body'));}else open.delete(key);};card.append(details);}
   return card;
  }
  function meetings(items,sessions){
@@ -54,7 +55,7 @@
    const summary=m.extra.filter(x=>x.kind==='summary').sort((a,b)=>b.at-a.at)[0],letter=m.extra.find(x=>x.kind==='meeting-mail');
    if(summary){const box=node('div','material-summary');for(const block of summary.text.split(/\n\n+/)){const [head,...rows]=block.split('\n');const h=node('p','material-summary-head',head.replace(/\*\*/g,''));box.append(h);const ul=node('ul');for(const r of rows)ul.append(node('li',null,r.replace(/^-\s*/,'')));if(rows.length)box.append(ul);}card.querySelector('.material-head').after(box);}
    else if(m.parts.length&&!['recording','processing'].includes(s?.phase)){const b=node('button',null,'Сделать сводку');b.type='button';b.onclick=run(async()=>{b.disabled=true;b.textContent='Собираю сводку…';try{await window.petya.feature('meetingSummary','summarize',m.ids[0]);await refreshContexts();}finally{b.disabled=false;}});card.querySelector('.material-actions').prepend(b);}
-   if(letter){const d=node('details','material-text');d.append(node('summary',null,letter.title));const body=node('div','material-body');d.ontoggle=()=>{if(d.open&&!body.textContent)body.append(node('p',null,letter.text));};d.append(body);card.append(d);}
+   if(letter){const d=node('details','material-text');d.append(node('summary',null,letter.title));const body=node('div','material-body');d.ontoggle=event=>{const box=event.currentTarget.querySelector('.material-body');if(event.currentTarget.open&&!box.textContent)box.append(node('p',null,letter.text));};d.append(body);card.append(d);}
    if(s?.phase==='error'){const retry=node('button',null,'Обработать снова');retry.type='button';retry.onclick=run(async()=>{await window.petya.feature('meetingMemory','retry',m.id);await refreshContexts();});card.querySelector('.material-actions').prepend(retry);}
    return card;});
  }
@@ -65,10 +66,12 @@
   const b=node('button',null,'Настроить');b.type='button';b.onclick=()=>{view('settings');setTimeout(()=>document.querySelector('[data-service="meetings"]')?.scrollIntoView({block:'center'}),100);};line.append(' ',b);return line;}
  function render(value){
   data=value;const sig=JSON.stringify([value.items.map(i=>[i.id,i.bytes,i.suspect]),value.meetings.map(m=>[m.id,m.phase,m.completed,m.segments,m.percent]),value.recording]);if(sig===signature)return;signature=sig;
-  const list=$('context-list');if(!list)return;
-  const scroll=window.scrollY;list.replaceChildren();
+  let list=$('context-list');if(!list)return;
+  // Built aside and merged into what is on screen: a recording meeting updates every few seconds, and redrawing
+  // the page each time made it blink and reset the scrolled transcript.
+  const target=list,scroll=window.scrollY;list=document.createElement('div');
   const stats=$('source-stats');if(stats)stats.replaceChildren(Object.assign(document.createElement('span'),{textContent:'Всего записей:'}),document.createTextNode(' '+value.items.length));
-  if(!value.items.length&&!value.meetings.length){list.append(node('p','material-empty','Пока нет сохранённых материалов. Здесь появятся встречи, сообщения Slack и Telegram и ваши заметки.'));const line=recordingLine(value.recording);if(line)list.append(line);return;}
+  if(!value.items.length&&!value.meetings.length){list.append(node('p','material-empty','Пока нет сохранённых материалов. Здесь появятся встречи, сообщения Slack и Telegram и ваши заметки.'));const line=recordingLine(value.recording);if(line)list.append(line);children(target,list);return;}
   for(const [id,label] of GROUPS){
    const items=value.items.filter(i=>i.app===id),sessions=id==='meetings'?value.meetings:[];if(!items.length&&!sessions.length)continue;
    const group=node('details','material-group');group.dataset.source=label;// Groups start folded so every app is visible at once; only the first is open. The user's choice sticks.
@@ -80,7 +83,22 @@
     const bad=[...new Set(items.filter(i=>i.suspect).map(i=>i.sessionId||i.id))].filter(sid=>items.filter(i=>(i.sessionId||i.id)===sid).every(i=>i.suspect));
     if(bad.length&&line){const b=node('button',null,'Удалить ошибочные записи · '+bad.length);b.type='button';b.onclick=run(async()=>{for(const sid of bad)await window.petya.feature('materials','remove',{sessionIds:[sid],ids:items.filter(i=>(i.sessionId||i.id)===sid).map(i=>i.id)});notice('Удалено ошибочных записей: '+bad.length+'.');await refreshContexts();});line.append(' ',b);}}group.append(...cards);list.append(group);
   }
-  window.scrollTo(0,scroll);
+  children(target,list);window.scrollTo(0,scroll);
+ }
+ // Brings `a` (on screen) to match `b` (fresh), keeping nodes that did not change: open details, scroll positions.
+ const HANDLERS=['onclick','ontoggle','oninput','onchange','onkeydown'];
+ function morph(a,b){
+  if(a.nodeType!==b.nodeType||a.nodeName!==b.nodeName||a.nodeType===1&&a.dataset.key!==b.dataset.key){a.replaceWith(b);return;}
+  if(a.nodeType!==1){if(a.nodeValue!==b.nodeValue)a.nodeValue=b.nodeValue;return;}
+  for(const {name,value} of [...b.attributes])if(a.getAttribute(name)!==value)a.setAttribute(name,value);
+  for(const {name} of [...a.attributes])if(!b.hasAttribute(name))a.removeAttribute(name);
+  for(const h of HANDLERS)if(a[h]!==b[h])a[h]=b[h];if('disabled' in b&&a.disabled!==b.disabled)a.disabled=b.disabled;
+  children(a,b);
+ }
+ function children(a,b){
+  const old=[...a.childNodes],fresh=[...b.childNodes];
+  fresh.forEach((child,i)=>{if(i<old.length)morph(old[i],child);else a.append(child);});
+  for(const extra of old.slice(fresh.length))extra.remove();
  }
  window.renderMaterials=render;
  if(window.materialsData)render(window.materialsData);

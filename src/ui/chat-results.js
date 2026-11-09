@@ -10,7 +10,8 @@
   const status=document.createElement('p');status.className='small chat-result-status';status.hidden=true;status.setAttribute('role','status');picker.after(status);
   let state={items:[],selected:null},revision=0,pending=false,restricted=null;
   const call=(method,...args)=>window.petya.feature('chatResults',method,...args);
-  function error(e){status.textContent=e.message;status.hidden=false;}
+  // An error under the composer goes away by itself: it must not stay there as if it were the input's text.
+  let fade;function error(e){status.textContent=e.message;status.hidden=false;clearTimeout(fade);fade=setTimeout(()=>{status.hidden=true;},6000);}
   function button(text,handler){
     const b=document.createElement('button');b.type='button';b.textContent=text;
     b.onclick=async()=>{if(pending)return;pending=true;b.disabled=true;status.hidden=true;
@@ -48,8 +49,9 @@
     const selected=state.items.find(item=>item.id===state.selected);
     // The bar shows only what the next question is about; an object is picked on its card or when Petya asks.
     bar.hidden=!selected&&!restricted;clear.hidden=!selected;
-    choose.textContent=selected?selected.title:'Выбрать объект · '+choices().length;
-    choose.title=selected?.subtitle||'Выбрать результат из этого чата';
+    // «Про: Jira · BW-4569» — the next message is about this object (its actions, «закрой её», «что там»).
+    choose.textContent=selected?'Про: '+selected.title:'Выбрать объект · '+choices().length;
+    choose.title=selected?'Следующее сообщение будет про этот объект'+(selected.subtitle?' · '+selected.subtitle:'')+'. Нажмите, чтобы выбрать другой; × — писать без него':'Выбрать результат из этого чата';
     paintPicker();
     document.querySelectorAll('.chat-result-card,.chat-result-inline-actions').forEach(card=>card.remove());
     for(const item of state.items){

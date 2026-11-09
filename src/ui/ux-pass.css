@@ -13,7 +13,7 @@
 #home .chat-sticky-header>.important-panel{order:7}
 #home .chat-sticky-header .chat-heading .chat-heading-more{order:8;margin-left:0}
 #home .chat-sticky-header>:not(.chat-heading):not(.chat-project-context):not(.important-panel){order:20;flex-basis:100%}
-#home .chat-sticky-header>:is(.chat-project-context,.important-panel){position:relative;margin:0;padding:0;border:0;background:none;font-size:12px}
+#home .chat-sticky-header>:is(.chat-project-context,.important-panel){position:relative;margin:0;padding:0;border:0;background:none;font-size:12px;max-height:none;overflow:visible}
 #home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary{display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:2px 10px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:12px;white-space:nowrap;list-style:none;cursor:pointer}
 #home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary::-webkit-details-marker{display:none}
 #home .chat-sticky-header>:is(.chat-project-context,.important-panel)>summary:hover,#home .chat-sticky-header>:is(.chat-project-context,.important-panel)[open]>summary{color:var(--ink);border-color:var(--muted)}
