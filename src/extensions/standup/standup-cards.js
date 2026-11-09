@@ -34,18 +34,19 @@
   else box.append(k.el('div','standup-none',empty));
   return box;
  }
- function person(k,p,thread){
+ function person(k,p,thread,source){
   const row=k.el('article','standup-person'+(p.blockers.length?' blocked':'')+(p.noAnswer?' silent':''));row.dataset.source=p.source;
   const who=k.el('div','standup-who');who.append(k.avatar(p.name,{size:30}));
   const names=k.el('div','standup-names');names.append(raw(k.el('strong',null,p.name)));if(p.role)names.append(raw(k.el('small',null,p.role)));
   const chips=k.el('div','standup-chips');
   if(p.source==='slack')chips.append(k.chip({label:'ответ в треде',tone:'done',title:p.answeredAt?'Ответ в Slack: '+when(p.answeredAt):'Ответ в Slack'}));
+  else if(p.source==='chat')chips.append(k.chip({label:'ответ в треде',tone:'done',title:'Ответ в '+(source||'мессенджере')+(p.answeredAt?': '+when(p.answeredAt):'')}));
   else if(p.source==='draft')chips.append(k.chip({label:'черновик',tone:'progress',title:'Собрано по Jira'+(p.commits?' и коммитам':'')+' — человек не отвечал'}));
   if(p.noAnswer){const c=k.chip({label:thread?'нет ответа':'нет активности',tone:'alert',title:thread?'Не ответил в треде стендапа':'Нет активности в Jira и коммитов с прошлого стендапа'});c.classList.add('standup-silent');chips.append(c);}
   if(p.blockers.length){const c=k.chip({label:p.blockers.length+' '+plural(p.blockers.length,['блокер','блокера','блокеров']),tone:'alert'});chips.append(c);}
   names.append(chips);who.append(names);
   const cols=k.el('div','standup-cols');
-  cols.append(column(k,'yesterday','Вчера',p.yesterday,p.source==='slack'?'не написал':'нет активности'),column(k,'today','Сегодня',p.today,'нет задач в работе'),column(k,'blockers','Блокеры',p.blockers,'нет',true));
+  cols.append(column(k,'yesterday','Вчера',p.yesterday,p.source==='slack'||p.source==='chat'?'не написал':'нет активности'),column(k,'today','Сегодня',p.today,'нет задач в работе'),column(k,'blockers','Блокеры',p.blockers,'нет',true));
   row.append(who,cols);
   if(p.note){const n=raw(k.el('blockquote','standup-note',p.note));n.title='Ответ без разметки «вчера / сегодня / блокеры»';row.append(n);}
   return row;
@@ -71,7 +72,7 @@
   body.append(tiles);
   if(t.people)body.append(bar(k,t,!!c.thread));
   const list=k.el('div','standup-people');
-  if(c.people.length)list.append(k.collapse(c.people.map(p=>person(k,p,!!c.thread)),6,'Ещё участники'));
+  if(c.people.length)list.append(k.collapse(c.people.map(p=>person(k,p,!!c.thread,c.thread?.source||'')),6,'Ещё участники'));
   else list.append(k.el('p','standup-empty','В «Команде» нет людей — некого спрашивать.'));
   body.append(list);
   if(c.warnings?.length){const w=k.el('ul','standup-warnings');for(const line of c.warnings)w.append(raw(k.el('li',null,line)));body.append(w);}
@@ -84,7 +85,7 @@
    {label:'Обновить',run:()=>k.ask('Собери стендап',{send:true})}
   ];
   const status=t.blockers?{label:t.blocked+' с блокерами',tone:'alert'}:t.silent?{label:'не все ответили',tone:'progress'}:{label:'без блокеров',tone:'done'};
-  const src=[c.sources?.jira?'Jira':'',c.sources?.git?'git':'',c.sources?.slack?'Slack':''].filter(Boolean).join(' · ');
+  const src=[c.sources?.jira?'Jira':'',c.sources?.git?'git':'',c.sources?.slack?'Slack':'',typeof c.sources?.chat==='string'?c.sources.chat:''].filter(Boolean).join(' · ');
   const subtitle='период с '+when(c.since)+(src?' · '+src:'')+(c.schedule?' · '+c.schedule.days+', '+c.schedule.time:'');
   const card=k.card({app:'Стендап',initial:'С',color:'#5b4fc4',key:c.project.name+(c.jira?' · '+c.jira:''),href:c.thread?.url,status,subtitle,body,actions,className:'standup-card'});
   const key=card.querySelector('.kit-key');if(key)raw(key);

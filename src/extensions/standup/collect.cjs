@@ -118,6 +118,18 @@ async function replies(s,t,{since}){
  return out.filter(m=>m.ts!==t.ts&&!m.bot_id&&m.subtype!=='bot_message'&&m.user&&Number(m.ts)*1000>=from).map(m=>({user:m.user,name:clip(m.user_profile?.real_name||m.user_profile?.display_name||'',80),text:plain(m.text).slice(0,3000),at:Number(m.ts)*1000}));
 }
 
+// Answers in a messenger thread (the `messenger-source` registry, docs/foundations/messengers.md): the root is the
+// standup question, replies after it and after the last standup are answers; bots are ignored. `chat` is the
+// configured {source, channel, id}. Authors are matched to «Команда» by name (the caller).
+async function chatReplies(reg,chat,{since}){
+ const r=await reg.thread(chat.source,{channel:chat.channel,id:chat.id});
+ const root=r.messages.find(m=>m.id===chat.id)||null;
+ const from=Math.max(Date.parse(root?.at||'')||0,+since);
+ const answers=r.messages.filter(m=>m.id!==chat.id&&!m.bot&&(Date.parse(m.at)||0)>=from)
+  .map(m=>({user:'chat:'+(m.author.id||m.author.name),name:clip(m.author.name,80),text:String(m.text||'').slice(0,3000),at:Date.parse(m.at)||0,chat:true}));
+ return {root,answers};
+}
+
 // «Вчера: …  Сегодня: …  Блокеры: нет» → three lists; null when the answer has no such markers.
 const MARK=/(^|[\n;.]\s*|\s)(вчера|сделал[аи]?|yesterday|done|сегодня|today|план(?:ы)?(?:\s+на\s+сегодня)?|буду|блокер\p{L}*|блокир\p{L}*|проблем\p{L}*|blockers?|мешает)\s*[:—–-]\s*/giu;
 const NONE=/^(?:нет|ничего|не\s+было|отсутствуют|no|none|nope|n\/a|-|—)\.?$/iu;
@@ -133,4 +145,4 @@ function split(text){
  return out;
 }
 
-module.exports={jiraReady,jira,blockedBy,commits,thread,slackReady,replies,split,plain,clip,keyRe};
+module.exports={jiraReady,jira,blockedBy,commits,thread,slackReady,replies,chatReplies,split,plain,clip,keyRe};

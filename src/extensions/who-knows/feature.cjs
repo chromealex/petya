@@ -1,7 +1,9 @@
 // «Кто знает»: who in the team knows a subject («кто разбирается в сетевом коде», «к кому идти по магазину»), who
 // wrote or last touched a piece of code. People are ranked by a transparent score from evidence only: git history of
 // the project (recency-weighted lines in the subject's files), Jira issues that mention it (assignee, reporter,
-// commenters), Slack messages and meeting speech Petya already keeps. Every point has a source the card links to.
+// commenters), Slack messages and meeting speech Petya already keeps, and messages of connected messengers that can
+// search (the `messenger-source` registry: Mattermost, VK Teams, …; optional — with none, nothing changes). Every point
+// has a source the card links to.
 // The local model only turns the subject into search words (English names as in code); it never names people.
 const kit=require('../app-kit.cjs');
 const query=require('./query.cjs');
@@ -12,8 +14,12 @@ const talk=require('./talk.cjs');
 const {People}=require('./people.cjs');
 const ID='who-knows',BY='Кто знает';
 const TOP=8;
-const SOURCES={code:'код',jira:'Jira',slack:'Slack',meetings:'встречи'};
+const SOURCES={code:'код',jira:'Jira',slack:'Slack',meetings:'встречи',chat:'мессенджеры'};
 const round=n=>Math.round(n*10)/10;
+const deps={messengers:s=>s.messengerSources||require('../../features/messenger-sources.cjs').create(s),timeout:8000};
+// Messengers searched through the registry; those that only read Petya's memory (Slack, Telegram) are read above.
+function messengers(s){try{return deps.messengers(s).list().filter(x=>x.search&&!x.memory);}catch{return [];}}
+const within=(promise,ms)=>{let timer;return Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Не ответил за '+Math.round(ms/1000)+' с.')),ms);})]).finally(()=>clearTimeout(timer));};
 
 async function modelTerms(s,topic){
  if(!s.settings.model)return {};
@@ -95,6 +101,29 @@ async function collect(s,topic,{now=Date.now()}={}){
   for(const m of found){const p=people.get({name:m.speaker});const k=m.session+'|'+p.name,n=per.get(k)||0;if(n>=3)continue;per.set(k,n+1);
    p.points.meetings+=git.recency(m.at,now);const old=p.meetings.get(m.session);if(!old)p.meetings.set(m.session,{session:m.session,title:m.title,text:m.text,at:m.at,count:1});else old.count++;}
  }
+ // Messengers (docs/foundations/messengers.md): the subject searched in each connected messenger over 31 days; a
+ // message that mentions it gives its author a point, recency-weighted, up to 3 per thread; the thread is the
+ // evidence link. Only sources that are connected appear on the card.
+ const chats=messengers(s);
+ if(chats.length&&re){
+  s.requestProgress?.report('Ищу по теме в мессенджерах');
+  const reg=deps.messengers(s),query=String(topic||'').slice(0,200);
+  await Promise.all(chats.map(async x=>{
+   try{
+    const r=await within(reg.search(x.id,{query,days:31,limit:200}),deps.timeout);
+    const found=r.messages.filter(m=>!m.bot&&m.author?.name&&re.test(m.text||''));
+    sources.push({kind:'chat',state:found.length?'ok':'empty',count:found.length,label:x.name,source:x.id});
+    const per=new Map();
+    for(const m of found){
+     const thread=x.id+':'+m.channel.id+':'+(m.thread||m.id),p=people.get({name:m.author.name});
+     const k=thread+'|'+p.name,n=per.get(k)||0;if(n>=3)continue;per.set(k,n+1);
+     const at=Date.parse(m.at)||0;p.points.chat=(p.points.chat||0)+git.recency(at,now);
+     const old=p.chats.get(thread);
+     if(!old||old.at<at)p.chats.set(thread,{source:x.name,title:x.name+(m.channel.name?' · '+m.channel.name:''),text:talk.snippet(m.text,re),at,url:m.url||''});
+    }
+   }catch(e){sources.push({kind:'chat',state:'error',label:x.name,source:x.id,note:e.message});}
+  }));
+ }
  return {people:people.list(),sources,search};
 }
 
@@ -108,7 +137,8 @@ function row(p){
   commits:p.commits.sort((a,b)=>b.at-a.at).slice(0,6),
   issues:[...p.issues.values()].sort((a,b)=>b.points-a.points||b.at-a.at).slice(0,6).map(({points,...i})=>i),
   threads:[...p.threads.values()].sort((a,b)=>b.at-a.at).slice(0,5),
-  meetings:[...p.meetings.values()].sort((a,b)=>b.at-a.at).slice(0,4)};
+  meetings:[...p.meetings.values()].sort((a,b)=>b.at-a.at).slice(0,4),
+  ...p.chats.size?{chats:[...p.chats.values()].sort((a,b)=>b.at-a.at).slice(0,5)}:{}};
 }
 const dateText=ms=>new Date(ms).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:new Date(ms).getFullYear()===new Date().getFullYear()?undefined:'numeric'});
 function summary(rows,{topic,mode}){
@@ -159,4 +189,4 @@ async function turn(s,command){
  try{return await whoTurn(s,text,ask);}
  catch(e){return kit.failure(s,text,BY,e);}
 }
-module.exports={name:'whoKnows',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,whoTurn,collect,summary};
+module.exports={name:'whoKnows',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,whoTurn,collect,summary,deps};

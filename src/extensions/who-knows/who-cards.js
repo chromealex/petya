@@ -1,10 +1,11 @@
 // «Кто знает», renderer: the people ranked for a subject with avatars, a score bar split by source (code, Jira, Slack,
-// meetings), the evidence behind every point (files and commits with links, Jira issues, Slack messages, meetings)
+// meetings, messengers when one is connected), the evidence behind every point (files and commits with links, Jira
+// issues, Slack messages, meetings, messenger threads)
 // in a collapsible list, and per person «Написать в Slack» (the share-message flow asks for the channel and
 // confirms) and «Пригласить на встречу» (handed to the chat, where the calendar app asks for the time).
 (()=>{
  const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('who-cards.css',document.currentScript.src).href;document.head.append(style);
- const SOURCES=[['code','Код','#86c2ff'],['jira','Jira','#c9a8f0'],['slack','Slack','#e5ce8c'],['meetings','Встречи','#9dd9c9']];
+ const SOURCES=[['code','Код','#86c2ff'],['jira','Jira','#c9a8f0'],['slack','Slack','#e5ce8c'],['meetings','Встречи','#9dd9c9'],['chat','Мессенджеры','#f0b4a8']];
  const MODES={expert:'кто разбирается',author:'кто работал над кодом',last:'кто последним трогал'};
  const locale=()=>window.petyaLocale||'ru-RU';
  const num=v=>Number(v||0).toLocaleString(locale(),{maximumFractionDigits:1});
@@ -44,10 +45,11 @@
   const commits=p.commits.map(c=>{const li=k.el('li');li.append(link(k,c.short,c.url,'who-hash'),raw(k.el('span','who-text',c.subject)),k.el('small',null,date(c.at)+(c.byMessage?' · по описанию':'')));return li;});
   const issues=p.issues.map(i=>{const li=k.el('li');li.append(link(k,i.key,i.url,'who-hash'),raw(k.el('span','who-text',i.summary)),k.el('small',null,[...i.roles,i.status].filter(Boolean).join(' · ')));return li;});
   const threads=p.threads.map(t=>{const li=k.el('li');li.append(link(k,t.title||'Slack',t.url,'who-hash who-thread'),raw(k.el('q','who-quote',t.text)),k.el('small',null,date(t.at)));return li;});
+  const chats=(p.chats||[]).map(t=>{const li=k.el('li');li.append(link(k,t.title,t.url,'who-hash who-thread'),raw(k.el('q','who-quote',t.text)),k.el('small',null,date(t.at)));return li;});
   const meetings=p.meetings.map(m=>{const li=k.el('li');li.append(raw(k.el('span','who-hash who-thread',m.title)),raw(k.el('q','who-quote',m.text)),k.el('small',null,date(m.at)+(m.count>1?' · реплик: '+m.count:'')));return li;});
   const box=k.el('div','who-evidence selectable');
-  for(const s of [section(k,'Файлы',files),section(k,'Коммиты',commits),section(k,'Задачи Jira',issues),section(k,'Slack',threads),section(k,'Встречи',meetings)])if(s)box.append(s);
-  const total=files.length+commits.length+issues.length+threads.length+meetings.length;
+  for(const s of [section(k,'Файлы',files),section(k,'Коммиты',commits),section(k,'Задачи Jira',issues),section(k,'Slack',threads),section(k,'Мессенджеры',chats),section(k,'Встречи',meetings)])if(s)box.append(s);
+  const total=files.length+commits.length+issues.length+threads.length+chats.length+meetings.length;
   const details=k.el('details','who-details');const summary=k.el('summary',null,'Основания · '+total);details.append(summary,box);return details;
  }
 
@@ -64,7 +66,7 @@
   const score=k.el('div','who-score');score.append(k.el('strong',null,num(p.score)),k.el('small',null,Number.isInteger(p.score)?plural(p.score,['балл','балла','баллов']):'балла'));
   const meter=k.el('div','who-meter');meter.append(bar(k,p,max),split(k,p));
   const actions=k.el('div','who-actions');
-  const facts=[p.points.code>0?'код':'',p.points.jira>0?'задачи Jira':'',p.points.slack>0?'Slack':'',p.points.meetings>0?'встречи':''].filter(Boolean).join(', ');
+  const facts=[p.points.code>0?'код':'',p.points.jira>0?'задачи Jira':'',p.points.slack>0?'Slack':'',p.points.chat>0?'мессенджеры':'',p.points.meetings>0?'встречи':''].filter(Boolean).join(', ');
   // Only people of «Команда» can be addressed; a name from a source alone is not a recipient.
   if(p.member)actions.append(k.links('share-message',{text:p.name+', подскажи, пожалуйста, по теме «'+c.topic+'» — ты больше всех с этим работал(а) ('+facts+').'},{label:'Написать в Slack',title:'Сообщение пройдёт через Slack: Петя спросит канал и покажет текст перед отправкой'}));
   if(c.calendar&&p.member){const b=k.el('button',null,'Пригласить на встречу');b.type='button';b.title='Петя подставит запрос в поле ввода: добавьте время';b.onclick=e=>{e.stopPropagation();k.ask('Поставь встречу с '+p.name+' по теме «'+c.topic+'» ');};actions.append(b);}
@@ -74,11 +76,12 @@
 
  function sources(k,c){
   const line=k.el('div','who-sources');
-  const names={code:'Git',jira:'Jira',slack:'Slack',meetings:'Встречи'},colors=Object.fromEntries(SOURCES.map(([id,,color])=>[id,color]));
+  const names={code:'Git',jira:'Jira',slack:'Slack',meetings:'Встречи',chat:''},colors=Object.fromEntries(SOURCES.map(([id,,color])=>[id,color]));
   for(const x of c.sources||[]){
    const item=k.el(x.url?'a':'span','who-source '+(x.state||''));if(x.url&&k.safeUrl(x.url)){item.href=k.safeUrl(x.url);item.target='_blank';item.rel='noopener';}
    const dot=k.el('i');dot.style.background=x.state==='ok'?colors[x.kind]:'transparent';dot.style.borderColor=colors[x.kind];
-   const label=names[x.kind]+(x.label&&x.kind!=='slack'?' · '+x.label:'');
+   // A messenger is named by its source (Mattermost, VK Teams).
+   const label=x.kind==='chat'?String(x.label||''):names[x.kind]+(x.label&&x.kind!=='slack'?' · '+x.label:'');
    const state=x.state==='ok'?String(x.count??''):x.state==='empty'?'ничего':x.state==='error'?'ошибка':'нет';
    item.append(dot,raw(k.el('span',null,label)),k.el('b',null,state));item.title=x.note||(x.state==='ok'?'Найдено: '+x.count:x.state==='empty'?'Источник подключён, по теме ничего нет':'');
    line.append(item);
@@ -96,6 +99,7 @@
   else body.append(k.el('p','who-empty','Следов по этой теме нет ни в коде, ни в задачах, ни в переписке. Попробуйте назвать её как в коде — класс, папку или модуль.'));
   const how=k.el('details','who-how');how.append(k.el('summary',null,'Как считаются баллы'),
    k.el('p',null,'Код: за каждый коммит в файлах темы — 1 + lg(1 + изменённых строк); коммит, найденный только по описанию, — 1. Jira: исполнитель — 3, автор — 1, комментарий — 1 (до 3 на задачу). Slack и встречи: 1 за сообщение или реплику (до 3 на тред или встречу). Каждый балл теряет половину веса за 4 месяца.'));
+  if((c.sources||[]).some(x=>x.kind==='chat'))how.append(k.el('p',null,'Мессенджеры: 1 за сообщение по теме (до 3 на тред).'));
   if(c.search){const words=[...(c.search.identifiers||[]),...(c.search.paths||[]),...(c.search.text||[]).filter(t=>/[а-яё]/i.test(t))];if(words.length)how.append(raw(k.el('p','who-terms','Искал: '+[...new Set(words)].join(', '))));}
   body.append(how);
   const status=people.length?{label:people.length===1?'1 человек':people.length+' '+plural(people.length,['человек','человека','человек']),tone:'done'}:{label:'нет следов',tone:'alert'};

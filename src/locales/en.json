@@ -12775,6 +12775,27 @@
   "Минуты": "Minutes",
   "Начало": "Start",
   "Окно": "Window",
-  "Учёт времени ·": "Time tracking ·"
+  "Учёт времени ·": "Time tracking ·",
+  ", ответы читаю из треда «": ", reading answers from the thread «",
+  ". В это время подготовлю черновики «вчера / сегодня / блокеры» в чате «Стендап» и пришлю уведомление — в мессенджер ничего не отправляю сам.": ". At that time I'll prepare «yesterday / today / blockers» drafts in the «Standup» chat and send a notification — I post nothing to the messenger myself.",
+  "» за неделю нет сообщений. Напишите туда вопрос стендапа и повторите.": "» has no messages this week. Post the standup question there and try again.",
+  "» не подключён — ответы из треда не прочитаны.": "» is not connected — the thread answers were not read.",
+  "» не подключён.": "» is not connected.",
+  "» не умеет читать треды — для стендапа нужен тред.": "» cannot read threads — the standup needs a thread.",
+  "» нет каналов, которые Петя читает. Выберите их в настройках «": "» has no channels Petya reads. Choose them in the settings of «",
+  "» тред стендапа?": "» is the standup thread?",
+  "» — вопрос стендапа? Ответы в его треде станут ответами команды.": "» is the standup question? Replies in its thread become the team's answers.",
+  "В каком канале «": "In which channel of «",
+  "Ищу по теме в мессенджерах": "Searching messengers for the topic",
+  "Какое сообщение в «": "Which message in «",
+  "Мессенджеры": "Messengers",
+  "Мессенджеры: 1 за сообщение по теме (до 3 на тред).": "Messengers: 1 per message on the topic (up to 3 per thread).",
+  "Подключите его в настройках этого приложения.": "Connect it in this app's settings.",
+  "Такого канала нет в списке.": "That channel is not in the list.",
+  "Такого сообщения нет в списке.": "That message is not in the list.",
+  "Участник чата": "Chat participant",
+  "Читаю ответы в треде": "Reading answers in the thread",
+  "мессенджере": "messenger",
+  "мессенджеры": "messengers"
  }
 }

@@ -139,6 +139,37 @@ run(['remote','add','origin','git@github.com:studio/game.git']);
  assert.equal(withModel.people[0].name,'Иван Петров');
  settings.model='';
 
+ // Messengers (messenger-source): optional evidence. Without one connected the card above has no messenger row and
+ // no `chat` points; with one, a message on the subject is a point for its author with the thread as evidence.
+ assert.ok(!card.sources.some(x=>x.kind==='chat')&&card.people.every(p=>!('chat' in p.points)&&!p.chats),'no messenger: nothing changes');
+ const M=require('../src/features/messenger-sources.cjs');
+ const asked=[];
+ const chat={id:'chatx',name:'ЧатИкс',ready:()=>true,async channels(){return [];},async messages(){return [];},async search(s2,q){asked.push(q.query);return {messages:[
+  {id:'m1',channel:{id:'c1',name:'netcode'},author:{id:'u2',name:'Анна Смирнова'},text:'Сетевой код: таймауты переносим в конфиг',at:NOW-3600e3,url:'https://chat.example.com/studio/pl/m1',replies:2},
+  {id:'m2',channel:{id:'c1',name:'netcode'},thread:'m1',author:{id:'u2',name:'Анна Смирнова'},text:'и сетевые ретраи тоже',at:NOW-3000e3,url:'https://chat.example.com/studio/pl/m2'},
+  {id:'m3',channel:{id:'c1',name:'netcode'},author:{id:'b',name:'ci-bot'},bot:true,text:'сетевой тест упал',at:NOW-2000e3},
+  {id:'m4',channel:{id:'c2',name:'random'},author:{id:'u9',name:'Пётр'},text:'обед в час',at:NOW-1000e3}]};}};
+ const broken={id:'chaty',name:'ЧатИгрек',ready:()=>true,async channels(){return [];},async messages(){return [];},async search(){throw Error('сервер недоступен');}};
+ const memoryOnly={id:'mem',name:'Mem',memory:true,ready:()=>true,async channels(){return [];},async messages(){return [];},async search(){throw Error('memory sources are read from the memory');}};
+ const realMessengers=app.deps.messengers;
+ app.deps.messengers=s2=>M.create(s2,{now:()=>NOW,sources:[{id:'chatx',extension:'chatx',setting:'',name:'ЧатИкс',source:chat},{id:'chaty',extension:'chaty',setting:'',name:'ЧатИгрек',source:broken},{id:'mem',extension:'mem',setting:'',name:'Mem',source:memoryOnly}]});
+ const withChat=await app.turn(s,'Кто разбирается в сетевом коде?');
+ const wc=withChat.extensionData.whoKnows;
+ assert.deepEqual(asked,['сетевом коде'],'the subject is searched once per messenger');
+ assert.deepEqual(wc.sources.filter(x=>x.kind==='chat').map(x=>[x.label,x.state,x.count??null]).sort(),[['ЧатИгрек','error',null],['ЧатИкс','ok',2]]);
+ assert.deepEqual(wc.sources.slice(0,4).map(x=>x.kind),['code','jira','slack','meetings'],'the other sources stay as they were');
+ const annaChat=wc.people.find(p=>p.name==='Анна Смирнова');
+ assert.ok(annaChat.points.chat>1.9&&annaChat.points.chat<=2,'two messages in one thread');
+ assert.deepEqual(annaChat.chats.map(t=>[t.title,t.url]),[['ЧатИкс · netcode','https://chat.example.com/studio/pl/m2']]);
+ assert.ok(annaChat.score>anna.score);
+ assert.ok(!wc.people.some(p=>/ci-bot|Пётр/.test(p.name)),'bots and messages off the subject give nothing');
+ assert.ok(wc.people.every(p=>p.score===Math.round(Object.values(p.points).reduce((a,b)=>a+b,0)*10)/10));
+ // Only a messenger: still something to look at.
+ const onlyChat=await app.turn({...s,gitWorkspace:new GitWorkspace({context:()=>null}),memory:{prune:()=>[]},settings:{...settings,jiraUrl:''},workspace:null},'кто разбирается в сетевом коде');
+ assert.ok(!onlyChat.question);assert.equal(onlyChat.extensionData.whoKnows.people[0].name,'Анна Смирнова');
+ assert.match(onlyChat.text,/Анна Смирнова \(мессенджеры 2\)/);
+ app.deps.messengers=realMessengers;
+
  // Nothing to look at: a question, not an error.
  const bare={...s,gitWorkspace:new GitWorkspace({context:()=>null}),memory:{prune:()=>[]},settings:{...settings,jiraUrl:''},workspace:null};
  const none=await app.turn(bare,'кто разбирается в сетевом коде');

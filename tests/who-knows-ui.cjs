@@ -70,6 +70,17 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  // The whole list with evidence collapsed, and the last-touch and empty cards.
  await js("document.querySelectorAll('.who-details').forEach(d=>d.open=false);document.querySelector('.who-card .kit-more').open=true;const box=document.getElementById('card-shot'),keep=document.createElement('div');keep.append(...box.querySelectorAll('.who-card'));document.body.append(keep);box.remove()");
  console.log('Who knows list: '+await require('./card-shot.cjs')(win,'.who-card','petya-who-knows-list'));
- console.log('Who knows card: ranked people, split score bars, collapsible evidence with links, safe text, Slack and calendar actions passed');
+ // A connected messenger (messenger-source): its own row in the sources, a «Мессенджеры» part of the bar and threads.
+ const chatCard={...card,topic:'матчмейкинге',sources:[...card.sources,{kind:'chat',state:'ok',count:3,label:'Mattermost',source:'mattermost'},{kind:'chat',state:'error',label:'VK Teams',source:'vk-teams',note:'сервер недоступен'}],
+  people:[person('Анна Смирнова','UI-программист',true,{code:1.3,jira:1,slack:1,meetings:0,chat:2},{chats:[{source:'Mattermost',title:'Mattermost · netcode',text:'Сетевой код: таймауты переносим в конфиг',at:now-DAY,url:'https://chat.example.com/studio/pl/m1'}]})]};
+ await js(`document.getElementById('card-shot')?.remove();showDialogueMessages([{role:'assistant',text:'По теме «матчмейкинге» больше всех знают: Анна Смирнова.',by:'Кто знает',extensionData:{whoKnows:${JSON.stringify(chatCard)}}}],'Кто знает · чаты')`);
+ for(let i=0;i<150;i++){if(await js("!!document.querySelector('.who-card .who-row')"))break;await new Promise(r=>setTimeout(r,40));}
+ assert.deepEqual(await js("[...document.querySelectorAll('.who-card .who-source span')].map(s=>s.textContent).slice(-2)"),['Mattermost','VK Teams'],'each messenger under its own name');
+ assert.deepEqual(await js("[...document.querySelectorAll('.who-card .who-seg')].map(s=>s.dataset.source)"),['code','jira','slack','chat']);
+ await js("document.querySelector('.who-card .who-details').open=true");
+ assert.equal(await js("document.querySelector('.who-card .who-details a[href=\"https://chat.example.com/studio/pl/m1\"]').textContent"),'Mattermost · netcode');
+ assert.match(await js("document.querySelector('.who-card .who-how').textContent"),/Мессенджеры: 1 за сообщение/);
+ console.log('Who knows with messengers: '+await require('./card-shot.cjs')(win,'.who-card','petya-who-knows-chat'));
+ console.log('Who knows card: ranked people, split score bars, collapsible evidence with links, safe text, Slack and calendar actions, messenger evidence passed');
 }};
 require('../src/main.cjs');

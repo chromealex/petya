@@ -86,18 +86,15 @@ message that does not exist is dropped; its quote is the model's verbatim part o
   registry (`each()` expands it into one source per messenger): every ready source with `search` and without
   `memory` is searched with the user's words, each under its own name, time limit and state chip; results carry a
   generic chat icon.
-- **«Кто знает»** (not wired yet; `src/extensions/who-knows/feature.cjs` reads Slack from the memory). To count
-  messenger evidence, replace the Slack-only block with:
-  ```js
-  const reg=s.messengerSources||require('../../features/messenger-sources.cjs').create(s);
-  const {messages}=await reg.searchAll({query:words.join(' '),days:31,limit:200},{memory:false});
-  // per message: people.get({name:m.author.name}) gets a point (recency-weighted), the thread m.thread||m.id is the
-  // evidence link (m.url); keep the existing memory path for Slack. Add a `chat` points kind to the card.
-  ```
-- **«Стендап»** (not wired yet; reads answers from one Slack thread by link). A messenger thread works the same way:
-  `reg.thread(id, {id: rootId})` returns the root (the questions) and the replies in time order; each reply's
-  `author.name` maps to a team member, `text` is split by the existing `split()`. The thread's source and root id
-  would be chosen in the standup settings from `reg.list()` and `reg.channels()`.
+- **«Кто знает»** (`src/extensions/who-knows/feature.cjs`, [who-knows.md](../apps/who-knows.md)): each ready source
+  with `search` and without `memory` is searched with the subject (31 days, ≤ 200, 8 s each, its own chip); a message
+  matching the subject's words gives `people.get({name: m.author.name})` a recency-weighted `chat` point (up to 3 per
+  thread `m.thread || m.id`, the evidence link `m.url`); the Slack memory path stays. No messenger → no change.
+- **«Стендап»** (`src/extensions/standup/feature.cjs`, [standup.md](../apps/standup.md)): «настрой стендап … в треде
+  <мессенджер>» picks the channel (`reg.channels()`) and the root message (`reg.messages()`) by strict choices;
+  collecting reads `reg.thread(id, {id: rootId, channel})` — the root (the question) and the replies in time order;
+  each reply's `author.name` maps to a team member, `text` is split by the existing `split()`. A Slack thread link
+  still wins; no messenger thread configured → no change.
 - **Digests elsewhere** (a morning brief, a channel digest app): `reg.list()` → `reg.channels(id)` →
   `reg.messages(id, {channel, days})` → `require('../../messenger-digest.cjs').digest(s, {...})` for the same card data.
 

@@ -1,6 +1,7 @@
 // «Стендап»: an async standup for the lead. For each person of «Команда» a draft «вчера / сегодня / блокеры» from
 // their Jira activity since the last standup (transitions, comments, worklogs), their open issues and the project's
-// git commits — or their own answer in a chosen Slack thread (read-only). A summary card shows blockers in alert
+// git commits — or their own answer in a chosen Slack thread or a thread of a connected messenger (the
+// `messenger-source` registry: Mattermost, VK Teams, …; optional), read-only. A summary card shows blockers in alert
 // tone and who has not answered. On a schedule (time and weekdays per chat project) Petya only prepares the summary
 // in the «Стендап · …» chat and notifies; posting the questions or the summary goes through the confirmed Slack
 // flow from the card (share-message → «Попроси команду …»), never automatically.
@@ -10,6 +11,8 @@ const {ask}=require('../../input-required.cjs');
 const collect=require('./collect.cjs');
 const ID='standup',BY='Стендап';
 const DAY=86400000;
+// The messenger-source registry (replaceable in tests).
+const chatSources={messengers:s=>s.messengerSources||require('../../features/messenger-sources.cjs').create(s)};
 
 // --- Routing ------------------------------------------------------------------------------------------------------
 const clean=t=>String(t||'').replace(/^\s*петя[\s,:.!?—-]*/iu,'').replace(/[.!?]+$/u,'').replace(/ё/g,'е').trim();
@@ -113,7 +116,7 @@ async function splitByModel(s,text){
 }
 const linkItem=(text,site)=>{const k=collect.keyRe.exec(text)?.[1];return {text,...k&&site?{key:k,url:site+'/browse/'+k}:{}};};
 
-async function build(s,{pid,jiraKey,now=new Date(),since,thread,git}){
+async function build(s,{pid,jiraKey,now=new Date(),since,thread,chat,git}){
  const team=(()=>{try{return require('../../team.cjs').members(s.settings);}catch{return [];}})();
  const warnings=[],used={jira:false,git:false,slack:false};
  const site=String(s.settings.jiraUrl||'').replace(/\/+$/,'');
@@ -130,13 +133,30 @@ async function build(s,{pid,jiraKey,now=new Date(),since,thread,git}){
   if(!collect.slackReady(s))warnings.push('Slack не подключён — ответы из треда не прочитаны.');
   else{s.requestProgress?.report?.('Читаю ответы в треде Slack');try{answers=await collect.replies(s,t,{since});used.slack=true;}catch(e){warnings.push(collect.clip(e.message,140));}}
  }
- const people=team.filter(m=>m.jiraId||m.slackId||m.email||m.accounts?.slack?.id);
+ // A messenger thread (chosen by «настрой стендап … в треде <мессенджер>»), when no Slack thread is given.
+ let chatThread=null;
+ if(!t&&chat?.source&&chat.id){
+  let reg=null,src=null;try{reg=chatSources.messengers(s);src=reg.find(chat.source);}catch{src=null;}
+  const name=src?.name||collect.clip(chat.name||chat.source,60);
+  chatThread={url:'',source:name,...chat.channelName?{channel:collect.clip(chat.channelName,80)}:{}};used.chat=false;
+  if(!src?.ready)warnings.push('«'+name+'» не подключён — ответы из треда не прочитаны.');
+  else{
+   s.requestProgress?.report?.('Читаю ответы в треде '+name);
+   try{const r=await collect.chatReplies(reg,chat,{since});answers=r.answers;chatThread.url=r.root?.url||'';used.chat=name;}
+   catch(e){warnings.push(name+': '+collect.clip(e.message,140));}
+  }
+  // A messenger knows people by name only: match them to «Команда».
+  const match=require('../../team-match.cjs');
+  for(const a of answers)a.member=match.match(a.name,team)?.name||'';
+ }
+ const people=team.filter(m=>m.jiraId||m.slackId||m.email||m.accounts?.slack?.id||answers.some(a=>a.chat&&a.member===m.name));
  const slackOf=m=>m.slackId||m.accounts?.slack?.id||'';
+ const answeredBy=(a,m)=>a.chat?!!a.member&&a.member===m.name:a.user===slackOf(m);
  const mails=m=>[m.email,...Object.values(m.accounts||{}).map(a=>a.email)].filter(Boolean).map(x=>x.toLowerCase());
  const sameName=(a,b)=>{const x=String(a||'').toLowerCase().trim(),y=String(b||'').toLowerCase().trim();return !!x&&(x===y||require('../../team-match.cjs').latin(x)===require('../../team-match.cjs').latin(y));};
  const rows=[];
  for(const m of people){
-  const mine=answers.filter(a=>a.user===slackOf(m));
+  const mine=answers.filter(a=>answeredBy(a,m));
   let answer=null;
   if(mine.length){const text=mine.map(a=>a.text).join('\n');answer=collect.split(text)||await splitByModel(s,text)||{yesterday:[],today:[],blockers:[],note:collect.clip(text,600)};}
   const act=m.jiraId?j.activity[m.jiraId]:null,open=m.jiraId?j.open[m.jiraId]:null;
@@ -147,20 +167,20 @@ async function build(s,{pid,jiraKey,now=new Date(),since,thread,git}){
   const blockers=[...(answer?.blockers||[]).map(x=>linkItem(x,site))];
   for(const b of open?.blockers||[])if(!blockers.some(x=>x.key===b.key))blockers.push(b);
   const active=!!(answer||drafted.length||today.length);
-  rows.push({name:m.name,role:m.role||'',source:answer?'slack':drafted.length||today.length?'draft':'none',yesterday,today,blockers,...answer?.note?{note:answer.note}:{},
-   noAnswer:t?!answer:!active,commits:own.length,...answer?{answeredAt:new Date(Math.max(...mine.map(a=>a.at))).toISOString()}:{}});
+  rows.push({name:m.name,role:m.role||'',source:answer?(chatThread?'chat':'slack'):drafted.length||today.length?'draft':'none',yesterday,today,blockers,...answer?.note?{note:answer.note}:{},
+   noAnswer:t||chatThread?!answer:!active,commits:own.length,...answer?{answeredAt:new Date(Math.max(...mine.map(a=>a.at))).toISOString()}:{}});
  }
- // Answers in the thread from people outside «Команда» are shown too, by their Slack name.
- for(const a of answers.filter(a=>!people.some(m=>slackOf(m)===a.user))){
+ // Answers in the thread from people outside «Команда» are shown too, by their Slack (or messenger) name.
+ for(const a of answers.filter(a=>!people.some(m=>answeredBy(a,m)))){
   if(rows.some(r=>r.slackUser===a.user))continue;
   const text=answers.filter(x=>x.user===a.user).map(x=>x.text).join('\n');
   const parts=collect.split(text)||await splitByModel(s,text)||{yesterday:[],today:[],blockers:[],note:collect.clip(text,600)};
-  rows.push({name:a.name||'Участник Slack',role:'не в «Команде»',slackUser:a.user,source:'slack',yesterday:parts.yesterday.map(x=>linkItem(x,site)),today:parts.today.map(x=>linkItem(x,site)),blockers:parts.blockers.map(x=>linkItem(x,site)),...parts.note?{note:parts.note}:{},noAnswer:false,commits:0});
+  rows.push({name:a.name||(a.chat?'Участник чата':'Участник Slack'),role:'не в «Команде»',slackUser:a.user,source:a.chat?'chat':'slack',yesterday:parts.yesterday.map(x=>linkItem(x,site)),today:parts.today.map(x=>linkItem(x,site)),blockers:parts.blockers.map(x=>linkItem(x,site)),...parts.note?{note:parts.note}:{},noAnswer:false,commits:0});
  }
  rows.sort((a,b)=>(b.blockers.length>0)-(a.blockers.length>0)||(a.noAnswer-b.noAnswer)||a.name.localeCompare(b.name,'ru'));
- const totals={people:rows.length,answered:rows.filter(r=>r.source==='slack').length,drafted:rows.filter(r=>r.source==='draft').length,blocked:rows.filter(r=>r.blockers.length).length,blockers:rows.reduce((n,r)=>n+r.blockers.length,0),silent:rows.filter(r=>r.noAnswer).length};
+ const totals={people:rows.length,answered:rows.filter(r=>r.source==='slack'||r.source==='chat').length,drafted:rows.filter(r=>r.source==='draft').length,blocked:rows.filter(r=>r.blockers.length).length,blockers:rows.reduce((n,r)=>n+r.blockers.length,0),silent:rows.filter(r=>r.noAnswer).length};
  if(!team.length)warnings.push('«Команда» пуста — добавьте людей с аккаунтами Jira и Slack, чтобы собрать стендап по каждому.');
- return {project:{id:pid,name:projectName(s,pid)},jira:jiraKey||'',site,since:since.toISOString(),at:now.toISOString(),thread:t?{url:t.url}:null,sources:used,people:rows,totals,warnings};
+ return {project:{id:pid,name:projectName(s,pid)},jira:jiraKey||'',site,since:since.toISOString(),at:now.toISOString(),thread:t?{url:t.url}:chatThread,sources:used,people:rows,totals,warnings};
 }
 
 function summary(card,focus){
@@ -179,12 +199,14 @@ function summary(card,focus){
 // --- Turns ----------------------------------------------------------------------------------------------------------
 async function collectTurn(s,command,focus,{now=new Date(),git}={}){
  const pid=projectId(s),cfg=config(s,pid);
- const hasThread=collect.thread(link(command)||cfg.thread);
+ // A Slack link in the request wins over the configured thread (Slack or messenger).
+ const chat=link(command)?null:cfg.messenger||null;
+ const hasThread=collect.thread(link(command)||cfg.thread)||chat;
  const go=async jiraKey=>{
   if(jiraKey&&typeof jiraKey==='object')return jiraKey;
   if(!jiraKey&&!hasThread&&!folders(s,pid).length)return kit.reply(s,command,{by:BY,question:true,text:'Стендап собираю по Jira, git проекта или ответам в треде Slack. Подключите Jira в «Подключениях» или пришлите ссылку на тред: «настрой стендап на 10:30 в треде https://…slack.com/archives/…».'});
   const since=sinceFor(cfg,now);
-  const card=await build(s,{pid,jiraKey,now,since,thread:link(command)||cfg.thread,git});
+  const card=await build(s,{pid,jiraKey,now,since,thread:link(command)||cfg.thread,chat,git});
   if(jiraKey&&jiraKey!==cfg.jira)cfg.jira=jiraKey;
   markRun(s,pid,cfg,now,since);
   return kit.reply(s,command,{by:BY,text:summary(card,focus),data:{standupCard:{...card,focus,schedule:cfg.enabled?{time:cfg.time,days:dayNames(cfg.days)}:null}},
@@ -193,16 +215,50 @@ async function collectTurn(s,command,focus,{now=new Date(),git}={}){
  return go(jiraProject(s,cfg,go));
 }
 
-function configureTurn(s,command){
+// «… в треде маттермоста»: a connected messenger with threads, named in the request. Its channel and the root message
+// (the standup question) are chosen from what it shows; `finish(chat)` saves the choice. null when no messenger is named.
+async function pickChat(s,command,finish){
+ let reg,named;
+ try{reg=chatSources.messengers(s);named=reg.named(command).map(id=>reg.find(id)).filter(x=>x&&!x.memory);}catch{return null;}
+ if(!named.length)return null;
+ const src=named.find(x=>x.ready&&x.thread)||named[0];
+ if(!src.ready)return kit.reply(s,command,{by:BY,question:true,text:'«'+src.name+'» не подключён. '+(src.hint||'Подключите его в настройках этого приложения.')});
+ if(!src.thread)return kit.reply(s,command,{by:BY,error:true,text:'«'+src.name+'» не умеет читать треды — для стендапа нужен тред.'});
+ const channels=await reg.channels(src.id);
+ if(!channels.length)return kit.reply(s,command,{by:BY,question:true,text:'В «'+src.name+'» нет каналов, которые Петя читает. Выберите их в настройках «'+src.name+'».'});
+ const pickThread=async ch=>{
+  const r=await reg.messages(src.id,{channel:ch.id,days:7,limit:200});
+  const roots=r.messages.filter(m=>!m.thread||m.thread===m.id).slice(0,8);
+  if(!roots.length)return kit.reply(s,command,{by:BY,question:true,text:'В «'+ch.name+'» за неделю нет сообщений. Напишите туда вопрос стендапа и повторите.'});
+  const day=at=>new Date(at).toLocaleString('ru-RU',{weekday:'short',hour:'2-digit',minute:'2-digit'});
+  const options=roots.map((m,i)=>(i+1)+'. '+day(m.at)+' · '+m.author.name+': '+collect.clip(m.text,60));
+  return ask({text:'Какое сообщение в «'+ch.name+'» — вопрос стендапа? Ответы в его треде станут ответами команды.',label:'Тред',options,strictChoices:true},answer=>{
+   const i=options.indexOf(String(answer||'').trim());if(i<0)return {handled:true,text:'Такого сообщения нет в списке.',error:true};
+   return finish({source:src.id,name:src.name,channel:ch.id,channelName:ch.name,id:roots[i].id,title:collect.clip(roots[i].text,80)});
+  });
+ };
+ if(channels.length===1)return pickThread(channels[0]);
+ const names=channels.slice(0,12).map(c=>c.name);
+ return ask({text:'В каком канале «'+src.name+'» тред стендапа?',label:'Канал',options:names,strictChoices:true},answer=>{
+  const ch=channels.find(c=>c.name===String(answer||'').trim());if(!ch)return {handled:true,text:'Такого канала нет в списке.',error:true};
+  return pickThread(ch);
+ });
+}
+async function configureTurn(s,command){
  const pid=projectId(s),cfg=config(s,pid),p=parseSchedule(command);
  if(p.error)return kit.reply(s,command,{by:BY,error:true,text:p.error});
  const time=p.time||cfg.time;
  if(!time)return ask({text:'Во сколько готовить стендап?',label:'Время',placeholder:'10:30',options:['10:00','10:30','11:00']},answer=>configureTurn(s,command+' в '+answer));
  if(link(command)&&!p.thread)return kit.reply(s,command,{by:BY,error:true,text:'Это не ссылка на тред Slack. Скопируйте ссылку на сообщение: «Копировать ссылку» в меню сообщения.'});
- const next={...cfg,time,days:p.days||cfg.days,thread:p.thread||cfg.thread,enabled:true,preparedDay:''};
- saveConfig(s,pid,next);
- const where='Слежу за проектом «'+projectName(s,pid)+'»'+(next.thread?', ответы читаю из треда Slack':'');
- return kit.reply(s,command,{by:BY,text:'Готово: сводка стендапа '+dayNames(next.days)+' в '+time+'. '+where+'. В это время подготовлю черновики «вчера / сегодня / блокеры» в чате «Стендап» и пришлю уведомление — в Slack ничего не отправляю сам.'});
+ const save=chat=>{
+  const next={...cfg,time,days:p.days||cfg.days,thread:chat?'':p.thread||cfg.thread,enabled:true,preparedDay:''};
+  if(chat)next.messenger=chat;else if(p.thread)delete next.messenger;
+  saveConfig(s,pid,next);
+  const where='Слежу за проектом «'+projectName(s,pid)+'»'+(next.thread?', ответы читаю из треда Slack':next.messenger?', ответы читаю из треда «'+next.messenger.title+'» в '+next.messenger.name+' · '+next.messenger.channelName:'');
+  return kit.reply(s,command,{by:BY,text:'Готово: сводка стендапа '+dayNames(next.days)+' в '+time+'. '+where+(next.messenger?'. В это время подготовлю черновики «вчера / сегодня / блокеры» в чате «Стендап» и пришлю уведомление — в мессенджер ничего не отправляю сам.':'. В это время подготовлю черновики «вчера / сегодня / блокеры» в чате «Стендап» и пришлю уведомление — в Slack ничего не отправляю сам.')});
+ };
+ if(!p.thread&&/тред/iu.test(command)){const picked=await pickChat(s,command,save);if(picked)return picked;}
+ return save(null);
 }
 function disableTurn(s,command){
  const pid=projectId(s),cfg=config(s,pid);
@@ -220,7 +276,7 @@ async function prepare(s,pid,now=new Date(),deps={}){
  if(!topic){topic={id:randomUUID(),projectId:pid,title:'Стендап · '+project.name,kind:'chat',standupProject:pid,messages:[],at:Date.now()};state.topics.push(topic);}
  const jiraKey=collect.jiraReady(s)&&cfg.jira&&require('../../jira-routing.cjs').allowed(s.settings).includes(cfg.jira)?cfg.jira:'';
  const since=sinceFor(cfg,now);
- const card=await build(s,{pid,jiraKey,now,since,thread:cfg.thread,git:deps.git});
+ const card=await build(s,{pid,jiraKey,now,since,thread:cfg.thread,chat:cfg.messenger||null,git:deps.git});
  markRun(s,pid,{...cfg,preparedDay:ymd(now)},now,since);
  const text=summary(card,'collect');
  topic.messages.push({role:'assistant',text,at:Date.now(),by:BY,extensionData:{standupCard:{...card,focus:'collect',schedule:{time:cfg.time,days:dayNames(cfg.days)}}}});
@@ -251,7 +307,7 @@ function setup(s){
  };
  if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){const timer=setInterval(()=>{tick().catch(()=>{});},60000);timer.unref?.();}
  return {standup:{tick},ipc:{
-  schedule:()=>{const pid=projectId(s),c=config(s,pid);return {project:projectName(s,pid),enabled:c.enabled,time:c.time,days:c.days,thread:c.thread};}
+  schedule:()=>{const pid=projectId(s),c=config(s,pid);return {project:projectName(s,pid),enabled:c.enabled,time:c.time,days:c.days,thread:c.thread,...c.messenger?{messenger:{source:c.messenger.source,name:c.messenger.name,channel:c.messenger.channelName,title:c.messenger.title}}:{}};}
  }};
 }
 
@@ -260,9 +316,9 @@ async function turn(s,command,deps={}){
  const k=kind(text);
  if(!k||!kit.installed(s,ID))return null;
  try{
-  if(k==='configure')return configureTurn(s,text);
+  if(k==='configure')return await configureTurn(s,text);
   if(k==='disable')return disableTurn(s,text);
   return await collectTurn(s,text,k,deps);
  }catch(e){if(e?.name==='InputRequired')throw e;return kit.failure(s,command,BY,e);}
 }
-module.exports={name:'standup',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,kind,parseSchedule,build,summary,prepare,due,sinceFor,collectTurn};
+module.exports={name:'standup',defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,kind,parseSchedule,build,summary,prepare,due,sinceFor,collectTurn,chatSources};

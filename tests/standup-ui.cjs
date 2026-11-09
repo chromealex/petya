@@ -43,6 +43,15 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("document.getElementById('card-shot').scrollTop=1e5");
  await js('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');await new Promise(r=>setTimeout(r,300));
  require('node:fs').writeFileSync(require('node:path').join(require('node:os').tmpdir(),'petya-standup-2.png'),(await win.webContents.capturePage()).toPNG());
- console.log('Standup card ('+file+'): tiles, answers bar, people rows, blockers, no answer, safe text and actions passed');
+ // A messenger thread (messenger-source) instead of Slack: answers marked as in the thread, the messenger named.
+ const chat={...card,thread:{url:'https://chat.example.com/studio/pl/p100',source:'Mattermost',channel:'standup'},sources:{jira:true,git:true,slack:false,chat:'Mattermost'},
+  people:card.people.map(p=>p.source==='slack'?{...p,source:'chat'}:p)};
+ await js(`document.getElementById('card-shot')?.remove();showDialogueMessages([{role:'assistant',text:'Стендап: ответили в треде 3 из 5.',by:'Стендап',extensionData:{standupCard:${JSON.stringify(chat)}}}],'Стендап · чат')`);
+ for(let i=0;i<150;i++){if(await js("!!document.querySelector('.standup-card')"))break;await new Promise(r=>setTimeout(r,30));}
+ assert.match(await js("document.querySelector('.standup-card .kit-sub, .standup-card .kit-subtitle')?.textContent||document.querySelector('.standup-card').textContent"),/Mattermost/);
+ assert.equal(await js("[...document.querySelectorAll('.standup-person[data-source=chat] .kit-chip')].filter(c=>c.textContent==='ответ в треде').length"),3);
+ assert.match(await js("[...document.querySelectorAll('.standup-person[data-source=chat] .kit-chip')].find(c=>c.textContent==='ответ в треде').title"),/^Ответ в Mattermost/);
+ console.log('Standup with a messenger thread: '+await require('./card-shot.cjs')(win,'.standup-card','petya-standup-chat'));
+ console.log('Standup card ('+file+'): tiles, answers bar, people rows, blockers, no answer, safe text and actions, messenger thread passed');
 }};
 require('../src/main.cjs');
