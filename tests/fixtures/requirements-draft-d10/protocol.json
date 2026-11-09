@@ -1,0 +1,39 @@
+{
+  "part": "D10",
+  "group": "Andromeda",
+  "parent": "/Users/aleksandrfeer/.petya-train/andromeda-d9/adapter",
+  "parent_sha256": "53e20e498ad1fc7147de2dd2b94c826c23794fa11af97b75ae1718cd19a889f2",
+  "training_file": "train.jsonl",
+  "steps": 921,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 5e-07,
+  "families": [
+    "open-recipient",
+    "code",
+    "cancel-one",
+    "permission"
+  ],
+  "per_family": 20,
+  "kept_families": [
+    "screen-only",
+    "exact-name",
+    "two-recipients",
+    "quote"
+  ],
+  "per_kept_family": 10,
+  "offset": 40,
+  "hashes": {
+    "train.jsonl": "e8a5f20b62939ad4fa9ef81a6e1962f46f0f2dcbe67b8ee698f498634f8e8bf6",
+    "../requirements-draft-d2/new-train.jsonl": "7d47c8442a914deb4b11b3138cae1d9fe0debb0dd92a9540b9792b4d8417e895",
+    "../requirements-draft-d2/holdout.jsonl": "5b51097323c8f46ee79ccfcb7df061edf46baa1bddc8c492191268625dc1c03f"
+  },
+  "sources": {
+    "tests/fixtures/requirements-draft-v21/train_checkpointed.py": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+    "tests/fixtures/requirements-draft-v21/checkpoint.py": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549"
+  },
+  "recipe": "Continue D9 on the 801 familiar cases once plus dialogues 41–60 of four weak D2 families and 41–50 of the four families D9 learned (921 presentations) at lr 5e-7.",
+  "gate": "D10 replaces D9 only if it is not worse than D9 on any set (39/54, 28+7/42, 796/801).",
+  "limits": "The families were chosen from D9 errors on the generated held-out set, so that set is not blind to the choice (no held-out dialogue is trained)."
+}
