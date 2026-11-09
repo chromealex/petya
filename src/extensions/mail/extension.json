@@ -6,6 +6,7 @@
   "setting": "module_gmail",
   "service": "gmail",
   "settings": false,
+  "quickStart": {"order": 40},
   "feature": "feature.cjs",
   "scripts": [
     ["mail-cards.js", "message-format.js"],

@@ -6,6 +6,7 @@
   "setting": "module_jira",
   "service": "jira",
   "settings": true,
+  "quickStart": {"order": 20},
   "scripts": [
     [
       "settings.js",

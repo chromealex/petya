@@ -8,6 +8,8 @@ const runtime=require('../extension-runtime.cjs');
 // Catalog categories: ordered groups, and the category of service modules that have no extension directory.
 const groups=registry.categories();
 for(const [id,list] of Object.entries(groups.moduleExamples||{}))if(!groups.modules?.[id]||!Array.isArray(list)||!list.every(e=>typeof e==='string'&&e.trim()))throw Error('Invalid module examples '+id);
+// Service modules without an app folder may join «С чего начать» like apps do with extension.json "quickStart".
+for(const [id,order] of Object.entries(groups.moduleQuickStart||{}))if(!groups.modules?.[id]||!Number.isInteger(order)||order<0||order>1000)throw Error('Invalid module quick start '+id);
 const descriptors=()=>registry.descriptors();
 // Bundled features (and external ones present at startup) for src/features.cjs; later ones are added live.
 const features=[...descriptors().filter(d=>d.feature&&d.origin==='bundled').map(d=>require(path.join(d.dir,d.feature))),...runtime.startup()];

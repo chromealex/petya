@@ -79,6 +79,7 @@ extension (refused). Everything the extension needs is inside its folder; there 
 | `provides` | `{kind: "file.cjs" \| [files]}` | Kinds it serves to other apps (section 9). |
 | `downloads` | `[{id, name, bytes \| {darwin, win32}, approx?, optional?, requires?}]` | What adding it downloads (section 11). |
 | `ui` | `{pages: [...], tabs: [...], personFields: [...]}` | Its own items in Petya's interface: a page in the left rail, tabs on Petya's or other apps' pages, fields on the cards of «Команда» (section 8a). |
+| `quickStart` | `{"order": 0–1000}` | Bundled service apps: a button in «С чего начать» on «Настройки» → «Сервисы» (first run, nothing added yet), in `order`; the button adds the app and opens its card. Service modules without an app folder declare it in `categories.json` `moduleQuickStart` (`{"notion": 30}`). Today: Slack 10, Jira 20, Notion 30, Почта 40. |
 
 `registry.validate()` checks all of this; bundled errors throw at startup (a bug), external errors refuse the
 extension and show a notification with the reason.

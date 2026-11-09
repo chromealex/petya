@@ -138,6 +138,8 @@ function validate(dir,{external=false,expectId}={}){
  if(d.connects!==undefined&&!(typeof d.connects==='string'&&d.connects.trim()))throw Error('Invalid extension connects '+d.id);
  if(d.connectsKeys!==undefined&&!(Array.isArray(d.connectsKeys)&&d.connectsKeys.every(k=>/^[A-Za-z][\w-]*$/.test(k))))throw Error('Invalid extension connectsKeys '+d.id);
  if(d.results!==undefined&&!(d.results&&typeof d.results==='object'&&!Array.isArray(d.results)&&Object.entries(d.results).every(([k,v])=>/^[A-Za-z][\w-]{0,63}$/.test(k)&&/^[A-Za-z_$][\w$]{0,63}$/.test(v))))throw Error('Invalid extension results '+d.id);
+ // «С чего начать» on «Настройки» → «Сервисы» (src/ui/ux-review.js): the app is one of the first services to add.
+ if(d.quickStart!==undefined&&!(d.quickStart&&typeof d.quickStart==='object'&&!Array.isArray(d.quickStart)&&Object.keys(d.quickStart).every(k=>k==='order')&&Number.isInteger(d.quickStart.order)&&d.quickStart.order>=0&&d.quickStart.order<=1000))throw Error('Invalid extension quickStart '+d.id+': {"order": 0–1000}');
  if(d.version!==undefined&&!(typeof d.version==='string'&&/^\d{1,6}(?:\.\d{1,6}){0,3}$/.test(d.version)))throw Error('Invalid extension version '+d.id+': use digits and dots, e.g. 1.2.0');
  if(d.author!==undefined&&!(typeof d.author==='string'&&d.author.trim()&&d.author.length<=120))throw Error('Invalid extension author '+d.id);
  if(d.markup){if(!/^[a-z][a-z0-9-]*\.html$/.test(d.markup))throw Error('Invalid settings template');d.template=fs.readFileSync(path.join(dir,d.markup),'utf8');}

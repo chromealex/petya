@@ -27,6 +27,19 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const tabs=page=>js(`[...document.querySelectorAll('#${page} .page-tabs button')].map(b=>b.dataset.tabKey)`);
  await js('window.chatNavigationReady');win.setContentSize(1280,860);win.showInactive();await clean();
 
+ // «С чего начать»: the buttons are the apps that declare a quick start, in their order, then the catalog.
+ await js("view('settings');window.petyaTabs.select('settings','services')");
+ await wait("document.querySelectorAll('.settings-start [data-quick-start]').length===4&&!document.querySelector('.settings-start').hidden");
+ assert.deepEqual(await js("[...document.querySelectorAll('.settings-start [data-quick-start]')].map(b=>b.dataset.quickStart)"),['slack','jira','notion','mail']);
+ assert.deepEqual(await js("[...document.querySelectorAll('.settings-start .actions button')].map(b=>b.textContent)"),en?['Slack','Jira','Notion','Mail','All apps…']:['Slack','Jira','Notion','Почта','Все приложения…']);
+ await shot('quick-start',{rail:'wide'});await shot('quick-start-compact',{rail:'compact'});await shot('quick-start-narrow',{rail:'compact',size:[760,860]});
+ // A button adds that app and opens its card; the start card goes once a service is added.
+ await js("document.querySelector('.settings-start [data-quick-start=\"mail\"]').click()");
+ await wait("(window.extensionHost.entries().find(e=>e.id==='mail')||{}).installed===true||moduleEnabled('gmail')");
+ await wait("document.querySelector('.settings-start').hidden");
+ assert.equal(await js("moduleEnabled('gmail')"),true,'«Почта» added');
+ await js("window.extensionHost.remove('mail').catch(()=>{});const c=moduleChecks.get('gmail');if(c&&c.checked){c.checked=false;c.onchange();}");await settle();
+
  // «Почта» → «Почтовые правила» on «Навыки».
  const mail=require('../src/extensions/mail/feature.cjs').instance();
  for(const r of mail.list())mail.remove(r.id);
