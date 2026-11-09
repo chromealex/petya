@@ -7,7 +7,7 @@ Petya runs a group of models named after a constellation (Andromeda, Bootes, Cas
 - **A** — answers and conversation; optional, downloaded separately when turned on, otherwise R answers;
 - **D** — requirement drafts (the fine-tuned adapter).
 
-The version names the parts: **Petya Andromeda R1-A1-D8** (since 9 November 2026; D7 and D1 before). Retraining a part raises only its number (D2, R2);
+The version names the parts: **Petya Andromeda R1-A1-D9** (since 9 November 2026; D8, D7 and D1 before). Retraining a part raises only its number (D2, R2);
 a new group name starts when the set of parts or a base model changes; the group is stable once every part passes
 all gates (familiar, held-out, live dialogue, runtime, packaging).
 
@@ -23,7 +23,9 @@ familiar cases (up to 791) but lost D3's new corrections; it is a recipe, not pu
 rehearsal) is the best so far — 37/54 new, 34/42 v22, 795/801 familiar — but loses five of D1's held-out successes;
 pre-release `andromeda-d7`. On 9 November 2026 the owner made D7 the group's D (R1-A1-D7); D1 stays
 published for rollback. D8 (D7 continued on its weak correction families) is better still — 39/54, 35/42, 795/801 —
-and became the group's D the same night (R1-A1-D8).
+and became the group's D the same night (R1-A1-D8). D9 (D8 continued on its four remaining weak families) ties D8
+on new dialogues (39/54, but 25 exact against 19) and v22 (35/42) and keeps one more familiar case (796/801), so by the
+"not worse on any set" gate it became the group's D (R1-A1-D9); D8 stays published for rollback.
 
 Training keeps here what the next stage needs: data, protocols, scripts, evidence, the training environment in
 `~/.petya-train/env` (recreated from `scripts/train-requirements.txt` when missing; `/tmp` does not survive a restart), the base model in the Hugging Face cache and the parent adapter of the next stage.

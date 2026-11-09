@@ -1,0 +1,71 @@
+{
+  "part": "Andromeda D9",
+  "adapter_sha256": "53e20e498ad1fc7147de2dd2b94c826c23794fa11af97b75ae1718cd19a889f2",
+  "parent": "D8",
+  "steps": 881,
+  "learning_rate": 5e-07,
+  "generated_holdout": {
+    "D9": 39,
+    "D8": 39,
+    "D1": 24,
+    "total": 54,
+    "exact": 25,
+    "lost_D8": [
+      "d2-hold-cancel-one-27",
+      "d2-hold-cancel-one-9",
+      "d2-hold-open-recipient-34",
+      "d2-hold-open-recipient-43",
+      "d2-hold-permission-19",
+      "d2-hold-permission-37",
+      "d2-hold-quote-33"
+    ],
+    "gained_vs_D8": [
+      "d2-hold-exact-name-22",
+      "d2-hold-quote-24",
+      "d2-hold-screen-only-14",
+      "d2-hold-screen-only-32",
+      "d2-hold-screen-only-5",
+      "d2-hold-screen-only-50",
+      "d2-hold-two-recipients-38"
+    ]
+  },
+  "v22": {
+    "checks": {
+      "D9": 28,
+      "D8": 28,
+      "D1": 27,
+      "total": 30
+    },
+    "drafts": {
+      "D9": 7,
+      "D8": 7,
+      "D1": 6,
+      "total": 12,
+      "lost_D8": [
+        "v22-new-two-recipients"
+      ],
+      "gained_vs_D8": [
+        "v22-new-code-item"
+      ]
+    }
+  },
+  "familiar": {
+    "D9": 796,
+    "D8": 795,
+    "D1": 787,
+    "total": 801,
+    "lost_D8": [
+      "fresh-add-not-replace",
+      "fresh-cancel-first",
+      "fresh-quoted-instruction"
+    ],
+    "gained_vs_D8": [
+      "fresh-sort-3-1-1",
+      "fresh-undo-ban",
+      "v20-only-one-recipient",
+      "v20-repeat"
+    ]
+  },
+  "gate": "passed: not worse than D8 on any set (ties on new and v22, +1 familiar; 25 exact vs 19)",
+  "decision": "D9 is the group's D since 9 November 2026 (R1-A1-D9)"
+}
