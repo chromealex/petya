@@ -19,6 +19,13 @@
  }
  const renameCard=$('company-rename-form').closest('article');renameCard.hidden=true;
  const companyList=document.createElement('div');companyList.id='company-list';$('company-rename-form').closest('article').before(companyList);
+ // Start over: every company goes to the Trash, Petya restarts into the introduction (src/company-reset.cjs).
+ const resetAll=document.createElement('details');resetAll.className='compact-help company-reset';
+ const resetSummary=document.createElement('summary');resetSummary.textContent='Удалить все компании и начать заново';
+ const resetText=document.createElement('p');resetText.className='small';resetText.textContent='Чаты, подключения, команды, задачи и обучение всех компаний переместятся в Корзину. Скачанные модели, установленные приложения и язык интерфейса останутся. Петя перезапустится и начнёт знакомство с начала.';
+ const resetButton=document.createElement('button');resetButton.type='button';resetButton.className='quiet danger';resetButton.textContent='Удалить все компании';
+ resetButton.onclick=async()=>{resetButton.disabled=true;try{const result=await window.petya.companyRemoveAll();if(result?.restarting)$('company-status').textContent='Перезапускаюсь…';}catch(error){$('company-status').textContent=error.message;}finally{resetButton.disabled=false;}};
+ resetAll.append(resetSummary,resetText,resetButton);$('company-status').before(resetAll);
  function render(data){
   current=data.activeId;tabs.replaceChildren();companyList.replaceChildren();
   for(const company of data.companies){

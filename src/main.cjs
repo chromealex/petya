@@ -633,6 +633,12 @@ function setupHandlers() {
     if(answer.response!==0)return {...companies.list(),activeId:companyId,cancelled:true};
     const {dir}=companies.remove(id);try{await require('electron').shell.trashItem(dir);}catch{fs.rmSync(dir,{recursive:true,force:true});}
     refreshTrayMenu();return {...companies.list(),activeId:companyId};});
+  handle('companyRemoveAll',async()=>{const {t}=require('./interface-language.cjs');
+    if(chatJobs.any()||dialogue.running.size)throw Error('Дождитесь завершения запросов в чатах.');
+    const answer=await require('electron').dialog.showMessageBox(win,{type:'warning',buttons:[t('Удалить всё'),t('Отмена')],defaultId:1,cancelId:1,message:t('Удалить все компании?'),detail:t('Чаты, подключения, команды, задачи и обучение всех компаний переместятся в Корзину. Скачанные модели, установленные приложения и язык интерфейса останутся. Петя перезапустится и начнёт знакомство с начала.')});
+    if(answer.response!==0)return {cancelled:true};
+    require('./company-reset.cjs').request(app.getPath('userData'));
+    app.relaunch({args:process.argv.slice(1).filter(arg=>arg!=='--hidden')});setImmediate(()=>app.quit());return {restarting:true};});
   handle('companyRename',(id,name)=>{companies.rename(id,name);win.setTitle('Петя · '+companies.get(companyId).name);refreshTrayMenu();return {...companies.list(),activeId:companyId};});
   handle('companySwitch',async(id,raw)=>{
     if(raw && chatLocation.parse(raw)?.company!==id)throw Error('Некорректная ссылка на компанию.');
@@ -721,6 +727,9 @@ if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.setAppUserModelId('com.petya.desktop');
   app.on('second-instance', (_event,args) => {const raw=args.find(s=>chatLocation.parse(s));if(raw)receiveMessageLink(raw);else if(win)show();});
+  // «Удалить все компании» finishes here, before anything opens the data folders (src/company-reset.cjs).
+  let removedCompanies=null;try{removedCompanies=require('./company-reset.cjs').apply(app.getPath('userData'));}catch(error){console.error('Company reset:',error);}
+  if(removedCompanies)app.whenReady().then(()=>require('electron').shell.trashItem(removedCompanies)).catch(()=>fs.rmSync(removedCompanies,{recursive:true,force:true}));
   try { companies=new (require('./companies.cjs').Companies)(app.getPath('userData'));companyId=companies.state.activeId;dataRoot=companies.directory(companyId);fs.mkdirSync(dataRoot,{recursive:true});app.setPath('sessionData',dataRoot); }catch(error){((title,body)=>require('electron').dialog.showErrorBox(require('./interface-language.cjs').t(title),require('./interface-language.cjs').t(body)))('Петя: компании недоступны',error.message);app.exit(1);}
   app.whenReady().then(() => {
     // Linux CI and containers have no OS keyring; tests only use a plain-text store there.
