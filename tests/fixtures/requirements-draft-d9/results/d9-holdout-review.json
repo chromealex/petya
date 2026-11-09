@@ -1,0 +1,147 @@
+{
+ "d2-hold-permission-1": {
+  "passed": true,
+  "reason": "Field kept, no seal, sending allowed.",
+  "answer_sha256": "1cfdd5030e49718ce7ee4df692c46a5ce6688e5dfd0ac66adb1bf7e1d28c4651"
+ },
+ "d2-hold-two-recipients-2": {
+  "passed": false,
+  "reason": "«Без пояснения» (no comment) lost.",
+  "answer_sha256": "90e574c9e637454a711ad1ef08a705f0b30e9362ddc2c7046ab28ad42b59cb17"
+ },
+ "d2-hold-quote-6": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "384f7797f719fe5c9c73fbc0bd52f8e2054a9c161d4e028fc4cb8754795ca6bf"
+ },
+ "d2-hold-open-recipient-7": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "6f6853e2adf91a88da88299b8788f6d7cd9f1c3fb19afe13fe9a65409e758c34"
+ },
+ "d2-hold-code-8": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "169d3ecb85efe148609cc410dde9e2edcd462f28b9e4d044992211ed88ad94ec"
+ },
+ "d2-hold-cancel-one-9": {
+  "passed": false,
+  "reason": "Invents «назначение dock_slot»; rejected bay_slot replacement not stated.",
+  "answer_sha256": "a1cfd42c463d7c9b464ea2d3e0252165b8af9da54fa6c7765853b07f078623ee"
+ },
+ "d2-hold-permission-10": {
+  "passed": true,
+  "reason": "Field, sending allowed, no signature.",
+  "answer_sha256": "ef24b4c07f7360e9a9d25fbb70ada296fd5df53d9a32e70ed7286650ed0a8dd2"
+ },
+ "d2-hold-quote-15": {
+  "passed": false,
+  "reason": "Recipient «стажёру» lost.",
+  "answer_sha256": "8ba8839529a5e9561f680f797be63a809f1e2687d4871d7d4ae264e6b5b8d694"
+ },
+ "d2-hold-open-recipient-16": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "bf460629317945f7c3d942aa23485649c8c3905109bc479e070c4835505a9059"
+ },
+ "d2-hold-code-17": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "8b7e564568a3e4cc883702e14391a68c4044d94b350973b83f0bf3062764ae70"
+ },
+ "d2-hold-permission-19": {
+  "passed": false,
+  "reason": "Invented ban for others; lowercase «дату».",
+  "answer_sha256": "0635cea060faa9103a03110f3206a536b62f15d74e2287da9048a33739267631"
+ },
+ "d2-hold-quote-24": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "519728ef2787f308ee8fe3e26fb8eb4d7c91a592af5a6fd1fb335a7b82332632"
+ },
+ "d2-hold-code-26": {
+  "passed": false,
+  "reason": "Loses the next pickup by a new code.",
+  "answer_sha256": "bc60ec0b28a5e2bf88265569248388ef45052d4df6ecc3699e6d7c02c3ac09e7"
+ },
+ "d2-hold-cancel-one-27": {
+  "passed": false,
+  "reason": "«Назначение dock_slot» changes the meaning.",
+  "answer_sha256": "24f4bf129f79de648cbe73e04baa68c3de4259ee470ed36f656e65486016febf"
+ },
+ "d2-hold-permission-28": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "22584dfc9384e124ff4daf006957d50cd0c9a5220e0ade1b811a0edf41f4c732"
+ },
+ "d2-hold-two-recipients-29": {
+  "passed": true,
+  "reason": "Identical copies without explanation, permissions per recipient.",
+  "answer_sha256": "0b93e7327c4cfd086d99344401e205fbe590f7136cc9f17e54e3b752eefb694e"
+ },
+ "d2-hold-quote-33": {
+  "passed": false,
+  "reason": "Summary «Копия анкеты» is wrong; document name lost.",
+  "answer_sha256": "ab4bcf247d8747f8a9a121ef990cb2caca495f05a521c523f205f0ccd3b270b1"
+ },
+ "d2-hold-open-recipient-34": {
+  "passed": false,
+  "reason": "Grammar: «в зал 30» instead of «в зале 30».",
+  "answer_sha256": "b8e239a56d88d3ddceacb6290ca630e6ec0e048d725a6383f70b3e8f855ab812"
+ },
+ "d2-hold-code-35": {
+  "passed": false,
+  "reason": "Invents the unapproved 515-second lifetime; open question lost.",
+  "answer_sha256": "3d99daca4ebe6f05778cadb2481e9576800f48825a1e89b7fc1dce6d8b7c8af0"
+ },
+ "d2-hold-cancel-one-36": {
+  "passed": true,
+  "reason": "Rename and the kept field.",
+  "answer_sha256": "5e42430287fe546b0de450adf56aab5eb1729e1021dc87374425a7f7dbd30ff2"
+ },
+ "d2-hold-permission-37": {
+  "passed": false,
+  "reason": "Permission not stated, only «получатель».",
+  "answer_sha256": "c82361eccc2f995e6c50c77d1fe2f1db279aa9fa0b4bfac6d6e44044f3232bb8"
+ },
+ "d2-hold-two-recipients-38": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "feaa5c433957c27e9af5ce7f0bad719139ea7f95bde10e2381d0257599fd10d0"
+ },
+ "d2-hold-screen-only-41": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "e3e2d4545d446282bbc24f8987c3defeaa12acc34936c4b196b71a0c7c9dc04d"
+ },
+ "d2-hold-quote-42": {
+  "passed": false,
+  "reason": "Garbage text «норму characters не задано»; quote-is-not-a-ban lost.",
+  "answer_sha256": "e3573e2ab8c8cb32f5bcaa1a88a41c5fc5ebb944483008bd1e022d9616ee1fe2"
+ },
+ "d2-hold-open-recipient-43": {
+  "passed": false,
+  "reason": "Grammar: «в зал 17» instead of «в зале 17».",
+  "answer_sha256": "4fb6a3cbb1e03f7dd1f6c4f6298783d3c9e7c0fc54f80fc7268cd6f563595806"
+ },
+ "d2-hold-code-44": {
+  "passed": false,
+  "reason": "Not-for-login lost.",
+  "answer_sha256": "04635c829aafc5185b4966a4c285cef02ce92979af1126aaa6b1acf036680b44"
+ },
+ "d2-hold-permission-46": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "475676ff15dbbd484af3a86eb9316a9e6db25dd1bb19a994c6ba2a9f729d5583"
+ },
+ "d2-hold-open-recipient-52": {
+  "passed": false,
+  "reason": "Open question about the recipient lost.",
+  "answer_sha256": "7d8dd0b472f856acd6c91d1bd91f02eff1d63c2a787989658663d416f0ab3222"
+ },
+ "d2-hold-code-53": {
+  "passed": false,
+  "reason": "Invents «исчерпывает срок действия по умолчанию».",
+  "answer_sha256": "800f244ae3766ee5de89ec8b6b3d3d5c382164934c6c0636a7d22982de4acdde"
+ }
+}

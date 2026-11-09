@@ -1,0 +1,72 @@
+{
+ "v20-only-one-recipient": {
+  "passed": true,
+  "reason": "Same.",
+  "answer_sha256": "c105866027c8e942876750ca3514370f284482bec31546269a4729800309b5a6"
+ },
+ "v21-previous-draft-quote": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "a515c7af52460b9222682be49a693a2e1d16f39c55cb0167e3008eb4380dadba"
+ },
+ "fresh-cancel-first": {
+  "passed": false,
+  "reason": "Calls form fields «индекс»; invented term, form lost.",
+  "answer_sha256": "c0a3c3d80140ff9a9e06ae626e512ab28a5da3db9e5ec6539b9476c733a8457b"
+ },
+ "fresh-revoke-transmit": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "3e113d16b68c38c93048efbdd84f760f393e8972cfa77d01cf92c9e69b98f279"
+ },
+ "fresh-unchanged-field-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1a4f82f08fc53621ecfb096214761358daec1ae18bb04ff8b5969dafe9625154"
+ },
+ "fresh-copy-scope": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "4a225bc4b572cc70d1a2088999ba4ffc5c7d04d728e456250fc5ba0d7a58b819"
+ },
+ "fresh-add-not-replace": {
+  "passed": false,
+  "reason": "Summary mixes English: «Поля locations».",
+  "answer_sha256": "fe889ae9c24fe093ccb4468616c621c6997a32ecd8184c868b233364cf1e4b08"
+ },
+ "fresh-code-versus-item": {
+  "passed": false,
+  "reason": "Inverted: forbids another badge, while a new code may issue one.",
+  "answer_sha256": "330dc74afc407490acdeeb83550c8d8578278abb229cb34d0ad42a0c03a9f84b"
+ },
+ "fresh-duration-open": {
+  "passed": false,
+  "reason": "Lost requirement: code is not used for login.",
+  "answer_sha256": "f9012ec30bf1e4894c3adb2610a185038b32b0edbdcb4a16c7735945d36972e8"
+ },
+ "fresh-exact-caption": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "899e733800fa05fd8a4bf1734aa730b07470c4f0014464704d7bddd8afdf2eb0"
+ },
+ "fresh-quoted-instruction": {
+  "passed": false,
+  "reason": "Typo «преподаателю»; adds an odd «не смешивать в одном действии» instruction.",
+  "answer_sha256": "0a5bff7878d294ed938f2752c19d34f22d7095e83e8c951cabc414a685f82eba"
+ },
+ "fresh-negative-order": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "370d6fc52350ee44b6d88dc15a722a869919be0fe6a5e6a5152cd8b8124920a4"
+ },
+ "fresh-recipient-pending": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "5c1f1c3e72a8b337b40cadc2b388e4764715cadcbc6e6c8e39925f6a15f089df"
+ },
+ "fresh-rename-withdrawn": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "061a101053b1667e2f7ae53be46cd133e1de23d90e482fe714fde6c682c53ac5"
+ }
+}

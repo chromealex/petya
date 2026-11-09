@@ -1,0 +1,57 @@
+{
+ "v22-new-cancel-one": {
+  "passed": false,
+  "reason": "Inverted: uses final_key; value clarification lost.",
+  "answer_sha256": "7161e1b5d8178fedbe2e11f40420c40b727e40874ff013809d7c3744eed2cfff"
+ },
+ "v22-new-cancel-two": {
+  "passed": false,
+  "reason": "Reversed: keeps river_id and renames hill_id, opposite of the decision.",
+  "answer_sha256": "a7664b80be97528c3a89fac457e8b794adb300f17853a835ef3fdc4f0344075d"
+ },
+ "v22-new-two-recipients": {
+  "passed": false,
+  "reason": "Summary «Копия ведомости» is wrong for two statements.",
+  "answer_sha256": "e18eab56184164d4333b0958f817a059726e4f5b1ca73bad1ab58df66e79d093"
+ },
+ "v22-new-revoke-send": {
+  "passed": false,
+  "reason": "«Дату не добавлять» lost.",
+  "answer_sha256": "76a5f6760dc619ffe585e55db0ada426dc27a2d3d73e848e6c776f1ccc23aad4"
+ },
+ "v22-new-restore-send": {
+  "passed": false,
+  "reason": "Object «талон» missing.",
+  "answer_sha256": "c91793ad20e24b270979ceeb58fdb45eddc2c67f1c95e985afaad7feb200564b"
+ },
+ "v22-new-code-item": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "df5ec3fd9ddc48a0280f49da8f3a1edff2fb37edac61dbfb9e6135342ea31af9"
+ },
+ "v22-new-open-duration": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "59c8051fb8e2f0fb502281ddd51cafd46beebc523bd5751bdb3b3e1520e8b414"
+ },
+ "v22-new-exact-name": {
+  "passed": true,
+  "reason": "Exact literals and zeros, no extra ban.",
+  "answer_sha256": "adde27a4fbb32568f2c56f9ffea05af144f7922a34a7f250faf1497cbf2f256d"
+ },
+ "v22-new-add-separate": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "ea34b73b7f5426c1b8c131fb7327ba02a9a99795613ddc6c7010b28a292007c7"
+ },
+ "v22-new-quote": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "1143a06b3045c946fbe66ce308cc1b1ca20ee848788a7b27e6f737cd742e8396"
+ },
+ "v22-new-recipient-open": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "d6c81ac3f00222de765219202d0ebd0d5e42694f5f01f76ff24a6c7eb1d2d23f"
+ }
+}

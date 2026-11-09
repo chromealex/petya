@@ -1,4 +1,4 @@
-// «Модели Пети»: the group (e.g. Petya Andromeda R1-A1-D8) and its parts in the settings; A is optional and downloaded on
+// «Модели Пети»: the group (e.g. Petya Andromeda R1-A1-D9) and its parts in the settings; A is optional and downloaded on
 // its own. Downloads report to the notification center whether or not the settings are open.
 (()=>{
  const call=(method,...args)=>window.petya.feature('modelParts',method,...args);
