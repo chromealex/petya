@@ -84,3 +84,11 @@ const assert=require('node:assert/strict');const {slackProfiles,jiraWork,enrich}
  const polina=saved.find(m=>m.name==='Полина Самарина');assert.equal(polina.role,'Project Manager, Jet Whales');assert.match(polina.aliases,/Polina Samarina/,'the Latin spelling stays for Slack and Jira');assert.match(r.text,/из Jira/);
  console.log('Team fill: names from Jira, roles from Slack profiles, not split into agent parts passed');
 })().catch(e=>{console.error(e);process.exit(1);});
+// Slack connected by sign-in: no token in the settings, the request pipeline adds it; a refusal is reported.
+(async()=>{
+ const r=await slackProfiles({slackCredential:'c'},async url=>({ok:true,members:[{id:'U1',profile:{real_name:'Polina Samarina',title:'PM',email:'p@x.ru',phone:'+7 900'}}]}),[{name:'Polina Samarina'}]);
+ assert.equal(r.profiles[0]?.title,'PM','profiles are read with a sign-in connection');assert.equal(r.profiles[0].phone,'+7 900');
+ const denied=await slackProfiles({slackCredential:'c'},async()=>({ok:false,error:'missing_scope'}),[{name:'X'}]);
+ assert.match(denied.error,/users:read/);
+ console.log('Team enrich: Slack sign-in connection reads profiles, missing scope is reported passed');
+})().catch(e=>{console.error(e);process.exit(1);});

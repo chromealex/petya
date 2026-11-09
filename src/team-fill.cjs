@@ -123,6 +123,8 @@ class TeamFill {
    const deactivated=m=>{if(m.slackId)return gone.some(d=>d.slackId===m.slackId);const n=normalized(m.name).replace(/\s+/g,' ');return !!n&&gone.some(d=>d.names.includes(n))&&!activeNames.has(n);};
    const skipped=candidates.filter(c=>deactivated(c.member)).map(c=>c.member.name);candidates=candidates.filter(c=>!deactivated(c.member));
    const removed=[];for(let i=members.length-1;i>=0;i--)if(deactivated(members[i])){removed.push(members[i].name);members.splice(i,1);}
+   // People removed from the team by hand are neither added back nor filled (src/team-removed.cjs).
+   const dropped=require('./team-removed.cjs');candidates=candidates.filter(c=>!dropped.removed(settings,c.member));
    let renamed=0,joined=0;
    // Saved duplicates of one person («Полина» and «Polina Samarina» from an earlier refresh) become one card:
    // the earlier card keeps its values, the other fills its gaps; both spellings stay as aliases.

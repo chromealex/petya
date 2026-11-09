@@ -51,7 +51,8 @@
   window.paintMeetingNames?.();
   updateSummary();
   const actions=document.createElement('div');actions.className='actions team-member-wide';
-  const remove=window.deleteButton('Удалить участника');remove.onclick=()=>{setDirty(true);card.remove();status.textContent='Изменения не сохранены.';};
+  // A removed person goes to «Удалённые»: a team refresh does not add them back or update them (src/team-removed.cjs).
+  const remove=window.deleteButton('Удалить участника');remove.onclick=()=>{const value=key=>editor.querySelector('[data-field="'+key+'"]')?.value.trim()||'';if(value('name'))window.teamRemovedNow?.({...Object.fromEntries([...editor.querySelectorAll('[data-field]')].map(e=>[e.dataset.field,e.value])),at:Date.now()});setDirty(true);card.remove();status.textContent='Изменения не сохранены.';};
   actions.append(remove);editor.append(actions);details.append(summary,editor);card.append(details);list.append(card);return card;
  }
  // Birthday: a date with a calendar; the stored value (ISO, or «--MM-DD» when Slack gave no year) is in the
@@ -216,12 +217,27 @@
  }
  loadRefresh.onclick=()=>refreshLoad(true);
  document.addEventListener('petya-view',e=>{if(e.detail==='team')refreshLoad().catch(()=>{});});
- async function load(force=false){const data=await window.petya.teamList();if(dirty&&!force){status.textContent='Команда обновлена. Обновите список перед сохранением ручных правок.';$('team-save').disabled=true;return;}list.replaceChildren();data.members.forEach(add);window.paintTeamLoad?.();$('team-notes').value=data.notes;loaded=true;setDirty(false);$('team-save').disabled=false;$('team-add').disabled=false;status.textContent=data.members.length?'Участников: '+data.members.length:'Добавьте коллег, чтобы Петя знал, кто за что отвечает.';}
+ // «Удалённые»: people removed by hand. Saved ones come from the team list, the ones removed now are sent with the save.
+ let stored=[],gone=[];
+ const removedBox=document.createElement('details');removedBox.className='card team-removed';removedBox.hidden=true;$('team-add').before(removedBox);
+ function paintRemoved(){
+  const rows=[...gone,...stored];removedBox.hidden=!rows.length;const open=removedBox.open;removedBox.replaceChildren();removedBox.open=open;
+  const summary=document.createElement('summary');summary.textContent='Удалённые · '+rows.length;
+  const hint=document.createElement('p');hint.className='small';hint.textContent='При обновлении команды Петя не добавляет их снова и не обновляет их данные.';
+  const ul=document.createElement('ul');ul.className='team-removed-list';
+  for(const row of rows){const li=document.createElement('li');const name=document.createElement('span');name.textContent=row.name+(row.role?' · '+row.role:'');
+   const back=document.createElement('button');back.type='button';back.textContent='Вернуть';back.title='Вернуть в команду (сохранится вместе с командой)';
+   back.onclick=()=>{gone=gone.filter(x=>x!==row);stored=stored.filter(x=>x!==row);const {at,...member}=row;add(member);setDirty(true);status.textContent='Изменения не сохранены.';paintRemoved();};
+   li.append(name,back);ul.append(li);}
+  removedBox.append(summary,hint,ul);
+ }
+ window.teamRemovedNow=row=>{gone.unshift(row);paintRemoved();};
+ async function load(force=false){const data=await window.petya.teamList();if(dirty&&!force){status.textContent='Команда обновлена. Обновите список перед сохранением ручных правок.';$('team-save').disabled=true;return;}stored=data.removed||[];gone=[];paintRemoved();list.replaceChildren();data.members.forEach(add);window.paintTeamLoad?.();$('team-notes').value=data.notes;loaded=true;setDirty(false);$('team-save').disabled=false;$('team-add').disabled=false;status.textContent=data.members.length?'Участников: '+data.members.length:'Добавьте коллег, чтобы Петя знал, кто за что отвечает.';}
  document.querySelector('[data-view="team"]').addEventListener('click',run(async()=>{if(!loaded)await load();refreshLoad().catch(()=>{});}));
  $('team-add').onclick=()=>{if(list.children.length>=100){notice('Можно добавить до 100 участников.',true);return;}setDirty(true);add().querySelector('[data-field="name"]').focus();status.textContent='Изменения не сохранены.';};
  form.addEventListener('input',()=>{setDirty(true);status.textContent='Изменения не сохранены.';});
  document.addEventListener('petya-team-updated',()=>{if(dirty){status.textContent='Петя обновил команду. У вас есть несохранённые правки — обновите список перед сохранением.';$('team-save').disabled=true;return;}load().catch(e=>notice(e.message,true));});
  const reload=document.createElement('button');reload.type='button';reload.textContent='Обновить список';reload.onclick=run(()=>load(true));$('team-add').after(reload);
  window.saveTeamNow=()=>new Promise(resolve=>{const done=()=>{document.removeEventListener('petya-team-saved',done);resolve();};document.addEventListener('petya-team-saved',done);form.requestSubmit();setTimeout(done,5000);});
- form.onsubmit=run(async()=>{const members=[...list.children].map(card=>Object.fromEntries([...card.querySelectorAll('[data-field]')].map(e=>[e.dataset.field,e.value])));$('team-save').disabled=true;try{await window.petya.teamSave({members,notes:$('team-notes').value});setDirty(false);refreshLoad(true).catch(()=>{});status.textContent='Команда сохранена. Петя учитывает её в диалоге и при подготовке задач.';}finally{$('team-save').disabled=false;document.dispatchEvent(new Event('petya-team-saved'));}});
+ form.onsubmit=run(async()=>{const members=[...list.children].map(card=>Object.fromEntries([...card.querySelectorAll('[data-field]')].map(e=>[e.dataset.field,e.value])));$('team-save').disabled=true;try{await window.petya.teamSave({members,notes:$('team-notes').value,removed:gone});setDirty(false);window.petya.teamList().then(data=>{stored=data.removed||[];gone=[];paintRemoved();}).catch(()=>{});refreshLoad(true).catch(()=>{});status.textContent='Команда сохранена. Петя учитывает её в диалоге и при подготовке задач.';}finally{$('team-save').disabled=false;document.dispatchEvent(new Event('petya-team-saved'));}});
 })();
