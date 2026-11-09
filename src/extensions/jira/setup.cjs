@@ -1,20 +1,20 @@
 // Jira: routing, documents, metadata, people, batches and history actions IPC.
 // Extracted from main.cjs: shared state comes through ctx (live getters/setters).
 module.exports=ctx=>{
-  const routing = new (require('./jira-routing.cjs').JiraRouting)(ctx.workspace);
+  const routing = new (require('./routing.cjs').JiraRouting)(ctx.workspace);
   ctx.handle('routeJira', async(command,id,project,issueType)=>{
-    command=ctx.text(command,4000);const context=ctx.contextFor(id);const remembered=ctx.projectMemory.get(context.projectMemoryId);const explicit=require('./jira-selection.cjs').keys(ctx.settings.jiraProjects||ctx.settings.jiraProject).some(key=>new RegExp('(?:^|[^a-z0-9])'+key+'(?:$|[^a-z0-9])','i').test(command));const known=!explicit&&remembered?.jira?.site===ctx.settings.jiraUrl?remembered.jira.key:'';const result=await routing.resolve(command,context,project||known,issueType);
+    command=ctx.text(command,4000);const context=ctx.contextFor(id);const remembered=ctx.projectMemory.get(context.projectMemoryId);const explicit=require('./selection.cjs').keys(ctx.settings.jiraProjects||ctx.settings.jiraProject).some(key=>new RegExp('(?:^|[^a-z0-9])'+key+'(?:$|[^a-z0-9])','i').test(command));const known=!explicit&&remembered?.jira?.site===ctx.settings.jiraUrl?remembered.jira.key:'';const result=await routing.resolve(command,context,project||known,issueType);
     const target=ctx.dialogue.active()||ctx.dialogue.state;
     target.lastRouting={project:result.project||'',name:result.name||'',reason:result.reason,source:context.source+' · '+context.title,at:Date.now()};ctx.dialogue.persist();return result;
   });
   const routed = id => id ? routing.settings(id) : (() => { throw new Error('Сначала определите проект по контексту задачи.'); })();
   // Planning without a Jira project is fine when Jira is not connected (the plan goes to Asana).
-  const planSettings = id => { const live = ctx.workspace.settings(); return id || require('./workload.cjs').sources(live, ctx.modules).jira ? routed(id) : { ...live, jiraProject: '' }; };
+  const planSettings = id => { const live = ctx.workspace.settings(); return id || require('../../workload.cjs').sources(live, ctx.modules).jira ? routed(id) : { ...live, jiraProject: '' }; };
   // The running decomposition, so a reopened window shows its progress.
   ctx.handle('decomposeStatus', () => ctx.workspace.decomposing);
   ctx.handle('searchDocs', (id, query) => ctx.workspace.searchDocs(ctx.contextFor(id), query));
-  ctx.handle('jiraChoices', project => require('./jira-selection.cjs').choices(ctx.workspace, ctx.settings, project));
-  ctx.handle('taskMetrics',input=>require('./task-metrics.cjs').read(ctx.workspace,input));
+  ctx.handle('jiraChoices', project => require('./selection.cjs').choices(ctx.workspace, ctx.settings, project));
+  ctx.handle('taskMetrics',input=>require('./metrics.cjs').read(ctx.workspace,input));
   ctx.handle('jiraMetadata', (boardId, routeId) => ctx.workspace.metadata(boardId, routed(routeId)));
   ctx.handle('jiraPeople', (query, routeId) => ctx.workspace.people(query, routed(routeId)));
   ctx.handle('prepareBatch', async (command, id, docs, boardId, routeId) => {

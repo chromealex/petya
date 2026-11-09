@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict');
 const {Dialogue}=require('../src/dialogue.cjs');
-const {JiraInsights}=require('../src/jira-insights.cjs');
+const {JiraInsights}=require('../src/extensions/jira/insights.cjs');
 const {ProjectMemory}=require('../src/project-memory.cjs');
 const {projectCatalogReply}=require('../src/project-catalog.cjs');
 let turns=0;

@@ -63,7 +63,7 @@ const dayNames=days=>days.length===7?'каждый день':days.join()==='1,2,
 // The chat's Jira project, the only allowed one or the working project; several → a question.
 function jiraProject(s,cfg,resume){
  if(!collect.jiraReady(s))return '';
- const {allowed}=require('../../jira-routing.cjs');
+ const {allowed}=require('../jira/routing.cjs');
  const keys=allowed(s.settings),topic=s.dialogue.active();
  const binding=s.projectMemory?.get?.(topic?.projectMemoryId)?.jira;
  const bound=topic?.jiraProject||(binding?.site===s.settings.jiraUrl&&binding.key)||cfg.jira;
@@ -274,7 +274,7 @@ async function prepare(s,pid,now=new Date(),deps={}){
  const project=state.projects?.find(p=>p.id===pid&&!p.archived);if(!project)return null;
  let topic=state.topics.find(t=>t.standupProject===pid&&!t.archived);
  if(!topic){topic={id:randomUUID(),projectId:pid,title:'Стендап · '+project.name,kind:'chat',standupProject:pid,messages:[],at:Date.now()};state.topics.push(topic);}
- const jiraKey=collect.jiraReady(s)&&cfg.jira&&require('../../jira-routing.cjs').allowed(s.settings).includes(cfg.jira)?cfg.jira:'';
+ const jiraKey=collect.jiraReady(s)&&cfg.jira&&require('../jira/routing.cjs').allowed(s.settings).includes(cfg.jira)?cfg.jira:'';
  const since=sinceFor(cfg,now);
  const card=await build(s,{pid,jiraKey,now,since,thread:cfg.thread,chat:cfg.messenger||null,git:deps.git});
  markRun(s,pid,{...cfg,preparedDay:ymd(now)},now,since);

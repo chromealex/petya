@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {AtlassianOAuth,ORIGIN}=require('../src/atlassian-oauth.cjs');
+const {AtlassianOAuth,ORIGIN}=require('../src/extensions/jira/atlassian-oauth.cjs');
 (async()=>{
  let calls=0;const oauth=new AtlassianOAuth(async(url,options)=>{if(url==='https://api.atlassian.com/oauth/token/accessible-resources'){assert.equal(options.headers.Authorization,'Bearer access-secret');return [{id:'cloud-id',url:'https://test.atlassian.net',scopes:['search:confluence']}];} assert.equal(url,ORIGIN+'/v1/token');assert.equal(options.headers.Authorization,'Bearer private-device-key');calls++;return {accessToken:'access-secret',expiresAt:Date.now()+300000,site:{id:'cloud-id',url:'https://test.atlassian.net'}};});
  const settings={jiraUrl:'https://test.atlassian.net',atlassianCredential:'private-device-key'};

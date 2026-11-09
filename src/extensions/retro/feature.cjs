@@ -43,7 +43,7 @@ function named(text){
 
 // --- Project and board ---------------------------------------------------------------------------------------------
 function project(s,resume){
- const {allowed}=require('../../jira-routing.cjs');
+ const {allowed}=require('../jira/routing.cjs');
  const keys=allowed(s.settings),topic=s.dialogue.active();
  const binding=s.projectMemory?.get?.(topic?.projectMemoryId)?.jira;
  const bound=topic?.jiraProject||(binding?.site===s.settings.jiraUrl&&binding.key);

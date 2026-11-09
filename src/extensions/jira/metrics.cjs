@@ -1,5 +1,5 @@
-const {allowed}=require('./jira-routing.cjs');
-const {members}=require('./team.cjs');
+const {allowed}=require('./routing.cjs');
+const {members}=require('../../team.cjs');
 const quote=s=>'"'+String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"';
 function summarize(issues,logs,done,since,ids,known){
  const selected=new Set(ids),closed=new Set(),reopened=new Set();let open=0;

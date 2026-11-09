@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict');
 const {Dialogue,actionRequest,intent,selectChoice}=require('../src/dialogue.cjs');
-const {JiraInsights}=require('../src/jira-insights.cjs');
+const {JiraInsights}=require('../src/extensions/jira/insights.cjs');
 const {GooglePlay}=require('../src/extensions/google-play/client.cjs');
 (async()=>{
  for(const text of ['Петя, посмотри сколько там багов по последней версии','посмотри anr в гугл плее','что думаешь о том, чтобы создать задачу?','не создавай задачу','если создай задачу','«создай задачу»'])assert(!actionRequest(text));

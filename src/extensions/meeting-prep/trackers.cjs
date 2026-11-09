@@ -24,14 +24,14 @@ async function jira(s,task){
  const key=KEY.exec(task.what)?.[1];
  if(key){const issue=await api('/rest/api/3/issue/'+encodeURIComponent(key)+'?fields=summary,status');return issue?.key?jiraRow(s,issue):null;}
  const terms=jqlWords(task.what);if(!terms.length)return null;
- const projects=require('../../jira-selection.cjs').keys(s.settings.jiraProjects||s.settings.jiraProject).filter(k=>/^[A-Z][A-Z0-9_]{1,9}$/.test(k));
+ const projects=require('../jira/selection.cjs').keys(s.settings.jiraProjects||s.settings.jiraProject).filter(k=>/^[A-Z][A-Z0-9_]{1,9}$/.test(k));
  const jql=(projects.length?'project in ('+projects.join(',')+') AND ':'')+'text ~ "'+terms.join(' ')+'" AND updated >= -45d ORDER BY updated DESC';
  const found=await api('/rest/api/3/search/jql',{method:'POST',body:JSON.stringify({jql,maxResults:5,fields:['summary','status']})});
  const hit=(found?.issues||[]).find(i=>fits(task.what,i.fields?.summary));
  return hit?jiraRow(s,hit):null;
 }
 async function asana(s,task){
- const {Asana}=require('../../asana.cjs');
+ const {Asana}=require('../asana/asana.cjs');
  const client=new Asana({settings:()=>s.settings,request:s.request});
  const session=client.session();
  const q=new URLSearchParams({resource_type:'task',query:jqlWords(task.what).join(' ')||task.what.slice(0,60),count:'5',opt_fields:'name,completed,permalink_url'});

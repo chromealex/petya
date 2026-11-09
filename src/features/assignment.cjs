@@ -4,7 +4,7 @@
 // The same workload snapshot answers «загрузка команды» in chat and shows load on the team page.
 const assign = require('../assign.cjs');
 const { Workload, loadQuestion, answer, personAnswer, groupAnswer } = require('../workload.cjs');
-const { Asana } = require('../asana.cjs');
+const { Asana } = require('../extensions/asana/asana.cjs');
 
 module.exports = {
   name: 'assignment',

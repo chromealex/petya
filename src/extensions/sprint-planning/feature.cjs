@@ -52,7 +52,7 @@ function members(s){
 // The chat's Jira project: bound to the chat or its project memory, the only allowed one, or the working project;
 // otherwise a question with the allowed projects.
 function project(s,resume){
- const {allowed}=require('../../jira-routing.cjs');
+ const {allowed}=require('../jira/routing.cjs');
  const keys=allowed(s.settings),topic=s.dialogue.active();
  const binding=s.projectMemory?.get?.(topic?.projectMemoryId)?.jira;
  const bound=topic?.jiraProject||(binding?.site===s.settings.jiraUrl&&binding.key);
@@ -231,7 +231,7 @@ function parseApply(text){
 async function applyTurn(s,command){
  const p=parseApply(command);
  if(p.error)return kit.reply(s,command,{by:BY,error:true,text:p.error});
- const {allowed}=require('../../jira-routing.cjs');
+ const {allowed}=require('../jira/routing.cjs');
  if(!allowed(s.settings).includes(p.project))return kit.reply(s,command,{by:BY,error:true,text:'Проект '+p.project+' недоступен в подключении Jira.'});
  const settings=agile.scoped(s,p.project),w=s.workspace;
  const sprint=(await agile.sprints(s,p.project,p.board,'active,future')).find(x=>x.name===p.sprint);

@@ -1,4 +1,4 @@
-const { allowed } = require('../../jira-routing.cjs');
+const { allowed } = require('./routing.cjs');
 const cancel = require('../../answer-cancel.cjs');
 module.exports = { service:true, description:'Мои задачи по типам и статусам, поиск зависших задач.', type: 'jira', name: 'Jira', ...require('./chat-reply.cjs'),
   matches(command, {settings,topic}) {

@@ -1,5 +1,5 @@
 // Asana calls of the plugin: my open tasks and quick edits (done / due date) of one task.
-const {Asana}=require('../../asana.cjs');
+const {Asana}=require('./asana.cjs');
 const FIELDS='name,notes,completed,due_on,permalink_url,projects.name,workspace.gid,modified_at';
 const gid=v=>{if(typeof v!=='string'||!/^\d{1,40}$/.test(v))throw Error('Некорректный ID Asana.');return v;};
 const client=s=>new Asana({settings:()=>s.settings,request:s.request});

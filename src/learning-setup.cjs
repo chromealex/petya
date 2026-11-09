@@ -6,7 +6,7 @@ module.exports=ctx=>{
   ctx.handle('dictionaryDelete',id=>ctx.learning.removeRule(id));
   const dictionaryScope=command=>{
     const global=dictionary.applyRules(command,ctx.learning.list().dictionary,'').text;
-    const keys=require('./jira-routing.cjs').allowed(ctx.settings).filter(k=>new RegExp('(?<![A-Za-z0-9_])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![A-Za-z0-9_])','i').test(global));
+    const keys=require('./extensions/jira/routing.cjs').allowed(ctx.settings).filter(k=>new RegExp('(?<![A-Za-z0-9_])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![A-Za-z0-9_])','i').test(global));
     return keys.length===1?keys[0]:keys.length>1?'':ctx.dialogue.active()?.jiraProject||'';
   };
   const undoLast=id=>{

@@ -1,6 +1,6 @@
 // A request that names one Jira issue (a browse link or a key) reads that issue, not the project's task list.
 const assert=require('node:assert/strict');
-const issue=require('../src/jira-issue.cjs');
+const issue=require('../src/extensions/jira/issue.cjs');
 (async()=>{
  assert.deepEqual(issue.named('https://jetwhales.atlassian.net/browse/BW-4569\nПосмотри эту таску'),{key:'BW-4569',host:'jetwhales.atlassian.net'});
  assert.deepEqual(issue.named('посмотри задачу BW-12'),{key:'BW-12'});
@@ -24,7 +24,7 @@ const issue=require('../src/jira-issue.cjs');
  await assert.rejects(issue.read(workspace(),{key:'XX-1'}),/Проект XX не отмечен в подключении Jira/);
  await assert.rejects(issue.read(workspace({jiraProjects:'BW'}),{key:'BW-1'}),/Подключите Jira/);
  // Routing: the link with «посмотри эту таску» goes to the Jira tasks reader, which reads the one issue.
- const {JiraInsights}=require('../src/jira-insights.cjs');
+ const {JiraInsights}=require('../src/extensions/jira/insights.cjs');
  calls.length=0;const one=await new JiraInsights(workspace()).read('https://jetwhales.atlassian.net/browse/BW-4569\nПосмотри эту таску',{},'','tasks');
  assert.match(one.text,/^BW-4569 — /);assert.equal(calls.length,1,'one request for the issue, no project listing');
  // A key-like word from a project that is not connected («UTF-8») is not taken for an issue.

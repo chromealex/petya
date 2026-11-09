@@ -56,7 +56,7 @@ const smoke = !app.isPackaged && process.env.PETYA_SMOKE_TEST === '1';
 if (smoke) app.setPath('userData', fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'petya-test-')));
 let companies, companyId, dataRoot, switchingCompany=false, activeOperations=0, requestCompanySwitch=async()=>{throw Error("Петя ещё запускается.");};
 let win, tray, quitting = false, pending = new Map(), snapshots = new Map(), settings = {};
-const { AtlassianOAuth } = require('./atlassian-oauth.cjs');
+const { AtlassianOAuth } = require('./extensions/jira/atlassian-oauth.cjs');
 const atlassianOAuth = new AtlassianOAuth(directRequest);
 const { ServiceOAuth } = require('./service-oauth.cjs');
 const serviceOAuth = { asana: new ServiceOAuth('asana', directRequest), slack: new ServiceOAuth('slack', directRequest), notion: new ServiceOAuth('notion', directRequest) };
@@ -214,7 +214,6 @@ function saveSettings(input, internal = false, profile = profileState()) {
     for (const key of Object.keys(defaults)) if ((!(key.endsWith('Credential') || key === 'asanaWorkspace') || internal) && typeof input[key] === 'string') { if (!secrets.includes(key) || input[key]) next[key] = input[key].trim().slice(0, key==='telegramCredential'?100000:['teamMembers','teamRemoved'].includes(key)?400000:featureLimits[key]||2000); }
     for (const key of secrets) if ((!(key.endsWith('Credential') || key === 'asanaWorkspace') || internal) && input['clear_' + key] === true) next[key] = '';
     if (next.unityUrl !== settings.unityUrl && !input.unityToken) next.unityToken = '';
-    if (!internal && settings.atlassianCredential && (input.jiraToken || (input.jiraUrl && input.jiraUrl.replace(/\/$/, '') !== settings.jiraUrl))) throw new Error('Сначала отключите вход Atlassian через браузер.');
     for (const name of ['slack']) if (!internal && settings[name+'Credential'] && input[name+'Token']) throw new Error('Сначала отключите вход '+name+' через браузер.');
     if(typeof input.teamMembers==='string')next.teamMembers=JSON.stringify(team.validate(JSON.parse(input.teamMembers)));
     if(typeof input.integrationChoices==='string'){const choices=JSON.parse(input.integrationChoices);if(!choices||typeof choices!=='object'||Array.isArray(choices)||Object.entries(choices).some(([key,value])=>!require('./service-access.cjs').services[key]||value!=='browser'))throw Error('Некорректный выбор способа доступа.');next.integrationChoices=JSON.stringify(choices);}
@@ -222,7 +221,8 @@ function saveSettings(input, internal = false, profile = profileState()) {
     if(next.userName!==settings.userName&&typeof input.userNameVariants!=='string')next.userNameVariants='';
     const nameProfile=require('./ui/name-profile.js').NameProfile.validate(next.userName,next.userNameVariants,next.userNameExcluded);next.userNameExcluded=nameProfile.excluded;next.userName=nameProfile.name;next.userNameVariants=nameProfile.custom;
     next.speechStyle = require('./speech-style.cjs').validate(next.speechStyle);
-    for (const feature of features) feature.validate?.(next, input);
+    // `validate(next, input)`, then the saved settings and whether the save is Petya's own (Jira keeps its project selection).
+    for (const feature of features) feature.validate?.(next, input, settings, internal);
     next.contextDays = String(retention(next.contextDays));
     if (!['1', '5', '15'].includes(next.slackInterval)) throw new Error('Интервал Slack: 1, 5 или 15 минут.');
     for (const key of ['telegramAutoSync','smartNotifications', 'interpretationEnabled', 'slackAutoSync', ...Object.keys(modules.defaults)]) if (!['true', 'false'].includes(next[key])) throw new Error('Некорректная настройка ' + key);
@@ -230,9 +230,6 @@ function saveSettings(input, internal = false, profile = profileState()) {
     useBundledSpeech(next);
     // Autosave sends the whole form: an empty or unparsable address must name its field instead of a bare «Invalid URL».
     for (const key of ['whisperUrl', 'ollamaUrl']) { if (!String(next[key] || '').trim()) next[key] = defaults[key]; try { core.localEndpoint(next[key]); } catch (error) { throw new Error((key === 'ollamaUrl' ? 'Адрес Ollama' : 'Адрес whisper.cpp') + ': ' + (/Invalid URL/.test(error.message) ? 'укажите адрес вида ' + defaults[key] : error.message)); } }
-    if (next.jiraUrl && !/^[a-z]+:\/\//i.test(next.jiraUrl.trim())) next.jiraUrl = 'https://' + next.jiraUrl.trim();
-    if (next.jiraUrl) { let url; try { url = new URL(next.jiraUrl); } catch { throw new Error('Адрес Jira: укажите его в виде https://company.atlassian.net'); } if (url.protocol !== 'https:' || !url.hostname.endsWith('.atlassian.net') || url.username || url.password || url.pathname !== '/') throw new Error('Укажите адрес Jira Cloud: https://company.atlassian.net'); next.jiraUrl = url.origin; }
-    require('./jira-selection.cjs').normalizeSelection(next, settings, input);
     const saved = { ...next };
     for (const key of secrets) if (saved[key]) { if (!safeStorage.isEncryptionAvailable()) throw new Error('Хранилище секретов ОС недоступно.'); saved[key] = safeStorage.encryptString(saved[key]).toString('base64'); }
     fs.writeFileSync(file() + '.tmp', JSON.stringify(saved), { mode: 0o600 }); fs.renameSync(file() + '.tmp', file());
@@ -309,7 +306,7 @@ function setupHandlers() {
   };
   maintenance();
   const contextFor = id => { maintenance(); const c = snapshots.get(id); if (!c) throw new Error('Выберите контекст заново.'); return c; };
-  const jiraInsights=new (require('./jira-insights.cjs').JiraInsights)(workspace);
+  const jiraInsights=new (require('./extensions/jira/insights.cjs').JiraInsights)(workspace);
   const dialogueFile=path.join(dataRoot,'dialogue-memory.json');
   let dialogueState={topics:[],activeId:''};
   if(fs.existsSync(dialogueFile))dialogueState=JSON.parse(safeStorage.decryptString(Buffer.from(JSON.parse(fs.readFileSync(dialogueFile,'utf8')).encrypted,'base64')));
@@ -331,7 +328,7 @@ function setupHandlers() {
     if(topic&&dialogue.state.topics.includes(topic)){topic.messages.push({role:'user',text:command,at:Date.now()},{role:'assistant',text:result.text,at:Date.now()});topic.at=Date.now();dialogue.persist();return {handled:true,...result,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};}
     return {handled:true,...result};
   });
-  const readProjectJira=(command,topic,context,kind)=>{const binding=projectMemory?.get(topic.projectMemoryId)?.jira;if(!topic.jiraProject&&binding?.site===settings.jiraUrl&&require('./jira-selection.cjs').keys(settings.jiraProjects||settings.jiraProject).includes(binding.key))topic.jiraProject=binding.key;return jiraInsights.read(command,topic,context,kind);};
+  const readProjectJira=(command,topic,context,kind)=>{const binding=projectMemory?.get(topic.projectMemoryId)?.jira;if(!topic.jiraProject&&binding?.site===settings.jiraUrl&&require('./extensions/jira/selection.cjs').keys(settings.jiraProjects||settings.jiraProject).includes(binding.key))topic.jiraProject=binding.key;return jiraInsights.read(command,topic,context,kind);};
   const draftAnswers=new (require('./speculative-answer.cjs').SpeculativeAnswer)();
   const answerDialogue=async(command,topic,unclear,draft=null)=>{
       if(!draft)requestProgress.report(topic.attachments?.length?'Читаю прикреплённые материалы':'Готовлю ответ по контексту разговора');
@@ -466,7 +463,7 @@ function setupHandlers() {
         if(found.length!==1)throw Error('Назовите точное имя доступного канала Slack.');return {id:found[0].id,name:found[0].name};
       }
       if(kind==='jira'){
-        modules.assertEnabled(settings,'jira');const key=value.toUpperCase();if(!require('./jira-selection.cjs').keys(settings.jiraProjects||settings.jiraProject).includes(key))throw Error('Проект должен быть выбран в подключении Jira.');
+        modules.assertEnabled(settings,'jira');const key=value.toUpperCase();if(!require('./extensions/jira/selection.cjs').keys(settings.jiraProjects||settings.jiraProject).includes(key))throw Error('Проект должен быть выбран в подключении Jira.');
         const p=await workspace.api('/rest/api/3/project/'+encodeURIComponent(key));if(p.key!==key)throw Error('Jira не подтвердила проект.');return {key,site:settings.jiraUrl};
       }
       if(kind==='repo'){
@@ -574,7 +571,9 @@ function setupHandlers() {
     get undoLast(){return undoLast;},
     get voicePreparation(){return voicePreparation;},
     get voicePreparationKey(){return voicePreparationKey;},
-    get workSkills(){return workSkills;}
+    get workSkills(){return workSkills;},
+    // For apps' IPC (Jira, Asana): a chat context snapshot by id, adding one, a task draft from a command.
+    get contextFor(){return contextFor;},addContext:data=>addContext(data),get composeDraft(){return composeDraft;}
   };
   const converseTurn=require('./converse.cjs')(services);
   handle('converse',(command,choice)=>converseTurn(command,choice));
@@ -605,8 +604,6 @@ function setupHandlers() {
   handle('chatJobFinish',(id,state,result)=>chatJobs.finishForeground(id,state,result));
   handle('chatJobState',id=>{const t=dialogue.state.topics.find(t=>t.id===id);return t?{topicId:t.id,projectId:t.projectId,job:t.chatJob,messages:t.messages,result:t.lastChatResult}:null;});
   require('./chat-projects-setup.cjs')({get attachments(){return attachments;},get chatJobs(){return chatJobs;},get chatUndo(){return chatUndo;},get dialogue(){return dialogue;},get handle(){return handle;},get projectMemory(){return projectMemory;},get settings(){return settings;},get slackAccount(){return slackAccount;},get win(){return win;}});
-  const {routed}=require('./jira-setup.cjs')({get contextFor(){return contextFor;},get delegation(){return delegation;},get dialogue(){return dialogue;},get handle(){return handle;},get projectMemory(){return projectMemory;},get settings(){return settings;},get modules(){return modules;},get taskDuplicates(){return taskDuplicates;},get text(){return text;},get workSkills(){return workSkills;},get workspace(){return workspace;}});
-  require('./asana-setup.cjs')({get addContext(){return addContext;},get composeDraft(){return composeDraft;},get contextFor(){return contextFor;},get handle(){return handle;},get modules(){return modules;},get request(){return request;},get settings(){return settings;},get text(){return text;}});
   // Saved chats may ask for attention right after start; the build check needs a quiet tray start.
   handle('requestAttention', () => { if (process.env.PETYA_VERIFY_BUILD !== '1') show(); });
   // `recording`: companies whose meeting is being recorded now, the open one or in the background (src/meeting-carry.cjs).
@@ -646,7 +643,6 @@ function setupHandlers() {
   };
   handle('companySwitch',(id,raw)=>requestCompanySwitch(id,raw));
   require('./telegram-setup.cjs')({get app(){return app;},get clientDefaults(){return clientDefaults;},get handle(){return handle;},get memory(){return memory;},get modules(){return modules;},get saveSettings(){return saveSettings;},get settings(){return settings;},get shell(){return shell;},get telegramSource(){return telegramSource;},set telegramSource(v){telegramSource=v;}});
-  handle('teamJiraSearch',query=>require('./team-jira.cjs').search(workspace,query));
   handle('teamPhotoOptions',accounts=>require('./team-photos.cjs').options(require('./team.cjs').accountsOf(accounts),{nativeImage:require('electron').nativeImage}));
   handle('teamPhotoPick',async()=>{const picked=await require('electron').dialog.showOpenDialog(win,{title:require('./interface-language.cjs').t('Фото участника'),properties:['openFile'],filters:[{name:'Images',extensions:['png','jpg','jpeg','webp']}]});if(picked.canceled||!picked.filePaths[0])return null;return require('./team-photos.cjs').fromFile(require('electron').nativeImage,fs.readFileSync(picked.filePaths[0]));});
   // aliasHint: how people usually call this person («Полина, Поля»), shown as the field's placeholder.

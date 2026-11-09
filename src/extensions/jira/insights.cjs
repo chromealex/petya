@@ -1,4 +1,4 @@
-const {allowed,choose}=require('./jira-routing.cjs');
+const {allowed,choose}=require('./routing.cjs');
 const quote=s=>'"'+String(s).replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'"';
 // Keep the evidence needed for follow-up questions without full user profiles
 // or nested linked issue payloads consuming the model's context window.
@@ -15,8 +15,8 @@ class JiraInsights {
  constructor(workspace){this.w=workspace;}
  async read(command,topic,context='',kind='bugs',options={}){
   // One issue named by a link or key («посмотри эту таску», «что в BW-12?»): that issue, not the project's list.
-  if(kind==='tasks'&&!options.reportRows){const one=require('./jira-issue.cjs').named(command);if(one&&(one.host||allowed(this.w.settings()).includes(one.key.split('-')[0])))return require('./jira-issue.cjs').read(this.w,one);}
-  const tasks=kind==='tasks',personalFilter=tasks?require('./personal-tasks.cjs').details(command,topic):null,personal=!!personalFilter;
+  if(kind==='tasks'&&!options.reportRows){const one=require('./issue.cjs').named(command);if(one&&(one.host||allowed(this.w.settings()).includes(one.key.split('-')[0])))return require('./issue.cjs').read(this.w,one);}
+  const tasks=kind==='tasks',personalFilter=tasks?require('../../personal-tasks.cjs').details(command,topic):null,personal=!!personalFilter;
   const personalStatus=personalFilter?.status||'',personalOverdue=!!personalFilter?.overdue;
   const unversioned=personal&&!/верс|релиз/iu.test(command);
   if(tasks){topic.taskAssignee=personal?'currentUser':'';topic.personalTaskStatus=personalStatus;topic.personalTaskOverdue=personalOverdue;}
@@ -27,7 +27,7 @@ class JiraInsights {
   if(!projects.length)throw new Error('Подключите Jira и отметьте доступные проекты.');
   if(options.wholeProject){delete topic.versionId;delete topic.versionField;}
   const explicit=choose(command,{title:'',text:''},projects);
-  const explicitMatches=require('./jira-routing.cjs').matches(command,projects);
+  const explicitMatches=require('./routing.cjs').matches(command,projects);
   const unspecified=/^Примени скилл к данным текущей темы[.]/.test(command)||/^(?:в )?(?:текущем|этом) проекте[.!?]*$/iu.test(command.trim());
   // A status the user named in passing («таски в new») counts only if Jira has a status with that name.
   if(personalFilter?.guess){const statuses=await api('/rest/api/3/status',{},s).catch(()=>[]);const found=(Array.isArray(statuses)?statuses:[]).find(v=>String(v?.name||'').toLowerCase()===personalFilter.name.toLowerCase());if(found)personalFilter.name=found.name;else delete personalFilter.name;delete personalFilter.guess;}
@@ -64,7 +64,7 @@ class JiraInsights {
    for(const issue of result.issues){
     if(!issue||typeof issue.key!=='string'||!new RegExp('^(?:'+(everywhere?projects.map(p=>p.key):[project.key]).map(k=>k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')-[0-9]+$','i').test(issue.key)||!issue.fields||typeof issue.fields!=='object'||Array.isArray(issue.fields))throw Error('Jira вернула карточку без данных или из другого проекта. Отчёт не составлен.');
     if(personal&&(typeof issue.fields.summary!=='string'||typeof issue.fields.status?.name!=='string'||issue.fields.assignee?.accountId!==account.accountId||!['new','indeterminate','done'].includes(issue.fields.status?.statusCategory?.key)||personalStatus==='open'&&issue.fields.status.statusCategory.key==='done'||personalStatus==='done'&&issue.fields.status.statusCategory.key!=='done'||personalFilter?.category&&issue.fields.status.statusCategory.key!==({'To Do':'new','In Progress':'indeterminate'})[personalFilter.category]||personalFilter?.name&&issue.fields.status.name.toLowerCase()!==personalFilter.name.toLowerCase()))throw Error('Jira вернула задачи другого исполнителя или неподходящего статуса. Личный список не составлен.');
-    if(personalOverdue&&(!require('./verified-work-report.cjs').validDate(issue.fields.duedate)||issue.fields.duedate>=dueDay))throw Error('Jira вернула задачу вне выбранного срока. Список не составлен.');
+    if(personalOverdue&&(!require('../../verified-work-report.cjs').validDate(issue.fields.duedate)||issue.fields.duedate>=dueDay))throw Error('Jira вернула задачу вне выбранного срока. Список не составлен.');
     const previous=issues.get(issue.key);
     if(previous&&JSON.stringify(evidenceIssue(previous))!==JSON.stringify(evidenceIssue(issue)))throw Error('Карточка Jira изменилась между страницами. Повторите чтение для согласованного подсчёта.');
     issues.set(issue.key,issue);
@@ -80,7 +80,7 @@ class JiraInsights {
   const byPriority={};for(const issue of rows){const name=issue.fields?.priority?.name||'Без приоритета';byPriority[name]=(byPriority[name]||0)+1;}
   const priorityText=rows.length&&/критич|приоритет|блокир/iu.test(command)?' По приоритетам: '+Object.entries(byPriority).map(([k,v])=>k+' — '+v).join(', ')+'.':'';
   if(personal)return {text:'Аккаунт Jira: '+(account.displayName||account.accountId)+'. '+(everywhere?'Проекты: ':'Проект: ')+project.name+'. '+(personalOverdue?'Просроченные':personalStatus==='open'?'Незавершённые':personalStatus==='done'?'Завершённые':'Все')+' назначенные задачи'+(personalFilter?.category||personalFilter?.name?' в статусе «'+(personalFilter.category||personalFilter.name)+'»':'')+': '+rows.length+'.'+(rows.length?'\n'+rows.slice(0,20).map(i=>i.key+' — '+i.fields.summary+' ('+i.fields.status.name+')'+(i.fields.duedate?' · срок '+i.fields.duedate:'')).join('\n'):'')+(rows.length>20?'\nПоказаны первые 20; полный список по ссылке Jira.':'')+'\nПроверено сейчас; только задачи этого аккаунта в выбранном проекте.',sources:[{title:'Мои задачи Jira',url:s.jiraUrl+'/issues/?jql='+encodeURIComponent(jql)}],data:{project:project.key,total:rows.length,open,at:Date.now(),assignee:{accountId:account.accountId,displayName:account.displayName},scope:{assignee:'currentUser',status:personalStatus,overdue:personalOverdue,accessibleOnly:true,completedPagination:true},issues:rows.slice(0,20).map(evidenceIssue)},title:'Мои задачи · '+project.name};
-  if(tasks)return {...options.reportRows?{reportRows:rows.map(evidenceIssue)}:{},text:`${project.name}${version?', версия '+version.name:''}: найдено ${rows.length} задач всех типов, незавершённых — ${open}.`+(rows.length?'\n'+[...rows].sort((a,b)=>Number(a.fields?.status?.statusCategory?.key==='done')-Number(b.fields?.status?.statusCategory?.key==='done')).slice(0,20).map(i=>i.key+' — '+i.fields?.summary+(i.fields?.status?.name?' ('+i.fields.status.name+')':'')).join('\n'):'')+(rows.length>20?'\nПоказаны первые 20. Остальные — по ссылке Jira.':'')+(version?' Версия отобрана по полю «Исправить в версиях».':'')+' Проверено сейчас.',sources:[{title:'Задачи Jira',url:s.jiraUrl+'/issues/?jql='+encodeURIComponent(jql)}],data:{scope:{accessibleOnly:true,completedPagination:true,atomicSnapshot:false},...(options.wholeProject?{aggregate:require('./work-skills.cjs').aggregate(rows),detailsTruncated:rows.length>20}:{}),project:project.key,version:version?.name,total:rows.length,open,field:version?field:null,at:Date.now(),issues:rows.slice(0,20).map(evidenceIssue)},title:`Задачи · ${project.name}`};
+  if(tasks)return {...options.reportRows?{reportRows:rows.map(evidenceIssue)}:{},text:`${project.name}${version?', версия '+version.name:''}: найдено ${rows.length} задач всех типов, незавершённых — ${open}.`+(rows.length?'\n'+[...rows].sort((a,b)=>Number(a.fields?.status?.statusCategory?.key==='done')-Number(b.fields?.status?.statusCategory?.key==='done')).slice(0,20).map(i=>i.key+' — '+i.fields?.summary+(i.fields?.status?.name?' ('+i.fields.status.name+')':'')).join('\n'):'')+(rows.length>20?'\nПоказаны первые 20. Остальные — по ссылке Jira.':'')+(version?' Версия отобрана по полю «Исправить в версиях».':'')+' Проверено сейчас.',sources:[{title:'Задачи Jira',url:s.jiraUrl+'/issues/?jql='+encodeURIComponent(jql)}],data:{scope:{accessibleOnly:true,completedPagination:true,atomicSnapshot:false},...(options.wholeProject?{aggregate:require('../../work-skills.cjs').aggregate(rows),detailsTruncated:rows.length>20}:{}),project:project.key,version:version?.name,total:rows.length,open,field:version?field:null,at:Date.now(),issues:rows.slice(0,20).map(evidenceIssue)},title:`Задачи · ${project.name}`};
   // No open bugs in the chosen version: also say how many open bugs the project has without a version,
   // so «Какие баги открыты в BW?» is not answered with a bare zero.
   let elsewhere='';

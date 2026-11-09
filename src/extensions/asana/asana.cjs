@@ -29,7 +29,7 @@ class Asana {
     const projects = []; let offset = null; const seen = new Set();
     do { if(seen.has(offset)) throw new Error('Asana повторила страницу проектов. Повторите позже.'); seen.add(offset); const page = await this.projects(offset); projects.push(...page.items.filter(p=>!p.archived).map(p=>({key:p.gid,name:p.name}))); offset = page.next; if(projects.length > 1000 || seen.size > 10) throw new Error('Слишком много проектов Asana. Уточните рабочее пространство.'); } while(offset);
     if (!projects.length) throw new Error('Нет доступных проектов Asana.');
-    const selection = projectKey ? {project:projects.find(p=>p.key===projectKey)} : require('./jira-routing.cjs').choose(command,context,projects);
+    const selection = projectKey ? {project:projects.find(p=>p.key===projectKey)} : require('../../project-choice.cjs').choose(command,context,projects);
     if (projectKey && !selection.project) throw new Error('Проект Asana недоступен.');
     if (!selection.project) return {ready:false,projects,reason:'В каком проекте Asana создать задачу?'};
     const draft = await composeDraft(command,context);

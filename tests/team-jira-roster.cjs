@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {roster}=require('../src/team-jira-roster.cjs');const {TeamFill}=require('../src/team-fill.cjs');
+const assert=require('node:assert/strict');const {roster}=require('../src/extensions/jira/team-roster.cjs');const {TeamFill}=require('../src/team-fill.cjs');
 (async()=>{
  const issues=[
   {fields:{project:{key:'BW'},assignee:{accountId:'a1',displayName:'Полина Иванова',active:true,accountType:'atlassian',emailAddress:'p@x.ru'}}},

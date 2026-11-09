@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {Asana}=require('../src/asana.cjs');
+const assert=require('node:assert/strict');const {Asana}=require('../src/extensions/asana/asana.cjs');
 (async()=>{
  let s={asanaCredential:'secret',asanaWorkspace:'1'},writes=0,modified='old';
  const task=()=>({gid:'3',name:'Before',notes:'Text',due_on:null,completed:false,modified_at:modified,workspace:{gid:'1'},projects:[{gid:'2'}]});

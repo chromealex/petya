@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict'),fs=require('node:fs');const cases=require('./fixtures/work-routing-100.json');const {classify,dispatch}=require('../src/work-query-route.cjs');
-const {JiraInsights}=require('../src/jira-insights.cjs');const {WorkSkills,defaults}=require('../src/work-skills.cjs');
+const {JiraInsights}=require('../src/extensions/jira/insights.cjs');const {WorkSkills,defaults}=require('../src/work-skills.cjs');
 (async()=>{
  assert.equal(cases.length,100);assert.equal(new Set(cases.map(r=>r.question+'|'+JSON.stringify(r.topic))).size,100);
  const results=[];

@@ -95,7 +95,7 @@ class Agents {
 }
 async function batchTasks(workspace, record, spec) {
   const original = { ...workspace.settings() }, s = { ...original, jiraProject: record.project };
-  if (s.jiraUrl !== record.url || !require('./jira-routing.cjs').allowed(original).includes(record.project)) throw new Error('Подключение Jira изменилось. Передача остановлена.');
+  if (s.jiraUrl !== record.url || !require('./extensions/jira/routing.cjs').allowed(original).includes(record.project)) throw new Error('Подключение Jira изменилось. Передача остановлена.');
   const me = spec.mine ? await workspace.api('/rest/api/3/myself', {}, s) : null;
   if (spec.mine && !me?.accountId) throw new Error('Не удалось определить ваш accountId в Jira.');
   const tasks = [];

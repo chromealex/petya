@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict');
 const {WorkSkills,aggregate,validatedTasks,taskId,migrate}=require('../src/work-skills.cjs');
-const {JiraInsights}=require('../src/jira-insights.cjs');
+const {JiraInsights}=require('../src/extensions/jira/insights.cjs');
 (async()=>{
  const original={id:'old',name:'project-status',body:'# Статус проекта\nПо данным текущей темы подготовь: x',enabled:false};const migrated=migrate([original]);assert.equal(migrated[0].workflow,'project-status');assert.equal(migrated[0].enabled,false);assert.equal(migrated[0].body,original.body);assert.equal(migrated.length,3);
  const rows=Array.from({length:35},(_,i)=>({id:String(i),key:'AA-'+i,fields:{summary:'Task '+i,status:{name:i<30?'Open':'Done',statusCategory:{key:i<30?'new':'done'}},assignee:{accountId:i%2?'one':'two',displayName:'Алексей'},duedate:'2020-01-01'}}));

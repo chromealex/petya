@@ -41,7 +41,7 @@ class History {
     if (entry?.retentionExpired) throw new Error('Срок хранения контекста истёк. Снимки для отката удалены; задачу можно изменить в Jira.');
     if (!entry) throw new Error('Запись истории не найдена.');
     const s = { ...this.w.settings() };
-    if (s.jiraUrl !== entry.url || !require('./jira-routing.cjs').allowed(s).includes(entry.project)) throw new Error('Выберите подключение и проект этой записи истории.');
+    if (s.jiraUrl !== entry.url || !require('./extensions/jira/routing.cjs').allowed(s).includes(entry.project)) throw new Error('Выберите подключение и проект этой записи истории.');
     s.jiraProject = entry.project;
     this.w.credentials(s);
     if (this.w.inFlight.has(id)) throw new Error('Действие с этим пакетом уже выполняется.');

@@ -36,7 +36,7 @@ module.exports=ctx=>{
   const teamFill = new (require('./team-fill.cjs').TeamFill)({
     roster:command=>slackTeam.collect(command),
     // Second source: people assigned to issues of the allowed Jira projects in the last 90 days.
-    jiraRoster:()=>require('./team-jira-roster.cjs').roster(ctx.workspace,ctx.settings),
+    jiraRoster:()=>require('./extensions/jira/team-roster.cjs').roster(ctx.workspace,ctx.settings),
     enrich:async (rows,saved=[])=>{const e=require('./team-enrich.cjs');let slack={profiles:[],complete:false,limited:false,error:''},work=new Map();
       try{work=await e.jiraWork(ctx.workspace,rows);}catch(err){console.error('Jira work:',err.message);}
       // E-mails from Jira let Slack find people directly by e-mail.
