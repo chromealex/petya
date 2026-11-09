@@ -1,5 +1,5 @@
 // Jira: routing, documents, metadata, people, batches and history actions IPC.
-// Extracted from main.cjs: shared state comes through ctx (live getters/setters).
+// Set up by the Jira feature (feature.cjs): shared state comes through ctx (live getters over the services).
 module.exports=ctx=>{
   const routing = new (require('./routing.cjs').JiraRouting)(ctx.workspace);
   ctx.handle('routeJira', async(command,id,project,issueType)=>{
