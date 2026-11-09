@@ -38,7 +38,7 @@ Never trigger (tested): «код-ревью», «ревью PR», «перфом
   back to the renderer). JWT: ES256, `aud: appstoreconnect-v1`, 20-minute lifetime, reused for 15 minutes.
   App ids are optional; without them all apps visible to the key (`GET /v1/apps`) are used.
 - **Google Play**: reuses the existing credential `settings.googlePlayCredential` (Connections → Google Play) parsed by
-  the shared adapter in `src/google-play.cjs`; this app signs its own token for the
+  the shared adapter in `src/extensions/google-play/client.cjs`; this app signs its own token for the
   `https://www.googleapis.com/auth/androidpublisher` scope. Only a **service-account key** works: the browser sign-in
   grants only the Play Developer Reporting scope, and the app says so. In Play Console, give the service account
   «View app information» and «Reply to reviews». Package names are optional («Name = com.package» per line);
