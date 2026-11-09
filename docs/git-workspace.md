@@ -1,5 +1,7 @@
 # Git in Petya
 
+_Owned by the Git app (`src/extensions/git`: `workspace.cjs`, `intent.cjs`, the chat route `chat-route.cjs`, the panel `git-panel.js`); other apps read `services.gitWorkspace`._
+
 Git is detected automatically from the local context folders of the current project. A separate Git connection in the settings is not needed. The **Git** button in the chat opens the project panel and immediately starts the search. Multiple folders, nested repositories, a folder inside a repository and Git worktrees are supported. When there are several repositories, Petya asks you to choose a specific one; the choice applies only to the current project and its set of folders.
 
 If Git is not found, Petya says so and offers «Создать Git» (Create Git) with a specific folder. Only clicking this button or the explicit command «создай git для проекта» ("create git for the project") runs `git init -b main`. When there are several empty folders, a choice is required. Files are not added to the index, no commit is created and no remote is configured. If system Git is missing, a separate error about installing the program is shown.

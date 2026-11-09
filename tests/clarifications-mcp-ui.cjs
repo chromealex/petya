@@ -4,7 +4,7 @@ const {Client}=require('@modelcontextprotocol/sdk/client/index.js');
 const {StreamableHTTPClientTransport}=require('@modelcontextprotocol/sdk/client/streamableHttp.js');
 const mcp=require('../src/mcp.cjs'),start=mcp.startMcp;let endpoint,runs=0,release;
 mcp.startMcp=async(...args)=>{endpoint=await start(...args);return endpoint;};
-require('../src/git-workspace.cjs').GitWorkspace.prototype.execute=async input=>{runs++;await new Promise(resolve=>release=resolve);return {text:'Создана ветка '+input.branch};};
+require('../src/extensions/git/workspace.cjs').GitWorkspace.prototype.execute=async input=>{runs++;await new Promise(resolve=>release=resolve);return {text:'Создана ветка '+input.branch};};
 require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const js=code=>win.webContents.executeJavaScript(code),wait=async code=>{for(let i=0;i<150;i++){if(await js(code))return;await new Promise(r=>setTimeout(r,50));}throw Error('Timeout '+code);};
  await js('window.chatNavigationReady');await js("view('home');$('command').value='создай ветку';window.sendChatNow()");await wait("!!document.querySelector('.clarification-input')");

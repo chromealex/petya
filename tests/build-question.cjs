@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {BuildQuestion,isBuildQuestion,owners}=require('../src/build-question.cjs');
+const {BuildQuestion,isBuildQuestion,owners}=require('../src/extensions/ci-builds/build-question.cjs');
 (async()=>{
  let now=1700000000000;assert(isBuildQuestion('Петя, что с билдом'));assert(isBuildQuestion('что с билдом 123?'));assert(!isBuildQuestion('почему падает билд'));assert(!isBuildQuestion('не спрашивай что с билдом'));
  const message={user:'UQA',ts:'1699999999.000000',text:'Собираю билд 123'};assert.equal(owners([message],'123','UME',now)[0].id,'UQA');assert.equal(owners([{...message,text:'Не собираю билд 123'}],'123','UME',now).length,0);assert.equal(owners([{...message,text:'QA обсуждают билд 123'}],'123','UME',now).length,0);assert.equal(owners([message],'124','UME',now).length,0);

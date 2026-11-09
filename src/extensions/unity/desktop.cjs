@@ -20,7 +20,7 @@ async function connect(settings,work){
   finally{await client.close();}
 }
 module.exports={
-  name:'unity',defaults:{unityUrl:'http://127.0.0.1:8080/mcp',unityToken:''},
+  name:'unity',defaults:{unityUrl:'http://127.0.0.1:8080/mcp',unityToken:''},secrets:['unityToken'],
   // An empty address means the usual one (the field is optional; Petya finds the editor by itself).
   validate(settings){if(!String(settings.unityUrl||'').trim())settings.unityUrl='http://127.0.0.1:8080/mcp';endpoint(settings.unityUrl);},
   tools,
@@ -31,7 +31,8 @@ module.exports={
     let operation;
     function progress(text,busy,error=false){
       operation={id:'unity-mcp',title:'Unity Editor',text,busy,kind:error?'error':'info'};
-      if(s.win && !s.win.isDestroyed())s.win.webContents.send('unity-progress',operation);
+      // The notification center's generic channel for apps' long work (one stable id, updated in place).
+      if(s.win && !s.win.isDestroyed())s.win.webContents.send('extension-install-progress',operation);
     }
     async function invoke(...args){
       if(operation?.busy)throw Error('Дождитесь завершения текущего запроса Unity.');

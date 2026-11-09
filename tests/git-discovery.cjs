@@ -1,7 +1,7 @@
 process.env.GIT_CONFIG_GLOBAL=require('node:os').devNull;process.env.GIT_CONFIG_NOSYSTEM='1';
 const assert=require('node:assert/strict'),fs=require('node:fs/promises'),os=require('node:os'),path=require('node:path');
 const {execFile}=require('node:child_process'),{promisify}=require('node:util');const exec=promisify(execFile);
-const {GitWorkspace,commandRoute}=require('../src/git-workspace.cjs');const {projectFolders}=require('../src/project-folders.cjs');const {validate}=require('../src/project-settings.cjs');
+const {GitWorkspace,commandRoute}=require('../src/extensions/git/workspace.cjs');const {projectFolders}=require('../src/project-folders.cjs');const {validate}=require('../src/project-settings.cjs');
 (async()=>{const base=await fs.mkdtemp(path.join(os.tmpdir(),'petya-discovery-'));try{
  const root=await fs.realpath(base),one=path.join(root,'one'),two=path.join(root,'two');await fs.mkdir(one);await fs.mkdir(two);await fs.writeFile(path.join(one,'existing.txt'),'keep');
  let context={id:'a',name:'App',folders:[one,two]};const git=new GitWorkspace({context:()=>context});let found=await git.discover();assert.equal(found.repositories.length,0);assert.deepEqual(found.missing,[one,two]);await assert.rejects(git.status(),error=>!!error.gitDiscovery&&/не найден/.test(error.message));await assert.rejects(fs.stat(path.join(one,'.git')));

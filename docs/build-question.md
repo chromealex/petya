@@ -1,5 +1,7 @@
 # «Петя, что с билдом» (Petya, what's up with the build)
 
+_Owned by «Сборки» (`src/extensions/ci-builds/build-question.cjs`, see docs/apps/ci-builds.md); works while the app is added._
+
 This command means asking people in Slack for the status, not just summarizing a saved log. Supported phrases: «что с билдом» (what's up with the build), «что с билдом 123» (what's up with build 123), «как там сборка» (how's the build going). If the same phrase says «не пиши» (don't write), «не отправляй» (don't send), «без отправки» (without sending), nothing is sent.
 
 The context is taken from the active topic with a link to a Slack thread; otherwise from saved build discussions from the last 24 hours, taking into account the known project and the specified number. Several matching discussions require a choice. The thread content is re-read through the Slack API before sending. Incomplete loading, a change of topic/account during the choice, or several numbers without clarification stop the sending.

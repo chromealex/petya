@@ -9,8 +9,8 @@ const PHRASES={
  undo:/^(?:отмени|отменить|верни назад) (?:последнее(?: действие)?|последний шаг)[.!?]*$/iu,
  dailyBrief:/^(?:что у нас сегодня|что на сегодня|сводка на сегодня|дай сводку|покажи сводку)[.!?]*$/iu,
 };
-const READ_GIT=new Set(['status','diff','log','branches']);
-const CATALOG=[
+const APPS=Symbol('apps');
+const CORE=[
  {id:'recurring',says:'повторять команду по расписанию (каждые N минут или часов, каждый день в ЧЧ:ММ), показать повторы или остановить повтор',
   examples:['проверяй почту каждые 5 минут','каждый день в 9:30 присылай сводку','какие у меня повторы','перестань проверять почту'],accepts:t=>req('./features/recurring.cjs').matches(t)},
  {id:'skill-create',says:'Петя сам пишет себе новый скилл (инструкцию, как делать какую-то работу)',
@@ -27,10 +27,8 @@ const CATALOG=[
  {id:'list-followup',says:'выбрать, отфильтровать или переназначить задачи из только что показанного списка',
   examples:['какую из них сделать сначала','какие из них в работе','на кого их можно перевести'],
   accepts:t=>{const f=req('./features/list-followup.cjs');return !!(f.question(t)||f.filterQuestion(t)||f.assignQuestion(t));}},
- {id:'git-read',says:'посмотреть состояние git в папке проекта: статус, изменения, историю коммитов, ветки',examples:['статус гита','покажи diff','история коммитов','покажи ветки'],
-  accepts:t=>READ_GIT.has(req('./git-workspace.cjs').commandRoute(t)?.action)},
- {id:'unity',says:'Unity: найти или показать префаб, ошибки консоли, иерархию сцены',examples:['покажи префаб Player','покажи ошибки в консоли Unity','покажи иерархию сцены в Unity'],
-  accepts:t=>!!req('./extensions/unity/intent.cjs').intent(t)},
+ // Apps' entries (chat routes with a `capability`, src/features/chat-routes.cjs) are listed here, in their order.
+ APPS,
  {id:'draw',says:'нарисовать или сгенерировать картинку',examples:['нарисуй кота-космонавта на Луне','сгенерируй картинку: закат над морем'],accepts:t=>!!req('./local-images.cjs').imagePrompt(t)},
  {id:'capabilities',says:'что Петя умеет и какие у него возможности',examples:['что ты умеешь','какие у тебя возможности'],accepts:t=>!!req('./capabilities-reply.cjs').reply(t,null,{},[])},
  {id:'jira-decompose',says:'декомпозировать фичу: разбить обсуждение или документацию на несколько задач Jira',
@@ -44,11 +42,14 @@ const CATALOG=[
  {id:'slack-digest',says:'что нового в Slack за день, два дня или неделю, кто писал пользователю',examples:['что нового в Slack','что нового в слаке за 2 дня','что мне писали в Slack'],
   accepts:t=>!!req('./slack-digest.cjs').question(t)},
  {id:'telegram-sync',says:'обновить сообщения Telegram',examples:['обнови телеграм'],accepts:t=>PHRASES.telegramSync.test(String(t).trim())},
- {id:'build',says:'что со сборкой (билдом) и почему она упала, по логу из Slack',examples:['что с билдом','почему упал билд','разбери лог'],
-  accepts:t=>req('./build-question.cjs').isBuildQuestion(t)||req('./slack-log.cjs').isLogQuestion(t)},
+ {id:'build',says:'почему упала сборка (билд), по логу из Slack',examples:['почему упал билд','разбери лог'],
+  accepts:t=>req('./slack-log.cjs').isLogQuestion(t)},
  {id:'delegation',says:'чем закончилась или как продвигается переданная агенту задача',examples:['что с задачей PROJ-12','статус поручений','чем закончилась задача'],accepts:t=>req('./task-progress.cjs').isProgress(t)},
 ];
-const byId=new Map(CATALOG.map(c=>[c.id,c]));
+// The whole list: Petya's own entries with the apps' entries in place of APPS. Built on first use, after the
+// extension registry is up (the apps' entries are cached by the registry and follow installs and removals).
+const catalog=()=>CORE.flatMap(c=>c===APPS?req('./features/chat-routes.cjs').capabilities():[c]);
+const byIdNow=id=>catalog().find(c=>c.id===id);
 // Names, numbers, keys and channels the restatement keeps must come from the user's own words.
 const norm=w=>w.toLocaleLowerCase('ru').replace(/ё/g,'е');
 const WORDS={1:/один|одну|одна|раз(?!\p{L})/u,2:/два|две|пару/u,3:/три(?!\p{L}*дцат)/u,4:/четыр/u,5:/пят(?!\p{L}*надцат|\p{L}*десят)|пять/u,6:/шест/u,7:/сем(?!\p{L}*надцат)/u,8:/восем/u,9:/девят/u,10:/десят/u,12:/полдень|двенадцат/u,15:/пятнадцат|четверть/u,20:/двадцат/u,30:/тридцат|полчаса|пол\s*часа|половин/u,40:/сорок/u,45:/сорок\s*пят/u,60:/шестьдесят|час(?!\p{L}*[2-9])/u};
@@ -69,9 +70,9 @@ function grounded(canonical,original,examples=[]){
 }
 // The restated request, or null when it is not one this capability takes.
 function restate(id,canonical,original){
- const c=byId.get(id),text=String(canonical||'').trim();
+ const c=byIdNow(id),text=String(canonical||'').trim();
  if(!c||!text||text.length>500||norm(text)===norm(String(original||'').trim()))return null;
  let ok=false;try{ok=!!c.accepts(text);}catch{ok=false;}
  return ok&&grounded(text,original,c.examples)?text:null;
 }
-module.exports={CATALOG,PHRASES,restate,grounded};
+module.exports={get CATALOG(){return catalog();},catalog,PHRASES,restate,grounded};

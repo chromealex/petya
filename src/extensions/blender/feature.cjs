@@ -50,7 +50,8 @@ function setup(s, dialog = () => require('../../app-dialog.cjs').dialog()) {
   });
   function publish(id, text, busy, error = false) {
     operation = {id, title:'Анимация Blender',text,busy,kind:error?'error':'info',version:id+':'+text};
-    if (s.win && !s.win.isDestroyed()) s.win.webContents.send('blender-motion-progress',operation);
+    // The notification center's generic channel for apps' long work (one stable id, updated in place).
+    if (s.win && !s.win.isDestroyed()) s.win.webContents.send('extension-install-progress',operation);
   }
   async function run(text, work) {
     if (operation?.busy) throw Error('Дождитесь завершения текущей операции Blender.');

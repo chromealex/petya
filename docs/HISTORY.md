@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.17.6 — Git, build flows and Unity Editor live in their apps
+
+- Git, the build flows (repair, questions, watch) and Unity Editor left Petya's core for their apps: chat routes, project detectors and company lifecycle hooks are registries the apps fill. A core audit lists what service- and app-specific code remains, with owners and effort. Nothing changes in use.
+
 ## 0.17.5 — mail, Notion and Google Play live in their apps
 
 - Mail, Notion and Google Play left Petya's core: their clients, settings cards and chat routes belong to their apps («Почта», «Notion», «Google Play Console»). Nothing changes in use; the core no longer knows these services by name.

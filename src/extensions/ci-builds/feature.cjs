@@ -2,8 +2,8 @@
 // per workflow, and for a failed run the failing job/step with the first error lines of its log (found by code).
 // Re-running is a card button with its own confirmation; a chat turn never re-runs anything.
 //
-// Boundary with the existing build flows (they run after extension turns in converse.cjs, so this turn must
-// step aside for what they own):
+// The app also owns the Slack/Jira build flows (build-flows.cjs), asked later in the pipeline through its chat
+// route (chat-route.cjs, stage 'builds', where Petya's core used to run them), so this turn steps aside for them:
 //  - build-repair.cjs: «почини/исправь билд», «статус исправления», «отмени исправление» and build logs attached
 //    to the chat or a repair source in the topic;
 //  - build-question.cjs: «спроси/узнай, что с билдом», «что с этим билдом», and a bare «что с билдом / как там
@@ -36,8 +36,8 @@ const NOT_OURS=[
 ];
 const BRANCH=/(?:ветк\p{L}*|branch)\s+[«"]?([A-Za-z0-9._\/-]{1,100})|(?:^|[\s«"])(main|master|develop|dev|release\/[A-Za-z0-9._-]+)(?=$|[\s»".,!?])/iu;
 
-const isRepair=text=>{try{return require('../../build-repair.cjs').isRepair(text);}catch{return false;}};
-const isBuildQuestion=text=>{try{return require('../../build-question.cjs').isBuildQuestion(text);}catch{return false;}};
+const isRepair=text=>require('./build-repair.cjs').isRepair(text);
+const isBuildQuestion=text=>require('./build-question.cjs').isBuildQuestion(text);
 
 // Whether a chat request is for «Сборки», and what it asks: {kind:'why'|'rerun'|'status', platform, branch}.
 function route(text,topic){
@@ -91,7 +91,31 @@ function setup(s){
  }
  // Settings form: what is connected (secrets never reach the renderer).
  async function status(){return {github:github.connected(s.settings),unity:src.unityConfigured(s.settings),org:s.settings.ciUnityOrg||'',project:s.settings.ciUnityProject||'',keyId:String(s.settings.ciUnityKey||'').split(':')[0]||''};}
- return {ciBuilds:{remember},ipc:{rerun,status}};
+ // The Slack/Jira build flows of this company; they keep their state whether or not the app is added (so clearing
+ // the context and the retention still apply) and work only while it is.
+ const flows=require('./build-flows.cjs').create(s,{added:()=>kit.installed(s,ID)});
+ if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){
+  const timer=setInterval(()=>{if(flows.company!==s.companyId){clearInterval(timer);timers.delete(timer);return;}flows.tick();},5000);
+  timer.unref?.();timers.add(timer);
+ }
+ // A choice from the chat's list, inside the open chat and its project, as Petya's own chat requests run.
+ const select=(flow,id)=>{
+  if(typeof id!=='string'||!id||id.length>200)throw Error('Выберите вариант из списка.');
+  const d=s.dialogue,project=d.state.projects.find(p=>p.id===d.state.activeProjectId);
+  return s.modules.withProject(project,()=>d.within(d.state.activeId,d.state.activeProjectId,()=>flow.turn('',id)));
+ };
+ return {ciBuilds:{remember,question:flows.question,repair:flows.repair,
+  // The build watch for the Slack review flow («следи за билдом»): only while the app is added.
+  get watch(){return kit.installed(s,ID)?flows.watch:null;}},ipc:{rerun,status,
+  repairSelect:id=>select(flows.repair,id),questionSelect:id=>select(flows.question,id)}};
+}
+const timers=new Set();
+// Users who had Petya's build flows before «Сборки» owned them keep them: the app is added once for a company with
+// Slack or Claude / Codex connected that never had the switch saved.
+function migrate(settings,saved){
+ if(Object.hasOwn(saved||{},'extension_'+ID))return;
+ const modules=require('../../modules.cjs');
+ if(modules.enabled(settings,'slack')&&(settings.slackToken||settings.slackCredential)||settings.module_ai==='true')settings['extension_'+ID]='true';
 }
 
 async function collect(s,{repos,platform,branch}){
@@ -159,4 +183,5 @@ module.exports={name:'ciBuilds',dashboard,defaults:{['extension_'+ID]:'false',ci
   for(const key of ['ciUnityOrg','ciUnityProject'])if(next[key]&&!/^[A-Za-z0-9._-]{1,100}$/.test(String(next[key]).trim()))throw Error('ID организации и проекта Unity — латиница, цифры, точка, дефис или подчёркивание.');
   if(next.ciUnityKey&&!/^[^:\s]{1,200}:[^\s]{1,400}$/.test(next.ciUnityKey))throw Error('Ключ Unity Build Automation: Key ID и Secret сервисного аккаунта.');
  },
- setup,turn,route,handoff,pickFailure,groups};
+ setup,turn,route,handoff,pickFailure,groups,migrate,
+ teardown(){for(const timer of timers)clearInterval(timer);timers.clear();}};

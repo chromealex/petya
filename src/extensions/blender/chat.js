@@ -1,3 +1,4 @@
+{const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('chat.css',document.currentScript.src).href;document.head.append(style);}
 // A chat may redraw its messages during a background operation. Reuse the live card.
 const motionCards = new Map();
 window.renderMotionCard = function(parent, message) {
@@ -76,3 +77,5 @@ window.renderMotionCard = function(parent, message) {
     output.append(image,apply);
   }),status,output);
 };
+// A Blender animation still running when the window was reopened: its card in the notification center again.
+window.petya.feature('blenderMotion','status').then(item=>{if(item?.id)document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail:item}));}).catch(()=>{});

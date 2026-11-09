@@ -1,3 +1,5 @@
+// Unity Editor cards in the chat: a prefab's preview and actions, the editor's tools and resources.
+{const style=document.createElement('link');style.rel='stylesheet';style.href=new URL('chat.css',document.currentScript.src).href;document.head.append(style);}
 window.renderUnityPrefab=function(node,query){
   const box=document.createElement('div'),status=document.createElement('p'),results=document.createElement('div'),preview=document.createElement('div');
   box.className='unity-prefab-actions';status.setAttribute('role','status');
@@ -119,3 +121,5 @@ window.renderUnityRequest = function(parent,message) {
   if(request.name)box.append(button(request.name==='read_console'?'Прочитать консоль':request.name==='assist'?'Проверить по запросу':'Показать иерархию',async()=>show(await call(request.name==='assist'?'assist':'call_tool',request.name==='assist'?request.arguments:request))));
   box.append(button('Инструменты и ресурсы Unity',catalog),controls,output);parent.append(box);
 };
+// A Unity request still running when the window was reopened: its card in the notification center again.
+window.petya.feature('unity','status').then(item=>{if(item?.id)document.dispatchEvent(new CustomEvent('petya-ui-notification',{detail:item}));}).catch(()=>{});

@@ -9,7 +9,7 @@ const {errorLines}=require('../src/extensions/ci-builds/log.cjs');
 const github=require('../src/extensions/github/client.cjs');
 const githubFeature=require('../src/extensions/github/feature.cjs');
 const coderIntent=require('../src/extensions/coder/intent.cjs');
-const {isRepair}=require('../src/build-repair.cjs');
+const {isRepair}=require('../src/extensions/ci-builds/build-repair.cjs');
 const offers=require('../src/features/extension-offers.cjs');
 const {InputRequired}=require('../src/input-required.cjs');
 
@@ -149,12 +149,13 @@ const LOG=['2026-11-08T10:00:00.0000000Z ##[group]Run npm test','2026-11-08T10:0
  assert.equal(JSON.stringify(status).includes('secret'),false,'the secret never reaches the renderer');
  assert.equal(calls.filter(c=>c.url.includes('11434')).length,0,'no model calls');
 
- // --- Offer: CI names and «последние сборки»; Slack build questions are left to Petya ---------------------------
+ // --- Offer: CI names, «последние сборки» and the app's own build flows; Slack log questions are left to Petya ---
  const list=offers.load(),pick=text=>offers.candidates(text,{offers:list,settings:{}}).filter(r=>r.direct).map(r=>r.offer.id);
  assert.deepEqual(pick('покажи последние сборки'),['ci-builds']);
  assert.deepEqual(pick('статус CI'),['ci-builds']);
  assert.deepEqual(pick('почему упал CI на main'),['ci-builds']);
- for(const text of ['почему упала сборка?','почему упал билд','что с билдом','почини билд','сколько весит билд','какие PR ждут моего ревью'])assert.equal(pick(text).includes('ci-builds'),false,'no offer: '+text);
+ for(const text of ['что с билдом','почини билд'])assert.deepEqual(pick(text),['ci-builds'],'the app owns: '+text);
+ for(const text of ['почему упала сборка?','почему упал билд','сколько весит билд','какие PR ждут моего ревью'])assert.equal(pick(text).includes('ci-builds'),false,'no offer: '+text);
  const offer=list.find(o=>o.id==='ci-builds');
  assert.equal(offer.ready({'extension_ci-builds':'true'}),false);assert.equal(offer.ready({'extension_ci-builds':'true',githubToken:'x'}),true);
  console.log('CI builds: routing and build-repair/build-question/Slack boundary, GitHub runs + failing job/step + redirected log, platform/branch filters, history strips, card-only rerun with notification, 401/403, repo clarification and git remote, Unity Build Automation v2, offer passed');

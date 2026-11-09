@@ -23,21 +23,37 @@ notification center), «Отдать Программисту» (sends a coding 
   (up to 6 enabled targets, filtered by platform), `…/builds/{n}/log?offsetlines=1&linenumbers=false`,
   `POST …/buildtargets/{id}/builds {"clean":false}`. Settings (org, project, key) are in the «Сборки» card; the key is
   the secret `ciUnityKey`.
-- `ready` (offers) = app added + GitHub token. The chat turn also works with Unity only.
+- `ready` (offers) = app added + (GitHub token, or Slack connected, or Claude / Codex on — the build flows below need
+  no GitHub). The CI chat turn also works with Unity only and asks for GitHub itself when neither is connected.
 
-## Boundary with Petya's existing build flows
-Extension turns run before `build-repair` / `build-question` / Slack log reading in `converse.cjs`, so `route()` steps
-aside for what those own:
+## Slack/Jira build flows (moved from Petya's core)
+The app owns the flows that used to live in `src/build-*.cjs`, now `build-watch.cjs`, `build-question.cjs`,
+`build-repair.cjs`, `build-repair-sources.cjs`, created per company by `build-flows.cjs`:
 - `build-repair.cjs`: «почини/исправь/пофикси билд», «статус исправления», «отмени исправление», logs attached to the
-  chat or the composer, topics with a repair source.
+  chat or the composer, topics with a repair source. Reads the log from a Jira issue, a Slack thread or the attached
+  file, hands the fix to an agent (Claude / Codex) and, when asked, reports back.
 - `build-question.cjs`: «спроси/узнай, что с билдом», «что с этим билдом», and a bare «что с билдом / как там сборка»
-  without a CI target (platform, branch, CI/GitHub/workflow/Unity Cloud). With a target («что с билдом на андроид») the
-  request is answered here.
+  without a CI target: asks the person responsible in Slack and reports the answer.
+- `build-watch.cjs`: «следи за билдом 123» in a reviewed Slack thread (the Slack review flow, `src/review-assistant.cjs`,
+  gets the watch as `services.ciBuilds.watch`, null while the app is off): polls the thread for the CI bot's result.
+
+They plug in through generic core registries: the chat route `chat-route.cjs` (stage `builds`, asked where the core
+used to run them, right before the Slack log review; also the meaning-router entry `build-question` and the
+clarification `repair-input`), IPC `repairSelect` / `questionSelect` for the choice buttons, and the company
+lifecycle (`src/features/lifecycle.cjs`: reset when the Slack connection or the project changes, cleared with the
+context, pruned to the retention). Their rows stay where they were (the company's encrypted `review-memory.json`:
+`repairs`, `buildQuestions`, `watches`), so nothing is migrated. A one-time settings migration adds the app for
+companies that had Slack or Claude / Codex and never saved the switch, so existing users keep the flows; without the
+app these requests get its offer.
+
+## Boundary between the CI turn and the build flows
+Extension turns run first, so `route()` steps aside for what the build flows own:
+- the repair and question phrases above (a «что с билдом» with a CI target — platform, branch, CI/GitHub/workflow/
+  Unity Cloud — is the CI turn's: «что с билдом на андроид»);
 - Slack log / review assistant: any request naming Slack/тред/канал, chats opened from a Slack thread (`slackSource`,
   `slackLog`), «следи за билдом», «статус билдов», «сравни с прошлым падением».
 - Neighbours: build size («сколько весит билд»), dependencies, local builds («собери билд», «запусти сборку»).
-The offer is stricter still: a failure question without a CI name («почему упала сборка?») never gets an offer,
-it stays with the Slack flow for users without this app.
+The offer never takes a failure question without a CI name («почему упала сборка?»): it stays with the Slack log review.
 
 «Отдать Программисту» sends «Исправь код проекта, чтобы проходила проверка …» rather than «Исправь ошибку сборки»:
 `coder/intent.cjs` hands every request mentioning «сборк/билд/CI/commit/push» to other flows (and «исправь сборку» is
@@ -48,7 +64,8 @@ Up to 3 repositories × 40 runs, 6 Unity targets × 10 builds; one failure expla
 last 4 MB; legacy commit statuses are not read. Rerun only for runs shown in a card within the last hour.
 
 ## Verification
-Stubs only: `node tests/ci-builds.cjs`; UI: `tests/ci-builds-ui.cjs`, `tests/github-settings-ui.cjs` (screenshots
+Stubs only: `node tests/ci-builds.cjs`, `tests/build-question.cjs`, `tests/build-repair.cjs`,
+`tests/review-assistant.cjs`, `tests/core-ci-builds-guard.cjs`; UI: `tests/ci-builds-ui.cjs`, `tests/github-settings-ui.cjs` (screenshots
 `/tmp/petya-ci-builds.png`, `/tmp/petya-ci-builds-bottom.png`, `/tmp/petya-github-settings.png`). Not verified live:
 real GitHub log redirect host, rerun response codes, Unity v2 `builds` / `log` paths and the `links.dashboard_url`
 field (assumed from the v1 shape, which v2 mirrors for build targets and start build).

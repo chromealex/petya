@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict'),{commandRoute}=require('../src/git-workspace.cjs'),{eligible}=require('../src/chat-jobs.cjs');
+const assert=require('node:assert/strict'),{commandRoute}=require('../src/extensions/git/workspace.cjs'),{eligible}=require('../src/chat-jobs.cjs');
 const groups={
  status:['Можешь проверить гит?','А сейчас можешь гит посмотреть','Пожалуйста, проверь репозиторий'],
  diff:['Можешь показать изменения в файлах?','Давай посмотрим изменения','Покажи разницу в коде'],

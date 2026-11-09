@@ -4,7 +4,8 @@ const {Dialogue,intent,actionRequest}=require('./dialogue.cjs');
 // action flows (Jira drafts and plans). Without it, only plain model questions can (legacy clone path).
 function eligible(text,topic,full=false){
  if(full)return !actionRequest(text);
- if(require('./git-workspace.cjs').commandRoute(text))return false;
+ // Requests an app routes inline (a foreground chat route, src/features/chat-routes.cjs) never become background jobs.
+ if(require('./features/chat-routes.cjs').claims(text))return false;
  if(actionRequest(text)||topic?.pending||topic?.chatJob?.state==='attention')return false;
  if(/(?:запомни|забудь|работаем над|переключись|заполни|подключи|покажи.{0,12}откуда|источник|сводк|что у нас сегодня|напомни|встреч|билд|сборк|slack|слак|почт|браузер|интернет|погода|новост|поиск|найди|telegram|телеграм|confluence|notion|asana)/iu.test(text))return false;
  if(require('./ui/conversation-input.js').ConversationInput.isProjectCatalogQuestion(text))return false;
