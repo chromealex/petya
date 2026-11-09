@@ -1,0 +1,33 @@
+.tone-card{width:620px;max-width:100%}
+.tc-body{display:flex;flex-direction:column;gap:10px;margin-top:6px}
+.tc-scale{display:flex;flex-direction:column;gap:3px}
+.tc-scale-bar{position:relative;height:8px;border-radius:4px;background:linear-gradient(90deg,#c9ed9d,#e5ce8c 55%,#f0b4a8)}
+.tc-scale-marker{position:absolute;top:-4px;width:4px;height:16px;margin-left:-2px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 2px var(--bg)}
+.tc-scale-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.tc-counts{display:flex;flex-wrap:wrap;gap:6px}
+.tc-count{font-size:11.5px;padding:1px 7px;border-radius:9px;border:1px solid var(--line);color:var(--muted)}
+.tc-count[data-severity="problem"]{color:#f0b4a8;border-color:#f0b4a840}
+.tc-count[data-severity="warning"]{color:#e5ce8c;border-color:#e5ce8c40}
+.tc-text{padding:10px 12px;border:1px solid var(--line);border-radius:8px;font-size:14px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.tc-mark{padding:0 2px;border-radius:3px;color:inherit;background:#ffffff14;border-bottom:2px solid var(--muted)}
+.tc-mark[data-severity="problem"]{background:#f0b4a822;border-bottom-color:#f0b4a8}
+.tc-mark[data-severity="warning"]{background:#e5ce8c1f;border-bottom-color:#e5ce8c}
+.tc-num{margin-left:2px;font-size:9.5px;color:var(--muted)}
+.tc-list{margin:0;padding-left:22px;display:flex;flex-direction:column;gap:6px;font-size:13px}
+.tc-item{padding-left:2px}
+.tc-item::marker{color:var(--muted);font-size:12px}
+.tc-item[data-severity="problem"]::marker{color:#f0b4a8}
+.tc-item[data-severity="warning"]::marker{color:#e5ce8c}
+.tc-item{display:list-item}
+.tc-item>.tc-item-text{display:inline-flex;flex-wrap:wrap;gap:4px 6px;line-height:1.45;margin-right:8px}
+.tc-item.done{opacity:.6}
+.tc-quote,.tc-apply q{quotes:"«" "»";color:var(--ink);overflow-wrap:anywhere}
+.tc-quote{font-weight:600}
+.tc-message{color:var(--muted)}
+.tc-apply{display:inline-flex;align-items:center;gap:4px;max-width:300px;margin-top:3px;padding:3px 8px;font-size:12px;white-space:nowrap}
+.tc-apply q{overflow:hidden;text-overflow:ellipsis}
+.tc-done{font-size:12px;color:#c9ed9d}
+.tc-ok{margin:0;font-size:13px;color:#c9ed9d}
+.tc-section{font-size:12px;color:var(--muted);margin-bottom:4px}
+.tc-rewrite{display:flex;flex-direction:column;align-items:flex-start;gap:6px;padding:10px 12px;border:1px solid #c9ed9d40;border-radius:8px;background:#c9ed9d08}
+.tc-rewrite-text{margin:0;font-size:14px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}

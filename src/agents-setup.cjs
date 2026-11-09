@@ -48,7 +48,7 @@ module.exports=ctx=>{
     ctx.fs.writeFileSync(agentFile + '.tmp', JSON.stringify({ encrypted: ctx.safeStorage.encryptString(JSON.stringify(records)).toString('base64') }), { mode: 0o600 });
     ctx.fs.renameSync(agentFile + '.tmp', agentFile);
   } });
-  const taskMonitor=new (require('./task-monitor.cjs').TaskMonitor)({records:()=>agents.records,save:()=>agents.persist(),status:row=>agentDelivery.status(row),notify:ctx.notify,enabled:()=>ctx.settings.smartNotifications==='true'&&ctx.modules.enabled(ctx.settings,'ai'),claude:()=>process.platform==='darwin'&&ctx.settings.claudeStatusCheck!=='false'});
+  const taskMonitor=new (require('./task-monitor.cjs').TaskMonitor)({records:()=>agents.records,save:()=>agents.persist(),status:row=>agentDelivery.status(row),notify:text=>require('./features/notification-policy.cjs').tag({source:'assignments'},()=>ctx.notify(text)),enabled:()=>ctx.settings.smartNotifications==='true'&&ctx.modules.enabled(ctx.settings,'ai'),claude:()=>process.platform==='darwin'&&ctx.settings.claudeStatusCheck!=='false'});
   if(!ctx.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){const timer=setInterval(()=>taskMonitor.tick().catch(e=>console.error('Task monitor:',e.message)),60000);timer.unref();ctx.app.on('will-quit',()=>clearInterval(timer));taskMonitor.tick().catch(()=>{});}
   const taskProgress=require('./task-progress.cjs');
   const checkProgress=async id=>{

@@ -2,7 +2,7 @@
 // Extracted from main.cjs: shared state comes through ctx (live getters/setters).
 module.exports=ctx=>{
   const slackRequest=new (require('./slack-request.cjs').SlackRequest)({
-    preview:true,state:ctx.reviewState,save:ctx.saveReview,settings:()=>ctx.settings,request:ctx.request,
+    preview:true,review:draft=>require('./features/outgoing.cjs').review(draft),state:ctx.reviewState,save:ctx.saveReview,settings:()=>ctx.settings,request:ctx.request,
     enabled:()=>ctx.modules.enabled(ctx.settings,'slack'),
     context:()=>{const t=ctx.dialogue.active(),p=ctx.projectMemory.context();return {id:t?.id,projectId:t?.projectId,versionIndex:t?.versionIndex||0,projectMemoryId:t?.projectMemoryId,projectName:p.name,projectMembers:p.members,jiraProject:t?.jiraProject||p.jira?.key,reviewScope:t?.reviewScope||p.name,slackSource:t?.slackSource,projectChannels:p.projectChannels,hasSavedChannels:p.hasSavedChannels};},
     reply:(text,extra={})=>{const topic=ctx.dialogue.active();if(topic&&extra.actionReceipt){require('./action-evidence.cjs').recordReceipt(topic,extra.actionReceipt);let message=topic.messages.find(m=>m.actionReceiptId===extra.actionReceipt.id);if(!message){message={role:'assistant',text,at:Date.now()};topic.messages.push(message);}Object.assign(message,{text,sources:extra.sources||[],actionReceiptId:extra.actionReceipt.id,error:!!extra.error});ctx.dialogue.persist();return {handled:true,text,...extra,topicId:topic.id,messages:topic.messages};}return {handled:true,text,...extra};}

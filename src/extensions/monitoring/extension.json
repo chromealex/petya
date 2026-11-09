@@ -1,0 +1,25 @@
+{
+  "id": "monitoring",
+  "name": "Мониторинг",
+  "description": "Живы ли серверы и сервисы: Prometheus, Alertmanager, Grafana и свои проверки доступности — алерты, аптайм, инциденты недели, «почему лежит api», тишина для алерта после подтверждения и поиск адресов серверов в коде проекта",
+  "category": "dev",
+  "icon": "icon.svg",
+  "examples": ["Что с серверами?","Какие алерты горят?","Аптайм за неделю","Найди все адреса серваков в проекте"],
+  "connects": "Prometheus, Alertmanager, Grafana или свои проверки доступности",
+  "uses": ["task-tracker","share-message"],
+  "setting": "extension_monitoring",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["monitor-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "monitorCard": "renderMonitorCard",
+    "monitorSilence": "renderMonitorSilence",
+    "monitorEndpoints": "renderMonitorEndpoints"
+  },
+  "provides": {
+    "monitor-source": ["prometheus-source.cjs", "alertmanager-source.cjs", "grafana-source.cjs", "uptime-source.cjs"]
+  }
+}

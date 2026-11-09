@@ -1,0 +1,23 @@
+{
+  "id": "time-tracking",
+  "name": "Учёт времени",
+  "description": "На что ушёл день: какие приложения и окна были открыты, по категориям, проектам и задачам — таймлайн дня, встречи и фокус поверх, выгрузка в CSV и запись времени в Jira после подтверждения. Учёт включается отдельно и хранится только на компьютере",
+  "category": "personal",
+  "icon": "icon.svg",
+  "examples": ["На что ушёл день?","Сколько я сидел в Unity на этой неделе?","Время по задачам за неделю","Запиши время в Jira"],
+  "connects": "учёт активности",
+  "setting": "extension_time-tracking",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["time-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "timeCard": "renderTimeCard"
+  },
+  "provides": {
+    "activity-classifier": ["classifier-jira.cjs", "classifier-project.cjs"],
+    "journal-source": "journal-source.cjs"
+  }
+}

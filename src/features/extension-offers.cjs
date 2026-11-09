@@ -124,6 +124,14 @@ function setup(s){
   s.dialogue.persist();
   return {...result,extensionData:{...result.extensionData,...data}};
  }
+ // An app that needs another one (e.g. «Подготовка к встрече» needs «Календарь») answers with the same offer
+ // card for it: accepting adds that app (and opens its settings when a service must be connected), and the
+ // original request is sent again. Returns the card data, or null when no such extension offers itself.
+ function prerequisite(id,command){
+  const o=live().find(x=>x.id===id);if(!o)return null;
+  const topic=s.dialogue.active();
+  return {items:[keep(o,command,topic?.id,true)],direct:true};
+ }
  function find(id){prune();const row=pending.get(id);if(!row)throw Error('Предложение устарело. Повторите запрос.');return row;}
  function accept(id){
   const row=find(id),o=live().find(x=>x.id===row.ext);
@@ -144,6 +152,6 @@ function setup(s){
   return {dismissed:row.ext,forever};
  }
  function unmute(ext){s.saveSettings({extensionOffersMuted:JSON.stringify(muted(s.settings).filter(x=>x!==ext))});return muted(s.settings);}
- return {extensionOffers:{turn,annotate,propose,get offers(){return live();}},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
+ return {extensionOffers:{turn,annotate,propose,prerequisite,get offers(){return live();}},ipc:{accept,dismiss,unmute,muted:()=>muted(s.settings)}};
 }
 module.exports={name:'extensionOffers',defaults:{extensionOffersMuted:'[]'},validate(){},setup,load,candidates,decide,REQUEST};

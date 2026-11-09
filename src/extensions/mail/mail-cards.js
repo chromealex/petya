@@ -23,11 +23,14 @@
   label.htmlFor=text.id='mail-draft-'+Math.random().toString(36).slice(2);
   const row=k.el('div','kit-actions');
   const suggest=k.el('button',null,'Предложи текст');suggest.type='button';suggest.title='Петя напишет черновик по письму и вашему пожеланию';
-  suggest.onclick=async()=>{suggest.disabled=true;try{const r=await window.chatResultsApi.perform(key(item),'draft',{hint:text.value});if(r?.draft)text.value=r.draft;}catch(e){k.toast(e.message,{error:true});}finally{suggest.disabled=false;}};
+  suggest.onclick=async()=>{suggest.disabled=true;try{const r=await window.chatResultsApi.perform(key(item),'draft',{hint:text.value});if(r?.draft){text.value=r.draft;text.dispatchEvent(new Event('input',{bubbles:true}));}}catch(e){k.toast(e.message,{error:true});}finally{suggest.disabled=false;}};
   const open=k.el('button','primary','Открыть в почте');open.type='button';open.title='Откроется окно ответа в почте; отправляете вы';
   open.onclick=()=>{const url=k.safeUrl(composeUrl(item,text.value.slice(0,1800)));if(url)window.open(url,'_blank','noopener');};
   const cancel=k.el('button',null,'Отмена');cancel.type='button';cancel.onclick=()=>box.remove();
-  row.append(open,suggest,cancel);box.append(label,text,row);card.append(box);text.focus();
+  row.append(open,suggest,cancel);box.append(label,text);
+  // The draft passes the outgoing review before it goes to the mail service's compose window.
+  if(k.outgoingReview)box.append(k.outgoingReview(text,{channel:{service:'mail',target:address(item.from),audience:'direct'}}));
+  box.append(row);card.append(box);text.focus();
  }
  function mailCard(k,item){
   const body=item.excerpt?k.el('p','mail-excerpt',item.excerpt):null;

@@ -48,7 +48,9 @@ module.exports={name:'extensionUI',get descriptors(){return descriptors();},grou
  // Plugins may claim a chat turn (e.g. corrections to an open plan) through `turn(services, command)`;
  // external ones only while they are loaded (a removed one stops answering at once).
  const bundledTurns=features.filter(f=>!f.external&&typeof f.turn==='function');
- const extensionTurn=async command=>{for(const f of [...bundledTurns,...runtime.active().filter(w=>w.turn)]){const reply=await f.turn(s,command);if(reply)return reply;}return null;};
+ // A feature whose `claims(command)` is true goes first: its request quotes text that may name other apps' subjects
+ // («как это звучит: кто сломал билд?» is about tone, not CI).
+ const extensionTurn=async command=>{const all=[...bundledTurns,...runtime.active().filter(w=>w.turn)];const first=all.filter(f=>{try{return typeof f.claims==='function'&&!!f.claims(command);}catch{return false;}});for(const f of [...first,...all.filter(f=>!first.includes(f))]){const reply=await f.turn(s,command);if(reply)return reply;}return null;};
  const find=id=>descriptors().find(d=>d.id===id);
  const dialog=()=>require('electron').dialog;
  return {extensionTurn,ipc:{catalog,uninstall(id){const d=find(id);if(!d?.setting)throw Error('Это расширение нельзя удалить отдельно.');s.saveSettings({[d.setting]:'false'});return catalog();},install(id){const d=find(id);if(!d)throw Error('Расширение не найдено.');if(d.setting)s.saveSettings({[d.setting]:'true'});return catalog();},

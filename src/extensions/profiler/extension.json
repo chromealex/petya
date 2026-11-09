@@ -1,0 +1,18 @@
+{
+  "id": "profiler",
+  "name": "Профайлер",
+  "description": "Что съедает кадр: CSV из Unity Profile Analyzer, трасса Chrome JSON или gfxinfo — главные маркеры по потокам, доля бюджета кадра, пики и GC, сравнение до и после",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Разбери профайлер","Что жрёт кадр?","Сравни профайл до и после","Почему фризы?"],
+  "setting": "extension_profiler",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["profiler-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "profiler": "renderProfiler"
+  },
+  "uses": ["code-fix"]
+}

@@ -14,7 +14,7 @@ function parse(command){
 }
 function thread(topic,channel){try{const u=new URL(topic.slackSource?.url);if(u.hostname!=='app.slack.com'&&!u.hostname.endsWith('.slack.com'))return '';const m=/^\/archives\/([CG][A-Z0-9]+)\/p(\d{10,})$/.exec(u.pathname);if(m?.[1]!==channel)return '';const ts=u.searchParams.get('thread_ts');return /^\d+\.\d{6}$/.test(ts||'')?ts:m[2].slice(0,-6)+'.'+m[2].slice(-6);}catch{return '';}}
 class SlackRequest {
- constructor({state,save,settings,enabled,context,request,reply,preview=false,now=Date.now}){Object.assign(this,{state,save,settings,enabled,context,request,reply,preview,now});state.slackRequests ||= [];this.pending=null;this.busy=false;for(const r of state.slackRequests)if(r.status==='sending')r.status='unknown';}
+ constructor({state,save,settings,enabled,context,request,reply,preview=false,review=null,reviewBudget=5000,now=Date.now}){Object.assign(this,{state,save,settings,enabled,context,request,reply,preview,review,reviewBudget,now});state.slackRequests ||= [];this.pending=null;this.busy=false;for(const r of state.slackRequests)if(r.status==='sending')r.status='unknown';}
  account(){return hash(this.settings().slackCredential||this.settings().slackToken||'');}
  scope(){return JSON.stringify([this.account(),this.enabled(),this.context(),this.settings().teamMembers]);}
  async turn(command,answer=false){
@@ -42,6 +42,7 @@ class SlackRequest {
    if(!selected&&!task.literal&&!topic.projectMemoryId&&!topic.jiraProject&&!topic.reviewScope&&!topic.slackSource?.url)choice={options:choice.channels||choice.options||all,reason:'Не выбран рабочий проект. В какой канал отправить поручение?'};
    if(!choice.channels)return this.ask(task,choice.options||[],choice.reason);
    const channel=choice.channels[0],thread_ts=thread(topic,channel.id);
+   const confirm=async task=>{
    const key=hash(JSON.stringify([account,channel.id,thread_ts,task.text.toLowerCase().replace(/\s+/g,' '),...task.recipientRole?[task.recipientRole]:[]]));
    const legacyKey=hash(JSON.stringify([account,channel.id,thread_ts,task.text.toLowerCase().replace(/\s+/g,' ')]));
    const old=this.state.slackRequests.find(r=>(r.key===key||!Array.isArray(r.recipients)&&r.key===legacyKey)&&(r.status==='unknown'||r.status==='sending'||r.status==='sent'&&this.now()-r.at<900000));
@@ -64,9 +65,30 @@ class SlackRequest {
    row.ts=result.ts;row.status='sent';row.url='https://app.slack.com/archives/'+channel.id+'/p'+result.ts.replace('.','');this.save();
    return this.receipt(row);
    };
-   if(this.preview)return require('./input-required.cjs').ask({text:'Отправить в #'+channel.name+(thread_ts?' · ответ в треде':'')+'?\n'+(recipients.length?'Упоминания: '+recipients.map(r=>r.name).join(', ')+'\n':'')+task.text,label:'Отправка сообщения',options:['Отправить','Отмена'],strictChoices:true},async()=>{if(this.busy)throw Error('Дождитесь завершения отправки.');this.busy=true;try{return await send();}finally{this.busy=false;}});
-   return await send();
+   if(!this.preview)return await send();
+   // The draft passes the outgoing pipeline (src/features/outgoing.cjs) before the confirmation: findings are
+   // shown under the text; it changes only when the user chooses «Применить правки», which shows the edited text
+   // for a new confirmation. A slow or failing check only means no findings.
+   const outgoing=require('./features/outgoing.cjs');
+   const review=await this.reviewDraft(task.text,channel,thread_ts);
+   check();
+   const fixed=review?outgoing.applyAll(task.text,review.findings):null;
+   const canFix=!!fixed?.applied.length&&!!fixed.text.trim()&&fixed.text!==task.text;
+   const notes=review?outgoing.confirmation(review):'';
+   return require('./input-required.cjs').ask({text:'Отправить в #'+channel.name+(thread_ts?' · ответ в треде':'')+'?\n'+(recipients.length?'Упоминания: '+recipients.map(r=>r.name).join(', ')+'\n':'')+task.text+(notes?'\n\n'+notes:''),label:'Отправка сообщения',options:canFix?['Отправить','Применить правки','Отмена']:['Отправить','Отмена'],strictChoices:true},async answer=>{
+    if(canFix&&String(answer||'').trim().toLowerCase()==='применить правки')return confirm({...task,text:fixed.text});
+    if(this.busy)throw Error('Дождитесь завершения отправки.');this.busy=true;try{return await send();}finally{this.busy=false;}});
+   };
+   return await confirm(task);
   }catch(e){if(e instanceof require('./input-required.cjs').InputRequired)throw e;return this.reply(e.message,{error:true});}finally{this.busy=false;}
+ }
+ // Findings of the outgoing pipeline for a draft, or null: never longer than `reviewBudget`, never throws.
+ async reviewDraft(text,channel,thread_ts){
+  if(typeof this.review!=='function')return null;
+  let timer;
+  const audience=channel.is_im||channel.is_mpim?'direct':channel.is_private?'team':'public';
+  try{return await Promise.race([Promise.resolve().then(()=>this.review({text,channel:{service:'slack',target:'#'+channel.name,audience},context:{thread:!!thread_ts}})),new Promise(resolve=>{timer=setTimeout(()=>resolve(null),this.reviewBudget);})]);}
+  catch{return null;}finally{clearTimeout(timer);}
  }
  ask(task,options,reason,lookup=false){options=options.filter(c=>!c.is_archived&&/^[CG][A-Z0-9]+$/.test(c.id)).slice(0,8);this.pending={task,options,lookup,scope:this.scope(),at:this.now()};return this.reply(reason||'Куда отправить поручение?',{question:true,slackRequestReply:true,...lookup||!options.length?{clarificationInput:{label:'Канал Slack',placeholder:'#название или ссылка',submit:'Продолжить'}}:{},slackRequestChoices:options.map(c=>({id:c.id,label:'#'+c.name}))});}
  async verify(id,authorize=()=>{}){

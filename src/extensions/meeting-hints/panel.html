@@ -1,0 +1,8 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; object-src 'none'; base-uri 'none'"><title>Подсказки на встрече</title><script src="../../ui/i18n-core.js"></script><script src="../../ui/i18n.js"></script><link rel="stylesheet" href="panel.css"></head><body>
+<section id="hint" class="hint" hidden aria-live="polite">
+ <header><span class="kind" id="kind" aria-hidden="true"></span><strong id="title"></strong><button type="button" class="close" id="close" title="Понятно" aria-label="Понятно">×</button></header>
+ <p id="text" class="text" data-no-i18n></p>
+ <p class="source"><span>Источник: </span><span id="source" data-no-i18n></span></p>
+ <footer><button type="button" id="ok">Понятно</button><button type="button" id="mute">Не показывать такое</button><button type="button" id="hide" class="quiet" title="Скрыть до конца встречи">Скрыть</button></footer>
+</section>
+<script src="panel.js"></script></body></html>

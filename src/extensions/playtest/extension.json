@@ -1,0 +1,22 @@
+{
+  "id": "playtest",
+  "name": "Разбор плейтеста",
+  "description": "Запись игровой сессии с голосом игрока и журналом событий — где игрок застрял: повторные смерти, простои, негатив в речи, промахи по интерфейсу. Каждый момент с кадром, цитатой или событием",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Разбери плейтест","Где игрок застрял?","Моменты фрустрации в этом видео"],
+  "setting": "extension_playtest",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["playtest-cards.js", "message-format.js"],
+    ["playtest-notifications.js", "notifications.js"]
+  ],
+  "results": {
+    "playtest": "renderPlaytest"
+  },
+  "uses": ["task-tracker"],
+  "downloads": [
+    {"id": "vision-model", "name": "Модель для кадров (gemma3:4b)", "bytes": 3300000000, "approx": true, "optional": true}
+  ]
+}

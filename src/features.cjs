@@ -19,6 +19,9 @@ module.exports=[
  require('./features/context-discovery.cjs'),
  require('./features/meeting-sources.cjs'),
  require('./features/crash-sources.cjs'),
+ require('./features/meeting-stream.cjs'),
+ require('./features/activity.cjs'),
+ require('./features/mail-records.cjs'),
  require('./features/meeting-memory.cjs'),
  require('./features/materials.cjs'),
  require('./features/meeting-summary.cjs'),
@@ -42,10 +45,13 @@ module.exports=[
  require('./features/extension-replies.cjs'),
  require('./features/extension-offers.cjs'),
  require('./features/app-links.cjs'),
+ require('./features/outgoing.cjs'),
+ require('./features/notification-policy.cjs'),
  require('./features/chat-results.cjs'),
  require('./features/chat-changes.cjs'),
  require('./features/model-parts.cjs'),
  require('./features/boot-splash.cjs'),
  require('./features/onboarding.cjs'),
- require('./features/project-share.cjs')
+ require('./features/project-share.cjs'),
+ require('./features/semantic-index.cjs')
 ];

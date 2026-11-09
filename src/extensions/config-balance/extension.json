@@ -1,0 +1,18 @@
+{
+  "id": "config-balance",
+  "name": "Конфиги и баланс",
+  "description": "Сверка таблицы баланса (Google Таблица, CSV или XLSX) с конфигами игры — ScriptableObject, JSON, CSV: расхождения, проверка по схеме и что поменялось между версиями",
+  "category": "gamedev",
+  "icon": "icon.svg",
+  "examples": ["Сверь баланс с конфигами","Что поменялось в балансе с прошлой версии?","Проверь конфиги юнитов","Почему урон лучника в игре не как в таблице?"],
+  "uses": ["code-fix", "spreadsheet-export"],
+  "setting": "extension_config-balance",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["balance-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "balanceCard": "renderBalanceCard"
+  }
+}

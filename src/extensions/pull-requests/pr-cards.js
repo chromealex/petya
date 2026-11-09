@@ -70,7 +70,10 @@
     catch(e){k.toast(e.message,{error:true});yes.disabled=no.disabled=false;}finally{yes.removeAttribute('aria-busy');}};
    confirm.append(yes,no);area.disabled=true;box.append(confirm);
   };
-  row.append(send,cancel);box.append(area,row);card.querySelector('.kit-actions').before(box);area.focus();
+  row.append(send,cancel);box.append(area);
+  // The comment passes the outgoing review (findings and suggestions under the text; sending stays as it is).
+  if(k.outgoingReview)box.append(k.outgoingReview(area,{channel:{service:'github',target:pr.repo+'#'+pr.number,audience:'team'}}));
+  box.append(row);card.querySelector('.kit-actions').before(box);area.focus();
  }
  function single(k,p){
   const body=k.el('div','pr-body');

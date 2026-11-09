@@ -1,0 +1,18 @@
+{
+  "id": "code-review",
+  "name": "Код-ревью",
+  "description": "Ревью ваших изменений перед PR и GitHub PR: проверки кода (секреты, отладка, тесты) и замечания локальной модели с привязкой к строкам, исправление через Программиста",
+  "category": "dev",
+  "icon": "icon.svg",
+  "examples": ["Проверь мои изменения","Ревью ветки перед PR","Посмотри diff","Сделай ревью PR 123"],
+  "uses": ["code-fix"],
+  "setting": "extension_code-review",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["review-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "codeReview": "renderCodeReview"
+  }
+}

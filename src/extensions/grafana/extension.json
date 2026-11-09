@@ -1,0 +1,21 @@
+{
+  "id": "grafana",
+  "name": "Grafana",
+  "description": "Дашборды Grafana в чате: графики, плитки и таблицы панелей за нужный период, поиск дашбордов, ссылки на панели; источник для «Метрик игры». Только чтение",
+  "category": "analytics",
+  "icon": "icon.svg",
+  "connects": "Grafana",
+  "uses": ["share-message"],
+  "provides": {"metrics-source": "metrics-source.cjs", "query-source": "query-source.cjs"},
+  "setting": "extension_grafana",
+  "settings": true,
+  "feature": "feature.cjs",
+  "examples": ["Какие дашборды есть в Grafana?", "Что на дашборде лиг?", "Покажи лиги за неделю", "Найди дашборд про ретеншн"],
+  "scripts": [
+    ["grafana-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "grafanaCard": "renderGrafanaCard"
+  }
+}

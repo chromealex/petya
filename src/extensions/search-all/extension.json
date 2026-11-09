@@ -1,0 +1,18 @@
+{
+  "id": "search-all",
+  "name": "Поиск по всему",
+  "description": "Один вопрос — поиск сразу по Slack, Confluence и Notion, Jira, почте, Telegram, встречам, файлам проекта и глоссарию, с ответом по найденному и ссылками",
+  "category": "docs",
+  "icon": "icon.svg",
+  "examples": ["Найди везде про матчмейкинг","Где обсуждали оплату в Китае?","Поиск по всему: лиги","Ответь по найденному"],
+  "setting": "extension_search-all",
+  "settings": false,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["search-cards.js", "message-format.js"]
+  ],
+  "results": {
+    "searchAll": "renderSearchAll",
+    "searchAllAnswer": "renderSearchAllAnswer"
+  }
+}

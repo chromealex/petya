@@ -7,6 +7,7 @@
   "examples": ["Покажи последние сборки","Почему упала сборка?","Перезапусти последний workflow"],
   "connects": "GitHub или Unity Build Automation",
   "uses": ["code-fix","task-tracker","share-message"],
+  "provides": {"release-check": "release-check.cjs"},
   "setting": "extension_ci-builds",
   "settings": true,
   "feature": "feature.cjs",

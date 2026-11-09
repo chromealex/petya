@@ -29,7 +29,10 @@
   if(!entry.template||templates.has(entry.id))return;templates.add(entry.id);
   const form=document.getElementById('settings-form');form?.querySelector(':scope>button[type=submit]')?.insertAdjacentHTML('beforebegin',entry.template);
  }
- async function mount(entry){
+ // Concurrent mounts of one extension share one run (several cards rendering at once).
+ const mounting=new Map();
+ function mount(entry){if(!mounting.has(entry.id))mounting.set(entry.id,mountOnce(entry).finally(()=>mounting.delete(entry.id)));return mounting.get(entry.id);}
+ async function mountOnce(entry){
   template(entry);
   for(const [file] of entry.scripts)await load(source(entry,file));
   let card=document.querySelector('[data-extension="'+entry.id+'"]');
@@ -50,7 +53,9 @@
  }
  window.extensionHost={source,allowed,refresh,reload,entries:()=>entries,
   async remove(id){entries=await window.petya.feature('extensionUI','uninstall',id);const card=document.querySelector('[data-extension="'+id+'"]');if(card)card.hidden=true;document.dispatchEvent(new Event('petya-extensions-changed'));},
-  async render(parent,message){for(const entry of entries)for(const [key,handler] of Object.entries(entry.results||{})){const data=message.extensionData?.[key]||message[key];if(!data)continue;try{parent.dataset.extensionPresentation='true';if(!window[handler])await mount(entry);window[handler]?.(parent,data);}catch(e){notice(e.message,true);}}},
+  // A card is interface, not message text: what the renderer adds to the message gets [data-i18n], so the
+  // interface translation (i18n.js) covers it while the message text around it and [data-no-i18n] inside it stay.
+  async render(parent,message){for(const entry of entries)for(const [key,handler] of Object.entries(entry.results||{})){const data=message.extensionData?.[key]||message[key];if(!data)continue;try{parent.dataset.extensionPresentation='true';if(!window[handler])await mount(entry);const before=new Set(parent.children);window[handler]?.(parent,data);for(const node of parent.children)if(!before.has(node))node.dataset.i18n='';}catch(e){notice(e.message,true);}}},
   async openMany(ids){entries=await window.petya.feature('extensionUI','installMany',ids);for(const id of ids){const entry=entries.find(e=>e.id===id);if(entry)await mount(entry);}return entries;},
   async open(id,{stay=false}={}){entries=await window.petya.feature('extensionUI','install',id);const entry=entries.find(e=>e.id===id),card=await mount(entry);if(stay){notice('«'+(entry.name||id)+'» добавлено.');return;}view('settings');if(card)window.revealSettings?.(card);else notice('Расширение добавлено. Используйте его в чате.');},
   // After an installation from a file: the new extension's scripts and settings card, without a restart.

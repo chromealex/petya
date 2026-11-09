@@ -6,6 +6,7 @@
   "icon": "icon.svg",
   "examples": ["Проверь зависимости проекта","Какие пакеты устарели?","Есть ли уязвимости в пакетах?"],
   "uses": ["code-fix","task-tracker"],
+  "provides": {"release-check": "release-check.cjs"},
   "setting": "extension_dependencies",
   "settings": false,
   "feature": "feature.cjs",

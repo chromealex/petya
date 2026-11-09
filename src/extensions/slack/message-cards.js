@@ -31,7 +31,10 @@
      ask.onclick=()=>{const c=document.getElementById('command');c.value='Предложи короткий ответ '+(item.author?item.author+' ':'')+'на сообщение: «'+String(item.text||'').slice(0,300)+'»';c.focus();};
      cancel.onclick=()=>{draft.remove();open.hidden=false;};
      send.onclick=async()=>{send.disabled=true;try{await window.resultKit.quick(key,'reply',{text:text.value});draft.replaceChildren(Object.assign(document.createElement('div'),{className:'kit-draft-label',textContent:'Отправлено: '+text.value.slice(0,120)}));}catch{send.disabled=false;}};
-     row.append(send,cancel,ask);draft.append(label,text,row);card.append(draft);text.focus();};
+     row.append(send,cancel,ask);draft.append(label,text);
+     // The reply passes the outgoing review (findings and suggestions under the text; sending stays as it is).
+     if(window.resultKit?.outgoingReview)draft.append(window.resultKit.outgoingReview(text,{channel:{service:'slack',target:item.channel?'#'+item.channel:'',audience:'team'},context:{thread:true}}));
+     draft.append(row);card.append(draft);text.focus();};
     header.append(open);
    }
    // Attached files: «Посмотреть» downloads the file into the chat attachments and tells what is in it.

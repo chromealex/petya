@@ -1,0 +1,6 @@
+{"events":[
+ {"timestamp":"2026-11-03T10:15:00.000Z","type":"recording_start"},
+ {"timestamp":"2026-11-03T10:15:42.500Z","type":"player_died","stage":"forest-1"},
+ {"timestamp":"2026-11-03T10:16:10.000Z","type":"tap_miss","stage":"shop","target":"banner"},
+ {"timestamp":"2026-11-03T10:17:00.000Z","type":"level_complete","stage":"forest-1"}
+]}

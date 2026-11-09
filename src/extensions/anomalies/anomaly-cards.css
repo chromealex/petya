@@ -1,0 +1,33 @@
+.an-card{width:620px;max-width:100%;margin:12px 0}
+.an-body{display:flex;flex-direction:column;gap:10px;min-width:0}
+.an-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.an-item{display:grid;grid-template-columns:minmax(0,1fr) 200px;gap:12px;align-items:center;padding:9px 10px;border-radius:10px;border:1px solid var(--line,#ffffff1f);background:#ffffff05}
+.an-item.bad{border-color:#f0b4a833;background:#f0b4a808}
+.an-item.good{border-color:#c9ed9d2e;background:#c9ed9d06}
+.an-text{display:flex;flex-direction:column;gap:4px;min-width:0}
+.an-headline{font-size:14px;font-weight:600;color:var(--ink);overflow-wrap:anywhere}
+.an-facts{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px;font-size:12.5px;color:var(--muted)}
+.an-delta{font-weight:600;font-variant-numeric:tabular-nums;margin-right:4px}
+.an-delta.bad{color:#f0b4a8}.an-delta.good{color:#c9ed9d}
+.an-usual-value,.an-context-value{color:var(--ink);font-variant-numeric:tabular-nums}
+.an-context{margin-left:6px}
+.an-chips{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+.an-chips .kit-chip{font-size:11px}
+.an-day{font-size:11.5px;color:var(--muted)}
+.an-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.an-actions button{min-height:26px;padding:2px 10px;font-size:12px}
+.an-spark{display:block;width:200px;height:48px;max-width:100%}
+.an-band{fill:#c9ed9d1a;stroke:#c9ed9d33;stroke-width:.6}
+.an-median{stroke:#c9ed9d55;stroke-width:.8;stroke-dasharray:2 2}
+.an-line{fill:none;stroke:#aab3ae;stroke-width:1.4;stroke-linejoin:round;stroke-linecap:round}
+.an-base{fill:#c9ed9d}
+.an-point{stroke:var(--bg,#111);stroke-width:1.2}
+.an-point.bad{fill:#f0b4a8}.an-point.good{fill:#c9ed9d}
+.an-calm{margin:0;font-size:13px;color:var(--ink)}
+.an-notes{display:flex;flex-direction:column;gap:3px;padding:8px 10px;border-radius:9px;background:#ffffff06;font-size:12.5px;color:var(--muted)}
+.an-notes-title{font-size:11.5px;text-transform:uppercase;letter-spacing:.04em}
+.an-notes ul{margin:0;padding-left:16px;display:flex;flex-direction:column;gap:2px}
+.an-notes li.error{color:#e5ce8c}
+.an-meta{display:flex;flex-wrap:wrap;gap:6px;font-size:11.5px;color:var(--muted)}
+.an-meta span+span{margin-right:6px}
+@media (max-width:560px){.an-item{grid-template-columns:1fr}.an-spark{width:100%}}

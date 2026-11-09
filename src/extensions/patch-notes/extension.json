@@ -1,0 +1,24 @@
+{
+  "id": "patch-notes",
+  "name": "Патчноуты",
+  "description": "Что нового для игроков из задач Jira, коммитов между тегами и PR: по языкам, в лимитах App Store и Google Play, плюс чейнджлог для команды",
+  "category": "comms",
+  "icon": "icon.svg",
+  "provides": {"release-check": "release-check.cjs"},
+  "setting": "extension_patch-notes",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["notes-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "patchNotes": "renderPatchNotes"
+  },
+  "examples": [
+    "Напиши патчноут к версии 1.5",
+    "Что нового для стора",
+    "Чейнджлог между v1.4 и v1.5",
+    "Анонс обновления для игроков"
+  ]
+}

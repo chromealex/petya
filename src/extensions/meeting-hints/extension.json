@@ -1,0 +1,21 @@
+{
+  "id": "meeting-hints",
+  "name": "Подсказки на встрече",
+  "description": "Во время записи встречи — подсказки в углу экрана: что это уже решали, что вы обещали, что значит термин проекта. Со ссылкой на источник, не чаще раза в 30 секунд",
+  "category": "meetings",
+  "icon": "icon.svg",
+  "examples": ["Подсказывай на встречах","Включи подсказки","Выключи подсказки","Какие подсказки на встрече?"],
+  "setting": "extension_meeting-hints",
+  "settings": true,
+  "feature": "feature.cjs",
+  "provides": {
+    "meeting-listener": "listener.cjs"
+  },
+  "scripts": [
+    ["hints-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "meetingHints": "renderMeetingHints"
+  }
+}

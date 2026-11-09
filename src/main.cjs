@@ -678,7 +678,7 @@ function setupHandlers() {
   handle('permissionStatus', permissionChecklist.status);
   handle('requestPermission', permissionChecklist.request);
   handle('permission', async () => process.platform !== 'darwin' || await systemPreferences.askForMediaAccess('microphone'));
-  handle('notify', body => notify(text(body, 250)));
+  handle('notify', body => notify(text(body, 4000)));
   handle('listening', (enabled,meeting) => { trayListening=enabled===true;trayMeeting=meeting===true;refreshTrayMenu();if(speechModelSwap)useDownloadedSpeech(); });
   // Features last: everything they may need is set up by now.
   // A feature returns services (added to `services`) and optionally `ipc` methods, reachable from the UI as

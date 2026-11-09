@@ -1,0 +1,20 @@
+{
+  "id": "sql",
+  "name": "SQL по словам",
+  "description": "Вопрос словами — запрос SQL по схеме вашей базы (ClickHouse, PostgreSQL, BigQuery): только чтение, стоимость до запуска, результат таблицей и графиком",
+  "category": "analytics",
+  "icon": "icon.svg",
+  "examples": ["Сколько игроков дошли до 10 уровня за неделю?","Топ стран по платежам в ClickHouse","Покажи схему таблицы events","Выполни SELECT count(*) FROM events"],
+  "connects": "ClickHouse, PostgreSQL, BigQuery",
+  "setting": "extension_sql",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["sql-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "sqlQuery": "renderSqlQuery",
+    "sqlSchema": "renderSqlSchema"
+  }
+}

@@ -3,10 +3,11 @@ const path=require('node:path');
 const {randomUUID}=require('node:crypto');
 const {SOUND,MIC}=require('./meeting-talk.cjs');
 // Persist encrypted segments immediately; recognition runs in the background while the meeting goes on
-// and finishes after the recording stops.
+// and finishes after the recording stops. `observe` sees each fragment recognised while the meeting is still being
+// recorded (the live meeting stream, src/meeting-stream.cjs); fragments recognised after the stop are not live.
 class MeetingRecording {
- constructor({directory,encrypt,decrypt,transcribe,save,emit=()=>{},days=()=>7}){
-  Object.assign(this,{directory,encrypt,decrypt,transcribe,save,emit,days});this.sessions=new Map();this.running=new Set();
+ constructor({directory,encrypt,decrypt,transcribe,save,emit=()=>{},observe=()=>{},days=()=>7}){
+  Object.assign(this,{directory,encrypt,decrypt,transcribe,save,emit,observe,days});this.sessions=new Map();this.running=new Set();
   fs.mkdirSync(directory,{recursive:true,mode:0o700});
   this.cleanup();
   for(const name of fs.readdirSync(directory).filter(n=>/^[a-f0-9-]{36}\.json$/.test(n))){
@@ -43,6 +44,11 @@ class MeetingRecording {
     if(text)await this.save({id:s.id+'-'+s.completed,sessionId:s.id,source:part.source,...part.speaker?{speaker:part.speaker}:{},title:(s.title||'Встреча'+(s.app?' '+s.app:''))+' · '+new Date(part.at).toLocaleString('ru-RU'),text,at:part.endedAt,url:''});
     // A deterministic context ID makes recovery idempotent if persistence fails after saving.
     if(result)s.previous[part.source]=result;
+    if(s.phase==='recording'){
+     // Whether the next fragment of this source (if already recorded) continues this one without a pause.
+     const next=s.segments.slice(s.completed+1).find(p=>p.source===part.source);
+     try{this.observe({id:s.id,index:s.completed,source:part.source,at:part.at,endedAt:part.endedAt,overlap:part.overlap,text:text||'',...part.speaker?{speaker:part.speaker}:{},pending:s.segments.length-s.completed-1,...next?{continues:next.overlap}:{}});}catch{/* the live stream never breaks the recording */}
+    }
     s.completed++;s.message=s.phase==='recording'?`Записываю встречу · расшифровано ${s.completed} из ${s.segments.length} фрагментов`:`Расшифровываю встречу: ${s.completed} из ${s.segments.length} фрагментов`;this.persist(s);
    }
    // Caught up while the meeting goes on: the next fragment or the finish starts the loop again.

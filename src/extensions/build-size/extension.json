@@ -5,6 +5,7 @@
   "category": "gamedev",
   "icon": "icon.svg",
   "examples": ["Из чего состоит этот APK?","Сравни размер двух последних билдов","Почему билд вырос?"],
+  "provides": {"release-check": "release-check.cjs"},
   "setting": "extension_build-size",
   "settings": false,
   "feature": "feature.cjs",

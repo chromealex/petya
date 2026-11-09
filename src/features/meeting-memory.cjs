@@ -26,11 +26,21 @@ module.exports = {
    decrypt:bytes=>safeStorage.decryptString(bytes),
    transcribe:bytes=>require('../voice-setup.cjs').transcribe(s,bytes),
    save:item=>memory.put([item]),
-   emit:state=>{if(company===s.companyId&&s.win&&!s.win.isDestroyed())s.win.webContents.send('meeting-memory-progress',state);}
+   emit:state=>{if(company===s.companyId&&s.win&&!s.win.isDestroyed())s.win.webContents.send('meeting-memory-progress',state);},
+   // Recognised fragments go to the live meeting stream (src/features/meeting-stream.cjs) while the meeting is recorded.
+   observe:item=>{if(company===s.companyId)s.meetingStreamProducer?.segment({...item,meetingId:item.id});}
   });
+  // The live stream starts when the recording does and ends when it stops: started/ended with the meeting's context.
+  const live=state=>{
+   const stream=s.meetingStreamProducer;if(!stream||company!==s.companyId)return;
+   try{
+    if(state.active&&state.phase==='recording'){const session=recording.sessions.get(state.id);stream.start({meetingId:state.id,title:session?.title||'',app:state.app||session?.app||'',source:local.source||'',attendees:local.source?s.meetingSources?.participants?.()||[]:[]});}
+    else if(!state.active&&stream.status().meetingId===state.id){const session=recording.sessions.get(state.id);stream.end(state.id,{reason:state.phase==='error'?'error':'stopped',pending:session?session.segments.length-session.completed:0});}
+   }catch{/* the live stream never breaks the recording */}
+  };
   const local=new (require('../local-meeting.cjs').LocalMeeting)({settings:()=>s.settings,sources:{list:()=>s.meetingSources?.list()||[],detect:()=>s.meetingSources?s.meetingSources.detect():{active:false},speaker:(...a)=>s.meetingSources?.speaker(...a)||'',begin:id=>s.meetingSources?.begin(id),end:id=>s.meetingSources?.end(id)},recording,
    createCapture:options=>new (require('../meeting-capture.cjs').LocalCapture)(options),
-   emit:state=>{if(company===s.companyId&&s.win&&!s.win.isDestroyed())s.win.webContents.send('local-meeting-progress',state);}
+   emit:state=>{live(state);if(company===s.companyId&&s.win&&!s.win.isDestroyed())s.win.webContents.send('local-meeting-progress',state);}
   });
   const timer=setInterval(()=>{if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1')local.tick().catch(()=>{});},5000);timer.unref();
   app.once('before-quit',async()=>{clearInterval(timer);await local.stop(false);});

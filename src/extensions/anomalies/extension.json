@@ -1,0 +1,19 @@
+{
+  "id": "anomalies",
+  "name": "Аномалии",
+  "description": "Каждое утро сравнивает вчерашние метрики, крэши, обращения в поддержку, рекламную выручку и оценки в сторах с теми же днями недели и сообщает только о заметных отклонениях",
+  "category": "analytics",
+  "icon": "icon.svg",
+  "examples": ["Что необычного вчера?","Есть аномалии за неделю?","Аномалии в метриках вчера"],
+  "connects": "метрики, крэши, поддержку, рекламу или отзывы",
+  "setting": "extension_anomalies",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["anomaly-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "anomalies": "renderAnomalies"
+  }
+}

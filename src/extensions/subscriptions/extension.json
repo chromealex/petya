@@ -1,0 +1,19 @@
+{
+  "id": "subscriptions",
+  "name": "Подписки и продления",
+  "description": "За что вы платите регулярно и что скоро продлится: подписки, сумма в месяц, следующее списание и прошлые платежи, домены, сертификаты и лицензии — по чекам из подключённой почты, только на этом компьютере",
+  "category": "personal",
+  "icon": "icon.svg",
+  "examples": ["За что я плачу каждый месяц?","Что продлится на этой неделе?","Сколько уходит на сервисы?","Когда истекает домен?"],
+  "connects": "Почта",
+  "setting": "extension_subscriptions",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["subs-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "subscriptionsCard": "renderSubscriptionsCard"
+  }
+}

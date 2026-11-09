@@ -115,7 +115,8 @@
  }
 
  // Reply editor: the channel is fixed (the question's own channel or thread), the text is exactly what is sent.
- function editor(k,{parent,label,text,limit=2000,send,onSent,cancellable=true}){
+ // The draft passes the outgoing review (k.outgoingReview): findings and suggestions under the text, never blocking.
+ function editor(k,{parent,label,text,limit=2000,send,onSent,cancellable=true,target=''}){
   parent.querySelector(':scope > .kit-draft')?.remove();
   const box=k.el('div','kit-draft dc-editor');
   const area=raw(k.el('textarea'));area.value=text||'';area.rows=4;area.setAttribute('aria-label',(window.t||String)('Текст сообщения'));
@@ -131,7 +132,9 @@
    finally{go.removeAttribute('aria-busy');}
   };
   area.oninput=sync;sync();
-  row.append(go);if(cancellable)row.append(cancel);row.append(counter);box.append(k.el('div','kit-draft-label',label),area,row);
+  row.append(go);if(cancellable)row.append(cancel);row.append(counter);box.append(k.el('div','kit-draft-label',label),area);
+  if(k.outgoingReview)box.append(k.outgoingReview(area,{channel:{service:'discord',target,audience:'public'}}));
+  box.append(row);
   parent.append(box);area.focus();return box;
  }
  function sentLine(k,sent){const p=k.el('p','dc-sent');p.append(k.el('b',null,'Отправлено: '),raw(k.el('span',null,sent.text)),' ',link(k,sent.url,'↗'));return p;}
@@ -152,7 +155,7 @@
    const where=(q.thread?'ветку в #':'#')+(channelName(d,q.channel)||'канал');
    const actions=k.el('div','kit-actions dc-row-actions');
    const reply=k.el('button',null,q.sent?'Отправлено':'Ответить в Discord');reply.type='button';reply.disabled=!!q.sent;
-   reply.onclick=()=>editor(k,{parent:item,label:'Ответ в '+where+' на последний такой вопрос — отправится ровно этот текст',text:q.answer,
+   reply.onclick=()=>editor(k,{parent:item,label:'Ответ в '+where+' на последний такой вопрос — отправится ровно этот текст',text:q.answer,target:where,
     send:text=>call('send',{card:d.id,replyTo:q.latest.id},text),
     onSent:(result,text)=>{q.sent={...result,text};reply.textContent='Отправлено';reply.disabled=true;item.querySelector('.dc-sent')?.remove();actions.before(sentLine(k,q.sent));k.toast(result.text);notify('discord-send:'+d.id+':'+q.latest.id,{title:'Discord',text:'Ответ отправлен в '+where+'.',kind:'success'});}});
    actions.append(reply);item.append(actions);box.append(item);
@@ -188,11 +191,11 @@
  window.renderDiscordCompose=(parent,d)=>{
   const k=window.resultKit;if(!k||!d||parent.querySelector('.discord-compose'))return;
   const body=k.el('div','dc-body');
-  const target=k.el('div','dc-target');target.append(k.el('span','dc-section','Канал'),raw(k.chip({label:'#'+d.channel.name,title:'Сообщение уйдёт только в этот канал'})));
+  const target=k.el('div','dc-target');target.append(k.el('span','dc-section','Канал'),raw(k.chip({label:'#'+d.channel.name,title:(window.t||String)('Сообщение уйдёт только в этот канал')})));
   body.append(target);
   const status={label:d.sent?'отправлено':'не отправлено',tone:d.sent?'done':'progress'};
   if(d.sent){body.append(sentLine(k,d.sent));}
-  else editor(k,{parent:body,label:'Сообщение в #'+d.channel.name+' — отправится ровно этот текст',text:d.text,limit:d.limit,cancellable:false,
+  else editor(k,{parent:body,label:'Сообщение в #'+d.channel.name+' — отправится ровно этот текст',text:d.text,limit:d.limit,cancellable:false,target:'#'+d.channel.name,
    send:text=>call('send',{card:d.id,channel:d.channel.id},text),
    onSent:(result,text)=>{d.sent={...result,text};body.append(sentLine(k,d.sent));const chip=node.querySelector('.kit-card-head .kit-chip');if(chip){chip.textContent='отправлено';chip.className='kit-chip tone-done';}k.toast(result.text);notify('discord-send:'+d.id,{title:'Discord',text:'Сообщение отправлено в #'+d.channel.name+'.',kind:'success'});}});
   const node=k.card({app:'Discord',initial:'#',color:'#5b62c9',key:d.guildName||'Discord',status,subtitle:'новое сообщение',body,className:'discord-card discord-compose'});
