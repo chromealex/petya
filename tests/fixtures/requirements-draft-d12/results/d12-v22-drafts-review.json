@@ -1,0 +1,57 @@
+{
+ "v22-new-cancel-one": {
+  "passed": false,
+  "reason": "Clarification that values may change lost.",
+  "answer_sha256": "5a7cd000c51600f1b6fe40d3626fa8ea74949beb8ab00f6321081de1e3b238ea"
+ },
+ "v22-new-cancel-two": {
+  "passed": false,
+  "reason": "Inverted.",
+  "answer_sha256": "8c37b7389a4352e2231eaa8f3b1586fb535d08a5edea41f792d3d3b204536a75"
+ },
+ "v22-new-two-recipients": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "9cb6130219651111a539abbd5e3bf6a1ead364dcba87799ff7b6464375b76148"
+ },
+ "v22-new-revoke-send": {
+  "passed": false,
+  "reason": "Lost «Дату не добавлять»; summary «Акт» too vague.",
+  "answer_sha256": "87d31afe72c692fd7097b713b0e5361eec51cc0a12fab73f83fcc747dcfe271d"
+ },
+ "v22-new-restore-send": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "f20cdc9ce839a1457cee072ed771382ac00397419c35fd19e494b643f02186a4"
+ },
+ "v22-new-code-item": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "7ec9f6e73e8a8a14bc94396846999dd684aacc28c6233b7601668db9e81d0fde"
+ },
+ "v22-new-open-duration": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "2613cfbbac23ac6f8dedad711d427973a7cd074b7ad65dfd51618afef4540704"
+ },
+ "v22-new-exact-name": {
+  "passed": true,
+  "reason": "Exact literals and zeros, no extra ban.",
+  "answer_sha256": "adde27a4fbb32568f2c56f9ffea05af144f7922a34a7f250faf1497cbf2f256d"
+ },
+ "v22-new-add-separate": {
+  "passed": true,
+  "reason": "All requirements.",
+  "answer_sha256": "ea34b73b7f5426c1b8c131fb7327ba02a9a99795613ddc6c7010b28a292007c7"
+ },
+ "v22-new-quote": {
+  "passed": false,
+  "reason": "«Не ограничивать её передачу» ties the permission to the quote; muddled.",
+  "answer_sha256": "2f44cfe1d8808d86e2e43c48f7b4eb4c1f24240b12a5fc116a88a913567d54c6"
+ },
+ "v22-new-recipient-open": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "d6c81ac3f00222de765219202d0ebd0d5e42694f5f01f76ff24a6c7eb1d2d23f"
+ }
+}

@@ -1,0 +1,92 @@
+{
+ "d2-hold-two-recipients-2": {
+  "passed": false,
+  "reason": "«Без пояснения» (no comment) lost.",
+  "answer_sha256": "90e574c9e637454a711ad1ef08a705f0b30e9362ddc2c7046ab28ad42b59cb17"
+ },
+ "d2-hold-cancel-one-9": {
+  "passed": false,
+  "reason": "Invents «назначение dock_slot».",
+  "answer_sha256": "0d137d6a3aeb653e9153e3b8f92d1b64de16decea0467078bf240aa3e534edc0"
+ },
+ "d2-hold-permission-10": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "354a0e6e42428a128cf10d5e6ba13492565a4462917273118cd3dfedfafc516a"
+ },
+ "d2-hold-code-17": {
+  "passed": false,
+  "reason": "Inverted: says the next issue by the same code is allowed.",
+  "answer_sha256": "6dd7739ac6880724d45d79fd1c5bd4aa127a8a7e4c04af96a591fcdc1b2f45a8"
+ },
+ "d2-hold-code-26": {
+  "passed": false,
+  "reason": "Inverted: says the next issue by the same code is allowed.",
+  "answer_sha256": "9c4d2df172789e910b461d56fd07cc548cdddeceb8d0eb00e3a0b58f3acfb139"
+ },
+ "d2-hold-cancel-one-27": {
+  "passed": false,
+  "reason": "Invents «назначение dock_slot».",
+  "answer_sha256": "1aa91bf8c8a38b116a6e7364b01d478221ce556a490badc1397af9424185d34b"
+ },
+ "d2-hold-two-recipients-29": {
+  "passed": true,
+  "reason": "Identical copies without explanation, permissions per recipient.",
+  "answer_sha256": "0b93e7327c4cfd086d99344401e205fbe590f7136cc9f17e54e3b752eefb694e"
+ },
+ "d2-hold-quote-33": {
+  "passed": false,
+  "reason": "Summary «Копия анкеты» is wrong.",
+  "answer_sha256": "05904288c26f3023e0bf21bc52da56e5a3879d0856ae64a5af23ea9a86917ce3"
+ },
+ "d2-hold-open-recipient-34": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "850b90da911c018feba816c72829b856f99802077c3b6fe9f977cd83df9b0135"
+ },
+ "d2-hold-code-35": {
+  "passed": false,
+  "reason": "Invents the unapproved 515-second lifetime; open question lost.",
+  "answer_sha256": "3d99daca4ebe6f05778cadb2481e9576800f48825a1e89b7fc1dce6d8b7c8af0"
+ },
+ "d2-hold-permission-37": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "eb1886a00b35afc3ded7be7937e63376c4fbf66e0f985671203716985a75af73"
+ },
+ "d2-hold-two-recipients-38": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "feaa5c433957c27e9af5ce7f0bad719139ea7f95bde10e2381d0257599fd10d0"
+ },
+ "d2-hold-quote-42": {
+  "passed": false,
+  "reason": "Invented «норму слова «отмени» не менять».",
+  "answer_sha256": "66275a194a74632a9c160253250f1a2ae47c29f68567f7f5d949e8990342a565"
+ },
+ "d2-hold-open-recipient-43": {
+  "passed": true,
+  "reason": "All requirements and the question.",
+  "answer_sha256": "127e753e31a5b776bf1b0a72fd91d174b89eac7ed18a183e90dd421ead553d2f"
+ },
+ "d2-hold-code-44": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "bc11bb53f4ca4bb25f8dd7ce87a86ac0b69a54df59a40856996a69e0307255f0"
+ },
+ "d2-hold-permission-46": {
+  "passed": true,
+  "reason": "Same requirements, correct Russian.",
+  "answer_sha256": "475676ff15dbbd484af3a86eb9316a9e6db25dd1bb19a994c6ba2a9f729d5583"
+ },
+ "d2-hold-quote-51": {
+  "passed": false,
+  "reason": "Lost that the quote is not a ban on sending; invents «Подготовить документ».",
+  "answer_sha256": "917903842b8d7e511362b0772e9f4ff57b016d1452d75f29fd085641622a3067"
+ },
+ "d2-hold-code-53": {
+  "passed": false,
+  "reason": "Invents the unapproved 180 seconds; open question lost.",
+  "answer_sha256": "78ecc06134930e83c326b89a8b0a7dab72f1b33adbd207574cae99c2dd542891"
+ }
+}

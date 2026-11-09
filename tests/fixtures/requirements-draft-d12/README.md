@@ -9,3 +9,14 @@ D11 was rejected, so D12 continues D10 (the group's D). D11 trained only the fou
 lost what D10 had fixed; D12 trains all nine families evenly: the 801 familiar cases once plus the first 20 fresh
 dialogues of each family (981 presentations, lr 5e-7). `Train Petya.app` runs `execution.json` into
 `~/.petya-train/andromeda-d12`. Gate: replaces D10 only if not worse than D10 on any set (46/54, 28+8/42, 797/801).
+
+## Result: rejected, D10 stays
+
+| Set | D12 | D10 |
+|---|---|---|
+| 54 generated held-out drafts | 44 (36 exact) | 46 (30 exact) |
+| 30 v22 checks + 12 v22 drafts | 28 + 8 | 28 + 8 |
+| 801 familiar cases | 798 | 797 |
+
+The most exact answers so far, but codes got worse: two drafts allow the next issue «по тому же коду», one invents
+the unapproved 180 seconds. Quotes and cancellations otherwise unchanged. Rejected by the gate.

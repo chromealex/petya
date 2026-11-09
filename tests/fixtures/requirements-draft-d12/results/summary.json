@@ -1,0 +1,43 @@
+{
+  "part": "Andromeda D12",
+  "adapter_sha256": "b69202c07174d8619a0e1c9c7055eb9518f6d9314c58b1f846228e8d8c9cf94b",
+  "parent": "D10",
+  "steps": 981,
+  "learning_rate": 5e-07,
+  "generated_holdout": {
+    "D12": 44,
+    "D10": 46,
+    "total": 54,
+    "exact": 36,
+    "lost_D10": [
+      "d2-hold-code-35",
+      "d2-hold-code-53",
+      "d2-hold-quote-51"
+    ],
+    "gained_vs_D10": [
+      "d2-hold-quote-15"
+    ]
+  },
+  "v22": {
+    "checks": {
+      "D12": 28,
+      "D10": 28,
+      "total": 30
+    },
+    "drafts": {
+      "D12": 8,
+      "D10": 8,
+      "total": 12
+    }
+  },
+  "familiar": {
+    "D12": 798,
+    "D10": 797,
+    "total": 801,
+    "gained_vs_D10": [
+      "fresh-cancel-first"
+    ]
+  },
+  "gate": "failed: 44/54 new against D10's 46 (codes: the next issue «by the same code» allowed, an unapproved 180 s); v22 equal, +1 familiar",
+  "decision": "rejected; D10 stays the group's D (R1-A1-D10)"
+}
