@@ -1,0 +1,38 @@
+{
+  "part": "Andromeda D9",
+  "protocol": "tests/fixtures/requirements-draft-d9/protocol.json",
+  "python": "/Users/aleksandrfeer/.petya-train/env/bin/python",
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "work": "/Users/aleksandrfeer/.petya-train/andromeda-d9",
+  "trainer": "tests/fixtures/requirements-draft-v21/train_checkpointed.py",
+  "helper": "tests/fixtures/requirements-draft-v21/checkpoint.py",
+  "initial_stop_after": 16,
+  "resume_retries": 4,
+  "evaluator": "tests/fixtures/requirements-draft-v8/evaluate.py",
+  "verify_artifact": "tests/fixtures/requirements-draft-v21/verify_artifact.py",
+  "verify_continuation": "tests/fixtures/requirements-draft-v21/verify_continuation.py",
+  "parent_evaluations": [],
+  "trained_evaluations": [
+    {
+      "name": "D9 on 54 generated held-out drafts",
+      "data": "tests/fixtures/requirements-draft-d2/holdout.jsonl",
+      "output": "d9-holdout.jsonl"
+    },
+    {
+      "name": "D9 on 30 v22 checks",
+      "data": "tests/fixtures/requirements-draft-v22/check.jsonl",
+      "output": "d9-v22-check.jsonl"
+    },
+    {
+      "name": "D9 on 12 v22 drafts",
+      "data": "tests/fixtures/requirements-draft-v22/fresh-drafts.jsonl",
+      "output": "d9-v22-drafts.jsonl"
+    },
+    {
+      "name": "D9 on 801 familiar cases",
+      "data": "tests/fixtures/requirements-draft-v22/acquisition.jsonl",
+      "output": "d9-familiar.jsonl"
+    }
+  ],
+  "limits": "Trains D9 from D8 and evaluates it; D8 results are in requirements-draft-d8/results."
+}
