@@ -17,14 +17,25 @@ require('electron').ipcMain?.on('petya:extension-ui-bootstrap',event=>{event.ret
 // Download sizes for this platform: what adding the app downloads (minus what is already here) and what it may
 // download on request. Presence comes from the app's optional downloads.cjs ({present(services)} → ids).
 const bytesOf=(item,platform=process.platform)=>typeof item.bytes==='object'?(item.bytes[platform]??Math.max(...Object.values(item.bytes))):item.bytes;
+// The app's own files on disk (scripts, cards, icons), counted once per registry revision.
+function ownBytes(dir){
+ let total=0,count=0;const walk=folder=>{let list=[];try{list=fs.readdirSync(folder,{withFileTypes:true});}catch{return;}
+  for(const e of list){if(++count>5000)return;const file=path.join(folder,e.name);if(e.isSymbolicLink())continue;
+   if(e.isDirectory()){if(e.name!=='node_modules'&&e.name!=='.git')walk(file);}else{try{total+=fs.statSync(file).size;}catch{}}}};
+ walk(dir);return total;
+}
 async function sizes(services,{platform=process.platform,timeout=4000,free}={}){
  const out={};
+ // Every app has a weight: its own files, plus downloads (models, images) that are not on the disk yet.
+ const own=registry.cached('own-bytes',()=>Object.fromEntries(descriptors().map(d=>[d.id,d.dir?ownBytes(d.dir):0])));
+ for(const d of descriptors())out[d.id]={items:[],own:own[d.id]||0,install:own[d.id]||0,optional:0,approx:false};
  await Promise.all(descriptors().filter(d=>d.downloads?.length).map(async d=>{
   let present=[];const file=path.join(d.dir,'downloads.cjs');
   const module=fs.existsSync(file)?registry.load(registry.entry(d.id),file):null;
   if(module)present=await Promise.race([Promise.resolve().then(()=>module.present(services)).catch(()=>[]),new Promise(r=>setTimeout(()=>r([]),timeout))]);
   const items=d.downloads.map(item=>({id:item.id,name:item.name,bytes:bytesOf(item,platform),approx:!!item.approx,optional:!!item.optional,requires:item.requires||'',present:present.includes(item.id)}));
-  out[d.id]={items,install:items.filter(i=>!i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),optional:items.filter(i=>i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),approx:items.some(i=>i.approx)};
+  const self=out[d.id].own;
+  out[d.id]={items,own:self,install:self+items.filter(i=>!i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),optional:items.filter(i=>i.optional&&!i.present).reduce((a,i)=>a+i.bytes,0),approx:items.some(i=>i.approx)};
  }));
  let available=null;try{available=(free||(()=>require('../disk-space.cjs').inspectSpace(require('node:os').homedir(),0).available))();}catch{available=null;}
  return {apps:out,available,reserve:512*1024**2};
@@ -42,7 +53,7 @@ function connected(s,d){
 // desktopFound: the installed program an app works with (extension.json "desktop"), '' when it is missing.
 const rows=s=>descriptors().map(d=>({...d,installed:!d.setting||s.settings[d.setting]==='true',connected:connected(s,d),...d.desktop?{desktopFound:require('../desktop-apps.cjs').find(d.desktop.apps)}:{},...d.origin!=='bundled'?{restart:runtime.needsRestart(d.id)}:{}}));
 const smokeOnly=s=>{if(!s.smoke)throw Error('Неизвестная функция.');};
-module.exports={name:'extensionUI',get descriptors(){return descriptors();},groups,sizes,bytesOf,features,rows,setup(s){
+module.exports={name:'extensionUI',get descriptors(){return descriptors();},groups,sizes,ownBytes,bytesOf,features,rows,setup(s){
  const catalog=()=>rows(s);
  snapshot=catalog;
  // Plugins may claim a chat turn (e.g. corrections to an open plan) through `turn(services, command)`;

@@ -12149,6 +12149,13 @@
   "Не выбрано ни одной строки для записи.": "No rows selected to log.",
   "в таблице": "in the table",
   "в таблицах": "in the tables",
-  "Ревью моих изменений": "Review my changes"
+  "Ревью моих изменений": "Review my changes",
+  "· размер ≈": "· size ≈",
+  "Добавить ·": "Add ·",
+  "Не хватит места: свободно": "Not enough space: free",
+  "При установке": "When installed",
+  "Размер при установке:": "Size when installed:",
+  "Размер при установке: ≈": "Size when installed: ≈",
+  "Само приложение": "The app itself"
  }
 }
