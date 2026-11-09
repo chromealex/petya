@@ -70,6 +70,8 @@ const own={
  monitoring:['что с серверами','всё ли живое','какие алерты горят','аптайм за неделю','почему лежит api','инциденты за неделю','что в Prometheus','найди все адреса серваков в проекте','какие сервера использует игра'],
  subscriptions:['за что я плачу каждый месяц','что продлится на этой неделе','сколько уходит на сервисы','какие у меня подписки','когда истекает домен'],
  'time-tracking':['на что ушёл день','сколько я сидел в Unity на этой неделе','время по задачам','куда ушло время на этой неделе','запиши время в Jira'],
+ absences:['кто в отпуске на этой неделе','кто у нас на больничном','отпуска команды','график отпусков','когда Маша вернётся из отпуска'],
+ 'one-on-one':['подготовь 1:1 с Олегом','запиши итоги 1:1 с Машей','что обсудить на встрече один на один','что я обещал на 1:1','повестка на one-on-one с Ваней'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -174,6 +176,10 @@ const not={
  'ua-campaigns':['сколько заработали на рекламе вчера','eCPM по сетям','выручка с рекламы за неделю','запусти рекламу в TikTok','отключи рекламу','маркетинговые кампании','покупки в приложении','расходы на обед','что в Unity'],
  // Server health only: competitors / mentions monitoring, the screen, this computer's uptime, a calendar alert, logs,
  // Kubernetes objects, Docker containers, office or computer addresses and API requests belong to others.
+ // The user's own leave and HR questions, travel, the calendar's meetings and sprint capacity are not the team's absences.
+ absences:['отпуск в Турции','куда поехать в отпуск','сколько дней отпуска осталось','как оформить отпуск','я в отпуске','хочу в отпуск на море','что у меня сегодня в календаре','спланируй спринт','ёмкость спринта с учётом отпусков','кто перегружен'],
+ // Games and sports, scores, scale, promises about tasks and other meetings' prep or summaries are not 1:1s.
+ 'one-on-one':['1 на 1 в игре','бой один на один','счёт 1:1','масштаб 1:1','мои обещания','мои обещания по задачам','подготовь встречу с заказчиком','сводка встречи','что решили на встрече','подготовь вопросы к собеседованию'],
  monitoring:['мониторинг конкурентов','мониторинг упоминаний бренда','второй монитор не работает','настрой яркость монитора','аптайм компьютера','поставь алерт в календаре','логи сервиса api за последний час','что с подами в kubernetes','почему падает контейнер postgres','что запущено в докере','адрес офиса','IP моего компьютера','проверь, отвечает ли staging','какие эндпоинты в openapi проекта','что нового у конкурентов','метрики команды']
 };
 const problems=[];
@@ -193,7 +199,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){
