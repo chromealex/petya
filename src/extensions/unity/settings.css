@@ -1,0 +1,18 @@
+/* Unity Editor card in Connections (settings.js). */
+.unity-found{display:flex;align-items:center;gap:10px;margin:10px 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px}
+.unity-found-text{flex:1;min-width:0;overflow-wrap:anywhere}
+.unity-dot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.unity-found[data-state=ok] .unity-dot{background:var(--green)}
+.unity-found[data-state=warn] .unity-dot{background:#ffd07d}
+.unity-found[data-state=off] .unity-dot{background:#ff9daf}
+.unity-found[data-state=busy] .unity-dot{animation:unity-pulse 1s ease-in-out infinite alternate}
+@keyframes unity-pulse{to{opacity:.3}
+}
+.unity-refresh{flex:none;font-size:12px;padding:5px 10px}
+.unity-projects h3{margin:14px 0 6px;font-size:13px;color:var(--muted)}
+.unity-project{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.unity-project-name{flex:1;min-width:0;display:grid}
+.unity-project-name span{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.unity-project-ok{font-size:12px;color:var(--green)}
+.unity-manual{margin-top:12px}
+.unity-manual summary{cursor:pointer;font-size:13px;color:var(--muted)}

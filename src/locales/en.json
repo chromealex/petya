@@ -902,7 +902,9 @@
   "Отправь в Mattermost:",
   "Отправь в VK Teams:",
   "рабочего чата команды в Mattermost",
-  "рабочего чата команды в VK Teams"
+  "рабочего чата команды в VK Teams",
+  "<div class=\"unity-found\" role=\"status\"><span class=\"unity-dot\"></span><span class=\"unity-found-text\">Ищу редактор Unity…</span><button type=\"button\" class=\"unity-refresh\">Найти снова</button></div>",
+  "<h2>Unity Editor</h2><p>Петя работает с открытым проектом Unity через MCP for Unity: просите в чате найти префаб, разобрать ошибку консоли или поправить сцену.</p>"
  ],
  "strings": {
   "# Итоги встречи Выдели решения, открытые вопросы и поручения. Поручения оформи таблицей: действие, ответственный, срок, источник. Не назначай людей и сроки самостоятельно; неизвестные поля отмечай «не указано». Если расшифровки нет, попроси приложить её. Не утверждай, что задачи уже созданы.": "# Meeting summary List decisions, open questions and action items. Format action items as a table: action, owner, due date, source. Do not assign people or due dates yourself; mark unknown fields “not specified”. If there is no transcript, ask me to attach it. Do not claim that tasks have already been created.",
@@ -12772,6 +12774,24 @@
   "Петя не видит, кто говорит в Zoom: разрешите ему «Универсальный доступ» в настройках macOS.": "Petya can't see who is talking in Zoom: allow it Accessibility in macOS settings.",
   "Сообщение в Slack": "Slack message",
   "Это не ссылка на Slack.": "This is not a Slack link.",
-  "участник Slack": "Slack member"
+  "участник Slack": "Slack member",
+  "), но": "), but",
+  "MCP for Unity есть": "MCP for Unity is there",
+  "В Packages/manifest.json появится пакет com.coplaydev.unity-mcp. Unity скачает его, когда вы переключитесь в редактор; затем Window → MCP for Unity → Start Server.": "The package com.coplaydev.unity-mcp will be added to Packages/manifest.json. Unity downloads it when you switch to the editor; then Window → MCP for Unity → Start Server.",
+  "Добавить MCP for Unity в проект «": "Add MCP for Unity to the project «",
+  "Добавить пакет MCP for Unity в Packages/manifest.json проекта": "Add the MCP for Unity package to the project's Packages/manifest.json",
+  "Ищу редактор Unity…": "Looking for the Unity editor…",
+  "Не удалось прочитать Packages/manifest.json проекта.": "Couldn't read the project's Packages/manifest.json.",
+  "Пакет добавлен — переключитесь в Unity": "Package added: switch to Unity",
+  "Проект Unity не найден среди папок проектов Пети.": "The Unity project is not among Petya's project folders.",
+  "Проекты Unity": "Unity projects",
+  "Редактор не найден. Откройте проект в Unity и в меню Window → MCP for Unity нажмите Start Server — Петя подключится сам.": "Editor not found. Open the project in Unity and click Window → MCP for Unity → Start Server; Petya connects by itself.",
+  "Сервер MCP for Unity найден (": "MCP for Unity server found (",
+  "Это не проект Unity.": "This is not a Unity project.",
+  "Найти снова": "Search again",
+  "Вручную: адрес и токен": "Manually: address and token",
+  "Петя работает с открытым проектом Unity через MCP for Unity: просите в чате найти префаб, разобрать ошибку консоли или поправить сцену.": "Petya works with the open Unity project through MCP for Unity: ask in the chat to find a prefab, explain a console error or fix a scene.",
+  "Адрес редактора": "Editor address",
+  "Если требуется редактором": "If the editor requires it"
  }
 }

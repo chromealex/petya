@@ -21,7 +21,8 @@ async function connect(settings,work){
 }
 module.exports={
   name:'unity',defaults:{unityUrl:'http://127.0.0.1:8080/mcp',unityToken:''},
-  validate(settings){endpoint(settings.unityUrl);},
+  // An empty address means the usual one (the field is optional; Petya finds the editor by itself).
+  validate(settings){if(!String(settings.unityUrl||'').trim())settings.unityUrl='http://127.0.0.1:8080/mcp';endpoint(settings.unityUrl);},
   tools,
   setup(s,dialog=()=>require('../../app-dialog.cjs').dialog()){
     const available=project=>{if(s.settings.module_unity!=='true'||project?.disabledServices?.includes('unity'))throw Error('Включите Unity Editor в каталоге и настройках проекта.');};
@@ -160,6 +161,25 @@ module.exports={
         const editors=await inspect(client);const catalog=await native.discover(client,()=>available());
         return 'Unity подключена · инструментов: '+catalog.tools.length+(editors?' · редакторов: '+editors.length:'');
       });
+    },
+    // Settings open → Petya looks for the editor on the usual addresses and saves the one that answers, and lists
+    // the Unity projects among Petya's projects with or without MCP for Unity.
+    async discover(){
+      const discover=require('./discover.cjs');
+      const probe=async(url,token)=>{try{endpoint(url);}catch{return null;}
+        const client=new Client({name:'Petya Unity',version:'0.8.3'});
+        const transport=new StreamableHTTPClientTransport(new URL(url),{requestInit:{redirect:'error',headers:token?{Authorization:'Bearer '+token}:{}}});
+        try{await client.connect(transport,{timeout:1500});let editors=null;try{editors=await inspect(client);}catch(e){editors={error:e.message};}return {editors};}catch{return null;}finally{try{await client.close();}catch{}}};
+      const found=await discover.server({saved:s.settings.unityUrl,token:s.settings.unityToken,probe});
+      if(found&&found.url!==s.settings.unityUrl)s.saveSettings?.({unityUrl:found.url},true);
+      const rows=(s.dialogue.state.projects||[]).filter(p=>!p.archived).map(p=>({id:p.id,name:p.name,folders:require('../../project-folders.cjs').projectFolders(p,s.projectMemory?.get?.(p.memoryId))}));
+      return {server:found?{url:found.url,editors:Array.isArray(found.editors)?found.editors:[],error:found.editors?.error||''}:null,projects:discover.projects(rows)};
+    },
+    // «Подключить» for a Unity project: the MCP for Unity package goes into its Packages/manifest.json.
+    install(root){
+      const discover=require('./discover.cjs'),rows=(s.dialogue.state.projects||[]).filter(p=>!p.archived).map(p=>({id:p.id,name:p.name,folders:require('../../project-folders.cjs').projectFolders(p,s.projectMemory?.get?.(p.memoryId))}));
+      if(!discover.projects(rows).some(p=>p.root===root))throw Error('Проект Unity не найден среди папок проектов Пети.');
+      return discover.install(root);
     }}};
   }
 };
