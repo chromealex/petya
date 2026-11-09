@@ -126,5 +126,6 @@ async function turn(s,command){
  catch(e){return kit.reply(s,command,{by:BY,error:true,text:BY+' · '+(e.message||'источник крэшей недоступен.')});}
 }
 // Dashboards (src/features/dashboards.cjs): read-only requests refresh there by themselves.
-const dashboard={accepts:text=>query.about(String(text||'')),widgets:[{title:'Крэши за неделю',command:'крэши за неделю'},{title:'Новые крэши',command:'новые крэши за неделю'}]};
+// A dashboard part names the subject alone («краши»), so the crash word itself is enough.
+const dashboard={accepts:text=>query.about(String(text||''),{named:true}),widgets:[{title:'Крэши за неделю',command:'крэши за неделю'},{title:'Новые крэши',command:'новые крэши за неделю'}]};
 module.exports={name:'crashes',dashboard,defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,crashesTurn,summary};

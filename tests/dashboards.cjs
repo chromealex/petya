@@ -76,7 +76,7 @@ async function sources(root){
   const d=feature.dashboards.find(reply.dashboard.id);
   assert.deepEqual(d.widgets.map(w=>w.source),[
    {kind:'extension',extension:'metrics',command:'основные метрики проекта',selected:'grafana'},
-   {kind:'extension',extension:'crashes',command:'покажи краши'},
+   {kind:'extension',extension:'crashes',command:'краши'},
    {kind:'extension',extension:'google-play',command:'ANR'}]);
   const v=await feature.ipc.refresh(d.id);
   assert.match(v.widgets[0].describe,/^Метрики игры · «основные метрики проекта» · Grafana$/);
@@ -102,7 +102,7 @@ async function sources(root){
   // Bare nouns: every phrase is implicitly «покажи …».
   assert.deepEqual(one('отзывы'),{kind:'extension',extension:'store-reviews',command:'отзывы'});
   assert.equal(one('сборки').command,'покажи сборки');
-  assert.equal(one('краши').command,'покажи краши');
+  assert.equal(one('краши').command,'краши','the crash word alone is enough for «Крэши»');
   // Not data: nothing matches, and nobody is suggested for it.
   assert.equal(feature.dashboards.compose('собери дашборд: поставь встречу','general').d.widgets.length,0);
   assert.equal(feature.dashboards.advise('поставь встречу'),null);
@@ -126,9 +126,11 @@ async function sources(root){
  reply=feature.dashboards.turn(REQUEST);
  assert.match(reply.text,/^Собрал дашборд «Дашборд»: ANR\. Для «основные метрики проекта \(из wombyte\)» подключите «Grafana» \(Каталог → «Grafana», затем Настройки → «Grafana»: адрес, токен/,reply.text);
  assert.match(reply.text,/для «краши» добавьте «Крэши»/);
- // A phrase nobody knows keeps the generic hint.
+ // A phrase nobody knows: Petya asks for a page; without one, the generic hint.
  ({feature}=make({}));
- assert.match(feature.dashboards.turn('Собери дашборд: погода на марсе').text,/^Не нашёл источников для: «погода на марсе»\. Подключите приложения/);
+ let unknown;try{feature.dashboards.turn('Собери дашборд: погода на марсе');}catch(e){unknown=e;}
+ assert.equal(unknown?.name,'InputRequired');
+ assert.match(unknown.resume('Собрать без этого').text,/^Не нашёл источников для: «погода на марсе»\. Подключите приложения/);
 }
 
 // --- Feature ------------------------------------------------------------------------------------------------------
@@ -145,7 +147,7 @@ async function sources(root){
  const dialogue={state:{topics:[topic],projects:[{id:'general',name:'Общее'},{id:'p1',name:'BW',memoryId:'m1'}],activeProjectId:'p1',activeId:'t1'},
   active(){return this.state.topics.find(t=>t.id===this.state.activeId);},persist(){persisted++;},
   rememberAction(command,text){remembered++;const t=this.active();t.messages.push({role:'user',text:command,at:Date.now()},{role:'assistant',text,at:Date.now()});}};
- const s={dialogue,settings:{extension_crashes:'true',extension_storeReviews:'false'},dataRoot:root,win:null,modules:{assertEnabled(){},enabled(){return false;}},
+ const s={dialogue,settings:{extension_crashes:'true',extension_storeReviews:'false'},dataRoot:root,win:null,modules:{assertEnabled(){},enabled(){return false;}},saveSettings(patch){Object.assign(this.settings,patch);},
   projectShare:{folders:id=>id==='p1'?[repo]:[]},projectMemory:{get:()=>null}};
  const feature=require('../src/features/dashboards.cjs').setup(s),ipc=feature.ipc;
  try{
@@ -183,11 +185,29 @@ async function sources(root){
   // Start screen of the project.
   ipc.start('p1',d.id);assert.equal(ipc.startOf('p1').id,d.id);assert(ipc.list('p1').find(x=>x.id===d.id).start);
   // «Собери дашборд»: phrases → sources; what has no source is named.
-  const reply=feature.dashboards.turn('Собери дашборд «Релиз»: крэши за неделю, отзывы в сторах');
-  assert.match(reply.text,/Собрал дашборд «Релиз»: Крэши за неделю\. Для «отзывы в сторах» добавьте «Отзывы в сторах»\./,'the app that would take the phrase is named');
+  // An app that shows a part is added right away; for what no app shows Petya asks for a page (or builds without it).
+  let asked;try{feature.dashboards.turn('Собери дашборд «Релиз»: крэши за неделю, отзывы в сторах, погода на марсе');}catch(e){asked=e;}
+  assert.equal(asked?.name,'InputRequired');assert.match(asked.spec.text,/«погода на марсе» в Пете нет приложения/);assert.equal(s.settings['extension_store-reviews'],'true','the reviews app is added');
+  const reply=asked.resume('Собрать без этого');
+  assert.match(reply.text,/Собрал дашборд «Релиз»: Крэши за неделю, Отзывы в сторах\. Добавил приложение «Отзывы в сторах»\. Не нашёл источника для: «погода на марсе»/);
   assert.equal(topic.messages.at(-1).dashboard.id,reply.dashboard.id);
   assert.equal(feature.dashboards.turn('что умеет дашборд'),null);
   assert.throws(()=>ipc.compose('погода на марсе','p1'),/Не нашёл/);
+  // A phrase nothing added can show says what would: an app to add, Google Play to connect.
+  const hints=feature.dashboards.turn('Собери дашборд: аномалии, ANR');
+  assert.match(hints.text,/Добавил приложение «Аномалии»/);assert.match(hints.text,/Для «ANR» подключите «Google Play Console»/);
+  // A page from the answer becomes a web widget read in the chat browser's session; the page opens next to the chat.
+  let attended='';s.chatBrowser={attend:async(id,o)=>{attended=o.url;return true;},WEB:'petya-web-search'};
+  // An unknown service with no app that knows its data: asked about («погода на марсе» here; «(из wombyte)» is
+  // Grafana's host or «Метрики игры» to connect, see sources()).
+  let ask2;try{feature.dashboards.turn('Собери дашборд: погода на марсе');}catch(e){ask2=e;}
+  assert.equal(ask2?.name,'InputRequired','a phrase no app knows asks for a page');
+  const viaWeb=ask2.resume('https://app.wombyte.com/dashboard');const wd=ipc.get(viaWeb.dashboard.id);
+  assert.equal(wd.widgets[0].kind,'web');assert.match(wd.widgets[0].describe,/app\.wombyte\.com/);assert.equal(attended,'https://app.wombyte.com/dashboard');
+  const web=require('../src/dashboard-web.cjs');
+  await assert.rejects(web.load({settings:{}},{url:'https://x.io/d',query:'DAU'},{read:async()=>({url:'https://x.io/login',password:true,text:''})}),/Нужно войти на x\.io/);
+  assert.match((await web.load({settings:{}},{url:'https://x.io/d',query:'DAU'},{read:async()=>({url:'https://x.io/d',text:'DAU 12 500\nRetention D1 38%'})})).text,/DAU 12 500/);
+  ipc.remove(wd.id);
   // Share: the definition goes to .petya/dashboards, the snapshot stays personal; the start screen follows.
   const out=ipc.share(d.id,0);
   const file=path.join(repo,'.petya','dashboards','relize.json');

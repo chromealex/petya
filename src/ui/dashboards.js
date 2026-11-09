@@ -65,6 +65,8 @@
   if(w.live)rows.push({label:'Обновлять',note:true},...Object.entries(EVERY_LABEL).map(([every,label])=>({label,current:w.every===Number(every),run:()=>call('widget',d.id,w.id,{every:Number(every)}).then(paint).catch(fail)})));
   rows.push({label:'Ещё',note:true},{label:'Переименовать',run:()=>renameWidget(d,w)});
   if(w.kind==='jira')rows.push({label:'Изменить запрос JQL',hint:w.describe.replace(/^Jira · /,''),run:()=>editJql(d,w)});
+  // A web widget: its page opens next to the chat (to sign in or check the figures).
+  if(w.kind==='web'&&w.url)rows.push({label:'Открыть в браузере',hint:w.describe.replace(/^Страница · /,''),run:()=>{if(typeof view==='function')view('home');window.openChatBrowser?.(w.url);}});
   if(w.chat?.topicId)rows.push({label:'Открыть чат с карточкой',run:()=>openChat(w.chat.topicId)});
   rows.push({label:'Убрать с дашборда',run:()=>removeWidget(d,w)});
   return rows;

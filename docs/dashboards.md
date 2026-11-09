@@ -22,8 +22,12 @@ meetings, charts. A widget keeps its **source**, not only its data, so it refres
   - A phrase nothing connected takes is explained concretely: the app that would take it (added or not, connected or
     not — `dashboard.accepts` of every app, then Jira, providers and the apps' offers) and what to do: «для «ANR»
     подключите «Google Play Console» (Подключения → «Google Play Console»)», «для «краши» добавьте «Крэши»». When
-    nothing could be built, the shared offer card adds the apps and repeats the request. Only a phrase no app
-    recognises gets the generic «Не нашёл источников…».
+    nothing could be built, the shared offer card brings the apps to connect and repeats the request.
+  - In the chat, a catalog app that would take a phrase and needs nothing connected is added on the spot («Добавил
+    приложение «Отзывы в сторах»»). For a phrase no app recognises («погода на марсе») Petya asks for the page where
+    it is visible: the page opens in the chat browser, the person signs in there, and a *web* widget reads the page
+    in that session (`src/dashboard-web.cjs`, figures picked by the local model). A sign-in page is reported, never
+    filled in.
 - **On the dashboard**: «Добавить виджет» — a phrase, or one of the ready widgets of connected apps.
 
 - **Example**: «Пример аналитики» (on the start screen of a project without dashboards, in «Добавить виджет» and on

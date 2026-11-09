@@ -28,7 +28,7 @@
   actions.append(deleteButton(request,label));head.append(info,actions);card.append(head);
   if(text){const details=node('details','material-text'),summary=node('summary',null,warning?'Показать текст':'Прочитать запись'),body=node('div','material-body');details.append(summary,body);
    // The body is looked up at toggle time: a redraw keeps the card already on screen (morph below), not this one.
-   const fill=body=>{if(!body.childElementCount&&!body.textContent)for(const part of [].concat(text())){if(part.at){const line=node('p');line.append(node('span','material-time',new Date(part.at).toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'})+' '),...part.who?[node('strong','material-who'+(part.who==='Вы'?' me':''),part.who+': ')]:[],document.createTextNode(part.text));body.append(line);}else body.append(node('p',null,part.text||part));}};
+   const fill=body=>{if(!body.childElementCount&&!body.textContent)for(const part of [].concat(text())){if(part&&typeof part==='object'&&part.at){const line=node('p');line.append(node('span','material-time',new Date(part.at).toLocaleTimeString(window.petyaLocale||'ru-RU',{hour:'2-digit',minute:'2-digit'})+' '),...part.who?[node('strong','material-who'+(part.who==='Вы'?' me':''),part.who+': ')]:[],document.createTextNode(part.text));body.append(line);}else body.append(node('p',null,typeof part==='string'?part:String(part?.text||'')));}};
    if(open.has(key)){details.open=true;fill(body);}
    details.ontoggle=event=>{const d=event.currentTarget;if(d.open){open.add(key);fill(d.querySelector('.material-body'));}else open.delete(key);};card.append(details);}
   return card;

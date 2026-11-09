@@ -8,6 +8,12 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.14.4 — «Собери дашборд» adds what it needs and asks for a page for the rest
+
+- «Собери дашборд»: a catalog app that would show a part and needs nothing connected is added on the spot («Добавил приложение «Отзывы в сторах»»); for one that needs a connection the reply names it.
+- For a part no app shows («погода на марсе») Petya asks for the page where it is visible, opens it in the browser next to the chat for you to sign in, and the widget reads that page. A sign-in page is reported, never filled in.
+- «Краши» alone is enough for the crashes widget; Slack window snapshots in the materials are no longer duplicated.
+
 ## 0.14.3 — dashboards from metrics, Grafana and ANR
 
 - «Собери дашборд: основные метрики проекта (из wombyte), краши и ANR» builds three widgets: game metrics read from the Grafana at dashboards.wombyte.net, crashes and the Google Play ANR card.

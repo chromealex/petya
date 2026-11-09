@@ -68,10 +68,10 @@ function setup(s){
     return {id:d.id,title:d.title,projectId:d.projectId,shared:d.shared?{folder:d.shared.folder}:null,fromChat:d.fromChat||'',demo:!!d.demo,start:state().dashboardStart[d.projectId]===d.id,
       // Reading order (the small window, screen readers): top to bottom, left to right.
       widgets:[...d.widgets].sort((a,b)=>(a.pos?a.pos.y:1e9)-(b.pos?b.pos.y:1e9)||(a.pos?.x||0)-(b.pos?.x||0)).map(w=>{const hit=w.source.kind==='snapshot'?{data:w.data,text:w.text,at:w.at}:c.get(cacheKey(d,w))||{};
-        return {id:w.id,title:w.title,size:w.size,pos:w.pos||null,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,
+        return {id:w.id,title:w.title,size:w.size,pos:w.pos||null,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,...(w.source.kind==='web'?{url:w.source.url}:{}),
           data:hit.data||null,text:hit.text||'',at:hit.at||0,error:hit.error||'',count:hit.count??null,loading:running.has(cacheKey(d,w))};})};
   }
-  const describe=src=>src.kind==='extension'?(plugins.get(src.extension)?.d.name||src.extension)+' · «'+src.command+'»'+(src.selected?' · '+(subSources(plugins.get(src.extension)).find(x=>x.id===src.selected)?.name||src.selected):''):src.kind==='provider'?(providers.find(p=>p.type===src.provider)?.name||src.provider)+' · «'+src.query+'»':src.kind==='jira'?'Jira · '+src.jql:'Снимок карточки, не обновляется';
+  const describe=src=>src.kind==='extension'?(plugins.get(src.extension)?.d.name||src.extension)+' · «'+src.command+'»'+(src.selected?' · '+(subSources(plugins.get(src.extension)).find(x=>x.id===src.selected)?.name||src.selected):''):src.kind==='provider'?(providers.find(p=>p.type===src.provider)?.name||src.provider)+' · «'+src.query+'»':src.kind==='jira'?'Jira · '+src.jql:src.kind==='web'?'Страница · '+(()=>{try{return new URL(src.url).host;}catch{return src.url;}})():'Снимок карточки, не обновляется';
   const summary=d=>({id:d.id,title:d.title,projectId:d.projectId,shared:!!d.shared,folder:d.shared?.folder||'',widgets:d.widgets.length,start:state().dashboardStart[d.projectId]===d.id,fromChat:d.fromChat||''});
 
   // --- Refresh ---------------------------------------------------------------------------------------------------
@@ -94,6 +94,8 @@ function setup(s){
   async function load(d,w){
     const src=w.source,box=sandbox(d);
     if(src.kind==='jira')return jira.load(box.s,src,box.topic);
+    // A web page, read in the chat browser's session (src/dashboard-web.cjs).
+    if(src.kind==='web')return require('../dashboard-web.cjs').load(box.s,src);
     if(src.kind==='extension'){
       const entry=plugins.get(src.extension);
       if(!entry||!installed(src.extension))throw Error('Расширение «'+(entry?.d.name||src.extension)+'» не добавлено.');
@@ -272,24 +274,62 @@ function setup(s){
     for(const part of parts){const w=widgetFor(part,d.projectId);if(w)add(d,w);else missed.push(part);}
     return {d,missed};
   }
+  // The catalog app that would show a phrase, is not added yet and needs nothing connected: it is added right away.
+  function addable(phrase){
+    for(const form of FORMS)for(const r of routes(phrase)){
+      if(installed(r.id)||!accepts(r.e,form(r.text)))continue;
+      if(r.source?!r.source.ready:!ready(r.e))continue;
+      return {id:r.id,name:r.e.d.name,setting:r.e.d.setting};
+    }
+    return null;
+  }
+  function enable(apps){
+    const patch={};for(const a of apps)if(a.setting)patch[a.setting]='true';if(!Object.keys(patch).length||typeof s.saveSettings!=='function')return [];
+    s.saveSettings(patch);try{const w=s.win;if(w&&!w.isDestroyed())w.webContents.send('extension-runtime',{type:'changed'});}catch{}
+    return apps.filter(a=>installed(a.id));
+  }
+  const web=url=>{try{const u=new URL(String(url||'').trim());return ['https:','http:'].includes(u.protocol)?u.href:'';}catch{return '';}};
+  function finish(command,d,missed,added=[]){
+    let text,dashboard=null;
+    const plus=added.length?' Добавил '+(added.length===1?'приложение':'приложения')+' '+added.map(a=>'«'+a.name+'»').join(', ')+'.':'';
+    if(!d.widgets.length){
+      const m=missedText(missed,{none:true});text=m.text+plus;
+      // The apps to connect, on the shared offer card: accepting it repeats this request.
+      if(m.offers.length){const offered=s.extensionOffers?.propose?.(command,m.offers,text,'Дашборды');if(offered)return offered;}
+    }
+    else{const saved=commit(d);dashboard={id:saved.id,title:saved.title};refresh(saved.id).catch(()=>{});
+      text='Собрал дашборд «'+saved.title+'»: '+saved.widgets.map(w=>w.title).join(', ')+'.'+plus+(missed.length?' '+missedText(missed).text:'')+' Он в списке проекта слева.';}
+    s.dialogue.rememberAction(command,text);
+    const t=s.dialogue.active(),message=t.messages.at(-1);if(dashboard)message.dashboard=dashboard;s.dialogue.persist();
+    return {handled:true,text,topicId:t.id,topicTitle:t.title,messages:t.messages,...(dashboard?{dashboard}:{})};
+  }
+  // «Собери дашборд: …». What an added app shows becomes a widget; an app that would show it and needs nothing
+  // connected is added right away; for one that needs a connection the reply says which (and the offer card brings
+  // it); for what no app shows Petya asks for a page and reads it in the chat browser, where the person signs in.
   function turn(command){
     if(!model.wantsDashboard(command))return null;
     const topic=s.dialogue.active();
     const projectId=topic?.projectId||s.dialogue.state.activeProjectId||'general';
-    let text,dashboard=null;
-    try{
-      const {d,missed}=compose(command,projectId);
-      if(!d.widgets.length){
-        const m=missedText(missed,{none:true});text=m.text;
-        // The apps to add or connect, on the shared offer card: accepting it repeats this request.
-        if(m.offers.length){const offered=s.extensionOffers?.propose?.(command,m.offers,text,'Дашборды');if(offered)return offered;}
-      }
-      else{const saved=commit(d);dashboard={id:saved.id,title:saved.title};refresh(saved.id).catch(()=>{});
-        text='Собрал дашборд «'+saved.title+'»: '+saved.widgets.map(w=>w.title).join(', ')+'.'+(missed.length?' '+missedText(missed).text:'')+' Он в списке проекта слева.';}
-    }catch(e){text=e.message;}
-    s.dialogue.rememberAction(command,text);
-    const t=s.dialogue.active(),message=t.messages.at(-1);if(dashboard)message.dashboard=dashboard;s.dialogue.persist();
-    return {handled:true,text,topicId:t.id,topicTitle:t.title,messages:t.messages,...(dashboard?{dashboard}:{})};
+    let composed;
+    try{composed=compose(command,projectId);}catch(e){s.dialogue.rememberAction(command,e.message);const t=s.dialogue.active();return {handled:true,text:e.message,topicId:t.id,topicTitle:t.title,messages:t.messages};}
+    let apps=[...new Map(composed.missed.map(addable).filter(Boolean).map(a=>[a.id,a])).values()];
+    if(apps.length){apps=enable(apps);if(apps.length)composed=compose(command,projectId);}
+    const {d,missed}=composed;
+    const pages=missed.filter(m=>!advise(m));
+    if(!pages.length)return finish(command,d,missed,apps);
+    const list=pages.map(m=>'«'+m+'»').join(', ');
+    return require('../input-required.cjs').ask({
+      text:(d.widgets.length?'Собрал: '+d.widgets.map(w=>w.title).join(', ')+'. ':'')+'Для '+list+' в Пете нет приложения. Пришлите ссылку на страницу, где это видно (например, дашборд сервиса аналитики), — я открою её в браузере рядом с чатом, вы войдёте, и виджет будет брать данные оттуда. Или соберу без этого.',
+      label:'Ссылка на страницу',placeholder:'https://…',options:['Собрать без этого']},
+     answer=>{
+      const url=web(answer);
+      if(!url)return finish(command,d,missed,apps);
+      for(const m of pages)add(d,model.widget({title:cap(m),size:'auto',source:{kind:'web',url,query:m}}));
+      const out=finish(command,d,missed.filter(m=>!pages.includes(m)),apps);
+      // The page opens next to the chat: the person signs in there once, the widget reads it in the same session.
+      const chat=s.dialogue.active()?.id;if(chat&&s.chatBrowser)s.chatBrowser.attend(chat,{url,message:'Войдите, если сайт попросит, — виджет дашборда будет брать данные с этой страницы.'}).catch(()=>{});
+      return out;
+     });
   }
 
   // --- IPC -------------------------------------------------------------------------------------------------------
