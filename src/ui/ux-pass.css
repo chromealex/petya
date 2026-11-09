@@ -146,7 +146,7 @@ label.file-label:hover{background:#2e3533}
 /* --- Subprojects: nested groups under their parent, with a guide line. --- */
 /* Tree: one dashed line runs down from the folder icon; each chat, subfolder and button gets a dashed
    connector that starts a little off the line (no corner) and ends exactly at its field. The last child masks the line below its connector. */
-.project-sidebar-tree{--tree-line:#535c59;--tree-x:12px;--tree-indent:24px;--tree-mid:17px;--tree-gap:3px;--tree-bg:#161b19}
+.project-sidebar-tree{--tree-line:#535c59;--tree-x:12px;--tree-indent:24px;--tree-mid:17px;--tree-gap:0px;--tree-bg:#161b19}
 .project-subfolders:empty{display:none}
 .project-subfolders{margin:0;padding:0;border:0}
 .project-sidebar-group{position:relative}
@@ -157,8 +157,8 @@ label.file-label:hover{background:#2e3533}
 .project-subfolders>.project-sidebar-subgroup{position:relative;margin-left:var(--tree-indent)}
 .project-subfolders>.project-sidebar-subgroup{margin-bottom:0}
 .project-sidebar-group>:is(.project-chat-row,.project-view-all,.agent-chat-toggle,small)::after,
-.project-subfolders>.project-sidebar-subgroup::after{content:'';position:absolute;top:var(--tree-mid);left:calc(var(--tree-x) + var(--tree-gap) + 1px - var(--tree-indent));width:calc(var(--tree-indent) - var(--tree-x) - var(--tree-gap) - 1px);height:1px;pointer-events:none;
- background:repeating-linear-gradient(to left,var(--tree-line) 0 2px,transparent 2px 4.5px)}
+.project-subfolders>.project-sidebar-subgroup::after{content:'';position:absolute;top:var(--tree-mid);left:calc(var(--tree-x) + var(--tree-gap) + 1px - var(--tree-indent));width:calc(var(--tree-indent) - var(--tree-x) - var(--tree-gap) - 5px);height:1px;pointer-events:none;
+ background:repeating-linear-gradient(to right,var(--tree-line) 0 2px,transparent 2px 4.5px)}
 .project-sidebar-group>:is(.project-view-all,.agent-chat-toggle,small){--tree-mid:50%}
 /* The line stops at the last child's connector. */
 .project-sidebar-group>:is(.project-chat-row,.project-view-all,.agent-chat-toggle,small):last-child::before,
@@ -175,8 +175,8 @@ label.file-label:hover{background:#2e3533}
 .project-sidebar-group>.agent-chat-list::after{content:'';position:absolute;left:calc(var(--tree-x) - 1px);top:-6px;bottom:var(--tree-mid);width:1px;pointer-events:none;
  background:repeating-linear-gradient(to bottom,var(--tree-line) 0 2px,transparent 2px 4.5px)}
 .project-sidebar-group>.agent-chat-list>.project-chat-row.agent-chat-row{position:relative;margin-left:var(--tree-indent)}
-.project-sidebar-group>.agent-chat-list>.agent-chat-row::after{content:'';position:absolute;top:var(--tree-mid);left:calc(var(--tree-x) + var(--tree-gap) - var(--tree-indent));width:calc(var(--tree-indent) - var(--tree-x) - var(--tree-gap));height:1px;pointer-events:none;
- background:repeating-linear-gradient(to left,var(--tree-line) 0 2px,transparent 2px 4.5px)}
+.project-sidebar-group>.agent-chat-list>.agent-chat-row::after{content:'';position:absolute;top:var(--tree-mid);left:calc(var(--tree-x) + var(--tree-gap) - var(--tree-indent));width:calc(var(--tree-indent) - var(--tree-x) - var(--tree-gap) - 4px);height:1px;pointer-events:none;
+ background:repeating-linear-gradient(to right,var(--tree-line) 0 2px,transparent 2px 4.5px)}
 .project-sidebar-subgroup>.project-sidebar-project .project-chat-title{font-weight:500}
 .project-sidebar-subgroup .project-folder-icon{opacity:.85}
 /* Project settings: what a subproject inherits. */
@@ -259,3 +259,40 @@ input,textarea,select,[contenteditable]:not([contenteditable="false"]),pre,code,
 .kit-panel-body,.kit-title,.kit-meta,.jira-description,.jira-comment-text,.mail-excerpt,.doc-excerpt,.file-body,.file-code,.file-full-table,
 .material-body,.material-body *,.chat-file-body,.history-preview,.notification-item p,.team-account dd,.selectable,
 #notice,.kit-toast span,.error{-webkit-user-select:text;user-select:text}
+/* Project settings: wide, one column; the title and the buttons stay, the middle scrolls. */
+.project-edit-dialog.ux-topic-dialog{width:min(760px,calc(100vw - 32px));max-height:min(860px,calc(100vh - 40px));padding:0;overflow:hidden}
+.project-edit-dialog[open]{display:flex;flex-direction:column}
+.project-edit-dialog form{display:flex;flex-direction:column;gap:0;min-height:0;flex:1}
+.project-edit-dialog form>h2{padding:20px 24px 14px;border-bottom:1px solid var(--line)}
+.project-editor-body{display:flex;flex-direction:column;gap:18px;padding:18px 24px 22px;overflow:auto;min-height:0;flex:1}
+.project-editor-footer{display:flex;align-items:center;gap:12px;padding:14px 24px;border-top:1px solid var(--line);background:var(--panel)}
+.project-editor-footer [role=status]{flex:1;margin:0;color:#f0b4a8;font-size:13px}
+.project-editor-footer .project-editor-actions{margin-left:auto}
+.project-edit-dialog .project-folder-row{display:flex;flex-direction:column;align-items:stretch;gap:8px;font-size:13px}
+.project-folder-list{display:flex;flex-direction:column;gap:4px}
+.project-folder-list>div{display:flex;align-items:center;gap:8px;min-width:0;padding:6px 6px 6px 12px;border:1px solid var(--line);border-radius:10px}
+.project-folder-list>div>span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.project-edit-dialog .project-folder-row .project-folder-add{align-self:flex-start;font-size:13px;padding:7px 12px}
+.project-edit-dialog .project-icon-box .actions{display:flex;flex-wrap:wrap;gap:8px}
+.project-services-off[hidden]{display:none}
+.project-service-list{display:flex;flex-direction:column;gap:6px}
+.project-service-off{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 8px 8px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px}
+.project-service-off button{padding:5px 11px;font-size:12px}
+/* Project chips in a person's card: a slim pill that sits in the field, not a second button row. */
+.team-project-field{min-height:40px;padding:5px 8px;gap:5px}
+.team-project-chip{height:26px;box-sizing:border-box;padding:0 3px 0 10px;gap:2px;line-height:1;font-size:12.5px;border-radius:7px}
+.team-project-chip button{width:20px;height:20px;min-height:0;min-width:0;display:inline-grid;place-items:center;font-size:13px;border-radius:5px}
+.team-project-field input{min-height:0;height:28px;padding:0 4px}
+.team-project-chips{display:contents}
+.team-project-chip{line-height:24px}
+/* Ring spinners do not rotate their box: a rotating box that sits on half a pixel (a flex row centred on an odd
+   height) wobbles. The ring stays put and only its bright arc turns (a conic gradient with an animated angle). */
+@property --spin{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes ring-spin{to{--spin:360deg}}
+#home .chat-activity .command-progress[data-state="working"]::before,
+#home .chat-feed .message-steps.live>summary::before,
+#workspace-card .decompose-progress.live>summary::before{border:0!important;transform:none!important;animation:ring-spin .9s linear infinite!important;
+ background:conic-gradient(from var(--spin),var(--ring,var(--green)) 0 95deg,color-mix(in srgb,var(--ring,var(--green)) 28%,transparent) 95deg 360deg);
+ -webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px));mask:radial-gradient(farthest-side,transparent calc(100% - 2px),#000 calc(100% - 1.5px))}
+#workspace-card .decompose-progress.live[data-stage=assigning]>summary::before,#workspace-card .decompose-progress.live[data-stage=starting]>summary::before{--ring:var(--work)}
+.dash-ghost.loading svg,.dash-tool.loading svg,.chat-browser-tool.loading svg{will-change:transform;transform-origin:50% 50%}

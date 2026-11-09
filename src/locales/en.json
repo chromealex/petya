@@ -12756,6 +12756,9 @@
   "чатах бота": "the bot's chats",
   "чате": "chat",
   "Уточните проект в разделе «Агенты».": "Specify the project in “Agents”.",
-  "Петя ещё запускается.": "Petya is still starting."
+  "Петя ещё запускается.": "Petya is still starting.",
+  "Выключенные сервисы": "Switched-off services",
+  "выключен в проекте «": "is switched off in the project «",
+  "выключен в этом проекте": "is switched off in this project"
  }
 }

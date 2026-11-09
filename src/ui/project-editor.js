@@ -1,13 +1,13 @@
 (()=>{
  const el=(tag,text)=>{const n=document.createElement(tag);if(text)n.textContent=text;return n;};
  const button=(title,fn)=>{const b=el('button',title);b.type='button';b.onclick=fn;return b;};
- const dialog=el('dialog');dialog.className='ux-topic-dialog project-edit-dialog';const form=el('form'),heading=el('h2'),name=el('input'),context=el('textarea'),services=el('div'),status=el('p');heading.id='project-edit-title';dialog.setAttribute('aria-labelledby',heading.id);name.maxLength=80;name.required=true;name.placeholder='Например: Мобильное приложение';name.setAttribute('aria-label','Название проекта');context.rows=3;context.maxLength=12000;context.placeholder='Цели, важные сведения и правила работы';context.setAttribute('aria-label','Контекст проекта');services.className='project-service-checks';status.setAttribute('role','status');status.hidden=true;
+ const dialog=el('dialog');dialog.className='ux-topic-dialog project-edit-dialog';const form=el('form'),heading=el('h2'),name=el('input'),context=el('textarea'),services=el('div'),status=el('p');heading.id='project-edit-title';dialog.setAttribute('aria-labelledby',heading.id);name.maxLength=80;name.required=true;name.placeholder='Например: Мобильное приложение';name.setAttribute('aria-label','Название проекта');context.rows=3;context.maxLength=12000;context.placeholder='Цели, важные сведения и правила работы';context.setAttribute('aria-label','Контекст проекта');services.className='project-service-list';status.setAttribute('role','status');status.hidden=true;
  let project=null,folders=[],disabled=[],inherited=null;
  // Subprojects: choose the parent; inherited folders, notes and disabled services are shown read-only.
  const parent=el('select');parent.setAttribute('aria-label','Внутри проекта');const parentLabel=el('label','Внутри проекта');parentLabel.append(parent);
  const inheritedBox=el('div');inheritedBox.className='project-inherited';inheritedBox.hidden=true;
- const folderRow=el('div'),folderLabel=el('span');folderRow.className='project-folder-row';
- const choose=button('Добавить папку',async()=>{try{const value=await window.petya.chatProjectPickFolder(project?.id||'');if(value&&!folders.includes(value)){folders.push(value);paintFolder();}}catch(e){error(e);}});folderRow.append(choose,folderLabel);
+ const folderRow=el('div'),folderLabel=el('div');folderRow.className='project-folder-row';folderLabel.className='project-folder-list';
+ const choose=button('Добавить папку',async()=>{try{const value=await window.petya.chatProjectPickFolder(project?.id||'');if(value&&!folders.includes(value)){folders.push(value);paintFolder();}}catch(e){error(e);}});choose.className='project-folder-add';folderRow.append(el('h3','Папки'),folderLabel,choose);
  function paintFolder(){folderLabel.replaceChildren();for(const folder of inherited&&parent.value===(project?.parentId||'')?inherited.folders:[]){const row=el('div'),text=el('span',folder);row.className='project-folder-inherited';row.title='Из проекта «'+inherited.name+'»';row.append(text,el('small','из «'+inherited.name+'»'));folderLabel.append(row);}for(const folder of folders){const row=el('div'),text=el('span',folder);const remove=button('',()=>{folders=folders.filter(p=>p!==folder);paintFolder();});remove.className='project-folder-remove';remove.title='Убрать папку';remove.setAttribute('aria-label','Убрать папку '+folder);remove.innerHTML='<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="m5 5 10 10M15 5 5 15"/></svg>';row.append(text,remove);folderLabel.append(row);}choose.disabled=folders.length>=20;}
  // The parent's notes and folders are shown for the selected parent; changing the parent updates the hint after saving.
  function paintInherited(){const same=inherited&&parent.value===(project?.parentId||'');inheritedBox.replaceChildren();inheritedBox.hidden=!parent.value;
@@ -27,18 +27,26 @@
   autoIcon.hidden=info?.iconMode==='auto';noIcon.hidden=info?.iconMode==='none';}
  const iconBox=el('div');iconBox.className='project-icon-box';iconBox.append(iconLabel,iconRow,iconButtons);
  const shareBox=el('div');shareBox.className='project-share';shareBox.hidden=true;
- form.append(heading,label('Название',name),parentLabel,inheritedBox,label('Контекст · необязательно',context),folderRow,iconBox,el('h3','Сервисы проекта'),services,shareBox,status,actions);dialog.append(form);document.body.append(dialog);
+ // One column that scrolls between the title and the buttons; «Отмена» and «Сохранить» are always in view.
+ const servicesBox=el('div');servicesBox.className='project-services-off';servicesBox.hidden=true;servicesBox.append(el('h3','Выключенные сервисы'),services);
+ const body=el('div');body.className='project-editor-body';body.append(label('Название',name),parentLabel,inheritedBox,label('Контекст · необязательно',context),folderRow,iconBox,servicesBox,shareBox);
+ const footer=el('div');footer.className='project-editor-footer';footer.append(status,actions);
+ form.append(heading,body,footer);dialog.append(form);document.body.append(dialog);
  window.openProjectSettings=async (id,{parentId=''}={})=>{
   if(dialog.open)return;dialog.showModal();form.setAttribute('aria-busy','true');save.disabled=true;status.hidden=true;
   try{const state=await window.petya.chatProjectSettings(id||'');project=state.project;window.paintProjectShare?.(shareBox,project);inherited=project?.inherited||null;parent.replaceChildren(new Option('— верхний уровень —',''),...(state.parents||[]).map(p=>new Option(p.name,p.id)));parent.value=project?project.parentId||'':parentId;if(parent.value!==(project?.parentId||parentId))parent.value='';parentLabel.hidden=project?.id==='general'||!(state.parents||[]).length;parent.onchange=()=>{paintInherited();paintFolder();};folders=project?.folders|| (project?.folder?[project.folder]:[]);disabled=project?.disabledServices||[];name.value=project?.name||'';name.readOnly=project?.id==='general';context.value=project?.context||'';heading.textContent=project?'Настройки проекта':parentId?'Новая подпапка':'Новый проект';save.textContent=project?'Сохранить':'Создать проект';folderRow.hidden=project?.id==='general';paintInherited();paintFolder();services.replaceChildren();
-   for(const service of state.services.filter(s=>s.connected)){const input=el('input');input.type='checkbox';input.dataset.projectService=service.id;input.checked=!disabled.includes(service.id);if(inherited?.disabledServices?.includes(service.id)){input.checked=false;input.disabled=true;input.title='Отключено в проекте «'+inherited.name+'»';}const row=el('label');row.className='check';row.append(input,document.createTextNode(service.name));services.append(row);}
-   if(!services.children.length)services.append(el('p','Нет подключённых сервисов. Их можно добавить в «Подключениях».'));
+   // Services are switched on and off in «Подключения» for all projects. Here only what an older version of
+   // Petya switched off for this project is listed, so it can be switched back on.
+   const names=new Map(state.services.map(s=>[s.id,s.name]));
+   for(const id of disabled){const row=el('div');row.className='project-service-off';row.append(el('span',(names.get(id)||id)+' выключен в этом проекте'));const on=button('Включить',()=>{disabled=disabled.filter(x=>x!==id);row.remove();servicesBox.hidden=!services.children.length;});row.append(on);services.append(row);}
+   for(const id of inherited?.disabledServices||[]){if(disabled.includes(id))continue;const row=el('div');row.className='project-service-off';row.append(el('span',(names.get(id)||id)+' выключен в проекте «'+inherited.name+'»'));services.append(row);}
+   servicesBox.hidden=!services.children.length;
    iconBox.hidden=!project||project.id==='general';if(!iconBox.hidden)paintIcon(project);
    save.disabled=false;name.focus();
   }catch(e){error(e);}finally{form.removeAttribute('aria-busy');}
  };
  form.onsubmit=async event=>{event.preventDefault();status.hidden=true;save.disabled=true;try{
-  const checks=[...services.querySelectorAll('input')],shown=new Set(checks.map(c=>c.dataset.projectService));const disabledServices=[...disabled.filter(id=>!shown.has(id)),...checks.filter(c=>!c.checked).map(c=>c.dataset.projectService)];
+  const disabledServices=[...disabled];
   const result=await window.petya.chatProjectSave({id:project?.id||'',name:name.value,context:context.value,folders,disabledServices:disabledServices.filter(id=>!inherited?.disabledServices?.includes(id)),parentId:parentLabel.hidden?(project?.parentId||''):parent.value});dialog.close();if(!project)await selectDialogueTopic('');await refreshTopics();document.dispatchEvent(new Event('petya-project-settings'));if(result.activeId)await window.restoreChatJob?.(result.activeId);
  }catch(e){error(e);}finally{save.disabled=false;}};
  const picker=$('topic-picker-button');if(picker)picker.onclick=()=>window.openProjectSettings(topicSelect.dataset.projectId||'general');
