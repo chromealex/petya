@@ -115,7 +115,10 @@ async function retroTurn(s,command,deps={}){
   return b.question?kit.reply(s,command,{by:BY,question:true,text:b.question}):go(key,b);
  };
  const go=async(key,b)=>{
-  const card=await build(s,key,b,{now:deps.now||new Date(),named:wanted});
+  let card;
+  // Also reached from the board question's answer, outside turn(): failures are reported the same way.
+  try{card=await build(s,key,b,{now:deps.now||new Date(),named:wanted});}
+  catch(e){if(e?.name==='InputRequired')throw e;return kit.failure(s,command,BY,e);}
   if(!card)return kit.reply(s,command,{by:BY,question:true,text:'На доске «'+b.name+'» нет ни активного, ни закрытого спринта — ретро не по чему готовить.'});
   return kit.reply(s,command,{by:BY,text:summary(card),data:{retroCard:card},sources:[{title:'Jira · '+card.sprint.name,url:card.facts[0]?.source?.url||card.board.url}]});
  };
