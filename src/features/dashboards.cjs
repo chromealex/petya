@@ -83,7 +83,8 @@ function setup(s){
     api:{peek:id=>view(find(id)),refresh:(id,widgetId)=>refresh(id,widgetId,true),watch:(id,on)=>watch(id,on)},
     show:id=>{const w=s.win;if(!w||w.isDestroyed())return;if(w.isMinimized())w.restore();w.show();w.focus();w.webContents.send('dashboard-open',id);}}));
   try{if(require('../dashboard-window.cjs').current())windows();}catch{}
-  const changed=()=>{try{api.onChange?.();}catch{}};
+  // The tray menu and the sidebar list follow every change of the set of dashboards.
+  const changed=()=>{try{api.onChange?.();}catch{}send({list:true});};
   function sandbox(d){
     const p=project(d.projectId);
     const topic={id:'dashboard:'+d.id,title:d.title,kind:'chat',projectId:d.projectId,projectMemoryId:p?.memoryId||'',messages:[{role:'assistant',text:'',at:Date.now()}],at:Date.now()};

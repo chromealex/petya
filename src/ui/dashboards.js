@@ -270,28 +270,38 @@
  // Widgets report their refresh; the open screen and the start dashboard repaint.
  let pending=null;
  window.petyaEvents.onDashboards?.(state=>{
+  if(state.list){changed().catch(()=>{});return;}
   if(state.id===openId&&current){const w=current.widgets.find(x=>x.id===state.widgetId);if(w&&state.loading){w.loading=true;const node=screen.querySelector('.dash-widget[data-id="'+state.widgetId+'"] .dash-widget-meta');node?.replaceWith(meta(w,current));}}
   clearTimeout(pending);pending=setTimeout(async()=>{if(openId&&state.id===openId)paint(await call('peek',openId).catch(()=>null));if(start?.dataset.id===state.id)drawStart(true);},150);
  });
 
- // --- Sidebar: the project's dashboards under its chats --------------------------------------------------------
+ // --- Sidebar: «Дашборды», a section of their own above the chat tree -------------------------------------------
+ // A dashboard is its own thing, not a chat: the list of the company's dashboards sits apart from the projects'
+ // chats, with «+» to make an empty one; each row says which project it belongs to.
  let lists=new Map(),loadingLists=null;
  async function loadLists(){loadingLists=loadingLists||call('list','').then(rows=>{lists=new Map();for(const r of rows){if(!lists.has(r.projectId))lists.set(r.projectId,[]);lists.get(r.projectId).push(r);}}).finally(()=>{loadingLists=null;});return loadingLists;}
- function fill(box){
-  const rows=lists.get(box.dataset.project)||[];box.replaceChildren();box.hidden=!rows.length;
-  for(const d of rows){
+ const section=el('section','sidebar-dashboards');section.hidden=true;section.setAttribute('aria-label','Дашборды');
+ const sectionHead=el('div','sidebar-dashboards-head');const sectionTitle=el('span','sidebar-dashboards-title','Дашборды');
+ const addButton=button('Новый дашборд',ICON.plus,async()=>{const title=await ask('Название дашборда','Мой дашборд');if(!title)return;try{const d=await call('create',title,typeof topicSelect!=='undefined'?topicSelect.dataset.projectId||'general':'general');await changed();open(d.id);}catch(e){fail(e);}},'dash-tool sidebar-dashboards-add');
+ sectionHead.append(sectionTitle,addButton);const sectionRows=el('div','sidebar-dashboards-rows');section.append(sectionHead,sectionRows);
+ const projectName=id=>{const p=(window.projectSidebarState?.()||[]).find(x=>x.id===id);return p?p.name:'';};
+ function fillSection(){
+  const rows=[...lists.values()].flat();const live=rows.filter(d=>(window.projectSidebarState?.()||[]).some(p=>p.id===d.projectId&&!p.archived)||!window.projectSidebarState);
+  sectionRows.replaceChildren();
+  for(const d of live){
    const row=el('div','project-chat-row project-dashboard-row'),b=el('button','project-sidebar-chat');b.type='button';b.dataset.dashboard=d.id;
    const ic=el('span','project-dashboard-icon');ic.innerHTML=icon(ICON.grid);
-   b.append(ic,el('span','project-chat-title',d.title));if(d.shared)b.append(el('span','project-dashboard-shared','общий'));
-   b.title=d.title+' · '+d.widgets+' '+(d.widgets===1?'виджет':d.widgets<5&&d.widgets>1?'виджета':'виджетов')+(d.shared?' · общий, '+d.folder+'/.petya':'')+(d.start?' · стартовый экран':'');
-   b.onclick=()=>open(d.id);row.append(b);box.append(row);
+   const name=projectName(d.projectId);
+   b.append(ic,el('span','project-chat-title',d.title));if(d.shared)b.append(el('span','project-dashboard-shared','общий'));if(name&&name!=='Общее')b.append(el('span','project-dashboard-project',name));
+   b.title=d.title+(name?' · '+name:'')+' · '+d.widgets+' '+(d.widgets===1?'виджет':d.widgets<5&&d.widgets>1?'виджета':'виджетов')+(d.shared?' · общий, '+d.folder+'/.petya':'')+(d.start?' · стартовый экран':'');
+   b.onclick=()=>open(d.id);row.append(b);sectionRows.append(row);
   }
-  markSidebar();
+  section.hidden=false;markSidebar();
  }
- window.projectSidebarExtras=(projectId,group)=>{const box=el('div','project-dashboards');box.dataset.project=projectId;box.hidden=true;group.append(box);
-  if(lists.size)fill(box);loadLists().then(()=>{if(box.isConnected)fill(box);}).catch(()=>{});};
+ // The sidebar (src/ui/project-sidebar.js) gives the place for the section once and asks again after each redraw.
+ window.projectSidebarDashboards=(anchor,projects)=>{window.projectSidebarState=()=>projects;if(!section.isConnected)anchor.before(section);if(lists.size)fillSection();loadLists().then(fillSection).catch(()=>{});};
  function markSidebar(){for(const b of document.querySelectorAll('.project-dashboard-row button')){if(b.dataset.dashboard===openId)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');}}
- async function changed(){await loadLists().catch(()=>{});for(const box of document.querySelectorAll('.project-dashboards'))fill(box);refreshHeading();drawStart(true);}
+ async function changed(){await loadLists().catch(()=>{});fillSection();refreshHeading();drawStart(true);}
  window.dashboardsChanged=changed;
 
  // --- Chat header: «Дашборд» -------------------------------------------------------------------------------------
