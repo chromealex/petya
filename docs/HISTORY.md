@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.17.7 — Jira and Asana live in their apps
+
+- Jira and Asana left Petya's core for their apps: Jira's bugs, settings card and «Команда» row go through the shared registries, the Asana page lives in its app, and sign-in goes through a neutral broker. Nothing changes in use.
+
 ## 0.17.6 — Git, build flows and Unity Editor live in their apps
 
 - Git, the build flows (repair, questions, watch) and Unity Editor left Petya's core for their apps: chat routes, project detectors and company lifecycle hooks are registries the apps fill. A core audit lists what service- and app-specific code remains, with owners and effort. Nothing changes in use.

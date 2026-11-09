@@ -1,3 +1,5 @@
+// Asana on «Настройки»: the connection card (browser sign-in) and the Asana page with projects and tasks
+// (preview, create, change; IPC in feature.cjs). Loaded always, like the Asana cards.
 (() => {
  const node=connectionNode,button=(label,fn)=>{const b=node('button',label);b.type='button';b.onclick=run(fn);return b;};
  const form=$('settings-form'),card=node('article','','card');card.dataset.service='asana';

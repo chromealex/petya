@@ -1,17 +1,12 @@
 'use strict';
-const ORIGIN='https://auth.petya-app.ru';
-class AtlassianOAuth {
- constructor(request){this.request=request;this.pending=null;this.cached=null;this.inFlight=null;}
- call(route,method='GET',credential,body){return this.request(ORIGIN+route,{method,headers:{'Content-Type':'application/json',...(credential?{Authorization:'Bearer '+credential}:{})},...(body?{body:JSON.stringify(body)}:{})});}
- async start(){const s=await this.call('/v1/sessions','POST');if(!/^[A-Za-z0-9_-]{43}$/.test(s.id)||s.url!==ORIGIN+'/authorize?id='+s.id)throw new Error('Сервер вернул неверный адрес входа.');this.pending=s;return {code:s.code,url:s.url};}
- async poll(){if(!this.pending)throw new Error('Начните вход заново.');return this.call('/v1/sessions/'+this.pending.id,'GET',this.pending.secret);}
- async claim(siteId){if(!this.pending)throw new Error('Начните вход заново.');const s=this.pending;const r=await this.call('/v1/sessions/'+s.id+'/claim','POST',s.secret,{siteId});if(!r.credential||!/^https:\/\/[a-z0-9-]+\.atlassian\.net$/.test(r.site?.url))throw new Error('Некорректное подключение.');this.pending=null;this.cached=null;return r;}
- async disconnect(credential){await this.call('/v1/connection','DELETE',credential);this.cached=null;}
- async token(credential){
-  if(this.cached?.credential===credential && this.cached.expiresAt>Date.now()+30000)return this.cached;
-  if(this.inFlight?.credential===credential)return this.inFlight.promise;
-  const promise=this.call('/v1/token','POST',credential).then(t=>{if(typeof t.accessToken!=='string'||!t.site?.id)throw new Error('Не удалось получить доступ Atlassian.');this.cached={...t,credential};return this.cached;}).finally(()=>{if(this.inFlight?.promise===promise)this.inFlight=null;});this.inFlight={credential,promise};return promise;
- }
+// The shared Atlassian connection of Jira and Confluence: Petya's sign-in broker (src/oauth-broker.cjs) for an
+// Atlassian site, and the rewrite of `<site>/rest/…` (Jira) and `<site>/wiki/rest/…` (Confluence) requests to the
+// Atlassian cloud API with the access token. Confluence (src/extensions/confluence) uses it through this file;
+// nothing in Petya's core knows Atlassian.
+const {OAuthBroker,ORIGIN}=require('../../oauth-broker.cjs');
+class AtlassianOAuth extends OAuthBroker {
+ valid(r){return !!r?.credential&&/^https:\/\/[a-z0-9-]+\.atlassian\.net$/.test(r.site?.url);}
+ tokenError(){return 'Не удалось получить доступ Atlassian.';}
  async requireConfluence(token) {
   // The same cloud ID can have separate Jira and Confluence resource entries.
   // Check current grants, not the single resource saved at initial sign-in.

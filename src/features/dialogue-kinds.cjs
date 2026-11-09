@@ -1,18 +1,20 @@
-// Dialogue kinds: a chat subject an app reads data for, answered in the open chat like Petya's own «bugs» and
-// «tasks» (src/dialogue.cjs): the chat takes the kind for its follow-ups («обнови», «а за вчера?»), a failed read keeps
+// Dialogue kinds: a chat subject an app reads data for, answered in the open chat like Petya's own «tasks»
+// (src/dialogue.cjs): the chat takes the kind for its follow-ups («обнови», «а за вчера?»), a failed read keeps
 // a retry button, and the topic router may pick the kind. An app declares
 //   "provides": { "dialogue-kind": "<file>.cjs" }
 // and the file exports
-//   {id, title, by, label, service?, router?, routerNote?, detect?(text) → bool, read(services, command, topic, context)}
+//   {id, title, by, label, service?, router?, routerNote?, carry?, detect?(text) → bool, read(services, command, topic, context)}
 // — `title`: the new chat's title; `by`: the answer's signature; `label`: what the retry button retries («запрос к …»);
 // `service`: Petya's service module behind it (connection offers for a chat of this kind); `router`: its line for the
 // topic router («<id> — <router>»), `routerNote`: the router's note on what is talk, not this kind; `detect(text)`:
-// the request is clearly of this kind (checked where Petya's own patterns are); `read` returns a turn result
+// the request is clearly of this kind (checked where Petya's own patterns are); `carry`: topic keys a new chat of this
+// kind takes over from the open one (a chosen project, then its version — only when the first is set); `read` returns a turn result
 // ({text, question?, options?, field?, data?, extensionData?, error?}). Kinds count only while their app is added.
-// Example: «Google Play» answers ANR (src/extensions/google-play/anr-kind.cjs).
+// Examples: «Google Play» answers ANR (src/extensions/google-play/anr-kind.cjs), «Jira» bugs
+// (src/extensions/jira/dialogue-kind.cjs).
 const KIND='dialogue-kind';
 const ID=/^[a-z][a-z0-9-]{1,30}$/;
-const RESERVED=['chat','bugs','tasks','files'];
+const RESERVED=['chat','tasks','files'];
 const registry=()=>require('../extension-registry.cjs');
 let bound=null;
 function load(dir){

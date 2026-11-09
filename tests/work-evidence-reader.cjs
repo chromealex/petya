@@ -1,6 +1,6 @@
 const assert=require('node:assert/strict'),path=require('node:path');
 const root=process.env.PETYA_ROOT||path.resolve(__dirname,'..');
-const {JiraInsights}=require(process.env.PETYA_READER||path.join(root,'src/jira-insights.cjs'));
+const {JiraInsights}=require(process.env.PETYA_READER||path.join(root,'src/extensions/jira/insights.cjs'));
 (async()=>{
  for(const kind of ['tasks','bugs']){
   const queries=[];

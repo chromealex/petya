@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const { JiraRouting, choose } = require('../src/jira-routing.cjs');
+const { JiraRouting, choose } = require('../src/extensions/jira/routing.cjs');
 const { Workspace } = require('../src/workspace.cjs');
 const projects = [{key:'WEB',name:'Веб-платформа',description:'Сайт и личный кабинет'}, {key:'MOB',name:'Мобильное приложение',description:'Приложение iOS и Android'}];
 (async () => {

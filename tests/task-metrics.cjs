@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {read,summarize}=require('../src/task-metrics.cjs');
+const assert=require('node:assert/strict');const {read,summarize}=require('../src/extensions/jira/metrics.cjs');
 (async()=>{const now=Date.UTC(2026,10,4),at=new Date(now-1000).toISOString(),old=new Date(now-100*86400000).toISOString();
  const issue=(key,who,status='new')=>({key,fields:{assignee:{accountId:who},status:{statusCategory:{key:status}},updated:at}});
  const change=(from,to,created=at)=>({created,items:[{field:'status',from,to}]});

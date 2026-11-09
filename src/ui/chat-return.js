@@ -111,7 +111,7 @@
    }));
    if(message.error && message.retryStep && message===chatHistory.at(-1)){
      // An app's subject (dialogue-kind) names what is retried on the message itself (retryLabel).
-     const label={bugs:'запрос к Jira',tasks:'запрос к Jira',files:'анализ файлов'}[message.retryStep]||message.retryLabel||'запрос';
+     const label={tasks:'запрос к Jira',files:'анализ файлов'}[message.retryStep]||message.retryLabel||'запрос';
      if(label)node.append(button('Повторить '+label,async()=>{
        const id=topicSelect.value,info=await window.petya.chatWorkspaceInfo(id);
        const answer=await window.petya.chatRetryStep(id,info.index,message.at);

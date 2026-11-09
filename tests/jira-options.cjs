@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const { jiraOptions, guideUrl } = require('../src/jira-options.cjs');
+const { jiraOptions, guideUrl } = require('../src/extensions/jira/options.cjs');
 (async () => {
   const saved = { jiraUrl: 'https://test.atlassian.net', jiraEmail: 'a@example.com', jiraToken: 'fixture' };
   let calls = 0;

@@ -81,7 +81,7 @@ function merge(items){
 }
 
 // --- Jira --------------------------------------------------------------------------------------------------------
-const projectKeys=settings=>require('../../jira-selection.cjs').keys(settings.jiraProjects||settings.jiraProject).filter(k=>/^[A-Z][A-Z0-9_]{1,9}$/.test(k));
+const projectKeys=settings=>require('../jira/selection.cjs').keys(settings.jiraProjects||settings.jiraProject).filter(k=>/^[A-Z][A-Z0-9_]{1,9}$/.test(k));
 const quote=v=>'"'+String(v).replace(/["\\]/g,'')+'"';
 async function jiraSearch(s,jql){
  const out=[];let token='';

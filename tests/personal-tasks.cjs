@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {personalTasks}=require('../src/personal-tasks.cjs');const {intent,Dialogue}=require('../src/dialogue.cjs');const {JiraInsights}=require('../src/jira-insights.cjs');
+const assert=require('node:assert/strict');const {personalTasks}=require('../src/personal-tasks.cjs');const {intent,Dialogue}=require('../src/dialogue.cjs');const {JiraInsights}=require('../src/extensions/jira/insights.cjs');
 (async()=>{
  for(const q of ['Какие задачи на мне?','Покажи мои задачи','Мои задачи','Какие у меня задачи?','Петя, задачи назначенные мне','Покажи все мои задачи','Покажи закрытые мои задачи','Мои задачи в AA']){assert(personalTasks(q),q);assert.equal(intent(q),'tasks');}
  for(const q of ['Как дела?','Какие задачи у Анны?','Не показывай мои задачи','Объясни фразу «мои задачи»','«Какие задачи на мне?»','Покажи мои задачи и удали их','Мои задачи в AA и отправь в Slack'])assert(!personalTasks(q),q);

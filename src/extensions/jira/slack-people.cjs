@@ -16,7 +16,7 @@ async function turn(command,s){
  }
  const wanted=[...people.values()].map(p=>({name:p.displayName,email:p.emailAddress||''}));
  s.requestProgress?.report('Ищу должности этих людей в профилях Slack');
- const slack=wanted.length?await require('../team-enrich.cjs').slackProfiles(s.settings,s.request,wanted):{profiles:[],complete:true};
+ const slack=wanted.length?await require('../../team-enrich.cjs').slackProfiles(s.settings,s.request,wanted):{profiles:[],complete:true};
  const lines=wanted.map(p=>{
   const byEmail=p.email?slack.profiles.filter(x=>norm(x.email)===norm(p.email)):[];
   const found=byEmail.length?byEmail:slack.profiles.filter(x=>x.names.includes(norm(p.name)));
@@ -26,4 +26,5 @@ async function turn(command,s){
  const text=(complete?'Люди из Jira':'Частичный список людей из Jira')+': '+wanted.length+'. Должности из профилей Slack.\n\n'+(lines.join('\n')||'Доступных людей не найдено.')+(slack.limited?'\n\nSlack ограничил запросы.':'');
  s.dialogue.rememberAction(command,text);const topic=s.dialogue.active();return {handled:true,text,topicId:topic.id,messages:topic.messages,by:'Jira → Slack'};
 }
-module.exports={name:'jira-slack-people',matches,turn,setup:s=>({jiraSlackPeople:{turn:command=>turn(command,s)}})};
+// A chat turn of the Jira app (feature.cjs).
+module.exports={matches,turn};

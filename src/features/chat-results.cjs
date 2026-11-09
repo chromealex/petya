@@ -10,6 +10,13 @@ function extract(result){
   for(const adapter of adapterList()){if(typeof adapter.extract!=='function')continue;try{Object.assign(data,adapter.extract(result)||{});}catch{}}
   return Object.keys(data).length?data:undefined;
 }
+// Fields an app keeps on the chat message itself (not in extensionData), e.g. Jira's `jiraItems` that dashboards and
+// card actions read: `fields(result)` → {key: value} of every live extension's result.cjs, merged as they come.
+function fields(result){
+  const out={};
+  for(const adapter of adapterList()){if(typeof adapter.fields!=='function')continue;try{Object.assign(out,adapter.fields(result)||{});}catch{}}
+  return out;
+}
 function collect(topic,services){
   return (topic?.messages||[]).flatMap((message,index)=>adapterList().flatMap(adapter=>
     (typeof adapter.describe==='function'&&adapter.describe(message,topic,services)||[]).map(result=>({
@@ -105,4 +112,4 @@ function setup(s){
   }
   return {chatResults:{current,adopt,turn,selected},ipc:{snapshot,choose,action}};
 }
-module.exports={name:'chatResults',setup,collect,scope,extract};
+module.exports={name:'chatResults',setup,collect,scope,extract,fields};

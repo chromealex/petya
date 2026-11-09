@@ -32,7 +32,7 @@ assert.ok(!/googlePlay/.test(/const calls = \[.*\]/.exec(read('src/preload.cjs')
 assert.ok(!/googlePlay|google-play/.test(read('src/main.cjs')),'main.cjs has no Google Play reader or IPC');
 assert.ok(!/playCard|Google Play Console/.test(read('src/ui/dialogue.js')),'no Google Play card in the core renderer');
 const router=require('../src/intent-router.cjs'),semantic=require('../src/semantic-tools.cjs'),kinds=require('../src/features/dialogue-kinds.cjs');
-assert.deepEqual(router.routingRequest('m','x',[],'',{kinds:[]}).format.properties.kind.enum,['bugs','chat'],'the topic router has no ANR without the app');
+assert.deepEqual(router.routingRequest('m','x',[],'',{kinds:[]}).format.properties.kind.enum,['chat'],'the topic router has no ANR (nor Jira bugs) without the apps');
 assert.ok(!semantic.routingRequest('m','x',{tools:[]}).format.properties.tool.enum.includes('anr'),'the tool router has no ANR without the app');
 assert.deepEqual(kinds.RESERVED.includes('anr'),false);
 
@@ -43,7 +43,7 @@ assert.equal(app.provides['dialogue-kind'],'anr-kind.cjs');assert.equal(app.prov
 const feature=require('../src/extensions/google-play/feature.cjs');
 assert.deepEqual(feature.defaults,{googlePlayCredential:''},'the settings key stays');assert.deepEqual(feature.secrets,['googlePlayCredential']);
 assert.equal(feature.limits.googlePlayCredential,20000);assert.deepEqual(feature.publicFlags({googlePlayCredential:'x'}),{hasGooglePlay:true});
-assert.deepEqual(kinds.list().map(k=>k.id),['anr']);
+assert.ok(kinds.list().some(k=>k.id==='anr'),'Google Play provides the ANR kind');
 const {intent}=require('../src/dialogue.cjs');
 assert.equal(intent('ANR за неделю'),'anr');assert.equal(intent('крэши в Google Play'),'chat','Google Play with crashes is «Крэши»\'s');
 assert.equal(kinds.serviceOf('anr'),'googleplay');

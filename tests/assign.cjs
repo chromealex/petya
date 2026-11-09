@@ -1,7 +1,7 @@
 // Assigning decomposed tasks to people and sending them to Asana as one batch.
 const assert = require('assert').strict;
 const a = require('../src/assign.cjs');
-const { Asana } = require('../src/asana.cjs');
+const { Asana } = require('../src/extensions/asana/asana.cjs');
 let count = 0;
 async function test(name, fn) { await fn(); count++; console.log('✓ ' + name); }
 const team = [

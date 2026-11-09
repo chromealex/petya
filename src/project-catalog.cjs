@@ -1,4 +1,4 @@
-const {keys}=require('./jira-selection.cjs');
+const {keys}=require('./extensions/jira/selection.cjs');
 const {ConversationInput}=require('./ui/conversation-input.js');
 const isProjectCatalogQuestion=raw=>ConversationInput.isProjectCatalogQuestion(raw);
 function projectCatalogReply(command,{projects=[],activeId='',settings={}}={}){

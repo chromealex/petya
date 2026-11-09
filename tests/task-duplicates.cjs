@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {TaskDuplicates,similarity}=require('../src/task-duplicates.cjs');
+const assert=require('node:assert/strict');const {TaskDuplicates,similarity}=require('../src/extensions/jira/duplicates.cjs');
 const planId='12345678-1234-1234-1234-123456789abc';
 const tasks=[{summary:'Исправить ошибку авторизации',description:'Анна: исправлю ошибку при входе. Источник: встреча.',assigneeId:'a',dependsOn:[]},{summary:'Добавить экспорт аналитики',description:'Борис: сделаю CSV-выгрузку.',assigneeId:'b',dependsOn:[0]}];
 const card=(key='AA-7',summary='Починить ошибку входа')=>({key,fields:{project:{key:key.split('-')[0]},summary,description:{type:'doc',version:1,content:[{type:'paragraph',content:[{type:'text',text:'Ошибка входа при сохранении токена.'}]}]},status:{name:'In Progress'},updated:'2026-11-04T10:00:00Z'}});

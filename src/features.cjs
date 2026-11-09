@@ -6,7 +6,7 @@ module.exports=[
  require('./features/model-runtime.cjs'),
  require('./features/chat-models.cjs'),
  require('./features/project-instructions.cjs'),
- require('./features/jira-slack-people.cjs'),
+ require('./features/dialogue-kinds.cjs'),
  require('./features/python.cjs'),
  require('./features/disk-space.cjs'),
  require('./features/action-results.cjs'),

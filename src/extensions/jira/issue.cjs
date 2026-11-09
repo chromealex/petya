@@ -1,7 +1,7 @@
 // One Jira issue named in a request («https://site.atlassian.net/browse/BW-4569 посмотри эту таску», «что в BW-12?»):
 // Petya reads that issue — summary, status, people, description, latest comments, links — instead of listing the
 // whole project. Only the connected site and the projects allowed in the connection are read.
-const {allowed}=require('./jira-routing.cjs');
+const {allowed}=require('./routing.cjs');
 const KEY=/^[A-Z][A-Z0-9_]{0,19}-\d{1,9}$/;
 // The issue a request names: {key, host} for a browse link, {key} for a bare key; null for none or several.
 function named(command){

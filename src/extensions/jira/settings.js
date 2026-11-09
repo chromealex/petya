@@ -1,3 +1,51 @@
+// The Jira connection card (window.addConnectionCard, src/ui/connections.js) and its project selection.
+// The Atlassian browser sign-in is shared with Confluence (src/extensions/confluence/settings.js uses
+// window.petyaAtlassian): one sign-in gives Petya both services on the chosen site.
+let atlassianLoginActive = false, atlassianConnected = false;
+async function connectAtlassian(status, button, form) {
+  if (atlassianLoginActive) return;
+  atlassianLoginActive = true; button.disabled = true;
+  const choices = document.createElement('div'); status.after(choices);
+  let cancelled = false;
+  const cancel = connectionNode('button', 'Отменить'); cancel.type='button'; cancel.onclick=()=>{cancelled=true;}; choices.append(cancel);
+  try {
+    const login=await window.petya.atlassianStart();
+    status.textContent='Сверьте код '+login.code+' в браузере и разрешите доступ Atlassian.';
+    const deadline=Date.now()+600000;
+    while(!cancelled && Date.now()<deadline) {
+      await new Promise(r=>setTimeout(r,2000)); if(cancelled) break;
+      const state=await window.petya.atlassianPoll();
+      if(state.status==='failed') throw new Error('Вход отменён или Atlassian не выдал доступ. Повторите подключение.');
+      if(state.status!=='ready') continue;
+      let siteId;
+      if(state.sites.length===1) siteId=state.sites[0].id;
+      else {
+        status.textContent='Выберите сайт Atlassian для Пети.';
+        const select=document.createElement('select');state.sites.forEach(site=>select.add(new Option(site.name+' — '+site.url,site.id)));
+        const apply=connectionNode('button','Подключить сайт');apply.type='button';choices.prepend(select,apply);
+        siteId=await new Promise(resolve=>{apply.onclick=()=>resolve(select.value);cancel.onclick=()=>{cancelled=true;resolve(null);};});
+      }
+      if(!siteId || cancelled) break;
+      const saved=await window.petya.atlassianClaim(siteId);
+      displaySettings(saved); form.elements.jiraUrl.value=saved.jiraUrl;form.elements.jiraToken.value='';atlassianConnected=true;
+      status.textContent='Atlassian подключён · '+saved.jiraUrl+'. Выберите проект Jira в настройках.';status.className='connection-status connected';
+      connectionCards.get('jira').content.open = true;
+      if (moduleEnabled('jira')) await refreshJiraChoices();
+      const confluenceCard = document.querySelector('[data-service="confluence"]');
+      if (confluenceCard && moduleEnabled('confluence')) {
+        const result = await window.petya.checkSavedConnection('confluence');
+        confluenceCard.dataset.reconnect = String(result.action === 'reconnect');
+        const label = confluenceCard.querySelector('.connection-status');
+        label.textContent = result.message; label.className = 'connection-status ' + result.state;
+      }
+      return;
+    }
+    status.textContent=cancelled?'Подключение отменено.':'Время входа истекло. Повторите подключение.';
+  } catch(e) { status.textContent=e.message;status.className='connection-status error'; }
+  finally {choices.remove();button.disabled=false;atlassianLoginActive=false;}
+}
+// For Confluence's card: the same sign-in and whether it is connected.
+window.petyaAtlassian = { connect: (status, button, form) => connectAtlassian(status, button, form), connected: () => atlassianConnected };
 // Selection is kept in the settings form until the user saves it.
 let jiraChoicesRevision = 0;
 let jiraProjectsAvailable = [];
@@ -77,3 +125,13 @@ connectionsReady.then(async () => {
 document.addEventListener('petya-settings-displayed', renderJiraProjects);
 
 for (const key of ["jiraProject", "jiraIssueType", "jiraBoardId", "jiraVersionId"]) jiraField(key).closest("label").hidden = true;
+
+// The card itself: fields from settings.html, the Atlassian sign-in instead of «Подключить», the manual token folded.
+window.addConnectionCard?.({ id: 'jira', title: 'Jira', description: 'Задачи, спринты и версии', field: 'jiraToken', flag: 'hasJiraToken',
+  fields: ['jiraUrl', 'jiraEmail', 'jiraToken', 'jiraProjects', 'jiraProject', 'jiraIssueType', 'jiraBoardId', 'jiraVersionId', 'confluenceSpace'],
+  login: { label: 'Подключить Jira и Confluence', run: connectAtlassian },
+  logout: { label: 'Отключить Atlassian', run: async status => { await window.petya.atlassianDisconnect(); atlassianConnected = false; status.textContent = 'Atlassian отключён'; status.className = 'connection-status'; } },
+  hint: 'При входе разрешите доступ к Jira и Confluence на нужном сайте. Доступ к каждому сервису проверяется отдельно. Токены обновляются автоматически.',
+  manual: ['jiraEmail', 'jiraToken', 'clear_jiraToken'],
+  status: settings => { atlassianConnected = !!settings.hasAtlassianOAuth; },
+  checked: async result => { if (result.ready) await refreshJiraChoices(); } });

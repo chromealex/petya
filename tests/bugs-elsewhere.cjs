@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {JiraInsights}=require('../src/jira-insights.cjs');
+const assert=require('node:assert/strict');const {JiraInsights}=require('../src/extensions/jira/insights.cjs');
 (async()=>{
  const queries=[];let all=[];
  const w={settings:()=>({jiraUrl:'https://fixture.invalid',jiraProjects:'BW',jiraToken:'token'}),pages:async()=>[{key:'BW',name:'Bunker Wars'}],

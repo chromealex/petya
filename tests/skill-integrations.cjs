@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {JiraInsights}=require('../src/jira-insights.cjs');
+const {JiraInsights}=require('../src/extensions/jira/insights.cjs');
 const {aggregate,validatedTasks,meetingOwner,WorkSkills}=require('../src/work-skills.cjs');
 const {runSkill}=require('../src/instruction-skills.cjs');
 const issue=(key='AA-1',extra={})=>({id:key,key,fields:{summary:'Работа',status:{name:'Open',statusCategory:{key:'new'}},issuelinks:[],...extra}});

@@ -1,18 +1,18 @@
 // Tools apps add to the semantic tool router (src/semantic-tools.cjs): the local model reads the request and picks one
-// bounded read tool — Petya's own (bugs, web, brief, meeting) or an added app's. An app declares
+// bounded read tool — Petya's own (web, brief, meeting) or an added app's (e.g. src/extensions/jira/route-tool.cjs). An app declares
 //   "provides": { "route-tool": "<file>.cjs" }
 // and the file exports
 //   {id, says, order?, rule?, choices?(services) → [{id, name, phrases, enabled}], keepsClarify?(question) → bool,
 //    ready?(settings), async run(services, {command, original, route}) → turn result | null}
-// `says` is the tool's line in the router prompt («<id>: <says>»), placed among Petya's tools by `order` (bugs 10,
-// web 30, brief 35, meeting 50); `rule` is one more sentence after the shared rules. A tool with `choices` lets the
+// `says` is the tool's line in the router prompt («<id>: <says>»), placed among Petya's tools by `order` (Jira's
+// bugs 10, web 30, brief 35, meeting 50); `rule` is one more sentence after the shared rules. A tool with `choices` lets the
 // model pick one of them: the choice comes back as `route.recipeId` (the field the router has always used), and an
 // unknown choice comes back empty for the app to ask about. `keepsClarify(question)`: the router's own question is
 // the app's (asking which of its choices), so it is shown instead of falling back to the dialogue model.
 // A tool counts only while its app is added (and ready). Reading only: a tool never writes by itself.
 const KIND='route-tool';
 const ID=/^[a-z][a-z0-9-]{1,30}$/;
-const RESERVED=['chat','clarify','capability','bugs','web','brief','meeting'];
+const RESERVED=['chat','clarify','capability','web','brief','meeting'];
 const registry=()=>require('../extension-registry.cjs');
 function load(dir){
  const build=()=>require('./app-links.cjs').scan(dir).filter(x=>x.kind===KIND).flatMap(({provider:p,...x})=>{

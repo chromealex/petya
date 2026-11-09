@@ -1,10 +1,9 @@
 'use strict';
-const {AtlassianOAuth,ORIGIN}=require('./atlassian-oauth.cjs');
-class ServiceOAuth extends AtlassianOAuth {
+const {OAuthBroker}=require('./oauth-broker.cjs');
+class ServiceOAuth extends OAuthBroker {
  constructor(name,request){super(request);if(!['slack','notion','asana'].includes(name))throw new Error('Unknown provider');this.name=name;}
- call(route,...args){return super.call('/'+this.name+route,...args);}
- async start(){const s=await this.call('/v1/sessions','POST');if(!/^[A-Za-z0-9_-]{43}$/.test(s.id)||s.url!==ORIGIN+'/'+this.name+'/authorize?id='+s.id)throw new Error('Сервер вернул неверный адрес входа.');this.pending=s;return {code:s.code,url:s.url};}
- async claim(siteId){if(!this.pending)throw new Error('Начните вход заново.');const s=this.pending;const r=await this.call('/v1/sessions/'+s.id+'/claim','POST',s.secret,{siteId});if(!/^[A-Za-z0-9_-]{43}$/.test(r.credential)||r.site?.provider!==this.name||!r.site.id)throw new Error('Некорректное подключение.');this.pending=null;this.cached=null;return r;}
+ prefix(){return '/'+this.name;}
+ valid(r){return /^[A-Za-z0-9_-]{43}$/.test(r?.credential)&&r.site?.provider===this.name&&!!r.site.id;}
  async rewrite(url,options,s){
   const credential=s[this.name+'Credential'];if(!credential)return {url,options};const u=new URL(url);
   const origin=({slack:'https://slack.com',notion:'https://api.notion.com',asana:'https://app.asana.com'})[this.name];

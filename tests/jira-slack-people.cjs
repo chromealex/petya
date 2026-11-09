@@ -1,5 +1,5 @@
 const assert=require('node:assert/strict');
-const {matches,turn}=require('../src/features/jira-slack-people.cjs');
+const {matches,turn}=require('../src/extensions/jira/slack-people.cjs');
 (async()=>{
  const command='Пойди в жиру и возьми все имена, потом пойди в слак и возьми по этим именам их должности';
  assert(matches(command));assert(!matches('Покажи задачи Jira'));assert(!matches('Отправь сообщение Slack'));
@@ -9,7 +9,7 @@ const {matches,turn}=require('../src/features/jira-slack-people.cjs');
  s.serviceAccess.offer=async()=>({question:true,text:'Подключить Slack?'});calls.length=0;assert((await turn(command,s)).question);assert.equal(calls.length,0);
  console.log('Jira people → Slack titles: original request, ordered reads, ambiguous/missing/empty profiles and access gate passed');
 })().catch(e=>{console.error(e);process.exit(1);});
-{const {matches}=require('../src/features/jira-slack-people.cjs');
+{const {matches}=require('../src/extensions/jira/slack-people.cjs');
  if(!matches('Возьми из Jira все имена и найди их должности в Slack'))throw Error('listing request must match');
  if(matches('Сходи в жиру, возьми оттуда все имена, потом в слаке по этим именам возьми должности и заполни команду'))throw Error('filling the team goes to the team fill');
  console.log('Jira → Slack people: «заполни команду» is left to the team fill passed');}

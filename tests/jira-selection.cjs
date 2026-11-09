@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const { Workspace } = require('../src/workspace.cjs');
-const { normalizeSelection, choices } = require('../src/jira-selection.cjs');
+const { normalizeSelection, choices } = require('../src/extensions/jira/selection.cjs');
 (async () => {
   const old = { jiraUrl: 'https://test.atlassian.net', jiraProject: 'ONE', jiraIssueType: '1', jiraBoardId: '2', jiraVersionId: '3' };
   let next = { ...old }; normalizeSelection(next, old, {}); assert.equal(next.jiraProjects, 'ONE');

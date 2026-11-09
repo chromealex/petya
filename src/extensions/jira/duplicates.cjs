@@ -1,6 +1,6 @@
 const {randomUUID,createHash}=require('node:crypto');
-const {adf}=require('./core.cjs');
-const {adfText}=require('./history.cjs');
+const {adf}=require('../../core.cjs');
+const {adfText}=require('../../history.cjs');
 const hash=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const norm=x=>String(x||'').normalize('NFKC').toLocaleLowerCase().replace(/ё/g,'е').replace(/[^\p{L}\p{N}]+/gu,' ').trim();
 const taskHash=t=>hash([t.summary.trim(),t.description.trim()]);
@@ -21,7 +21,7 @@ class TaskDuplicates{
  constructor({workspace,state,save,context,now=Date.now}){Object.assign(this,{workspace,state,save,context,now});this.plans=new Map();this.pending=null;this.busy=false;this.submissions=new Map();this.epoch=0;this.revoked=new Set();state.taskDuplicateOps ||= [];for(const row of state.taskDuplicateOps)if(row.status==='sending')row.status='unknown';}
  reset(){for(const id of this.plans.keys())this.revoked.add(id);this.plans.clear();this.pending=null;this.submissions.clear();this.epoch++;}
  scope(s){const live=this.workspace.settings();return hash([live.jiraUrl,live.jiraProjects,live.jiraProject,live.jiraToken,live.jiraEmail,live.atlassianCredential,live.module_jira,s.jiraProject,this.context()]);}
- check(s,scope){const live=this.workspace.settings();if(live.module_jira==='false'||live.jiraUrl!==s.jiraUrl||!require('./jira-routing.cjs').allowed(live).includes(s.jiraProject)||this.scope(s)!==scope)throw Error('Проект, диалог или подключение изменились. Проверьте план заново.');}
+ check(s,scope){const live=this.workspace.settings();if(live.module_jira==='false'||live.jiraUrl!==s.jiraUrl||!require('./routing.cjs').allowed(live).includes(s.jiraProject)||this.scope(s)!==scope)throw Error('Проект, диалог или подключение изменились. Проверьте план заново.');}
  async scan(tasks,s,scope){this.check(s,scope);const issues=new Map(),seen=new Set();let token;
   for(let page=0;page<100;page++){
    const data=await this.workspace.api('/rest/api/3/search/jql',{method:'POST',body:JSON.stringify({jql:'project = '+q(s.jiraProject)+' ORDER BY key ASC',fields:['summary','description','status','updated','project'],maxResults:100,...token?{nextPageToken:token}:{}})},s);this.check(s,scope);
@@ -34,7 +34,7 @@ class TaskDuplicates{
   return tasks.map(task=>{const matches=[...issues.values()].map(i=>similarity(task,i)).filter(Boolean).sort((a,b)=>b.score-a.score||a.key.localeCompare(b.key));return {fingerprint:taskHash(task),matches:matches.slice(0,5),matchCount:matches.length,catalog:hash(matches.map(i=>[i.key,i.updated,i.summary,i.description]).sort())};});
  }
  prior(task,s){return this.state.taskDuplicateOps.find(r=>r.task===task&&r.site===s.jiraUrl&&r.project===s.jiraProject&&['sent','unknown','sending'].includes(r.status));}
- async prepare(id,prepared,s){require('./workspace.cjs').validateTasks(prepared.tasks,null,false);if(!Array.isArray(prepared.tasks)||!prepared.tasks.length)throw Error('Нет поручений для проверки.');const seen=new Set();for(const t of prepared.tasks){const h=taskHash(t);if(seen.has(h))throw Error('В плане повторяется одно и то же поручение. Удалите повтор перед созданием.');seen.add(h);}
+ async prepare(id,prepared,s){require('../../workspace.cjs').validateTasks(prepared.tasks,null,false);if(!Array.isArray(prepared.tasks)||!prepared.tasks.length)throw Error('Нет поручений для проверки.');const seen=new Set();for(const t of prepared.tasks){const h=taskHash(t);if(seen.has(h))throw Error('В плане повторяется одно и то же поручение. Удалите повтор перед созданием.');seen.add(h);}
   const epoch=this.epoch,scope=this.scope(s),entries=await this.scan(prepared.tasks,s,scope);if(epoch!==this.epoch)throw Error('Контекст удалён.');
   const previous=this.plans.get(id);const plan={id,settings:{...s},scope,topic:this.context()?.id,at:this.now(),tasks:structuredClone(prepared.tasks),entries};
   entries.forEach(e=>{const old=previous?.entries.find(x=>x.fingerprint===e.fingerprint&&x.catalog===e.catalog);if(old?.decision)e.decision=old.decision;const prior=this.prior(e.fingerprint,s);if(prior?.status==='sent')e.decision={kind:'existing',key:prior.key};else if(prior)e.uncertain=prior.key;});

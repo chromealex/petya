@@ -3,7 +3,7 @@
 // Priority names differ per site, so blockers are picked by code from the open issues of the version: a bug whose
 // priority is Blocker / Highest / Critical (or Russian names) or that carries a «blocker» label.
 const modules=require('../../modules.cjs');
-const keysOf=settings=>require('../../jira-selection.cjs').keys(settings.jiraProjects||settings.jiraProject).filter(k=>/^[A-Z][A-Z0-9_]{1,9}$/.test(k));
+const keysOf=settings=>require('./selection.cjs').keys(settings.jiraProjects||settings.jiraProject).filter(k=>/^[A-Z][A-Z0-9_]{1,9}$/.test(k));
 const plain=v=>String(v||'').toLowerCase().replace(/^(?:release|version|ver|rel|v)[-_/ ]?/,'').replace(/^v/,'').replace(/(?:\.0)+$/,'');
 const BUG=/bug|баг|ошибк|дефект|defect/i;
 const BLOCKER_PRIORITY=/blocker|highest|critical|блок|крит|наивысш|высочайш/i;

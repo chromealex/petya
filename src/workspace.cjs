@@ -293,7 +293,7 @@ class Workspace {
       this.batches.set(batch.id, batch); this.checkpoint(batch);
     }
     const live = this.settings();
-    if (live.jiraUrl !== batch.settings.jiraUrl || !require('./jira-routing.cjs').allowed(live).includes(batch.settings.jiraProject)) throw new Error('Восстановите исходное подключение и проект для продолжения пакета.');
+    if (live.jiraUrl !== batch.settings.jiraUrl || !require('./extensions/jira/routing.cjs').allowed(live).includes(batch.settings.jiraProject)) throw new Error('Восстановите исходное подключение и проект для продолжения пакета.');
     this.credentials(live);
     batch.settings.atlassianCredential = live.atlassianCredential; batch.settings.jiraToken = live.jiraToken; batch.settings.jiraEmail = live.jiraEmail;
     if (batch.busy) throw new Error('Пакет уже отправляется.');

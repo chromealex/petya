@@ -37,7 +37,9 @@
   for(const [file] of entry.scripts)await load(source(entry,file));
   let card=document.querySelector('[data-extension="'+entry.id+'"]');
   // An installed extension without its own settings still gets a card, so everything added is visible in settings.
-  if(!card&&!entry.service&&entry.installed){card=document.createElement('article');card.className='card';card.dataset.extension=entry.id;const h=document.createElement('h2');h.textContent=entry.name||entry.id;const p=document.createElement('p');p.textContent=(entry.description||'')+' Используется в чате, настроек нет.';card.append(h,p);document.getElementById('settings-form').append(card);}
+  if(!card&&!entry.service&&entry.installed){card=document.createElement('article');card.className='card';card.dataset.extension=entry.id;const h=document.createElement('h2');h.textContent=entry.name||entry.id;const p=document.createElement('p');p.textContent=(entry.description||'')+' Используется в чате, настроек нет.';card.append(h,p);
+   // In the catalog's order whichever app finishes loading its scripts first.
+   const form=document.getElementById('settings-form'),rank=id=>entries.findIndex(e=>e.id===id),next=[...form.querySelectorAll(':scope>[data-extension]')].find(c=>rank(c.dataset.extension)>rank(entry.id));form.insertBefore(card,next||null);}
   if(card){card.hidden=entry.service?!moduleEnabled(entry.id):!entry.installed;fold(card);}
   document.dispatchEvent(new CustomEvent('petya-extension-open',{detail:entry.id}));
   document.dispatchEvent(new Event('petya-extensions-changed'));return card;

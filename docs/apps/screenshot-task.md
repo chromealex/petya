@@ -24,7 +24,7 @@ Category: computer. Local; settings card for the global shortcut (`screenshotTas
    a «Создай задачу в Jira: Баг. …» request to its own flow, which previews and creates only after «Создать».
    No tracker connected → a hint plus «Скопировать текст» / «Скопировать картинку».
 6. **Attachment.** Petya's Jira and Asana flows create tasks from text only (checked: `src/workspace.cjs` issue creation
-   and `src/asana.cjs` `apply` send JSON without files; their `task-tracker.cjs` providers return a chat request). Instead
+   and `src/extensions/asana/asana.cjs` `apply` send JSON without files; their `task-tracker.cjs` providers return a chat request). Instead
    of changing those extensions, this app uploads the picture to the created task after the hand-off: the card watches
    the chat for the new task (Jira `…/browse/KEY` links of the connected site or «Создал задачу KEY», Asana task links)
    and offers «Прикрепить скриншот к KEY» (or a typed key/link). The upload happens only on that press:

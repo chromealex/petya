@@ -79,10 +79,18 @@
   input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();list.querySelector('button')?.click();}else if(e.key==='Backspace'&&!input.value&&values().length){write(values().slice(0,-1));}else if(e.key==='Escape'){list.hidden=true;}});
   const field=node('div','team-project-field');field.append(chips,input);box.append(field,list);paint();return box;
  }
- // «В сервисах»: how the person appears in each service — one row per service. Slack and Jira are always shown
- // and can be linked here (Slack member ID, a person found in Jira); other services add their own rows.
- const SERVICES={slack:'Slack',jira:'Jira',telegram:'Telegram',meetings:'Встречи',instagram:'Instagram',whatsapp:'WhatsApp',linkedin:'LinkedIn',asana:'Asana',notion:'Notion',confluence:'Confluence',gmail:'Почта',github:'GitHub'};
+ // «В сервисах»: how the person appears in each service — one row per service. Slack is always shown and can be
+ // linked here (Slack member ID); apps add their own always-shown rows with a way to link the person
+ // (window.petyaTeamServices.register, below: Jira finds the person in its projects); other services add rows
+ // when the person has an account there.
+ const SERVICES={slack:'Slack',telegram:'Telegram',meetings:'Встречи',instagram:'Instagram',whatsapp:'WhatsApp',linkedin:'LinkedIn',asana:'Asana',notion:'Notion',confluence:'Confluence',gmail:'Почта',github:'GitHub'};
  const FIELDS={name:'Имя',handle:'Ник',title:'Должность',email:'Email',url:'Ссылка',id:'ID'};
+ // Apps' rows: register(id, {title, link(panel, open, api), unlink?(api), init?(api), order?}). `api` is
+ // {member, field(key), read(), write(accounts), mark(), paint(id), node} of the open card; `init` runs before the rows
+ // are drawn (to show links older cards keep in their own fields). Registered by the app's script after team.js.
+ const linked=new Map();
+ window.petyaTeamServices={register(id,row){if(typeof id!=='string'||!/^[a-z][a-z0-9-]{0,40}$/.test(id)||!row||typeof row.link!=='function')throw Error('[team] invalid service row '+id);linked.set(id,row);}};
+ const serviceName=id=>linked.get(id)?.title||SERVICES[id]||id.charAt(0).toUpperCase()+id.slice(1);
  const node=(tag,className,text)=>{const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=text;return n;};
  function addAccounts(editor,member){
   const photo=node('input');photo.type='hidden';photo.dataset.field='photo';photo.value=member.photo||'';editor.append(photo);
@@ -90,18 +98,18 @@
   // Photo: pick one of the service pictures (Slack, Jira, …), upload your own, or keep initials.
   {const box=node('div','team-photo team-member-wide'),current=node('span','team-photo-current'),choices=node('div','team-photo-choices'),tools=node('div','team-photo-tools');
    const paint=()=>{current.replaceChildren();if(/^data:image\/(png|jpeg);base64,/.test(photo.value)){const img=node('img');img.src=photo.value;img.alt='';current.append(img);}else current.textContent=(field('name').value.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('')||'+').toLocaleUpperCase();
-    const label={slack:'из Slack',jira:'из Jira',custom:'своё фото',none:'без фото'}[photoSource.value]||(photo.value?'из профиля':'нет фото');caption.textContent=label;
+    const label={slack:'из Slack',custom:'своё фото',none:'без фото'}[photoSource.value]||(linked.has(photoSource.value)?'из '+serviceName(photoSource.value):photo.value?'из профиля':'нет фото');caption.textContent=label;
     // The avatar in the card's header follows (without marking the form as changed).
     const avatar=editor.closest('.team-member')?.querySelector('.team-avatar');if(avatar){if(/^data:image\/(png|jpeg);base64,/.test(photo.value)){const img=avatar.querySelector('img')||node('img');img.src=photo.value;img.alt='';avatar.replaceChildren(img);avatar.classList.add('has-photo');}else{avatar.classList.remove('has-photo');avatar.textContent=current.textContent;}}};
    const set=(value,source)=>{photo.value=value;photoSource.value=source;mark();paint();for(const b of choices.querySelectorAll('button'))b.setAttribute('aria-pressed',String(b.dataset.photo===value));};
    const caption=node('span','small');const head=node('div','team-photo-head');head.append(current,node('div',null));head.lastChild.append(node('strong',null,'Фото'),caption);
-   const pick=node('button',null,'Выбрать…');pick.type='button';pick.title='Фото из профилей Slack и Jira';
+   const pick=node('button',null,'Выбрать…');pick.type='button';pick.title='Фото из профилей сервисов';
    const upload=node('button',null,'Загрузить своё…');upload.type='button';
    const none=node('button','quiet','Без фото');none.type='button';none.onclick=()=>set('','none');
    upload.onclick=async()=>{upload.disabled=true;try{const value=await window.petya.teamPhotoPick();if(value)set(value,'custom');}catch(e){status.textContent=e.message;}finally{upload.disabled=false;}};
    pick.onclick=async()=>{if(!choices.hidden&&choices.childElementCount){choices.hidden=true;return;}choices.hidden=false;choices.replaceChildren(node('span','small','Загружаю фото из профилей…'));
-    try{const list=await window.petya.teamPhotoOptions(read())||[];choices.replaceChildren();if(!list.length){choices.append(node('span','small','В профилях Slack и Jira нет фото. Обновите команду или загрузите своё.'));return;}
-     for(const o of list){const b=node('button','team-photo-choice');b.type='button';b.dataset.photo=o.photo;b.title=SERVICES[o.service]||o.service;b.setAttribute('aria-pressed',String(o.photo===photo.value));const img=node('img');img.src=o.photo;img.alt=SERVICES[o.service]||o.service;b.append(img,node('span',null,SERVICES[o.service]||o.service));b.onclick=()=>set(o.photo,o.service);choices.append(b);}
+    try{const list=await window.petya.teamPhotoOptions(read())||[];choices.replaceChildren();if(!list.length){choices.append(node('span','small','В профилях сервисов нет фото. Обновите команду или загрузите своё.'));return;}
+     for(const o of list){const b=node('button','team-photo-choice');b.type='button';b.dataset.photo=o.photo;b.title=serviceName(o.service);b.setAttribute('aria-pressed',String(o.photo===photo.value));const img=node('img');img.src=o.photo;img.alt=serviceName(o.service);b.append(img,node('span',null,serviceName(o.service)));b.onclick=()=>set(o.photo,o.service);choices.append(b);}
     }catch(e){choices.replaceChildren(node('span','small',e.message));}};
    choices.hidden=true;tools.append(pick,upload,none);head.append(tools);box.append(head,choices);editor.append(box);setTimeout(paint,0);}
   const hidden=node('input');hidden.type='hidden';hidden.dataset.field='accounts';hidden.value=member.accounts&&Object.keys(member.accounts).length?JSON.stringify(member.accounts):'';editor.append(hidden);
@@ -118,29 +126,14 @@
    for(const [key,label] of shown){const dd=node('dd',key==='id'?'mono':'',entry[key]);if(key==='id'){dd.title='Скопировать';dd.tabIndex=0;dd.onclick=()=>navigator.clipboard?.writeText(entry[key]).catch(()=>{});}row.list.append(node('dt',null,label),dd);}
    row.unlink.hidden=!shown.length;row.link.textContent=service==='meetings'?(shown.length?'Изменить имя':'Указать имя'):shown.length?'Изменить':'Связать';
   }
-  function unlinkService(service){const next=read();delete next[service];write(next);if(service==='jira'){field('jiraId').value='';field('jiraName').value='';}if(service==='slack')field('slackId').value='';mark();paint(service);}
+  const api={member,field,read,write,mark,paint:service=>paint(service),node};
+  function unlinkService(service){const next=read();delete next[service];write(next);linked.get(service)?.unlink?.(api);if(service==='slack')field('slackId').value='';mark();paint(service);}
   function addRow(service){
-   const item=node('div','team-account'),label=node('span','team-account-service',SERVICES[service]||service),list=node('dl'),tools=node('div','team-account-tools'),panel=node('div','team-account-link');panel.hidden=true;
-   const link=node('button','quiet','Связать');link.type='button';const unlink=node('button','quiet','Отвязать');unlink.type='button';unlink.title='Убрать связь с '+(SERVICES[service]||service);unlink.onclick=()=>{panel.hidden=true;unlinkService(service);};
+   const item=node('div','team-account'),label=node('span','team-account-service',serviceName(service)),list=node('dl'),tools=node('div','team-account-tools'),panel=node('div','team-account-link');panel.hidden=true;
+   const link=node('button','quiet','Связать');link.type='button';const unlink=node('button','quiet','Отвязать');unlink.type='button';unlink.title='Убрать связь с '+serviceName(service);unlink.onclick=()=>{panel.hidden=true;unlinkService(service);};
    tools.append(link,unlink);const main=node('div','team-account-main');main.append(list,panel);item.append(label,main,tools);box.append(item);rows.set(service,{list,link,unlink,panel});
-   if(service==='jira')jiraLink(panel,link);else if(service==='slack')slackLink(panel,link);else if(service==='meetings')meetingLink(panel,link,unlink);else link.hidden=true;
+   if(linked.has(service))linked.get(service).link(panel,link,api);else if(service==='slack')slackLink(panel,link);else if(service==='meetings')meetingLink(panel,link,unlink);else link.hidden=true;
    paint(service);
-  }
-  // Jira: search people in the allowed projects and pick one.
-  function jiraLink(panel,open){
-   const query=node('input');query.type='search';query.placeholder='Имя или фамилия в Jira';query.maxLength=200;query.setAttribute('aria-label','Найти человека в Jira');
-   const find=node('button',null,'Найти');find.type='button';const message=node('p','small');message.setAttribute('role','status');const results=node('div','team-jira-results');let revision=0;
-   const bar=node('div','team-account-search');bar.append(query,find);panel.append(bar,message,results);
-   open.onclick=()=>{panel.hidden=!panel.hidden;if(!panel.hidden){query.value=field('jiraName').value||field('name').value||member.name||'';query.focus();query.select();}};
-   query.addEventListener('input',e=>{e.stopPropagation();revision++;results.replaceChildren();message.textContent='';});
-   query.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();find.click();}if(e.key==='Escape'){e.stopPropagation();panel.hidden=true;}});
-   find.onclick=async()=>{const current=++revision;results.replaceChildren();if(query.value.trim().length<2){message.textContent='Введите хотя бы две буквы имени.';return;}find.disabled=true;message.textContent='Ищу людей в доступных проектах Jira…';
-    try{const found=await window.petya.teamJiraSearch(query.value);if(current!==revision||!panel.isConnected)return;message.textContent=found.length?'Выберите человека:':'Никого не найдено. Попробуйте фамилию или написание имени в Jira.';
-     for(const person of found){const choice=node('button',null,person.name+' · '+person.projects.join(', '));choice.type='button';choice.title=person.name+' · '+person.id;
-      choice.onclick=()=>{field('jiraId').value=person.id;field('jiraName').value=person.name;const next=read();next.jira={id:person.id,name:person.name};write(next);
-       const local=field('name');if(!local.value.trim()){local.value=person.name;local.dispatchEvent(new Event('input',{bubbles:true}));}
-       revision++;results.replaceChildren();message.textContent='';panel.hidden=true;mark();paint('jira');};results.append(choice);}
-    }catch(e){if(current===revision)message.textContent=e.message;}finally{find.disabled=false;}};
   }
   // Slack: the member ID (Profile → ⋮ → Copy member ID).
   function slackLink(panel,open){
@@ -162,9 +155,12 @@
    input.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Enter'){e.preventDefault();apply();}if(e.key==='Escape')panel.hidden=true;});
    unlink.onclick=()=>{field('meetingName').value='';panel.hidden=true;mark();paint('meetings');};
   }
-  // Older cards keep the link only in the Jira/Slack fields: show it in the rows too.
-  {const next=read();if(field('jiraId')?.value&&!next.jira)next.jira={id:field('jiraId').value,...(field('jiraName').value?{name:field('jiraName').value}:{})};if(field('slackId')?.value&&!next.slack)next.slack={id:field('slackId').value};write(next);}
-  for(const service of ['slack','jira','meetings',...Object.keys(read()).filter(k=>!['slack','jira','meetings'].includes(k))])addRow(service);
+  // Older cards keep the link only in the Slack field (apps' own fields: their `init`): show it in the rows too.
+  {const next=read();if(field('slackId')?.value&&!next.slack)next.slack={id:field('slackId').value};write(next);}
+  const apps=[...linked].sort((a,b)=>(a[1].order??100)-(b[1].order??100)||a[0].localeCompare(b[0])).map(([id])=>id);
+  for(const id of apps){try{linked.get(id).init?.(api);}catch(e){console.error('[team] '+id,e);}}
+  const always=['slack',...apps,'meetings'];
+  for(const service of [...always,...Object.keys(read()).filter(k=>!always.includes(k))])addRow(service);
   editor.append(box);
  }
  // Load: open tasks per person from Jira and Asana, next to each name. Refreshed when the page opens.

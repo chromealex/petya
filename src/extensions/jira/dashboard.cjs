@@ -1,6 +1,6 @@
 // Jira on dashboards: issues by JQL, refreshed by themselves (src/features/dashboards.cjs). The phrase «баги
 // спринта», «мои задачи в работе», «закрыто за неделю» becomes JQL limited to the projects of the connection.
-const {allowed}=require('../../jira-routing.cjs');
+const {allowed}=require('./routing.cjs');
 const FIELDS='summary,status,assignee,priority,issuetype,duedate';
 const ABOUT=/(?:^|[^\p{L}])(?:jira|д?жир\p{L}*|задач\p{L}*|таск\p{L}*|баг\p{L}*|тикет\p{L}*|спринт\p{L}*|эпик\p{L}*|issues?|bugs?|tasks?)(?=$|[^\p{L}])/iu;
 const WRITE=/(?:^|[^\p{L}])(?:созда\p{L}*|заведи|удали\p{L}*|перенеси|назначь|закрой|поменяй|измени\p{L}*)(?=$|[^\p{L}])/iu;

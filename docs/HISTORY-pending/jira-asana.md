@@ -1,0 +1,4 @@
+- Jira and Asana live in their apps: Jira's readers, project routing and selection, task duplicates and metrics, team search, the people list with Slack titles, its settings card with the Atlassian sign-in and its «Jira» row on «Команда» cards moved into the Jira app; the Asana client, its IPC and its page into the Asana app. Everything works as before while the apps are added.
+- «Проверь баги» and «какие баги открыты?» are answered by Jira when it is added; without Jira Petya offers to add it instead of failing with «Включите Jira».
+- The Atlassian sign-in is the Jira app's and is shared with Confluence.
+- For app authors: chat kinds (`dialogue-kind`), service connection cards (`window.addConnectionCard` login hooks), rows under «В сервисах» on «Команда» (`window.petyaTeamServices`) and message fields of chat results (`fields`) — see docs/extensions.md.

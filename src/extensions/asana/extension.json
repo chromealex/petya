@@ -11,6 +11,10 @@
     [
       "task-cards.js",
       "message-format.js"
+    ],
+    [
+      "asana-page.js",
+      "connections.js"
     ]
   ],
   "results": {

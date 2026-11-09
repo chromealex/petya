@@ -14,6 +14,8 @@ function capture(result){
 }
 module.exports={
   id:'jira',capture,
+  // The issues of a Jira answer stay on the message as `jiraItems` (cards, quick edits, dashboards).
+  fields(result){const items=capture(result);return items?{jiraItems:items}:{};},
   describe(message,topic,s){
     const tasks=(message.jiraItems||[]).map(item=>({key:[item.site,item.key],item,presentationKey:JSON.stringify([item.site,item.key]),
       title:'Jira · '+item.key,subtitle:item.summary,

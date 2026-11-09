@@ -1,4 +1,4 @@
-const {allowed}=require('./jira-routing.cjs');
+const {allowed}=require('./routing.cjs');
 async function search(workspace,query){
  if(typeof query!=='string'||query.trim().length<2||query.length>200)throw Error('Введите хотя бы две буквы имени.');
  const s={...workspace.settings()};if(s.module_jira==='false')throw Error('Включите Jira в настройках.');const projects=allowed(s);if(!projects.length)throw Error('Выберите доступные проекты Jira в настройках.');
