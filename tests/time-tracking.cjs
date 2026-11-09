@@ -100,6 +100,17 @@ const {InputRequired}=require('../src/input-required.cjs');
  assert.ok(text.startsWith('\uFEFFstart,end,minutes,app,title,project,task,category'));
  assert.ok(text.includes('BW-123')&&text.includes(',work\r\n'));assert.equal(saved.rows,text.trim().split('\r\n').length-1);
  await assert.rejects(ipc.exportCsv(c.period.to,c.period.from),/период/);
+ // «Выгрузить в Google Таблицы» (spreadsheet-export): the same rows as a table, minutes as numbers, category names.
+ const sheet=ipc.exportTable(c.period.from,c.period.to);
+ assert.deepEqual(sheet.header,['Начало','Конец','Минуты','Приложение','Окно','Проект','Задача','Категория']);
+ assert.equal(sheet.rows.length,saved.rows,'one row per span, like the CSV');
+ assert.ok(sheet.rows.every(r=>typeof r[2]==='number'&&/^\d{4}-\d\d-\d\d \d\d:\d\d:\d\d$/.test(r[0])));
+ assert.ok(sheet.rows.some(r=>r[6]==='BW-123'&&r[7]==='Работа'));
+ assert.match(sheet.title,/^Учёт времени · \d{4}-\d\d-\d\d$/);assert.equal(sheet.app,'Учёт времени');
+ assert.throws(()=>ipc.exportTable(c.period.to,c.period.from),/период/);
+ // Through the real registry: the provider accepts the table as it is.
+ assert.equal(require('../src/extensions/google-sheets/exports.cjs').clean(sheet).rows.length,sheet.rows.length);
+ assert.deepEqual(JSON.parse(fs.readFileSync(path.join(__dirname,'..','src','extensions','time-tracking','extension.json'),'utf8')).uses,['spreadsheet-export']);
  r=await app.turn(s,'выгрузи время в CSV');assert.equal(r.extensionData.timeCard.exportReady,true);assert.match(r.text,/Скачать CSV/);
 
  // Worklog: a preview first (nothing written), then only the ticked rows, once; a Jira error is shown per row.

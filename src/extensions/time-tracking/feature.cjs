@@ -182,20 +182,32 @@ async function turn(s,command,deps={}){
 }
 
 // --- Renderer calls --------------------------------------------------------------------------------------------------
+const stamp=t=>{const d=new Date(t);return ymd(t)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');};
 function csv(rows){
  const q=v=>{const t=String(v??'');return /[",\n;]/.test(t)?'"'+t.replace(/"/g,'""')+'"':t;};
- const iso=t=>{const d=new Date(t);return ymd(t)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');};
- return '\uFEFF'+['start,end,minutes,app,title,project,task,category',...rows.map(r=>[iso(r.start),iso(r.end),((r.end-r.start)/MIN).toFixed(1),r.app,r.title,r.project||'',r.task||'',r.category].map(q).join(','))].join('\r\n')+'\r\n';
+ return '\uFEFF'+['start,end,minutes,app,title,project,task,category',...rows.map(r=>[stamp(r.start),stamp(r.end),((r.end-r.start)/MIN).toFixed(1),r.app,r.title,r.project||'',r.task||'',r.category].map(q).join(','))].join('\r\n')+'\r\n';
+}
+// The same rows as the CSV, as the table «Выгрузить в Google Таблицы» hands to `spreadsheet-export`: minutes are
+// numbers, categories are their names; the title names the period's dates.
+function table(rows,{from,to}){
+ return {title:'Учёт времени · '+ymd(from)+(to-from>86400000?' – '+ymd(to-1):''),sheet:'Учёт времени',app:'Учёт времени',
+  header:['Начало','Конец','Минуты','Приложение','Окно','Проект','Задача','Категория'],
+  rows:rows.map(r=>[stamp(r.start),stamp(r.end),Math.round((r.end-r.start)/MIN*10)/10,r.app,r.title,r.project||'',r.task||'',categories.LABELS[r.category]||r.category])};
 }
 function setup(s,{dialog}={}){
  const log=worklogs.create(s);
  const range=(from,to)=>{const a=Number(from),b=Number(to);if(!Number.isFinite(a)||!Number.isFinite(b)||b<=a||b-a>370*86400000)throw Error('Некорректный период.');return {from:a,to:b};};
+ // Spans of a period with their categories, for both exports.
+ const spans=(from,to)=>{
+  if(!s.activity)throw Error('Учёт активности ещё загружается.');
+  const r=range(from,to),mapping=categories.parse(s.settings.timeTrackingCategories);
+  const rows=s.activity.spans(r).map(x=>({...x,category:categories.of(x,mapping)}));
+  if(!rows.length)throw Error('За этот период нечего выгружать.');
+  return {r,rows};
+ };
  return {ipc:{
   async exportCsv(from,to,label){
-   if(!s.activity)throw Error('Учёт активности ещё загружается.');
-   const r=range(from,to),mapping=categories.parse(s.settings.timeTrackingCategories);
-   const rows=s.activity.spans(r).map(x=>({...x,category:categories.of(x,mapping)}));
-   if(!rows.length)throw Error('За этот период нечего выгружать.');
+   const {r,rows}=spans(from,to);
    const d=dialog||require('electron').dialog;
    const name='time-'+ymd(r.from)+(r.to-r.from>86400000?'_'+ymd(r.to-1):'')+'.csv';
    const result=await d.showSaveDialog(s.win&&!s.win.isDestroyed?.()?s.win:undefined,{title:'Сохранить учёт времени',defaultPath:name,filters:[{name:'CSV',extensions:['csv']}]});
@@ -203,6 +215,9 @@ function setup(s,{dialog}={}){
    fs.writeFileSync(result.filePath,csv(rows));
    return {path:result.filePath,rows:rows.length};
   },
+  // The table for «Выгрузить в Google Таблицы»: read when the button is pressed, written only after the export card
+  // of the providing app confirms.
+  exportTable(from,to){const {r,rows}=spans(from,to);return table(rows,r);},
   // The user's category for an app (from the card's chip menu); 'auto' removes it.
   setCategory(app,category){
    const k=categories.key(app);if(!k)throw Error('Нет приложения.');
@@ -215,4 +230,4 @@ function setup(s,{dialog}={}){
  }};
 }
 function validate(next){categories.validate(next);}
-module.exports={name:'timeTracking',defaults:{['extension_'+ID]:'false',timeTrackingCategories:'{}'},validate,setup,turn,wants,intent,build,summaryText,csv,matcher};
+module.exports={name:'timeTracking',defaults:{['extension_'+ID]:'false',timeTrackingCategories:'{}'},validate,setup,turn,wants,intent,build,summaryText,csv,table,matcher};

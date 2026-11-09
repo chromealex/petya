@@ -87,7 +87,8 @@ offer).
 | Calendar, created meeting / timeline | | | | | «Петя запишет встречу» / «Записать Петей» |
 
 «Выгрузить в Google Таблицы» (`spreadsheet-export`): sprint plan, game metrics (daily series), A/B-test groups, the
-config-balance report and its version diff.
+config-balance report and its version diff, and «Учёт времени» (next to «Скачать CSV»: the CSV's rows, read from the
+app only when pressed — `k.links` accepts an async payload function for that).
 
 «Сохранить в Google Docs» (`document-export`, shown only while «Google Диск» is added and connected; the card's text as
 Markdown): the meeting summary (decisions, tasks with assignee and due date, not discussed, discussed), the «Поиск по

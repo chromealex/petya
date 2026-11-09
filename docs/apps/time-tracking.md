@@ -18,7 +18,11 @@ worklogs the user confirms.
 - «Время по задачам», «время по проектам» — from the classifiers this app provides: a Jira key in a window title,
   project names from editor and Unity window titles and repo paths.
 - «Выгрузи время в CSV» — «Скачать CSV»: a save dialog, one row per span (start, end, minutes, app, title, project,
-  task, category; UTF-8 with BOM for Excel). There is no shared spreadsheet-export kind yet; CSV is the export.
+  task, category; UTF-8 with BOM for Excel). Next to it, «Выгрузить в Google Таблицы» (cross-app kind
+  `spreadsheet-export`, only while a spreadsheet app such as «Google Таблицы» is added and connected): the same rows
+  (start, end, minutes as numbers, app, window, project, task, category name) are read from this app (ipc
+  `exportTable`) only when the button is pressed and handed to the provider, whose export card previews them and
+  writes only on «Выгрузить» (≤ 2000 rows; the card says when more were cut).
 - «Запиши время в Jira» — a preview of time per task per day (rounded to 5 minutes, < 5 minutes not offered) with
   checkboxes; only after «Записать в Jira» are the ticked rows written: `POST /rest/api/3/issue/{key}/worklog?adjustEstimate=auto`
   with `timeSpentSeconds`, `started` (`2026-11-09T10:30:00.000+0300`) and an ADF comment (the window title), through

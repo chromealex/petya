@@ -20,11 +20,13 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
   app:{query:'Unity',label:'unity'},rows:[{key:'Bunker - Main - Windows, Mac, Linux - Unity 6000.0.3f1',ms:14*3600000,category:'work',detail:'',top:''},{key:'Bunker - Shop - Windows, Mac, Linux - Unity 6000.0.3f1',ms:5*3600000,category:'work',detail:'',top:''}]};
  const taskCard={...dayCard,mode:'task',worklog:true,rows:[{key:'BW-123',ms:95*60000,category:'work',url:'https://studio.atlassian.net/browse/BW-123',detail:'Google Chrome, Rider',top:'[BW-123] Магазин падает при покупке - Jira'},{key:'BW-77',ms:40*60000,category:'work',url:'https://studio.atlassian.net/browse/BW-77',detail:'Rider',top:'Bunker – BW-77 PlayerController.cs'}],untagged:5.8*3600000};
  // Feature calls of the card are stubbed in the main process: a worklog preview and the write of the ticked rows.
- const {ipcMain}=require('electron'),writes=[];
+ const {ipcMain}=require('electron'),writes=[],runs=[],tables=[];
  const now=new Date(),today=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
  ipcMain.removeHandler('petya:feature');
  ipcMain.handle('petya:feature',async(event,name,method,...args)=>{
-  if(name==='appLinks'&&method==='available')return [];
+  if(name==='appLinks'&&method==='available')return args[0]==='spreadsheet-export'?[{id:'google-sheets',name:'Google Таблицы',label:'Выгрузить в Google Таблицы'}]:[];
+  if(name==='appLinks'&&method==='run'){runs.push(args);return {text:'ok'};}
+  if(name==='timeTracking'&&method==='exportTable'){tables.push(args);return {title:'Учёт времени · '+today,sheet:'Учёт времени',app:'Учёт времени',header:['Начало','Конец','Минуты','Приложение','Окно','Проект','Задача','Категория'],rows:[[today+' 10:00:00',today+' 10:40:00',40,'Rider','BW-123 Shop.cs','Bunker','BW-123','Работа']]};}
   if(name==='timeTracking'&&method==='worklogPreview')return {id:'p1',site:'https://studio.atlassian.net',rows:[{id:'BW-123|d',key:'BW-123',day:today,seconds:5700,title:'[BW-123] Магазин падает при покупке - Jira',done:false},{id:'BW-77|d',key:'BW-77',day:today,seconds:2400,title:'Bunker – BW-77 PlayerController.cs',done:false},{id:'BW-5|d',key:'BW-5',day:today,seconds:900,title:'',done:true}]};
   if(name==='timeTracking'&&method==='worklogWrite'){writes.push(args);return args[1].map(id=>({id,key:id.split('|')[0],ok:id!=='BW-77|d',error:id==='BW-77|d'?'Jira: нет прав на запись времени':''}));}
   return null;
@@ -47,7 +49,17 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js("document.querySelectorAll('.time-wl li').length"),3);
  assert.equal(await js("document.querySelector('.time-wl li:last-child input').disabled"),true);
  assert.match(await js("document.querySelector('.time-worklog button.primary').textContent"),/Записать в Jira: 2/);
+ // «Выгрузить в Google Таблицы» sits next to «Скачать CSV»; the table is read from the app only when pressed.
+ for(let i=0;i<150;i++){if(await js("!!document.querySelector('.time-card .kit-links[data-kind=spreadsheet-export] button')"))break;await new Promise(r=>setTimeout(r,30));}
+ assert.equal(await js("document.querySelector('.time-card .kit-links[data-kind=spreadsheet-export] button').textContent"),'Выгрузить в Google Таблицы');
+ assert.equal(await js("document.querySelector('.time-card .kit-links[data-kind=spreadsheet-export]').previousElementSibling.textContent"),'Скачать CSV');
+ assert.equal(tables.length,0,'nothing is read before the press');
  await require('./card-shot.cjs')(win,'.time-card','petya-time-tracking');
+ await js("document.querySelector('#card-shot .time-card .kit-links[data-kind=spreadsheet-export] button').click()");
+ for(let i=0;i<100&&!runs.length;i++)await new Promise(r=>setTimeout(r,30));
+ assert.equal(tables.length,1);assert.equal(runs[0][0],'spreadsheet-export');assert.equal(runs[0][1],'google-sheets');
+ assert.deepEqual(runs[0][2].rows[0].slice(2,4),[40,'Rider'],'the table from the app goes to the provider');
+ assert.equal(tables[0][0],dayCard.period.from);
  await js("document.querySelector('.time-worklog button.primary').click()");
  for(let i=0;i<100;i++){if(await js("document.querySelectorAll('.time-wl-state').length>=3"))break;await new Promise(r=>setTimeout(r,30));}
  assert.deepEqual(writes,[['p1',['BW-123|d','BW-77|d']]],'only the ticked rows, once');

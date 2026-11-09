@@ -1,6 +1,7 @@
 // «Учёт времени», renderer: the period's total split by category (a stacked bar), the day's timeline (activity
 // colored by category, meetings from «Календарь» and focus sessions of «Фокус» above it) or the week as stacked day
-// columns, the top apps / projects / tasks with bars and an editable category, CSV export and «Записать время в
+// columns, the top apps / projects / tasks with bars and an editable category, CSV export (and «Выгрузить в Google
+// Таблицы» through spreadsheet-export when a spreadsheet app is connected) and «Записать время в
 // Jira» with a preview the user ticks and confirms (nothing is written before that).
 (()=>{
  if(window.renderTimeCard)return;
@@ -152,6 +153,8 @@
   const status=!c.tracking.enabled?{label:'учёт выключен',tone:'alert'}:c.tracking.paused?{label:'на паузе',tone:'progress'}:{label:'учёт идёт',tone:'done'};
   const actions=[];
   if(c.total)actions.push({label:'Скачать CSV',primary:!!c.exportReady,run:async()=>{const r=await call('exportCsv',c.period.from,c.period.to,c.period.label);if(r?.path)k.toast('Сохранено строк: '+r.rows);}});
+  // The same rows to a spreadsheet app (spreadsheet-export: «Google Таблицы» previews and writes only on confirmation).
+  if(c.total)actions.push(k.links('spreadsheet-export',()=>call('exportTable',c.period.from,c.period.to)));
   if(c.jira&&c.total)actions.push({label:'Записать время в Jira',primary:!!c.worklog,run:()=>worklog(k,c,wl)});
   if(c.mode!=='task'&&c.total)actions.push({label:'По задачам',run:()=>k.ask('Время по задачам за '+(c.period.kind==='day'?c.period.label:'неделю'),{send:true})});
   if(c.mode!=='project'&&c.total)actions.push({label:'По проектам',run:()=>k.ask('Время по проектам за '+(c.period.kind==='day'?c.period.label:'неделю'),{send:true})});

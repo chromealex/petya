@@ -219,7 +219,8 @@
  document.addEventListener('petya-extensions-changed',availableLinks.clear);
  function openSettings(id){if(typeof view==='function')view('settings');const card=document.querySelector('[data-extension="'+id+'"],[data-service="'+id+'"]');if(card)window.revealSettings?.(card);}
  async function runLink(kind,provider,payload,onDone){
-  const result=await window.petya.feature('appLinks','run',kind,provider.id,typeof payload==='function'?payload():payload);
+  // A payload function may be async (a card that reads its table from its app only when the button is pressed).
+  const result=await window.petya.feature('appLinks','run',kind,provider.id,typeof payload==='function'?await payload():payload);
   if(result?.settings)toast(result.text||'Нужна настройка приложения',{error:true,action:{label:'Открыть настройки',run:()=>openSettings(result.settings)}});
   else if(result?.ask)await (window.resultKit?.ask||ask)(result.ask,{send:result.send!==false});
   else if(result?.text)toast(result.text);
