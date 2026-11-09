@@ -1,0 +1,23 @@
+{
+  "id": "iap",
+  "name": "Покупки в игре",
+  "description": "Внутриигровые покупки: выручка по продуктам, возвраты, платящие, ARPPU, конверсия в платящих и первые покупки, ROAS с покупками — из App Store Connect, Google Play или таблицы покупок в базе; валюты не смешиваются",
+  "category": "analytics",
+  "icon": "icon.svg",
+  "connects": "App Store Connect, Google Play или база с покупками",
+  "uses": ["spreadsheet-export", "share-message"],
+  "provides": {
+    "purchase-source": ["appstore-source.cjs", "googleplay-source.cjs"]
+  },
+  "setting": "extension_iap",
+  "settings": true,
+  "feature": "feature.cjs",
+  "examples": ["Покупки в игре за неделю", "Какие паки покупают лучше?", "Конверсия в платящих и ARPPU за месяц", "Рефанды в App Store за месяц", "ROAS с покупками за неделю"],
+  "scripts": [
+    ["iap-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "iapCard": "renderIapCard"
+  }
+}

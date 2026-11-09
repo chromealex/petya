@@ -5,7 +5,11 @@
 //   { id?, name?, ready(settings) -> bool, apps?(settings) -> [{id, name}],
 //     async fetch(services, query) -> {app?, series:[Series], unavailable:[{metric, reason}]},
 //     async retention?(services, query) -> {cohorts:[{date, size, returned:{1, 7, 30}}]} | null,
-//     async facets?(services, query) -> {versions:[string], platforms:[string]} }
+//     async facets?(services, query) -> {versions:[string], platforms:[string]},
+//     async events?(services, query) -> [{name, users}],                      // for «Воронки»: event names of the period
+//     installs?: bool,                                                        // journeys can include installs ($install)
+//     async journeys?(services, {from, to, app, platform, events:[name], install}) ->
+//       {journeys:[{user, platform, country, version, times:{[event]:[ms ascending]}}], truncated?} }
 // query = {from, to (YYYY-MM-DD, inclusive), metrics:['dau','new','revenue'], platform:'android'|'ios'|null,
 //   version:string|null, app:string|null}.
 // Series — the normalized shape every source returns:
@@ -18,7 +22,7 @@ const METRICS=['dau','new','revenue'];
 function load(dir){
  return require('../../features/app-links.cjs').scan(dir).filter(x=>x.kind===KIND).map(({provider:p,...x})=>{
   if(typeof p.ready!=='function'||typeof p.fetch!=='function')throw Error('Invalid metrics source '+x.extension+'/'+x.file);
-  for(const hook of ['apps','retention','facets'])if(p[hook]!==undefined&&typeof p[hook]!=='function')throw Error('Invalid metrics source '+x.extension+'/'+x.file);
+  for(const hook of ['apps','retention','facets','events','journeys'])if(p[hook]!==undefined&&typeof p[hook]!=='function')throw Error('Invalid metrics source '+x.extension+'/'+x.file);
   return {id:p.id||x.extension,extension:x.extension,setting:x.setting,name:p.name||x.name,source:p};
  }).sort((a,b)=>a.id.localeCompare(b.id));
 }

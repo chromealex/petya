@@ -35,9 +35,9 @@ one group per currency, with `cpi`, `ctr`, `cvr`), `period(text)` («вчера�
 «за 14 дней», «на прошлой неделе», «в этом месяце»), `roas(revenue, spend)`, `bound`.
 
 ROAS: «Закупка трафика» divides ad revenue of the same days from the `ad-source` registry («Реклама и
-монетизация», USD) by USD spend — a blended ad-revenue ROAS, without in-app purchases. IAP revenue from
-`metrics-source` comes in the app's currency and per app; combining it needs a currency rate and app mapping
-(next wave).
+монетизация», USD) by USD spend — a blended ad-revenue ROAS, without in-app purchases. ROAS with in-app
+purchases is «Покупки в игре» (`docs/apps/iap.md`): per spend currency, purchases net in that currency plus ad
+revenue when the currency is USD, divided by the spend in that currency — no currency rates.
 
 ## Networks
 

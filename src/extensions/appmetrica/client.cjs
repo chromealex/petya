@@ -86,4 +86,50 @@ async function versions(s,{id,from,to,platform}){
  const r=await api(s,'/stat/v1/data',{id,metrics:'ym:u:activeUsers',dimensions:'ym:u:appVersion',date1:from,date2:to,sort:'-ym:u:activeUsers',limit:6,filters:filters('ym:u',{platform})});
  return (Array.isArray(r?.data)?r.data:[]).map(x=>String(x?.dimensions?.[0]?.name||'')).filter(v=>/^[\w.+-]{1,40}$/.test(v));
 }
-module.exports={BASE,CURRENCIES,ID,config,connected,api,applications,filters,daily,cohorts,versions,explain};
+// Event names of the period with the number of devices that sent each (Reporting API, client events namespace).
+async function eventNames(s,{id,from,to,platform}){
+ const r=await api(s,'/stat/v1/data',{id,metrics:'ym:ce2:devicesWithEvent',dimensions:'ym:ce2:eventLabel',date1:from,date2:to,sort:'-ym:ce2:devicesWithEvent',limit:300,filters:filters('ym:ce2',{platform}),accuracy:'full'});
+ return (Array.isArray(r?.data)?r.data:[]).map(x=>({name:String(x?.dimensions?.[0]?.name||'').slice(0,80),users:Number(x?.metrics?.[0])||0})).filter(e=>e.name);
+}
+
+// Logs API (raw events and installations of devices): GET /logs/v1/export/{events|installations}.json. The export is
+// prepared asynchronously: 202 while it is being prepared (the same request is repeated), 200 with {data:[…]} when
+// ready. Raw fetch, because the 202 body is plain text. Field filters are query parameters (event_name=…).
+const deps={base:BASE,fetch:(...a)=>fetch(...a),wait:ms=>new Promise(r=>setTimeout(r,ms)),tries:8,pause:5000};
+const LOG_ROWS=300000;
+async function logs(s,kind,params){
+ const c=config(s);if(!c.token)throw Error('Нет токена AppMetrica.');
+ const url=deps.base+'/logs/v1/export/'+kind+'.json?'+new URLSearchParams(Object.entries(params).filter(([,v])=>v!==undefined&&v!==null&&v!=='').map(([k,v])=>[k,String(v)]));
+ for(let i=0;i<deps.tries;i++){
+  const r=await deps.fetch(url,{headers:{Authorization:'OAuth '+c.token,Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(300000)});
+  if(r.status===202){await r.text().catch(()=>'');if(i<deps.tries-1){s.requestProgress?.report?.('AppMetrica готовит выгрузку логов…');await deps.wait(deps.pause);}continue;}
+  if(!r.ok){let detail='';try{detail=(await r.text()).slice(0,300);}catch{detail='';}const e=Error('HTTP '+r.status);e.status=r.status;throw explain(Object.assign(e,{detail}));}
+  const body=await r.json();
+  return Array.isArray(body?.data)?body.data:[];
+ }
+ const e=Error('AppMetrica ещё готовит выгрузку логов. Повторите запрос через минуту-две.');e.preparing=true;throw e;
+}
+const PLATFORM={android:'android',ios:'ios',iphone:'ios',ipad:'ios'};
+// Per device: the times (ms, ascending) of each asked event, installs as `$install`, and the device's platform,
+// country and app version (from its first row).
+async function journeys(s,{id,from,to,events,install=false,platform}){
+ const since=from+' 00:00:00',until=to+' 23:59:59',devices=new Map();let rows=0,truncated=false;
+ const add=(device,name,ms,row)=>{
+  if(!device||!Number.isFinite(ms))return;
+  let j=devices.get(device);
+  if(!j){j={user:device,platform:PLATFORM[String(row.os_name||'').toLowerCase()]||'',country:String(row.country_iso_code||'').toUpperCase().slice(0,2),version:String(row.app_version_name||'').slice(0,40),times:{}};devices.set(device,j);}
+  (j.times[name]||(j.times[name]=[])).push(ms);
+ };
+ const want=os=>!platform||PLATFORM[String(os||'').toLowerCase()]===platform;
+ if(install){
+  const list=await logs(s,'installations',{application_id:id,date_since:since,date_until:until,fields:'appmetrica_device_id,install_timestamp,os_name,country_iso_code,app_version_name'});
+  for(const r of list){if(rows>=LOG_ROWS){truncated=true;break;}rows++;if(want(r.os_name))add(String(r.appmetrica_device_id||''),'$install',Number(r.install_timestamp)*1000,r);}
+ }
+ for(const name of [...new Set(events)].filter(n=>n!=='$install')){
+  const list=await logs(s,'events',{application_id:id,date_since:since,date_until:until,fields:'appmetrica_device_id,event_name,event_timestamp,os_name,country_iso_code,app_version_name',event_name:name});
+  for(const r of list){if(rows>=LOG_ROWS){truncated=true;break;}rows++;if(want(r.os_name)&&String(r.event_name)===name)add(String(r.appmetrica_device_id||''),name,Number(r.event_timestamp)*1000,r);}
+ }
+ for(const j of devices.values())for(const k of Object.keys(j.times))j.times[k].sort((a,b)=>a-b);
+ return {journeys:[...devices.values()],truncated,rows};
+}
+module.exports={BASE,CURRENCIES,ID,config,connected,api,applications,filters,daily,cohorts,versions,explain,eventNames,logs,journeys,deps};

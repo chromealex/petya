@@ -16,5 +16,8 @@
   "results": {
     "sqlQuery": "renderSqlQuery",
     "sqlSchema": "renderSqlSchema"
+  },
+  "provides": {
+    "purchase-source": "purchase-source.cjs"
   }
 }

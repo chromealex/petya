@@ -223,6 +223,11 @@ served by a dedicated registry next to app links. Two exist:
 - `search-source` (`src/extensions/search-all/registry.cjs`, `docs/apps/search-all.md`): `{id, label, order?, icon?,
   color?, in?, names?, parts?, ready(settings, services), off?, timeout?, search(services, {topic, terms, own,
   words})}`, read by «Поиск по всему» (Slack, «Документы», Jira, «Глоссарий», «Google Диск» are sources).
+  «Поиск по всему» (Slack, Telegram, Discord, Mattermost and VK Teams are sources).
+- `purchase-source` (`src/features/purchase-sources.cjs`, `docs/apps/iap.md`): `{id, name, ready(settings), hint?,
+  maxDays?, names?, confirm?, plan?, fetch(services, {start, end, plan?, check})}`, read by «Покупки в игре» (App Store
+  Connect and Google Play reports in `src/extensions/iap`, a purchases table of «SQL по словам»); a source with
+  `confirm` runs only the plan the user confirmed on the card.
 
 A source counts only while its extension is added; an installed extension may provide one, and a broken installed
 source is skipped and reported. A new source kind is a core change: add it to `REGISTRIES` in `app-links.cjs` and

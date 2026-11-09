@@ -2,7 +2,8 @@
 // DAU and new users come from the audience namespace (ym:u:activeUsers, ym:u:newUsers), revenue from the revenue
 // namespace (ym:r2:revenue<currency>, in-app plus ad revenue when configured), retention from cohorts by install
 // day (ym:u:profileInstallDate × ym:u:date). A metric AppMetrica refuses or has no data for is reported as
-// unavailable instead of failing the whole card.
+// unavailable instead of failing the whole card. For «Воронки»: event names (ym:ce2 namespace) and per-device times
+// of the steps from the Logs API (events and installations exports).
 const client=require('./client.cjs');
 
 function pickApp(s,app){
@@ -36,6 +37,16 @@ module.exports={
  async retention(s,q){
   const id=pickApp(s,q.app);if(!id)return null;
   return {cohorts:await client.cohorts(s,{id,from:q.from,to:q.to,platform:q.platform,version:q.version})};
+ },
+ // Funnels («Воронки»): event names of the period and per-device step times from the Logs API.
+ async events(s,q){
+  const id=pickApp(s,q.app);if(!id)throw Error('В настройках «AppMetrica» не выбрано приложение.');
+  return client.eventNames(s,{id,from:q.from,to:q.to,platform:q.platform});
+ },
+ installs:true,
+ async journeys(s,q){
+  const id=pickApp(s,q.app);if(!id)throw Error('В настройках «AppMetrica» не выбрано приложение.');
+  return client.journeys(s,{id,from:q.from,to:q.to,events:q.events,install:!!q.install,platform:q.platform});
  },
  async facets(s,q){
   const id=pickApp(s,q.app);if(!id)return {versions:[],platforms:[]};
