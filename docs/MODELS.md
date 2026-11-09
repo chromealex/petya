@@ -62,6 +62,7 @@ the v22 checks and the 801 familiar cases (`requirements-draft-v22`), the checkp
    and `summary.json` into `requirements-draft-dN/results` here.
 
 State on 9 November 2026: D10 is the group's D (R1-A1-D10: 46/54 with 30 exact, 36/42, 797/801); its adapter is
-`~/.petya-train/andromeda-d10/adapter` on the Mac Studio. D11 (D10 on quote, cancel-one, code, two-recipients,
+`/Volumes/KINGSTON/petya-train/andromeda-d10/adapter` on the Mac Studio. D11 (D10 on quote, cancel-one, code, two-recipients,
 rehearsing the rest with 10 dialogues each) was rejected: 41/54 against 46 — permissions turned into orders again.
-D12 (D10 on 20 fresh dialogues of every family) was rejected too: 44/54 (36 exact) — codes got worse.
+D12 (D10 on 20 fresh dialogues of every family) was rejected too: 44/54 (36 exact) — codes got worse. D13
+(D10 weighted to code and quote, all other families kept in; 911 presentations) trains on the Kingston SSD.
