@@ -28,5 +28,12 @@ const write=async(root,file,text)=>{await fs.mkdir(path.dirname(path.join(root,f
  assert.ok(score('a/AppIcon.appiconset/x.png')>score('favicon.png'));assert.equal(score('img/arrow_icon.png'),0);
  // Game and UI art is not the app icon.
  assert.equal(score('Assets/UI/coin_icon.png'),0);assert.equal(score('Assets/Art/logo_partner.png'),0);assert.equal(score('Assets/Art/UI/icon.png'),0);assert.equal(score('Assets/Icons/icon.png'),75);
- console.log('Project icon search: game art skipped, AppIcon, Android launcher, Unity player icon, skipped dependencies, shape filter passed');
+ // A repository with the Unity game in «Client/» and a tool with its own «icon.png»: the game's player icon wins.
+ const repo=path.join(base,'repo'),guid='c'.repeat(32);
+ await write(repo,'mapeditor/app/resources/icon.png','tool-icon');
+ await write(repo,'Client/ProjectSettings/ProjectSettings.asset','m_BuildTargetIcons:\n  - m_BuildTarget: \n    m_Icons:\n    - serializedVersion: 2\n      m_Icon: {fileID: 2800000, guid: '+guid+', type: 3}');
+ await write(repo,'Client/Assets/Art/Units/soldier.png','game-art');await write(repo,'Client/Assets/Art/Units/soldier.png.meta','guid: '+'d'.repeat(32));
+ await write(repo,'Client/Assets/_ICONS/1024.png','game-icon');await write(repo,'Client/Assets/_ICONS/1024.png.meta','fileFormatVersion: 2\nguid: '+guid);
+ assert.equal(decode(await projectIcon(repo,native({}))),'game-icon');
+ console.log('Project icon search: game art skipped, AppIcon, Android launcher, Unity player icon (also of a game in a subfolder), skipped dependencies, shape filter passed');
 }finally{await fs.rm(base,{recursive:true,force:true});}})().catch(e=>{console.error(e);process.exit(1);});
