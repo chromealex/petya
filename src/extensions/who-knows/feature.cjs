@@ -101,7 +101,8 @@ async function collect(s,topic,{now=Date.now()}={}){
 // The card row of one person: points by source, total, evidence lists (most relevant first).
 function row(p){
  const points=Object.fromEntries(Object.entries(p.points).map(([k,v])=>[k,round(v)]));
- const score=round(Object.values(p.points).reduce((a,b)=>a+b,0));
+ // The total is the sum of the parts as shown, so the card always adds up.
+ const score=round(Object.values(points).reduce((a,b)=>a+b,0));
  return {name:p.name,member:p.member,role:p.role,slackId:p.slackId||'',score,points,last:p.lastCommit,
   files:[...p.files.values()].sort((a,b)=>b.weight-a.weight).slice(0,6).map(({weight,root,...f})=>f),
   commits:p.commits.sort((a,b)=>b.at-a.at).slice(0,6),
