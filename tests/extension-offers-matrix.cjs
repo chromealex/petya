@@ -91,6 +91,7 @@ const own={
  'tidy-downloads':['разбери загрузки','что можно удалить из загрузок','дубликаты в загрузках','наведи порядок в папке загрузок'],
  'balance-sim':['сколько дней до 10 уровня у игрока без доната','что будет с экономикой, если поднять награду за победу на 20%','симулируй прогрессию по текущим конфигам','смоделируй экономику игры на 60 дней'],
  'pdf-contracts':['разбери этот договор','какие штрафы в договоре','сравни две версии договора','договор в PDF'],
+ 'event-ideas':['какой ивент провести в декабре','идеи ивентов на Хэллоуин для Бразилии','запланируй ивент на Новый год','придумай ивент к Новому году'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -102,7 +103,7 @@ const not={
  crashlytics:['Firebase Analytics за неделю','настрой Firebase Remote Config','Firebase Auth не пускает','ANR в Crashlytics','упала сборка в Firebase App Distribution'],
  'google-play':['ANR в Google Play','ANR за неделю','отзывы в Google Play','жалобы игроков в Google Play','зависания в гугл плей','упала сборка'],
  'store-reviews':['сделай код-ревью','ревью PR #42','перфоманс-ревью','отзыв о кандидате','фидбэк по встрече'],
- calendar:['сводка встречи','что решили на встрече','срок задачи','календарь отпусков','дни рождения'],
+ calendar:['сводка встречи','что решили на встрече','срок задачи','календарь отпусков','дни рождения','какой ивент провести в декабре','идеи ивентов на Хэллоуин'],
  'pull-requests':['отзывы в App Store','задачи на ревью в Jira'],
  'ci-builds':['готов ли релиз 1.5','почини билд','размер сборки','сколько весит билд'],
  // The Downloads folder named on its own is «Уборка загрузок».
@@ -241,6 +242,8 @@ const not={
  'balance-sim':['сверь баланс с конфигами','что поменялось в балансе с прошлой версии','проверь конфиги юнитов','почему урон лучника в игре не как в таблице','какой у меня баланс на карте','DAU за неделю','ретеншн D1 D7 D30','сколько дней до отпуска','какой уровень английского нужен','баланс работы и жизни'],
  // «Договор» about agreements with a colleague, writing a contract, «договорились» and other documents are not a PDF contract.
  'pdf-contracts':['у нас с Олегом договор: он ревьюит по пятницам','мы договорились с Машей о встрече','договор с коллегой о дежурствах','напиши договор на разработку','составь договор аренды','разбери отчёт','подпиши договор','найди документ про онбординг'],
+ // An event in the calendar stays with the calendar; events in code, analytics events and funnels are not live-ops.
+ 'event-ideas':['поставь ивент в календаре на завтра','какие ивенты в календаре','создай ивент в календаре с Олегом','UnityEvent не вызывается','воронка ивентов туториала','что у меня сегодня в календаре','что нового у конкурентов','какие механики добавили в обновлениях'],
 };
 const problems=[];
 for(const [id,phrases] of Object.entries(own)){
@@ -259,7 +262,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review','gdd','wiki-author','doc-diff','screen-bug','clipboard','balance-sim','pdf-contracts'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams','retro','adr','doc-freshness','funnels','iap','chart-explain','onboarding','hiring','perf-review','gdd','wiki-author','doc-diff','screen-bug','clipboard','balance-sim','pdf-contracts','event-ideas'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

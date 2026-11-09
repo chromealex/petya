@@ -89,6 +89,7 @@ offer).
 | Documentation freshness, per finding | «Создать задачу» | «Предложить правку» without an exact line fix | | | |
 | Screen recording → bug («Запись экрана → баг»), report | ✓ (bug; video and log attached after creation) | | | | |
 | Clipboard history («История буфера»), link → issue | comment «Добавить в KEY» (Jira) | | | | |
+| Event ideas («Идеи для ивентов»), plan card | «Создать задачу» (then the event is kept in the project's plan) | | | | |
 | Calendar, confirm step | | | | ✓ + known rooms, typed link | |
 | «Онбординг новичка», welcome message | | | after the outgoing review | | |
 | Calendar, created meeting / timeline | | | | | «Петя запишет встречу» / «Записать Петей» |
