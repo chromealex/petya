@@ -8,6 +8,12 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.17.4 — a dashboard is its own thing, with its own chat beside it
+
+- A dashboard is no longer tied to the chat it was made from (no sync, no «К чату»).
+- «Чат» in the dashboard header moves the dashboard to the right panel and opens its own chat: «добавь …», «убери …», «переименуй в …» change the dashboard live; buttons on its cards («За вчера», «Что делать?») type into that chat.
+- The project's dashboards are a «Дашборды» block above its chats, with «+» for an empty one.
+
 ## 0.17.3 — anomalies, ANR and crash cards share one quieter look
 
 - Shared KPI tiles (a number over a hairline, no grey blocks), a bar chart with thin rounded bars, a solid threshold line and a tooltip that follows the pointer, and a legend — on the anomalies, ANR and crash cards.

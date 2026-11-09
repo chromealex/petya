@@ -5,8 +5,12 @@ meetings, charts. A widget keeps its **source**, not only its data, so it refres
 
 ## Making one
 - **From a chat**: «Сделать дашбордом» in the chat header. Every answer with a card becomes a widget; plain
-  answers stay out. The chat keeps its dashboard («Дашборд» in the header), and new cards of the chat join it
-  when the dashboard is opened.
+  answers stay out. From then on the dashboard lives on its own: nothing is pulled from that chat later.
+- **A dashboard is its own thing, not a chat.** In the sidebar it sits in the project's «Дашборды» block above the
+  chats. «Чат» in its header opens the dashboard's own chat beside it (the dashboard moves to the right panel; the
+  chat is a topic with `dashboardId`, hidden from the chat list): «добавь крэши за неделю», «убери задачи»,
+  «переименуй в Релиз» change the dashboard, anything else is an ordinary answer whose cards can be pinned. Buttons
+  on the dashboard's cards («За вчера», «Что делать?») type into that chat.
 - **From one card**: «•••» → «В дашборд…» on an answer, then a dashboard of the project or «Новый дашборд».
   The card shows at once; its source refreshes it afterwards.
 - **By description**: «Собери дашборд «Релиз»: баги спринта, крэши за неделю, отзывы в сторах». Each phrase goes

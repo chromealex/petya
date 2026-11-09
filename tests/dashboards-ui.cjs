@@ -77,13 +77,27 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await shot('dashboard-adder');
  await js("[...document.querySelectorAll('.dash-chip')].find(c=>c.textContent.includes('Новые крэши')).click()");
  await wait("document.querySelectorAll('.dash-widget').length===4",'widget added');
+ // «Чат»: the dashboard moves to the right panel, its own chat opens in the middle; «добавь …» there adds a widget;
+ // the chat is not listed among the project's chats; × brings the dashboard back to the full screen.
+ await js("document.querySelector('.dash-chat').click()");
+ await wait("!!document.querySelector('.kit-panel-dashboard .dash-screen')&&document.querySelector('.chat-shell:not(.showing-dashboard)')",'dashboard beside its chat');
+ const dashChat=await js('topicSelect.value');assert(dashChat&&dashChat!==id,'the dashboard has a chat of its own');
+ assert(await js("[...document.querySelectorAll('.dialogue-messages .message-content, .dialogue-messages p')].some(p=>p.textContent.includes('Это чат дашборда'))"),'the chat introduces itself');
+ await send('добавь крэши за вчера');
+ await wait("document.querySelectorAll('.kit-panel-dashboard .dash-widget').length===5",'a widget added from the chat');
+ await send('убери крэши за вчера');
+ await wait("document.querySelectorAll('.kit-panel-dashboard .dash-widget').length===4",'a widget removed from the chat');
+ assert.equal(await js("[...document.querySelectorAll('.project-chat-row .project-sidebar-chat')].filter(b=>b.title==='Привет').length"),1,'the dashboard chat is not among the chats (only the original one is)');
+ await js("document.querySelector('.kit-panel-close').click()");
+ await wait("document.querySelector('.chat-shell.showing-dashboard>.dash-screen')!==null",'full screen again');
  // Start screen of the project.
- await js("document.querySelector('.dash-head-tools .dash-tool').click()");
+ await js("document.querySelector('.dash-head-tools [title=\"Действия с дашбордом\"]').click()");
  await wait("[...document.querySelectorAll('.kit-menu-item')].some(b=>b.textContent.startsWith('Показывать при открытии проекта'))");
  await js("[...document.querySelectorAll('.kit-menu-item')].find(b=>b.textContent.startsWith('Показывать при открытии проекта')).click()");
  await wait("document.querySelector('.dash-sub')?.textContent.includes('стартовый экран проекта')",'start screen noted under the title');
- // Back to the chat; a new chat shows the start dashboard under «Чем помочь?».
- await js("document.querySelector('.dash-head-title .dash-tool').click()");
+ // Back to the chat (there is no «К чату»: a dashboard is not tied to a chat — the sidebar opens the chat); a new chat
+ // shows the start dashboard under «Чем помочь?».
+ await js("[...document.querySelectorAll('.project-chat-row .project-sidebar-chat')].find(b=>b.title==='Привет').click()");
  await wait("document.querySelector('.dash-screen').hidden&&getComputedStyle(document.querySelector('#home .chat-feed')).display!=='none'",'back to chat');
  await wait("document.getElementById('chat-dashboard-open').textContent.includes('Дашборд')&&!document.getElementById('chat-dashboard-open').textContent.includes('Сделать')",'header now opens it');
  await js("selectDialogueTopic('')");
@@ -113,7 +127,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await shot('jira');
  // A small window on top of the others: the same widgets, drawn by the card renderers; it can only read its dashboard.
  const dashId=await js("document.querySelector('.dash-screen').dataset.id");
- await js("[...document.querySelectorAll('.dash-head-tools .dash-tool')].at(-1).click()");
+ await js("document.querySelector('.dash-head-tools [title=\"Действия с дашбордом\"]').click()");
  await wait("[...document.querySelectorAll('.kit-menu-item')].some(b=>b.textContent.startsWith('Открыть в отдельном окне'))");
  await js("[...document.querySelectorAll('.kit-menu-item')].find(b=>b.textContent.startsWith('Открыть в отдельном окне')).click()");
  const {BrowserWindow}=require('electron');let mini;

@@ -195,16 +195,16 @@ async function sources(root){
   const withJira=await ipc.refresh(d.id,d.widgets[1].id);assert.match(withJira.widgets[1].error,/Jira не подключена/);
   // The same chat → the same dashboard; a new card in the chat joins it.
   topic.messages.push({role:'user',text:'новые крэши за неделю',at:20},{role:'assistant',text:'1',extensionData:{crashCard:{}},at:21});
-  assert.equal(ipc.peek(d.id).widgets.length,3,'peek does not sync');
-  assert.equal(ipc.get(d.id).widgets.length,4,'opening takes the chat\'s new cards');
+  assert.equal(ipc.peek(d.id).widgets.length,3);
+  assert.equal(ipc.get(d.id).widgets.length,3,'a dashboard is not tied to the chat it came from: opening it takes nothing new from the chat');
   assert.equal(ipc.fromChat('t1').id,d.id,'the same chat keeps its dashboard');
   assert.equal(ipc.chatDashboard('t1').id,d.id);
   // Widget settings, order, removal with undo.
   let v=ipc.widget(d.id,d.widgets[0].id,{size:'w',every:60,title:'Крэши'});assert.equal(v.widgets[0].size,'w');assert.equal(v.widgets[0].every,60);
   assert.throws(()=>ipc.widget(d.id,d.widgets[0].id,{every:7}),/интервал/);
   v=ipc.move(d.id,[d.widgets[2].id,d.widgets[0].id]);assert.equal(v.widgets[0].id,d.widgets[2].id);
-  const removed=ipc.removeWidget(d.id,d.widgets[2].id);assert.equal(removed.view.widgets.length,3);
-  assert.equal(ipc.restoreWidget(d.id,removed.undo.widget,removed.undo.index).widgets.length,4);
+  const removed=ipc.removeWidget(d.id,d.widgets[2].id);assert.equal(removed.view.widgets.length,2);
+  assert.equal(ipc.restoreWidget(d.id,removed.undo.widget,removed.undo.index).widgets.length,3);
   // The person's arrangement is saved as it was placed.
   let laid=ipc.layout(d.id,ipc.peek(d.id).widgets.map((w,i)=>({id:w.id,x:i%2*6,y:Math.floor(i/2)*8,w:6,h:8})));
   assert(laid.widgets.every(w=>w.pos&&w.pos.w===6&&w.pos.h===8));assert.throws(()=>ipc.layout(d.id,'x'),/раскладка/);
@@ -251,12 +251,25 @@ async function sources(root){
     await assert.rejects(ipc.cardAction(sd.id,w.id,JSON.stringify(['https://x.atlassian.net','BW-404']),'execute'),/Карточка устарела/);
     ipc.remove(sd.id);
    }finally{jiraResult.perform=realPerform;}}
+  // The dashboard's own chat: a topic bound to it; requests there add, remove and rename widgets.
+  {const {topicId}=ipc.chat(d.id);const chat=dialogue.state.topics.find(t=>t.id===topicId);assert.equal(chat.dashboardId,d.id);assert.equal(ipc.chat(d.id).topicId,topicId,'one chat per dashboard');
+   const was=dialogue.state.activeId;dialogue.state.activeId=topicId;
+   const before=ipc.peek(d.id).widgets.length;
+   let r=feature.dashboards.turn('добавь новые крэши за неделю');assert.match(r.text,/^Добавил: Новые крэши за неделю/);assert.equal(ipc.peek(d.id).widgets.length,before+1);
+   r=feature.dashboards.turn('убери новые крэши');assert.match(r.text,/^Убрал: «Новые крэши за неделю»/);assert.equal(ipc.peek(d.id).widgets.length,before);
+   assert.match(feature.dashboards.turn('убери погоду').text,/нет виджета про «погоду»/);
+   r=feature.dashboards.turn('переименуй в Релиз 3');assert.equal(ipc.peek(d.id).title,'Релиз 3');assert.equal(chat.title,'Релиз 3');ipc.rename(d.id,'Релиз');
+   assert.equal(feature.dashboards.turn('что там с багами?'),null,'other questions go on as usual');
+   dialogue.state.activeId=was;}
+  // Opening a dashboard no longer pulls new cards from the chat it was made from.
+  topic.messages.push({role:'user',text:'ещё крэши',at:30},{role:'assistant',text:'1',extensionData:{crashCard:{}},at:31});
+  assert.equal(ipc.get(d.id).widgets.length,ipc.peek(d.id).widgets.length,'no sync with the chat');
   // Share: the definition goes to .petya/dashboards, the snapshot stays personal; the start screen follows.
   const out=ipc.share(d.id,0);
   const file=path.join(repo,'.petya','dashboards','relize.json');
   assert.equal(out.file,path.join('.petya','dashboards',path.basename(out.file)));
   const written=JSON.parse(fs.readFileSync(path.join(repo,out.file),'utf8'));
-  assert.equal(written.widgets.length,3);assert(written.widgets.every(w=>w.source.kind!=='snapshot'&&!('data' in w)));assert.equal(out.kept,1);
+  assert.equal(written.widgets.length,2);assert(written.widgets.every(w=>w.source.kind!=='snapshot'&&!('data' in w)));assert.equal(out.kept,1);
   const sharedRow=ipc.list('p1').find(x=>x.shared);assert.equal(sharedRow.id,out.id);assert.equal(sharedRow.start,true,'the start screen moves to the shared copy');
   assert.equal(ipc.get(out.id).widgets[0].data?.crashCard?.totals?.issues,1,'cached data moves with it');
   ipc.rename(out.id,'Релиз BW');assert.equal(JSON.parse(fs.readFileSync(path.join(repo,out.file),'utf8')).title,'Релиз BW','edits of a shared dashboard go to its file');

@@ -191,7 +191,7 @@ function setup(s){
   }
   function fromChat(topicId){
     const topic=s.dialogue.state.topics.find(t=>t.id===topicId);if(!topic)throw Error('Чат не найден.');
-    const existing=state().dashboards.find(d=>d.fromChat===topicId);if(existing){sync(existing);return view(find(existing.id));}
+    const existing=state().dashboards.find(d=>d.fromChat===topicId);if(existing)return view(find(existing.id));
     const d=model.dashboard({title:topic.title||'Дашборд',projectId:topic.projectId||'general',fromChat:topicId,synced:0,widgets:[]});
     topic.messages.forEach((m,i)=>{if(hasCard(m))try{add(d,fromMessage(topic,i));}catch(e){if(process.env.DASH_DEBUG)console.error(e);}});
     if(!d.widgets.length)throw Error('В этом чате пока нет карточек с данными: спросите Петю про задачи, крэши, отзывы или сборки — и сделайте дашборд снова.');
@@ -316,9 +316,52 @@ function setup(s){
   // «Собери дашборд: …». What an added app shows becomes a widget; an app that would show it and needs nothing
   // connected is added right away; for one that needs a connection the reply says which (and the offer card brings
   // it); for what no app shows Petya asks for a page and reads it in the chat browser, where the person signs in.
+  // The dashboard's own chat: a topic bound to it (topic.dashboardId), opened beside the dashboard. Requests there
+  // change the dashboard — «добавь крэши за неделю», «убери задачи», «переименуй в Релиз» — everything else is an
+  // ordinary chat answer whose cards can be pinned.
+  function chatFor(id){
+    const d=find(id),topics=s.dialogue.state.topics;
+    let topic=topics.find(t=>t.dashboardId===id&&!t.archived);
+    if(!topic){
+      topic={id:require('node:crypto').randomUUID(),projectId:d.projectId,title:d.title,kind:'chat',dashboardId:id,at:Date.now(),
+        messages:[{role:'assistant',text:'Это чат дашборда «'+d.title+'». Напишите, что добавить («добавь крэши за неделю»), что убрать («убери задачи») или как переименовать — и спрашивайте о данных на виджетах.',at:Date.now(),by:'Дашборды'}]};
+      topics.push(topic);s.dialogue.persist();
+    }
+    return {topicId:topic.id,dashboardId:id};
+  }
+  const ADD=/^(?:петя[,\s]+)?(?:добавь|добавить|покажи|выведи|поставь)(?:\s+(?:на\s+дашборд|сюда|ещё|еще))?\s*[:,]?\s+(.+?)\s*[.!]?$/iu;
+  const DROP=/^(?:петя[,\s]+)?(?:убери|удали|скрой|сними)(?:\s+(?:с\s+дашборда|отсюда))?\s*[:,]?\s+(.+?)\s*[.!]?$/iu;
+  const RENAME=/^(?:петя[,\s]+)?(?:переименуй|назови)(?:\s+(?:дашборд|его))?(?:\s+в)?\s*[:,]?\s+[«"]?(.+?)[»"]?\s*[.!]?$/iu;
+  function dashboardChatTurn(command,topic){
+    const d=state().dashboards.find(x=>x.id===topic.dashboardId)||null;
+    const reply=text=>{s.dialogue.rememberAction(command,text);const t=s.dialogue.active();return {handled:true,text,topicId:t.id,topicTitle:t.title,messages:t.messages,dashboard:d?{id:d.id,title:d.title}:undefined};};
+    if(!d)return reply('Этого дашборда больше нет.');
+    let m;
+    if((m=RENAME.exec(command))){const title=m[1].trim().slice(0,model.LIMIT.title);if(!title)return null;d.title=title;commit(d);topic.title=title;send({id:d.id,changed:true});return reply('Переименовал дашборд в «'+title+'».');}
+    if((m=DROP.exec(command))){
+      const needle=m[1].trim().toLocaleLowerCase();
+      const hits=d.widgets.filter(w=>w.title.toLocaleLowerCase().includes(needle)||(w.source.command||w.source.query||'').toLocaleLowerCase().includes(needle));
+      if(!hits.length)return reply('На дашборде нет виджета про «'+m[1].trim()+'». Сейчас здесь: '+(d.widgets.map(w=>w.title).join(', ')||'пусто')+'.');
+      d.widgets=d.widgets.filter(w=>!hits.includes(w));commit(d);send({id:d.id,changed:true});
+      return reply('Убрал: '+hits.map(w=>'«'+w.title+'»').join(', ')+'.');
+    }
+    if((m=ADD.exec(command))||model.wantsDashboard(command)){
+      const parts=m?model.phrases('собери дашборд: '+m[1]).parts:model.phrases(command).parts;
+      if(!parts.length)return null;
+      const added=[],missed=[];
+      for(const part of parts){const w=widgetFor(part,d.projectId);if(w){add(d,w);added.push(w.title);}else missed.push(part);}
+      let apps=[...new Map(missed.map(addable).filter(Boolean).map(a=>[a.id,a])).values()];
+      if(apps.length){apps=enable(apps);for(const part of [...missed]){const w=widgetFor(part,d.projectId);if(w){add(d,w);added.push(w.title);missed.splice(missed.indexOf(part),1);}}}
+      if(added.length){commit(d);send({id:d.id,changed:true});refresh(d.id).catch(()=>{});}
+      const why=missed.map(x=>{const h=advise(x);return '«'+x+'»'+(h?' — '+h:'');}).join('; ');
+      return reply((added.length?'Добавил: '+added.join(', ')+'.':'Ничего не добавил.')+(apps.length?' Подключил '+apps.map(a=>'«'+a.name+'»').join(', ')+'.':'')+(missed.length?' Не нашёл источника для '+why+'.':''));
+    }
+    return null;
+  }
   function turn(command){
-    if(!model.wantsDashboard(command))return null;
     const topic=s.dialogue.active();
+    if(topic?.dashboardId){const out=dashboardChatTurn(command,topic);if(out)return out;}
+    if(!model.wantsDashboard(command))return null;
     const projectId=topic?.projectId||s.dialogue.state.activeProjectId||'general';
     let composed;
     try{composed=compose(command,projectId);}catch(e){s.dialogue.rememberAction(command,e.message);const t=s.dialogue.active();return {handled:true,text:e.message,topicId:t.id,topicTitle:t.title,messages:t.messages};}
@@ -363,13 +406,14 @@ function setup(s){
   }
   const ipc={
     list:(projectId='')=>all(projectId||'').map(summary),
-    get:id=>{const d=sync(find(id));refresh(d.id).catch(()=>{});return view(find(d.id));},
+    get:id=>{const d=find(id);refresh(d.id).catch(()=>{});return view(d);},
     peek:id=>view(find(id)),
     listForChat:topicId=>{const t=s.dialogue.state.topics.find(x=>x.id===topicId);return all(t?.projectId||s.dialogue.state.activeProjectId||'general').map(summary);},
     watch:(id,on=true)=>watch(id,!!on),
     popout:id=>{const d=find(id);windows().open(d.id,d.title);return true;},
     refresh:(id,widgetId='')=>refresh(id,widgetId,true),
     cardAction:(id,widgetId,key,actionId,args)=>cardAction(String(id),String(widgetId),String(key),String(actionId),args),
+    chat:id=>chatFor(String(id)),
     fromChat:topicId=>fromChat(String(topicId||'')),
     chatDashboard:topicId=>{const d=state().dashboards.find(x=>x.fromChat===topicId);return d?summary(d):null;},
     pin:(dashboardId,topicId,index)=>{
@@ -410,7 +454,7 @@ function setup(s){
       for(const [k,v] of Object.entries(state().dashboardStart))if(v===id)delete state().dashboardStart[k];
       for(const w of d.widgets)loadCache().delete(cacheKey(d,w));storeCache();save();changed();return true;},
     start:(projectId,id)=>{const st=state();if(id){const d=find(id);if(d.projectId!==projectId)throw Error('Дашборд из другого проекта.');st.dashboardStart[projectId]=id;}else delete st.dashboardStart[projectId];save();return true;},
-    startOf:projectId=>{const id=state().dashboardStart[projectId||s.dialogue.state.activeProjectId];if(!id)return null;try{const d=sync(find(id));refresh(d.id).catch(()=>{});return view(find(d.id));}catch{delete state().dashboardStart[projectId];return null;}},
+    startOf:projectId=>{const id=state().dashboardStart[projectId||s.dialogue.state.activeProjectId];if(!id)return null;try{const d=find(id);refresh(d.id).catch(()=>{});return view(find(d.id));}catch{delete state().dashboardStart[projectId];return null;}},
     // Share: the definition goes to the project's git; snapshots (someone's data) stay in a personal dashboard.
     folders:projectId=>folders(projectId).map((dir,index)=>({index,name:path.basename(dir)})),
     share:(id,index)=>{const d=state().dashboards.find(x=>x.id===id);if(!d)throw Error('Поделиться можно личным дашбордом.');
