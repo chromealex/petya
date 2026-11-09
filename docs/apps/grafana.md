@@ -140,6 +140,15 @@ named platform/os or version/build when it has that option; otherwise a note say
 «Метрики игры»'s own «подключите источник» question still names only AppMetrica (that text lives in the metrics
 app, not here).
 
+## Dashboards
+
+`dashboard` in `feature.cjs`: a dashboard named with «дашборд»/Grafana («дашборд лиг из графаны»), a pasted dashboard
+or panel link, or the list become widgets (full width); writes and short links are refused. Ready widgets are the
+dashboards Grafana listed in the last five minutes (the cached list, no extra request), each as its link.
+`dashboard.names` and the metrics source's `names` are «Графана» plus the labels of the address's host without the
+top-level domain and service words (`client.names`: «dashboards.wombyte.net» → «wombyte», «acme.grafana.net» →
+«acme»), so a dashboard request may say «(из wombyte)». See [dashboards.md](../dashboards.md).
+
 ## Verified
 
 All with a local fake Grafana (`tests/grafana-fake.cjs`, served under `/grafana` to check the path prefix), no real

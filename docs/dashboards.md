@@ -10,7 +10,20 @@ meetings, charts. A widget keeps its **source**, not only its data, so it refres
 - **From one card**: «•••» → «В дашборд…» on an answer, then a dashboard of the project or «Новый дашборд».
   The card shows at once; its source refreshes it afterwards.
 - **By description**: «Собери дашборд «Релиз»: баги спринта, крэши за неделю, отзывы в сторах». Each phrase goes
-  to the first source that accepts it; phrases without a source are named in the reply.
+  to the first source that accepts it:
+  - every phrase is implicitly «покажи …»: a bare noun («краши», «ANR», «отзывы», «сборки») that no source takes as
+    written is tried as «покажи краши», and the widget keeps the accepted form as its command;
+  - a source hint — «основные метрики (из wombyte)», «DAU из графаны», «дашборд лиг (из wombyte)» — is matched
+    against the names of the apps and of their own sources (an app's `dashboard.names` / `dashboard.sources`;
+    Grafana answers to the host labels of its address, «dashboards.wombyte.net» → «wombyte»). A hint naming one of
+    an app's sources selects it (`source.selected`: «Метрики игры» read only from Grafana); a hint naming the app
+    passes the phrase to it as «… из Grafana». A name in parentheses is always a hint; a trailing «из X» / «в X» only
+    when X is a known name, so «отзывы в сторах» stays as it is.
+  - A phrase nothing connected takes is explained concretely: the app that would take it (added or not, connected or
+    not — `dashboard.accepts` of every app, then Jira, providers and the apps' offers) and what to do: «для «ANR»
+    подключите «Google Play Console» (Подключения → «Google Play Console»)», «для «краши» добавьте «Крэши»». When
+    nothing could be built, the shared offer card adds the apps and repeats the request. Only a phrase no app
+    recognises gets the generic «Не нашёл источников…».
 - **On the dashboard**: «Добавить виджет» — a phrase, or one of the ready widgets of connected apps.
 
 - **Example**: «Пример аналитики» (on the start screen of a project without dashboards, in «Добавить виджет» and on
@@ -41,10 +54,29 @@ a trend sparkline). An analytics extension answers with `extensionData.charts` i
 
 An extension joins dashboards by exporting from its `feature.cjs`:
 ```js
-dashboard: { accepts: command => /* read-only requests only */, size: 'm', widgets: [{ title, command }] }
+dashboard: {
+  accepts: command => /* read-only requests only */,
+  size: 'm',                                   // optional: 's' | 'm' | 'l' | 'w' | 'auto'
+  widgets: [{ title, command }],               // or (services) => [...] for widgets that depend on the connection
+  ready: settings => bool,                     // optional: connected; otherwise its phrases are advice, not widgets
+  connect: (settings, phrase) => ({ names, where, offers }),  // optional: what to connect for this phrase
+  names: settings => [string],                 // optional: other names a source hint may use for the app
+  sources: settings => [{ id, name, names, ready, extension }], // optional: the app's own sources a hint selects
+  load: async (services, command, { selected, topic }) => reply, // optional: instead of `turn`
+}
 ```
 `accepts` must refuse anything that changes data («перезапусти сборку», «создай встречу»): the dashboard repeats
-the request on its own. `widgets` are offered in «Добавить виджет».
+the request on its own. `widgets` are offered in «Добавить виджет». `load` is for apps whose chat answer comes from
+elsewhere or that read with a chosen source: Google Play has no chat `turn` (ANR is Petya's own `anr` reader) and
+its `load` runs that reader and returns the same `playVitals` card data (`result.cjs`), so the widget is the chat's
+ANR card; «Метрики игры» `load` reads only the `selected` source. Widgets render extension data with the chat's own
+card renderers, so a widget looks like the card in the chat.
+
+| App | Phrases | Ready widgets |
+|---|---|---|
+| Метрики игры | «основные метрики», «метрики проекта», DAU, выручка, ретеншн, ARPDAU…; a hint selects the source | «Основные метрики», «DAU за неделю», «Выручка за месяц» |
+| Grafana | «дашборд X из графаны», a dashboard named with «дашборд»/Grafana, a pasted dashboard or panel link, the list | the dashboards Grafana listed in the last five minutes |
+| Google Play | «ANR», «ANR за неделю», «зависания» | «ANR за неделю» |
 
 Each widget refreshes on its interval (manual, 5 min … once a day, default 15 min) while its dashboard is open,
 is the project's start dashboard, or is in a small window; at most two at a time. Data is cached in

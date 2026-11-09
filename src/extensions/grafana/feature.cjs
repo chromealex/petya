@@ -149,5 +149,24 @@ async function turn(s,command){
  try{return await grafanaTurn(s,text,ask);}
  catch(e){return kit.reply(s,command,{by:BY,error:!e.question,question:!!e.question,text:(e.question?'':BY+' · ')+(e.message||'Grafana недоступна.')});}
 }
-module.exports={name:'grafana',defaults:{['extension_'+ID]:'false',grafanaUrl:'',grafanaToken:'',grafanaFolder:'',grafanaRender:'false',grafanaCurrency:'USD',grafanaMetricMap:'{}'},
+// Dashboards (src/features/dashboards.cjs): a Grafana dashboard by name («дашборд лиг из графаны»), a pasted
+// dashboard or panel link, or the list. Petya only reads Grafana, so every such request can be a widget; writes and
+// short links are refused. Ready widgets are the dashboards Grafana listed in the last five minutes (no extra request).
+const dashboard={
+ accepts:text=>{
+  const t=String(text||'').trim();if(query.excluded(t))return false;
+  const a=query.parse(t);
+  return !a.write&&!a.shortLink&&(!!a.link||(a.named||a.dash)&&(a.words.length>0||a.intent==='list'));
+ },
+ size:'w',
+ ready:settings=>client.connected(settings),
+ names:settings=>['Графана',...client.names(settings.grafanaUrl)],
+ connect:()=>({names:['Grafana'],where:'Настройки → «Grafana»: адрес и токен сервисного аккаунта',offers:['grafana']}),
+ widgets:s=>{
+  let c;try{c=client.config(s);}catch{return [];}
+  const hit=lists.get(c.url+'\n'+c.token.slice(-6));if(!hit||Date.now()-hit.at>=5*60000)return [];
+  return hit.list.slice(0,8).map(d=>({title:d.title,command:absolute(c.url,d.url)||links.dashboard(c.url,{uid:d.uid})}));
+ }
+};
+module.exports={name:'grafana',dashboard,defaults:{['extension_'+ID]:'false',grafanaUrl:'',grafanaToken:'',grafanaFolder:'',grafanaRender:'false',grafanaCurrency:'USD',grafanaMetricMap:'{}'},
  secrets:['grafanaToken'],validate,setup,turn,grafanaTurn,summary,reset:()=>lists.clear()};

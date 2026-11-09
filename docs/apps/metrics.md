@@ -87,6 +87,16 @@ Offers: data questions offer «Метрики игры»; «подключи App
   no-source question and the AppMetrica settings card; screenshots `petya-metrics*.png`,
   `petya-appmetrica-settings.png` in the temp folder.
 
+## Dashboards
+
+`dashboard` in `feature.cjs`: every request here only reads, so any phrase `query.about` accepts («основные метрики»,
+«метрики проекта», DAU, выручка, ретеншн, ARPDAU…) is a widget (full width; ready widgets «Основные метрики», «DAU за
+неделю», «Выручка за месяц»). `dashboard.sources` lists the metrics sources with the names a request may call them
+by (a source's own `names(settings)`: Grafana gives the labels of its host, «dashboards.wombyte.net» → «wombyte»), so
+«основные метрики проекта (из wombyte)» reads only Grafana (`dashboard.load` with `selected`). The same names work in
+the chat: «DAU из wombyte» picks Grafana (`query.parse(text, {sources})`). Not ready → the dashboard reply says which
+source to connect (`dashboard.connect`).
+
 ## Verified
 
 Everything with stubs only: no AppMetrica credentials were available. To verify live: token scopes, the

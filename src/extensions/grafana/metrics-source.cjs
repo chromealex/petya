@@ -61,6 +61,8 @@ module.exports={
  id:'grafana',name:'Grafana',
  ready:settings=>settings.extension_grafana==='true'&&client.connected(settings)&&['dau','new','revenue','arpdau'].some(k=>mapping.read(settings)[k]),
  apps:()=>[],
+ // «DAU из wombyte»: the connected Grafana answers to its host's name (dashboards.wombyte.net → wombyte).
+ names:settings=>['Графана',...client.names(settings.grafanaUrl)],
  async fetch(s,q){
   const map=mapping.read(s.settings),ctx=context(s),series=[],unavailable=[];
   const want=q.metrics||['dau','new','revenue'];

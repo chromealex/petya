@@ -2,6 +2,7 @@
  "language": "en",
  "name": "English",
  "untranslated": [
+  "Графана",
   "Андрюх",
   "Андрюша",
   "Ань",
@@ -3063,7 +3064,7 @@
   "Ошибка:": "Error:",
   "Ошибки и ANR приложений": "App errors and ANRs",
   "ПАМЯТЬ И ФОНОВАЯ РАБОТА": "MEMORY AND BACKGROUND WORK",
-  "ПЕТЯ / 0.12.4": "PETYA / 0.12.4",
+  "ПЕТЯ / 0.12.5": "PETYA / 0.12.5",
   "ПОНИМАНИЕ / НЕОБЯЗАТЕЛЬНО": "UNDERSTANDING / OPTIONAL",
   "ПОСЛЕДНЯЯ РЕПЛИКА": "LAST UTTERANCE",
   "ПРОВЕРКА ЗАДАЧИ": "TASK CHECK",
@@ -13489,6 +13490,19 @@
   "Не выбрана — черновики по шаблону": "Not chosen — drafts from a template",
   "Отвечает по умолчанию": "Answers by default",
   "Сначала дождитесь окончания загрузки.": "Wait for the download to finish first.",
-  "Такой версии": "No version"
+  "Такой версии": "No version",
+  "ANR за неделю": "ANR this week",
+  "Google Play не подключён: Подключения → «Google Play Console».": "Google Play is not connected: Connections → “Google Play Console”.",
+  "» не подключён к «Метрикам игры».": "” is not connected to “Game metrics”.",
+  "В Google Play несколько приложений — назовите одно в запросе виджета:": "Google Play has several apps — name one in the widget's request:",
+  "Выручка за месяц": "Revenue this month",
+  "Настройки → «Grafana»: адрес и токен сервисного аккаунта": "Settings → “Grafana”: address and service account token",
+  "Основные метрики": "Key metrics",
+  "Откройте его настройки": "Open its settings",
+  "Подключения → «Google Play Console»": "Connections → “Google Play Console”",
+  "Расширение «Метрики игры» не добавлено.": "The “Game metrics” extension is not added.",
+  "выручка за месяц": "revenue this month",
+  "основные метрики за неделю": "key metrics this week",
+  "— потом повторите вопрос.": "— then ask again."
  }
 }

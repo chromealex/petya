@@ -46,3 +46,11 @@
 .metrics-filter .kit-chip{min-height:22px;font-size:11.5px;padding:1px 9px}
 .metrics-filter .kit-chip[aria-pressed="true"]{color:var(--ink);border-color:#d0f59680;background:#d0f5960f}
 @media (max-width:560px){.metrics-tiles{grid-template-columns:repeat(2,1fr)}}
+/* A full-width dashboard widget (src/ui/dashboards.css, container «dash»): the KPI tiles beside the chart, so the
+   chart keeps its proportions and its labels their size instead of stretching across the whole row. */
+@container dash (min-width:900px){
+ .metrics-block{display:grid;grid-template-columns:minmax(240px,32%) minmax(0,1fr);gap:12px 20px;align-items:start}
+ .metrics-block>*{grid-column:1/-1}
+ .metrics-block>.metrics-tiles{grid-column:1;grid-row:1;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .metrics-block>.metrics-chart-area{grid-column:2;grid-row:1}
+}

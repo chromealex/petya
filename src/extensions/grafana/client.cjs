@@ -29,6 +29,15 @@ function config(s){
  let url='';try{url=base(st.grafanaUrl);}catch{url='';}
  return {url,token:String(st.grafanaToken||'').trim(),folder:String(st.grafanaFolder||'').trim(),render:st.grafanaRender==='true'};
 }
+// The names a person may call this Grafana by, from its host: «dashboards.wombyte.net» → «wombyte»,
+// «acme.grafana.net» → «acme». The top-level domain and service words (grafana, dashboards, monitoring…) are not names.
+const SERVICE=new Set(['www','grafana','dashboards','dashboard','dash','dashes','monitoring','monitor','metrics','stats','analytics','charts','graphs','observability','cloud','app','apps','internal','local','localhost']);
+function names(value){
+ let host='';try{host=new URL(base(value)).hostname.toLowerCase();}catch{return [];}
+ if(!host||/^[\d.:[\]]+$/.test(host))return [];
+ const labels=host.split('.');if(labels.length>1)labels.pop();
+ return [...new Set(labels.filter(l=>l.length>=3&&!SERVICE.has(l)&&!/^\d+$/.test(l)))];
+}
 const connected=settings=>{try{return !!base(settings.grafanaUrl)&&!!String(settings.grafanaToken||'').trim();}catch{return false;}};
 
 // Errors in words: missing access is told apart from a wrong address, a timeout and a refused query.
@@ -117,4 +126,4 @@ async function render(s,{uid,slug,panelId,from,to,vars={},width=600,height=280,o
  return 'data:image/png;base64,'+buf.toString('base64');
 }
 
-module.exports={TIMEOUT,base,config,connected,explain,api,test,search,dashboard,libraryPanel,frontendSettings,query,render};
+module.exports={TIMEOUT,base,config,connected,names,explain,api,test,search,dashboard,libraryPanel,frontendSettings,query,render};

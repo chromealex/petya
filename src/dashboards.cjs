@@ -1,6 +1,7 @@
 // Dashboards: a grid of widgets built from chat cards. A widget keeps its source (how to get fresh data), not
 // only the data, so it can refresh by itself:
-//   {kind:'extension', extension, command}   — a read-only request an extension accepts (`dashboard.accepts`)
+//   {kind:'extension', extension, command, selected?} — a read-only request an extension accepts (`dashboard.accepts`);
+//                                             `selected`: one of the app's own sources («(из wombyte)» → Grafana)
 //   {kind:'provider', provider, query, selected} — a chat-reply provider's read (e.g. Jira charts)
 //   {kind:'jira', jql}                        — Jira issues by JQL (src/extensions/jira/dashboard.cjs)
 //   {kind:'snapshot'}                         — a card as it was; never refreshed
@@ -18,7 +19,7 @@ const text=(value,max)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max
 
 function source(value){
   const kind=KINDS.includes(value?.kind)?value.kind:'snapshot';
-  if(kind==='extension'){const extension=text(value.extension,64),command=text(value.command,LIMIT.command);if(!/^[a-z0-9-]+$/.test(extension)||!command)throw Error('Источник виджета указан неверно.');return {kind,extension,command};}
+  if(kind==='extension'){const extension=text(value.extension,64),command=text(value.command,LIMIT.command);if(!/^[a-z0-9-]+$/.test(extension)||!command)throw Error('Источник виджета указан неверно.');const selected=text(value.selected,64);return {kind,extension,command,...(/^[\w-]+$/.test(selected)?{selected}:{})};}
   if(kind==='provider'){const provider=text(value.provider,64),query=text(value.query,LIMIT.command);if(!/^[a-z0-9-]+$/.test(provider)||!query)throw Error('Источник виджета указан неверно.');return {kind,provider,query,...(value.selected?{selected:text(value.selected,100)}:{})};}
   if(kind==='jira'){const jql=text(value.jql,LIMIT.jql);if(!jql)throw Error('Укажите запрос JQL.');return {kind,jql};}
   return {kind};
@@ -79,5 +80,23 @@ function phrases(description){
   const parts=rest.split(/\s*(?:[;,\n]|\s+и\s+(?=\S)|\s+а также\s+|\s*\+\s*)\s*/iu).map(p=>p.replace(/^(?:ещё|еще|плюс)\s+/iu,'').trim()).filter(p=>p.length>=3).slice(0,LIMIT.widgets);
   return {title,parts};
 }
+// «основные метрики (из wombyte)», «DAU из wombyte»: where the data should come from. A name in parentheses is always
+// a hint; a trailing «из X» / «в X» only when the caller recognises X (`known`), so «отзывы в сторах» stays as it is.
+function sourceHint(phrase,known=()=>false){
+ const t=String(phrase||'').trim();
+ const paren=t.match(/^(.*?\S)\s*\(\s*(?:(?:из|в|во|с|от|по)\s+)?([^()]{2,40}?)\s*\)\s*$/iu);
+ if(paren)return {body:paren[1].trim(),name:paren[2].trim(),paren:true};
+ const tail=t.match(/^(.*?\S)\s+(?:из|в|во)\s+([\p{L}\p{N}][\p{L}\p{N}._-]{1,39})\s*$/iu);
+ if(tail&&known(tail[2]))return {body:tail[1].trim(),name:tail[2].trim(),paren:false};
+ return null;
+}
+// A name mentioned as a word, with Russian case endings («из графаны» names «Графана»; «wombyte» names «wombyte»).
+const norm=v=>String(v||'').toLowerCase().replace(/ё/g,'е').trim();
+function mentions(text,name){
+ const n=norm(name);if(n.length<2)return false;
+ const stem=n.length>=6&&/[а-я]$/.test(n)?n.slice(0,-1):n;
+ const esc=stem.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+ return new RegExp('(?:^|[^\\p{L}\\p{N}_])'+esc+(stem===n?'':'\\p{L}{0,3}')+'(?![\\p{L}\\p{N}_])','iu').test(norm(text));
+}
 const wantsDashboard=command=>/^(?:петя[,!\s]+)?(?:пожалуйста[,\s]+)?(?:собери|сделай|создай|построй|заведи|сформируй)\s+(?:мне\s+|нам\s+)?(?:нов\p{L}*\s+)?(?:дашборд|дэшборд|dashboard)/iu.test(String(command||'').trim());
-module.exports={COLS,position,SIZES,EVERY,KINDS,LIMIT,DIR,source,widget,dashboard,shareable,slug,readShared,writeShared,phrases,wantsDashboard};
+module.exports={COLS,position,SIZES,EVERY,KINDS,LIMIT,DIR,source,widget,dashboard,shareable,slug,readShared,writeShared,phrases,wantsDashboard,sourceHint,mentions};

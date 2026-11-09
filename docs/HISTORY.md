@@ -8,6 +8,15 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.12.5 — dashboards from metrics, Grafana and ANR
+
+- «Собери дашборд: основные метрики проекта (из wombyte), краши и ANR» builds three widgets: game metrics read from the Grafana at dashboards.wombyte.net, crashes and the Google Play ANR card.
+- Short phrases work: «краши», «отзывы», «сборки», «ANR» are read as «покажи …».
+- «(из wombyte)», «из графаны»: a source named in the phrase picks that source; Grafana is known by the name in its address.
+- New widgets: «Основные метрики», «DAU за неделю», «Выручка за месяц», «ANR за неделю», and the Grafana dashboards you opened recently.
+- When a phrase has no source, Petya names the app to add or connect («для «ANR» подключите «Google Play Console»») and offers to add it; the generic hint stays only for phrases no app knows.
+- In the chat «DAU из wombyte» reads the metrics from that Grafana.
+
 ## 0.12.4 — a macOS download in every release
 
 - The Release workflow builds Petya for Apple Silicon Macs on GitHub as well: the speech runtime (whisper.cpp with Metal and the base model), every binary signed with the Developer ID and the hardened runtime, `Petya.dmg` notarized by Apple and stapled. It is attached to the release next to `Petya-Setup.exe`.
