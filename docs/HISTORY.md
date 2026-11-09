@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.16.5 — choosing the Google Play app: search and a list
+
+- The ANR widget's question is no longer an error box with a wall of chips: a calm prompt, a search field («bunker» finds Bunker Wars by name or package) and a scrolling list of names with the package beside each. All apps of the account are there (it showed only the first 40), and «Ничего не нашлось» says to check the account's access in Play Console.
+
 ## 0.16.4 — the ANR widget asks which Google Play app
 
 - With several apps in Google Play the ANR widget shows them as buttons right on the card («Hearts: Classic Cards», «Rummy Gin»…) instead of asking to retype the request; the choice stays with the widget («ANR · Hearts: Classic Cards») and it reads that app at once.

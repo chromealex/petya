@@ -145,6 +145,13 @@
 .dash-widget.refreshing .dash-widget-spin{opacity:1;animation:dash-spin .8s linear infinite}
 .dash-widget.refreshing:hover .dash-widget-spin,.dash-widget.refreshing:focus-within .dash-widget-spin{opacity:0}
 @media (prefers-reduced-motion:reduce){.dash-widget.refreshing .dash-widget-spin{animation-duration:2.4s}}
-.dash-choice{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 8px}
-.dash-choice-option{min-height:30px;padding:4px 12px;border-radius:999px;font-size:13px;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--ink)}
-.dash-choice-option:hover{background:color-mix(in srgb,var(--accent) 20%,transparent)}
+/* The card's own question (which Google Play app): a calm prompt, a search field and a list of names, not an error. */
+.dash-choice{display:grid;gap:8px;padding:2px 0 8px;min-height:0}
+.dash-choice-ask{margin:0;font-size:13px;color:var(--muted)}
+.dash-choice-find{width:100%;min-height:32px}
+.dash-choice-list{display:grid;gap:2px;overflow:auto;max-height:260px}
+.dash-choice-option{display:flex;align-items:baseline;gap:8px;width:100%;min-height:32px;padding:6px 10px;border:0;border-radius:8px;background:transparent;color:var(--ink);text-align:left;font-size:13px}
+.dash-choice-option:hover,.dash-choice-option:focus-visible{background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.dash-choice-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.dash-choice-id{flex:1;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-choice-note{margin:4px 0 0;font-size:12px;color:var(--muted)}

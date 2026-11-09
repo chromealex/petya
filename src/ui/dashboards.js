@@ -55,12 +55,20 @@
    tools.append(more);head.append(tools);
   }
   const body=el('div','dash-widget-body');
-  if(w.error){const err=el('p','dash-widget-error');if(kit()?.linkText)kit().linkText(err,w.error);else err.textContent=w.error;body.append(err);}
+  if(w.error&&!w.choice?.options?.length){const err=el('p','dash-widget-error');if(kit()?.linkText)kit().linkText(err,w.error);else err.textContent=w.error;body.append(err);}
   // The card's own question (which Google Play app): the options as chips; the choice stays with the widget.
-  if(w.choice?.options?.length){const box=el('div','dash-choice');
-   for(const o of w.choice.options){const b=button(o.label,'',()=>{box.querySelectorAll('button').forEach(x=>x.disabled=true);card.classList.add('refreshing');
-    const name=String(o.label).split(' · ')[0];call('widget',d.id,w.id,{selected:o.id,...(w.title.includes(name)?{}:{title:(w.title+' · '+name).slice(0,80)})}).then(paint).catch(fail);},'dash-choice-option');box.append(b);}
-   body.append(box);}
+  // Many options (a publisher's whole Google Play): a search field above them, a dozen shown at a time.
+  if(w.choice?.options?.length){const box=el('div','dash-choice'),list=el('div','dash-choice-list'),SHOWN=12;box.append(el('p','dash-choice-ask',w.error||'Выберите вариант.'));
+   const pick=o=>{box.querySelectorAll('button,input').forEach(x=>x.disabled=true);card.classList.add('refreshing');
+    const name=String(o.label).split(' · ')[0];call('widget',d.id,w.id,{selected:o.id,...(w.title.includes(name)?{}:{title:(w.title+' · '+name).slice(0,80)})}).then(paint).catch(fail);};
+   const norm=v=>String(v||'').toLocaleLowerCase().replace(/ё/g,'е');
+   const draw=(q='')=>{const words=norm(q).split(/\s+/).filter(Boolean),hits=w.choice.options.filter(o=>words.every(x=>norm(o.label+' '+o.id).includes(x)));
+    const row=o=>{const [name,...rest]=String(o.label).split(' · '),b=button('','',()=>pick(o),'dash-choice-option');b.textContent='';b.append(el('span','dash-choice-name',name));if(rest.length)b.append(el('span','dash-choice-id',rest.join(' · ')));b.title=o.label;return b;};
+    list.replaceChildren(...hits.slice(0,SHOWN).map(row));
+    if(!hits.length)list.append(el('p','dash-choice-note','Ничего не нашлось — проверьте, что у аккаунта есть доступ к приложению в Play Console.'));
+    else if(hits.length>SHOWN)list.append(el('p','dash-choice-note','Ещё '+(hits.length-SHOWN)+' — уточните поиск.'));};
+   if(w.choice.options.length>SHOWN){const find=el('input','dash-choice-find');find.type='search';find.placeholder='Найти приложение: название или пакет';find.setAttribute('aria-label','Найти приложение');find.oninput=()=>draw(find.value);box.append(find);}
+   box.append(list);draw();body.append(box);}
   card.append(head,body);
   const content=el('div');body.append(content);card.drawn=drawBody(content,w).catch(()=>{});
   if(!compact){const grip=el('span','dash-resize');grip.title='Потяните, чтобы изменить размер';grip.setAttribute('aria-hidden','true');card.append(grip);}

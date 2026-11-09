@@ -132,7 +132,7 @@ function setup(s){
         const count=Array.isArray(result.data?.jiraItems)?result.data.jiraItems.length:result.count??null;
         c.set(key,{data:result.data,text:result.text,at:Date.now(),error:'',count,choice:null});
       }catch(e){
-        const choice=e.choice&&Array.isArray(e.choice.options)?{options:e.choice.options.slice(0,40).map(o=>({id:String(o.id||'').slice(0,200),label:String(o.label||o.id||'').slice(0,120)})).filter(o=>o.id)}:null;
+        const choice=e.choice&&Array.isArray(e.choice.options)?{options:e.choice.options.slice(0,1000).map(o=>({id:String(o.id||'').slice(0,200),label:String(o.label||o.id||'').slice(0,120)})).filter(o=>o.id)}:null;
         c.set(key,{...(hit||{}),error:String(e.message||e).slice(0,300),choice,failedAt:Date.now(),at:hit?.at||0});}
       finally{clearTimeout(timer);running.delete(key);storeCache();}
       send({id:d.id,widgetId:w.id,loading:false});
