@@ -306,7 +306,6 @@ function setupHandlers() {
   };
   maintenance();
   const contextFor = id => { maintenance(); const c = snapshots.get(id); if (!c) throw new Error('Выберите контекст заново.'); return c; };
-  const jiraInsights=new (require('./extensions/jira/insights.cjs').JiraInsights)(workspace);
   const dialogueFile=path.join(dataRoot,'dialogue-memory.json');
   let dialogueState={topics:[],activeId:''};
   if(fs.existsSync(dialogueFile))dialogueState=JSON.parse(safeStorage.decryptString(Buffer.from(JSON.parse(fs.readFileSync(dialogueFile,'utf8')).encrypted,'base64')));
@@ -328,7 +327,6 @@ function setupHandlers() {
     if(topic&&dialogue.state.topics.includes(topic)){topic.messages.push({role:'user',text:command,at:Date.now()},{role:'assistant',text:result.text,at:Date.now()});topic.at=Date.now();dialogue.persist();return {handled:true,...result,topicId:topic.id,topicTitle:topic.title,messages:topic.messages};}
     return {handled:true,...result};
   });
-  const readProjectJira=(command,topic,context,kind)=>{const binding=projectMemory?.get(topic.projectMemoryId)?.jira;if(!topic.jiraProject&&binding?.site===settings.jiraUrl&&require('./extensions/jira/selection.cjs').keys(settings.jiraProjects||settings.jiraProject).includes(binding.key))topic.jiraProject=binding.key;return jiraInsights.read(command,topic,context,kind);};
   const draftAnswers=new (require('./speculative-answer.cjs').SpeculativeAnswer)();
   const answerDialogue=async(command,topic,unclear,draft=null)=>{
       if(!draft)requestProgress.report(topic.attachments?.length?'Читаю прикреплённые материалы':'Готовлю ответ по контексту разговора');
@@ -358,7 +356,8 @@ function setupHandlers() {
       const response=await request(core.localEndpoint(settings.ollamaUrl),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(routingRequest(settings.model,command,topics,activeId))});
       return parseRoute(response,topics)||{unclear:true};
     },
-    readers:{tasks:(command,topic,context)=>readProjectJira(command,topic,context,'tasks'),bugs:(command,topic,context)=>readProjectJira(command,topic,context,'bugs')},
+    // Petya's own «tasks» reader (Jira, not moved yet); apps' chat kinds (Jira's bugs) read through src/features/dialogue-kinds.cjs.
+    readers:{tasks:(command,topic,context)=>require('./extensions/jira/read.cjs').read(services,command,topic,context,'tasks')},
     answer:answerDialogue
   });
   const reviewFile=path.join(dataRoot,'review-memory.json');
@@ -380,7 +379,7 @@ function setupHandlers() {
 
   let formatReader;
   const {attachments,allowedMedia,importMedia}=require('./attachments-setup.cjs')({get app(){return app;},get core(){return core;},get dialogue(){return dialogue;},get formatReader(){return formatReader;},get fs(){return fs;},get handle(){return handle;},get memory(){return memory;},get modules(){return modules;},get path(){return path;},get request(){return request;},get serviceOAuth(){return serviceOAuth;},get settings(){return settings;},get speech(){return speech;},get telegramSource(){return telegramSource;},get win(){return win;}});
-  const {instructionSkills,inspectAttachments,executeSkill,taskDuplicates,workSkills}=require('./skills-setup.cjs')({get analyzeMaterials(){return analyzeMaterials;},get attachments(){return attachments;},get companies(){return companies;},get companyId(){return companyId;},get dataRoot(){return dataRoot;},get dialogue(){return dialogue;},get fs(){return fs;},get handle(){return handle;},get jiraInsights(){return jiraInsights;},get memory(){return memory;},get path(){return path;},get randomUUID(){return randomUUID;},get request(){return request;},get reviewState(){return reviewState;},get safeStorage(){return safeStorage;},get saveReview(){return saveReview;},get settings(){return settings;},get snapshots(){return snapshots;},get teamFill(){return teamFill;},get text(){return text;},get workspace(){return workspace;}});
+  const {instructionSkills,inspectAttachments,executeSkill,taskDuplicates,workSkills}=require('./skills-setup.cjs')({get analyzeMaterials(){return analyzeMaterials;},get attachments(){return attachments;},get companies(){return companies;},get companyId(){return companyId;},get dataRoot(){return dataRoot;},get dialogue(){return dialogue;},get fs(){return fs;},get handle(){return handle;},get jiraInsights(){return require('./extensions/jira/read.cjs').insights(workspace);},get memory(){return memory;},get path(){return path;},get randomUUID(){return randomUUID;},get request(){return request;},get reviewState(){return reviewState;},get safeStorage(){return safeStorage;},get saveReview(){return saveReview;},get settings(){return settings;},get snapshots(){return snapshots;},get teamFill(){return teamFill;},get text(){return text;},get workspace(){return workspace;}});
   const browserAction=service=>{show();win.webContents.send('browser-action',{service});};
   // Sign-ins, CAPTCHAs and consent pages open in the chat's browser (src/features/chat-browser.cjs).
   const chatAttend=(options)=>{const id=dialogue.active()?.id;const host=services.chatBrowser;return !!(id&&host&&!smoke)&&host.attend(id,options);};

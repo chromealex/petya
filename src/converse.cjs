@@ -34,7 +34,6 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
       if(fix?.refine){d.rememberAction(original,'Понял, переделываю: «'+fix.from+'» — '+fix.refine+'.');return redo(fix.from+'\nУточнение: '+fix.refine);}
       if(fix?.from&&fix.to){ctx.learning.putRule(fix);d.rememberAction(original,'Запомнил: «'+fix.from+'» — это «'+fix.to+'»'+(fix.scope?' в проекте '+fix.scope:'')+'. Делаю.');return redo(fix.to);}
     }
-    const people=await ctx.jiraSlackPeople?.turn(original);if(people)return people;
 
     // A complex request for agents: subtasks run as parallel background chats of this project.
     // Explicit («раздай агентам») runs at once; a request over several areas gets an offer first
@@ -244,12 +243,7 @@ module.exports=ctx=>{let restating=0;const route=(async(command,choice,backgroun
         // An app's own question about its choices (which of its rules) stays.
         if(route?.tool==='clarify'&&!routeTools.keepsClarify(tools,route.question))route=null;
       }catch{} // Offline or malformed model output cannot trigger a tool.
-      const read=async(kind,service)=>{
-        const offer=await ctx.serviceAccess.offer('Проверь '+service+': '+value,ctx.dialogue.active());
-        return offer||ctx.dialogue.turn(value,undefined,kind);
-      };
       const routed=await semantic.dispatch(route,value,{
-        bugs:()=>read('bugs','Jira'),
         web:()=>ctx.runWeb(original,{query:value,fresh:true}),brief:()=>ctx.dailyBrief(),
         meeting:()=>ctx.meetingSummary?ctx.meetingSummary.answer(value):null,
         // Another function of Petya in other words: the restated request goes through the pipeline once; the chat

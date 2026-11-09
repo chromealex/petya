@@ -1,3 +1,4 @@
+// Jira task metrics (closed / reopened / open for you and the team), IPC taskMetrics (metrics.cjs).
 // The Jira results card stays out of the growth page: task statistics and charts are asked for in the chat
 // («Покажи график по закрытым задачам»). The card is kept hidden for the IPC it shares with the chat.
 (()=>{

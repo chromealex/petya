@@ -80,7 +80,7 @@ ChatJobs.prototype.executeFull=async function(job){
   if(job.scope!==this.scope(topic.projectId))throw Error('Настройки или компания изменились. Повторите запрос с новым контекстом.');
   if(!result||!result.handled)throw Error('Для этого запроса нужно действие. Откройте чат и повторите запрос.');
   // The answer always stays in the chat that asked: Petya never switches chats himself. When the pipeline also wrote
-  // it into another chat (an existing «Баги в Jira», a Slack log), that chat is offered with a button.
+  // it into another chat (an existing chat of the same kind, a Slack log), that chat is offered with a button.
   const elsewhere=!topic.agentOf&&result.topicId&&result.topicId!==topic.id?d.state.topics.find(t=>t.id===result.topicId):null;
   const target=topic;settle();
   if(elsewhere&&!result.chatOffer)result.chatOffer={topicId:elsewhere.id,title:elsewhere.title};

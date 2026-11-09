@@ -16,6 +16,14 @@
     [
       "issue-cards.js",
       "message-format.js"
+    ],
+    [
+      "team-field.js",
+      "team.js"
+    ],
+    [
+      "task-metrics.js",
+      "agent-board.js"
     ]
   ],
   "id": "jira",
@@ -25,6 +33,8 @@
   },
   "provides": {
     "voice-action": "voice-action.cjs",
+    "dialogue-kind": "dialogue-kind.cjs",
+    "route-tool": "route-tool.cjs",
     "search-source": "search-source.cjs",
     "task-tracker": "task-tracker.cjs",
     "release-check": "release-check.cjs"

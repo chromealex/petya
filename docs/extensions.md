@@ -92,7 +92,7 @@ module.exports={
  name:'wordCount',                                   // camelCase id; external: exactly the camelCase id
  defaults:{'extension_word-count':'false',wordCountLimit:'8'}, // its settings, all strings
  secrets:['wordCountToken'],                         // settings stored with the OS keychain (must be in defaults)
- validate(next){ /* throw Error('…') for invalid values on save */ },
+ validate(next, input, saved, internal){ /* throw Error('…') for invalid values on save */ },
  setup(services){ return {ipc:{…}}; },               // once per company; returns ipc and at most its own service
  async turn(s,command){ … },                         // a chat turn, or null
  teardown(){ … },                                    // stop timers/watchers/listeners (needed for live removal)
@@ -103,7 +103,9 @@ module.exports={
 ```
 
 `validate(next, input)` gets the merged settings and what was asked to be saved (`input`, before values are cut to
-`limits`), so a too-long value can be refused rather than cut. `publicFlags` is how a settings card shows «сохранён»
+`limits`), so a too-long value can be refused rather than cut; then the settings saved before (`saved`) and whether the
+save is Petya's own (`internal`), for keys that depend on the previous value (Jira's project selection, the site an
+Atlassian sign-in owns). `publicFlags` is how a settings card shows «сохранён»
 for a secret it never receives (Почта: `hasGmail`, Google Play: `hasGooglePlay`, Notion: `hasNotionToken`).
 
 - **`turn(s, command)` returns `null` unless the request is clearly for this app *and* `kit.installed(s, id)`.**
@@ -325,22 +327,25 @@ had (bundled apps today; the shapes are checked like the others):
 - `route-tool` (`src/features/route-tools.cjs`): a tool of the semantic tool router (`src/semantic-tools.cjs`) —
   `{id, says, order?, rule?, choices?(services), keepsClarify?(question), ready?(settings), async run(services,
   {command, original, route})}`. `says` is the tool's line in the router prompt («<id>: <says>»), placed among Petya's
-  tools by `order` (bugs 10, web 30, brief 35, meeting 50); `rule` one more sentence after the shared rules; `choices`
+  tools by `order` (web 30, brief 35, meeting 50; Jira's `bugs` is 10); `rule` one more sentence after the shared rules; `choices`
   the enabled options the model may pick (`route.recipeId`, the field the router was trained with; an unknown one comes
   back empty); `keepsClarify` keeps the router's own question about them. Example: «Почта» `mail`
-  (`src/extensions/mail/route-tool.cjs`: rules as choices, order 40), «Google Play» `anr` (order 20) — with both added the
-  prompt is the text Petya's core had.
+  (`src/extensions/mail/route-tool.cjs`: rules as choices, order 40), «Google Play» `anr` (order 20), «Jira» `bugs` (order
+  10, `src/extensions/jira/route-tool.cjs`) — with all three added the prompt is the text Petya's core had.
 - `chat-route` (`src/features/chat-routes.cjs`): `{id, order?, ready?(settings), async turn(services, command)}` tried at
   a fixed point of the request pipeline (`src/converse.cjs`: after the web search shortcut, before undo, the daily
   summary, learned commands and the tool router), so a handler that moves out of the core keeps its place; unlike
   `feature.turn`, which goes before Petya's handlers. Example: «Почта»'s mail rules (`src/extensions/mail/chat-route.cjs`).
 - `dialogue-kind` (`src/features/dialogue-kinds.cjs`): a chat subject an app reads data for, answered in the open chat
-  like Petya's bugs and tasks — `{id, title, by, label, service?, router?, routerNote?, detect?(text), read(services,
+  like Petya's own tasks — `{id, title, by, label, service?, router?, routerNote?, carry?, detect?(text), read(services,
   command, topic, context)}`: the new chat's title, the answer's signature, the retry label (saved on the message as
   `retryLabel`), the service module (connection offers in a chat of that kind), the topic router's line and note
   (`src/intent-router.cjs`), whether a request is clearly of this kind (checked where Petya's own patterns are,
   `src/dialogue.cjs` `intent`), and the reader. The chat keeps the kind for follow-ups; «Повторить» re-reads
-  (`src/features/chat-return.cjs`). Example: «Google Play» `anr` (`src/extensions/google-play/anr-kind.cjs`).
+  (`src/features/chat-return.cjs`). `carry` lists topic keys a new chat of the kind takes over from the open one (the
+  first one must be set: a project, then its version). Without the app its requests are ordinary chat and the app's
+  `offer.cjs` proposes it. Examples: «Google Play» `anr` (`src/extensions/google-play/anr-kind.cjs`), «Jira» `bugs`
+  (`src/extensions/jira/dialogue-kind.cjs`, «Проверь баги», «какие баги открыты?»).
 - `doc-source` (`src/features/doc-sources.cjs`): a documentation source of the task decomposition (`src/workspace.cjs`
   `searchDocs` / `fullDocument`) next to Confluence — `{id, name, ready(settings), watch?, note?, search({settings,
   request}, terms) → {docs, warnings}, full?({settings, request}, doc)}`; `watch` lists the settings whose change voids a
@@ -351,7 +356,11 @@ had (bundled apps today; the shapes are checked like the others):
   `connectService`, `checkSavedConnection` and `connectionGuide`. The card itself is Petya's shared service card:
   the app's `settings.js` (after `connections.js`) puts its markup into the form and calls
   `window.addConnectionCard({id, title, description, field, flag?, fields, oauth?, guideLabel?, placeholder?,
-  connected?})` (`src/ui/connections.js`); a `.connection-help[data-help-title]` block folds into the compact help, a
+  connected?, login?, logout?, hint?, manual?, status?, checked?})` (`src/ui/connections.js`); `login: {label, run(status,
+  button, form)}` replaces «Подключить» with the app's own sign-in, `logout: {label, run(status)}` adds its disconnect,
+  `hint` is the line under the card, `manual` the fields folded into «Ручное подключение по токену», `status(settings)`
+  sees the saved state and `checked(result)` runs after a check (Jira: the Atlassian sign-in, shared with Confluence as
+  `window.petyaAtlassian`, `src/extensions/jira/settings.js`); a `.connection-help[data-help-title]` block folds into the compact help, a
   `data-clear-secret` box is sent by the form's save, `data-fold-guides` on a card folds its long paragraphs. Example:
   «Notion» (`src/extensions/notion/settings.js`, `connection-check.cjs`).
 
@@ -363,8 +372,13 @@ Petya's own modules; the other registries count an app while its switch is `"tru
 - `desktop-reply.cjs` — `{type:<id>, name, description, matches(command, context), turn(s, command, context, check)
   | scope(s, topic) + answer(command, scope), install?, downloadBytes?}` for the generic «chat extension» flow
   (`src/features/extension-replies.cjs`). Prefer `feature.turn`.
-- `result.cjs` — `{id, extract?(result), describe(message, topic, services)}` for chat results the user can select and
-  act on (`src/features/chat-results.cjs`); `change.cjs` — edits through chat changes. Rare; read the Jira ones.
+- `result.cjs` — `{id, extract?(result), fields?(result), describe(message, topic, services)}` for chat results the user
+  can select and act on (`src/features/chat-results.cjs`); `fields` returns keys kept on the chat message itself rather
+  than in `extensionData` (Jira's `jiraItems`); `change.cjs` — edits through chat changes. Rare; read the Jira ones.
+- A row under «В сервисах» on the cards of «Команда» with a way to link the person (not a `personFields` value): the
+  app's script, loaded after `team.js`, calls `window.petyaTeamServices.register(id, {title, order?, link(panel, open,
+  api), unlink?(api), init?(api)})`; `api` = `{member, field(key), read(), write(accounts), mark(), paint(id), node}` of
+  the open card. Example: `src/extensions/jira/team-field.js` (find the person in the allowed Jira projects).
 
 ## 11. Downloads
 
