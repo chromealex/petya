@@ -84,6 +84,7 @@ offer).
 | Pull request with failing checks | ✓ | ✓ | waiting for review | | |
 | Meeting summary | per task and «Создать все» | | summary | | |
 | Retro («Ретро»), «Попробовать» | per item and «Создать задачи из «Попробовать»» | | «Отправить на голосование» | | |
+| Documentation freshness, per finding | «Создать задачу» | «Предложить правку» without an exact line fix | | | |
 | Calendar, confirm step | | | | ✓ + known rooms, typed link | |
 | Calendar, created meeting / timeline | | | | | «Петя запишет встречу» / «Записать Петей» |
 
