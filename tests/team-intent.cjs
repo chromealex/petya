@@ -16,6 +16,16 @@ const assert=require('node:assert/strict');const feature=require('../src/feature
   assert.deepEqual(people.map(p=>p[0]),['Анна','Полина','Полина']);
   answer='workload';assert.equal(await teamIntent.turn('Полина и Аня, кто чем занят?'),null,'two colleagues: the team report');
   answer='facts';calls.length=0;await teamIntent.turn('Полина теперь отвечает за релизы');assert.equal(people.length,3,'stated facts are recorded, not answered');
+  // A follow-up with a pronoun goes to the one colleague named in the last turns, not to the project's tasks.
+  {const real=s.dialogue.active;const chat=messages=>{s.dialogue.active=()=>({id:'t',messages});};const asks=s.request;let modelCalls=0;s.request=async(...a)=>{modelCalls++;return asks(...a);};
+   chat([{role:'user',text:'Чем Аня занимается?'},{role:'assistant',text:'Анна — тестировщик. Открыто в Jira: 3.'}]);
+   assert.equal((await teamIntent.turn('Какие у неё задачи?'))?.text,'card');assert.deepEqual(people.at(-1),['Анна','Какие у неё задачи?']);
+   assert.equal((await teamIntent.turn('а у нее что в работе'))?.text,'card','lower case, no question mark, «нее»');
+   assert.equal(modelCalls,0,'resolved from the chat, no model call');
+   chat([{role:'user',text:'Как дела у Полины и Ани?'}]);assert.equal(await teamIntent.turn('Какие у неё задачи?'),null,'two colleagues in the last turn: ambiguous');
+   chat([{role:'user',text:'Покажи задачи BW'}]);assert.equal(await teamIntent.turn('Какие у него задачи?'),null,'no colleague in the chat');
+   chat([{role:'user',text:'Чем Аня занимается?'}]);assert.equal(await teamIntent.turn('Как её зовут полностью?'),null,'not about work');
+   s.dialogue.active=real;s.request=asks;}
   // A group by role: the model picks the people from the saved cards; unknown names are dropped.
   const groups=[];s.teamLoad.people=async(g,text)=>{groups.push(g.map(m=>m.name));return {handled:true,text:'group'};};
   s.settings.teamMembers=JSON.stringify([{name:'Иван Петров',role:'бэкенд'},{name:'Олег',role:'бэкенд-разработчик'},{name:'Полина',role:'QA',responsibilities:'тестирование релизов'}]);

@@ -5,6 +5,9 @@
 const ABOUT=/(?:команд|коллег|сотрудник|участник|людей|люди|человек|роли|роль|ролей|должност|обязанност|кто\s+(?:чем|за\s+что|у\s+нас)|справочник)/iu;
 const PERSON_FACT=/(?:отвечает\s+за|занимается|теперь\s+(?:в|на|тестиру|дела|веде)|почт[аы]\s|e-?mail|[\w.-]+@[\w-]+\.\w+|\bslack\s*id|в\s+jira\s+(?:он|она))/iu;
 const INTENTS=['fill','existing','facts','workload','other'];
+// Third-person pronouns in Russian, and a question about someone's work, for follow-ups about one colleague.
+const PRONOUN=/(?:^|[^\p{L}])(?:он|она|его|её|ее|него|неё|нее|ему|ей|нему|ней|ним|нём|нем)(?![\p{L}])/iu;
+const FOLLOW_UP_WORK=/(?:задач|тикет|таск|занят|занима|работа|делает|загруж|назначен|в\s+работе)/iu;
 // A shell or console «команда» is not the team.
 const shellCommand=text=>/(?:пример\p{L}*|напиши|какая|какую|подскажи|синтаксис\p{L}*)\s+(?:\S+\s+)?команд|команд\p{L}*\s+(?:для|в\s+терминал|git|гит|bash|docker|npm|linux|консол|shell)/iu.test(text);
 function request(model,command,topic,team){
@@ -39,6 +42,16 @@ module.exports={
    const firstNames=m=>[m.name,...String(m.aliases||'').split(',')].map(n=>String(n||'').trim().split(/\s+/)[0]).filter(n=>n&&n.length>=3);
    const said=n=>new RegExp('(?:^|[^\\p{L}])'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').slice(0,-1)+'\\p{L}{0,3}(?![\\p{L}])','iu').test(text);
    const mentioned=team.filter(m=>firstNames(m).some(said)),mentionsColleague=mentioned.length>0;
+   // A follow-up about the colleague just discussed («Какие у неё задачи?», «а он над чем работает?»): the pronoun
+   // stands for the one saved colleague named in the last turns of this chat, not for the whole Jira project.
+   if(!mentionsColleague&&PRONOUN.test(text)&&FOLLOW_UP_WORK.test(text)&&s.teamLoad?.person&&!shellCommand(text)){
+    const recent=(s.dialogue.active()?.messages||[]).slice(-6).reverse();
+    for(const m of recent){
+     const named=team.filter(x=>firstNames(x).some(n=>new RegExp('(?:^|[^\\p{L}])'+n.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').slice(0,-1)+'\\p{L}{0,3}(?![\\p{L}])','iu').test(String(m.text||'').slice(0,4000))));
+     if(named.length===1)return s.teamLoad.person(named[0],text);
+     if(named.length>1)break; // several colleagues in the last turn: the pronoun is ambiguous
+    }
+   }
    // A group named by role («бэк», «тестировщики») when the words match a role or duty on a saved card.
    const words=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').split(/[^\p{L}]+/u).filter(w=>w.length>=3);
    const duties=new Set(team.flatMap(m=>words(m.role+' '+(m.responsibilities||''))));

@@ -54,7 +54,7 @@ const { Workspace } = require('./workspace.cjs');
 let workspace, dialogue, stopWebSearch=()=>{};
 const smoke = !app.isPackaged && process.env.PETYA_SMOKE_TEST === '1';
 if (smoke) app.setPath('userData', fs.mkdtempSync(path.join(require('node:os').tmpdir(), 'petya-test-')));
-let companies, companyId, dataRoot, switchingCompany=false, activeOperations=0;
+let companies, companyId, dataRoot, switchingCompany=false, activeOperations=0, requestCompanySwitch=async()=>{throw Error("Петя ещё запускается.");};
 let win, tray, quitting = false, pending = new Map(), snapshots = new Map(), settings = {};
 const { AtlassianOAuth } = require('./atlassian-oauth.cjs');
 const atlassianOAuth = new AtlassianOAuth(directRequest);
@@ -529,6 +529,7 @@ function setupHandlers() {
     get checkProgress(){return checkProgress;},
     get companies(){return companies;},
     get companyId(){return companyId;},
+    switchCompany:id=>requestCompanySwitch(id),
     get computer(){return computer;},
     get computerApproval(){return computerApproval;},
     get computerIntent(){return computerIntent;},
@@ -640,7 +641,8 @@ function setupHandlers() {
     require('./company-reset.cjs').request(app.getPath('userData'));
     app.relaunch({args:process.argv.slice(1).filter(arg=>arg!=='--hidden')});setImmediate(()=>app.quit());return {restarting:true};});
   handle('companyRename',(id,name)=>{companies.rename(id,name);win.setTitle('Петя · '+companies.get(companyId).name);refreshTrayMenu();return {...companies.list(),activeId:companyId};});
-  handle('companySwitch',async(id,raw)=>{
+  // Also used by features: a meeting that belongs to another company switches to it (src/meeting-company.cjs).
+  requestCompanySwitch=async(id,raw)=>{
     if(raw && chatLocation.parse(raw)?.company!==id)throw Error('Некорректная ссылка на компанию.');
     companies.get(id);if(id===companyId)return {unchanged:true};
     if(chatJobs.any()||dialogue.running.size)throw Error('Дождитесь завершения запросов в чатах перед сменой компании.');
@@ -654,7 +656,8 @@ function setupHandlers() {
     // Let the IPC response reach the old renderer before loading the new profile.
     setTimeout(()=>switchCompanyRuntime(id,raw).catch(error=>{console.error(error);}),50);
     return {switching:true};
-  });
+  };
+  handle('companySwitch',(id,raw)=>requestCompanySwitch(id,raw));
   require('./telegram-setup.cjs')({get app(){return app;},get clientDefaults(){return clientDefaults;},get handle(){return handle;},get memory(){return memory;},get modules(){return modules;},get saveSettings(){return saveSettings;},get settings(){return settings;},get shell(){return shell;},get telegramSource(){return telegramSource;},set telegramSource(v){telegramSource=v;}});
   handle('teamJiraSearch',query=>require('./team-jira.cjs').search(workspace,query));
   handle('teamPhotoOptions',accounts=>require('./team-photos.cjs').options(require('./team.cjs').accountsOf(accounts),{nativeImage:require('electron').nativeImage}));

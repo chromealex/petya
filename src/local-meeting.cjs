@@ -7,13 +7,18 @@ const {MeetingMonitor}=require('./meeting-monitor.cjs');
 const {SOUND}=require('./meeting-talk.cjs');
 const idle=sources=>sources?.list?.().length?'Ожидаю встречу.':'Запись встречи — по кнопке «Слушать встречу».';
 class LocalMeeting {
- constructor({settings,sources=null,recording,createCapture,emit}){
-  Object.assign(this,{settings,sources,recording,createCapture,emit});this.phase='idle';this.present=false;this.found=null;
+ // place(state) → {record, note}: which company the meeting belongs to (src/meeting-company.cjs); record:false means
+ // another company takes it over, so this one neither offers nor starts the recording.
+ constructor({settings,sources=null,recording,createCapture,emit,place=null,ended=null}){
+  Object.assign(this,{settings,sources,recording,createCapture,emit,place,ended});this.phase='idle';this.present=false;this.found=null;
   this.monitor=new MeetingMonitor({
    inspect:async()=>{let state;try{state=this.sources?await this.sources.detect():{active:false};}catch(error){if(this.capture)return {active:true};throw error;}
     if(state.active){this.found=state;if(!this.present){this.present=true;this.emit(this.snapshot());}}return state;},
-   start:async state=>{this.publish('detected','Обнаружена встреча'+(state?.app?' · '+state.app:'')+'.');if(settings().meetingAutoRecord==='auto')await this.start();},
-   stop:async()=>{await this.stop(false);this.present=false;this.found=null;this.publish('idle',idle(this.sources));}
+   start:async state=>{
+    let placed={record:true,note:''};if(this.place){try{placed=await this.place(state)||placed;}catch{/* recorded here */}}
+    if(!placed.record){this.present=false;this.found=null;return;}
+    this.publish('detected','Обнаружена встреча'+(state?.app?' · '+state.app:'')+'.'+(placed.note?' '+placed.note:''));if(settings().meetingAutoRecord==='auto')await this.start();},
+   stop:async()=>{await this.stop(false);this.present=false;this.found=null;this.ended?.();this.publish('idle',idle(this.sources));}
   });
  }
  snapshot(){return {id:this.id||'local-observer',phase:this.phase,present:this.present,active:!!this.capture,busy:!!this.capture||!!this.starting,mode:this.settings().meetingAutoRecord,app:this.found?.app||'',sources:this.sources?.list?.().map(x=>x.name)||[],message:this.message||idle(this.sources),canStart:this.phase==='detected'||this.phase==='stopped'&&this.present,canRetry:this.phase==='error'};}

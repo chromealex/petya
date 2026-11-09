@@ -6,10 +6,11 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const zoomWindow=require('./window.cjs');
-const {SpeakerTimeline}=require('./speakers.cjs');
+const {SpeakerTimeline,read:readWindow,parse}=require('./speakers.cjs');
 const SAMPLE='zoom-speakers-sample.json';
 const HOUR=3600000;
 let timeline=null;
+let seen=null; // participants read from the window while a meeting is detected
 
 // A Zoom join link → {kind:'zoom', key, url, name}: one meeting id on any Zoom host is one room; the passcode is kept.
 function recognizeLink(raw){
@@ -30,8 +31,12 @@ module.exports={
  async detect(){
   if(!['darwin','win32'].includes(process.platform))return null;
   const state=await zoomWindow.inspect(false);
-  if(!zoomWindow.hasMeeting(state))return {active:false};
-  return {active:true,app:'Zoom',windowTitle:state.windows.find(w=>zoomWindow.isMeeting(w.title))?.title||''};
+  if(!zoomWindow.hasMeeting(state)){seen=null;return {active:false};}
+  // Who is in the meeting, from Zoom's window (tile labels, the participant list), so Petya can tell which
+  // company it belongs to before recording (src/meeting-company.cjs). Read at most every 20 seconds.
+  const now=Date.now();
+  if(!seen||now-seen.at>20000){let names=[];try{const r=parse((await readWindow()).texts||[]);names=[...new Set([...r.people,...r.talking])];}catch{}seen={at:now,names};}
+  return {active:true,app:'Zoom',windowTitle:state.windows.find(w=>zoomWindow.isMeeting(w.title))?.title||'',participants:seen.names};
  },
  begin(context={}){
   timeline?.stop();
@@ -52,5 +57,5 @@ module.exports={
   const vtt=fit.attachments.find(a=>/\.(?:vtt|srt|txt)$/i.test(a.name));
   return {from:'Zoom',subject:fit.subject,text:(vtt?require('../../features/meeting-summary.cjs').plainVtt(vtt.text):fit.text).slice(0,120000)};
  },
- _reset(){timeline?.stop();timeline=null;}
+ _reset(){timeline?.stop();timeline=null;seen=null;}
 };

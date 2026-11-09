@@ -3059,7 +3059,7 @@
   "Ошибка:": "Error:",
   "Ошибки и ANR приложений": "App errors and ANRs",
   "ПАМЯТЬ И ФОНОВАЯ РАБОТА": "MEMORY AND BACKGROUND WORK",
-  "ПЕТЯ / 0.11.1": "PETYA / 0.11.1",
+  "ПЕТЯ / 0.11.2": "PETYA / 0.11.2",
   "ПОНИМАНИЕ / НЕОБЯЗАТЕЛЬНО": "UNDERSTANDING / OPTIONAL",
   "ПОСЛЕДНЯЯ РЕПЛИКА": "LAST UTTERANCE",
   "ПРОВЕРКА ЗАДАЧИ": "TASK CHECK",
@@ -12755,6 +12755,7 @@
   "чатах": "chats",
   "чатах бота": "the bot's chats",
   "чате": "chat",
-  "Уточните проект в разделе «Агенты».": "Specify the project in “Agents”."
+  "Уточните проект в разделе «Агенты».": "Specify the project in “Agents”.",
+  "Петя ещё запускается.": "Petya is still starting."
  }
 }

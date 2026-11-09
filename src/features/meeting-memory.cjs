@@ -40,6 +40,9 @@ module.exports = {
   };
   const local=new (require('../local-meeting.cjs').LocalMeeting)({settings:()=>s.settings,sources:{list:()=>s.meetingSources?.list()||[],detect:()=>s.meetingSources?s.meetingSources.detect():{active:false},speaker:(...a)=>s.meetingSources?.speaker(...a)||'',begin:id=>s.meetingSources?.begin(id),end:id=>s.meetingSources?.end(id)},recording,
    createCapture:options=>new (require('../meeting-capture.cjs').LocalCapture)(options),
+   // The company a meeting belongs to, by its participants and each company's «Команда» (src/meeting-company.cjs).
+   place:state=>require('../meeting-company.cjs').place(s,state,{decrypt:b64=>safeStorage.decryptString(Buffer.from(b64,'base64'))}),
+   ended:()=>require('../meeting-company.cjs').reset(),
    emit:state=>{live(state);if(company===s.companyId&&s.win&&!s.win.isDestroyed())s.win.webContents.send('local-meeting-progress',state);}
   });
   const timer=setInterval(()=>{if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1')local.tick().catch(()=>{});},5000);timer.unref();
