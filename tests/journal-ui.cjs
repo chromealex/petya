@@ -75,6 +75,8 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("document.querySelector('.jr-notes .delete-button').click()");
  for(let i=0;i<100;i++){if(!(journal.store().peek(key).notes||[]).length)break;await new Promise(r=>setTimeout(r,30));}
  assert.equal(journal.store().peek(key).notes.length,0);
+ // The toast follows the saved removal: wait for it rather than racing the IPC answer.
+ for(let i=0;i<100;i++){if(await js("[...document.querySelectorAll('.kit-toast button')].some(b=>b.textContent==='Отменить')"))break;await new Promise(r=>setTimeout(r,30));}
  assert.ok(await js("[...document.querySelectorAll('.kit-toast button')].some(b=>b.textContent==='Отменить')"),'note delete offers undo');
  // The evening switch saves the setting.
  await js("{const b=document.querySelector('.jr-evening input[type=checkbox]');b.checked=true;b.dispatchEvent(new Event('change'))}");
