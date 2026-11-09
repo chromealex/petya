@@ -133,11 +133,25 @@ async function build(s,key,b,{now=new Date(),fetcher}={}){
  const team=members(s);
  const noted=absences.notes(s,key).map(n=>({...n,source:'note'}));
  let cal={rows:[],note:''};
- try{s.requestProgress?.report?.('Смотрю отпуска в календаре');cal=await absences.fromCalendar(s,{from:plan.dayStart(start),to:end,members:team,...fetcher?{fetcher}:{}});}
- catch(e){cal={rows:[],note:'Календарь: '+(e.message||'не прочитан')+' — отпуска из него не учтены.'};}
+ // The people records foundation (s.people) knows absences typed for «Отсутствия», the calendar and HR sources;
+ // without it (or if it fails) the calendar is read here as before.
+ let viaPeople=false;
+ if(s.people?.absences){
+  try{
+   s.requestProgress?.report?.('Смотрю отсутствия команды');
+   const r=await s.people.absences({from:plan.ymd(plan.dayStart(start)),to:plan.ymd(end),...fetcher?{fetcher}:{}});
+   cal={rows:r.rows.map(a=>({member:a.member,name:a.name,from:a.from,to:a.to,kind:a.kind,source:a.source==='calendar'?'calendar':'people',title:a.title||a.sourceName||''})),note:r.notes.join(' ')};
+   viaPeople=true;
+  }catch{viaPeople=false;}
+ }
+ if(!viaPeople){
+  try{s.requestProgress?.report?.('Смотрю отпуска в календаре');cal=await absences.fromCalendar(s,{from:plan.dayStart(start),to:end,members:team,...fetcher?{fetcher}:{}});}
+  catch(e){cal={rows:[],note:'Календарь: '+(e.message||'не прочитан')+' — отпуска из него не учтены.'};}
+ }
  if(cal.note)warnings.push(cal.note);
  const first=days[0]||plan.ymd(start),last=days.at(-1)||plan.ymd(end);
- const away=[...noted,...cal.rows].filter(a=>a.to>=first&&a.from<=last);
+ const same=new Set(noted.map(n=>n.member+'|'+n.from+'|'+n.to));
+ const away=[...noted,...cal.rows.filter(r=>!same.has(r.member+'|'+r.from+'|'+r.to))].filter(a=>a.to>=first&&a.from<=last);
  const cap=plan.capacity({vel,members:people,absences:away,days});
  const fitted=plan.fit({backlog,lanes:cap.lanes,teamCapacity:cap.team,base:[...carry,...already],mode:est.mode});
  const lanes=plan.loads(cap.lanes,{carry,planned:already,chosen:fitted.chosen});

@@ -164,6 +164,19 @@ function fixture(over={}){
  assert.deepEqual(withCal.absences.map(a=>[a.name,a.from,a.to,a.source]),[['Олег Смирнов','2026-11-30','2026-12-01','calendar'],['Иван Козлов','2026-12-03','2026-12-03','calendar']]);
  assert.equal(withCal.people.find(p=>p.jiraId==='u-oleg').absent,2);assert.equal(withCal.people.find(p=>p.jiraId==='u-ivan').absent,1);
 
+ // --- Absences from the people records foundation (s.people): typed in «Отсутствия» plus its sources ---------------
+ const viaPeople=fixture({settings:{extension_calendar:'true'}});
+ const peopleDir=fs.mkdtempSync(path.join(os.tmpdir(),'petya-sprint-people-'));
+ process.on('exit',()=>fs.rmSync(peopleDir,{recursive:true,force:true}));
+ viaPeople.s.people=require('../src/features/people.cjs').create(viaPeople.s,{now:()=>NOW.getTime(),dir:peopleDir,sources:()=>[{id:'calendar',name:'Календарь',setting:'extension_calendar',
+  source:{ready:()=>true,absences:async(s,{from,to})=>{assert.equal(from.getDate(),23);assert.ok(to>new Date('2026-12-04'));return [{member:'u-oleg',from:'2026-11-30',to:'2026-12-01',kind:'vacation',title:'Отпуск Олег'}];}}}]});
+ viaPeople.s.people.addAbsence('u-ivan',{from:'2026-12-03',to:'2026-12-03',kind:'dayoff'});
+ absences.addNote(viaPeople.s,'GAME',{member:'u-masha',name:'Маша Петрова',from:'2026-11-23',to:'2026-11-27',kind:'vacation'});
+ const pc=(await app.planTurn(viaPeople.s,'спланируй спринт','plan',{now:NOW})).extensionData.sprintPlan;
+ assert.deepEqual(pc.absences.map(a=>[a.name,a.from,a.to,a.source]),[['Маша Петрова','2026-11-23','2026-11-27','note'],['Олег Смирнов','2026-11-30','2026-12-01','calendar'],['Иван Козлов','2026-12-03','2026-12-03','people']],'project notes stay, the foundation replaces the calendar read');
+ assert.equal(pc.people.find(p=>p.jiraId==='u-ivan').absent,1);assert.equal(pc.people.find(p=>p.jiraId==='u-oleg').absent,2);
+ assert.ok(!viaPeople.calls.some(c=>/googleapis/.test(c.url.href)),'the calendar is not read twice');
+
  // --- Count estimation when the board estimates nothing -------------------------------------------------------------
  const count=fixture({configuration:{}});
  const ccr=await app.turn(count.s,'спланируй спринт',{now:NOW});assert.ok(ccr.extensionData,ccr.text);const cc=ccr.extensionData.sprintPlan;

@@ -72,5 +72,6 @@ for(const [id,setting] of [['google-meet','extension_google-meet'],['teams','ext
  assert.equal(require('../src/extensions/'+id+'/feature.cjs').defaults[setting],'false','not installed for new users: '+id);
 }
 assert.ok(!fs.existsSync(path.join(root,'src/extensions/calendar/video-meet.cjs'))&&!fs.existsSync(path.join(root,'src/extensions/calendar/video-teams.cjs')),'the calendar provides no video meetings of its own');
-assert.equal(JSON.parse(fs.readFileSync(path.join(root,'src/extensions/calendar/extension.json'),'utf8')).provides,undefined);
+// The calendar provides no meeting capability (it is a people source for absences only).
+assert.deepEqual(Object.keys(JSON.parse(fs.readFileSync(path.join(root,'src/extensions/calendar/extension.json'),'utf8')).provides||{}).filter(k=>/meeting/.test(k)),[]);
 console.log('Core meeting guard: '+files.length+' core and extension files free of Zoom outside the extension ('+Object.keys(ALLOWED).length+' unrelated uses allowed), '+videoFiles.length+' free of Google Meet and Teams outside theirs passed');

@@ -22,6 +22,7 @@ module.exports=[
  require('./features/meeting-stream.cjs'),
  require('./features/activity.cjs'),
  require('./features/mail-records.cjs'),
+ require('./features/people.cjs'),
  require('./features/meeting-memory.cjs'),
  require('./features/materials.cjs'),
  require('./features/meeting-summary.cjs'),
