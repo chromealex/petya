@@ -13470,6 +13470,17 @@
   "— слишком мало дней": "— too few days",
   "Петя будет знать, что это вы, и говорить вам «ты»": "Petya will know this is you and talk to you directly",
   "Это я": "This is me",
-  "это вы": "you"
+  "это вы": "you",
+  "ПЕТЯ / 0.12.2": "PETYA / 0.12.2",
+  "· в группе": "· in the group",
+  "· выпуск ещё не допущен": "· release not approved yet",
+  "· запустите сервис": "· start the service",
+  "· откат": "· rollback",
+  "Выбрано вручную. Текущая версия группы —": "Chosen by hand. The group’s current version is",
+  "Модель Пети · petya-v1": "Petya’s model · petya-v1",
+  "Не выбрана — черновики по шаблону": "Not chosen — drafts from a template",
+  "Отвечает по умолчанию": "Answers by default",
+  "Сначала дождитесь окончания загрузки.": "Wait for the download to finish first.",
+  "Такой версии": "No version"
  }
 }
