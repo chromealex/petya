@@ -131,6 +131,17 @@ function detect(series,{days,yesterday,sensitivity='normal',mutes=[]}){
  shown.sort((a,b)=>b.impact-a.impact||a.headline.localeCompare(b.headline));
  for(const m of missing.values())notes.push({...m,missing:true,text:m.sourceName+': нет данных за '+dayLabel(m.day,yesterday).toLowerCase()+' — источник ещё не прислал их, это не аномалия.'});
  for(const sh of short.values())notes.push({...sh,short:true,text:sh.sourceName+' · '+meta(sh).label+': мало истории для сравнения (нужно хотя бы 3 таких же дня недели или 7 дней подряд).'});
- return {items:shown,notes,hidden};
+ // «Пульс»: every top-level metric read for the last day — its value, the usual value and its band — so the card
+ // shows the quiet metrics too (what was checked, not only what moved). Sorted by what matters most.
+ const watched=[];
+ for(const x of series){
+  if(x.segment)continue;const points=new Map(x.points.map(p=>[p.date,p.value]));if(!points.has(yesterday))continue;
+  const base=baseline(points,yesterday);if(!base)continue;
+  const m=meta(x),value=points.get(yesterday),r=score(value,base,preset,{volume:m.stars?0:m.volume,absolute:m.absolute,floor:m.floor});
+  watched.push({key:x.key,kind:x.kind,source:x.source,sourceName:x.sourceName,metric:x.metric,label:m.label,unit:x.unit,value,median:r.median,change:r.change,band:r.band,weight:m.weight,
+   bad:r.anomaly?r.direction===m.bad:null,spark:spark(points,yesterday,base,r.band)});
+ }
+ watched.sort((a,b)=>b.weight-a.weight||a.label.localeCompare(b.label));
+ return {items:shown,notes,hidden,watched};
 }
 module.exports={METRICS,detect,headline,deltaText,why,muteKey,muteLabel,muted,segmentPhrase,dayLabel,meta};

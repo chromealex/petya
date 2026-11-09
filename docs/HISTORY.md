@@ -8,6 +8,12 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.17.3 — anomalies, ANR and crash cards share one quieter look
+
+- Shared KPI tiles (a number over a hairline, no grey blocks), a bar chart with thin rounded bars, a solid threshold line and a tooltip that follows the pointer, and a legend — on the anomalies, ANR and crash cards.
+- The quiet anomalies state shows what was checked: each watched metric with yesterday's value, its distance from the usual and a sparkline in its band.
+- Crashes: one series by default for a single source («По крэшам» on demand), the source chip not repeated on every row, quieter row actions.
+
 ## 0.17.2 — the crashes widget asks which game too
 
 - The «Крэши» widget with several Google Play apps asks which game to show — or «Все приложения» — with the same search and list as ANR, instead of mixing every game into one card. The choice stays with the widget and is read by naming the package.

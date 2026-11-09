@@ -15188,9 +15188,18 @@
   "непрочитанные": "unread",
   "отключённый аккаунт": "disconnected account",
   "с рассылками": "with newsletters",
-  "ПЕТЯ / 0.17.2": "PETYA / 0.17.2",
+  "ПЕТЯ / 0.17.3": "PETYA / 0.17.3",
   "В Google Play несколько приложений — выберите, чьи крэши показывать.": "Google Play has several apps — choose whose crashes to show.",
   "Все приложения": "All apps",
-  "Выбрать другое приложение": "Choose another app"
+  "Выбрать другое приложение": "Choose another app",
+  "· все ANR": "· all ANRs",
+  "Заметные пользователям ANR по дням": "User-perceived ANRs by day",
+  "заметные ANR": "perceived ANRs",
+  "Вчера всё в пределах обычного": "Yesterday everything was within the usual",
+  "За неделю всё в пределах обычного": "This week everything was within the usual",
+  "ничего не выбивается из привычных значений": "nothing stands out from the usual values",
+  "показателей": "metrics",
+  "показатель": "metric",
+  "показателя": "metrics"
  }
 }

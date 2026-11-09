@@ -21,7 +21,7 @@
  const feature=(method,...args)=>window.petya.feature('crashes',method,...args);
  const open=url=>{const safe=window.resultKit.safeUrl(url);if(safe)window.open(safe,'_blank','noopener');};
 
- function tile(k,value,label,{alert=false,title,note}={}){const box=k.el('div','crash-tile'+(alert?' alert':''));box.append(k.el('span','crash-value',value),k.el('span','crash-label',label));if(note)box.append(k.el('span','crash-note',note));if(title)box.title=title;return box;}
+ const tile=(k,value,label,{alert=false,title,note}={})=>{const box=k.kpi(value,label,{tone:alert?'alert':'',title,note});box.classList.add('crash-tile');return box;};
  function sourceChip(k,src){const chip=k.el('span','crash-source',src?.name||'');raw(chip);chip.style.setProperty('--source',src?.color||NEUTRAL);chip.title='Источник: '+(src?.name||'');return chip;}
 
  function sparkline(values){
@@ -51,47 +51,30 @@
   return box;
  }
 
+ // Events per day: by source when there are several (the sources' colours), else one series — the total; «По крэшам»
+ // stacks the top issues on demand.
  function chart(k,c,colorOf,sourceOf){
   const box=k.el('div','crash-chart');
   const split=(c.bySource?.length||0)>1;
-  let mode=split?'source':'issue';
-  const head=k.el('div','crash-chart-head');const title=k.el('span',null,'События по дням');const max=k.el('span','crash-chart-max');
+  let mode=split?'source':'total';
+  const head=k.el('div','crash-chart-head');head.append(k.el('span','crash-chart-title','События по дням'));
   const toggle=k.el('div','crash-toggle');toggle.setAttribute('role','group');toggle.setAttribute('aria-label','Разбивка графика');
-  const modes=[['source','По источникам'],['issue','По крэшам']].map(([id,label])=>{const b=k.el('button',null,label);b.type='button';b.dataset.mode=id;b.onclick=()=>{mode=id;draw();};toggle.append(b);return b;});
-  head.append(title);if(split)head.append(toggle);head.append(max);
-  const tip=k.el('div','crash-tip','Наведите на день');
-  const bars=k.el('div','crash-bars');bars.setAttribute('role','list');
-  const axis=k.el('div','crash-axis');axis.append(k.el('span',null,day(c.days[0])),k.el('span',null,day(c.days.at(-1))));
-  const legend=k.el('ul','crash-legend');
+  const modes=[['total','Всего'],...(split?[['source','По источникам']]:[]),['issue','По крэшам']].map(([id,label])=>{const b=k.el('button',null,label);b.type='button';b.dataset.mode=id;b.onclick=()=>{mode=id;draw();};toggle.append(b);return b;});
+  head.append(toggle);
+  const seriesOf=()=>mode==='source'?c.bySource.map(s=>({...s,color:s.color||NEUTRAL})):mode==='issue'?c.series.map(s=>({...s,color:colorOf(s.id)})):[{id:'total',label:'События',color:'var(--muted)',values:c.days.map((_,i)=>c.series.reduce((n,s)=>n+(s.values[i]||0),0))}];
+  const totals=c.days.map((_,i)=>c.series.reduce((n,s)=>n+(s.values[i]||0),0));
+  const plot=k.bars({labels:c.days.map(day),series:seriesOf(),inside:i=>c.days[i]>=c.from&&c.days[i]<=c.to,ariaLabel:'События по дням',height:84,
+   text:i=>{const parts=(mode==='total'?c.series:seriesOf()).filter(s=>s.values[i]).slice(0,5).map(s=>(s.label.length>40?s.label.slice(0,39)+'…':s.label)+' — '+fmt(s.values[i]));
+    return day(c.days[i])+': '+fmt(totals[i])+' '+plural(totals[i],['событие','события','событий'])+(c.days[i]>=c.from&&c.days[i]<=c.to?'':' (вне периода)')+(parts.length?'\n'+parts.join('\n'):'');}});
+  const legendBox=k.el('div','crash-legend-box');
   function draw(){
-   const series=mode==='source'?c.bySource.map(s=>({...s,color:s.color||NEUTRAL})):c.series.map(s=>({...s,color:colorOf(s.id)}));
-   for(const b of modes)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));
-   box.dataset.mode=mode;
-   const totals=c.days.map((_,i)=>series.reduce((n,s)=>n+(s.values[i]||0),0)),top=Math.max(1,...totals);
-   max.textContent='макс. '+fmt(Math.max(...totals))+' в день';
-   bars.replaceChildren();legend.replaceChildren();
-   c.days.forEach((d,i)=>{
-    const inside=d>=c.from&&d<=c.to;
-    const col=k.el('button','crash-col'+(inside?'':' outside'));col.type='button';col.setAttribute('role','listitem');
-    const stack=k.el('div','crash-stack');stack.style.height=(totals[i]?Math.max(3,100*totals[i]/top):0)+'%';
-    for(const s of series){const v=s.values[i]||0;if(!v)continue;const seg=k.el('span','crash-seg');seg.style.flexGrow=String(v);seg.style.background=s.color;seg.dataset.series=s.id;stack.append(seg);}
-    col.append(stack);
-    const parts=series.filter(s=>s.values[i]).map(s=>(s.label.length>40?s.label.slice(0,39)+'…':s.label)+' — '+fmt(s.values[i]));
-    const text=day(d)+': '+fmt(totals[i])+' '+plural(totals[i],['событие','события','событий'])+(inside?'':' (вне периода)');
-    col.setAttribute('aria-label',text+(parts.length?'. '+parts.join('; '):''));col.title=text+(parts.length?'\n'+parts.join('\n'):'');
-    col.onpointerenter=col.onfocus=()=>{tip.textContent=text;};col.onpointerleave=col.onblur=()=>{tip.textContent='Наведите на день';};
-    bars.append(col);
-   });
-   for(const s of series){
-    const li=k.el('li');const dot=k.el('i');dot.style.background=s.color;
-    const label=s.id==='rest'?k.el('span',null,'остальные'):raw(k.el('span',null,s.label));
-    li.append(dot,label);
-    const src=mode==='issue'&&s.source?sourceOf(s.source):null;if(src&&split)li.append(sourceChip(k,src));
-    li.title=s.label;legend.append(li);
-   }
+   for(const b of modes)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));box.dataset.mode=mode;
+   const series=seriesOf();plot.draw(series);legendBox.replaceChildren();
+   if(mode!=='total')legendBox.append(k.legend(series.map(s=>{const node=k.el('span','crash-legend-item');node.append(s.id==='rest'?k.el('span',null,'остальные'):raw(k.el('span',null,s.label)));
+    const src=mode==='issue'&&split&&s.source?sourceOf(s.source):null;if(src)node.append(sourceChip(k,src));return {color:s.color,title:s.label,node};})));
   }
   draw();
-  box.append(head,bars,axis,tip,legend);return box;
+  box.append(head,plot,legendBox);return box;
  }
 
  function issueRow(k,r,color,ctx){
@@ -99,9 +82,9 @@
   const li=k.el('article','crash-row');li.dataset.issue=r.id;li.dataset.source=r.source;if(color)li.style.setProperty('--stripe',color);
   const main=k.el('div','crash-main');
   const top=k.el('div','crash-line');
-  top.append(sourceChip(k,src));
+  if(ctx.multi)top.append(sourceChip(k,src));
   const level=LEVEL[r.level]||{label:r.level||'error',tone:'alert'};
-  top.append(k.chip({label:level.label,tone:level.tone,title:'Уровень'}));
+  if(level.label!=='error'&&level.label!=='fatal'||r.level==='fatal')top.append(k.el('span','crash-level'+(level.tone?' '+level.tone:''),level.label));
   if(r.isNew){const fresh=k.chip({label:'новый',title:(r.firstSeen?'Впервые '+date(r.firstSeen):'Впервые')+(ctx.release?' — после релиза '+ctx.release.name:' — в этом периоде')});fresh.classList.add('crash-new');top.append(fresh);}
   const title=raw(k.el(r.url?'a':'span','crash-title',r.title));if(r.url){title.href=k.safeUrl(r.url);title.target='_blank';title.rel='noopener';}title.title=r.title;top.append(title);
   const meta=k.el('div','crash-meta');
@@ -117,12 +100,12 @@
   const numbers=k.el('div','crash-numbers');
   const ev=k.el('div','crash-count');ev.append(k.el('strong',null,short(r.events)),k.el('small',null,plural(r.events,['событие','события','событий'])));
   const us=k.el('div','crash-count users');us.append(k.el('strong',null,short(r.users)),k.el('small',null,plural(r.users,['польз.','польз.','польз.'])));
-  const spark=k.el('div','crash-spark-box');spark.title='14 дней: '+(r.spark||[]).map(fmt).join(', ');spark.append(sparkline(r.spark?.length?r.spark:[0,0]),k.el('small',null,'14 дн.'));
+  const spark=k.el('div','crash-spark-box');spark.title='14 дней: '+(r.spark||[]).map(fmt).join(', ');spark.append(sparkline(r.spark?.length?r.spark:[0,0]));spark.title='14 дней: '+(r.spark||[]).map(fmt).join(', ');
   numbers.append(ev,us,spark);
   const actions=k.el('div','crash-actions');
   const button=(label,run,cls='')=>{const b=k.el('button',cls,label);b.type='button';b.onclick=async e=>{e.stopPropagation();if(b.disabled)return;b.disabled=true;try{await run(b);}catch(err){k.toast(err.message,{error:true});}finally{if(!b.dataset.keep)b.disabled=false;}};actions.append(b);return b;};
   const name=src?.name||'';
-  if(r.url){const b=button('Открыть в '+name,()=>open(r.url));b.dataset.action='open';}
+  if(r.url){const b=button(ctx.multi?'Открыть в '+name:'Открыть',()=>open(r.url));b.dataset.action='open';b.title='Открыть в '+name;}
   const facts=fmt(r.events)+' '+plural(r.events,['событие','события','событий'])+', '+fmt(r.users)+' '+plural(r.users,['пользователь','пользователя','пользователей'])+' '+ctx.period;
   actions.append(k.links('task-tracker',{title:'Крэш '+(r.shortId?r.shortId+' ':'')+'— '+r.title+(r.culprit?' в '+r.culprit:''),description:facts+(name?' ('+name+')':''),link:r.url||'',type:'bug'}),
    k.links('code-fix',{text:'Исправь баг в коде — крэш из '+name+': '+r.title+(r.culprit?' в '+r.culprit:'')+'. Ссылка: '+(r.url||'')+'. Это '+facts+(r.platform?', платформа '+r.platform:'')+'.'}));
@@ -147,7 +130,7 @@
   const ids=(c.chart?.series||[]).map(s=>s.id),colorOf=id=>id==='rest'?REST:COLORS[ids.indexOf(id)%COLORS.length]||REST;
   const body=k.el('div','crash-body');
   const t=c.totals||{issues:0,events:0,users:0};
-  const tiles=k.el('div','crash-tiles');
+  const tiles=k.el('div','crash-tiles kit-kpis');
   tiles.append(tile(k,fmt(t.issues)+(t.more?'+':''),plural(t.issues,c.onlyNew?['новый крэш','новых крэша','новых крэшей']:['крэш','крэша','крэшей']),{alert:!!t.fresh,note:t.fresh&&!c.onlyNew?'новых: '+t.fresh:''}),
    tile(k,short(t.events),plural(t.events,['событие','события','событий'])),
    tile(k,short(t.users),'затронуто пользователей',{title:'Сумма по крэшам: один человек может попасть в несколько'}));
@@ -162,7 +145,7 @@
   if(c.common){const p=k.el('p','crash-common');p.append(k.el('span',null,'Общее: '),raw(k.el('span','crash-common-text',c.common)));p.title='Вывод локальной модели по названиям крэшей';body.append(p);}
   for(const n of c.notes||[]){const p=k.el('p','crash-note-line'+(n.error?' error':''));p.append(raw(k.el('span',null,n.text)));body.append(p);}
   const single=sources.flatMap(x=>(x.scope||'').split(/[,/]\s*/)).map(v=>v.trim()).filter(Boolean);
-  const ctx={release:c.release,single,period:c.period?.label||'',sourceOf};
+  const ctx={release:c.release,single,period:c.period?.label||'',sourceOf,multi};
   // Several sources: the stripe and sparkline take the source's colour (the chart's default split); one source: the issue's.
   const rowOf=r=>issueRow(k,r,multi?sourceOf(r.source).color||NEUTRAL:ids.includes(r.source+':'+r.id)?colorOf(r.source+':'+r.id):'',ctx);
   if(c.issues?.length){
@@ -177,7 +160,8 @@
    }else body.append(k.collapse(c.issues.map(rowOf),5,'Ещё крэши'));
   }else body.append(k.el('p','crash-empty',c.onlyNew?'Новых крэшей нет.':'Крэшей нет — источники ничего не прислали за этот период.'));
   const status=!t.issues?{label:'чисто',tone:'done'}:t.fresh?{label:t.fresh+' '+plural(t.fresh,['новый','новых','новых']),tone:'alert'}:{label:'без новых',tone:'done'};
-  const subtitle=[c.period?.label,c.platform,c.environment,c.release&&c.period?.kind!=='release'?'релиз '+c.release.name:''].filter(Boolean).join(' · ');
+  const scope=!multi&&sources[0]?.scope?String(sources[0].scope):'';
+  const subtitle=[c.period?.label,c.platform,c.environment,c.release&&c.period?.kind!=='release'?'релиз '+c.release.name:'',scope.length>60?scope.slice(0,57)+'…':scope].filter(Boolean).join(' · ');
   const actions=[];
   const linked=sources.filter(x=>x.url);
   if(linked.length===1)actions.push({label:'Открыть список в '+linked[0].name,run:()=>open(linked[0].url)});
@@ -187,7 +171,7 @@
    actions.push(k.links('share-message',{text:'посмотреть новые крэши ('+t.fresh+' '+plural(t.fresh,['новый','новых','новых'])+', '+(c.period?.label||'')+'), самый частый в '+src.name+': '+top.title+' — '+fmt(top.events)+' '+plural(top.events,['событие','события','событий'])+'. '+(top.url||src.url||'')}));}
   if(c.period?.kind!=='yesterday')actions.push({label:'За вчера',run:()=>k.ask('Сколько крэшей вчера'+(c.platform?' на '+c.platform:''),{send:true})});
   const href=linked.length===1?linked[0].url:'';
-  const card=k.card({app:'Крэши',initial:'⚡',color:'#6b3f36',key:sources.map(x=>x.name+(x.scope&&!multi?' · '+x.scope:'')).join(' + '),href,status,subtitle,body,actions,className:'crash-card'});
+  const card=k.card({app:'Крэши',initial:'⚡',color:'#6b3f36',key:sources.map(x=>x.name).join(' + '),href,status,subtitle,body,actions,className:'crash-card'});
   const key=card.querySelector('.kit-key');if(key)raw(key);
   card.dataset.sources=String(sources.length);
   parent.append(card);

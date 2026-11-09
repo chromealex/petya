@@ -6,28 +6,18 @@
  const THRESHOLD=0.0047;
  const pct=v=>v===null||v===undefined?'—':(v*100).toLocaleString('ru-RU',{maximumFractionDigits:2})+'%';
  const short=d=>new Date(d+'T12:00:00Z').toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
- function tile(k,label,value,hint,alert){const box=k.el('div','vitals-tile'+(alert?' alert':''));box.append(k.el('span','vitals-value',pct(value)),k.el('span','vitals-label',label));if(hint)box.title=hint;return box;}
+ const tile=(k,label,value,hint,alert)=>k.kpi(pct(value),label,{tone:alert?'alert':'',title:hint});
+ // Per-day user-perceived ANR rate against Google's threshold: one series, days over the line in the alert colour.
  function chart(k,days){
-  const box=k.el('div','vitals-chart');const values=days.map(d=>d.perceived??0);const max=Math.max(THRESHOLD*1.25,...values)||1;
-  const tip=k.el('div','vitals-tip','Наведите на день');
-  const bars=k.el('div','vitals-bars');bars.setAttribute('role','list');
-  const line=k.el('div','vitals-threshold');line.style.bottom=(100*THRESHOLD/max)+'%';line.title='Порог Google Play: '+pct(THRESHOLD);line.append(k.el('span',null,'порог '+pct(THRESHOLD)));
-  for(const d of days){
-   const bar=k.el('button','vitals-bar'+((d.perceived??0)>=THRESHOLD?' alert':''));bar.type='button';bar.setAttribute('role','listitem');
-   bar.style.height=Math.max(2,100*(d.perceived??0)/max)+'%';
-   const text=short(d.date)+': заметные ANR '+pct(d.perceived)+', все ANR '+pct(d.rate);bar.setAttribute('aria-label',text);
-   bar.onpointerenter=bar.onfocus=()=>{tip.textContent=text;};bar.onpointerleave=bar.onblur=()=>{tip.textContent='Наведите на день';};
-   bars.append(bar);
-  }
-  const axis=k.el('div','vitals-axis');axis.append(k.el('span',null,short(days[0].date)),k.el('span',null,short(days.at(-1).date)));
-  const plot=k.el('div','vitals-plot');plot.append(bars,line);
-  box.append(plot,axis,tip);return box;
+  const values=days.map(d=>d.perceived??0);
+  return k.bars({labels:days.map(d=>short(d.date)),series:[{id:'perceived',color:'var(--info)',values}],threshold:{value:THRESHOLD,label:'порог '+pct(THRESHOLD)},
+   text:i=>short(days[i].date)+'\n'+'заметные ANR '+pct(days[i].perceived)+' · все ANR '+pct(days[i].rate),ariaLabel:'Заметные пользователям ANR по дням',height:84});
  }
  window.renderPlayVitals=(parent,v)=>{
   const k=window.resultKit;if(!k||!v||parent.querySelector('.vitals-card'))return;
   const bad=(v.perceived??0)>=THRESHOLD;
   const body=k.el('div','vitals-body');
-  const tiles=k.el('div','vitals-tiles');
+  const tiles=k.el('div','vitals-tiles kit-kpis');
   tiles.append(tile(k,'заметные пользователям',v.perceived,'User-perceived ANR rate: доля пользователей с заметным зависанием',bad),tile(k,'все ANR',v.rate,'ANR rate'),tile(k,'заметные за 7 дней',v.week,'Средневзвешенный по пользователям показатель за 7 дней',(v.week??0)>=THRESHOLD));
   body.append(tiles);
   if(v.days?.length>1)body.append(chart(k,v.days));

@@ -38,7 +38,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  assert.equal(await js("document.querySelectorAll('.an-card')[0].querySelectorAll('svg.an-spark').length"),n);
  assert.equal(await js("[...document.querySelectorAll('.an-item .an-headline')].some(h=>h.textContent==='Вчера установки из Бразилии −40%')"),true);
  assert.equal(await js("document.querySelector('.an-item .an-headline').hasAttribute('data-no-i18n')"),true);
- assert.equal(await js("document.querySelectorAll('.an-card')[0].querySelectorAll('.an-point.bad').length"),n,'every anomaly here is bad news');
+ assert.equal(await js("document.querySelectorAll('.an-card')[0].querySelectorAll('.an-spark .an-point.bad').length"),n,'every anomaly here is bad news');
  assert.equal(await js("[...document.querySelectorAll('.an-item')].find(i=>/Бразилии/.test(i.textContent)).querySelectorAll('.an-base').length"),4,'four same-weekday baseline days');
  assert.equal(await js("[...document.querySelectorAll('.an-item')].find(i=>/крэши/.test(i.textContent)).textContent.includes('короткая история')"),true,'14-day crash stats are marked');
  assert.match(await js("document.querySelector('.an-notes').textContent"),/AppLovin MAX: нет данных за вчера/);
