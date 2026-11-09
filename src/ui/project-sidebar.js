@@ -87,12 +87,11 @@
  const titleSizes=new ResizeObserver(entries=>{for(const {target}of entries)target.classList.toggle('is-truncated',target.scrollWidth>target.clientWidth+1);});
  const agentView=new Map();
  function draw(state){titleSizes.disconnect();list.replaceChildren();
-  // Dashboards are their own section above the chat tree (src/ui/dashboards.js), not rows among the chats.
-  window.projectSidebarDashboards?.(list,state.projects);
   // Subprojects render inside their parent's group, so parents are drawn first.
   const depthOf=p=>{let d=0;for(let n=p,seen=new Set();n?.parentId&&!seen.has(n.id);n=state.projects.find(x=>x.id===n.parentId)){seen.add(n.id);d++;}return d;};
   const groups=new Map();
-  for(const p of [...state.projects].sort((a,b)=>depthOf(a)-depthOf(b)||Number(b.id==='general')-Number(a.id==='general')||Number(!!b.pinned)-Number(!!a.pinned))){const allRows=state.topics.filter(t=>t.projectId===p.id),rows=allRows.filter(t=>archiveMode?p.archived||t.archived:!t.archived).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||(a.order??-a.at)-(b.order??-b.at));if(!archiveMode&&p.archived)continue;if(archiveMode&&!p.archived&&!rows.length&&p.id!=='general')continue;if(search.value&&!rows.length&&p.id!=='general')continue;
+  for(const p of [...state.projects].sort((a,b)=>depthOf(a)-depthOf(b)||Number(b.id==='general')-Number(a.id==='general')||Number(!!b.pinned)-Number(!!a.pinned))){const allRows=state.topics.filter(t=>t.projectId===p.id&&!t.dashboardId),// a dashboard's own chat is reached from the dashboard
+   rows=allRows.filter(t=>archiveMode?p.archived||t.archived:!t.archived).sort((a,b)=>Number(b.pinned)-Number(a.pinned)||(a.order??-a.at)-(b.order??-b.at));if(!archiveMode&&p.archived)continue;if(archiveMode&&!p.archived&&!rows.length&&p.id!=='general')continue;if(search.value&&!rows.length&&p.id!=='general')continue;
   const group=node('div',null,'project-sidebar-group'),bar=node('div',null,'project-sidebar-project');group.dataset.projectId=p.id;const subfolders=node('div',null,'project-subfolders');groups.set(p.id,subfolders);if(p.parentId)group.classList.add('project-sidebar-subgroup');
   const select=button('',action(async()=>{if(p.archived)throw Error('Восстановите проект через меню «…».');if(p.id!==state.activeProjectId){await window.petya.chatProjectSelect(p.id);await selectDialogueTopic('');}await refresh();}));
   const projectTitle=node('span',p.name,'project-chat-title');
@@ -107,6 +106,8 @@
   if(!archiveMode){
     const unsent=state.drafts?.['draft:'+p.id];
     if(unsent){const row=node('div',null,'project-chat-row'),b=button('Новый чат',newChat);b.className='project-sidebar-chat';row.append(b);showDraft(row,b,unsent);group.append(row);}
+    // The project's dashboards, a block of their own above the chats (src/ui/dashboards.js).
+    window.projectSidebarExtras?.(p.id,group);
     const saved=state.projects.find(project=>project.id===p.id)?.savedCount;
     if(saved){const b=button('Сохранённые ответы · '+saved,()=>window.showProjectAnswers(p.id));b.className='project-view-all';group.append(b);}
   }

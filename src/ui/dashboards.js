@@ -8,7 +8,7 @@
  const kit=()=>window.resultKit;
  const el=(tag,className,text)=>{const n=document.createElement(tag);if(className)n.className=className;if(text!==undefined&&text!==null)n.textContent=text;return n;};
  const icon=d=>'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+d+'"/></svg>';
- const ICON={grid:'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',refresh:'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7',more:'M5 12h.01M12 12h.01M19 12h.01',pin:'M12 17v5M8 3h8l-1 6 4 4H5l4-4z',back:'M15 18l-6-6 6-6',plus:'M12 5v14M5 12h14',share:'M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13',drag:'M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01'};
+ const ICON={chat:'M21 12a8 8 0 0 1-11.6 7.2L4 21l1.8-5.4A8 8 0 1 1 21 12z',grid:'M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z',refresh:'M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7',more:'M5 12h.01M12 12h.01M19 12h.01',pin:'M12 17v5M8 3h8l-1 6 4 4H5l4-4z',back:'M15 18l-6-6 6-6',plus:'M12 5v14M5 12h14',share:'M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13',drag:'M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01'};
  const button=(label,path,onClick,className='')=>{const b=el('button',className);b.type='button';if(path){b.innerHTML=icon(path);if(label){b.title=label;b.setAttribute('aria-label',label);}}else b.textContent=label;b.onclick=onClick;return b;};
  const fail=e=>{const k=kit();if(k)k.toast(e.message||String(e),{error:true});else notice(e.message,true);};
  const WIDTHS=[[3,'Четверть'],[4,'Треть'],[6,'Половина'],[8,'Две трети'],[12,'Во всю ширину']];
@@ -17,7 +17,35 @@
  const screen=el('section','dash-screen');screen.setAttribute('aria-label','Дашборд');screen.hidden=true;shell?.append(screen);
  let current=null,openId='';
  // The dashboard takes the chat's place; opening any chat brings the chat back.
- function close(){if(!openId)return;call('watch',openId,false).catch(()=>{});openId='';current=null;screen.hidden=true;shell?.classList.remove('showing-dashboard');markSidebar();}
+ function close(){if(!openId)return;call('watch',openId,false).catch(()=>{});openId='';current=null;leaveSide();screen.hidden=true;shell?.classList.remove('showing-dashboard');markSidebar();}
+ // --- Side mode: the dashboard in the right panel, its own chat in the middle ---------------------------------------
+ // «Открыть чат» moves the dashboard into the right panel and opens the dashboard's chat (feature `chat`): requests
+ // there add, remove and rename widgets; card buttons on the dashboard type into that chat.
+ let side=null; // {dashboardId, topicId}
+ function leaveSide(){if(!side)return;const was=side;side=null;if(screen.parentElement!==shell)shell?.append(screen);window.resultKit?.closePanel?.();void was;}
+ async function openSideChat(d){
+  const k=kit();if(!k||!shell)return;
+  const {topicId}=await call('chat',d.id);
+  const fresh=side?.dashboardId!==d.id;
+  if(fresh)side={dashboardId:d.id,topicId};
+  // The chat first (a panel belongs to the chat that is open), then the dashboard into the panel beside it.
+  if(typeof topicSelect!=='undefined'&&topicSelect.value!==topicId&&typeof selectDialogueTopic==='function')await selectDialogueTopic(topicId);
+  if(fresh){shell.classList.remove('showing-dashboard');screen.hidden=false;k.panel({id:'dashboard:'+d.id,title:d.title,subtitle:'',className:'kit-panel-dashboard',body:screen,actions:[]});}
+ }
+ document.addEventListener('petya-panel',e=>{
+  if(!String(e.detail?.id||'').startsWith('dashboard:')||e.detail.open)return;
+  // The panel closed (×, Esc, another panel): the dashboard comes back to the full screen.
+  if(!side)return;side=null;if(screen.parentElement!==shell)shell?.append(screen);
+  // Another chat was opened: the dashboard goes away with its chat; × or Esc: back to the full screen.
+  if(e.detail.reason==='chat'){close();return;}
+  if(openId){screen.hidden=false;shell?.classList.add('showing-dashboard');}
+ });
+ // Card buttons («За вчера», «Что делать?») pressed on a dashboard go to the dashboard's chat, not the chat behind it.
+ let dashClickAt=0;screen.addEventListener('click',()=>{dashClickAt=Date.now();},true);
+ const wrapAsk=()=>{const k=window.resultKit;if(!k||k.ask.dashboardAware)return;const original=k.ask;
+  const wrapped=async function(text,options={}){if(openId&&current&&Date.now()-dashClickAt<800){await openSideChat(current).catch(fail);}return original.call(this,text,options);};
+  wrapped.dashboardAware=true;k.ask=wrapped;};
+ if(document.readyState==='complete')wrapAsk();else window.addEventListener('load',wrapAsk);
 
  // --- One widget -------------------------------------------------------------------------------------------------
  // Loading without data yet: a calm placeholder of the card's shape, not a line of text.
@@ -203,7 +231,6 @@
  function header(d){
   const head=el('header','dash-head');
   const left=el('div','dash-head-title');
-  if(d.fromChat){const back=button('К чату',ICON.back,()=>openChat(d.fromChat),'dash-tool');left.append(back);}
   const names=el('div','dash-head-names');
   const h=el('h1',null,d.title);h.title='Нажмите, чтобы переименовать';h.tabIndex=0;h.onclick=async()=>{const v=await ask('Название дашборда',d.title);if(v)call('rename',d.id,v).then(paint).catch(fail);};
   // One quiet line under the title: whose it is, how many widgets, when it was last refreshed.
@@ -218,7 +245,8 @@
   const tools=el('div','dash-head-tools');
   const refresh=button('Обновить всё',ICON.refresh,()=>{refresh.classList.add('loading');screen.querySelectorAll('.dash-widget').forEach(c=>{if(c.querySelector('.dash-refresh'))c.classList.add('refreshing');});call('refresh',d.id,'').then(paint).catch(fail).finally(()=>{refresh.classList.remove('loading');screen.querySelectorAll('.dash-widget.refreshing').forEach(c=>c.classList.remove('refreshing'));});},'dash-ghost');refresh.append(' Обновить');
   const add=button('Добавить виджет',ICON.plus,()=>adder.hidden?openAdder(d):(adder.hidden=true),'primary dash-add');add.append(' Виджет');
-  tools.append(refresh,add);
+  const chat=button('Открыть чат дашборда',ICON.chat,()=>openSideChat(d).catch(fail),'dash-tool dash-chat');chat.append(' Чат');chat.title='Чат рядом с дашбордом: попросить добавить, убрать или объяснить';
+  tools.append(refresh,add,chat);
   const more=button('Действия с дашбордом',ICON.more,()=>kit().menu(more,async()=>dashboardMenu(d),o=>o.run()),'dash-tool');tools.append(more);
   // Delete is the red trash can (AGENTS.md → Interface rules).
   if(window.deleteButton)tools.append(window.deleteButton(d.shared?'Удалить дашборд и его файл в папке проекта':'Удалить дашборд',()=>removeDashboard(d)));
@@ -271,51 +299,51 @@
    if(openId&&openId!==id)call('watch',openId,false).catch(()=>{});
    if(typeof view==='function'&&document.getElementById('home')?.hidden)view('home');
    window.resultKit?.closePanel?.('chat');
-   openId=id;adder.hidden=true;screen.dataset.id=id;screen.hidden=false;shell?.classList.add('showing-dashboard');
+   if(side&&side.dashboardId!==id)leaveSide();
+   openId=id;adder.hidden=true;screen.dataset.id=id;screen.hidden=false;if(!side)shell?.classList.add('showing-dashboard');
    const d=await call('get',id);paint(d);call('watch',id,true).catch(()=>{});markSidebar();
   }catch(e){fail(e);}
  }
  window.openDashboard=open;
  // The tray menu and the small dashboard window open a dashboard here.
  window.petyaEvents.onDashboardOpen?.(id=>open(String(id)));
- document.addEventListener('petya-chat-opened',close);
+ document.addEventListener('petya-chat-opened',e=>{if(side&&e.detail?.id===side.topicId)return;close();});
  window.closeDashboard=close;
 
  // Widgets report their refresh; the open screen and the start dashboard repaint.
  let pending=null;
  window.petyaEvents.onDashboards?.(state=>{
   if(state.list){changed().catch(()=>{});return;}
+  if(state.changed&&state.id===openId){call('peek',openId).then(d=>{paint(d);if(side)window.resultKit?.panelBox?.()&&(document.querySelector('.kit-panel-dashboard .kit-panel-title').textContent=d.title);}).catch(()=>{});changed().catch(()=>{});return;}
   if(state.id===openId&&current){const w=current.widgets.find(x=>x.id===state.widgetId);if(w&&state.loading){w.loading=true;const card=screen.querySelector('.dash-widget[data-id="'+state.widgetId+'"]');card?.classList.add('refreshing');card?.querySelector('.dash-refresh')?.classList.add('loading');}}
   clearTimeout(pending);pending=setTimeout(async()=>{if(openId&&state.id===openId)paint(await call('peek',openId).catch(()=>null));if(start?.dataset.id===state.id)drawStart(true);},150);
  });
 
- // --- Sidebar: «Дашборды», a section of their own above the chat tree -------------------------------------------
- // A dashboard is its own thing, not a chat: the list of the company's dashboards sits apart from the projects'
- // chats, with «+» to make an empty one; each row says which project it belongs to.
+ // --- Sidebar: the project's dashboards, a block of their own in the project's group -----------------------------
+ // A dashboard is not a chat: inside the project it is listed in a «Дашборды» block above the chats, without the
+ // chat tree's connectors, with «+» for an empty one.
  let lists=new Map(),loadingLists=null;
  async function loadLists(){loadingLists=loadingLists||call('list','').then(rows=>{lists=new Map();for(const r of rows){if(!lists.has(r.projectId))lists.set(r.projectId,[]);lists.get(r.projectId).push(r);}}).finally(()=>{loadingLists=null;});return loadingLists;}
- const section=el('section','sidebar-dashboards');section.hidden=true;section.setAttribute('aria-label','Дашборды');
- const sectionHead=el('div','sidebar-dashboards-head');const sectionTitle=el('span','sidebar-dashboards-title','Дашборды');
- const addButton=button('Новый дашборд',ICON.plus,async()=>{const title=await ask('Название дашборда','Мой дашборд');if(!title)return;try{const d=await call('create',title,typeof topicSelect!=='undefined'?topicSelect.dataset.projectId||'general':'general');await changed();open(d.id);}catch(e){fail(e);}},'dash-tool sidebar-dashboards-add');
- sectionHead.append(sectionTitle,addButton);const sectionRows=el('div','sidebar-dashboards-rows');section.append(sectionHead,sectionRows);
- const projectName=id=>{const p=(window.projectSidebarState?.()||[]).find(x=>x.id===id);return p?p.name:'';};
- function fillSection(){
-  const rows=[...lists.values()].flat();const live=rows.filter(d=>(window.projectSidebarState?.()||[]).some(p=>p.id===d.projectId&&!p.archived)||!window.projectSidebarState);
-  sectionRows.replaceChildren();
-  for(const d of live){
-   const row=el('div','project-chat-row project-dashboard-row'),b=el('button','project-sidebar-chat');b.type='button';b.dataset.dashboard=d.id;
+ function fill(box){
+  const rows=lists.get(box.dataset.project)||[];box.replaceChildren();box.hidden=!rows.length;if(!rows.length)return;
+  const head=el('div','project-dashboards-head');head.append(el('span','project-dashboards-title','Дашборды'));
+  const addButton=button('Новый дашборд',ICON.plus,async()=>{const title=await ask('Название дашборда','Мой дашборд');if(!title)return;try{const d=await call('create',title,box.dataset.project);await changed();open(d.id);}catch(e){fail(e);}},'dash-tool project-dashboards-add');
+  head.append(addButton);box.append(head);
+  for(const d of rows){
+   const row=el('div','project-dashboard-row'),b=el('button','project-sidebar-chat');b.type='button';b.dataset.dashboard=d.id;
    const ic=el('span','project-dashboard-icon');ic.innerHTML=icon(ICON.grid);
-   const name=projectName(d.projectId);
-   b.append(ic,el('span','project-chat-title',d.title));if(d.shared)b.append(el('span','project-dashboard-shared','общий'));if(name&&name!=='Общее')b.append(el('span','project-dashboard-project',name));
-   b.title=d.title+(name?' · '+name:'')+' · '+d.widgets+' '+(d.widgets===1?'виджет':d.widgets<5&&d.widgets>1?'виджета':'виджетов')+(d.shared?' · общий, '+d.folder+'/.petya':'')+(d.start?' · стартовый экран':'');
-   b.onclick=()=>open(d.id);row.append(b);sectionRows.append(row);
+   b.append(ic,el('span','project-chat-title',d.title));if(d.shared)b.append(el('span','project-dashboard-shared','общий'));
+   b.title=d.title+' · '+d.widgets+' '+(d.widgets===1?'виджет':d.widgets<5&&d.widgets>1?'виджета':'виджетов')+(d.shared?' · общий, '+d.folder+'/.petya':'')+(d.start?' · стартовый экран':'');
+   b.onclick=()=>open(d.id);row.append(b);box.append(row);
   }
-  section.hidden=false;markSidebar();
+  markSidebar();
  }
- // The sidebar (src/ui/project-sidebar.js) gives the place for the section once and asks again after each redraw.
- window.projectSidebarDashboards=(anchor,projects)=>{window.projectSidebarState=()=>projects;if(!section.isConnected)anchor.before(section);if(lists.size)fillSection();loadLists().then(fillSection).catch(()=>{});};
+ window.projectSidebarExtras=(projectId,group)=>{const box=el('div','project-dashboards');box.dataset.project=projectId;box.hidden=true;
+  // Above the chats: right after the project's header row.
+  const headRow=group.querySelector(':scope>.project-sidebar-project');if(headRow)headRow.after(box);else group.prepend(box);
+  if(lists.size)fill(box);loadLists().then(()=>{if(box.isConnected)fill(box);}).catch(()=>{});};
  function markSidebar(){for(const b of document.querySelectorAll('.project-dashboard-row button')){if(b.dataset.dashboard===openId)b.setAttribute('aria-current','true');else b.removeAttribute('aria-current');}}
- async function changed(){await loadLists().catch(()=>{});fillSection();refreshHeading();drawStart(true);}
+ async function changed(){await loadLists().catch(()=>{});for(const box of document.querySelectorAll('.project-dashboards'))fill(box);refreshHeading();drawStart(true);}
  window.dashboardsChanged=changed;
 
  // --- Chat header: «Дашборд» -------------------------------------------------------------------------------------

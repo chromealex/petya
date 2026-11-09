@@ -107,15 +107,15 @@
 .dash-open-reply{display:inline-flex;align-items:center;gap:6px;margin:8px 0 0}
 
 /* Sidebar rows */
-/* «Дашборды» in the sidebar: a section of their own, apart from the chat tree. */
-.sidebar-dashboards{padding:2px 8px 6px;border-bottom:1px solid var(--line);margin-bottom:6px}
-.sidebar-dashboards[hidden]{display:none}
-.sidebar-dashboards-head{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:4px 6px 2px}
-.sidebar-dashboards-title{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.sidebar-dashboards-add{width:26px;height:26px}
-.sidebar-dashboards-rows{display:flex;flex-direction:column;gap:2px}
-.sidebar-dashboards .project-chat-row{margin:0;border-left:0;border-radius:7px}.sidebar-dashboards .project-sidebar-chat{padding-left:8px}
-.project-dashboard-project{font-size:10.5px;color:var(--muted);flex:none;max-width:40%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* The project's dashboards in the sidebar: a block of their own above the chats, no tree connectors. */
+.project-dashboards{margin:2px 0 6px 12px;padding:4px 0 6px 8px;border-left:1px solid var(--line);border-radius:0 8px 8px 0}
+.project-dashboards[hidden]{display:none}
+.project-dashboards-head{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:0 4px 0 6px}
+.project-dashboards-title{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.project-dashboards-add{width:22px;height:22px}.project-dashboards-add svg{width:13px;height:13px}
+.project-dashboard-row{display:flex;min-width:0}
+.project-dashboard-row .project-sidebar-chat{flex:1;min-width:0;width:auto;margin:1px 0;padding:4px 8px;border:0;border-radius:7px;background:transparent;text-align:left}
+.project-dashboard-row .project-sidebar-chat:hover{background:color-mix(in srgb,var(--on) 5%,transparent)}
 .project-dashboard-row .project-sidebar-chat{display:flex;align-items:center;gap:7px}
 .project-dashboard-icon{display:grid;place-items:center;flex:none;color:var(--green);opacity:.85}
 .project-dashboard-icon svg{width:14px;height:14px}
@@ -166,3 +166,8 @@
 .dash-choice-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .dash-choice-id{flex:1;min-width:0;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .dash-choice-note{margin:4px 0 0;font-size:12px;color:var(--muted)}
+/* The dashboard beside its chat: a wide panel, the dashboard screen fills it. */
+#home.with-side-panel:has(>.kit-panel-dashboard){--kit-panel-w:min(980px,58vw)}
+.kit-panel-dashboard .kit-panel-body{padding:0;display:flex;min-height:0}
+.kit-panel-dashboard .dash-screen{position:static;flex:1;min-width:0;height:auto;overflow:auto}
+.dash-head-tools .dash-chat{width:auto;padding:0 10px;gap:6px;font-size:12.5px}
