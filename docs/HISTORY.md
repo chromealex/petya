@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.16.3 — a spinner while a dashboard card refreshes
+
+- Refreshing a dashboard card no longer swaps the time for «обновляю…» or replaces the content with a placeholder: the card keeps what it shows and a small spinner turns in its top-right corner (the «Обновить» icon spins on hover). The same in the separate dashboard window.
+
 ## 0.16.2 — a button for the link in an error
 
 - An error or a status with a link shows a button for it instead of the raw address: «Включить API в Google Cloud» on the Google Play errors in dashboard widgets, in Settings → «Google Play Console» and in the anomalies card.

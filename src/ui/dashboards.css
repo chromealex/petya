@@ -137,3 +137,11 @@
  .dash-widget-content .chart-donut svg{align-self:center}
  .dash-widget-content .chart-legend{flex:1 1 auto}
 }
+
+/* A refresh keeps the card as it is: a small spinner in the top-right corner, outside the layout (no text, no shift).
+   On hover the tools take the corner and the «Обновить» icon spins instead. */
+
+.dash-widget-spin{position:absolute;top:18px;right:16px;width:14px;height:14px;border-radius:50%;border:2px solid color-mix(in srgb,var(--muted) 35%,transparent);border-top-color:var(--accent);opacity:0;pointer-events:none;transition:opacity .15s}
+.dash-widget.refreshing .dash-widget-spin{opacity:1;animation:dash-spin .8s linear infinite}
+.dash-widget.refreshing:hover .dash-widget-spin,.dash-widget.refreshing:focus-within .dash-widget-spin{opacity:0}
+@media (prefers-reduced-motion:reduce){.dash-widget.refreshing .dash-widget-spin{animation-duration:2.4s}}

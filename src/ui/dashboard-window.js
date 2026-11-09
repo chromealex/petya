@@ -26,11 +26,12 @@
   head.append(title,top,refresh,main);
   const grid=el('div','dash-grid compact');
   for(const w of d.widgets){
-   const box=el('article','dash-widget');box.dataset.size=w.size;box.dataset.kind=w.kind;
+   const box=el('article','dash-widget');box.dataset.size=w.size;box.dataset.kind=w.kind;box.classList.toggle('refreshing',!!w.loading);
    const h=el('header','dash-widget-head'),names=el('div','dash-widget-names'),meta=el('div','dash-widget-meta');
    if(!w.live)meta.append(el('span','dash-tag','снимок'));
-   if(w.loading)meta.append(el('span','dash-widget-loading','обновляю…'));else if(w.at&&window.timeElement)meta.append(window.timeElement(w.at,{prefix:'Обновлено: '}));
+   if(w.at&&window.timeElement)meta.append(window.timeElement(w.at,{prefix:'Обновлено: '}));
    names.append(el('h3','dash-widget-title',w.title),meta);h.append(names);
+   const spin=el('span','dash-widget-spin');spin.setAttribute('role','status');spin.setAttribute('aria-label','Обновляю');h.append(spin);
    const body=el('div','dash-widget-body');if(w.error)body.append(el('p','dash-widget-error',w.error));
    const holder=el('div','dash-widget-content');body.append(holder);
    if(w.data&&Object.keys(w.data).length)render(holder,w.data).then(()=>{if(!holder.childElementCount&&w.text)holder.append(el('p','dash-widget-text',w.text));});

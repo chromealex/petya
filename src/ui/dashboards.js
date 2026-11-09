@@ -29,7 +29,8 @@
    try{await window.extensionHost?.render(holder,{role:'assistant',extensionData:w.data,...w.data});}catch{}
    if(!holder.childElementCount&&w.text)holder.append(el('p','dash-widget-text',w.text));
   }else if(w.text)body.append(el('p','dash-widget-text',w.text));
-  else if(w.loading||!w.at&&!w.error)body.append(skeleton());
+  // The very first load only: a refresh keeps what is shown and spins in the corner (no text, no shift).
+  else if(!w.at&&!w.error)body.append(skeleton());
   else if(!w.error)body.append(el('p','dash-widget-empty','Пока нет данных.'));
  }
  function meta(w,d){
@@ -37,19 +38,19 @@
   // An example is marked once, in the dashboard's header; its widgets need no «снимок» each.
   if(d?.demo){box.hidden=true;return box;}
   if(!w.live)box.append(el('span','dash-tag','снимок'));
-  if(w.loading)box.append(el('span','dash-widget-loading','обновляю…'));
-  else if(w.at){const t=window.timeElement?window.timeElement(w.at,{prefix:'Обновлено: '}):el('span',null,new Date(w.at).toLocaleString(window.petyaLocale));box.append(t);}
+  if(w.at){const t=window.timeElement?window.timeElement(w.at,{prefix:'Обновлено: '}):el('span',null,new Date(w.at).toLocaleString(window.petyaLocale));box.append(t);}
   return box;
  }
  function widget(d,w,{compact=false}={}){
-  const card=el('article','dash-widget');card.dataset.size=w.size;card.dataset.id=w.id;card.dataset.kind=w.kind;
+  const card=el('article','dash-widget');card.dataset.size=w.size;card.dataset.id=w.id;card.dataset.kind=w.kind;card.classList.toggle('refreshing',!!w.loading);
   const head=el('header','dash-widget-head'),names=el('div','dash-widget-names'),title=el('h3','dash-widget-title',w.title);title.title=w.describe;
   names.append(title,meta(w,d));head.append(names);
+  const spin=el('span','dash-widget-spin');spin.setAttribute('role','status');spin.setAttribute('aria-label','Обновляю');head.append(spin);
   if(Number.isFinite(w.count)&&w.count!==null)head.append(el('span','dash-count',String(w.count)));
   if(!compact){
    const handle=el('span','dash-widget-drag');handle.innerHTML=icon(ICON.drag);handle.title='Перетащите за заголовок, чтобы переставить';head.prepend(handle);
    const tools=el('div','dash-widget-tools');
-   if(w.live){const r=button('Обновить',ICON.refresh,()=>call('refresh',d.id,w.id).then(paint).catch(fail),'dash-tool');if(w.loading)r.classList.add('loading');tools.append(r);}
+   if(w.live){const r=button('Обновить',ICON.refresh,()=>{card.classList.add('refreshing');r.classList.add('loading');call('refresh',d.id,w.id).then(paint).catch(fail).finally(()=>{card.classList.remove('refreshing');r.classList.remove('loading');});},'dash-tool');if(w.loading)r.classList.add('loading');tools.append(r);}
    const more=button('Действия с виджетом',ICON.more,()=>kit().menu(more,async()=>widgetMenu(d,w),option=>option.run()),'dash-tool');
    tools.append(more);head.append(tools);
   }
@@ -196,7 +197,7 @@
   if(d.start)sub.append(el('span',null,'стартовый экран проекта'));
   names.append(h,sub);left.append(names);
   const tools=el('div','dash-head-tools');
-  const refresh=button('Обновить всё',ICON.refresh,()=>{refresh.classList.add('loading');call('refresh',d.id,'').then(paint).catch(fail).finally(()=>refresh.classList.remove('loading'));},'dash-ghost');refresh.append(' Обновить');
+  const refresh=button('Обновить всё',ICON.refresh,()=>{refresh.classList.add('loading');screen.querySelectorAll('.dash-widget').forEach(c=>{if(c.querySelector('.dash-tool[aria-label="Обновить"]'))c.classList.add('refreshing');});call('refresh',d.id,'').then(paint).catch(fail).finally(()=>{refresh.classList.remove('loading');screen.querySelectorAll('.dash-widget.refreshing').forEach(c=>c.classList.remove('refreshing'));});},'dash-ghost');refresh.append(' Обновить');
   const add=button('Добавить виджет',ICON.plus,()=>adder.hidden?openAdder(d):(adder.hidden=true),'primary dash-add');add.append(' Виджет');
   tools.append(refresh,add);
   const more=button('Действия с дашбордом',ICON.more,()=>kit().menu(more,async()=>dashboardMenu(d),o=>o.run()),'dash-tool');tools.append(more);
@@ -264,7 +265,7 @@
  // Widgets report their refresh; the open screen and the start dashboard repaint.
  let pending=null;
  window.petyaEvents.onDashboards?.(state=>{
-  if(state.id===openId&&current){const w=current.widgets.find(x=>x.id===state.widgetId);if(w&&state.loading){w.loading=true;const node=screen.querySelector('.dash-widget[data-id="'+state.widgetId+'"] .dash-widget-meta');node?.replaceWith(meta(w,current));}}
+  if(state.id===openId&&current){const w=current.widgets.find(x=>x.id===state.widgetId);if(w&&state.loading){w.loading=true;const card=screen.querySelector('.dash-widget[data-id="'+state.widgetId+'"]');card?.classList.add('refreshing');card?.querySelector('.dash-tool[aria-label="Обновить"],.dash-tool[title="Обновить"]')?.classList.add('loading');}}
   clearTimeout(pending);pending=setTimeout(async()=>{if(openId&&state.id===openId)paint(await call('peek',openId).catch(()=>null));if(start?.dataset.id===state.id)drawStart(true);},150);
  });
 

@@ -12,7 +12,8 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  const s=globalThis.petyaTestServices;
  // A read the dashboard can refresh: the «Крэши» extension answers with a chart (stands in for Sentry here).
  const crashes=require('../src/extensions/crashes/feature.cjs');let reads=0;
- crashes.turn=async(sx,command)=>{reads++;return require('../src/extensions/app-kit.cjs').reply(sx,command,{by:'Крэши',text:'Крэшей: '+reads,data:{charts:[{type:'bars',title:'Крэши по дням',rows:[{label:'пн',value:3+reads},{label:'вт',value:5},{label:'ср',value:2}]}]}});};
+ crashes.turn=async(sx,command)=>{reads++;return require('../src/extensions/app-kit.cjs').reply(sx,command,{by:'Крэши',text:'Крэшей: '+reads,data:{charts:[{type:'bars',title:'Крэши по дням',rows:[{label:'пн',value:3+reads},{label:'вт',value:5},{label:'ср',value:2}]}]}});}
+ crashes.crashesTurn=(...a)=>crashes.turn(...a);// the widget reads the card directly (dashboard.load);
  s.settings.extension_crashes='true';
  await js('window.chatNavigationReady');await js("view('home')");
  const send=require('./chat-send.cjs')(win);await js("selectDialogueTopic('')");await send('Привет');
@@ -30,6 +31,16 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await wait("document.querySelector('.dash-widget[data-kind=extension] .chart-card')&&document.querySelector('.dash-widget[data-kind=extension] .dash-widget-meta time')",'refreshed widget drawn by the charts renderer');
  assert(reads>=1);assert.equal(s.dialogue.state.topics.find(t=>t.id===id).messages.length,6,'refresh writes nothing to the chat');
  assert.equal(await js("document.querySelector('.dash-widget[data-kind=snapshot] .dash-widget-meta').textContent.startsWith('снимок')"),true);
+ // A refresh keeps the card: a spinner in the corner, no «обновляю…» text, the same height and the same content.
+ {const slow=crashes.turn;crashes.turn=async(...a)=>{await new Promise(r=>setTimeout(r,900));return slow(...a);};
+  const sel=".dash-widget[data-kind=extension]";
+  const before=await js("(()=>{const c=document.querySelector('"+sel+"');return {h:c.offsetHeight,text:c.querySelector('.dash-widget-meta').textContent};})()");
+  await js("document.querySelector('"+sel+" .dash-tool[aria-label=\"Обновить\"]').click()");
+  await wait("document.querySelector('"+sel+"')?.classList.contains('refreshing')",'the card is marked as refreshing');
+  const during=await js("(()=>{const c=document.querySelector('"+sel+"'),sp=c.querySelector('.dash-widget-spin');document.querySelectorAll('.dash-widget').forEach(n=>n.blur?.());return {h:c.offsetHeight,meta:c.querySelector('.dash-widget-meta').textContent,chart:!!c.querySelector('.chart-card'),pos:getComputedStyle(sp).position,anim:getComputedStyle(sp).animationName};})()");
+  assert.equal(during.h,before.h,'no shift while refreshing');assert(!/обновляю/i.test(during.meta),during.meta);assert.equal(during.meta,before.text,'the meta line keeps its time');
+  assert(during.chart,'the content stays while refreshing');assert.equal(during.pos,'absolute');assert.equal(during.anim,'dash-spin');
+  await wait("!document.querySelector('"+sel+"')?.classList.contains('refreshing')",'the spinner goes away');crashes.turn=slow;}
  await wait("[...document.querySelectorAll('.project-dashboard-row button')].some(b=>b.getAttribute('aria-current')==='true')",'sidebar row');
  await shot('dashboard');
  // Widget menu: size.
