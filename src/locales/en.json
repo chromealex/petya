@@ -15544,6 +15544,7 @@
   "профиль пока не найден — проверка Slack неполная": "profile not found yet — the Slack check is incomplete",
   "связана с": "relates to",
   "совпадений.": "matches.",
-  "Не удалось получить доступ к сервису.": "Couldn't get access to the service."
+  "Не удалось получить доступ к сервису.": "Couldn't get access to the service.",
+  "Подключите Jira в каталоге приложений.": "Connect Jira in the app catalog."
  }
 }

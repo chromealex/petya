@@ -20,8 +20,9 @@ async function turn(s,command){
 module.exports={name:'jira',defaults:{},validate,turn,
  setup(s){
   // The same live getters main.cjs gave the old src/jira-setup.cjs.
-  require('./setup.cjs')({get contextFor(){return s.contextFor;},get delegation(){return require('../../agents.cjs').delegation;},get dialogue(){return s.dialogue;},get handle(){return s.handle;},get projectMemory(){return s.projectMemory;},get settings(){return s.settings;},get modules(){return s.modules;},get taskDuplicates(){return s.taskDuplicates;},get text(){return s.text;},get workSkills(){return s.workSkills;},get workspace(){return s.workspace;}});
+  const {routed}=require('./setup.cjs')({get contextFor(){return s.contextFor;},get delegation(){return require('../../agents.cjs').delegation;},get dialogue(){return s.dialogue;},get handle(){return s.handle;},get projectMemory(){return s.projectMemory;},get settings(){return s.settings;},get modules(){return s.modules;},get taskDuplicates(){return s.taskDuplicates;},get text(){return s.text;},get workSkills(){return s.workSkills;},get workspace(){return s.workspace;}});
   // «Команда» → a person's card → «В сервисах» → Jira: people of the allowed projects (src/extensions/jira/team-field.js).
   s.handle('teamJiraSearch',query=>require('./team-search.cjs').search(s.workspace,query));
-  return {};
+  // The route settings of a Jira project id, for the drafts and checks of the core (src/dictation-setup.cjs `routed`).
+  return {jiraRouted:routed};
  }};

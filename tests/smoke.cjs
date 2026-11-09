@@ -78,6 +78,8 @@ module.exports = async (win, workspace) => {
     view('home');
 
     if (document.querySelectorAll('[data-module]').length !== optionalModules.length) throw new Error('Missing module selection');
+    // The build flows belong to the «Сборки» app (src/extensions/ci-builds): added here, as a user would add it from the catalog.
+    await window.petya.saveSettings({'extension_ci-builds':'true'});
     const repairDisabled=await window.petya.converse('Почини падающую сборку');if(!repairDisabled.text.includes('Включите модуль Claude'))throw Error('Repair must require an enabled executor');
     const buildQuestionDisabled=await window.petya.converse('Петя, что с билдом');if(!buildQuestionDisabled.integrationOffers?.some(o=>o.service==='slack')&&!(buildQuestionDisabled.computerApproval||/Slack недоступен как сервис/.test(buildQuestionDisabled.text)))throw Error('Build question should offer Slack connection, browser or reading the Slack window');
     if (!document.getElementById('attachment-pick')) throw new Error('Missing attachments UI');

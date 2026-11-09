@@ -57,7 +57,6 @@ const REMAINING={
  'src/workspace.cjs':{why:'the Jira workspace (feature decomposition into Jira issues) is not moved yet',lines:/extensions\/jira\/routing\.cjs/},
  'src/history.cjs':{why:'history of the Jira workspace batches',lines:/extensions\/jira\/routing\.cjs/},
  'src/agents.cjs':{why:'agents re-check the Jira project of a delegated issue',lines:/extensions\/jira\/routing\.cjs/},
- 'src/build-repair-sources.cjs':{why:'build repair reads Jira attachments of allowed projects',lines:/extensions\/jira\/routing\.cjs/},
  'src/learning-setup.cjs':{why:'learning names Jira project keys in global phrases',lines:/extensions\/jira\/routing\.cjs/},
  'src/project-catalog.cjs':{why:'the project catalogue lists Jira projects',lines:/extensions\/jira\/selection\.cjs/},
  'src/slack-setup.cjs':{why:'the team fill falls back to Jira assignees',lines:/extensions\/jira\/team-roster\.cjs/},
