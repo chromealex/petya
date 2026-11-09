@@ -46,3 +46,4 @@ project folder.
 | D9 | rollback | D8 plus four weak families: new 39/54 (25 exact), v22 35/42, familiar 796/801 |
 | D10 | in the group | D9 plus open-recipient, code, cancel, permission: new 46/54 (30 exact), v22 36/42, familiar 797/801 |
 | D11 | rejected | D10 on quote, cancel, code, two-recipients: new 41/54 (33 exact), v22 36/42, familiar 798/801 |
+| D12 | rejected | D10 on 20 fresh dialogues per family: new 44/54 (36 exact), v22 36/42, familiar 798/801 |
