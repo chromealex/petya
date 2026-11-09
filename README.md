@@ -7,7 +7,7 @@
 **A voice work assistant for game and app teams that runs on your own computer.**<br>
 Say «Петя» — he hears the meeting, reads Slack and Jira, writes the task, and asks before he sends anything.
 
-[![Version](https://img.shields.io/badge/version-0.11.0-2ea043)](docs/HISTORY.md)
+[![Version](https://img.shields.io/badge/version-0.11.1-2ea043)](docs/HISTORY.md)
 [![Tests](https://github.com/chromealex/petya/actions/workflows/test.yml/badge.svg)](https://github.com/chromealex/petya/actions/workflows/test.yml)
 [![Platforms](https://img.shields.io/badge/macOS%20%7C%20Windows-lightgrey)](#install)
 [![Local models](https://img.shields.io/badge/models-local%20(Ollama%2C%20whisper.cpp)-8957e5)](#privacy)

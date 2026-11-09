@@ -8,6 +8,11 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.11.1 — agent board tidy-up
+
+- The agent board no longer shows chats of archived projects.
+- The rail item is called «Агенты» instead of «Claude и Codex».
+
 ## 0.11.0 — Google Drive, people records, more messengers
 
 - **Google Drive**: find files, read a Google Doc and answer from it with checked quotes, save an answer as a new Doc.
