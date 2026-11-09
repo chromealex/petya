@@ -3059,7 +3059,7 @@
   "Ошибка:": "Error:",
   "Ошибки и ANR приложений": "App errors and ANRs",
   "ПАМЯТЬ И ФОНОВАЯ РАБОТА": "MEMORY AND BACKGROUND WORK",
-  "ПЕТЯ / 0.11.3": "PETYA / 0.11.3",
+  "ПЕТЯ / 0.11.4": "PETYA / 0.11.4",
   "ПОНИМАНИЕ / НЕОБЯЗАТЕЛЬНО": "UNDERSTANDING / OPTIONAL",
   "ПОСЛЕДНЯЯ РЕПЛИКА": "LAST UTTERANCE",
   "ПРОВЕРКА ЗАДАЧИ": "TASK CHECK",
@@ -12759,6 +12759,9 @@
   "Петя ещё запускается.": "Petya is still starting.",
   "Выключенные сервисы": "Switched-off services",
   "выключен в проекте «": "is switched off in the project «",
-  "выключен в этом проекте": "is switched off in this project"
+  "выключен в этом проекте": "is switched off in this project",
+  "Jira не вернула задачу": "Jira did not return issue",
+  "Подключите Jira, чтобы я мог открыть задачу": "Connect Jira so I can open issue",
+  "Ссылка ведёт на другой сайт Jira (": "The link points to another Jira site ("
  }
 }

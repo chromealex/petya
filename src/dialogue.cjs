@@ -22,6 +22,8 @@ function jiraHeard(text){
 // A read-only question about tasks in any word order: «покажи мои задачи», «задачи посмотри»,
 // «в Jira задачи посмотри», «сколько у меня задач», «какие задачи открыты», «глянь джиру».
 function taskListRequest(text){
+ // A Jira issue link with a request to look at it («посмотри эту таску»), or a bare link: read that issue.
+ if(/https?:\/\/[\w.-]+\/browse\/[A-Z][A-Z0-9_]*-\d+/.test(text)&&!/(?:^|\s)(?:созда|завед|заведи|закр[оы]|назнач|перенес|перевед|удал|измен|помен|отправ|напиш|добав|разбей|декомпоз|оцени)\p{L}*/iu.test(text))return true;
  if(require('./personal-tasks.cjs').personalTasks(text))return true;
  if(/^(?:(?:а|и|теперь)\s+)?(?:(?:какие|покажи|перечисли|прочитай|посмотри|проверь)\s+(?:там\s+)?(?:таски|задачи)(?:\s+(?:есть|в|по|для)(?:\s+.*)?)?|(?:таски|задачи)\s+какие)[.!?]*$/iu.test(text.trim()))return true;
  const s=jiraHeard(text).replace(/^петя[\s,:.!?—-]*/u,'').replace(/[.!?]+$/u,'').trim();

@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.11.4 — a Jira link opens that issue
+
+- A Jira issue link («https://…/browse/BW-4569 посмотри эту таску», or just the link) or «посмотри задачу BW-12» shows that issue — type, status, priority, assignee, due date, version, parent, description, the latest comments and links, with its card — instead of the project's task list. Only the connected Jira site and the projects allowed in the connection are read.
+
 ## 0.11.3 — project settings tidy-up
 
 - Project settings in one column, with tree lines, chips and spinners.

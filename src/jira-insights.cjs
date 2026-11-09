@@ -14,6 +14,8 @@ function evidenceIssue(issue){
 class JiraInsights {
  constructor(workspace){this.w=workspace;}
  async read(command,topic,context='',kind='bugs',options={}){
+  // One issue named by a link or key («посмотри эту таску», «что в BW-12?»): that issue, not the project's list.
+  if(kind==='tasks'&&!options.reportRows){const one=require('./jira-issue.cjs').named(command);if(one&&(one.host||allowed(this.w.settings()).includes(one.key.split('-')[0])))return require('./jira-issue.cjs').read(this.w,one);}
   const tasks=kind==='tasks',personalFilter=tasks?require('./personal-tasks.cjs').details(command,topic):null,personal=!!personalFilter;
   const personalStatus=personalFilter?.status||'',personalOverdue=!!personalFilter?.overdue;
   const unversioned=personal&&!/верс|релиз/iu.test(command);
