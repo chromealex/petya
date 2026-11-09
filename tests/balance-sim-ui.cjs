@@ -83,6 +83,6 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async win=>{
  await js("(()=>{const b=document.getElementById('card-shot');const home=document.querySelector('.message-content')?.parentNode||document.body;for(const c of b.querySelectorAll('.sim-card'))home.append(c);b.remove();})()");
  const file2=await require('./card-shot.cjs')(win,'.sim-card[data-shot="1"]','petya-balance-sim-whatif',{width:700});
  app.deps.metrics=null;
- console.log('Balance simulation cards: economy with file:line, price ladder, curve reading, loop form, metrics calibration, run only on the button with the edited loop, bands, milestones, tabs, what-if before → after, Sheets slot, safe text passed · '+file+' · '+file2);
+ console.log('Balance simulation cards ('+file+', '+file2+'): economy with file:line, price ladder, curve reading, loop form, metrics calibration, run only on the button with the edited loop, bands, milestones, tabs, what-if before → after, Sheets slot, safe text passed');
 }};
 require('../src/main.cjs');
