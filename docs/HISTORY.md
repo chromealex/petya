@@ -8,6 +8,12 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.12.4 — a macOS download in every release
+
+- The Release workflow builds Petya for Apple Silicon Macs on GitHub as well: the speech runtime (whisper.cpp with Metal and the base model), every binary signed with the Developer ID and the hardened runtime, `Petya.dmg` notarized by Apple and stapled. It is attached to the release next to `Petya-Setup.exe`.
+- Without the signing secrets the release is Windows only, and a failed Mac build does not hold the Windows release back.
+- The channel post says «Скачать для macOS и Windows» when the release has the Mac image.
+
 ## 0.12.3 — Petya knows which colleague is you
 
 - «Команда» has «Это я» on each card (one card at most) and an «это вы» mark next to the name. Without a mark Petya finds your card himself by your Jira email or your full name.

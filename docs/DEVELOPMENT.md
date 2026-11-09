@@ -39,6 +39,25 @@ Only via `python3 scripts/build.py` (`--mac`, `--win`, or both platforms without
 
 Every change raises the version with `node scripts/bump-version.cjs patch|minor` and adds a `## x.y.z — …` section at the top of [HISTORY.md](HISTORY.md); `tests/version.cjs` checks both. Pushing the tag `v<version>` (or running the Release workflow) builds `Petya-Setup.exe` in GitHub Actions and publishes the release with that section as its notes.
 
+### Releases
+
+Pushing the tag `v<version>` (or running the Release workflow on main) builds both downloads in GitHub Actions and publishes the release with the HISTORY section as its notes, then announces it in Slack and Telegram (`scripts/announce.cjs`):
+
+- `Petya-Setup.exe` — on Windows, `python scripts/build.py --win`.
+- `Petya.dmg` — on an Apple Silicon Mac: `scripts/setup-whisper-mac.sh` builds the speech runtime, `scripts/build.py --mac` with `PETYA_RELEASE_SIGN=1` signs every binary with the hardened runtime and `scripts/entitlements.mac.plist`, and `scripts/package-mac.sh` makes the image, notarizes it with Apple and staples the ticket.
+
+The Mac build needs these repository secrets (Settings → Secrets and variables → Actions); without `MAC_CERTIFICATE` the release has only the Windows installer:
+
+| Secret | What |
+|---|---|
+| `MAC_CERTIFICATE` | the «Developer ID Application» certificate with its private key, exported from Keychain Access as .p12, in base64 (`base64 -i petya.p12 \| pbcopy`) |
+| `MAC_CERTIFICATE_PASSWORD` | the password set when exporting the .p12 |
+| `APPLE_ID` | the Apple ID of the developer account |
+| `APPLE_APP_PASSWORD` | an app-specific password for that Apple ID (account.apple.com → Sign-In and Security → App-Specific Passwords) |
+| `APPLE_TEAM_ID` | the team ID (developer.apple.com → Membership details) |
+
+A failed Mac build does not hold the Windows release back: re-run the failed jobs and `Petya.dmg` is added to the same release.
+
 ## Layout
 
 | Path | Contents |

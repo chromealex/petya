@@ -1,8 +1,8 @@
 name: Release
 # A version tag (v0.9.1) — or a manual run on main, which creates the tag from package.json — builds
-# the Windows installer on Windows, runs the same package and tray start checks as the Tests workflow
-# and attaches Petya-Setup.exe to the GitHub release.
-# The macOS build is signed with the local Developer ID and stays a local build.
+# the Windows installer on Windows and the notarized macOS image on a Mac, runs the same package and start
+# checks as a local build and attaches Petya-Setup.exe and Petya.dmg to the GitHub release.
+# The Mac build needs the signing secrets (docs/DEVELOPMENT.md#releases); without them the release is Windows only.
 on:
   push:
     tags: ['v*']
@@ -25,25 +25,106 @@ jobs:
           python-version: '3.12'
       - run: npm ci --no-audit --no-fund
       - name: The version from package.json
-        id: version
         shell: bash
         run: |
           tag="v$(node -p "require('./package.json').version")"
           if [ "$GITHUB_REF_TYPE" = tag ]; then test "$tag" = "$GITHUB_REF_NAME"; fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
       - name: Build and verify the Windows installer
         run: python scripts/build.py --win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
           PYTHONIOENCODING: utf-8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: Petya-Setup.exe
+          retention-days: 7
+
+  mac:
+    runs-on: macos-latest
+    timeout-minutes: 75
+    env:
+      MAC_CERTIFICATE: ${{ secrets.MAC_CERTIFICATE }}
+    steps:
+      - name: Signing secrets
+        id: secrets
+        run: |
+          if [ -n "$MAC_CERTIFICATE" ]; then echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::No MAC_CERTIFICATE secret: this release has no macOS download."; echo "enabled=false" >> "$GITHUB_OUTPUT"; fi
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.enabled == 'true'
+      - uses: actions/setup-node@v4
+        if: steps.secrets.outputs.enabled == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-python@v5
+        if: steps.secrets.outputs.enabled == 'true'
+        with:
+          python-version: '3.12'
+      - run: npm ci --no-audit --no-fund
+        if: steps.secrets.outputs.enabled == 'true'
+      - name: Speech runtime (whisper.cpp with Metal and the base model)
+        if: steps.secrets.outputs.enabled == 'true'
+        run: scripts/setup-whisper-mac.sh
+      - name: Developer ID into a temporary keychain
+        if: steps.secrets.outputs.enabled == 'true'
+        env:
+          MAC_CERTIFICATE_PASSWORD: ${{ secrets.MAC_CERTIFICATE_PASSWORD }}
+        run: |
+          keychain="$RUNNER_TEMP/petya.keychain-db"; password=$(uuidgen)
+          echo "$MAC_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/petya.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/petya.p12" -k "$keychain" -P "$MAC_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -k "$password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+          rm "$RUNNER_TEMP/petya.p12"
+          security find-identity -v -p codesigning "$keychain"
+      - name: Build and verify Petya.app
+        if: steps.secrets.outputs.enabled == 'true'
+        run: python3 scripts/build.py --mac
+        env:
+          PETYA_RELEASE_SIGN: '1'
+      - name: Petya.dmg, notarized
+        if: steps.secrets.outputs.enabled == 'true'
+        run: scripts/package-mac.sh
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      - uses: actions/upload-artifact@v4
+        if: steps.secrets.outputs.enabled == 'true'
+        with:
+          name: mac
+          path: Petya.dmg
+          retention-days: 7
+      - name: Remove the keychain
+        if: always() && steps.secrets.outputs.enabled == 'true'
+        run: security delete-keychain "$RUNNER_TEMP/petya.keychain-db" || true
+
+  publish:
+    # Windows is required; a failed Mac build still lets the Windows release out (re-run the failed jobs to add it).
+    needs: [windows, mac]
+    if: always() && needs.windows.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
       - name: Publish the release
-        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          MAC_RESULT: ${{ needs.mac.result }}
         run: |
-          tag="${{ steps.version.outputs.tag }}"
+          tag="v$(node -p "require('./package.json').version")"
+          files=(out/Petya-Setup.exe); [ -f out/Petya.dmg ] && files+=(out/Petya.dmg)
+          [ "$MAC_RESULT" = success ] || echo "::warning::The macOS build did not finish ($MAC_RESULT)."
           notes=$(awk -v v="## ${tag#v}" 'index($0,v)==1{f=1;print;next} f&&/^## /{exit} f' docs/HISTORY.md)
-          if gh release view "$tag" >/dev/null 2>&1; then gh release upload "$tag" Petya-Setup.exe --clobber
-          else gh release create "$tag" Petya-Setup.exe --target "$GITHUB_SHA" --title "Петя ${tag#v}" --notes "${notes:-Petya ${tag#v}}"
+          if gh release view "$tag" >/dev/null 2>&1; then gh release upload "$tag" "${files[@]}" --clobber
+          else gh release create "$tag" "${files[@]}" --target "$GITHUB_SHA" --title "Петя ${tag#v}" --notes "${notes:-Petya ${tag#v}}"
             # A new release is announced in Slack and Telegram (.github/workflows/announce.yml); a re-upload is not.
             gh workflow run announce.yml --ref "$GITHUB_REF_NAME" -f kind=app -f id="${tag#v}"; fi
