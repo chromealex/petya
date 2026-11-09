@@ -9,7 +9,7 @@ function fingerprint(collection,item){return createHash('sha256').update(collect
 // «Чему я научился» in Petya's own words; the user may rewrite any of them (state.growth.notes).
 function describe(collection,item){
  if(collection==='dictionary')return item.kind==='correction'?`Когда вы говорите «${item.from}», вы имеете в виду «${item.to}»${item.scope?' — в проекте '+item.scope:''}. Теперь сразу так и понимаю.`:`«${item.from}» для меня теперь означает «${item.to}»${item.scope?' в проекте '+item.scope:''}.`;
- if(collection==='skills')return `На фразы «${item.patterns.join('», «')}» ${{answer:'отвечаю: '+(item.output||''),reminder:'ставлю напоминание',bugs:'проверяю баги',anr:'проверяю ANR'}[item.action]||'реагирую'}.`;
+ if(collection==='skills')return `На фразы «${item.patterns.join('», «')}» ${{answer:'отвечаю: '+(item.output||''),command:'выполняю команду «'+(item.output||'')+'»',bugs:'проверяю баги',anr:'проверяю ANR'}[item.action]||'реагирую'}.`;
  return `Когда вы просите «${item.phrases.join('», «')}», проверяю почту за ${item.days} дн.${item.unread?', только непрочитанные':''}${item.skipPromotions?', без рассылок':''}. ${item.instructions||''}`.trim();
 }
 function record(state,collection,item,before,at,imported=false){

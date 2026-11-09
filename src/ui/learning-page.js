@@ -1,4 +1,4 @@
-// «Обучение» is what Petya learned from the chat: recurring commands with their timers, corrections, reminders,
+// «Обучение» is what Petya learned from the chat: recurring commands with their timers, corrections,
 // mail skills. Things are taught in the chat («Проверяй почту каждые 5 минут», «я имел в виду …», «Научись
 // проверять почту»); this page lists them with deletion. The manual forms stay out of sight.
 (() => {
@@ -9,7 +9,8 @@
  const intro=page.querySelector(':scope>p');if(intro)intro.textContent='Чему Петя научился в разговорах. Учите его прямо в чате — здесь всё видно и можно удалить.';
  // Recurring commands.
  const card=node('article','card learning-recurring');card.innerHTML='<h2>Повторяющиеся команды</h2><p class="small">Скажите в чате, например: «Проверяй почту каждые 5 минут» или «Каждое утро в 9 присылай сводку по задачам». Остановить: «перестань проверять почту».</p><div class="recurring-list"></div>';
- page.querySelector(':scope>h1')?.after(card);
+ // It belongs to the «Команды» tab (page-tabs.js), first among the commands.
+ window.petyaTabs?.mark(card,'commands');const commands=page.querySelector(':scope>[data-page-tab="commands"]');if(commands)commands.before(card);else page.append(card);
  const list=card.querySelector('.recurring-list');let rows=[];
  const left=t=>{const ms=t-Date.now();if(ms<=0)return 'сейчас';const s=Math.round(ms/1000),h=Math.floor(s/3600),m=Math.floor(s%3600/60),sec=s%60;return 'через '+(h?h+' ч '+m+' мин':m?m+' мин '+String(sec).padStart(2,'0')+' с':sec+' с');};
  function draw(items){rows=items||[];list.replaceChildren();

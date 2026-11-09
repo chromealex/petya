@@ -118,7 +118,9 @@ function review(staged,installed){
   category:category?.name||d.category,hue:category?.hue??200,files:staged.files,bytes:staged.bytes,connects:d.connects||'',
   provides:Object.keys(d.provides||{}),uses:d.uses||[],
   downloads:(d.downloads||[]).map(i=>({name:i.name,bytes:typeof i.bytes==='object'?(i.bytes[process.platform]??Math.max(...Object.values(i.bytes))):i.bytes,optional:!!i.optional})),
-  feature:!!d.feature,scripts:d.scripts.length,settings:!!d.settings,iconSvg:d.iconSvg||'',update};
+  feature:!!d.feature,scripts:d.scripts.length,settings:!!d.settings,iconSvg:d.iconSvg||'',
+  // Places in Petya's interface it adds (extension.json "ui"): rail pages and tabs on pages.
+  ui:{pages:(d.ui?.pages||[]).map(p=>({id:p.id,title:p.title})),tabs:(d.ui?.tabs||[]).map(t=>({page:t.page,title:t.title}))},update};
 }
 
 // Moves the reviewed package into place, keeping the previous copy until the new one is in.

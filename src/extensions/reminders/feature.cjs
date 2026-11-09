@@ -3,7 +3,7 @@
 // билд»). Time is read by code (when.cjs), events by reminder triggers (triggers.cjs) that other apps may provide.
 // Reminders belong to the current company, survive restarts and fire as a notification plus a message in the chat
 // where they were made. Nothing is written to any service: triggers only read.
-// Without this app «напомни …» keeps going to Petya's other handlers (recurring commands, the dialogue).
+// Petya's core has no reminders of its own: without this app «напомни …» gets the offer to add it (offer.cjs).
 const path=require('node:path');
 const kit=require('../app-kit.cjs');
 const when=require('./when.cjs');
@@ -189,6 +189,12 @@ function setup(s,{now:clock=()=>Date.now(),interval=15000}={}){
  const triggers=registry.create(s);
  const reminders=service.create({s,file,now:clock,triggers,publish,post,system});
  instances.set(company,reminders);
+ // Reminders Petya's core kept before 0.15 move here once (migrate.cjs).
+ try{require('./migrate.cjs').migrate(s,reminders);}catch(e){console.error('Reminders migration:',e.message);}
+ // The one-time note about that move, for the notification center (reminder-notifications.js).
+ const moved=()=>{const n=reminders.note();if(!n||n.kind!=='migrated'||n.seen)return [];
+  return [{id:'reminders:moved',title:'Напоминания',kind:'info',version:'moved',moved:true,
+   text:'Напоминания теперь в приложении «Напоминания»: их список — на странице «Навыки», вкладка «Напоминания». Ничего не потерялось.'+(n.added?' Приложение «Напоминания» добавлено само: оно работает на этом компьютере и никуда не подключается.':'')}];};
  let timer=null;
  if(!s.smoke&&process.env.PETYA_VERIFY_BUILD!=='1'){
   timer=setInterval(()=>{if(company!==s.companyId){clearInterval(timer);return;}reminders.tick().catch(e=>console.error('Reminders:',e.message));},interval);timer.unref?.();
@@ -203,7 +209,8 @@ function setup(s,{now:clock=()=>Date.now(),interval=15000}={}){
   remove:id=>reminders.remove(String(id)),
   restore:id=>reminders.restore(String(id)),
   checkNow:id=>reminders.checkNow(String(id)),
-  notices:()=>reminders.notices(),
+  notices:()=>[...reminders.notices(),...moved()],
+  noteSeen:()=>{const n=reminders.note();if(n)reminders.note({...n,seen:true});return true;},
   now:()=>clock()
  };
  return {reminders:{service:reminders,now:clock,triggers},ipc};

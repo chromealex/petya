@@ -6,7 +6,6 @@
  function disclosure(node,title){const d=el('details',null,'ux-editor'),s=el('summary',title);node.before(d);d.append(s,node);d.addEventListener('invalid',()=>d.open=true,true);return d;}
  function watchList(list,apply){new MutationObserver(apply).observe(list,{childList:true,subtree:true,characterData:true});apply();}
  function filters(list,placeholder,match){const bar=el('div',null,'ux-filters'),q=search(placeholder),count=el('span',null,'small');bar.append(q,count);bar.addEventListener('input',event=>event.stopPropagation());list.before(bar);const apply=()=>{let total=0,shown=0;for(const row of list.children){if(row.matches('[data-empty]'))continue;total++;const visible=match?match(row,q.value.toLocaleLowerCase()):row.textContent.toLocaleLowerCase().includes(q.value.toLocaleLowerCase());row.classList.toggle('ux-filtered',!visible);if(visible)shown++;}count.textContent=total?(shown?'Показано: '+shown+' из '+total:'Ничего не найдено'):'';bar.classList.toggle('is-empty',!total&&!q.value);};q.oninput=apply;list.addEventListener('invalid',event=>{for(let n=event.target;n&&n!==list;n=n.parentElement){n.classList.remove('ux-filtered');if(n.tagName==='DETAILS')n.open=true;}},true);watchList(list,apply);return {bar,q,apply};}
- function segmented(host,items,onChange){const bar=el('div',null,'ux-tabs');bar.setAttribute('role','group');bar.setAttribute('aria-label','Разделы');const select=id=>{for(const b of bar.children)b.setAttribute('aria-pressed',String(b.dataset.tab===id));onChange(id);};for(const [id,title]of items){const b=button(title,()=>select(id));b.dataset.tab=id;bar.append(b);}host.append(bar);return {bar,select};}
  const day=at=>new Date(at).toLocaleDateString(window.petyaLocale||'ru-RU');
  // Every section keeps its own result message, including failures from asynchronous actions.
  for(const page of document.querySelectorAll('.view:not(#home)')){const result=el('p',null,'ux-page-status');result.hidden=true;result.setAttribute('role','status');page.querySelector('h1')?.after(result);}
@@ -62,7 +61,8 @@
    settingsEmpty.textContent=services&&!added?'Пока нет добавленных сервисов. Выберите приложение в каталоге.':'По этим фильтрам ничего не найдено.';
  };
  const catalogButton=button('Каталог приложений',()=>window.openAppCatalog());catalogButton.className='app-catalog-trigger';
- const settingsTabs=segmented(controls,[['services','Сервисы'],['voice','Голос и модели'],['app','Приложение']],id=>{group=id;filterSettings();});
+ // The page's tab bar is the shared one (page-tabs.js): apps may add tabs here; their tab hides the settings list.
+ const settingsTabs=window.petyaTabs.core('settings',[{id:'services',title:'Сервисы'},{id:'voice',title:'Голос и модели'},{id:'app',title:'Приложение'}],{fallback:'*',host:controls,onSelect:id=>{filterRow.hidden=!id;if(id){group=id;filterSettings();}}});
  const filterRow=el('div',null,'ux-filters');filterRow.append(find,statusFilter,catalogButton);controls.append(filterRow);find.oninput=filterSettings;statusFilter.onchange=()=>{state=statusFilter.value;filterSettings();};
  window.revealSettings=card=>{find.value='';state='all';statusFilter.value='all';settingsTabs.select(category(card));const d=card.querySelector('.settings-disclosure');if(d)d.open=true;card.scrollIntoView({block:'nearest'});};
  for(const card of cards()){const heading=card.querySelector('h2');if(heading){heading.textContent=heading.textContent.replace(/whisper\.cpp/i,'Распознавание речи · Whisper').replace(/^Ollama$/,'Локальная модель · Ollama');}
@@ -82,10 +82,11 @@
  $('settings-form').addEventListener('input',()=>{note.textContent='Есть несохранённые изменения';save.classList.add('primary');idle(false);});document.addEventListener('petya-settings-displayed',()=>{if(savePanel.classList.contains('is-idle'))return;note.textContent='Настройки сохранены';save.classList.remove('primary');idleTimer=setTimeout(()=>idle(true),2500);});}
  // Permissions: keep long recovery advice available, without filling the whole page.
  const permissionList=$('permission-list');if(permissionList)new MutationObserver(()=>{for(const p of permissionList.querySelectorAll('p.small'))if(p.textContent.length>240&&!p.closest('details'))disclosure(p,'Как восстановить доступ');}).observe(permissionList,{childList:true});
- // Learning: separate corrections, phrase commands and reminders.
- const learning=$('learning');learning.querySelector('h1').textContent='Навыки';learning.querySelector(':scope>p:not(.ux-page-status)').textContent='Исправляйте распознавание, добавляйте команды и управляйте напоминаниями.';
- const learningGroups=new Map();for(const card of learning.querySelectorAll(':scope>article')){const text=card.querySelector('h2')?.textContent||'';learningGroups.set(card,/Напоминания/.test(text)?'reminders':/словарь|исправления/i.test(text)?'dictionary':'commands');}
- const tabsHost=el('div');learning.querySelector(':scope>p:not(.ux-page-status)').after(tabsHost);const learnTabs=segmented(tabsHost,[['dictionary','Исправления фраз'],['commands','Команды'],['reminders','Напоминания']],id=>{for(const [card,tab]of learningGroups)card.classList.toggle('ux-filtered',tab!==id);});learnTabs.select('dictionary');
+ // Learning: phrase corrections and voice commands (scenarios join below); apps add their own tabs (page-tabs.js).
+ const learning=$('learning');learning.querySelector('h1').textContent='Навыки';learning.querySelector(':scope>p:not(.ux-page-status)').textContent='Исправляйте распознавание и добавляйте свои команды.';
+ for(const card of learning.querySelectorAll(':scope>article')){const text=card.querySelector('h2')?.textContent||'';window.petyaTabs.mark(card,/словарь|исправления/i.test(text)?'dictionary':'commands');}
+ window.petyaTabs.mark(learning.querySelector(':scope>.learning-undo'),'*');
+ const learningCore=[{id:'dictionary',title:'Исправления фраз'},{id:'commands',title:'Команды'}];
  const growth=$('growth-card');if(growth){growth.querySelector('h2').textContent='Уровень Пети';const update=()=>growth.hidden=!$('growth-content').textContent.trim();watchList($('growth-content'),update);}
  // Instruction scenarios: list first, editor only when requested.
  const skills=$('skills');if(skills){skills.querySelector('h1').textContent='Сценарии';skills.querySelector(':scope>p:not(.ux-page-status)').textContent='Сценарий задаёт порядок работы и формат ответа. Выберите готовый или создайте свой. Голосовые команды и исправления фраз — в разделе «Словарь и команды».';
@@ -98,21 +99,22 @@
  const explanation=label.nextElementSibling;if(explanation?.tagName==='P')disclosure(explanation,'Формат импорта и ограничения');
  filters($('instruction-list'),'Найти сценарий');
  const testRow=el('div',null,'ux-filters'),example=search('Пример запроса для проверки');example.type='text';const test=button('Проверить на примере',run(async()=>{if(!$('instruction-name').value||!example.value.trim())throw Error('Сохраните сценарий и введите пример запроса.');const rows=await window.petya.skillsList();const saved=rows.find(s=>s.name===$('instruction-name').value);if(!saved)throw Error('Сначала сохраните сценарий.');$('command').value='/'+saved.name+' '+example.value;view('home');await processCommand($('command').value);}));testRow.append(example,test);$('instruction-result').after(testRow);}
- // One section for everything Petya is taught: scenarios, voice commands, phrase corrections and reminders.
+ // One section for everything Petya is taught: scenarios, voice commands and phrase corrections.
+ let learnTabs;
  if(skills){const scenarios=el('div',null,'learning-scenarios');scenarios.append(...[...skills.children].filter(n=>n.tagName!=='H1'&&!n.matches('p:not(.ux-page-status)')));
   const intro=el('p',skills.querySelector(':scope>p:not(.ux-page-status)')?.textContent.replace(/\s*Голосовые команды[^.]*\./,'')||'','small learning-scenarios-intro');scenarios.prepend(intro);
-  tabsHost.after(scenarios);learningGroups.set(scenarios,'scenarios');skills.remove();
-  learning.querySelector('h1').textContent='Навыки';learning.querySelector(':scope>p:not(.ux-page-status)').textContent='Сценарии ответов, голосовые команды, исправления распознавания и напоминания.';
+  window.petyaTabs.mark(scenarios,'scenarios');skills.remove();
+  learning.querySelector('h1').textContent='Навыки';learning.querySelector(':scope>p:not(.ux-page-status)').textContent='Сценарии ответов, голосовые команды и исправления распознавания.';
   const skillsNav=document.querySelector('aside .nav[data-view="skills"]'),learningNav=document.querySelector('aside .nav[data-view="learning"]');
   if(skillsNav)skillsNav.hidden=true;if(learningNav){learningNav.setAttribute('aria-label','Навыки');if(learningNav.title)learningNav.title='Навыки';const label=learningNav.querySelector('span');if(label)label.textContent='Навыки';}
-  const tab=learnTabs.bar.ownerDocument.createElement('button');tab.type='button';tab.dataset.tab='scenarios';tab.textContent='Сценарии';tab.onclick=()=>learnTabs.select('scenarios');learnTabs.bar.prepend(tab);
   // Opening scenarios loads them through the original handler; «skills» links land on this tab.
-  const originalView=window.view;let opening=false;
+  const originalView=window.view;let opening=false,ready=false;
+  learnTabs=window.petyaTabs.core('learning',[{id:'scenarios',title:'Сценарии'},...learningCore],{fallback:'commands',onSelect:id=>{if(ready&&id==='scenarios'&&!opening&&skillsNav){opening=true;Promise.resolve(skillsNav.onclick?.()).finally(()=>{opening=false;});}}});
+  learnTabs.bar.parentNode.after(scenarios);
   window.view=name=>{if(name!=='skills')return originalView(name);originalView('learning');if(!opening){opening=true;try{learnTabs.select('scenarios');}finally{opening=false;}}};
-  const select=learnTabs.select;learnTabs.select=id=>{select(id);if(id==='scenarios'&&!opening&&skillsNav){opening=true;Promise.resolve(skillsNav.onclick?.()).finally(()=>{opening=false;});}};
-  for(const b of learnTabs.bar.children)b.onclick=()=>learnTabs.select(b.dataset.tab);
-  select('scenarios');
+  learnTabs.select('scenarios');ready=true;
   document.addEventListener('petya-view',event=>{if(event.detail==='learning'&&!opening&&learnTabs.bar.querySelector('[data-tab="scenarios"][aria-pressed="true"]'))learnTabs.select('scenarios');});}
+ else{learnTabs=window.petyaTabs.core('learning',learningCore,{fallback:'commands'});learnTabs.select('dictionary');}
  // Histories: common search plus state and date filters; keep operation previews intact.
  const history=$('batch-history');let period='all',result='all',projectHistory='';const hf=filters(history,'Найти задачу или проект',(row,q)=>row.textContent.toLocaleLowerCase().includes(q)&&(!projectHistory||row.dataset.project===projectHistory)&&(period==='all'||Number(row.dataset.at)>=Date.now()-Number(period)*86400000)&&(result==='all'||row.dataset.result===result));const dates=el('select'),states=el('select');dates.setAttribute('aria-label','Период истории');states.setAttribute('aria-label','Результат действия');for(const [v,t]of [['all','За всё время'],['1','Сегодня и последние сутки'],['7','За неделю'],['30','За месяц']])dates.add(new Option(t,v));for(const [v,t]of [['all','Все результаты'],['done','Выполнено'],['attention','Требует внимания']])states.add(new Option(t,v));const hp=el('select');hp.setAttribute('aria-label','Проект истории');hp.add(new Option('Все проекты',''));hf.bar.append(dates,states,hp);hp.onchange=()=>{projectHistory=hp.value;hf.apply();};new MutationObserver(()=>{const value=hp.value;hp.replaceChildren(new Option('Все проекты',''),...[...new Set([...history.children].map(r=>r.dataset.project).filter(Boolean))].map(p=>new Option(p,p)));hp.value=value;}).observe(history,{childList:true});dates.onchange=()=>{period=dates.value;hf.apply();};states.onchange=()=>{result=states.value;hf.apply();};
  $('agents').querySelector('h1').textContent='Агенты';const handoff=button('Передать задачу',()=>{view('home');$('command').value='Передай задачу Codex: ';$('command').focus();},'primary');$('refresh-agents').before(handoff);filters($('agent-history'),'Найти передачу или проект');run(refreshAgents)();

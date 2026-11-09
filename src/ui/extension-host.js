@@ -52,6 +52,8 @@
   if(typeof showDialogueMessages==='function'&&typeof chatHistory!=='undefined')showDialogueMessages(chatHistory);
  }
  window.extensionHost={source,allowed,refresh,reload,entries:()=>entries,
+  // The renderer scripts of one added extension, loaded once (pages and tabs it adds: extension-places.js).
+  async scripts(id){const entry=entries.find(e=>e.id===id);if(!entry)throw Error('Расширение не найдено.');for(const [file] of entry.scripts)await load(source(entry,file));},
   async remove(id){entries=await window.petya.feature('extensionUI','uninstall',id);const card=document.querySelector('[data-extension="'+id+'"]');if(card)card.hidden=true;document.dispatchEvent(new Event('petya-extensions-changed'));},
   // A card is interface, not message text: what the renderer adds to the message gets [data-i18n], so the
   // interface translation (i18n.js) covers it while the message text around it and [data-no-i18n] inside it stay.

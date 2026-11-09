@@ -28,7 +28,7 @@ function apply(root, { fsImpl = fs, now = Date.now() } = {}) {
     if (KEEP.has(name) || name.startsWith('.removed-companies-')) continue;
     move(path.join(root, name), path.join(removed, name));
   }
-  // The first company's per-app data (reminders, journal, caches) shares the folder of installed extensions:
+  // The first company's per-app data (journal, caches) shares the folder of installed extensions:
   // an installed extension has its extension.json; anything else there is company data.
   const extensions = path.join(root, 'extensions');
   let entries = []; try { entries = fsImpl.readdirSync(extensions, { withFileTypes: true }); } catch { entries = []; }

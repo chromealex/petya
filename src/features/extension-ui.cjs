@@ -51,7 +51,10 @@ function connected(s,d){
 // Catalog rows: the descriptor, whether it is added and connected, and for external ones whether Petya must
 // restart to finish a removal or update.
 // desktopFound: the installed program an app works with (extension.json "desktop"), '' when it is missing.
-const rows=s=>descriptors().map(d=>({...d,installed:!d.setting||s.settings[d.setting]==='true',connected:connected(s,d),...d.desktop?{desktopFound:require('../desktop-apps.cjs').find(d.desktop.apps)}:{},...d.origin!=='bundled'?{restart:runtime.needsRestart(d.id)}:{}}));
+// featureName: the IPC name a page or tab renderer of the app calls (window.petya.feature(name, …)); external
+// features are held to the camelCase id, bundled ones keep their own names.
+const featureName=d=>{if(!d.feature)return '';if(d.origin!=='bundled')return registry.camel(d.id);try{return require(path.join(d.dir,d.feature)).name||'';}catch{return '';}};
+const rows=s=>descriptors().map(d=>({...d,installed:!d.setting||s.settings[d.setting]==='true',connected:connected(s,d),...d.ui?{featureName:featureName(d)}:{},...d.desktop?{desktopFound:require('../desktop-apps.cjs').find(d.desktop.apps)}:{},...d.origin!=='bundled'?{restart:runtime.needsRestart(d.id)}:{}}));
 const smokeOnly=s=>{if(!s.smoke)throw Error('Неизвестная функция.');};
 module.exports={name:'extensionUI',get descriptors(){return descriptors();},groups,sizes,ownBytes,bytesOf,features,rows,setup(s){
  const catalog=()=>rows(s);

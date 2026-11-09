@@ -203,8 +203,18 @@
   // Live state from the app: statuses change after the message was written.
   async function refresh(){try{const live=await call('list');if(Array.isArray(live)){const ids=new Set(live.map(i=>i.id));const gone=items.filter(i=>!ids.has(i.id)&&(i.id===data.created||i.id===data.fired)).map(i=>({...i,group:'done',status:'done'}));items=[...live,...gone];}}catch{/* the app may be removed */}paint();}
   paint();
-  const actions=data.mode==='list'?[{label:'Новое напоминание…',run:()=>k.ask('Напомни ')}]:[{label:'Все напоминания',run:()=>k.ask('Какие у меня напоминания?',{send:true})}];
+  // On the «Напоминания» tab of «Навыки» the composer is on the chat page: go there first.
+  const toChat=()=>{if(data.tab&&typeof view==='function')view('home');};
+  const actions=data.mode==='list'?[{label:'Новое напоминание…',run:()=>{toChat();k.ask('Напомни ');}}]:[{label:'Все напоминания',run:()=>k.ask('Какие у меня напоминания?',{send:true})}];
   const node=k.card({app:'Напоминания',initial:'⏰',color:'#6b5a8a',status,body,actions,className:'reminder-card'});node.querySelector('.kit-card-head')?.append(subtitle);parent.append(node);
   if(window.petya?.feature)refresh();
+ };
+ // The «Напоминания» tab on «Навыки» (extension.json "ui"): the same list card, read again whenever the tab is shown.
+ window.renderReminderTab=(container,api)=>{
+  const draw=async()=>{
+   let items=[];try{items=await api.feature('list');}catch{items=[];}
+   container.replaceChildren();window.renderReminderCard(container,{mode:'list',now:Date.now(),items:Array.isArray(items)?items:[],tab:true});
+  };
+  api.onShow(draw);return draw();
  };
 })();

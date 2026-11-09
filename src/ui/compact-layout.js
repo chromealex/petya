@@ -44,8 +44,9 @@
  const tooltip=document.createElement('div');tooltip.className='sidebar-tooltip';tooltip.id='sidebar-tooltip';tooltip.setAttribute('role','tooltip');tooltip.hidden=true;document.body.append(tooltip);
  let tooltipTarget=null;
  const hideTooltip=()=>{tooltip.hidden=true;tooltipTarget?.removeAttribute('aria-describedby');tooltipTarget=null;};
- for(const target of document.querySelectorAll('body>aside [title]')){
-  const label=target.title;target.removeAttribute('title');
+ // Rail tooltips; also used for the pages apps add to the rail later (window.petyaRail, extension-places.js).
+ function bindTooltip(target,label){
+  target.removeAttribute('title');
   const showTooltip=()=>{
    hideTooltip();tooltipTarget=target;tooltip.textContent=target.dataset.tooltip||label;tooltip.hidden=false;target.setAttribute('aria-describedby',tooltip.id);
    const rect=target.getBoundingClientRect();tooltip.style.left=(rect.right+12)+'px';
@@ -54,6 +55,14 @@
   target.addEventListener('pointerenter',showTooltip);target.addEventListener('pointerleave',hideTooltip);
   target.addEventListener('focus',()=>{if(target.matches(':focus-visible'))showTooltip();});target.addEventListener('blur',hideTooltip);target.addEventListener('click',hideTooltip);
  }
+ for(const target of document.querySelectorAll('body>aside [title]'))bindTooltip(target,target.title);
+ // A rail button of an app's page: its validated stroke icon and label, like the built-in sections.
+ window.petyaRail={tooltip:bindTooltip,item(button,label,svg){
+  const box=document.createElement('span');box.className='nav-icon-box';box.setAttribute('aria-hidden','true');box.innerHTML=svg;
+  const icon=box.querySelector('svg');if(icon){icon.classList.add('nav-icon');icon.setAttribute('aria-hidden','true');icon.setAttribute('focusable','false');for(const [k,v] of [['fill','none'],['stroke','currentColor']])if(!icon.getAttribute(k))icon.setAttribute(k,v);}
+  const text=document.createElement('span');text.textContent=label;
+  button.replaceChildren(icon||box,text);button.setAttribute('aria-label',label);bindTooltip(button,label);
+ }};
  document.addEventListener('keydown',event=>{if(event.key==='Escape')hideTooltip();});
  window.addEventListener('resize',hideTooltip);window.addEventListener('scroll',hideTooltip,true);
 

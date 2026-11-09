@@ -8,6 +8,6 @@ assert.equal(saved.topics[0].messages[0].text,'Запрос 0');
 const restored=new Dialogue({state:saved});
 assert.equal(restored.active().messages.length,160);
 const {dailyBrief}=require('../src/daily-brief.cjs');
-const text=dailyBrief({records:[],reminders:[],contexts:[{source:'slack',at:Date.now(),text:'More channel actions\nClose\nThread'}],slackEnabled:true}).text;
+const text=dailyBrief({records:[],contexts:[{source:'slack',at:Date.now(),text:'More channel actions\nClose\nThread'}],slackEnabled:true}).text;
 assert(text.includes('### Slack'));assert(!text.includes('More channel actions'));
 console.log('History survives 80 exchanges and restart; brief hides raw Slack UI text');

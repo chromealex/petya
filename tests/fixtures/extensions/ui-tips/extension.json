@@ -1,0 +1,18 @@
+{
+  "id": "ui-tips",
+  "name": "Советы дня",
+  "version": "1.0.0",
+  "author": "Петя · пример",
+  "description": "Пример приложения без своей страницы: вкладка с тем же названием, что у другого приложения, и вкладка на чужой странице",
+  "category": "personal",
+  "icon": "icon.svg",
+  "setting": "extension_ui-tips",
+  "settings": false,
+  "scripts": [["tips-ui.js", "message-format.js"]],
+  "ui": {
+    "tabs": [
+      {"page": "learning", "title": "подсказки", "render": "renderTipsLearning"},
+      {"page": "notes", "title": "Советы", "render": "renderTipsNotes"}
+    ]
+  }
+}

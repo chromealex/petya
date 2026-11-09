@@ -15,6 +15,9 @@
   "results": {
     "reminderCard": "renderReminderCard"
   },
+  "ui": {
+    "tabs": [{"page": "learning", "title": "Напоминания", "render": "renderReminderTab"}]
+  },
   "provides": {
     "reminder-trigger": ["trigger-jira.cjs", "trigger-slack.cjs", "trigger-calendar.cjs", "trigger-ci.cjs"],
     "reminder": "reminder-link.cjs",

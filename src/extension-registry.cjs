@@ -58,6 +58,47 @@ function walk(dir,depth=0,out=[]){
  return out;
 }
 
+// A monochrome SVG of the extension's folder, inlined for the renderer: no scripts, styles, links or url().
+function icon(dir,file,id){
+ if(typeof file!=='string'||!/^[a-z][a-z0-9-]*\.svg$/.test(file))throw Error('Invalid extension icon '+id);
+ const svg=fs.readFileSync(path.join(dir,file),'utf8').trim();
+ if(svg.length>20000||!/^<svg[\s>]/.test(svg)||!svg.endsWith('</svg>')||/<script|<style|foreignObject|<!|\son[a-z]+\s*=|href|url\(/i.test(svg))throw Error('Unsafe extension icon '+id);
+ return svg;
+}
+// Places in Petya's own interface (docs/extensions.md §8a): rail pages and tabs on pages. The shape is checked here;
+// whether a tab's page exists and whether two apps claim one page id is decided by the renderer
+// (src/ui/extension-places.js), which knows the core pages and every live extension.
+const UI_GROUPS=['assistant','work','setup'];
+const UI_ID=/^[a-z][a-z0-9-]{0,39}$/,UI_RENDER=/^[A-Za-z_$][\w$]{0,63}$/;
+function validateUi(d,dir){
+ const ui=d.ui,where='extension '+d.id+': ui';
+ if(!ui||typeof ui!=='object'||Array.isArray(ui)||Object.keys(ui).some(k=>!['pages','tabs'].includes(k)))throw Error(where+' is {"pages": [...], "tabs": [...]}');
+ const title=(value,at)=>{if(typeof value!=='string'||!value.trim()||value.length>40)throw Error(where+at+'.title: a Russian name up to 40 characters');};
+ const render=(value,at)=>{if(typeof value!=='string'||!UI_RENDER.test(value))throw Error(where+at+'.render: the name of a window function from "scripts"');};
+ if(!d.scripts.length)throw Error(where+': renderers come from "scripts", none declared');
+ const pages=ui.pages===undefined?[]:ui.pages,tabs=ui.tabs===undefined?[]:ui.tabs;
+ if(!Array.isArray(pages)||pages.length>4)throw Error(where+'.pages: a list of up to 4 pages');
+ if(!Array.isArray(tabs)||tabs.length>8)throw Error(where+'.tabs: a list of up to 8 tabs');
+ const ids=new Set();
+ pages.forEach((p,i)=>{
+  const at='.pages['+i+']';
+  if(!p||typeof p!=='object'||Object.keys(p).some(k=>!['id','title','icon','after','group','render'].includes(k)))throw Error(where+at+': {id, title, icon?, after? | group?, render}');
+  if(!UI_ID.test(p.id||'')||ids.has(p.id))throw Error(where+at+'.id: a unique id of latin letters, digits and dashes');
+  ids.add(p.id);title(p.title,at);render(p.render,at);
+  if(p.after!==undefined&&p.group!==undefined)throw Error(where+at+': "after" or "group", not both');
+  if(p.after!==undefined&&!UI_ID.test(p.after))throw Error(where+at+'.after: the id of a rail item («team», «history», another page)');
+  if(p.group!==undefined&&!UI_GROUPS.includes(p.group))throw Error(where+at+'.group: one of '+UI_GROUPS.join(', '));
+  if(p.icon!==undefined)p.iconSvg=icon(dir,p.icon,d.id);
+ });
+ tabs.forEach((t,i)=>{
+  const at='.tabs['+i+']';
+  if(!t||typeof t!=='object'||Object.keys(t).some(k=>!['page','title','render','order'].includes(k)))throw Error(where+at+': {page, title, render, order?}');
+  if(!UI_ID.test(t.page||''))throw Error(where+at+'.page: the id of a page («learning», «team», another app\'s page)');
+  title(t.title,at);render(t.render,at);
+  if(t.order!==undefined&&!(Number.isInteger(t.order)&&t.order>=0&&t.order<=1000))throw Error(where+at+'.order: an integer 0–1000');
+ });
+}
+
 // Reads and checks one extension.json. `external` adds the rules for code Petya did not ship: the catalog
 // switch is exactly extension_<id>, no service-module flags, required presentation fields, no symlinks.
 function validate(dir,{external=false,expectId}={}){
@@ -72,12 +113,8 @@ function validate(dir,{external=false,expectId}={}){
  if(d.category!==undefined&&!groups.categories.some(c=>c.id===d.category))throw Error('Unknown extension category '+d.category);
  for(const item of d.downloads||[]){const sizes=item&&typeof item.bytes==='object'?Object.values(item.bytes):[item?.bytes];if(!/^[a-z][a-z0-9-]*$/.test(item?.id||'')||!item.name||!sizes.every(n=>Number.isSafeInteger(n)&&n>0))throw Error('Invalid extension download '+d.id);}
  if(d.examples!==undefined&&!(Array.isArray(d.examples)&&d.examples.length&&d.examples.length<=6&&d.examples.every(e=>typeof e==='string'&&e.trim()&&e.length<=120)))throw Error('Invalid extension examples '+d.id);
- if(d.icon!==undefined){
-  if(!/^[a-z][a-z0-9-]*\.svg$/.test(d.icon))throw Error('Invalid extension icon '+d.id);
-  const svg=fs.readFileSync(path.join(dir,d.icon),'utf8').trim();
-  if(svg.length>20000||!/^<svg[\s>]/.test(svg)||!svg.endsWith('</svg>')||/<script|<style|foreignObject|<!|\son[a-z]+\s*=|href|url\(/i.test(svg))throw Error('Unsafe extension icon '+d.id);
-  d.iconSvg=svg;
- }
+ if(d.icon!==undefined)d.iconSvg=icon(dir,d.icon,d.id);
+ if(d.ui!==undefined)validateUi(d,dir);
  if(d.uses!==undefined&&!(Array.isArray(d.uses)&&d.uses.every(k=>KINDS.includes(k))))throw Error('Invalid extension uses '+d.id);
  if(d.provides!==undefined){
   if(!d.provides||typeof d.provides!=='object'||Array.isArray(d.provides))throw Error('Invalid extension provides '+d.id);
@@ -246,6 +283,6 @@ Module._resolveFilename=function(request,parent,...rest){
  return resolve.call(this,request,parent,...rest);
 };
 
-module.exports={BUNDLED,SCHEME,ID,FILE,MIME,root,devFolder,setDevFolder,validate,entries,descriptors,live,files,load,report,where,find,entry,
+module.exports={BUNDLED,SCHEME,ID,FILE,MIME,UI_GROUPS,root,devFolder,setDevFolder,validate,entries,descriptors,live,files,load,report,where,find,entry,
  cached,invalidate,subscribe,categories,unload,reinstate,isUnloaded,forget,rendererFile,walk,camel,inside,
  problems:()=>{descriptors();return [...problems,...loadProblems.values()];},get rev(){return rev;}};

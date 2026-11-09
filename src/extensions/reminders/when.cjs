@@ -27,16 +27,27 @@ const norm=t=>String(t||'').replace(/ё/g,'е').replace(/Ё/g,'Е');
 // Removes a matched fragment from the working text, keeping spacing sane.
 function cut(state,m){state.text=(state.text.slice(0,m.index)+' '+state.text.slice(m.index+m[0].length)).replace(/\s{2,}/g,' ');}
 
-// «через 2 часа», «через полчаса», «через полтора часа», «через минуту», «через пару дней».
-const RELATIVE=re(B+'через\\s+(?:(\\d+(?:[.,]\\d+)?|пару|полтора|полторы|одну|один|две|два|три|четыре|пять|шесть|семь|восемь|девять|десять|пятнадцать|двадцать|тридцать|сорок пять|сорок)\\s+)?(полчаса|минут\\p{L}*|мин|час\\p{L}*|дн\\p{L}*|день|сутки|недел\\p{L}*)'+E);
+// «через 2 часа», «через полчаса», «через полтора часа», «через минуту», «через пару дней», «через 30 секунд»,
+// and spans of several parts: «через 1 час 20 минут», «через час и 15 минут» (learned voice commands moved from
+// Petya's core say them so).
+const AMOUNT='(\\d+(?:[.,]\\d+)?|пару|полтора|полторы|одну|один|две|два|три|четыре|пять|шесть|семь|восемь|девять|десять|пятнадцать|двадцать|тридцать|сорок пять|сорок)';
+const UNIT='(полчаса|секунд\\p{L}*|сек|минут\\p{L}*|мин|час\\p{L}*|дн\\p{L}*|день|сутки|недел\\p{L}*)';
+const RELATIVE=re(B+'через\\s+(?:'+AMOUNT+'\\s+)?'+UNIT+E);
+const MORE=re('^(?:\\s*,)?\\s+(?:и\\s+)?'+AMOUNT+'\\s+'+UNIT+E);
+function part(amount,word){
+ word=word.toLocaleLowerCase('ru');let n=amount===undefined?1:/^[\d.,]+$/.test(amount)?Number(amount.replace(',','.')):/^полтор/iu.test(amount)?1.5:NUM[amount.toLocaleLowerCase('ru')];
+ if(!Number.isFinite(n)||n<=0)return null;
+ const unit=/^полчаса/.test(word)?(n=n*0.5,HOUR):/^сек/.test(word)?1000:/^мин/.test(word)?MIN:/^час/.test(word)?HOUR:/^(?:дн|день|сутки)/.test(word)?DAY:7*DAY;
+ return {span:n*unit,unit};
+}
 function relative(state,now){
  const m=RELATIVE.exec(state.text);if(!m)return null;
- const word=m[2].toLocaleLowerCase('ru');let n=m[1]===undefined?1:/^[\d.,]+$/.test(m[1])?Number(m[1].replace(',','.')):/^полтор/iu.test(m[1])?1.5:NUM[m[1].toLocaleLowerCase('ru')];
- if(!Number.isFinite(n)||n<=0)return null;
- let unit=/^полчаса/.test(word)?(n=n*0.5,HOUR):/^мин/.test(word)?MIN:/^час/.test(word)?HOUR:/^(?:дн|день|сутки)/.test(word)?DAY:7*DAY;
- const span=Math.round(n*unit);if(span<MIN||span>366*DAY)return {error:'Напомнить можно не раньше чем через минуту и не позже чем через год.'};
- cut(state,m);
- return {at:now+span,unit,words:'через '+m.slice(1).filter(Boolean).join(' ').toLocaleLowerCase('ru')};
+ const first=part(m[1],m[2]);if(!first)return null;
+ let span=first.span,unit=first.unit,end=m.index+m[0].length,words=m.slice(1).filter(Boolean).join(' ');
+ for(let more;(more=MORE.exec(state.text.slice(end)));){const p=part(more[1],more[2]);if(!p)break;span+=p.span;unit=Math.min(unit,p.unit);end+=more[0].length;words+=' '+more[1]+' '+more[2];}
+ span=Math.round(span);if(span<1000||span>366*DAY)return {error:'Напомнить можно не позже чем через год.'};
+ cut(state,{index:m.index,0:state.text.slice(m.index,end)});
+ return {at:now+span,unit,words:'через '+words.toLocaleLowerCase('ru')};
 }
 
 // Clock time: «в 16:00», «в 9.30», «в 4 дня», «в 9 утра», «в 15 часов», «к 11», «на 16:00», «в полдень».

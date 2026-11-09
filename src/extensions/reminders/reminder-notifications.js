@@ -10,7 +10,13 @@
   if(typeof selectDialogueTopic==='function'&&r.topicId)await selectDialogueTopic(r.topicId);
   if(typeof view==='function')view('home');
  }
+ // The one-time note that Petya's own reminders moved into this app: «Открыть» shows them on «Навыки».
+ function moved(item){
+  put({...item,actions:[['Открыть',()=>{if(typeof view==='function')view('learning');window.petyaTabs?.select('learning',window.petyaTabs.key('Напоминания'));}]]});
+  call('noteSeen').catch(()=>{});
+ }
  function shown(item,live=true){
+  if(item?.moved)return moved(item);
   if(!item||!String(item.id||'').startsWith('reminder:')||!item.reminder)return;
   const {reminder:r,...rest}=item;
   const settled=text=>put({...rest,text,kind:'success',version:'settled:'+Date.now(),actions:[]});

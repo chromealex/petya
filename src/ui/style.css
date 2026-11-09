@@ -211,8 +211,8 @@ nav{gap:4px}
 #learn-form>*,#dictionary-form>*,#mail-skill-form>*{grid-column:1/-1;margin:0}
 #learn-form>label:not(:has(textarea)):not(.check),#dictionary-form>label:not(.check),#mail-skill-form>label:not(:has(textarea)):not(.check){grid-column:auto}
 #learn-form>button,#dictionary-form>button,#mail-skill-form>button{justify-self:start}
-#learned-list>p,#dictionary-list>p,#mail-skills-list>p,#learn-reminders>p,#gmail-accounts>p{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;margin:0;border-bottom:1px solid var(--line)}
-#learned-list>p>span,#dictionary-list>p>span,#mail-skills-list>p>span,#learn-reminders>p>span{flex:1 1 220px;overflow-wrap:anywhere}
+#learned-list>p,#dictionary-list>p,#mail-skills-list>p,#gmail-accounts>p{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;margin:0;border-bottom:1px solid var(--line)}
+#learned-list>p>span,#dictionary-list>p>span,#mail-skills-list>p>span{flex:1 1 220px;overflow-wrap:anywhere}
 #gmail-accounts input{flex:1 1 180px;width:auto}
 .module-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
 .module-picker>h2,.module-picker>p{grid-column:1/-1}

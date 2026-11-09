@@ -51,6 +51,9 @@
   row('Подключается к',review.connects,true);
   row('Даёт другим приложениям',review.provides.map(k=>KIND_NAMES[k]||k).join(', '));
   row('Использует',review.uses.map(k=>KIND_NAMES[k]||k).join(', '));
+  const places=window.extensionPlaces?.describe(review.ui)||{pages:[],tabs:[]};
+  row('Пункты меню слева',places.pages.join(', '),true);
+  row('Вкладки на страницах',places.tabs.join('; '),true);
   row('Загрузки',review.downloads.map(i=>i.name+' · '+size(i.bytes)+(i.optional?' (по желанию)':'')).join('; '),true);
   row('Код',[review.feature?'в основном процессе Пети (feature.cjs)':'',review.scripts?'скрипты в окне Пети: '+review.scripts:''].filter(Boolean).join('; ')||'только описание');
   row('Файлы',review.files+' · '+size(review.bytes));
