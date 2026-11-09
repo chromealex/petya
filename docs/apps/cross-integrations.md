@@ -83,6 +83,7 @@ offer).
 | Dependencies | vulnerable packages | safe updates in a branch | | | |
 | Pull request with failing checks | ✓ | ✓ | waiting for review | | |
 | Meeting summary | per task and «Создать все» | | summary | | |
+| Retro («Ретро»), «Попробовать» | per item and «Создать задачи из «Попробовать»» | | «Отправить на голосование» | | |
 | Calendar, confirm step | | | | ✓ + known rooms, typed link | |
 | Calendar, created meeting / timeline | | | | | «Петя запишет встречу» / «Записать Петей» |
 
