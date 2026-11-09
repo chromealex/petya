@@ -1,5 +1,4 @@
 const { adf, localEndpoint, words } = require('./core.cjs');
-const { Notion } = require('./notion.cjs');
 const { History, snapshot } = require('./history.cjs');
 const plan = require('./decompose.cjs');
 const FULL_CHARS = 1500000;
@@ -20,7 +19,9 @@ function namedVersion(versions, text) {
 function plain(html) { return String(html || '').replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim(); }
 function queryTerms(context, query) { return [...new Set(words(query || context.title + ' ' + context.text.slice(0, 1200)))].slice(0, 8); }
 class Workspace {
-  constructor({ settings, request, save = () => {}, history = [], progress = () => {} }) { this.settings = settings; this.request = request; this.save = save; this.progress = progress; this.decomposing = null; this.fullText = new Map(); this.docs = new Map(); this.batches = new Map(); this.inFlight = new Set(); this.history = history; this.actions = new History(this); this.notion = new Notion((...args) => this.request(...args)); }
+  // `sources`: the documentation sources apps add (doc-source, src/features/doc-sources.cjs); a test may pass its own.
+  constructor({ settings, request, save = () => {}, history = [], progress = () => {}, sources }) { this.settings = settings; this.request = request; this.sources = sources; this.save = save; this.progress = progress; this.decomposing = null; this.fullText = new Map(); this.docs = new Map(); this.batches = new Map(); this.inFlight = new Set(); this.history = history; this.actions = new History(this); }
+  docSources(s) { return require('./features/doc-sources.cjs').list(s, this.sources ? { sources: this.sources.map((source, i) => ({ id: source.id || String(i), source })) } : {}); }
   credentials(s = this.settings()) { if (!s.jiraUrl || (!s.atlassianCredential && (!s.jiraEmail || !s.jiraToken))) throw new Error('Подключите Jira в настройках.'); if(s.atlassianCredential) return {'Content-Type':'application/json'}; return { Authorization: 'Basic ' + Buffer.from(s.jiraEmail + ':' + s.jiraToken).toString('base64'), 'Content-Type': 'application/json' }; }
   api(route, options = {}, s = this.settings()) { return this.request(s.jiraUrl + route, { ...options, headers: this.credentials(s) }); }
   async pages(route, s) {
@@ -55,15 +56,16 @@ class Workspace {
     if (!terms.length) throw new Error('Уточните тему документации.');
     const sources = [];
     if (s.module_confluence !== 'false' && s.jiraUrl && (s.atlassianCredential || (s.jiraEmail && s.jiraToken))) sources.push({ name: 'Confluence', run: () => this.searchConfluence(terms, s) });
-    if (s.module_notion !== 'false' && (s.notionToken || s.notionCredential)) sources.push({ name: 'Notion', run: () => this.notion.search(terms, s.notionToken) });
+    const apps = this.docSources(s);
+    for (const source of apps) sources.push({ name: source.name, run: () => source.search({ settings: s, request: this.request }, terms) });
     if (!sources.length) return { terms, docs: [], warnings: ['Документация не подключена: используется выбранный контекст.'] };
     const outcomes = await Promise.allSettled(sources.map(source => source.run()));
     const docs = [], warnings = [];
     outcomes.forEach((result, i) => { if (result.status === 'fulfilled') { docs.push(...result.value.docs); warnings.push(...(result.value.warnings || [])); } else warnings.push(sources[i].name + ': ' + result.reason.message); });
     const live = this.settings();
-    if (['module_confluence', 'module_notion', 'atlassianCredential', 'notionCredential', 'notionToken', 'jiraUrl', 'jiraToken', 'jiraEmail', 'confluenceSpace'].some(k => live[k] !== s[k])) throw new Error('Подключения изменились. Повторите поиск документации.');
+    if (['module_confluence', 'atlassianCredential', 'jiraUrl', 'jiraToken', 'jiraEmail', 'confluenceSpace', ...apps.flatMap(source => source.watch || [])].some(k => live[k] !== s[k])) throw new Error('Подключения изменились. Повторите поиск документации.');
     docs.sort((a,b) => b.score - a.score);
-    if (s.module_notion !== 'false' && (s.notionToken || s.notionCredential)) warnings.unshift('Notion: поиск по названиям страниц; текст найденных документов используется в плане.');
+    warnings.unshift(...apps.map(source => source.note).filter(Boolean));
     for (const doc of docs) this.docs.set(doc.id, doc);
     return { terms, docs, warnings };
   }
@@ -79,11 +81,13 @@ class Workspace {
     }).sort((a,b) => b.score - a.score);
     return { docs };
   }
-  // The whole text of a chosen document: Confluence pages come whole with the search, a long Notion page is read now.
+  // The whole text of a chosen document: Confluence pages come whole with the search; a long page of an app's source
+  // (its search gave only the start, `more`) is read now.
   async fullDocument(doc, s, report) {
-    if (doc.source === 'Notion' && doc.more && !this.fullText.has(doc.id)) {
+    const source = doc.more && !this.fullText.has(doc.id) ? this.docSources(s).find(x => x.name === doc.source && typeof x.full === 'function') : null;
+    if (source) {
       report({ stage: 'fetching', label: doc.title });
-      const content = await this.notion.content(doc.id.replace(/^notion:/, ''), s.notionToken, { full: true });
+      const content = await source.full({ settings: s, request: this.request }, doc);
       this.fullText.set(doc.id, content.text); doc.truncated = content.truncated;
     }
     return { ...doc, full: this.fullText.get(doc.id) ?? doc.text ?? '' };

@@ -25,7 +25,7 @@ async function playApps(s){
  // Names (and packages when none are configured) come from the shared Google Play adapter when it can list apps.
  let known=[];
  if(!configured.length||configured.some(a=>!a.label)){
-  try{const {GooglePlay}=require('../../google-play.cjs');known=await new GooglePlay({settings:()=>s.settings,request:s.request}).apps();}catch{known=[];}
+  try{const {GooglePlay}=require('../google-play/client.cjs');known=await new GooglePlay({settings:()=>s.settings,request:s.request}).apps();}catch{known=[];}
  }
  const rows=configured.length?configured.map(a=>({id:a.id,label:a.label||known.find(k=>k.packageName===a.id)?.label||a.id})):known.map(k=>({id:k.packageName,label:k.label||k.packageName}));
  return rows.filter(a=>PACKAGE.test(a.id)).map(a=>({...a,store:'play'}));

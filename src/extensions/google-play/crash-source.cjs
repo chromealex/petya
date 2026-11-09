@@ -7,7 +7,7 @@
 //   crashRateMetricSet:query — crash rate of a versionCode, shown as crash-free users (1 − weighted crash rate).
 // Only CRASH issues: ANR stays the Google Play ANR card's subject. Daily metrics use Google's
 // America/Los_Angeles calendar days. A release filter needs a numeric versionCode; issues cannot be resolved here.
-const {GooglePlay,metric,fmt}=require('../../google-play.cjs');
+const {GooglePlay,metric,fmt}=require('./client.cjs');
 const DAY=86400000,LOOKBACK=28,MAX_APPS=5;
 const NAMES=/(?:google\s?play|гугл[- ]?пле\p{L}*|play\s?console|плей\s?консол\p{L}*|android\s+vitals)/iu;
 

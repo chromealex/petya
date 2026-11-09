@@ -99,9 +99,9 @@
    const draw=(q='')=>{const words=norm(q).split(/\s+/).filter(Boolean),hits=w.choice.options.filter(o=>words.every(x=>norm(o.label+' '+o.id).includes(x)));
     const row=o=>{const [name,...rest]=String(o.label).split(' · '),b=button('','',()=>pick(o),'dash-choice-option');b.textContent='';b.append(el('span','dash-choice-name',name));if(rest.length)b.append(el('span','dash-choice-id',rest.join(' · ')));b.title=o.label;return b;};
     list.replaceChildren(...hits.slice(0,SHOWN).map(row));
-    if(!hits.length)list.append(el('p','dash-choice-note','Ничего не нашлось — проверьте, что у аккаунта есть доступ к приложению в Play Console.'));
+    if(!hits.length)list.append(el('p','dash-choice-note',w.choice.empty||'Ничего не нашлось.'));
     else if(hits.length>SHOWN)list.append(el('p','dash-choice-note','Ещё '+(hits.length-SHOWN)+' — уточните поиск.'));};
-   if(w.choice.options.length>SHOWN){const find=el('input','dash-choice-find');find.type='search';find.placeholder='Найти приложение: название или пакет';find.setAttribute('aria-label','Найти приложение');find.oninput=()=>draw(find.value);box.append(find);}
+   if(w.choice.options.length>SHOWN){const find=el('input','dash-choice-find');find.type='search';find.placeholder=w.choice.find||'Найти';find.setAttribute('aria-label',w.choice.find||'Найти');find.oninput=()=>draw(find.value);box.append(find);}
    box.append(list);draw();body.append(box);}
   card.append(head,body);
   const content=el('div');body.append(content);card.drawn=drawBody(content,w,d).catch(()=>{});

@@ -115,12 +115,12 @@ async function sources(root){
  let offered=null;
  ({s,topic,feature}=make({},{extensionOffers:{offers:[],propose(command,ids,text,by){offered={command,ids,text,by};return {handled:true,question:true,text};}}}));
  let reply=feature.dashboards.turn(REQUEST);
- assert.match(reply.text,/^Пока не из чего собрать дашборд: для «основные метрики проекта \(из wombyte\)» добавьте «Метрики игры» и подключите «AppMetrica» или «Grafana»; для «краши» добавьте «Крэши»; для «ANR» подключите «Google Play Console» \(Подключения → «Google Play Console»\)\.$/,reply.text);
+ assert.match(reply.text,/^Пока не из чего собрать дашборд: для «основные метрики проекта \(из wombyte\)» добавьте «Метрики игры» и подключите «AppMetrica» или «Grafana»; для «краши» добавьте «Крэши»; для «ANR» добавьте «Google Play» и подключите «Google Play Console» \(Подключения → «Google Play Console»\)\.$/,reply.text);
  assert(offered.ids.includes('metrics')&&offered.ids.includes('crashes'),'the offer card adds the apps: '+offered.ids);
  assert.equal(offered.command,REQUEST,'accepting the offer repeats the request');
  // Without the offer card: the same text in the chat, no dashboard.
  ({s,topic,feature}=make({}));
- reply=feature.dashboards.turn(REQUEST);assert.match(reply.text,/для «ANR» подключите «Google Play Console»/);assert.equal(reply.dashboard,undefined);
+ reply=feature.dashboards.turn(REQUEST);assert.match(reply.text,/для «ANR» добавьте «Google Play» и подключите «Google Play Console»/);assert.equal(reply.dashboard,undefined);
  // Metrics added, the wombyte Grafana known but without a token: «подключите Grafana»; Google Play connected → ANR built.
  ({s,topic,feature}=make({extension_metrics:'true',...GRAFANA,grafanaToken:'',...PLAY}));
  reply=feature.dashboards.turn(REQUEST);
@@ -225,7 +225,7 @@ async function sources(root){
   assert.throws(()=>ipc.compose('погода на марсе','p1'),/Не нашёл/);
   // A phrase nothing added can show says what would: an app to add, Google Play to connect.
   const hints=feature.dashboards.turn('Собери дашборд: аномалии, ANR');
-  assert.match(hints.text,/Добавил приложение «Аномалии»/);assert.match(hints.text,/Для «ANR» подключите «Google Play Console»/);
+  assert.match(hints.text,/Добавил приложение «Аномалии»/);assert.match(hints.text,/Для «ANR» добавьте «Google Play» и подключите «Google Play Console»/);
   // A page from the answer becomes a web widget read in the chat browser's session; the page opens next to the chat.
   let attended='';s.chatBrowser={attend:async(id,o)=>{attended=o.url;return true;},WEB:'petya-web-search'};
   // An unknown service with no app that knows its data: asked about («погода на марсе» here; «(из wombyte)» is

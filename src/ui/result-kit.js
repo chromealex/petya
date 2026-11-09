@@ -383,14 +383,14 @@
  }
  // A status or error that carries a link («Включите его: https://console.cloud.google.com/…») shows a button for it
  // instead of the raw address; the text keeps the rest. Links open in the browser (external-links.cjs).
- const LINK_LABELS=[[/^console\.cloud\.google\.com\/apis\//,'Включить API в Google Cloud'],[/^console\.cloud\.google\.com\//,'Открыть Google Cloud'],[/^play\.google\.com\/console/,'Открыть Play Console']];
+ // «[Подпись](https://…)» names its button; a bare address gets «Открыть <host>».
  function linkText(target,text){
-  target.textContent='';const value=String(text||''),re=/https?:\/\/[^\s«»"<>]+[^\s«»"<>.,;:)]/g;let at=0,m,links=[];
-  while((m=re.exec(value))){const url=safeUrl(m[0]);if(!url)continue;target.append(value.slice(at,m.index).replace(/:\s*$/,'.').replace(/\s+—\s*$/,''));links.push(url);at=m.index+m[0].length;}
+  target.textContent='';const value=String(text||''),re=/\[([^\]]{1,80})\]\((https?:\/\/[^\s)]+)\)|https?:\/\/[^\s«»"<>]+[^\s«»"<>.,;:)]/g;let at=0,m;const links=[];
+  while((m=re.exec(value))){const url=safeUrl(m[2]||m[0]);if(!url)continue;target.append(value.slice(at,m.index).replace(/:\s*$/,'.').replace(/\s+—\s*$/,''));links.push({url,label:m[1]||''});at=m.index+m[0].length;}
   target.append(value.slice(at).replace(/^\s*—\s*/,' '));
   if(!links.length)return target;
   const row=el('span','kit-link-row');
-  for(const url of links){const u=new URL(url),key=u.host+u.pathname;const a=el('a','kit-link-button',LINK_LABELS.find(([r])=>r.test(key))?.[1]||'Открыть '+u.host);a.href=url;a.target='_blank';a.rel='noopener';row.append(a);}
+  for(const {url,label} of links){const a=el('a','kit-link-button',label||'Открыть '+new URL(url).host);a.href=url;a.target='_blank';a.rel='noopener';row.append(a);}
   target.append(row);return target;
  }
  window.resultKit={kpi,bars,legend,linkText,panelBox:()=>side?.box||null,el,safeUrl,links,availableLinks,chip,card,menu,toast,quick,views,collapse,table,board,batch,dropLines,store,ask,icons,panel,closePanel,panelOpen,avatar,person:name=>person(name),loadTeam,outgoingReview,applyFinding};

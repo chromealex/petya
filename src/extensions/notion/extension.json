@@ -1,0 +1,19 @@
+{
+  "id": "notion",
+  "name": "Notion",
+  "description": "Страницы и базы знаний",
+  "category": "docs",
+  "examples": ["Найди в Notion страницу про онбординг", "Что в базе знаний про релизный процесс?", "Найди заметки по последнему спринту"],
+  "setting": "module_notion",
+  "service": "notion",
+  "settings": true,
+  "quickStart": {"order": 30},
+  "feature": "feature.cjs",
+  "scripts": [
+    ["settings.js", "connections.js"]
+  ],
+  "provides": {
+    "doc-source": "doc-source.cjs",
+    "connection-check": "connection-check.cjs"
+  }
+}

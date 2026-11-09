@@ -137,10 +137,10 @@ const dashboard={accepts:text=>query.about(String(text||''),{named:true}), choos
   const playOn=s.settings?.module_googleplay!=='false'&&!!s.settings?.googlePlayCredential&&typeof s.request==='function';
   if(/^apps\/[a-zA-Z0-9._-]+$/.test(selected))text+=' '+selected.slice(5);
   else if(selected!=='all'&&playOn){
-   const {GooglePlay}=require('../../google-play.cjs');let list=[];
+   const {GooglePlay}=require('../google-play/client.cjs');let list=[];
    try{list=await new GooglePlay({settings:()=>s.settings,request:s.request}).apps();}catch{}
    const t=text.toLowerCase(),named=list.some(a=>[a.label,a.packageName].some(n=>n&&n.length>2&&t.includes(n.toLowerCase())));
-   if(list.length>1&&!named)return {choice:{text:'В Google Play несколько приложений — выберите, чьи крэши показывать.',options:[{id:'all',label:'Все приложения'},...list.map(a=>({id:a.id,label:a.label+' · '+a.packageName}))]}};
+   if(list.length>1&&!named)return {choice:{text:'В Google Play несколько приложений — выберите, чьи крэши показывать.',find:'Найти приложение: название или пакет',empty:'Ничего не нашлось — проверьте, что у аккаунта есть доступ к приложению в Play Console.',options:[{id:'all',label:'Все приложения'},...list.map(a=>({id:a.id,label:a.label+' · '+a.packageName}))]}};
   }
   try{return await module.exports.crashesTurn(s,text);}
   catch(e){return kit.reply(s,command,{by:BY,error:true,text:BY+' · '+(e.message||'источник крэшей недоступен.')});}

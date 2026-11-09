@@ -1,5 +1,5 @@
 // Google Play plugin: turns the ANR reader's rows into card data (message.extensionData.playVitals).
-const {metric}=require('../../google-play.cjs');
+const {metric}=require('./client.cjs');
 const date=t=>t&&`${t.year}-${String(t.month).padStart(2,'0')}-${String(t.day).padStart(2,'0')}`;
 function extract(result){
   const d=result?.data;

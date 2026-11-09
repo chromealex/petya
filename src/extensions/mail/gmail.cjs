@@ -14,14 +14,14 @@ class Gmail{
  async start({scopes=[],email=''}={}){this.check();this.stop();const generation=this.generation,client=this.load().client;if(!client)throw Error('Сначала импортируйте OAuth JSON Google Desktop app в карточке Gmail.');
   const state=randomBytes(32).toString('base64url'),verifier=randomBytes(32).toString('base64url');let consumed=false;
   const server=http.createServer(async(req,res)=>{res.setHeader('Cache-Control','no-store');const u=new URL(req.url,'http://127.0.0.1');
-   if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state||consumed){require('./oauth-page.cjs').reply(res,{status:400,ok:false,title:'Недопустимый ответ авторизации.',text:'Нажмите «Подключить» в Пете ещё раз.',close:false});return;}
+   if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state||consumed){require('../../oauth-page.cjs').reply(res,{status:400,ok:false,title:'Недопустимый ответ авторизации.',text:'Нажмите «Подключить» в Пете ещё раз.',close:false});return;}
    consumed=true;
    try{if(u.searchParams.has('error')||!u.searchParams.get('code'))throw Error('Вход отменён в Google.');const tokens=await this.token({grant_type:'authorization_code',code:u.searchParams.get('code'),redirect_uri:redirect,code_verifier:verifier});
     if(generation!==this.generation)throw Error('Вход отменён.');this.check();if(!tokens.access_token||!tokens.refresh_token||!String(tokens.scope||'').split(' ').includes(SCOPE))throw Error('Google не предоставил постоянный доступ к чтению Gmail.');
     const profile=await this.json('https://gmail.googleapis.com/gmail/v1/users/me/profile',{headers:{Authorization:'Bearer '+tokens.access_token}});
     if(generation!==this.generation)throw Error('Вход отменён.');if(typeof profile.emailAddress!=='string'||!profile.emailAddress.includes('@'))throw Error('Не удалось определить адрес Gmail.');
-    this.save({client,email:profile.emailAddress,tokens:{access_token:tokens.access_token,refresh_token:tokens.refresh_token,expiresAt:Date.now()+Number(tokens.expires_in||3600)*1000,scope:String(tokens.scope||'')}});this.lastError='';require('./oauth-page.cjs').reply(res,{title:scopes.length?'Доступ выдан.':'Gmail подключён.'});
-   }catch(e){this.lastError=e.message;require('./oauth-page.cjs').reply(res,{ok:false,title:'Не удалось подключить.',text:e.message,close:false});}finally{if(generation===this.generation)this.stop();}
+    this.save({client,email:profile.emailAddress,tokens:{access_token:tokens.access_token,refresh_token:tokens.refresh_token,expiresAt:Date.now()+Number(tokens.expires_in||3600)*1000,scope:String(tokens.scope||'')}});this.lastError='';require('../../oauth-page.cjs').reply(res,{title:scopes.length?'Доступ выдан.':'Gmail подключён.'});
+   }catch(e){this.lastError=e.message;require('../../oauth-page.cjs').reply(res,{ok:false,title:'Не удалось подключить.',text:e.message,close:false});}finally{if(generation===this.generation)this.stop();}
   });
   await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
   if(generation!==this.generation){server.close();throw Error('Вход отменён.');}

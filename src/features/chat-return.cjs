@@ -67,8 +67,10 @@ function setup(s){
           const text=await s.analyzeMaterials({...t,attachments:files},question.text||require('../attachment-assistant.cjs').briefFileQuestion);
           return {text,usedMaterials:require('../chat-attribution.cjs').fileRefs(files,text)};
         }
-        if(!['bugs','tasks','anr'].includes(step))throw Error('Шаг недоступен.');
-        return s.dialogue.readers[step](question.text,t,t.contextHint||s.dialogue.context());
+        // Petya's own readers (tasks, bugs) and added apps' subjects (dialogue-kind).
+        const reader=typeof step==='string'&&(Object.hasOwn(s.dialogue.readers||{},step)?s.dialogue.readers[step]:require('./dialogue-kinds.cjs').reader(step));
+        if(!reader||step==='files')throw Error('Шаг недоступен.');
+        return reader(question.text,t,t.contextHint||s.dialogue.context());
       }));
       if(t.messages.at(-1)!==last)throw Error('Чат изменился во время запроса.');
       if(result.error)throw Error(result.text);

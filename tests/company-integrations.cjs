@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const {Companies}=require('../src/companies.cjs');const {ServiceOAuth}=require('../src/service-oauth.cjs');const {AtlassianOAuth}=require('../src/atlassian-oauth.cjs');const {GmailAccounts}=require('../src/gmail-accounts.cjs');const modules=require('../src/modules.cjs');
+const assert=require('node:assert/strict');const fs=require('node:fs');const os=require('node:os');const path=require('node:path');const {Companies}=require('../src/companies.cjs');const {ServiceOAuth}=require('../src/service-oauth.cjs');const {AtlassianOAuth}=require('../src/atlassian-oauth.cjs');const {GmailAccounts}=require('../src/extensions/mail/gmail-accounts.cjs');const modules=require('../src/modules.cjs');
 (async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'petya-integration-scope-'));
  try{

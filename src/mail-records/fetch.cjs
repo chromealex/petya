@@ -1,4 +1,4 @@
-// Reading candidate messages for mail records from the accounts Petya already reads (src/mail-accounts.cjs), with
+// Reading candidate messages for mail records from the accounts Petya already reads (the «Почта» app, services.mailAccounts), with
 // their HTML kept for JSON-LD. Read only; nothing is marked, moved or sent.
 // - Gmail (REST v1): users.messages.list with a query (purchases category or receipt / subscription / booking /
 //   renewal words, after the last scan), then users.messages.get?format=full.

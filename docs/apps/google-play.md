@@ -1,12 +1,15 @@
 # Google Play
 
-Google Play is a Petya service (module `googleplay`, connection card in Settings: one-click Google sign-in or a
-service-account JSON key, saved as `googlePlayCredential`; scope `playdeveloperreporting`) with an extension directory
-`src/extensions/google-play` (no settings of its own, always present while the service is on). It does two things:
+Google Play is the `googleplay` service module (`"setting": "module_googleplay"`, `"service": "googleplay"`), and its
+directory `src/extensions/google-play` owns all of it: the connection card in «Настройки» (`settings.js`: one-click
+Google sign-in or a service-account JSON key, saved as `googlePlayCredential`; scope `playdeveloperreporting`; IPC
+`window.petya.feature('googlePlay', 'connect' | 'importKey' | 'disconnect' | 'check')`), the Android vitals client
+(`client.cjs`, moved from `src/google-play.cjs`) and ANR in the chat. The settings key and the switch are unchanged.
+It does two things:
 
 | Subject | Where | What |
 |---|---|---|
-| ANR | `src/google-play.cjs` `read()` (the `anr` reader of the dialogue) + `vitals-cards.js` | «ANR за неделю», «ANR в Google Play»: ANR rate, user-perceived ANR rate, the 7-day weighted rate, Google's bad-behaviour threshold, per-day chart. |
+| ANR | `client.cjs` `read()` — the `anr` dialogue kind (`anr-kind.cjs`) and the tool router's `anr` (`route-tool.cjs`) — + `vitals-cards.js` | «ANR за неделю», «ANR в Google Play»: ANR rate, user-perceived ANR rate, the 7-day weighted rate, Google's bad-behaviour threshold, per-day chart. |
 | Crashes | `crash-source.cjs` (a `crash-source` for «Крэши», [crashes.md](crashes.md)) | «крэши в Google Play», «крэши в гугл плей», or any crash request while Google Play is connected: Android vitals crash clusters in the «Крэши» card. |
 
 On dashboards (`feature.cjs`, no chat `turn`): «ANR», «ANR за неделю», «зависания» become a widget whose
@@ -15,8 +18,19 @@ like the others. With several apps and none named in the phrase the widget asks 
 [dashboards.md](../dashboards.md).
 
 ANR stays a separate topic: the crash source returns only `CRASH` issues, and «ANR …» requests still go to the ANR
-card. A request that names Google Play together with a crash word is routed to «Крэши» (`src/dialogue.cjs` `intent`,
+card. A request that names Google Play together with a crash word is routed to «Крэши» (the kind's `detect`,
 `src/service-access.cjs`), not to the ANR reader.
+
+## ANR in the chat
+
+- `anr-kind.cjs` (`dialogue-kind`, `src/features/dialogue-kinds.cjs`): `detect` («ANR», «анр», Google Play without a
+  crash word), the chat title «ANR в Google Play», the signature «Google Play: ANR», the retry label «запрос к Google
+  Play», the topic router's line and note, and `read` = the shared reader's `read(command, topic, context)`. The open
+  chat keeps the kind for its follow-ups, a failed read keeps «Повторить запрос к Google Play».
+- `route-tool.cjs` (`route-tool`): the semantic router's `anr` («проверить реальные ANR приложения в Google Play»),
+  answered by the connection offer or the `anr` kind. Router prompts are the same text as before while the module is on.
+- Without the module, ANR requests get the service offer (`src/service-access.cjs`: «Подключите Google Play Console …»
+  or Petya's browser), as before.
 
 ## Crash source (Play Developer Reporting API v1beta1)
 

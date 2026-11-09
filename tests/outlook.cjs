@@ -1,4 +1,4 @@
-const assert=require('node:assert/strict');const {Outlook,clientConfig}=require('../src/outlook.cjs');const {MailAccounts}=require('../src/mail-accounts.cjs');
+const assert=require('node:assert/strict');const {Outlook,clientConfig}=require('../src/extensions/mail/outlook.cjs');const {MailAccounts}=require('../src/extensions/mail/accounts.cjs');
 const json=v=>new Response(JSON.stringify(v));
 (async()=>{
  const client=clientConfig({client_id:'12345678-1234-1234-1234-123456789abc'});assert.throws(()=>clientConfig({client_id:'bad'}));let state={client},url,exchanges=0,enabled=true;

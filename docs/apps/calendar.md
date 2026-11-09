@@ -66,7 +66,7 @@ in the notification center (`calendar-connect`), and the state is restored throu
 
 ### Incremental consent
 
-`src/gmail.cjs` and `src/outlook.cjs` now accept `start({scopes, email})` (the shared change, which is backwards
+`src/extensions/mail/gmail.cjs` and `outlook.cjs` (then `src/gmail.cjs`, `src/outlook.cjs`) now accept `start({scopes, email})` (the shared change, which is backwards
 compatible). Mail scopes are kept and extra scopes are added. Google uses `include_granted_scopes=true` and
 `login_hint`.
 

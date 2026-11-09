@@ -14,7 +14,7 @@
 .view,.history-preview{scroll-margin-top:80px}
 .connection-options{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}.connection-options summary{cursor:pointer;color:var(--muted);margin-bottom:14px}.connection-status{padding:10px 12px;border-radius:8px;background:var(--panel-2)}.connection-status.connected{color:var(--green);background:var(--hover)}.connection-status.error{color:#ffd7ce;background:var(--hover)}
 
-.notion-setup{max-width:760px}.notion-setup h3{margin:0 0 12px}.notion-setup ol{padding-left:24px}.notion-setup li{margin-bottom:16px;overflow-wrap:anywhere}
+.connection-help{max-width:760px}.connection-help h3{margin:0 0 12px}.connection-help ol{padding-left:24px}.connection-help li{margin-bottom:16px;overflow-wrap:anywhere}
 
 /* Keep navigation and all seven service statuses reachable on short windows. */
 body>aside{overflow-y:auto;gap:0}body>aside>*{flex-shrink:0}
@@ -211,9 +211,8 @@ nav{gap:4px}
 #learn-form>*,#dictionary-form>*{grid-column:1/-1;margin:0}
 #learn-form>label:not(:has(textarea)):not(.check),#dictionary-form>label:not(.check){grid-column:auto}
 #learn-form>button,#dictionary-form>button{justify-self:start}
-#learned-list>p,#dictionary-list>p,#gmail-accounts>p{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;margin:0;border-bottom:1px solid var(--line)}
+#learned-list>p,#dictionary-list>p{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 0;margin:0;border-bottom:1px solid var(--line)}
 #learned-list>p>span,#dictionary-list>p>span{flex:1 1 220px;overflow-wrap:anywhere}
-#gmail-accounts input{flex:1 1 180px;width:auto}
 .module-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}
 .module-picker>h2,.module-picker>p{grid-column:1/-1}
 .module-picker>.check{margin:0;min-height:32px}

@@ -210,7 +210,7 @@ const GOOGLE_SCOPE='https://www.googleapis.com/auth/gmail.readonly '+SCOPES.goog
  assert.equal(granted('google','https://www.googleapis.com/auth/gmail.readonly'),false);assert.equal(granted('microsoft','https://graph.microsoft.com/Calendars.ReadWrite'),true);
 
  // --- Shared clients: extra scopes asked with the mail scope kept ---
- const {Gmail}=require('../src/gmail.cjs');const {Outlook}=require('../src/outlook.cjs');
+ const {Gmail}=require('../src/extensions/mail/gmail.cjs');const {Outlook}=require('../src/extensions/mail/outlook.cjs');
  let url,state={client:{client_id:'id.apps.googleusercontent.com',client_secret:'s'}};
  const tokenCalls=[];
  const gfetch=async(u,o)=>{if(u.includes('oauth2.googleapis.com/token')){tokenCalls.push(Object.fromEntries(new URLSearchParams(o.body)));return new Response(JSON.stringify({access_token:'a',refresh_token:'r',expires_in:3600,scope:GOOGLE_SCOPE}));}return new Response(JSON.stringify({emailAddress:'me@corp.ru'}));};

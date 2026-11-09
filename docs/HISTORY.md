@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.17.5 — mail, Notion and Google Play live in their apps
+
+- Mail, Notion and Google Play left Petya's core: their clients, settings cards and chat routes belong to their apps («Почта», «Notion», «Google Play Console»). Nothing changes in use; the core no longer knows these services by name.
+
 ## 0.17.4 — a dashboard is its own thing, with its own chat beside it
 
 - A dashboard is no longer tied to the chat it was made from (no sync, no «К чату»).

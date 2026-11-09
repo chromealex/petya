@@ -10,7 +10,6 @@ function dailyBrief({records,jira=[],sections=[],now=Date.now()}){
  const created=jira.filter(r=>!r.retentionExpired&&r.at>=start.getTime()&&r.at<=now).flatMap(r=>(r.rows||[]).filter(v=>v.key&&v.state!=='deleted').map(v=>({key:v.key,title:v.title||v.snapshot?.summary||'',at:r.at})));
  lines.push('\n### Jira\n\nСозданные Петей сегодня задачи Jira: '+created.length+'.');for(const r of created.slice(0,8))lines.push(r.key+' · '+r.title+' (это запись о создании, не текущий статус Jira)');
  for(const section of sections)lines.push('\n### '+section.title+'\n\n'+(section.error?'Не удалось прочитать: '+section.error:section.lines.join('\n\n')));
- lines.push('Это не полная сводка почты и календаря: эти источники пока не подключены к сценарию.');
  return {handled:true,text:lines.join('\n\n')};
 }
 module.exports={dailyBrief};

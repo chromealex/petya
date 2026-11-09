@@ -2,7 +2,7 @@
 // signing in with Google; the Telegram app credentials survive a disconnect so reconnecting is one click again.
 const assert=require('node:assert/strict');
 const {TelegramSource,qrSvg}=require('../src/telegram.cjs');
-const play=require('../src/google-play.cjs');
+const play=require('../src/extensions/google-play/client.cjs');
 const {Api}=require('../src/vendor/telegram/client.cjs');
 (async()=>{
  assert.match(qrSvg('tg://login?token=abc'),/^<svg[\s\S]*<path/);

@@ -70,13 +70,13 @@ function services({settings={},over,offersStub}={}){
 
  // --- Registry: real declarations, each only while its extension is added and connected ---
  const real=registry.load();
- assert.deepEqual(real.map(x=>[x.id,x.extension,x.setting,x.service]),[['crashlytics','crashlytics','extension_crashlytics',''],['google-play','google-play','',' googleplay'.trim()],['sentry','sentry','extension_sentry','']]);
+ assert.deepEqual(real.map(x=>[x.id,x.extension,x.setting,x.service]),[['crashlytics','crashlytics','extension_crashlytics',''],['google-play','google-play','module_googleplay',' googleplay'.trim()],['sentry','sentry','extension_sentry','']]);
  const live=registry.create({settings:{}});
  assert.deepEqual(live.list(),[],'a new user has no crash source');
  assert.deepEqual(live.named('крэши в Google Play'),['google-play']);assert.deepEqual(live.named('только Sentry'),['sentry']);assert.deepEqual(live.named('что в Crashlytics'),['crashlytics']);
  assert.deepEqual(live.named('крэши в гугл плей и Firebase'),['crashlytics','google-play']);assert.deepEqual(live.named('топ крэшей'),[]);
  assert.equal(live.standalone('что в Sentry'),true);assert.equal(live.standalone('крэши в Google Play'),false,'Google Play alone is the ANR card or reviews');
- const liveSettings={extension_sentry:'true',sentryToken:'t',sentryOrg:'o',googlePlayCredential:'{}'};
+ const liveSettings={extension_sentry:'true',sentryToken:'t',sentryOrg:'o',module_googleplay:'true',googlePlayCredential:'{}'};
  assert.deepEqual(registry.create({settings:liveSettings}).list().map(x=>x.id),['google-play','sentry']);
  assert.deepEqual(registry.create({settings:{...liveSettings,module_googleplay:'false',extension_sentry:'false'}}).list(),[],'a removed extension or a switched-off service is not read');
  assert.equal(registry.create({settings:liveSettings}).find('sentry').canResolve,true);assert.equal(registry.create({settings:liveSettings}).find('google-play').canResolve,false);
@@ -211,7 +211,7 @@ function services({settings={},over,offersStub}={}){
  assert.equal(offer.connect,'install');
  assert.equal(offer.ready({extension_crashes:'true'}),false,'added without a source is not ready');
  assert.equal(offer.ready({extension_crashes:'true',extension_sentry:'true',sentryToken:'x',sentryOrg:'o'}),true);
- assert.equal(offer.connected({googlePlayCredential:'{}'}),true,'the catalog sees a connected source before «Крэши» is added');
+ assert.equal(offer.connected({module_googleplay:'true',googlePlayCredential:'{}'}),true,'the catalog sees a connected source before «Крэши» is added');
  console.log('Crashes: routing and near-misses, filters, crash-source registry, no source/named source offers, merged card of three sources, source filters, partial and total failures, notes, release, model line, resolve/reopen ipc and the offer passed');
  // The real sources have their own files; run them here so `npm test` covers them.
  for(const file of ['sentry.cjs','google-play-crashes.cjs','crashlytics.cjs'])if(require('node:fs').existsSync(require('node:path').join(__dirname,file)))await require('./'+file);

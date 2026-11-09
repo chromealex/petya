@@ -82,7 +82,8 @@
  help('#companies>p:not(.intro):not([id])','Как работают профили компаний');
  help('#team>p.small','Как заполнить сведения о команде');
  help('#history>p.small','Хранение истории и откат');
- help('.notion-setup','Пошаговая настройка Notion');
+ // Step-by-step help of service cards apps own (their markup names the fold's title).
+ for(const node of document.querySelectorAll('.connection-help[data-help-title]'))fold([node],node.dataset.helpTitle);
  const attachment=document.getElementById('attachment-pick')?.closest('article');
  if(attachment)fold([attachment.querySelector(':scope>p')],'Форматы файлов и ограничения');
  // Fold complete settings cards; keep the original status nodes and their listeners intact.

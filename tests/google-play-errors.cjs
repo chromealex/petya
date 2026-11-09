@@ -1,9 +1,9 @@
 // Google Play: a 403 from the reporting API says why — the API is off in the Google Cloud project (with the link to
 // turn it on) or the account has no Play Console access; 401 asks to reconnect; other errors pass through.
-const assert=require('node:assert/strict'),{explain,GooglePlay}=require('../src/google-play.cjs');
+const assert=require('node:assert/strict'),{explain,GooglePlay}=require('../src/extensions/google-play/client.cjs');
 const e=(status,detail)=>Object.assign(new Error('Сервис вернул HTTP '+status),{status,detail});
 const off=explain(e(403,JSON.stringify({error:{code:403,message:'Google Play Developer Reporting API has not been used in project 123456 before or it is disabled.',details:[{reason:'SERVICE_DISABLED'}]}})));
-assert.match(off.message,/не включён Google Play Developer Reporting API \(проект 123456\)/);assert.match(off.message,/apis\/library\/playdeveloperreporting\.googleapis\.com\?project=123456/);assert.equal(off.status,403);
+assert.match(off.message,/^В Google Cloud \(проект 123456\) не включён Google Play Developer Reporting API\. .*\[Включить API в Google Cloud\]\(/);assert.match(off.message,/apis\/library\/playdeveloperreporting\.googleapis\.com\?project=123456/);assert.equal(off.status,403);
 const denied=explain(e(403,JSON.stringify({error:{code:403,message:'The caller does not have permission',status:'PERMISSION_DENIED'}})));
 assert.match(denied.message,/нет доступа к отчётам Google Play.*Пользователи и разрешения.*The caller does not have permission/s);
 assert.match(explain(e(403,'')).message,/нет доступа к отчётам Google Play/);

@@ -50,6 +50,7 @@ module.exports=[
  require('./features/extension-replies.cjs'),
  require('./features/extension-offers.cjs'),
  require('./features/app-links.cjs'),
+ require('./features/dialogue-kinds.cjs'),
  require('./features/outgoing.cjs'),
  require('./features/notification-policy.cjs'),
  require('./features/chat-results.cjs'),

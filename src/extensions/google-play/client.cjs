@@ -14,12 +14,12 @@ async function login({client,open,request,timeout=300000}){
  const state=randomBytes(32).toString('base64url'),verifier=randomBytes(32).toString('base64url');let redirect,done,fail;
  const result=new Promise((resolve,reject)=>{done=resolve;fail=reject;});
  const server=http.createServer(async(req,res)=>{const u=new URL(req.url,'http://127.0.0.1');
-  if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state){require('./oauth-page.cjs').reply(res,{status:400,ok:false,title:'Недопустимый ответ авторизации.',text:'Нажмите «Подключить» в Пете ещё раз.',close:false});return;}
+  if(req.method!=='GET'||u.pathname!=='/callback'||u.searchParams.get('state')!==state){require('../../oauth-page.cjs').reply(res,{status:400,ok:false,title:'Недопустимый ответ авторизации.',text:'Нажмите «Подключить» в Пете ещё раз.',close:false});return;}
   try{if(u.searchParams.has('error')||!u.searchParams.get('code'))throw new Error('Вход отменён в Google.');
    const tokens=await request('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...client,grant_type:'authorization_code',code:u.searchParams.get('code'),redirect_uri:redirect,code_verifier:verifier}).toString()});
    if(!tokens.refresh_token||!String(tokens.scope||'').split(' ').includes(SCOPE))throw new Error('Google не дал постоянный доступ к отчётам Google Play.');
-   require('./oauth-page.cjs').reply(res,{title:'Google Play подключён.'});done({type:'oauth',client,refresh_token:tokens.refresh_token});
-  }catch(e){require('./oauth-page.cjs').reply(res,{ok:false,title:'Не удалось подключить.',text:e.message,close:false});fail(e);}
+   require('../../oauth-page.cjs').reply(res,{title:'Google Play подключён.'});done({type:'oauth',client,refresh_token:tokens.refresh_token});
+  }catch(e){require('../../oauth-page.cjs').reply(res,{ok:false,title:'Не удалось подключить.',text:e.message,close:false});fail(e);}
  });
  await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(0,'127.0.0.1',resolve);});
  redirect='http://127.0.0.1:'+server.address().port+'/callback';
@@ -36,7 +36,8 @@ function explain(error){
  let message;
  if(/SERVICE_DISABLED|has not been used in project|is disabled/i.test(reasons+' '+text)){
   const project=/project (\d+)/.exec(text)?.[1];
-  message='В Google Cloud не включён Google Play Developer Reporting API'+(project?' (проект '+project+')':'')+'. Включите его и через пару минут нажмите «Проверить»: '+('https://console.cloud.google.com/apis/library/playdeveloperreporting.googleapis.com'+(project?'?project='+project:''));
+  const link='https://console.cloud.google.com/apis/library/playdeveloperreporting.googleapis.com'+(project?'?project='+project:'');
+  message=(project?'В Google Cloud (проект '+project+') не включён Google Play Developer Reporting API.':'В Google Cloud не включён Google Play Developer Reporting API.')+' Включите его и через пару минут нажмите «Проверить». [Включить API в Google Cloud]('+link+')';
  }else if(error.status===401)message='Google не принял вход в Google Play. Нажмите «Отключить» и подключите заново.';
  else message='У аккаунта нет доступа к отчётам Google Play. В Play Console → «Пользователи и разрешения» пригласите этот аккаунт (или сервисный аккаунт) с правом «Просмотр информации о приложении» и подождите до суток'+(text?'. Ответ Google: '+text.slice(0,200):'.');
  const out=new Error(message);out.status=error.status;out.detail=error.detail;return out;
@@ -48,7 +49,7 @@ class GooglePlay {
   if(this.cached?.key===s.googlePlayCredential&&this.cached.until>Date.now()+60000)return this.cached.token;
   const c=credential(s.googlePlayCredential);
   if(c.type==='oauth'){const result=await this.request('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({...c.client,grant_type:'refresh_token',refresh_token:c.refresh_token}).toString()});if(!result.access_token)throw new Error('Вход Google Play истёк. Нажмите «Подключить» ещё раз.');this.cached={key:s.googlePlayCredential,token:result.access_token,until:Date.now()+Number(result.expires_in||3600)*1000};return result.access_token;}
-  const token=await require('./google-service-account.cjs').token(c,SCOPE,this.request);
+  const token=await require('../../google-service-account.cjs').token(c,SCOPE,this.request);
   this.cached={key:s.googlePlayCredential,token,until:Date.now()+3000000};return token;
  }
  async api(route,body){const token=await this.token();try{return await this.request(ROOT+route,{method:body?'POST':'GET',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},...body?{body:JSON.stringify(body)}:{}});}catch(error){throw explain(error);}}

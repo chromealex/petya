@@ -1,9 +1,9 @@
 // Access tokens for the two stores.
 // Google Play: the same service-account key Petya already keeps for Android vitals (settings.googlePlayCredential,
-// parsed by the shared adapter in src/google-play.cjs), signed here for the androidpublisher scope that reviews need.
+// parsed by the shared adapter in src/extensions/google-play/client.cjs), signed here for the androidpublisher scope that reviews need.
 // App Store Connect: an ES256 JWT made from the team API key (.p8), issuer id and key id.
 const {createSign,createPrivateKey}=require('node:crypto');
-const {credential}=require('../../google-play.cjs');
+const {credential}=require('../google-play/client.cjs');
 const PLAY_SCOPE='https://www.googleapis.com/auth/androidpublisher';
 const b64=v=>Buffer.from(JSON.stringify(v)).toString('base64url');
 
