@@ -226,6 +226,9 @@ function setup(s){
     const list=routes(phrase),projects=jira.connected(s)?jira.projectsOf(s,{projectMemoryId:project(projectId)?.memoryId}):null;
     for(const form of FORMS){
       for(const r of list){
+        // A hint that names an app's own source («(из wombyte)» = the Grafana feeding «Метрики игры») for a request
+        // that app takes: that source or nothing — not the same-named app with the phrase as a dashboard name.
+        if(r.source&&(!usable(r.id,r.e)||!r.source.ready)&&accepts(r.e,form(r.text)))return null;
         if(!usable(r.id,r.e)||r.source&&!r.source.ready)continue;
         const command=form(r.text);if(!accepts(r.e,command))continue;
         return model.widget({title:cap(phrase),size:r.e.mod.dashboard.size||'auto',source:{kind:'extension',extension:r.id,command,...(r.selected?{selected:r.selected}:{})}});
@@ -244,6 +247,7 @@ function setup(s){
       if(!accepts(r.e,form(r.text)))continue;
       const add=!installed(r.id),missing=r.source?!r.source.ready:!ready(r.e);
       if(!add&&!missing)continue;
+      if(missing&&r.source?.setup)return {phrase,add:add?r.e.d.name:'',offers:add?[r.id]:[],connect:[],where:'',todo:r.source.setup};
       const c=missing&&!r.source?call(r.e.mod.dashboard.connect,s.settings||{},phrase)||{}:{};
       const connect=!missing?[]:r.source?[r.source.name]:c.names?.length?c.names:[r.e.d.name];
       const where=!missing?'':r.source?(call(r.e.mod.dashboard.connect,s.settings||{},phrase)||{}).where||'':c.where||'';
@@ -258,7 +262,7 @@ function setup(s){
     return null;
   }
   const quoted=list=>list.map(m=>'«'+m+'»').join(', ');
-  const tip=a=>'для «'+a.phrase+'» '+[a.add&&'добавьте «'+a.add+'»',a.connect.length&&'подключите '+a.connect.map(n=>'«'+n+'»').join(' или ')+(a.where?' ('+a.where+')':''),a.pin&&'закрепите его карточку из чата («В дашборд…»)'].filter(Boolean).join(' и ');
+  const tip=a=>'для «'+a.phrase+'» '+[a.add&&'добавьте «'+a.add+'»',a.todo,a.connect.length&&'подключите '+a.connect.map(n=>'«'+n+'»').join(' или ')+(a.where?' ('+a.where+')':''),a.pin&&'закрепите его карточку из чата («В дашборд…»)'].filter(Boolean).join(' и ');
   // What to say about phrases without a widget: the concrete apps where known, the generic hint otherwise.
   function missedText(missed,{none=false}={}){
     const tips=missed.map(advise),known=tips.filter(Boolean),unknown=missed.filter((m,i)=>!tips[i]);

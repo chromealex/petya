@@ -126,6 +126,12 @@ async function sources(root){
  reply=feature.dashboards.turn(REQUEST);
  assert.match(reply.text,/^Собрал дашборд «Дашборд»: ANR\. Для «основные метрики проекта \(из wombyte\)» подключите «Grafana» \(Каталог → «Grafana», затем Настройки → «Grafana»: адрес, токен/,reply.text);
  assert.match(reply.text,/для «краши» добавьте «Крэши»/);
+ // The wombyte Grafana connected but no panel mapped to a metric: not a Grafana dashboard search for «основные метрики
+ // проекта», but «сопоставьте панели».
+ ({s,topic,feature}=make({extension_metrics:'true',...GRAFANA,grafanaMetricMap:'',...PLAY}));
+ assert.equal(feature.dashboards.compose('собери дашборд: основные метрики проекта (из wombyte)','general').d.widgets.length,0,'not given to «Grafana» as a dashboard name');
+ reply=feature.dashboards.turn(REQUEST);
+ assert.match(reply.text,/для «основные метрики проекта \(из wombyte\)» сопоставьте панели Grafana с метриками \(Настройки → «Grafana» → «Сопоставить панели с метриками»\)/i,reply.text);
  // A phrase nobody knows: Petya asks for a page; without one, the generic hint.
  ({feature}=make({}));
  let unknown;try{feature.dashboards.turn('Собери дашборд: погода на марсе');}catch(e){unknown=e;}
@@ -136,8 +142,9 @@ async function sources(root){
 // --- Feature ------------------------------------------------------------------------------------------------------
 (async()=>{
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'petya-dash-')),repo=path.join(root,'repo');fs.mkdirSync(repo);
- const crashes=require('../src/extensions/crashes/feature.cjs');const realTurn=crashes.turn;let turns=0;
+ const crashes=require('../src/extensions/crashes/feature.cjs');const realTurn=crashes.turn,realCrashes=crashes.crashesTurn;let turns=0;
  crashes.turn=async(s,command)=>{turns++;return require('../src/extensions/app-kit.cjs').reply(s,command,{by:'Крэши',text:'Крэшей: '+turns,data:{crashCard:{totals:{issues:turns}}}});};
+ crashes.crashesTurn=crashes.turn;// the widget reads the card directly (dashboard.load)
  const topic={id:'t1',title:'Релиз',projectId:'p1',kind:'chat',at:1,messages:[
   {role:'user',text:'Петя, крэши за неделю',at:10},{role:'assistant',text:'Крэшей 3',by:'Крэши',extensionData:{crashCard:{totals:{issues:3}}},at:11},
   {role:'user',text:'привет',at:12},{role:'assistant',text:'Привет!',at:13},
@@ -222,5 +229,5 @@ async function sources(root){
   void file;
   await sources(root);
   console.log('Dashboards: sources, sandboxed refresh, chat → dashboard, pin, compose, start screen, sharing through .petya, bare nouns, source hints, ANR and the missed-phrase advice passed');
- }finally{crashes.turn=realTurn;fs.rmSync(root,{recursive:true,force:true});}
+ }finally{crashes.turn=realTurn;crashes.crashesTurn=realCrashes;fs.rmSync(root,{recursive:true,force:true});}
 })().catch(e=>{console.error(e);process.exit(1);});

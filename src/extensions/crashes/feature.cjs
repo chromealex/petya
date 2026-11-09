@@ -127,5 +127,12 @@ async function turn(s,command){
 }
 // Dashboards (src/features/dashboards.cjs): read-only requests refresh there by themselves.
 // A dashboard part names the subject alone («краши»), so the crash word itself is enough.
-const dashboard={accepts:text=>query.about(String(text||''),{named:true}),widgets:[{title:'Крэши за неделю',command:'крэши за неделю'},{title:'Новые крэши',command:'новые крэши за неделю'}]};
+// The widget reads the crash card itself, so a bare «краши» (which the chat would not take without «покажи») works.
+const dashboard={accepts:text=>query.about(String(text||''),{named:true}),
+ async load(s,command){
+  if(!kit.installed(s,ID))throw Error('Расширение «Крэши» не добавлено.');
+  try{return await module.exports.crashesTurn(s,String(command||''));}
+  catch(e){return kit.reply(s,command,{by:BY,error:true,text:BY+' · '+(e.message||'источник крэшей недоступен.')});}
+ },
+ widgets:[{title:'Крэши за неделю',command:'крэши за неделю'},{title:'Новые крэши',command:'новые крэши за неделю'}]};
 module.exports={name:'crashes',dashboard,defaults:{['extension_'+ID]:'false'},validate(){},setup,turn,crashesTurn,summary};

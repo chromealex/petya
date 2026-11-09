@@ -61,6 +61,8 @@ module.exports={
  id:'grafana',name:'Grafana',
  ready:settings=>settings.extension_grafana==='true'&&client.connected(settings)&&['dau','new','revenue','arpdau'].some(k=>mapping.read(settings)[k]),
  apps:()=>[],
+ // Connected but no panel is mapped to a game metric yet: what to do, for the dashboard advice.
+ setup:settings=>settings.extension_grafana==='true'&&client.connected(settings)&&!['dau','new','revenue','arpdau'].some(k=>mapping.read(settings)[k])?'сопоставьте панели Grafana с метриками (Настройки → «Grafana» → «Сопоставить панели с метриками»)':'',
  // «DAU из wombyte»: the connected Grafana answers to its host's name (dashboards.wombyte.net → wombyte).
  names:settings=>['Графана',...client.names(settings.grafanaUrl)],
  async fetch(s,q){

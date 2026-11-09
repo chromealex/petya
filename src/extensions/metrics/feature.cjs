@@ -114,7 +114,7 @@ const dashboard={
  size:'w',
  widgets:[{title:'Основные метрики',command:'основные метрики за неделю'},{title:'DAU за неделю',command:'DAU за неделю'},{title:'Выручка за месяц',command:'выручка за месяц'}],
  ready:settings=>list(settingsOnly(settings)).ready().length>0,
- sources:settings=>{const reg=list(settingsOnly(settings));return reg.all().map(x=>({id:x.id,name:x.name,extension:x.extension,names:reg.names(x),ready:reg.isReady(x)}));},
+ sources:settings=>{const reg=list(settingsOnly(settings));return reg.all().map(x=>({id:x.id,name:x.name,extension:x.extension,names:reg.names(x),ready:reg.isReady(x),setup:(()=>{try{return x.source.setup?.(settings||{})||'';}catch{return '';}})()}));},
  // What to connect for a phrase: the source it names, otherwise any of the known ones.
  connect:(settings,phrase='')=>{
   const reg=list(settingsOnly(settings)),hit=reg.all().find(x=>reg.names(x).some(n=>query.mentions(phrase,n)));

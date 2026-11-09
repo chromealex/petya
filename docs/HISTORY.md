@@ -8,6 +8,11 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.16.1 — dashboard widgets that work: «из wombyte» metrics and bare «краши»
+
+- «основные метрики проекта (из wombyte)» is no longer searched as a Grafana dashboard name when the wombyte Grafana has no panels mapped to game metrics: the reply says to map them (Настройки → «Grafana» → «Сопоставить панели с метриками»), and once mapped the widget reads «Метрики игры» from that Grafana.
+- The «Краши» widget answers a bare «краши» (it said «Расширение не ответило»): the dashboard reads the crash card directly.
+
 ## 0.16.0 — apps add their own pages and tabs; reminders belong to the «Напоминания» app
 
 - An app can add an item to the left menu with a page of its own, and tabs on Petya's pages («Навыки», «Команда», «Материалы», «Настройки», «История», «Агенты») or on another app's page. Turning the app off or removing it takes them away at once; an open page goes back to the previous one.
