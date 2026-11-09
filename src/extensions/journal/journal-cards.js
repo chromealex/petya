@@ -147,6 +147,26 @@
   return row;
  }
 
+ // The week report as Markdown for a document: totals, each day's count, the week's main events (no chats or notes,
+ // nothing private), with links where the source has them.
+ const weekSpan=c=>{const days=c.week?.length?c.week:[{date:c.date}];const f=d=>dateOf(d).toLocaleDateString(locale(),{day:'numeric',month:'long'});return f(days[0].date)+' – '+f(days[days.length-1].date);};
+ function weekMarkdown(c){
+  const t=window.t||String,flat=v=>String(v??'').replace(/\s+/g,' ').replace(/[[\]]/g,m=>m==='['?'(':')').trim();
+  const out=['## '+t('Итого')];
+  for(const [key,label] of KINDS){const v=c.totals?.[key];if(v)out.push('- '+t(label)+': '+v);}
+  if(out.length===1)out.push('- '+t('В данных Пети за эту неделю ничего нет.'));
+  if(c.week?.length){
+   out.push('','## '+t('По дням'));
+   for(const d of c.week.filter(x=>!x.future)){const n=Object.values(partsOf(d.totals||{})).reduce((a,b)=>a+b,0);out.push('- '+dayTitle(d.date)+': '+n);}
+  }
+  const items=(c.timeline||[]).filter(i=>i.kind!=='chat'&&i.kind!=='note'&&!i.private).slice(-30);
+  if(items.length){
+   out.push('','## '+t('Главное за неделю'));
+   for(const i of items){const url=/^https?:\/\//.test(i.url||'')?String(i.url).replace(/[()\s]/g,encodeURIComponent):'';
+    out.push('- '+new Date(i.at).toLocaleDateString(locale(),{weekday:'short'})+' '+time(i.at)+' · '+(url?'['+flat(i.title)+']('+url+')':flat(i.title))+(i.detail?' — '+flat(i.detail):''));}
+  }
+  return out.join('\n');
+ }
  window.renderJournalCard=(parent,data)=>{
   const k=window.resultKit;if(!k||!data||parent.querySelector('.journal-card'))return;
   let c=data;const body=k.el('div','jr-body');const status=k.el('span');
@@ -165,7 +185,10 @@
   async function refresh(){try{const fresh=await call('card',c.brief?'plan':c.mode,c.date);if(fresh)c={...fresh,brief:c.brief};}catch{/* the app may be removed */}paint();}
   paint();
   const key=c.mode==='week'?(window.t||String)('Неделя с')+' '+dateOf(c.week?.[0]?.date||c.date).toLocaleDateString(locale(),{day:'numeric',month:'long'}):c.brief?dayTitle(c.tomorrow):dayTitle(c.date);
-  const actions=c.mode==='week'?[{label:'Что я сегодня сделал',run:()=>k.ask('Что я сегодня сделал?',{send:true})}]:[{label:'Итоги недели',run:()=>k.ask('Итоги недели',{send:true})},{label:'Запись в дневник…',run:()=>k.ask('Запиши в дневник: ')}];
+  const actions=c.mode==='week'?[{label:'Что я сегодня сделал',run:()=>k.ask('Что я сегодня сделал?',{send:true})},
+   // The week report as a document (document-export: «Google Диск» previews it and creates it only on confirmation).
+   k.links('document-export',()=>({title:(window.t||String)('Итоги недели')+' · '+weekSpan(c),app:'Дневник дня',text:weekMarkdown(c)}),{label:'Сохранить в Google Docs'})]
+   :[{label:'Итоги недели',run:()=>k.ask('Итоги недели',{send:true})},{label:'Запись в дневник…',run:()=>k.ask('Запиши в дневник: ')}];
   const node=k.card({app:'Дневник',initial:'✎',color:'#5a7a6a',key,status,body,actions,className:'journal-card'});
   node.querySelector('.kit-key')?.setAttribute('data-no-i18n','');
   parent.append(node);

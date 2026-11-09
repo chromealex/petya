@@ -101,6 +101,12 @@
   raw(card.querySelector('.kit-key'));
   paint();parent.append(card);
  };
+ // The answer and its cited sources as Markdown: «[n] [title](link) — source», links only for http(s).
+ function answerMarkdown(c){
+  const flat=v=>String(v??'').replace(/\s+/g,' ').replace(/[[\]]/g,m=>m==='['?'(':')').trim();
+  const lines=c.citations.map(x=>{const url=/^https?:\/\//.test(x.url||'')?x.url.replace(/[()\s]/g,encodeURIComponent):'';return '- ['+x.n+'] '+(url?'['+flat(x.title)+']('+url+')':flat(x.title))+' — '+(window.t||String)(labelOf(x.source));});
+  return [String(c.text||'').trim(),'','## '+(window.t||String)('Источники'),...lines].join('\n');
+ }
  window.renderSearchAllAnswer=(parent,c)=>{
   for(const x of c?.citations||[])learn(x);
   const k=window.resultKit;if(!k||!c||parent.querySelector('.sa-answer')||!c.citations?.length)return;
@@ -111,7 +117,9 @@
    const meta=k.el('span','sa-meta');meta.append(k.el('span','sa-src',labelOf(x.source)));const w=when(x.at);if(w)meta.append(w);
    li.append(t,meta);list.append(li);
   }
-  const card=k.card({app:'Поиск по всему',initial:'П',color:'#5a6b4a',key:'«'+c.query+'»',status:{label:'ответ по найденному',tone:'done'},subtitle:c.citations.length+' '+plural(c.citations.length,['ссылка','ссылки','ссылок']),body:list,className:'sa-card sa-answer'});
+  // The answer with its numbered sources as a document (document-export: «Google Диск» previews and confirms).
+  const actions=c.text?[k.links('document-export',()=>({title:(window.t||String)('Ответ по найденному')+': '+c.query,app:'Поиск по всему',text:answerMarkdown(c)}),{label:'Сохранить в Google Docs'})]:[];
+  const card=k.card({app:'Поиск по всему',initial:'П',color:'#5a6b4a',key:'«'+c.query+'»',status:{label:'ответ по найденному',tone:'done'},subtitle:c.citations.length+' '+plural(c.citations.length,['ссылка','ссылки','ссылок']),body:list,actions,className:'sa-card sa-answer'});
   raw(card.querySelector('.kit-key'));parent.append(card);
  };
 })();

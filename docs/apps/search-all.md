@@ -66,7 +66,9 @@ nomic-embed, mxbai-embed, bge, e5, minilm, arctic, …), the top 30 are embedded
 Uses the last search card in the chat (persisted in the message, so it works after a restart), optionally only the
 sources named («… в Slack»; the card's open tab sends that). The model gets up to 12 numbered excerpts and must cite
 them as [n]. Code removes citations to numbers that do not exist; an answer with no valid citation (or `found:false`)
-is reported as «В найденном нет прямого ответа». The answer card lists the cited items with links.
+is reported as «В найденном нет прямого ответа». The answer card lists the cited items with links and,
+when a `document-export` provider is connected («Google Диск»), «Сохранить в Google Docs»: the answer text (kept in
+the card data) and its numbered sources as Markdown.
 
 ## Phrases
 Own: «найди везде про матчмейкинг», «где обсуждали оплату в Китае», «поиск по всему: лиги», «поищи везде насчёт релиза

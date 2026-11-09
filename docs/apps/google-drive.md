@@ -42,7 +42,8 @@ three Google Docs found by their text alone are read for the snippet; see [searc
   настройки».
 - **`document-export`** (cross-app kind): another card hands `{title, text (Markdown), app?}`; the provider keeps it
   in memory for 2 h and sends «Сохрани в Google Документы «…» · #id» to the chat; the same confirmation card follows.
-  No card uses it yet; good candidates: «Поиск по всему» answers, meeting summaries, patch notes, standups.
+  Used by the meeting summary, the «Поиск по всему» answer and the «Дневник дня» week report («Сохранить в Google
+  Docs», `tests/document-export-ui.cjs`); other candidates: patch notes, standups.
 - **Dashboard**: recent files and searches are read-only (`dashboard.accepts`); widget «Недавние файлы Google Диска».
 - **Service for other apps** `services.googleDrive`: `ready()`, `who()`, `parseLink`, `search(text, {kind, size})`,
   `document(id)` (outline blocks and text).

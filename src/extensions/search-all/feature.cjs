@@ -158,7 +158,7 @@ async function answerTurn(s,text){
   return kit.reply(s,text,{by:BY,text:'В найденном нет прямого ответа на «'+card.query+'»'+(answer&&!r.found?': '+answer.replace(/\[[\d,\s]+\]/g,'').slice(0,300):'.')+' Откройте результаты в карточке поиска выше.',data:{searchAllAnswer:{query:card.query,found:false,citations:[]}}});
  }
  const citations=[...used].sort((a,b)=>a-b).map(n=>{const i=pool[n-1];return {n,source:i.source,...i.messenger?{messenger:true}:{},...!LABELS[i.source]?{label:label(i.source,card),...look(i.source,card)}:{},title:i.title,url:i.url,at:i.at,meta:i.meta,...i.path?{path:i.path,line:i.line}:{}};});
- return kit.reply(s,text,{by:BY,text:answer.slice(0,4000),data:{searchAllAnswer:{query:card.query,found:true,only,citations}},sources:citations.filter(c=>/^https:\/\//.test(c.url)).map(c=>({title:'['+c.n+'] '+(c.messenger?'':label(c.source,card)+' · ')+c.title,url:c.url}))});
+ return kit.reply(s,text,{by:BY,text:answer.slice(0,4000),data:{searchAllAnswer:{query:card.query,found:true,only,citations,text:answer.slice(0,4000)}},sources:citations.filter(c=>/^https:\/\//.test(c.url)).map(c=>({title:'['+c.n+'] '+(c.messenger?'':label(c.source,card)+' · ')+c.title,url:c.url}))});
 }
 
 async function turn(s,command){

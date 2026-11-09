@@ -66,7 +66,7 @@ to the chat (`k.ask(…, {send:true})`), `{text}` shows a toast, `{settings: '<e
 | `meeting-recording` | `zoom` (Zoom extension) | Petya's local recording (system audio, optional microphone) of a **Zoom** meeting: `when:'now'` starts it during the meeting, `when:'schedule'` stores a timer (`meetingRecordingSchedule`, at most 8) that, from the event time, starts the recording as soon as the Zoom meeting source sees the meeting, and reports in a cancellable notification. Fits Zoom links only. Ready unless `meetingAutoRecord` is `off`. |
 | | `google-meet`, `teams` | The same for Meet / Teams links (`googleMeetRecordingSchedule`, `teamsRecordingSchedule`): the scheduled recording starts when that app's meeting source sees the call. The timer is the shared core module `src/meeting-schedule.cjs` (each app passes its own key, name and `detect`). |
 | `spreadsheet-export` | `google-sheets` («Google Таблицы») | The card's table `{title, sheet?, app?, header, rows}` (≤2000 × 40) as a chat request «Выгрузи в Google Таблицы «…» · N строк · #id»; the export card asks where (new spreadsheet, new tab, existing tab with the exact cell diff) and writes only on «Выгрузить». Ready when Sheets access is granted; without write permission it answers `{settings:'google-sheets'}`. See [google-sheets.md](google-sheets.md). |
-| `document-export` | `google-drive` («Google Диск») | The card's text `{title, text (Markdown), app?}` as a chat request «Сохрани в Google Документы «…» · #id»; the confirmation card previews the document, lets the user fix the title and creates the Google Doc only on «Создать документ» (`drive.file`). Ready when Drive access is granted; without «Разрешить создавать документы» it answers `{settings:'google-drive'}`. No card uses it yet. See [google-drive.md](google-drive.md). |
+| `document-export` | `google-drive` («Google Диск») | The card's text `{title, text (Markdown), app?}` as a chat request «Сохрани в Google Документы «…» · #id»; the confirmation card previews the document, lets the user fix the title and creates the Google Doc only on «Создать документ» (`drive.file`). Ready when Drive access is granted; without «Разрешить создавать документы» it answers `{settings:'google-drive'}`. See [google-drive.md](google-drive.md). |
 
 Not provided: **Telegram** `share-message` — Petya reads Telegram but has no confirmed sending flow; adding one needs
 its own chat selection and preview. «Программист» has no offer file, so a missing `code-fix` shows nothing (no
@@ -87,7 +87,13 @@ offer).
 | Calendar, created meeting / timeline | | | | | «Петя запишет встречу» / «Записать Петей» |
 
 «Выгрузить в Google Таблицы» (`spreadsheet-export`): sprint plan, game metrics (daily series), A/B-test groups, the
-config-balance report and its version diff. «Конфиги и баланс» also uses `code-fix` for «Применить в конфиги».
+config-balance report and its version diff.
+
+«Сохранить в Google Docs» (`document-export`, shown only while «Google Диск» is added and connected; the card's text as
+Markdown): the meeting summary (decisions, tasks with assignee and due date, not discussed, discussed), the «Поиск по
+всему» answer (the answer and its numbered sources with links; answer cards saved before the answer text was kept
+show no button) and the «Дневник дня» week report (totals, days, the week's main events with links; chats and private
+notes stay out). UI: `tests/document-export-ui.cjs` (screenshots `petya-document-export-*.png`). «Конфиги и баланс» also uses `code-fix` for «Применить в конфиги».
 
 The meeting summary also gets «Назначить следующую встречу» when «Календарь» is added: a calendar request with the
 people from the tasks is put into the composer.

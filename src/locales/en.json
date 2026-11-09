@@ -12764,6 +12764,12 @@
   "Уточните проект в разделе «Claude и Codex».": "Specify the project in “Claude and Codex”.",
   "Документ · по смыслу": "Document · by meaning",
   "Поиск по смыслу в Google Диске не ответил.": "Search by meaning in Google Drive did not respond.",
-  "в Google Диске": "in Google Drive"
+  "в Google Диске": "in Google Drive",
+  "В данных Пети за эту неделю ничего нет.": "Petya's data has nothing for this week.",
+  "Итого": "Total",
+  "Обсудили": "Discussed",
+  "Ответ по найденному": "Answer from the results",
+  "По дням": "By day",
+  "Сохранить в Google Docs": "Save to Google Docs"
  }
 }

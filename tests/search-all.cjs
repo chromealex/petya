@@ -204,6 +204,7 @@ const DAY=86400000,NOW=Date.UTC(2026,10,9,12);
  const answer=await app.turn(s,'Ответь по найденному');
  assert.equal(answer.text,'Матчмейкинг на пиках ищет до 4 минут [1]. Решили начать с окна MMR 200 и расширять его [3, 9]. Ещё говорят про луну.','a citation of a missing excerpt is removed');
  assert.deepEqual(answer.extensionData.searchAllAnswer.citations.map(c=>c.n),[1,3,9]);
+ assert.equal(answer.extensionData.searchAllAnswer.text,answer.text,'the answer card keeps the text for «Сохранить в Google Docs»');
  // Only Slack.
  model=[body=>{const user=JSON.parse(body.messages[1].content);assert.ok(user.excerpts.every(e=>e.source==='Slack'));return {answer:'Окно MMR расширяют каждые 30 секунд [1].',found:true};}];
  const onlySlack=await app.turn(s,'ответь по найденному только в Slack');
