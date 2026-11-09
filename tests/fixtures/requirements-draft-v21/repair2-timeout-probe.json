@@ -1,0 +1,22 @@
+{
+  "status": "planned_bounded_probe",
+  "resume_step": 16,
+  "stop_after": 128,
+  "checkpoint_sha256": "5a1f13c61f2565ee9f84c07efc95629bea39302834714d84596b80310cb2b4d4",
+  "environment_override": {
+    "AGX_RELAX_CDM_CTXSTORE_TIMEOUT": "1"
+  },
+  "scope": "Child training process only; no persistent OS or application setting changes.",
+  "source": "https://github.com/ml-explore/mlx/issues/3267",
+  "limits": "Related upstream watchdog workaround, not a confirmed fix for this firmware lockup. A successful bounded probe is not final training or quality evidence.",
+  "trainer_changed": false,
+  "training_protocol_sha256": "fdb54b04481650f0dde8115b86ba6d3bdedf4914aaab2def0cf4d84e5b486c30",
+  "log_path": "/tmp/peter-v21/repair2-timeout-probe.log",
+  "checkpoint_directory": "/tmp/peter-v21/repair2-retry1-checkpoints",
+  "final_output": "/tmp/peter-v21/repair2-retry1-adapter",
+  "required_training_flags": {
+    "attention": true,
+    "mlp": true
+  },
+  "preflight_rejection": "Initial command omitted --attention and --mlp; checkpoint identity guard rejected it before resumed training. Corrected command restores both recorded flags."
+}

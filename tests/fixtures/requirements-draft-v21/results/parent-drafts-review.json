@@ -1,0 +1,82 @@
+{
+  "fresh-cancel-first": {
+    "passed": false,
+    "reason": "Applies the explicitly canceled in_mark to out_mark replacement. Correct second replacement does not repair the first.",
+    "answer_sha256": "21cde377e6bfd15d50f0e59194abc85f6d6cfd4fa6a130410fb538440f815200"
+  },
+  "fresh-cancel-second": {
+    "passed": false,
+    "reason": "Cancels both replacements although only the second was canceled, losing the approved result_no replacement.",
+    "answer_sha256": "5a08cc43b3af961bee2f42040af1911faece8fd2dcee7cd30de947f8650e8058"
+  },
+  "fresh-revoke-transmit": {
+    "passed": false,
+    "reason": "Changes the prohibited object to a parcel instead of the notice and does not clearly record replacement of the old object number. The heading alone does not repair the changed no-send object.",
+    "answer_sha256": "f3895c7e0c23d2be5f7afdb3d9602ecb7d4b911d2b16eea35f1fe2c535c16395"
+  },
+  "fresh-unchanged-field-send": {
+    "passed": true,
+    "reason": "Preserves case number and date without the proposed application number and explicitly allows sending the certificate to the notary. Does not conflate the rejected replacement with restored permission.",
+    "answer_sha256": "0339af16d5969454ecb685f2c548c1f0df06b4c41605392351bf2c5829a5023b"
+  },
+  "fresh-copy-scope": {
+    "passed": false,
+    "reason": "Blanket instruction to prepare identical extracts without transmission contradicts the later permission to transmit to the economist. The reviewer prohibition and excluded comment do not remove that contradiction.",
+    "answer_sha256": "cf1ae795554cb822bf8fc68f191c9bd5d0bce0beaedecf44aec720d34f20fe17"
+  },
+  "fresh-undo-ban": {
+    "passed": true,
+    "reason": "Preserves transfer to the custodian with inventory number and room. The superseded ban is not restored; imperative transfer is consistent with the explicitly permitted transfer task.",
+    "answer_sha256": "6677f8bab414df9e935a2cdd230534a199b7646b3642a51219d46c58b2b2b4ef"
+  },
+  "fresh-add-not-replace": {
+    "passed": true,
+    "reason": "Adds Terminal to Port and Pier and explicitly retains all three exact names without abbreviation. Broad address heading is compatible with location fields; no unauthorized replacement is introduced.",
+    "answer_sha256": "a5fb066cfee4bf19b9ca546531098670fc9eb348aab031983fa227170a7a79e6"
+  },
+  "fresh-code-versus-item": {
+    "passed": false,
+    "reason": "Replaces the ban on using the code for login with a different instruction not to add the badge during code login, and omits the explicit distinction allowing another badge with a new code.",
+    "answer_sha256": "f487a85d02a14d1e39dde0dea3d99c92e0c2b59e73ffab81b3c58c4abd5d0260"
+  },
+  "fresh-duration-open": {
+    "passed": false,
+    "reason": "Retains one-use container-receipt code and unresolved duration question, but omits the explicit exclusion of login use.",
+    "answer_sha256": "50c5bd3c6cc45c83b519e3beb51b38dd1615cd121860fa6b4dac740790113769"
+  },
+  "fresh-exact-caption": {
+    "passed": true,
+    "reason": "Preserves exact caption and filename, no normalization, unchanged original spelling and leading zeroes. Awkward adjective does not alter the explicit spelling restriction.",
+    "answer_sha256": "70039bd5fd430ccff7fc90790aa85a3956dd1bc5117d12b6681ee64d4b9fa415"
+  },
+  "fresh-display-only": {
+    "passed": true,
+    "reason": "Preserves lease_token display replacing hidden asset_token, unchanged storage, and no migration or value transfer.",
+    "answer_sha256": "9dcb8336dfe90a14d6777ba08ea550e0b83be8304cb052f95367c86ef3ae81e7"
+  },
+  "fresh-quoted-instruction": {
+    "passed": true,
+    "reason": "Retains the complete quote as an example and allows transmitting the whole text to the teacher. Recipient typo is unambiguous and creates no competing recipient; the quoted prohibition is not applied to transmission.",
+    "answer_sha256": "705882de1222d2950a927aec7730021e0ef0ea0f62edb3601e64d949be0ee13b"
+  },
+  "fresh-negative-order": {
+    "passed": false,
+    "reason": "Gives the correct descending/no-duplicate-removal rule but omits the explicitly requested complete sorted five-element result.",
+    "answer_sha256": "08afab100520c0af84ccf40edd20e3ffb2e17c64215a842aee8c750991dfac3f"
+  },
+  "fresh-interval-prose": {
+    "passed": true,
+    "reason": "Description exactly retains inclusive -63, exclusive -26 and unrounded fractional values. The alternative heading is accurate.",
+    "answer_sha256": "a8fee784861c60787a0e1e9ab1821dbe094917143de93467ddbb6b7ac439301d"
+  },
+  "fresh-recipient-pending": {
+    "passed": false,
+    "reason": "Does not preserve the explicit prohibition on sending to anyone. Adds a special condition about selecting the elder although the user asked only to keep the recipient unresolved and ask whom to address.",
+    "answer_sha256": "062e9337fa806abc632ea872b8c2c385195e352f810cfd2e6e87e77d1385e426"
+  },
+  "fresh-rename-withdrawn": {
+    "passed": false,
+    "reason": "Performs the withdrawn rename to Приём-09 instead of retaining Сбор-09. Correct icon color and link preservation do not fix that error.",
+    "answer_sha256": "e06d40b3b293dde57c0d8ae4be7bd0e47dfd49065f01439fbd8331fdd1a55f61"
+  }
+}

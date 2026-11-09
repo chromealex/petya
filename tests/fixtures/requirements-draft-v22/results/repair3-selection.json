@@ -1,0 +1,16 @@
+{
+  "candidate": "repair3-adapter",
+  "adapter_sha256": "839ff305924661e60b26c52def9c144e8e77538eefc150d43ad69a38897326ef",
+  "config_sha256": "77d7bef9a07175b1dce74dc8ad9cd83494d52ce6c4edced139185b4bc6d6e07a",
+  "protocol_sha256": "1a241e84951d9e5678371adfd2cc69824c2761f62763d9f4d3977e8cf903029b",
+  "familiar": {
+    "total": 801,
+    "exact": 801,
+    "passed": 801,
+    "literal_checks": 84,
+    "answers_sha256": "fae869514190c0a3a1b14f20861f5dafb66a405a014252ab3c848d7da06b48d5"
+  },
+  "holdout_freeze_sha256": "6f31b0844491140de7f374f736b917b34e816e5224419e035d148f2de3ee9317",
+  "next": "Evaluate the 42 frozen new cases (check.jsonl, fresh-drafts.jsonl) once, with the same evaluator and settings as the baseline; review every draft; keep every baseline success and improve the total (baseline 27/30 checks, 6/12 drafts). Live dialogue, runtime and packaging stay separate.",
+  "limits": "Authored synthetic non-blind study. Exact prompt disjointness does not establish distributional independence. Repeated targets and extra training are confounded; no causal or release claim."
+}

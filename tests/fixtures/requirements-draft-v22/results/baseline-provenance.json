@@ -1,0 +1,14 @@
+{
+  "freeze_commit": "ff315ad",
+  "exit_code": 0,
+  "parent_sha256": "e4750435ed3c09b138b0cb735c227ce074e9377612b3b147a657a885531a12d0",
+  "holdout_freeze_sha256": "6f31b0844491140de7f374f736b917b34e816e5224419e035d148f2de3ee9317",
+  "files": {
+    "baseline-check.jsonl": "342671fc0729cc3a339c298761f4f31e7f0c044263ae28abd6e98b9bf0294ef3",
+    "baseline-check.manifest.json": "a58dc4b9a944a4ad6235dbef6389f67efc1f506c030178b3417d2f3be9d0c90a",
+    "baseline-drafts.jsonl": "1ba7ce917f84adfc7ed607758cfcdffa99963ce5b12aa8beda80e5d2fe7cf199",
+    "baseline-drafts.manifest.json": "4d75286b1e45a1a2ea1f4201c72b185b46e26d38949c8362969f74c2427d0c26",
+    "baseline-drafts-review.json": "7b9d6e5a1caefb4986607507a24697a5a489c1b0d433f0797d25de84fd5383ba",
+    "baseline-summary.json": "8ee8801a9d0090da2af393dec40fc29dae6f7a4800c5b4ebc36f8784cba73fa2"
+  }
+}

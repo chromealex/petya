@@ -1,0 +1,32 @@
+{
+  "parent": "repair-adapter",
+  "parent_sha256": "52ffaac2bcae2c49de530d68c9bef17b96c558c29d80b63a5c8cf0921b921ac2",
+  "training_file": "repair2-train.jsonl",
+  "steps": 1653,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 1e-06,
+  "hashes": {
+    "repair2-train.jsonl": "ac5d6d7085107b13f3328c31cdbb76c82b080efda53912776cd53870673aac43",
+    "repair-train.jsonl": "72b9fd47c7840fc386d3deec55311b5d7f5ca9dba02ef46f1d1aef27beb0a3e9",
+    "acquisition.jsonl": "246201ced7d97426682c1e010d83e93151313ad9d683b6863fed955a99c60fdc",
+    "fresh-drafts.jsonl": "c7443cd7847af2fc3d9ff390c7eafa0c10e3be8807bd9874e44518fe3d692ea5",
+    "check.jsonl": "45f1372e7ce30327e9edd99ea1807c508c2e4a7c2064a03d8548f9157946ed09",
+    "holdout-freeze.json": "6f31b0844491140de7f374f736b917b34e816e5224419e035d148f2de3ee9317"
+  },
+  "sources": {
+    "tests/fixtures/requirements-draft-v21/train_checkpointed.py": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+    "tests/fixtures/requirements-draft-v21/checkpoint.py": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549"
+  },
+  "review_sha256": "35c13ac87e981c069c9c04480284e7cae31024bcdc879dbe5356879f1d957039",
+  "inspected_failure_ids": [
+    "fresh-add-not-replace"
+  ],
+  "exposures": {
+    "fresh-add-not-replace": 13
+  },
+  "recipe": "Unchanged 1641-presentation rehearsal of the first repair plus twelve extra copies of the one reviewed failure; continue from the first repair adapter. No reference rewriting, no prompt changes. Reset Adam, stop at 16 and verify before resuming with Adam state.",
+  "gate": "Preserve all 801 familiar cases. Commit selection only after complete semantic retention. Then evaluate the 42 frozen new cases under the same full-dialogue review criteria; preserve every parent success and improve total. Baseline is 27/30 checks and 6/12 drafts. No new-case training before candidate evaluation. Ordinary sampled live dialogue, runtime and package qualification remain required.",
+  "limits": "Authored synthetic non-blind study. Exact prompt disjointness does not establish distributional independence. Repeated targets and extra training are confounded; no causal or release claim."
+}

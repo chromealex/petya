@@ -1,0 +1,14 @@
+{
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "data_sha256": "1c0237125f907cb95e3078406b981782c39535396148df297ce8b6c150a60a27",
+  "adapter": "tests/fixtures/requirements-draft-v19/replay-adapter",
+  "temperature": 0,
+  "thinking": false,
+  "max_tokens": {
+    "draft": 450,
+    "other": 120
+  },
+  "reference_in_prompt": false,
+  "adapter_sha256": "e374d3de246d716862710921ade2c26b15fee91753dc42416fb3c2d94bbdf59a",
+  "config_sha256": "77d7bef9a07175b1dce74dc8ad9cd83494d52ce6c4edced139185b4bc6d6e07a"
+}

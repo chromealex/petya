@@ -1,0 +1,52 @@
+{
+  "v14-repeat": {
+    "answer_sha256": "01621e9825e1cea8b77cc959303a872c2a4526098b4d8908d3c097c1c49e2152",
+    "passed": true,
+    "reason": "Only the generic counter title changes from requests to records. The description exactly preserves closed requests, hidden authors and the final 181-second interval."
+  },
+  "v19-repeat": {
+    "answer_sha256": "4863008402055e5f89cbcb2e868f779d85fc5ce2fe71f5b0791131ae46142350",
+    "passed": true,
+    "reason": "The title names requests rather than generic records. The description exactly preserves processed requests, hidden assignees and the final 257-second interval."
+  },
+  "v20-repeat": {
+    "answer_sha256": "27a929e9fd62b76b1494083c900935ca4554bfee2843279ecdf56ea6abf3b4c4",
+    "passed": true,
+    "reason": "The title names acts and the seconds inflection is corrected. The final 293-second interval and hidden reviewer names remain unchanged."
+  },
+  "v20-withdrawn-latest": {
+    "answer_sha256": "ec7c5d373b0beea47051e82b7a36ac48dfd6f1b393542165604c7e9b83c3b365",
+    "passed": true,
+    "reason": "Consent and permission are equivalent here. The supply number replaces the order number, the draft is retained and sending to the supplier remains prohibited after withdrawal."
+  },
+  "v20-verbatim-name": {
+    "answer_sha256": "674e3c8f39fb5bcf683e9de5dac19c8ca659dd7153e18894329e19ce0716db6a",
+    "passed": true,
+    "reason": "Both literal names retain their exact characters, including ё, case and zeros. Character-for-character preservation and the normalization ban cover ё despite omitting its separate enumeration."
+  },
+  "v21-previous-draft-addition": {
+    "answer_sha256": "1f2767f67282a093b81d79ad898b61bf9424968415b03ca23144b9d2b7634948",
+    "passed": false,
+    "reason": "The response first retains Region but then says to add Oblast instead of Region. This contradicts the explicit rejection of replacement: Region and District must remain and Oblast must be an additional field."
+  },
+  "v21-previous-draft-quote": {
+    "answer_sha256": "754a06d8ee6149512fc7ea4500b1f991d06ca70e2f64d89dfd556ef4b4c6dd04",
+    "passed": true,
+    "reason": "The example quotation is retained as an example rather than an instruction; transferring the manual to the reviewer is explicitly permitted. Both decisions remain represented."
+  },
+  "v21-previous-draft-versions": {
+    "answer_sha256": "195b45ebb3f5bd477ca2d0eba125d3557d419edd3a34940847f0239ff421848a",
+    "passed": true,
+    "reason": "Only the title adds the word two. The description exactly preserves the full-version sending prohibition and limited short-version permission."
+  },
+  "v21-previous-draft-delete-undo": {
+    "answer_sha256": "1beaea2e00fa176cbf855b4f7aa3ad441cf14d3f5c0aa4163dd53d1facc4ea31",
+    "passed": true,
+    "reason": "Only the title noun number changes. Delete fax_line, retain home_line and work_line exactly matches the final decisions."
+  },
+  "v21-previous-draft-return": {
+    "answer_sha256": "994315c8560a0a1d6f073b45e1ec562905c9233c5ab4569e7f5a34e3f8b84d8c",
+    "passed": true,
+    "reason": "Number and quantity are equivalent. Returned books, hidden reader names and exclusion of the separate chair-replacement project are preserved."
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "check": {
+    "total": 30,
+    "exact": 27,
+    "passed": 27,
+    "failures": [
+      "v22-new-sort-0-1",
+      "v22-new-sort-1-1",
+      "v22-new-sort-2-0"
+    ],
+    "decisions": {
+      "v22-new-sort-0-0": true,
+      "v22-new-sort-0-1": false,
+      "v22-new-sort-1-0": true,
+      "v22-new-sort-1-1": false,
+      "v22-new-sort-2-0": false,
+      "v22-new-sort-2-1": true,
+      "v22-new-sort-3-0": true,
+      "v22-new-sort-3-1": true,
+      "v22-new-sort-4-0": true,
+      "v22-new-sort-4-1": true,
+      "v22-new-sort-5-0": true,
+      "v22-new-sort-5-1": true,
+      "v22-new-bound-0-0": true,
+      "v22-new-bound-0-1": true,
+      "v22-new-bound-0-2": true,
+      "v22-new-bound-0-3": true,
+      "v22-new-bound-1-0": true,
+      "v22-new-bound-1-1": true,
+      "v22-new-bound-1-2": true,
+      "v22-new-bound-1-3": true,
+      "v22-new-bound-2-0": true,
+      "v22-new-bound-2-1": true,
+      "v22-new-bound-2-2": true,
+      "v22-new-bound-2-3": true,
+      "v22-new-bound-cancel": true,
+      "v22-new-bound-equal": true,
+      "v22-new-general-0": true,
+      "v22-new-general-1": true,
+      "v22-new-general-2": true,
+      "v22-new-general-3": true
+    },
+    "literal_checks": {}
+  },
+  "drafts": {
+    "total": 12,
+    "exact": 0,
+    "passed": 6,
+    "failures": [
+      "v22-new-cancel-one",
+      "v22-new-two-recipients",
+      "v22-new-revoke-send",
+      "v22-new-open-duration",
+      "v22-new-exact-name",
+      "v22-new-recipient-open"
+    ],
+    "decisions": {
+      "v22-new-cancel-one": false,
+      "v22-new-cancel-two": true,
+      "v22-new-two-recipients": false,
+      "v22-new-revoke-send": false,
+      "v22-new-restore-send": true,
+      "v22-new-code-item": true,
+      "v22-new-open-duration": false,
+      "v22-new-exact-name": false,
+      "v22-new-screen-only": true,
+      "v22-new-add-separate": true,
+      "v22-new-quote": true,
+      "v22-new-recipient-open": false
+    },
+    "literal_checks": {
+      "v22-new-cancel-one": {
+        "passed": true,
+        "missing": []
+      },
+      "v22-new-cancel-two": {
+        "passed": true,
+        "missing": []
+      },
+      "v22-new-exact-name": {
+        "passed": true,
+        "missing": []
+      },
+      "v22-new-screen-only": {
+        "passed": true,
+        "missing": []
+      },
+      "v22-new-add-separate": {
+        "passed": true,
+        "missing": []
+      },
+      "v22-new-quote": {
+        "passed": true,
+        "missing": []
+      }
+    }
+  }
+}

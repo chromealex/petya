@@ -1,0 +1,19 @@
+{
+  "parent": "../requirements-draft-v19/replay-adapter",
+  "steps": 989,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 1e-06,
+  "recipe": "669 historical targets once, 32 authored conversational variants four times, 32 previous balanced variants, 112 numeric/sort rehearsal cases and 16 newly inspected diverse targets three extra times.",
+  "gate": "Retain all 669 familiar cases before candidate fresh inference. Preserve every parent success on freshly authored conversations and numeric checks. Runtime/live dialogue release gates remain separate.",
+  "limits": "Synthetic non-blind study. New language coverage and replay weights change together; no isolated causal claim.",
+  "hashes": {
+    "train.jsonl": "acd7a084e651e325e6f0f424b671a851c6af32190ad904089ebd2d460920623f",
+    "acquisition.jsonl": "5eb24b2456249661f08651b53b5614fb72746781d42689ce32ecb0f35e42a9bf",
+    "variants.jsonl": "b7fb6de6a4025d13af61137a4c0e295a2f2c98d25e20d64c9e082f0aad3d1046",
+    "fresh-drafts.jsonl": "df6255986015fb4ed6eacd284f036998fecc54b49a3e6a49e5472473736b0516",
+    "check.jsonl": "1c0237125f907cb95e3078406b981782c39535396148df297ce8b6c150a60a27"
+  },
+  "parent_sha256": "e374d3de246d716862710921ade2c26b15fee91753dc42416fb3c2d94bbdf59a"
+}

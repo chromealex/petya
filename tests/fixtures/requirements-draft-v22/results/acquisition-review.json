@@ -1,0 +1,62 @@
+{
+  "v19-repeat": {
+    "answer_sha256": "34dbd815e0e85d126b2ec5aa7aedf5660c80635c0714c2e731c9e37a1a0e23f5",
+    "passed": false,
+    "reason": "Preserves 257 seconds, hidden performer names and no open questions, but retains the explicitly corrected ungrammatical seconds inflection."
+  },
+  "v20-repeat": {
+    "answer_sha256": "fe5a457b7f4538407b9bc3a4f1d2e5030b57026f534b622da963f6b0504e26ff",
+    "passed": false,
+    "reason": "Preserves 293 seconds and hidden reviewer names. The summary is equivalent, but the corrected seconds inflection remains ungrammatical."
+  },
+  "v21-previous-draft-quote": {
+    "answer_sha256": "a515c7af52460b9222682be49a693a2e1d16f39c55cb0167e3008eb4380dadba",
+    "passed": true,
+    "reason": "Preserves the exact quotation as an example and expressly permits sending the manual to the reviewer; equivalent wording distinguishes quotation from instruction."
+  },
+  "fresh-unchanged-field-send": {
+    "answer_sha256": "ac58fd12cf83871ee638884d2d2da0ce893802841d0c494e8ef89702e12233ce",
+    "passed": false,
+    "reason": "Preserves case number, date and permission to send to the notary, but renders the explicitly rejected field replacement as an ungrammatical not-agreed statement instead of clearly recording rejection."
+  },
+  "fresh-undo-ban": {
+    "answer_sha256": "9a51017d8ee1f9da6aaba5ae1de264c718e7808945ab230fb145607cc0c1e938",
+    "passed": true,
+    "reason": "Current permission to send to the caretaker and both inventory number and hall are explicit; no restoration of the withdrawn ban is implied."
+  },
+  "fresh-add-not-replace": {
+    "answer_sha256": "73d8fa6d53d96b517c89ea1880ee7f63adf7c32cd5b6c2c604b432f662798b6c",
+    "passed": true,
+    "reason": "Preserves all three exact field names, adds a separate terminal field, retains existing fields and full names, and respects the request for no other changes."
+  },
+  "fresh-duration-open": {
+    "answer_sha256": "047f9c5ae224c9333e9a500efe340717b435409e4f5b1eddf75ce4d46b00f974",
+    "passed": true,
+    "reason": "Preserves single-use container receipt scope, excludes login, leaves duration undecided and asks only for that duration."
+  },
+  "fresh-exact-caption": {
+    "answer_sha256": "e22f272f4188e57662c7bb60fe31d8ecd25835f37fd58f0c25df6fedb8b839bb",
+    "passed": true,
+    "reason": "Both exact names are preserved character-for-character. The explicit character preservation and no-normalization rule cover all leading zeros despite singular wording."
+  },
+  "fresh-quoted-instruction": {
+    "answer_sha256": "3aff48460b718a5fd88dc1ba3e2b7f908654491f88d5a46d1d2ac20daf058ade",
+    "passed": true,
+    "reason": "Preserves the full quotation and example, separates it from the action, and explicitly permits sending the text to the teacher."
+  },
+  "fresh-negative-order": {
+    "answer_sha256": "e85c1c4d580cb14ca0592a922486ce2fe3daf01339c438def87e51e9dc9d594b",
+    "passed": true,
+    "reason": "Correct descending order -9, -9, -21, -38, -64 retains all five elements and the duplicate; both rule and result are present."
+  },
+  "fresh-recipient-pending": {
+    "answer_sha256": "357f6721d658acc21781c3920201ff3f266c64457912fb32087ea472b3990757",
+    "passed": false,
+    "reason": "Recipient remains unresolved, sending is forbidden and the recipient question is present, but repeated ungrammatical wording about the room change makes the requested task draft defective."
+  },
+  "fresh-rename-withdrawn": {
+    "answer_sha256": "1316c3096af36f53b7d3c2570cfeb1dbdc831242fe340f9c5cdd74e9692c0af7",
+    "passed": false,
+    "reason": "Omits the explicitly requested exact active name Сбор-09. Keeping an unspecified name does not satisfy the literal requirement; purple icon and unchanged link are preserved."
+  }
+}

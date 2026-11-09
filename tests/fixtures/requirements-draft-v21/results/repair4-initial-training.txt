@@ -1,0 +1,2 @@
+Step 16 loss 0.00245
+Checkpoint 16 saved

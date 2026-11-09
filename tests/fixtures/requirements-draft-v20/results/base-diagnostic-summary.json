@@ -1,0 +1,158 @@
+{
+  "base": {
+    "check": {
+      "total": 48,
+      "exact": 44,
+      "passed": 44,
+      "failures": [
+        "sort-0-1-0",
+        "sort-3-0-0",
+        "sort-4-1-0",
+        "sort-5-1-0"
+      ],
+      "decisions": {
+        "numeric-0-equal": true,
+        "numeric-0-lower": true,
+        "numeric-0-upper": true,
+        "numeric-0-open": true,
+        "numeric-1-equal": true,
+        "numeric-1-lower": true,
+        "numeric-1-upper": true,
+        "numeric-1-open": true,
+        "numeric-2-equal": true,
+        "numeric-2-lower": true,
+        "numeric-2-upper": true,
+        "numeric-2-open": true,
+        "numeric-3-equal": true,
+        "numeric-3-lower": true,
+        "numeric-3-upper": true,
+        "numeric-3-open": true,
+        "numeric-4-equal": true,
+        "numeric-4-lower": true,
+        "numeric-4-upper": true,
+        "numeric-4-open": true,
+        "sort-0-0-0": true,
+        "sort-0-0-1": true,
+        "sort-0-1-0": false,
+        "sort-0-1-1": true,
+        "sort-1-0-0": true,
+        "sort-1-0-1": true,
+        "sort-1-1-0": true,
+        "sort-1-1-1": true,
+        "sort-2-0-0": true,
+        "sort-2-0-1": true,
+        "sort-2-1-0": true,
+        "sort-2-1-1": true,
+        "sort-3-0-0": false,
+        "sort-3-0-1": true,
+        "sort-3-1-0": true,
+        "sort-3-1-1": true,
+        "sort-4-0-0": true,
+        "sort-4-0-1": true,
+        "sort-4-1-0": false,
+        "sort-4-1-1": true,
+        "sort-5-0-0": true,
+        "sort-5-0-1": true,
+        "sort-5-1-0": false,
+        "sort-5-1-1": true,
+        "general-0": true,
+        "general-1": true,
+        "general-2": true,
+        "general-3": true
+      },
+      "literal_checks": {}
+    },
+    "drafts": {
+      "total": 20,
+      "exact": 0,
+      "passed": 3,
+      "failures": [
+        "draft-payment",
+        "draft-copies",
+        "draft-two-edits",
+        "draft-addition",
+        "draft-literal",
+        "draft-export",
+        "draft-sort",
+        "draft-pressure",
+        "draft-quote",
+        "draft-versions",
+        "draft-token",
+        "draft-recipient",
+        "draft-delete-undo",
+        "draft-return",
+        "draft-label-colour",
+        "draft-proposal",
+        "draft-unset-lifetime"
+      ],
+      "decisions": {
+        "draft-payment": false,
+        "draft-copies": false,
+        "draft-two-edits": false,
+        "draft-addition": false,
+        "draft-literal": false,
+        "draft-export": false,
+        "draft-sort": false,
+        "draft-pressure": false,
+        "draft-quote": false,
+        "draft-display": true,
+        "draft-versions": false,
+        "draft-reallow": true,
+        "draft-token": false,
+        "draft-answered-format": true,
+        "draft-recipient": false,
+        "draft-delete-undo": false,
+        "draft-return": false,
+        "draft-label-colour": false,
+        "draft-proposal": false,
+        "draft-unset-lifetime": false
+      },
+      "literal_checks": {
+        "draft-addition": {
+          "passed": true,
+          "missing": []
+        },
+        "draft-literal": {
+          "passed": true,
+          "missing": []
+        },
+        "draft-label-colour": {
+          "passed": true,
+          "missing": []
+        }
+      }
+    }
+  },
+  "comparison": {
+    "check": {
+      "base_passed": 44,
+      "repair_passed": 42,
+      "repair_gains": [
+        "sort-3-0-0"
+      ],
+      "repair_losses": [
+        "sort-0-1-1",
+        "sort-2-1-0",
+        "sort-5-1-1"
+      ]
+    },
+    "drafts": {
+      "base_passed": 3,
+      "repair_passed": 12,
+      "repair_gains": [
+        "draft-literal",
+        "draft-export",
+        "draft-sort",
+        "draft-quote",
+        "draft-versions",
+        "draft-delete-undo",
+        "draft-return",
+        "draft-proposal",
+        "draft-unset-lifetime"
+      ],
+      "repair_losses": []
+    }
+  },
+  "release_ready": false,
+  "limits": "Post-hoc diagnosis on inspected synthetic cases. Does not isolate which training step caused a difference or establish fresh generalization."
+}

@@ -1,0 +1,20 @@
+{
+  "adapter_sha256": "e4750435ed3c09b138b0cb735c227ce074e9377612b3b147a657a885531a12d0",
+  "files": {
+    "repair4-acquisition.jsonl": "dfb1f466c0341abc77d8988ff7a5713315ac754713b5a83c754255367b89a113",
+    "repair4-acquisition.manifest.json": "a26b432c687ee1da466429586c6b431dfd2f602dd3953ede8da5d89ca483f45e",
+    "repair4-acquisition-review.json": "a84636ebb062481b991a8327a86df94182f2af04b46c8e36eb6322cffc4a51be",
+    "repair4-acquisition-summary.json": "c3ec75bf760ad3df2ef48547d2e59b293a84c01c007d9e7ab420e6d01a222e3b"
+  },
+  "result": {
+    "total": 737,
+    "exact": 732,
+    "passed": 737,
+    "failures": []
+  },
+  "language_quality_defects": [
+    "v15-repeat: new incorrect seconds inflection; requirements preserved."
+  ],
+  "selection": "Selected for the frozen 64-case holdout only; not qualified for release.",
+  "scope": "Non-blind semantic retention; exact disjointness does not prove distributional independence."
+}

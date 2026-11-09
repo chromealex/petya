@@ -1,0 +1,14 @@
+{
+  "files": {
+    "parent-check.jsonl": "d33aca55e2ff62ba75a8384401e2cc956477ea582c69518ba1e45f00b00fcd73",
+    "parent-check.manifest.json": "56842cd286467e5d239e1c3ba5a372bb65af7d0406863d29a136f43ff285666f",
+    "parent-drafts.jsonl": "0d59ac1de50dfd2bf3be0dc457340812f504aafa6a6aeb3566638beffb8eeb7c",
+    "parent-drafts.manifest.json": "f1d0b039307f0c20e7b6846a56f7c51d4d735b739b63cd38d04330532de8d1b1",
+    "parent-drafts-review.json": "446d49110d1ea6412cab946741e487e8d2936f4980653fa4412df3a30de284cd",
+    "baseline-summary.json": "f3cfe7182e841fcdbf855bb412c0c4512792f247700254e9ffa1e440bc670241"
+  },
+  "protocol_sha256": "975a3c31b3cb3e17e75d50a0c57b901a36e56041102dadf7dc47cdac9a93f3ca",
+  "adapter_sha256": "9d6ff318cafa9466fdee69a36f7fac3e4c640352cf203e058d0a0f139b0bc4d7",
+  "data_commit": "cd765be",
+  "limits": "Authored synthetic non-blind baseline. No candidate responses have been generated; frozen training data unchanged."
+}

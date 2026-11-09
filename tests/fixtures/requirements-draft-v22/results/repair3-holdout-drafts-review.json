@@ -1,0 +1,62 @@
+{
+  "v22-new-cancel-one": {
+    "passed": false,
+    "reason": "Contradicts the cancellation: uses final_key instead of keeping draft_key; same failure as the baseline.",
+    "answer_sha256": "7161e1b5d8178fedbe2e11f40420c40b727e40874ff013809d7c3744eed2cfff"
+  },
+  "v22-new-cancel-two": {
+    "passed": true,
+    "reason": "Renames river_id to stream_id and keeps hill_id without ridge_id; «не заменять его в ridge_id» is a slip of preposition, not of meaning.",
+    "answer_sha256": "8be9fce11d28e34821b548ea040fa58c7da24482a60e926c94d1b85dc5325c18"
+  },
+  "v22-new-two-recipients": {
+    "passed": true,
+    "reason": "Identical sheets without an explanation; forwarding to the foreman allowed, to the dispatcher not. Fixes the baseline omission.",
+    "answer_sha256": "db43086a44bc81da46739637eaa47a7e6db0337f08e3f02a55d0adcf54b672ca"
+  },
+  "v22-new-revoke-send": {
+    "passed": false,
+    "reason": "Keeps the price, new code and the ban on sending to the buyer, but drops «дату не добавлять» (as the baseline) and the withdrawn permission.",
+    "answer_sha256": "1890780ca242b2891185e3ff8a718f854d695cfc85f11e9afc2d69853f50788a"
+  },
+  "v22-new-restore-send": {
+    "passed": true,
+    "reason": "Seat number and session time, no cost, forwarding to the cashier allowed.",
+    "answer_sha256": "30898e1eff1c4a4cdb801bd5eb9a35b97d610ea3a5c8de8da59832d7c0988fcd"
+  },
+  "v22-new-code-item": {
+    "passed": true,
+    "reason": "347 seconds, single use, a new kit by a new code, not for login.",
+    "answer_sha256": "297d0fda060b7c3a0a926d6dbf0727564a2b5b77668a991e6baa3de600f79037"
+  },
+  "v22-new-open-duration": {
+    "passed": true,
+    "reason": "Warehouse tool pickup, not for login, duration not agreed, asks for it; «повторное использование запрещено» follows from «одноразовый». Fixes the baseline omission.",
+    "answer_sha256": "fb2fb8ba3e54d8b660586ec617ccc14025d0bf4e56b3c59553e587404856f1a9"
+  },
+  "v22-new-exact-name": {
+    "passed": false,
+    "reason": "Keeps the literals and leading zeros, but «без изменения регистра» does not forbid transliteration, which the user explicitly refused.",
+    "answer_sha256": "929169f6b54a2b3754c2cab01562e69bd5067452d7576a3abe9cb5f3d2310b89"
+  },
+  "v22-new-screen-only": {
+    "passed": false,
+    "reason": "«Старое поле сохранить» contradicts «старое скрыть», and the no-migration requirement is lost. Baseline passed.",
+    "answer_sha256": "360207afe9ea82a3d90983f72159cbf09a10fd963962c89ae3445a5c5ec7817f"
+  },
+  "v22-new-add-separate": {
+    "passed": false,
+    "reason": "Loses the addition: lists «Секция», «Ярус» and «Полка» as existing and garbles which ones stay separate. Baseline passed.",
+    "answer_sha256": "ab7a25ec1dd3f839c58ef92f088b85f9aa14b8cc82b2a9c19551ab72bdfc9287"
+  },
+  "v22-new-quote": {
+    "passed": false,
+    "reason": "Turns the permission into «передача макета редактору» (the thing the quote speaks of) instead of transmitting the manual; summary says the same. Baseline passed.",
+    "answer_sha256": "53c1227d1815c7474030e240a5ee3131a4b0b4f6359d3ba9d69fc737e40d08bf"
+  },
+  "v22-new-recipient-open": {
+    "passed": false,
+    "reason": "Room 6 and the no-send rule kept, but no question for the open recipient (as the baseline).",
+    "answer_sha256": "9ad34b8b9469d6e22a1c607382279e0bb74a4c7c406ed21d61ac4590d7d04e04"
+  }
+}

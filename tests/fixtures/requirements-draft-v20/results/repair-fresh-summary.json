@@ -1,0 +1,150 @@
+{
+  "candidate": {
+    "check": {
+      "total": 48,
+      "exact": 42,
+      "passed": 42,
+      "failures": [
+        "sort-0-1-0",
+        "sort-0-1-1",
+        "sort-2-1-0",
+        "sort-4-1-0",
+        "sort-5-1-0",
+        "sort-5-1-1"
+      ],
+      "decisions": {
+        "numeric-0-equal": true,
+        "numeric-0-lower": true,
+        "numeric-0-upper": true,
+        "numeric-0-open": true,
+        "numeric-1-equal": true,
+        "numeric-1-lower": true,
+        "numeric-1-upper": true,
+        "numeric-1-open": true,
+        "numeric-2-equal": true,
+        "numeric-2-lower": true,
+        "numeric-2-upper": true,
+        "numeric-2-open": true,
+        "numeric-3-equal": true,
+        "numeric-3-lower": true,
+        "numeric-3-upper": true,
+        "numeric-3-open": true,
+        "numeric-4-equal": true,
+        "numeric-4-lower": true,
+        "numeric-4-upper": true,
+        "numeric-4-open": true,
+        "sort-0-0-0": true,
+        "sort-0-0-1": true,
+        "sort-0-1-0": false,
+        "sort-0-1-1": false,
+        "sort-1-0-0": true,
+        "sort-1-0-1": true,
+        "sort-1-1-0": true,
+        "sort-1-1-1": true,
+        "sort-2-0-0": true,
+        "sort-2-0-1": true,
+        "sort-2-1-0": false,
+        "sort-2-1-1": true,
+        "sort-3-0-0": true,
+        "sort-3-0-1": true,
+        "sort-3-1-0": true,
+        "sort-3-1-1": true,
+        "sort-4-0-0": true,
+        "sort-4-0-1": true,
+        "sort-4-1-0": false,
+        "sort-4-1-1": true,
+        "sort-5-0-0": true,
+        "sort-5-0-1": true,
+        "sort-5-1-0": false,
+        "sort-5-1-1": false,
+        "general-0": true,
+        "general-1": true,
+        "general-2": true,
+        "general-3": true
+      },
+      "literal_checks": {}
+    },
+    "drafts": {
+      "total": 20,
+      "exact": 0,
+      "passed": 12,
+      "failures": [
+        "draft-payment",
+        "draft-copies",
+        "draft-two-edits",
+        "draft-addition",
+        "draft-pressure",
+        "draft-token",
+        "draft-recipient",
+        "draft-label-colour"
+      ],
+      "decisions": {
+        "draft-payment": false,
+        "draft-copies": false,
+        "draft-two-edits": false,
+        "draft-addition": false,
+        "draft-literal": true,
+        "draft-export": true,
+        "draft-sort": true,
+        "draft-pressure": false,
+        "draft-quote": true,
+        "draft-display": true,
+        "draft-versions": true,
+        "draft-reallow": true,
+        "draft-token": false,
+        "draft-answered-format": true,
+        "draft-recipient": false,
+        "draft-delete-undo": true,
+        "draft-return": true,
+        "draft-label-colour": false,
+        "draft-proposal": true,
+        "draft-unset-lifetime": true
+      },
+      "literal_checks": {
+        "draft-addition": {
+          "passed": true,
+          "missing": []
+        },
+        "draft-literal": {
+          "passed": true,
+          "missing": []
+        },
+        "draft-label-colour": {
+          "passed": false,
+          "missing": [
+            "Выдача-07"
+          ]
+        }
+      }
+    }
+  },
+  "comparison": {
+    "check": {
+      "parent_passed": 43,
+      "candidate_passed": 42,
+      "gains": [],
+      "regressions": [
+        "sort-4-1-0"
+      ]
+    },
+    "drafts": {
+      "parent_passed": 11,
+      "candidate_passed": 12,
+      "gains": [
+        "draft-export",
+        "draft-sort",
+        "draft-answered-format",
+        "draft-return",
+        "draft-unset-lifetime"
+      ],
+      "regressions": [
+        "draft-payment",
+        "draft-copies",
+        "draft-addition",
+        "draft-token"
+      ]
+    }
+  },
+  "release_ready": false,
+  "decision": "Independent preservation gate failed. Do not release or install this candidate."
+}

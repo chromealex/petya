@@ -1,0 +1,27 @@
+{
+  "training_protocol": "repair3-protocol.json",
+  "protocol_sha256": "99d13d29994c17cbd4046842d9d59d408cbc11adbdeb7a3a78dfb8b84d37f77d",
+  "trainer_sha256": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+  "checkpoint_helper_sha256": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549",
+  "environment_override": {
+    "AGX_RELAX_CDM_CTXSTORE_TIMEOUT": "1"
+  },
+  "flags": [
+    "--epochs",
+    "1",
+    "--lr",
+    "0.000001",
+    "--layers",
+    "32",
+    "--attention",
+    "--mlp"
+  ],
+  "parent": "/Users/aleksandrfeer/Projects/Peter/tests/fixtures/requirements-draft-v21/repair2-adapter",
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "data": "/Users/aleksandrfeer/Projects/Peter/tests/fixtures/requirements-draft-v21/repair3-train.jsonl",
+  "output": "/tmp/peter-v21/repair3-adapter",
+  "checkpoint_directory": "/tmp/peter-v21/repair3-checkpoints",
+  "checkpoint_interval": 128,
+  "initial_resume_check_stop_after": 16,
+  "policy": "Stop after 16, verify actual full-model checkpoint, then resume preserving Adam. Retention queue starts only after the resumed trainer owns the lock. No independent inference before complete passing familiar gate."
+}

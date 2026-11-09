@@ -1,0 +1,48 @@
+{"id": "fresh-bound-0-equal", "task": "bounds", "answer": "{\"status\": \"final\", \"lower\": -97, \"upper\": -97, \"lowerInclusive\": true, \"upperInclusive\": true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-0-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-97,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-0-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-97,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-0-open", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-1-equal", "task": "bounds", "answer": "{\"status\": \"final\", \"lower\": -42, \"upper\": -42, \"lowerInclusive\": true, \"upperInclusive\": true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-1-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":-42,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-1-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":-42,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-1-open", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-2-equal", "task": "bounds", "answer": "{\"status\": \"final\", \"lower\": 17, \"upper\": 17, \"lowerInclusive\": true, \"upperInclusive\": true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-2-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":17,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-2-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":17,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-2-open", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-3-equal", "task": "bounds", "answer": "{\"status\": \"final\", \"lower\": 69, \"upper\": 69, \"lowerInclusive\": true, \"upperInclusive\": true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-3-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":69,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-3-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":69,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-3-open", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-4-equal", "task": "bounds", "answer": "{\"status\": \"final\", \"lower\": 108, \"upper\": 108, \"lowerInclusive\": true, \"upperInclusive\": true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-4-lower", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":108,\"upper\":null,\"lowerInclusive\":false,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-4-upper", "task": "bounds", "answer": "{\"status\":\"final\",\"lower\":null,\"upper\":108,\"lowerInclusive\":null,\"upperInclusive\":true}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-bound-4-open", "task": "bounds", "answer": "{\"status\":\"open\",\"lower\":null,\"upper\":null,\"lowerInclusive\":null,\"upperInclusive\":null}", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-0-0-0", "task": "general", "answer": "[-89, -46, -23, -23]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-0-0-1", "task": "general", "answer": "[-89, -46, -23, -23]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-0-1-0", "task": "general", "answer": "[-23, -23, -46, -89]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-0-1-1", "task": "general", "answer": "[-23, -23, -46, -89]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-1-0-0", "task": "general", "answer": "[-107, -59, -32, -8, -8]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-1-0-1", "task": "general", "answer": "[-107,-59,-32,-8,-8]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-1-1-0", "task": "general", "answer": "[-8, -8, -32, -59, -107]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-1-1-1", "task": "general", "answer": "[-8, -32, -59, -107, -8]", "exactJSON": false, "schemaValid": true}
+{"id": "fresh-sort-2-0-0", "task": "general", "answer": "[-71, -48, -15, -15]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-2-0-1", "task": "general", "answer": "[-71,-48,-15,-15]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-2-1-0", "task": "general", "answer": "[-15, -15, -48, -71]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-2-1-1", "task": "general", "answer": "[-15, -15, -48, -71]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-3-0-0", "task": "general", "answer": "[-116, -29, -29, -3]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-3-0-1", "task": "general", "answer": "[-116, -29, -29, -3]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-3-1-0", "task": "general", "answer": "[-29, -29, -116, -3]", "exactJSON": false, "schemaValid": true}
+{"id": "fresh-sort-3-1-1", "task": "general", "answer": "[-29, -116, -3, -29]", "exactJSON": false, "schemaValid": true}
+{"id": "fresh-sort-4-0-0", "task": "general", "answer": "[-82, -34, -34, -11, -11]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-4-0-1", "task": "general", "answer": "[-82, -34, -34, -11, -11]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-4-1-0", "task": "general", "answer": "[-11, -11, -34, -34, -82]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-4-1-1", "task": "general", "answer": "[-11, -11, -34, -34, -82]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-5-0-0", "task": "general", "answer": "[-98, -67, -26, -26]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-5-0-1", "task": "general", "answer": "[-98,-67,-26,-26]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-5-1-0", "task": "general", "answer": "[-26, -26, -67, -98]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-sort-5-1-1", "task": "general", "answer": "[-26, -26, -67, -98]", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-general-0", "task": "general", "answer": "120", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-general-1", "task": "general", "answer": "126", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-general-2", "task": "general", "answer": "4", "exactJSON": true, "schemaValid": true}
+{"id": "fresh-general-3", "task": "general", "answer": "48", "exactJSON": true, "schemaValid": true}

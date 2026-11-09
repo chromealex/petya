@@ -1,0 +1,14 @@
+{
+  "status": "failed_infrastructure",
+  "process_exit_code": 1,
+  "last_logged_step": 400,
+  "planned_steps": 1361,
+  "failure": "METAL command buffer execution failed: GPU Hang Error",
+  "cause": "Not established; the error alone does not establish memory exhaustion or a data error.",
+  "artifact_saved": false,
+  "retention_evaluation_started": false,
+  "training_protocol": "repair2-protocol.json",
+  "protocol_sha256": "fdb54b04481650f0dde8115b86ba6d3bdedf4914aaab2def0cf4d84e5b486c30",
+  "log_sha256": "0178c6209a1834ee5432a9a453b8f318dca492baf61ebccb6ad990ee9647fbcb",
+  "gpu_recovery_probe": "512x512 matrix multiplication completed in a fresh MLX process; this does not validate a full training run."
+}

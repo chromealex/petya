@@ -1,0 +1,62 @@
+{
+  "v22-new-cancel-one": {
+    "answer_sha256": "7161e1b5d8178fedbe2e11f40420c40b727e40874ff013809d7c3744eed2cfff",
+    "passed": false,
+    "reason": "Contradicts the explicit cancellation by requiring final_key instead of draft_key; the separate local_tag rename is retained."
+  },
+  "v22-new-cancel-two": {
+    "answer_sha256": "759c1a5c2732cd8308611580a493ad6a7472c2d4959e6d1ca500f66c0934442d",
+    "passed": true,
+    "reason": "Preserves river_id to stream_id and cancels only hill_id to ridge_id. The broad heading does not contradict the precise description."
+  },
+  "v22-new-two-recipients": {
+    "answer_sha256": "7426dacab086a5d0e6469542e5ed792ee481ceb6234a96598011641c291579bc",
+    "passed": false,
+    "reason": "Recipient-specific permissions and identical contents are correct, but the explicit instruction not to add an explanation is omitted."
+  },
+  "v22-new-revoke-send": {
+    "answer_sha256": "7e692e6d1fc1c5d01367625beeacb29089802a7d8f5dbcbce868a6d37169bded",
+    "passed": false,
+    "reason": "The buyer transmission ban and retained price are present, but the explicit no-date requirement is omitted. Accepting an act also weakens the requested preparation and replacement action."
+  },
+  "v22-new-restore-send": {
+    "answer_sha256": "b54f8c7e75302e193d74b77fd226394a6d4a3a34ba05bf4c891a5c4386065f3a",
+    "passed": true,
+    "reason": "Preserves seat number and session time, excludes cost, and explicitly allows transmission to the cashier after the old ban was withdrawn."
+  },
+  "v22-new-code-item": {
+    "answer_sha256": "9db5b2d1975aae68b33a2a86d9d14c5c255ce7d826f45338b5ad3b1fe1479430",
+    "passed": true,
+    "reason": "Preserves 347 seconds, single-use same-code prohibition, a different kit under a new code, and separation from login. No extra requirement."
+  },
+  "v22-new-open-duration": {
+    "answer_sha256": "a69931c1b031d1ceb033db8adb15aa71784c553003c7b36b51686cacb7998642",
+    "passed": false,
+    "reason": "Correctly leaves duration open and asks for it, but omits the explicit exclusion from login."
+  },
+  "v22-new-exact-name": {
+    "answer_sha256": "e14c481e5da63528bfedbfdaeb8b431327d7a01553a05203595b5935d9b6962e",
+    "passed": false,
+    "reason": "Both exact literals and leading zeros survive, but the added ban on renaming other files contradicts the explicit scope limitation."
+  },
+  "v22-new-screen-only": {
+    "answer_sha256": "7927156a2baa41d1ac6486a291469bd2697504aefaabb559c13dd6ebf1263d29",
+    "passed": true,
+    "reason": "Precisely limits replacement to the screen, hides the old name, prohibits data transfer, schema changes and migration. Both literal identifiers survive."
+  },
+  "v22-new-add-separate": {
+    "answer_sha256": "7275c0820d85a0baff27ffd8fde526f2043a95ae90b734f32281d8dc39d9ce18",
+    "passed": true,
+    "reason": "Keeps both existing fields, adds the third separately without replacement, and preserves full literal names."
+  },
+  "v22-new-quote": {
+    "answer_sha256": "d0d9d0e151efa340f19ad6e56a3a2b2ed8eaa55bbe1c2d0d876e3c3fe8bd7b74",
+    "passed": true,
+    "reason": "Preserves the exact quote and permits transmission of the manual to the editor, without turning the quotation into an operative ban."
+  },
+  "v22-new-recipient-open": {
+    "answer_sha256": "13fd0de8aaa2b1e3f646fd55d491419772be4a553a908fa4b4fa2c72c71ef23b",
+    "passed": false,
+    "reason": "Preserves room 6 and the no-send-until-recipient-selected rule, but returns no question for the explicitly unresolved recipient despite the system instruction."
+  }
+}

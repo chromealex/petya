@@ -1,0 +1,117 @@
+{
+  "new-d-shift": {
+    "passed": true,
+    "reason": "The booking-email heading and client-directed content retain the agreed booking number, check-in date and exact date format, hidden administrator phone, and exclusion of payment and cleaning. Sending that content to the client is equivalent in this explicitly specified client-email task; no immediate external action is claimed. No open questions are invented.",
+    "answer_sha256": "8edf9543ed93f1fb3664f36ff7f251eeb9c4a446663164c0929bf6b29c2e43f2"
+  },
+  "retention-repeat": {
+    "passed": true,
+    "reason": "Preserves completed-order count, final 151-second update interval, and hidden client names. Combines the display and privacy requirements into one equivalent sentence; rejects both proposed reversions and adds no questions.",
+    "answer_sha256": "150454ede0717b021c4319d4433d6757aba58516292135fe6334f0fde6215d30"
+  },
+  "v14-repeat": {
+    "passed": true,
+    "reason": "Preserves closed-request count, final 181-second update interval, and hidden author names. Combining display and hidden names is semantically equivalent; no canceled 197-second setting or invented question returns.",
+    "answer_sha256": "29308856151a48227cf2cbd65eca76d69078cccc168cf9bbe5ceb22436d79249"
+  },
+  "v19-repeat": {
+    "passed": true,
+    "reason": "Preserves processed-request count, final 257-second interval, and hidden performer names without reopening questions. Corrects the reference grammatical error and uses a more specific accurate heading; no agreed requirement changes.",
+    "answer_sha256": "40f0ea4468b34928fe4dd91083cc7ce98a2c7ae96769f315bc4fdd534c2794a1"
+  },
+  "v19-revoked-all": {
+    "passed": false,
+    "reason": "Fails complete scope: the no-send pronoun refers to the revised draft only. The explicit revocation for every version, including the old version, is omitted. The contract-number substitution itself is correct.",
+    "answer_sha256": "b74835f77608111e748f0b77df98abac65a52c87f0f98b9e23a1e8e0b6811710"
+  },
+  "v19-cancel-second": {
+    "passed": false,
+    "reason": "Reverses the still-approved first replacement: says use ref_id instead of audit_id. Correctly preserving owner_id does not repair that contradiction.",
+    "answer_sha256": "5958876be13fff02193c83140c8852b62916aeeff503f0bfefb33940964956d8"
+  },
+  "v19-exact-identifier": {
+    "passed": false,
+    "reason": "Both exact identifiers and the no-normalization requirement are retained, but it invents a preservation requirement for fields and changes the heading to names and fields. The conversation specifies only the job name and output filename; no fields were agreed.",
+    "answer_sha256": "842d20f0ed1e66fd03a88aca0625f8d47d4f8620cc5840db5c4c3b0fc3a05511"
+  },
+  "v20-scope": {
+    "passed": true,
+    "reason": "Description exactly preserves all requirements. The changed heading correctly names the conclusion specified by the user instead of the less accurate act heading in the reference.",
+    "answer_sha256": "25b56ae1e0cebaf50c6e462287467110f2b529393e5c0992159971a430fe5a96"
+  },
+  "v20-repeat": {
+    "passed": true,
+    "reason": "Preserves agreed-act count, final 293-second interval, hidden reviewer names and no open questions. Corrects reference grammar and uses a more specific accurate heading.",
+    "answer_sha256": "27a929e9fd62b76b1494083c900935ca4554bfee2843279ecdf56ea6abf3b4c4"
+  },
+  "v20-withdrawn-latest": {
+    "passed": true,
+    "reason": "Retains the supply-number substitution, draft-only state, named supplier, withdrawn consent and canceled sending. Equivalent wording.",
+    "answer_sha256": "7e11330633d1bb3a8100dc74e9f261bc579b537c76bd85432fddad337015d5aa"
+  },
+  "v20-only-one-recipient": {
+    "passed": true,
+    "reason": "Retains two identical memos, permission only for the master, no sending to the apprentice and no added exercises. The broad preservation heading does not contradict the full description.",
+    "answer_sha256": "3919bbc33fcf74eae4fd4086da82d67e68dab0aa729c45c0124305607c937c97"
+  },
+  "v20-independent-field-cancels": {
+    "passed": false,
+    "reason": "Applies the canceled client_key to account_key replacement. The first approved replacement is present but does not excuse applying the second canceled edit.",
+    "answer_sha256": "7aee6c2ef410db84e8604faa2ee01e267c6ef0ed8d94aa9a6a8125481edd8f84"
+  },
+  "v20-verbatim-name": {
+    "passed": true,
+    "reason": "Both identifiers are verbatim and explicitly preserved without normalization; the filename must not be renamed. No agreed requirement is lost.",
+    "answer_sha256": "42bd8a999c6c228f39f1d85cec42f5618ad30286b2ef8833ce842c17d378d42f"
+  },
+  "v20-no-invented-columns": {
+    "passed": true,
+    "reason": "Retains manual TSV export, no ZIP, unresolved columns, no automatic addition of price/stock and the single necessary columns question. Awkward phrasing does not approve any columns.",
+    "answer_sha256": "e5638a8f421373088f87adbe4cff05697a8edc61c048bbc0efdad8231b0f4bf2"
+  },
+  "v20-return-from-other-topic": {
+    "passed": false,
+    "reason": "Invents a hexadecimal font code and a requirement to keep that font unchanged. The other-project font discussion should be excluded, not turned into a widget requirement.",
+    "answer_sha256": "2aec907c199fd4345f707f16dc1e9073bf8b8972f8788a8dbd7fc318d2f8898b"
+  },
+  "v20-boundary-language": {
+    "passed": true,
+    "reason": "Retains strictly greater than -35, inclusive -9 and fractional values without rounding.",
+    "answer_sha256": "0c80a67cd394681cb0329aedf2b0542ee3d11dc9c51f73b8bad4df85eb04c57d"
+  },
+  "v20-sort-with-rule": {
+    "passed": true,
+    "reason": "Correct descending rule and full ordered list -8, -8, -16, -27 preserve both duplicate entries and all original elements.",
+    "answer_sha256": "b5c74efb2fb9c46b68a6d5a5137ec59434bf2d7214fc1c3e840bfaca42e90a35"
+  },
+  "v20-destination-not-guessed": {
+    "passed": false,
+    "reason": "Correctly preserves no sending and unselected recipient, but invents an additional question about an address to save. No address-storage requirement was discussed.",
+    "answer_sha256": "dde4cd2cfa0a98e9a08e1c9430197bc6dbec80ea4b0055e40165d230b2e9ac26"
+  },
+  "v20-quoted-ban-not-action": {
+    "passed": false,
+    "reason": "Changes permission to send the memo TO the editor into permission FOR the editor to send. The quote is retained but the sender/recipient relationship is wrong.",
+    "answer_sha256": "f44e6e351422c81bfd3008029b72f87d85ebc0f2a60b041cb01adb73536c5ed5"
+  },
+  "v20-restricted-version": {
+    "passed": false,
+    "reason": "Adds the contradictory/undefined phrase only permission to the explicitly prohibited full-version sending. The short-version content and permission do not resolve this full-version contradiction.",
+    "answer_sha256": "8c7189f75c9bb952726776bf30db168767ef799b2f57075b1f80da090458f555"
+  },
+  "v20-reversed-undo": {
+    "passed": true,
+    "reason": "Correctly deletes pager and retains mobile after the cancellation is itself revoked. Sentence splitting is equivalent.",
+    "answer_sha256": "b92858cb9c8ac55cd9f6345746735511b611893ec26bea00cee470f26689ce10"
+  },
+  "v20-service-unselected": {
+    "passed": true,
+    "reason": "Retains error-only notification, administrator, copy name and reason, no attachments, no success notification, and exactly the unresolved communication-method question. Broad heading is consistent.",
+    "answer_sha256": "f27ea8625dc484de12d0ecb9404e216f0130a9e1ed0f23957025f17eb3a34d50"
+  },
+  "v20-single-use-scope": {
+    "passed": true,
+    "reason": "Retains parcel-only one-time code, 135-second lifetime, no repeated use and no account-login binding. Equivalent order and heading.",
+    "answer_sha256": "a2cd66d168c71b8ab896ac760c2ebd927e9e3c44119e3920196923bf93a2866e"
+  }
+}

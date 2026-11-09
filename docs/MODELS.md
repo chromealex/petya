@@ -36,3 +36,27 @@ Checkpoints and adapters of finished or rejected stages are deleted locally once
 A separate part for writing code (a ready open coding model such as Qwen3-Coder-30B-A3B, downloaded from «Модели Пети»
 in the settings like A), with a tool loop: read the project, edit in a git worktree, run the tests, show the diff for
 approval. First measured on tasks built from this repository's own commits; fine-tuning only for gaps that test shows.
+
+## Continuing D training
+
+Everything a stage needs is in this repository: the generated dialogues (`tests/fixtures/requirements-draft-d2`),
+the v22 checks and the 801 familiar cases (`requirements-draft-v22`), the checkpointed trainer and verifiers
+(`requirements-draft-v21`), the evaluator (`requirements-draft-v8`) and every stage's recipe, reviews and results
+(`requirements-draft-d3` … `d10`). Weights are only on the `models` branch and in its releases.
+
+1. **Prepare.** Copy the last stage folder, change its `prepare.py` (parent adapter path and sha256, families,
+   offset, gate), run it from the repository root, point `scripts/train-plan.json` at the new `execution.json`.
+2. **Train.** `Train Petya.app` in the project folder runs `scripts/train_petya.py`: it checks the protocol hashes,
+   creates `~/.petya-train/env` if missing, trains with checkpoints into `~/.petya-train/andromeda-dN`, verifies the
+   adapter and evaluates it on the four sets. Progress: `tests/results/train.log`. About 3–4 hours on the Mac Studio.
+3. **Review.** `python3 scripts/review_drafts.py todo dN ~/.petya-train/andromeda-dN` lists the non-exact drafts with
+   no earlier review; review them by the strict rules in the script, write the failures as JSON, then
+   `python3 scripts/review_drafts.py apply dN ~/.petya-train/andromeda-dN dPARENT failures.json`.
+4. **Gate and publish.** A stage replaces the group's D only if it is not worse than the current D on any set.
+   Publish it as `andromeda/DN` on the `models` branch (model.json, NOTES.md, BASE_MODEL_LICENSE, adapter files), add
+   it to `group.json` `versions`, and change `components.D`/`version` only when it passes. Copy the evaluation files
+   and `summary.json` into `requirements-draft-dN/results` here.
+
+State on 9 November 2026: D9 is the group's D (R1-A1-D9: 39/54 with 25 exact, 35/42, 796/801). D10 (D9 plus
+open-recipient, code, cancel-one, permission, rehearsing D9's four families; 921 presentations, lr 5e-7) is
+training into `~/.petya-train/andromeda-d10`; its parent adapter is `~/.petya-train/andromeda-d9/adapter`.

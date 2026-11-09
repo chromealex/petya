@@ -1,0 +1,27 @@
+{
+  "v14-repeat": {
+    "answer_sha256": "01621e9825e1cea8b77cc959303a872c2a4526098b4d8908d3c097c1c49e2152",
+    "passed": true,
+    "reason": "The general summary remains applicable; the description exactly retains closed requests, hidden author names and the final 181-second interval, rejecting 197."
+  },
+  "v15-repeat": {
+    "answer_sha256": "807d57cc28d54799aafc34215a04d6889d3c3922e0dde12263bf2f9080e97aaf",
+    "passed": true,
+    "reason": "All requirements are retained: processed files, hidden owner names and final 193-second interval, rejecting 211. The new grammatical error in the seconds inflection is recorded as a language-quality defect, not a semantic retention failure."
+  },
+  "v20-repeat": {
+    "answer_sha256": "fe5a457b7f4538407b9bc3a4f1d2e5030b57026f534b622da963f6b0504e26ff",
+    "passed": true,
+    "reason": "The more specific summary names acts; description is identical to reference and retains approved acts, hidden reviewer names and final 293-second interval. The seconds inflection error already exists in the reference."
+  },
+  "v21-previous-draft-quote": {
+    "answer_sha256": "b50cbb5f618609a1b608d9c044379efda8c1bff3d32ef2959d3d7352cf0f057a",
+    "passed": true,
+    "reason": "Retains the exact quoted example and permission to transfer the manual to the reviewer; explicitly states that the quotation does not cancel permission."
+  },
+  "v21-previous-draft-return": {
+    "answer_sha256": "528499ac58492149bf70a3a8a8fccc81b20897efc9ee21324b4d4e3b30ad223c",
+    "passed": true,
+    "reason": "Quantity and number are equivalent here; returned books, hidden reader names and exclusion of chair replacement from the other project are preserved."
+  }
+}

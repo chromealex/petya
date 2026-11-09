@@ -1,0 +1,62 @@
+{
+  "v19-repeat": {
+    "passed": true,
+    "answer_sha256": "4863008402055e5f89cbcb2e868f779d85fc5ce2fe71f5b0791131ae46142350",
+    "reason": "Only the summary changes from generic records to applications, matching the user subject. The description preserves the final 257-second interval and hides assignee names; questions remain empty."
+  },
+  "v20-repeat": {
+    "passed": true,
+    "answer_sha256": "27a929e9fd62b76b1494083c900935ca4554bfee2843279ecdf56ea6abf3b4c4",
+    "reason": "Preserves the final 293-second interval and hidden reviewer names; title specifies acts and the time-unit inflection changes without changing meaning."
+  },
+  "v20-withdrawn-latest": {
+    "passed": true,
+    "answer_sha256": "ec7c5d373b0beea47051e82b7a36ac48dfd6f1b393542165604c7e9b83c3b365",
+    "reason": "Uses consent instead of permission with the same explicit revocation. Supplier sending remains prohibited; the delivery number replaces the order number in the saved invoice draft."
+  },
+  "v20-only-one-recipient": {
+    "passed": true,
+    "answer_sha256": "498a015711f149e71fddab95b8c448aaa1fa2a450815bf5c5d8b3c6944a1eacd",
+    "reason": "The two named recipients and two-memo title preserve the pair of identical memos without extra exercises. Sending is allowed only to the master; the pupil permission remains expressly denied."
+  },
+  "v20-verbatim-name": {
+    "passed": true,
+    "answer_sha256": "fcd65b308816d3acd7b918eafa0eed0872f54b9d72cccb7cb29f13857d3f1daf",
+    "reason": "Both exact literal names are present unchanged. Character-for-character preservation and prohibition of normalization retain the original spelling, case and zero padding despite the more general explanation of numbering."
+  },
+  "v21-previous-draft-addition": {
+    "passed": true,
+    "answer_sha256": "fb17ca3cf71e00b097e1d2a9b067986afee0919081cb4852b8d0c8f3666704fa",
+    "reason": "Keeps Region and District, adds Oblast as a separate field instead of replacing Region, and forbids abbreviated names. All three exact names are retained."
+  },
+  "v21-previous-draft-literal": {
+    "passed": false,
+    "answer_sha256": "ea42add5d61afa134288a3bf244cd2a8bfca112a9688cd5c00d436cae9972d4d",
+    "reason": "Both literal names and the no-renaming/no-normalization instruction are preserved, but the extra sentence \"Цирюлицу не выполнять\" invents a meaningless requirement absent from the dialogue. This is not an acceptable final task description."
+  },
+  "v21-previous-draft-quote": {
+    "passed": true,
+    "answer_sha256": "c8994b8989e96f45e08d719f6532933e7cb605604da13bf96b0b5923bf2b24f8",
+    "reason": "Keeps the quoted example and explicitly permits sending the manual to the reviewer; distinguishes the example from an instruction."
+  },
+  "v21-previous-draft-display": {
+    "passed": true,
+    "answer_sha256": "c8560d62e2267eeda0989dc2771c0f2580d19cab1c1a2a1a3dcde0c7912b20f6",
+    "reason": "Description is unchanged: display only delivery_ref instead of booking_ref, with no database change, transfer or migration. Only summary pluralization differs."
+  },
+  "v21-previous-draft-delete-undo": {
+    "passed": true,
+    "answer_sha256": "1beaea2e00fa176cbf855b4f7aa3ad441cf14d3f5c0aa4163dd53d1facc4ea31",
+    "reason": "Description is unchanged: delete fax_line, preserve home_line and work_line. Only summary noun number differs."
+  },
+  "v21-previous-draft-return": {
+    "passed": true,
+    "answer_sha256": "327fdd3afbaa6604b55f033a62e3fcb864fc1b2ff5929cee95e0bce3ffb2c8c5",
+    "reason": "Equivalent count/quantity wording; hides reader names and excludes the other project chair-replacement task."
+  },
+  "v21-previous-draft-unset-lifetime": {
+    "passed": false,
+    "answer_sha256": "75a040c4bd8d86d2fd05ff011980492d1963cf0f7474b95f3b5047766dff14d0",
+    "reason": "The description and open lifetime question preserve the requirements, but the summary \"Веродополнение кодом\" is nonsensical and does not identify the equipment-receipt task. Reject degraded task output rather than crediting description alone."
+  }
+}

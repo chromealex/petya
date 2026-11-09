@@ -1,0 +1,34 @@
+{
+  "status": "full_model_resumed_at_step_16",
+  "checkpoint_sha256": "5a1f13c61f2565ee9f84c07efc95629bea39302834714d84596b80310cb2b4d4",
+  "tensor_count": 771,
+  "adapter_tensor_count": 256,
+  "optimizer_step": 16,
+  "training_sha256": "082793d2314d6864d588ba5d6efbdc85d18c3b0aba6c466b766e98377373c6d1",
+  "parent_sha256": "1828551b4a06eea7d38475a098daeebd07f27124a149e8c076f67747b9bda3da",
+  "trainer_sha256": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+  "first_16_losses": [
+    0.0007001321646384895,
+    3.0263183361967094e-05,
+    0.00038179144030436873,
+    0.08429824560880661,
+    6.368129106704146e-06,
+    1.6472797142341733e-05,
+    0.0009118941379711032,
+    0.0010159187950193882,
+    0.0003444324538577348,
+    0.0004212763742543757,
+    0.000988705432973802,
+    0.009434114210307598,
+    0.00010520313662709668,
+    0.07299639284610748,
+    3.394461236894131e-05,
+    0.08029913157224655
+  ],
+  "observed_log_lines": [
+    "Step 16 loss 0.01575",
+    "Checkpoint 16 saved",
+    "Resumed 16 steps with Adam state"
+  ],
+  "scope": "Saved full-model state and actual process restart verified; training remains in progress. No final adapter or quality result."
+}

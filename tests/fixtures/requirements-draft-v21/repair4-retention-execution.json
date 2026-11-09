@@ -1,0 +1,64 @@
+{
+  "training_lock": "/tmp/peter-v21/repair4-checkpoints/writer.lock",
+  "source_hashes": {
+    "tests/fixtures/requirements-draft-v21/queue_repair4_retention.py": "bbbc466d6a5b7fe19daa906de8341fb255223c008b45e927df71cae9b7985b6b",
+    "tests/fixtures/requirements-draft-v21/verify_artifact.py": "b8eb7e3a3f439ace034d0b4437e5f3facbacb0bc547216c2ee04e6856cf295ec",
+    "tests/fixtures/requirements-draft-v21/verify_continuation.py": "17480f3214d906adb195c1ecb385cb6b4d4309ad86f3cd1ea39faa40be5a6330",
+    "tests/fixtures/requirements-draft-v21/train_checkpointed.py": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+    "tests/fixtures/requirements-draft-v21/checkpoint.py": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549",
+    "tests/fixtures/requirements-draft-v21/repair4-protocol.json": "50d0a2dd9d917944a9f574193b82bcc36fe2020ea31345ae8857dafad8beb3de",
+    "tests/fixtures/requirements-draft-v8/evaluate.py": "6b8c01a05adc5fea462de4c090d0a4ac9d376007124ee6d396c3c39d3c72e287",
+    "tests/fixtures/requirements-draft-v8/scoring.py": "c11b8e892cdb7402b5d23edf5f787dd209a103109f78eb2607cf251e067dce7c"
+  },
+  "new_outputs": [
+    "/tmp/peter-v21/repair4-acquisition.jsonl",
+    "/tmp/peter-v21/repair4-acquisition.manifest.json",
+    "/tmp/peter-v21/repair4-adapter-verification.json",
+    "/tmp/peter-v21/repair4-continuation-verification.json"
+  ],
+  "stages": [
+    {
+      "name": "artifact architecture and frozen recipe",
+      "arguments": [
+        "tests/fixtures/requirements-draft-v21/verify_artifact.py",
+        "/tmp/peter-v21/repair4-adapter",
+        "--protocol",
+        "tests/fixtures/requirements-draft-v21/repair4-protocol.json",
+        "--output",
+        "/tmp/peter-v21/repair4-adapter-verification.json"
+      ]
+    },
+    {
+      "name": "exact completed checkpoint binding",
+      "arguments": [
+        "tests/fixtures/requirements-draft-v21/verify_continuation.py",
+        "--adapter",
+        "/tmp/peter-v21/repair4-adapter",
+        "--checkpoints",
+        "/tmp/peter-v21/repair4-checkpoints",
+        "--trainer",
+        "tests/fixtures/requirements-draft-v21/train_checkpointed.py",
+        "--helper",
+        "tests/fixtures/requirements-draft-v21/checkpoint.py",
+        "--data",
+        "tests/fixtures/requirements-draft-v21/repair4-train.jsonl",
+        "--parent",
+        "tests/fixtures/requirements-draft-v21/repair3-adapter",
+        "--output",
+        "/tmp/peter-v21/repair4-continuation-verification.json"
+      ]
+    },
+    {
+      "name": "all 737 familiar cases",
+      "arguments": [
+        "tests/fixtures/requirements-draft-v8/evaluate.py",
+        "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+        "tests/fixtures/requirements-draft-v21/acquisition.jsonl",
+        "/tmp/peter-v21/repair4-acquisition.jsonl",
+        "--adapter",
+        "/tmp/peter-v21/repair4-adapter"
+      ]
+    }
+  ],
+  "scope": "Single queued continuation; no retraining, no fresh inference, no automatic model qualification. Fail closed on missing/incomplete adapter or changed inputs."
+}

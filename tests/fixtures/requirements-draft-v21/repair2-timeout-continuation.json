@@ -1,0 +1,24 @@
+{
+  "resume_step": 128,
+  "checkpoint_sha256": "06a8c9ec212aff1950f1167d46dbee94aceda201b77d1694dc027dc7d3c6a547",
+  "target_step": 1361,
+  "environment_override": {
+    "AGX_RELAX_CDM_CTXSTORE_TIMEOUT": "1"
+  },
+  "training_flags": [
+    "--epochs",
+    "1",
+    "--lr",
+    "0.000001",
+    "--layers",
+    "32",
+    "--attention",
+    "--mlp",
+    "--resume"
+  ],
+  "checkpoint_directory": "/tmp/peter-v21/repair2-retry1-checkpoints",
+  "parent": "/tmp/peter-v21/repair-adapter",
+  "output": "/tmp/peter-v21/repair2-retry1-adapter",
+  "log": "/tmp/peter-v21/repair2-timeout-continuation.log",
+  "gate": "Verify final artifact; all 737 familiar cases must pass before candidate selection or fresh inference."
+}

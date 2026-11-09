@@ -1,0 +1,10 @@
+{
+  "files": {
+    "parent-check.jsonl": "3fa8c00c17a96218a316e95dc0769047b1d0f469ce0ae0f693829cd68777c1c3",
+    "parent-check.manifest.json": "c832d4798401259e5de0ed7dda26d45615fa2873b3ddafdcbf6af85cc72476f8",
+    "parent-drafts.jsonl": "deee76a9451fbc740f63c4c8744e9f25892c5fd82dd6a35304ac06d0d8633e7d",
+    "parent-drafts.manifest.json": "b05058c454d7ce2fe240d93319e54cf0e400da0bbe77f6edbd88cc6bef70d8b4",
+    "parent-drafts-review.json": "4a2fe337be3df75790d126919f3357e7ac37bb4b26ac0b59cc3afd09f00e0c7e"
+  },
+  "review": "Explicit non-blind semantic review with unchanged strict literal checks. Parent results only; no candidate fresh inference."
+}

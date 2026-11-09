@@ -1,0 +1,17 @@
+{
+  "train.jsonl": {
+    "rows": 989,
+    "max_tokens_including_target": 274,
+    "sha256": "acd7a084e651e325e6f0f424b671a851c6af32190ad904089ebd2d460920623f"
+  },
+  "fresh-drafts.jsonl": {
+    "rows": 20,
+    "max_tokens_including_target": 252,
+    "sha256": "df6255986015fb4ed6eacd284f036998fecc54b49a3e6a49e5472473736b0516"
+  },
+  "check.jsonl": {
+    "rows": 48,
+    "max_tokens_including_target": 155,
+    "sha256": "1c0237125f907cb95e3078406b981782c39535396148df297ce8b6c150a60a27"
+  }
+}

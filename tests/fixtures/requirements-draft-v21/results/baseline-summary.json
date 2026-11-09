@@ -1,0 +1,114 @@
+{
+  "check": {
+    "total": 48,
+    "exact": 42,
+    "passed": 42,
+    "failures": [
+      "fresh-sort-1-0-1",
+      "fresh-sort-3-0-1",
+      "fresh-sort-3-1-0",
+      "fresh-sort-3-1-1",
+      "fresh-sort-4-0-0",
+      "fresh-sort-4-0-1"
+    ],
+    "decisions": {
+      "fresh-bound-0-equal": true,
+      "fresh-bound-0-lower": true,
+      "fresh-bound-0-upper": true,
+      "fresh-bound-0-open": true,
+      "fresh-bound-1-equal": true,
+      "fresh-bound-1-lower": true,
+      "fresh-bound-1-upper": true,
+      "fresh-bound-1-open": true,
+      "fresh-bound-2-equal": true,
+      "fresh-bound-2-lower": true,
+      "fresh-bound-2-upper": true,
+      "fresh-bound-2-open": true,
+      "fresh-bound-3-equal": true,
+      "fresh-bound-3-lower": true,
+      "fresh-bound-3-upper": true,
+      "fresh-bound-3-open": true,
+      "fresh-bound-4-equal": true,
+      "fresh-bound-4-lower": true,
+      "fresh-bound-4-upper": true,
+      "fresh-bound-4-open": true,
+      "fresh-sort-0-0-0": true,
+      "fresh-sort-0-0-1": true,
+      "fresh-sort-0-1-0": true,
+      "fresh-sort-0-1-1": true,
+      "fresh-sort-1-0-0": true,
+      "fresh-sort-1-0-1": false,
+      "fresh-sort-1-1-0": true,
+      "fresh-sort-1-1-1": true,
+      "fresh-sort-2-0-0": true,
+      "fresh-sort-2-0-1": true,
+      "fresh-sort-2-1-0": true,
+      "fresh-sort-2-1-1": true,
+      "fresh-sort-3-0-0": true,
+      "fresh-sort-3-0-1": false,
+      "fresh-sort-3-1-0": false,
+      "fresh-sort-3-1-1": false,
+      "fresh-sort-4-0-0": false,
+      "fresh-sort-4-0-1": false,
+      "fresh-sort-4-1-0": true,
+      "fresh-sort-4-1-1": true,
+      "fresh-sort-5-0-0": true,
+      "fresh-sort-5-0-1": true,
+      "fresh-sort-5-1-0": true,
+      "fresh-sort-5-1-1": true,
+      "fresh-general-0": true,
+      "fresh-general-1": true,
+      "fresh-general-2": true,
+      "fresh-general-3": true
+    },
+    "literal_checks": {}
+  },
+  "drafts": {
+    "total": 16,
+    "exact": 0,
+    "passed": 7,
+    "failures": [
+      "fresh-cancel-first",
+      "fresh-cancel-second",
+      "fresh-revoke-transmit",
+      "fresh-copy-scope",
+      "fresh-code-versus-item",
+      "fresh-duration-open",
+      "fresh-negative-order",
+      "fresh-recipient-pending",
+      "fresh-rename-withdrawn"
+    ],
+    "decisions": {
+      "fresh-cancel-first": false,
+      "fresh-cancel-second": false,
+      "fresh-revoke-transmit": false,
+      "fresh-unchanged-field-send": true,
+      "fresh-copy-scope": false,
+      "fresh-undo-ban": true,
+      "fresh-add-not-replace": true,
+      "fresh-code-versus-item": false,
+      "fresh-duration-open": false,
+      "fresh-exact-caption": true,
+      "fresh-display-only": true,
+      "fresh-quoted-instruction": true,
+      "fresh-negative-order": false,
+      "fresh-interval-prose": true,
+      "fresh-recipient-pending": false,
+      "fresh-rename-withdrawn": false
+    },
+    "literal_checks": {
+      "fresh-add-not-replace": {
+        "passed": true,
+        "missing": []
+      },
+      "fresh-exact-caption": {
+        "passed": true,
+        "missing": []
+      },
+      "fresh-rename-withdrawn": {
+        "passed": true,
+        "missing": []
+      }
+    }
+  }
+}

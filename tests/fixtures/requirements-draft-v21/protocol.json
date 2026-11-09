@@ -1,0 +1,20 @@
+{
+  "parent": "../requirements-draft-v20/repair-adapter",
+  "parent_sha256": "9d6ff318cafa9466fdee69a36f7fac3e4c640352cf203e058d0a0f139b0bc4d7",
+  "training_file": "train.jsonl",
+  "steps": 1217,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 1e-06,
+  "recipe": "737 familiar cases once, 208 balanced contrasts twice, and 64 earlier varied semantic examples once. Unchanged rank-8 attention/MLP completion-only trainer, optimizer reset, max length 512.",
+  "gate": "Capture parent baselines on 64 fresh cases after data commit. Evaluate all 737 familiar cases after training. Require complete retention and committed selection before candidate fresh inference. Preserve every parent success and demonstrate improvement; live/runtime/package gates remain separate.",
+  "limits": "Authored synthetic non-blind study; exposure balance and language coverage change together. Exact prompt disjointness does not prove distributional independence.",
+  "hashes": {
+    "train.jsonl": "6f1fbe80695afc6dc20e6f468f0f2c87d6976a8e9a8974b33fac44c787ae090e",
+    "acquisition.jsonl": "01b1345b2c67b80205c1f76e3436c114f0c84b5cf99ce60c479ac34b9ee5ba9c",
+    "contrasts.jsonl": "b6512180e5f89bdadca1eea3d43c9f7465ddf8f134819b4a5313bb7af3bdf8ed",
+    "fresh-drafts.jsonl": "d1d77f59c8f91df1d735d5c1d19a6d5e67caa80681574fc9eda6e3f7f6d4cc9a",
+    "check.jsonl": "813c63718b1a4136e38989d83efeff06cfe39ef51c472e8edc82f24c14531ae5"
+  }
+}

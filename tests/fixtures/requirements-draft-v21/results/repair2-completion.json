@@ -1,0 +1,21 @@
+{
+  "status": "training_completed_not_qualified",
+  "steps": 1361,
+  "adapter_sha256": "f0f9bc277c9c6f3fc96d0e741ac9611fbadf928c56dcab700c9b1fcacf45e3c5",
+  "parent_sha256": "1828551b4a06eea7d38475a098daeebd07f27124a149e8c076f67747b9bda3da",
+  "training_sha256": "082793d2314d6864d588ba5d6efbdc85d18c3b0aba6c466b766e98377373c6d1",
+  "elapsed_successful_training_seconds": 3904.5482083750103,
+  "peak_memory_bytes": 40257804380,
+  "resume_boundaries": [
+    16,
+    128
+  ],
+  "final_checkpoint_sha256": "b5ecc563d36b1348e035bb37bf04154f975ddc10e93496b109ede771529d2d4c",
+  "environment_override_after_step_16": {
+    "AGX_RELAX_CDM_CTXSTORE_TIMEOUT": "1"
+  },
+  "training_exit_code": 0,
+  "retention_status": "Started separately; no score or qualification claimed.",
+  "holdout_status": "Not evaluated on this candidate.",
+  "limits": "A completed run with a timeout override does not establish the cause or permanent repair of earlier GPU failures. Elapsed training excludes unsuccessful discarded attempts."
+}

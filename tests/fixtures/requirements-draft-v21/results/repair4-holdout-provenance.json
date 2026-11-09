@@ -1,0 +1,13 @@
+{
+  "adapter_sha256": "e4750435ed3c09b138b0cb735c227ce074e9377612b3b147a657a885531a12d0",
+  "selection_commit": "cf1f0a4",
+  "files": {
+    "repair4-check.jsonl": "1d175022e5446ef3b8eafbbfae133b4c6cc4f637258ec7c02c11baad14c5f758",
+    "repair4-check.manifest.json": "9156ae747223bd879f002d75e2e948e28d709277720d57552679a018cbc130e7",
+    "repair4-drafts.jsonl": "0e3af1870f6420fba4a7e17695cd7ab06e8d9fe1ebe4998fc975f4b892bbff8f",
+    "repair4-drafts.manifest.json": "0ca97b24ca80b4c1ff61beb894f7a97c28cb262cf4358acc1d909bead21342b1",
+    "repair4-drafts-review.json": "331be94ac316ac11f582bf63a71e96e6019649a7a7806f5dd7b7a1e32b716265",
+    "repair4-holdout-summary.json": "7b8de8544f2711c633f90cbc9a4ee73cb2362876b6b6d1ec6123682c88d10a92"
+  },
+  "execution_exit_code": 0
+}

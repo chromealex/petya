@@ -1,0 +1,12 @@
+{
+  "interrupted_last_reported_step": 1296,
+  "failure": "Metal command buffer discarded as victim of GPU error/recovery",
+  "resume_step": 1280,
+  "checkpoint_sha256": "5ea9236d041596e3d0d63d6fec0275fc1f02c802b2cf37a1ef0cd4f6994ed01f",
+  "checkpoint_finite_tensors": 771,
+  "adam_and_loss_steps_verified": 1280,
+  "resume_stdout": "Resumed 1280 steps with Adam state",
+  "retention_interruption": "Stopped before inference because completed training.json did not exist.",
+  "retention_requeued": true,
+  "scope": "Recovery evidence only; training remains incomplete and candidate quality is unverified."
+}

@@ -1,0 +1,11 @@
+{
+  "rows": 208,
+  "drafts": 64,
+  "sorts": 144,
+  "max_full_tokens": 311,
+  "within_training_limit": true,
+  "deterministic_regeneration": true,
+  "sha256": "b6512180e5f89bdadca1eea3d43c9f7465ddf8f134819b4a5313bb7af3bdf8ed",
+  "scope": "Training-data structural and token checks only; no model improvement claimed.",
+  "token_count_method": "Render no-thinking chat template, then encode without extra special tokens; count integer token IDs."
+}

@@ -1,0 +1,40 @@
+{
+  "parent": "adapter",
+  "parent_sha256": "88525c608fd5beb1ea56892152b880b841f9eda500c0974927a4de051f86d128",
+  "training_file": "repair-train.jsonl",
+  "steps": 1641,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 1e-06,
+  "hashes": {
+    "repair-train.jsonl": "72b9fd47c7840fc386d3deec55311b5d7f5ca9dba02ef46f1d1aef27beb0a3e9",
+    "train.jsonl": "83e652e5fb204c39ae148a47a3167c55cee01d17e48d302bd1b5f0c7ca45ece8",
+    "acquisition.jsonl": "246201ced7d97426682c1e010d83e93151313ad9d683b6863fed955a99c60fdc",
+    "fresh-drafts.jsonl": "c7443cd7847af2fc3d9ff390c7eafa0c10e3be8807bd9874e44518fe3d692ea5",
+    "check.jsonl": "45f1372e7ce30327e9edd99ea1807c508c2e4a7c2064a03d8548f9157946ed09",
+    "holdout-freeze.json": "6f31b0844491140de7f374f736b917b34e816e5224419e035d148f2de3ee9317"
+  },
+  "sources": {
+    "tests/fixtures/requirements-draft-v21/train_checkpointed.py": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+    "tests/fixtures/requirements-draft-v21/checkpoint.py": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549"
+  },
+  "review_sha256": "e32a784852d443231104e150ba2bad675bb607355a1b3441decba8b4f61213b2",
+  "inspected_failure_ids": [
+    "v19-repeat",
+    "v20-repeat",
+    "fresh-unchanged-field-send",
+    "fresh-recipient-pending",
+    "fresh-rename-withdrawn"
+  ],
+  "exposures": {
+    "v19-repeat": 13,
+    "v20-repeat": 13,
+    "fresh-unchanged-field-send": 13,
+    "fresh-recipient-pending": 13,
+    "fresh-rename-withdrawn": 13
+  },
+  "recipe": "Unchanged 1581 presentations plus twelve extra copies of each of five reviewed failures. Existing corrected references, full rehearsal, no prompt changes. Reset Adam, stop at 16 and verify before resuming with Adam state.",
+  "gate": "Preserve all 801 familiar cases. Commit selection only after complete semantic retention. Then evaluate the 42 frozen new cases under the same full-dialogue review criteria; preserve every parent success and improve total. Baseline is 27/30 checks and 6/12 drafts. No new-case training before candidate evaluation. Ordinary sampled live dialogue, runtime and package qualification remain required.",
+  "limits": "Authored synthetic non-blind study. Exact prompt disjointness does not establish distributional independence. Repeated targets and extra training are confounded; no causal or release claim."
+}

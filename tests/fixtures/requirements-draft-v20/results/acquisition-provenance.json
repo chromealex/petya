@@ -1,0 +1,10 @@
+{
+  "files": {
+    "acquisition.jsonl": "3c2eb5494d2811ce60154c77616f62c94e6583186d0789f7caf592a1aca0198c",
+    "acquisition.manifest.json": "97fa05401e02cfc6dfaca0a107bad2357d3dd4b233af564e80505a1dbc28b06c",
+    "acquisition-review.json": "3874da3a5d46139751405fc3b098dd9d5cca3177a1c89d3a72e414abec2f7686",
+    "acquisition-summary.json": "d19223a34c24adffe3809f960c7bcc78d4cb32381dcd651c4b7bbe5f8655af5c"
+  },
+  "adapter_sha256": "dd9f7986513c53b05994abf0e48d2a2ca6ed0bc5e5fa46ee764b1fb61c7dda85",
+  "decision": "Retention gate failed. Do not select this artifact for fresh inference or release."
+}
