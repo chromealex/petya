@@ -14,7 +14,7 @@ require.cache[require.resolve('./smoke.cjs')]={exports:async(win,workspace)=>{
  const shots=[];
  const shot=async(name,service,{size=[1280,860]}={})=>{
   win.setContentSize(...size);await clean();
-  await js(`(()=>{const card=document.querySelector('[data-service="${service}"]');window.revealSettings?.(card);const d=card.querySelector('.settings-disclosure');if(d)d.open=true;card.scrollIntoView({block:'start'});})()`);
+  await js(`(()=>{const card=document.querySelector('[data-service="${service}"]');window.revealSettings?.(card);const d=card.querySelector('.settings-disclosure');if(d)d.open=true;card.scrollIntoView({block:'start'});(document.scrollingElement||document.documentElement).scrollTop-=90;})()`);
   win.webContents.invalidate();await js('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))');await sleep(350);
   const file=path.join(os.tmpdir(),'petya-app-service-'+name+suffix+'.png');fs.writeFileSync(file,(await win.webContents.capturePage()).toPNG());shots.push(file);return file;
  };
