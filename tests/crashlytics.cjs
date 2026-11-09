@@ -87,7 +87,9 @@ module.exports=(async()=>{
  // --- Through «Крэши»: tables discovered, realtime twin read, jobs.query shape, polling, card data ---
  let {s,calls}=services();
  assert.deepEqual(s.crashSources.list().map(x=>x.id),['crashlytics']);
- const week=await crashes.turn(s,'что в Crashlytics за неделю');
+ // On the fixture's clock (its daily rows are fixed dates): `turn` reads the current time itself.
+ const RealDate=Date;global.Date=class extends RealDate{constructor(...a){super(...(a.length?a:[NOW.getTime()]));}static now(){return NOW.getTime();}};
+ let week;try{week=await crashes.turn(s,'что в Crashlytics за неделю');}finally{global.Date=RealDate;}
  const post=queries(calls);assert.equal(post.length,1);
  const body=post[0].body;
  assert.equal(body.useLegacySql,false);assert.equal(body.parameterMode,'NAMED');assert.equal(body.maximumBytesBilled,String(5*1024**3));
