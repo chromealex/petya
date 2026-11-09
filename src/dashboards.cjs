@@ -21,7 +21,7 @@ const text=(value,max)=>String(value??'').replace(/\s+/g,' ').trim().slice(0,max
 
 function source(value){
   const kind=KINDS.includes(value?.kind)?value.kind:'snapshot';
-  if(kind==='extension'){const extension=text(value.extension,64),command=text(value.command,LIMIT.command);if(!/^[a-z0-9-]+$/.test(extension)||!command)throw Error('Источник виджета указан неверно.');const selected=text(value.selected,64);return {kind,extension,command,...(/^[\w-]+$/.test(selected)?{selected}:{})};}
+  if(kind==='extension'){const extension=text(value.extension,64),command=text(value.command,LIMIT.command);if(!/^[a-z0-9-]+$/.test(extension)||!command)throw Error('Источник виджета указан неверно.');const selected=text(value.selected,200);return {kind,extension,command,...(/^[\w.\/-]+$/.test(selected)?{selected}:{})};}
   if(kind==='provider'){const provider=text(value.provider,64),query=text(value.query,LIMIT.command);if(!/^[a-z0-9-]+$/.test(provider)||!query)throw Error('Источник виджета указан неверно.');return {kind,provider,query,...(value.selected?{selected:text(value.selected,100)}:{})};}
   if(kind==='web'){let url='';try{const u=new URL(String(value.url||''));if(u.protocol==='https:'||u.protocol==='http:')url=u.href;}catch{}if(!url)throw Error('Нужна ссылка на страницу (https://…).');return {kind,url:url.slice(0,2000),query:text(value.query,LIMIT.command)};}
   if(kind==='anr')return {kind,query:text(value.query,LIMIT.command)||'ANR'};

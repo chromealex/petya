@@ -69,7 +69,7 @@ function setup(s){
       // Reading order (the small window, screen readers): top to bottom, left to right.
       widgets:[...d.widgets].sort((a,b)=>(a.pos?a.pos.y:1e9)-(b.pos?b.pos.y:1e9)||(a.pos?.x||0)-(b.pos?.x||0)).map(w=>{const hit=w.source.kind==='snapshot'?{data:w.data,text:w.text,at:w.at}:c.get(cacheKey(d,w))||{};
         return {id:w.id,title:w.title,size:w.size,pos:w.pos||null,every:w.every,kind:w.source.kind,live:w.source.kind!=='snapshot',describe:describe(w.source),chat:w.chat||null,...(w.source.kind==='web'?{url:w.source.url}:{}),
-          data:hit.data||null,text:hit.text||'',at:hit.at||0,error:hit.error||'',count:hit.count??null,loading:running.has(cacheKey(d,w))};})};
+          data:hit.data||null,text:hit.text||'',at:hit.at||0,error:hit.error||'',choice:hit.error&&hit.choice||null,count:hit.count??null,loading:running.has(cacheKey(d,w))};})};
   }
   const describe=src=>src.kind==='extension'?(plugins.get(src.extension)?.d.name||src.extension)+' · «'+src.command+'»'+(src.selected?' · '+(subSources(plugins.get(src.extension)).find(x=>x.id===src.selected)?.name||src.selected):''):src.kind==='provider'?(providers.find(p=>p.type===src.provider)?.name||src.provider)+' · «'+src.query+'»':src.kind==='jira'?'Jira · '+src.jql:src.kind==='web'?'Страница · '+(()=>{try{return new URL(src.url).host;}catch{return src.url;}})():'Снимок карточки, не обновляется';
   const summary=d=>({id:d.id,title:d.title,projectId:d.projectId,shared:!!d.shared,folder:d.shared?.folder||'',widgets:d.widgets.length,start:state().dashboardStart[d.projectId]===d.id,fromChat:d.fromChat||''});
@@ -102,6 +102,8 @@ function setup(s){
       if(!entry.mod.dashboard.accepts(src.command))throw Error('Этот запрос не подходит для дашборда.');
       const reply=typeof entry.mod.dashboard.load==='function'?await entry.mod.dashboard.load(box.s,src.command,{selected:src.selected||'',topic:box.topic}):await entry.mod.turn(box.s,src.command);
       if(!reply)throw Error('Расширение не ответило на «'+src.command+'».');
+      // The app needs a choice the widget keeps (one of several Google Play apps): asked on the card itself.
+      if(reply.choice)throw Object.assign(Error(String(reply.choice.text||'Выберите вариант.')),{choice:reply.choice});
       const data=reply.extensionData||box.topic.messages.at(-1).extensionData||null;
       if(reply.error||reply.question&&!data)throw Error(String(reply.text||'Не удалось получить данные.').slice(0,400));
       return {data,text:String(reply.text||'').slice(0,2000)};
@@ -128,8 +130,10 @@ function setup(s){
         const p=project(d.projectId);
         const result=await Promise.race([require('../modules.cjs').withProject(p,()=>load(d,w)),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Источник не ответил за 90 секунд.')),LOAD_MS);})]);
         const count=Array.isArray(result.data?.jiraItems)?result.data.jiraItems.length:result.count??null;
-        c.set(key,{data:result.data,text:result.text,at:Date.now(),error:'',count});
-      }catch(e){c.set(key,{...(hit||{}),error:String(e.message||e).slice(0,300),failedAt:Date.now(),at:hit?.at||0});}
+        c.set(key,{data:result.data,text:result.text,at:Date.now(),error:'',count,choice:null});
+      }catch(e){
+        const choice=e.choice&&Array.isArray(e.choice.options)?{options:e.choice.options.slice(0,40).map(o=>({id:String(o.id||'').slice(0,200),label:String(o.label||o.id||'').slice(0,120)})).filter(o=>o.id)}:null;
+        c.set(key,{...(hit||{}),error:String(e.message||e).slice(0,300),choice,failedAt:Date.now(),at:hit?.at||0});}
       finally{clearTimeout(timer);running.delete(key);storeCache();}
       send({id:d.id,widgetId:w.id,loading:false});
     })();
@@ -370,7 +374,10 @@ function setup(s){
       if(patch.size!==undefined){if(!model.SIZES.includes(patch.size))throw Error('Неизвестный размер.');w.size=patch.size;}
       if(patch.every!==undefined){if(!model.EVERY.includes(Number(patch.every)))throw Error('Неизвестный интервал.');if(w.source.kind!=='snapshot')w.every=Number(patch.every);}
       if(patch.jql!==undefined&&w.source.kind==='jira'){w.source=model.source({kind:'jira',jql:patch.jql});loadCache().delete(cacheKey(d,w));}
-      commit(d);if(patch.jql!==undefined)refresh(d.id,w.id,true).catch(()=>{});return view(find(id));},
+      // The answer to the card's own question (which Google Play app): kept with the source, read again at once.
+      const chose=patch.selected!==undefined&&w.source.kind==='extension';
+      if(chose){w.source=model.source({...w.source,selected:String(patch.selected||'')});loadCache().delete(cacheKey(d,w));}
+      commit(d);if(patch.jql!==undefined||chose)refresh(d.id,w.id,true).catch(()=>{});return view(find(id));},
     removeWidget:(id,widgetId)=>{const d=own(id),i=d.widgets.findIndex(x=>x.id===widgetId);if(i<0)throw Error('Виджет не найден.');const [w]=d.widgets.splice(i,1);commit(d);return {view:view(find(id)),undo:{widget:w,index:i}};},
     restoreWidget:(id,widget,index)=>{const d=own(id),w=model.widget(widget);d.widgets.splice(Math.max(0,Math.min(Number(index)||0,d.widgets.length)),0,w);commit(d);return view(find(id));},
     // The person's arrangement: positions and sizes on the 12-column grid, all widgets at once.

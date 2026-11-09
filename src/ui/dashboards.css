@@ -145,3 +145,6 @@
 .dash-widget.refreshing .dash-widget-spin{opacity:1;animation:dash-spin .8s linear infinite}
 .dash-widget.refreshing:hover .dash-widget-spin,.dash-widget.refreshing:focus-within .dash-widget-spin{opacity:0}
 @media (prefers-reduced-motion:reduce){.dash-widget.refreshing .dash-widget-spin{animation-duration:2.4s}}
+.dash-choice{display:flex;flex-wrap:wrap;gap:6px;padding:4px 0 8px}
+.dash-choice-option{min-height:30px;padding:4px 12px;border-radius:999px;font-size:13px;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--ink)}
+.dash-choice-option:hover{background:color-mix(in srgb,var(--accent) 20%,transparent)}

@@ -136,6 +136,14 @@ async function sources(root){
  // not «подключите Grafana».
  ({s,topic,feature}=make({...GRAFANA,grafanaMetricMap:''}));
  assert.match(feature.dashboards.advise('основные метрики проекта (из wombyte)')&&(r=>'для «x» '+[r.add&&'добавьте «'+r.add+'»',r.todo].filter(Boolean).join(' и '))(feature.dashboards.advise('основные метрики проекта (из wombyte)')),/добавьте «Метрики игры» и сопоставьте панели Grafana с метриками/);
+ // Several Google Play apps: the ANR card asks which one; the choice is kept with the widget and read at once.
+ {const two=async(url,o)=>String(url).includes('apps:search')?{apps:[{name:'apps/com.a.one',displayName:'One',packageName:'com.a.one'},{name:'apps/com.b.two',displayName:'Two',packageName:'com.b.two'}]}:play(url,o);
+  ({s,topic,feature}=make({...PLAY},{request:two}));
+  const made=feature.ipc.compose('ANR','general');let v=await feature.ipc.refresh(made.dashboard.id);
+  assert.match(v.widgets[0].error,/несколько приложений — выберите/);assert.deepEqual(v.widgets[0].choice.options.map(o=>o.id),['apps/com.a.one','apps/com.b.two']);
+  feature.ipc.widget(made.dashboard.id,v.widgets[0].id,{selected:'apps/com.b.two',title:'ANR · Two'});
+  v=await feature.ipc.refresh(made.dashboard.id);
+  assert.equal(v.widgets[0].error,'',v.widgets[0].error);assert.equal(v.widgets[0].choice,null);assert.equal(v.widgets[0].data.playVitals.app,'Two');assert.equal(v.widgets[0].title,'ANR · Two');}
  // A phrase nobody knows: Petya asks for a page; without one, the generic hint.
  ({feature}=make({}));
  let unknown;try{feature.dashboards.turn('Собери дашборд: погода на марсе');}catch(e){unknown=e;}

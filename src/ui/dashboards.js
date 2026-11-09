@@ -56,6 +56,11 @@
   }
   const body=el('div','dash-widget-body');
   if(w.error){const err=el('p','dash-widget-error');if(kit()?.linkText)kit().linkText(err,w.error);else err.textContent=w.error;body.append(err);}
+  // The card's own question (which Google Play app): the options as chips; the choice stays with the widget.
+  if(w.choice?.options?.length){const box=el('div','dash-choice');
+   for(const o of w.choice.options){const b=button(o.label,'',()=>{box.querySelectorAll('button').forEach(x=>x.disabled=true);card.classList.add('refreshing');
+    const name=String(o.label).split(' · ')[0];call('widget',d.id,w.id,{selected:o.id,...(w.title.includes(name)?{}:{title:(w.title+' · '+name).slice(0,80)})}).then(paint).catch(fail);},'dash-choice-option');box.append(b);}
+   body.append(box);}
   card.append(head,body);
   const content=el('div');body.append(content);card.drawn=drawBody(content,w).catch(()=>{});
   if(!compact){const grip=el('span','dash-resize');grip.title='Потяните, чтобы изменить размер';grip.setAttribute('aria-hidden','true');card.append(grip);}

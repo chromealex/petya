@@ -8,6 +8,10 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.16.4 — the ANR widget asks which Google Play app
+
+- With several apps in Google Play the ANR widget shows them as buttons right on the card («Hearts: Classic Cards», «Rummy Gin»…) instead of asking to retype the request; the choice stays with the widget («ANR · Hearts: Classic Cards») and it reads that app at once.
+
 ## 0.16.3 — a spinner while a dashboard card refreshes
 
 - Refreshing a dashboard card no longer swaps the time for «обновляю…» or replaces the content with a placeholder: the card keeps what it shows and a small spinner turns in its top-right corner (the «Обновить» icon spins on hover). The same in the separate dashboard window.

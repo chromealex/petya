@@ -17,12 +17,14 @@ const dashboard={
  widgets:[{title:'ANR за неделю',command:'ANR за неделю'}],
  ready:connected,
  connect:()=>({names:['Google Play Console'],where:'Подключения → «Google Play Console»',offers:[]}),
- async load(s,command,{topic}={}){
+ async load(s,command,{topic,selected}={}){
   if(!connected(s.settings))throw Error('Google Play не подключён: Подключения → «Google Play Console».');
   const play=new GooglePlay({settings:()=>s.settings,request:s.request});
-  const answer=await play.read(String(command||''),topic||{},'');
-  // Several apps and none named: the widget cannot ask, so it says which names to use.
-  if(answer?.question)throw Error('В Google Play несколько приложений — назовите одно в запросе виджета: '+(answer.options||[]).map(o=>o.label).join(', ')+'.');
+  // The app chosen on the card (`selected`, apps/<package>) is the reader's own choice for this topic.
+  const scope=topic||{};if(/^apps\/[a-zA-Z0-9._-]+$/.test(String(selected||'')))scope.playApp=selected;
+  const answer=await play.read(String(command||''),scope,'');
+  // Several apps and none named or chosen: the card asks which one (the choice is kept with the widget).
+  if(answer?.question)return {choice:{text:'В Google Play несколько приложений — выберите, чьи ANR показывать.',options:answer.options||[]}};
   const data=result.extract(answer);
   return {text:String(answer?.text||''),extensionData:data||null};
  }
