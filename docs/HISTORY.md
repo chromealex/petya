@@ -8,6 +8,11 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.12.3 — Petya knows which colleague is you
+
+- «Команда» has «Это я» on each card (one card at most) and an «это вы» mark next to the name. Without a mark Petya finds your card himself by your Jira email or your full name.
+- In answers Petya talks to that person as «ты» and no longer suggests «Алекс (или ты)» when you are the Alex in question.
+
 ## 0.12.2 — «Важное» as a popover, steadier materials, «Реализовать» fixed
 
 - «Важное» opens as a popover (it was cut off inside the header); each mark has «Убрать», and there is «Убрать все»; the star on a message removes its mark.

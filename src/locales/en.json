@@ -3063,7 +3063,7 @@
   "Ошибка:": "Error:",
   "Ошибки и ANR приложений": "App errors and ANRs",
   "ПАМЯТЬ И ФОНОВАЯ РАБОТА": "MEMORY AND BACKGROUND WORK",
-  "ПЕТЯ / 0.12.2": "PETYA / 0.12.2",
+  "ПЕТЯ / 0.12.3": "PETYA / 0.12.3",
   "ПОНИМАНИЕ / НЕОБЯЗАТЕЛЬНО": "UNDERSTANDING / OPTIONAL",
   "ПОСЛЕДНЯЯ РЕПЛИКА": "LAST UTTERANCE",
   "ПРОВЕРКА ЗАДАЧИ": "TASK CHECK",
@@ -13467,6 +13467,9 @@
   "— заметного падения нет": "— no notable drop",
   "— заметного роста нет": "— no notable rise",
   "— например:": "— for example:",
-  "— слишком мало дней": "— too few days"
+  "— слишком мало дней": "— too few days",
+  "Петя будет знать, что это вы, и говорить вам «ты»": "Petya will know this is you and talk to you directly",
+  "Это я": "This is me",
+  "это вы": "you"
  }
 }

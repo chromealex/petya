@@ -667,7 +667,8 @@ function setupHandlers() {
   handle('teamPhotoOptions',accounts=>require('./team-photos.cjs').options(require('./team.cjs').accountsOf(accounts),{nativeImage:require('electron').nativeImage}));
   handle('teamPhotoPick',async()=>{const picked=await require('electron').dialog.showOpenDialog(win,{title:require('./interface-language.cjs').t('Фото участника'),properties:['openFile'],filters:[{name:'Images',extensions:['png','jpg','jpeg','webp']}]});if(picked.canceled||!picked.filePaths[0])return null;return require('./team-photos.cjs').fromFile(require('electron').nativeImage,fs.readFileSync(picked.filePaths[0]));});
   // aliasHint: how people usually call this person («Полина, Поля»), shown as the field's placeholder.
-  handle('teamList',()=>({members:team.members(settings).map(m=>({...m,aliasHint:require('./name-ru.cjs').hints(m.name).join(', ')})),notes:settings.teamRoles}));
+  // «Это я» is shown checked on the user's card even before it was marked, when the Jira email or full name says so.
+  handle('teamList',()=>{const me=team.self(settings);return {members:team.members(settings).map(m=>({...m,...me&&m.name===me.name?{me:'true'}:{},aliasHint:require('./name-ru.cjs').hints(m.name).join(', ')})),notes:settings.teamRoles};});
   handle('teamSave',data=>{if(!data||typeof data.notes!=='string'||data.notes.length>2000)throw Error('Заметки о команде: не более 2000 символов.');saveSettings({teamMembers:JSON.stringify(team.validate(data.members)),teamRoles:data.notes});return {saved:true};});
   handle('settings', publicSettings);
   handle('saveSettings', input => saveSettings(input));

@@ -2,7 +2,7 @@
  const list=$('team-list'),form=$('team-form'),status=$('team-status');let loaded=false,dirty=false;
  // The save strip appears only with unsaved edits.
  const setDirty=value=>{dirty=value;form.classList.toggle('is-dirty',value);};
- const fields=[['name','Имя',120],['aliases','Как вы называете человека',240],['role','Роль',160],['projects','Проекты',400],['responsibilities','За что отвечает',1600],['email','Email',254],['phone','Телефон',40],['birthday','День рождения',10],['slackId','Slack member ID (необязательно)',80],['jiraId','Jira',160],['jiraName','Имя в Jira',200],['meetingName','Имя на встречах',240]];
+ const fields=[['me','Это я',4],['name','Имя',120],['aliases','Как вы называете человека',240],['role','Роль',160],['projects','Проекты',400],['responsibilities','За что отвечает',1600],['email','Email',254],['phone','Телефон',40],['birthday','День рождения',10],['slackId','Slack member ID (необязательно)',80],['jiraId','Jira',160],['jiraName','Имя в Jira',200],['meetingName','Имя на встречах',240]];
  // Names seen in meetings: the list for «Имя на встречах» and the automatic match as each card's hint.
  let meetingNames=[];
  window.paintMeetingNames=()=>{let list=document.getElementById('team-meeting-names');if(!list){list=document.createElement('datalist');list.id='team-meeting-names';document.body.append(list);}
@@ -16,7 +16,7 @@
   const summary=document.createElement('summary');
   const heading=document.createElement('span');heading.className='team-member-heading';
   const title=document.createElement('strong'),subtitle=document.createElement('span');subtitle.className='team-member-subtitle';
-  const avatar=document.createElement('span');avatar.className='team-avatar';avatar.setAttribute('aria-hidden','true');heading.append(title,subtitle);const load=document.createElement('span');load.className='team-load';load.hidden=true;summary.append(avatar,heading,load);
+  const avatar=document.createElement('span');avatar.className='team-avatar';avatar.setAttribute('aria-hidden','true');const you=document.createElement('span');you.className='team-you';you.textContent='это вы';heading.append(title,you,subtitle);const load=document.createElement('span');load.className='team-load';load.hidden=true;summary.append(avatar,heading,load);
   const editor=document.createElement('div');editor.className='team-member-fields';
   const updateSummary=()=>{const value=key=>editor.querySelector('[data-field="'+key+'"]')?.value.trim()||'';title.textContent=value('name')||'Новый участник';const photo=value('photo');if(/^data:image\/(png|jpeg);base64,/.test(photo)){const img=avatar.querySelector('img')||document.createElement('img');img.src=photo;img.alt='';avatar.replaceChildren(img);avatar.classList.add('has-photo');}else{avatar.classList.remove('has-photo');avatar.textContent=(value('name').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('')||'+').toLocaleUpperCase();}subtitle.textContent=[value('role'),value('projects')].filter(Boolean).join(' · ')||'Роль и проекты не указаны';};
   for(const [key,label,max] of fields){
@@ -39,6 +39,12 @@
    if(key==='projects')input.placeholder='Название проекта, ключ Jira';
    if(key==='responsibilities'){input.rows=2;input.placeholder='Например: QA, проверка релизных сборок Android';}
    input.addEventListener('invalid',()=>{details.open=true;});
+   // «Это я»: the user's own card. One card at most; Petya then talks to that person as «ты».
+   if(key==='me'){input.type='hidden';input.value=member.me==='true'?'true':'';wrap.textContent='';wrap.className='check team-member-me team-member-wide';
+    const box=document.createElement('input');box.type='checkbox';box.className='team-me';box.checked=input.value==='true';card.classList.toggle('is-me',box.checked);
+    box.onchange=()=>{for(const other of list.querySelectorAll('[data-field="me"]'))if(other!==input&&other.value){other.value='';const b=other.parentElement.querySelector('.team-me');if(b)b.checked=false;other.closest('.team-member')?.classList.remove('is-me');}
+     input.value=box.checked?'true':'';card.classList.toggle('is-me',box.checked);setDirty(true);status.textContent='Изменения не сохранены.';};
+    wrap.append(box,document.createTextNode('Это я'));wrap.title='Петя будет знать, что это вы, и говорить вам «ты»';}
    wrap.append(input);editor.append(wrap);
   }
   addAccounts(editor,member);
@@ -212,7 +218,7 @@
  document.addEventListener('petya-view',e=>{if(e.detail==='team')refreshLoad().catch(()=>{});});
  async function load(force=false){const data=await window.petya.teamList();if(dirty&&!force){status.textContent='Команда обновлена. Обновите список перед сохранением ручных правок.';$('team-save').disabled=true;return;}list.replaceChildren();data.members.forEach(add);window.paintTeamLoad?.();$('team-notes').value=data.notes;loaded=true;setDirty(false);$('team-save').disabled=false;$('team-add').disabled=false;status.textContent=data.members.length?'Участников: '+data.members.length:'Добавьте коллег, чтобы Петя знал, кто за что отвечает.';}
  document.querySelector('[data-view="team"]').addEventListener('click',run(async()=>{if(!loaded)await load();refreshLoad().catch(()=>{});}));
- $('team-add').onclick=()=>{if(list.children.length>=100){notice('Можно добавить до 100 участников.',true);return;}setDirty(true);add().querySelector('input').focus();status.textContent='Изменения не сохранены.';};
+ $('team-add').onclick=()=>{if(list.children.length>=100){notice('Можно добавить до 100 участников.',true);return;}setDirty(true);add().querySelector('[data-field="name"]').focus();status.textContent='Изменения не сохранены.';};
  form.addEventListener('input',()=>{setDirty(true);status.textContent='Изменения не сохранены.';});
  document.addEventListener('petya-team-updated',()=>{if(dirty){status.textContent='Петя обновил команду. У вас есть несохранённые правки — обновите список перед сохранением.';$('team-save').disabled=true;return;}load().catch(e=>notice(e.message,true));});
  const reload=document.createElement('button');reload.type='button';reload.textContent='Обновить список';reload.onclick=run(()=>load(true));$('team-add').after(reload);
