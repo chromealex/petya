@@ -56,10 +56,8 @@ function connectionStatus(def, settings) {
 // the sign-in button, `savedOnly` the hint under it, `checkedOk` counts any check without a failure as connected,
 // `manualTitle` / `tokenButton` name the manual token part and a button that opens it; `decorate` adds help to the card
 // before its parts are arranged, `after` once they are; `parts` = {card, status, controls, content, field, form, manual}
-// A card with its own sign-in adds
-// its own sign-in adds {login?: {label, run(status, button, form)}, logout?: {label, run(status)}, hint?, manual?: [field
-// names folded into «Ручное подключение по токену»], status?(settings), checked?(result)} (Jira: Atlassian sign-in)
-.
+// A card with its own sign-in adds {login?: {label, run(status, button, form)}, logout?: {label, run(status)}, hint?, manual?: [field
+// names folded into «Ручное подключение по токену»], status?(settings), checked?(result)} (Jira: Atlassian sign-in).
 window.addConnectionCard = def => {
   setupConnection(def, $('settings-form'));
   return window.petya.settings().then(settings => connectionStatus(def, settings)).catch(e => notice(e.message, true));
