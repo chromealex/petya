@@ -36,7 +36,7 @@ const CATALOG=[
  {id:'project-catalog',says:'перечислить известные проекты',examples:['какие у нас проекты','список проектов'],accepts:t=>req('./project-catalog.cjs').isProjectCatalogQuestion(t)},
  {id:'project-memory',says:'выбрать рабочий проект, узнать текущий, забыть проект или запомнить для него канал Slack, проект Jira, репозиторий',
   examples:['работаем над проектом Альфа','какой сейчас проект','забудь проект Альфа','запомни канал разработки #dev'],accepts:t=>req('./project-memory.cjs').matches(t)},
- // Apps' entries from their chat routes (`capability`, src/features/chat-routes.cjs): git, unity, the build flows…
+ // Apps' entries (chat routes with a `capability`, src/features/chat-routes.cjs) are listed here, in their order.
  APPS,
  {id:'delegation',says:'чем закончилась или как продвигается переданная агенту задача',examples:['что с задачей PROJ-12','статус поручений','чем закончилась задача'],accepts:t=>req('./task-progress.cjs').isProgress(t)},
 ];
