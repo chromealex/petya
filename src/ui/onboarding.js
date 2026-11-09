@@ -105,7 +105,7 @@
   const guessButton=el('button','onb-guess','Угадай');guessButton.type='button';
   const row=el('div','onb-row');row.append(custom,guessButton);
   const status=el('p','onb-status'),alternatives=el('div','onb-alternatives');
-  frame({say:answers.name?[{data:answers.name},', а кем ты в команде?']:'А кем ты в команде?',body:[grid,row,status,alternatives],onNext:()=>go(STEP.team),inline:true});
+  frame({say:answers.name?[{data:answers.name},', а какая твоя роль в компании?']:'А какая твоя роль в компании?',body:[grid,row,status,alternatives],onNext:()=>go(STEP.team),inline:true});
   if(answers.role)select(answers.role);
   const update=smart(guessButton,{kind:'role',filled:()=>!!answers.role,next:()=>go(STEP.team),run:()=>guess('role',value=>{select(value);update();},custom)});
   grid.addEventListener('click',update);custom.addEventListener('input',update);
