@@ -7,7 +7,7 @@
   "examples": ["Что нового в дискорде?","Частые вопросы игроков","Баги из дискорда за неделю","Отправь в Discord в #announcements: сервер перезапустится в 18:00"],
   "connects": "Discord (бот)",
   "uses": ["task-tracker"],
-  "provides": {"share-message": "share-message.cjs"},
+  "provides": {"share-message": "share-message.cjs", "messenger-source": "messenger-source.cjs"},
   "setting": "extension_discord",
   "settings": true,
   "feature": "feature.cjs",

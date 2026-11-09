@@ -114,8 +114,8 @@
   for(const a of c.absences){
    const chip=k.el('span','sprint-absence');
    chip.append(raw(k.el('span',null,a.name)),k.el('span','sprint-muted',' '+(a.from===a.to?day(a.from):day(a.from)+'–'+day(a.to))));
-   chip.title=(a.source==='calendar'?'Из календаря':'Отмечено в чате')+(a.title?': '+a.title:'');
-   chip.append(k.el('span','sprint-source',a.source==='calendar'?'календарь':'заметка'));
+   chip.title=(a.source==='calendar'?'Из календаря':a.source==='people'?'Из приложения «Отсутствия»':'Отмечено в чате')+(a.title?': '+a.title:'');
+   chip.append(k.el('span','sprint-source',a.source==='calendar'?'календарь':a.source==='people'?'отсутствия':'заметка'));
    if(a.source==='note'&&a.id&&window.deleteButton){
     const del=window.deleteButton('Удалить отметку об отсутствии',async e=>{e.stopPropagation();del.disabled=true;try{const r=await window.petya.feature('sprintPlanning','removeAbsence',c.project,a.id);chip.remove();k.toast(r?.text||'Отметка удалена');onRemoved?.();}catch(err){del.disabled=false;k.toast(err.message,{error:true});}});
     chip.append(del);

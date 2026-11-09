@@ -1,0 +1,18 @@
+{
+  "id": "absences",
+  "name": "Отсутствия",
+  "description": "Кто из команды в отпуске, на больничном или в отгуле: полоса дней с отсутствиями, когда человек вернётся, отметки из чата после подтверждения и события «нет на месте» из календаря — только на этом компьютере",
+  "category": "team",
+  "icon": "icon.svg",
+  "examples": ["Кто в отпуске на этой неделе?","Когда Маша вернётся?","Маша в отпуске с 10 по 20","Отпуска команды"],
+  "setting": "extension_absences",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["absence-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "absenceCard": "renderAbsenceCard"
+  }
+}

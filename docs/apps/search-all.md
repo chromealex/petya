@@ -13,6 +13,10 @@ failing source marks itself on the card and the rest is shown.
 - **Slack search** — `search.messages` with the connected token (OAuth credential or token through `s.request`).
   Only tokens allowed to search (a user token with `search:read`) can; `not_allowed_token_type`/`missing_scope` →
   the card says «частично: искал в сохранённой переписке». The same message from both is one result.
+- **Messengers** — every ready `messenger-source` that has `search` and does not read Petya's memory (Mattermost,
+  VK Teams; [docs/foundations/messengers.md](../foundations/messengers.md)), with the user's words, each under its
+  own name and time limit; a failing messenger marks only itself. Slack and Telegram sources are memory-only and
+  already covered above.
 - **Confluence / Notion** — the shared docs search (`s.workspace.searchDocs`, the «Документы» path).
 - **Jira** — `POST /rest/api/3/search/jql`, `text ~ "…"` (Russian words with a trailing wildcard), the projects
   chosen in Jira settings.

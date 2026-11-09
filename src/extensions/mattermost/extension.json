@@ -1,0 +1,22 @@
+{
+  "id": "mattermost",
+  "name": "Mattermost",
+  "description": "Каналы команды в Mattermost: сводка с точными цитатами, пересказ треда, поиск; сообщение в канал — только после вашего подтверждения",
+  "category": "comms",
+  "icon": "icon.svg",
+  "examples": ["Что нового в Mattermost?","Что обсуждали в канале dev в маттермосте за неделю","Перескажи тред про релиз в Mattermost","Найди в Mattermost сообщения про оплату","Отправь в Mattermost в ~dev: билд 2.3 готов"],
+  "connects": "Mattermost (личный токен)",
+  "uses": ["task-tracker"],
+  "provides": {"share-message": "share-message.cjs", "messenger-source": "messenger-source.cjs"},
+  "setting": "extension_mattermost",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["mattermost-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "mattermostCard": "renderMattermostCard",
+    "mattermostCompose": "renderMattermostCompose"
+  }
+}

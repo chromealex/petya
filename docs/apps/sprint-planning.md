@@ -50,6 +50,11 @@ the word «спринт» is what moves a question here.
 - Absences: chat notes for the project + calendar events (the calendar app, if added and with calendar access)
   whose title says «Отпуск / Vacation / OOO / больничный / day off / отгул», matched to a person by a name in the
   title or by organizer/attendee e-mail; whole local days.
+- With the people records foundation loaded (`s.people`, `docs/foundations/people.md`), the absences of the sprint's
+  days come from it instead of the calendar read above: what was typed in «Отсутствия», the calendar app's people
+  source and any HR source; the project's chat notes are added (the same days of one person are counted once) and
+  shown as «отсутствия» on the card. If the foundation fails, the calendar is read here as before. When «Отсутствия»
+  is added, «Маша в отпуске 23–27» goes to it (a confirmation card) rather than to a project note.
 - Carry-over: unfinished issues of the active sprint (they keep their assignee and count first); issues already in
   the next sprint count too.
 - Proposal: the ranked backlog (`/board/{id}/backlog`, `statusCategory != Done`, rank order) taken greedily:

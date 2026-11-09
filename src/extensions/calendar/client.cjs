@@ -37,14 +37,15 @@ class CalendarClient{
   return new CalendarError(this.name+': запрос не выполнен (HTTP '+status+')'+(e.message?' — '+String(e.message).slice(0,200):'')+'.',{status});
  }
 
- // Events of [from,to): [{id,title,start,end,allDay,location,link,url,declined,tentative}] sorted by start.
+ // Events of [from,to): [{id,title,start,end,allDay,location,link,url,declined,tentative,meta}] sorted by start;
+ // meta.ooo marks an out-of-office event (Google eventType «outOfOffice», Outlook showAs «oof»).
  async events(from,to){
   if(this.provider==='microsoft'){
    const q=new URLSearchParams({startDateTime:from.toISOString(),endDateTime:to.toISOString(),$top:'250',$orderby:'start/dateTime',$select:'id,subject,start,end,isAllDay,location,onlineMeeting,onlineMeetingUrl,webLink,isCancelled,showAs,responseStatus,bodyPreview,attendees,organizer'});
    const data=await this.call(GRAPH+'/me/calendarView?'+q,{headers:{Prefer:'outlook.timezone="UTC"'}});
    return (data.value||[]).filter(e=>!e.isCancelled).map(e=>({id:String(e.id||''),title:clip(e.subject)||'(без названия)',start:utc(e.start),end:utc(e.end),allDay:!!e.isAllDay,
     location:clip(e.location?.displayName),link:safe(e.onlineMeeting?.joinUrl||e.onlineMeetingUrl),url:safe(e.webLink),declined:e.responseStatus?.response==='declined',tentative:e.showAs==='tentative',free:e.showAs==='free',
-    meta:{description:clip(e.bodyPreview,2000),attendees:(e.attendees||[]).map(a=>String(a.emailAddress?.address||'').toLowerCase()).filter(Boolean).slice(0,50),organizer:String(e.organizer?.emailAddress?.address||'').toLowerCase()}})).sort(byStart);
+    meta:{ooo:e.showAs==='oof',description:clip(e.bodyPreview,2000),attendees:(e.attendees||[]).map(a=>String(a.emailAddress?.address||'').toLowerCase()).filter(Boolean).slice(0,50),organizer:String(e.organizer?.emailAddress?.address||'').toLowerCase()}})).sort(byStart);
   }
   const q=new URLSearchParams({timeMin:from.toISOString(),timeMax:to.toISOString(),singleEvents:'true',orderBy:'startTime',maxResults:'250'});
   const data=await this.call(GOOGLE+'/calendars/primary/events?'+q);
@@ -53,7 +54,7 @@ class CalendarClient{
    const video=conferenceLink(e);
    return {id:String(e.id||''),title:clip(e.summary)||'(без названия)',start:allDay?localDate(e.start.date):new Date(e.start?.dateTime).toISOString(),end:allDay?localDate(e.end?.date||e.start.date):new Date(e.end?.dateTime).toISOString(),allDay,
     location:clip(e.location),link:safe(video),url:safe(e.htmlLink),declined:self?.responseStatus==='declined',tentative:self?.responseStatus==='tentative',free:e.transparency==='transparent',
-    meta:{description:clip(e.description,2000),attendees:(e.attendees||[]).map(a=>String(a.email||'').toLowerCase()).filter(Boolean).slice(0,50),organizer:String(e.organizer?.email||'').toLowerCase()}};
+    meta:{ooo:e.eventType==='outOfOffice',description:clip(e.description,2000),attendees:(e.attendees||[]).map(a=>String(a.email||'').toLowerCase()).filter(Boolean).slice(0,50),organizer:String(e.organizer?.email||'').toLowerCase()}};
   }).filter(e=>!Number.isNaN(Date.parse(e.start))).sort(byStart);
  }
 

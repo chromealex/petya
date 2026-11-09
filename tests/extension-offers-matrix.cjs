@@ -28,6 +28,8 @@ const own={
  'google-meet':['созвон в Meet','запиши созвон в мите','поставь созвон в гугл мит с Олегом','запиши встречу в Google Meet','подключись к созвону через Meet'],
  teams:['встреча в Teams','запиши встречу в тимсе','поставь встречу в тимс на завтра','что было на звонке в Microsoft Teams'],
  discord:['что нового в дискорде','баги из дискорда за неделю','покажи частые вопросы игроков','отправь в Discord: сервер перезапустится в 18:00'],
+ mattermost:['что нового в Mattermost','что обсуждали в канале dev в маттермосте за неделю','перескажи тред про релиз в Mattermost','найди в Mattermost сообщения про оплату','отправь в маттермост: билд готов'],
+ 'vk-teams':['что нового в VK Teams','что писали в вк тимс за неделю','перескажи тред про оплату в VK Teams','найди в VK Teams про сборку','отправь в VK Teams: билд готов'],
  support:['что жалуются в поддержку','тикеты про оплату за неделю','ответь на тикет 1234','покажи тикеты в Zendesk'],
  'sprint-planning':['спланируй спринт','что влезет в следующий спринт','какая у нас скорость','кто перегружен в спринте','velocity команды'],
  standup:['собери стендап','что вчера делала команда','у кого блокеры','настрой стендап на 10:30'],
@@ -57,6 +59,7 @@ const own={
  'release-checklist':['готов ли релиз 1.5','чек-лист релиза','что мешает выпустить версию 2.0','можно ли выпускать 1.5','релизный чек-лист'],
  anomalies:['что необычного вчера','есть аномалии за неделю?','покажи аномалии','что необычного в метриках','какие аномалии вчера'],
  mentor:['что мне автоматизировать?','что я делаю руками','где я теряю время','покажи, что мне стоит автоматизировать'],
+ 'google-drive':['найди в гугл диске план релиза','последние файлы в Google Drive','открой Google Docs','найди презентацию про Китай в гугл диске','прочитай https://docs.google.com/document/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/edit','сохрани это в Google Docs'],
  'google-sheets':['что в гугл таблице баланса','открой Google Sheets','найди лучника в гугл таблице','покажи https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/edit#gid=0'],
  'config-balance':['сверь баланс с конфигами','что поменялось в балансе с прошлой версии','проверь конфиги юнитов','почему урон лучника в игре не как в таблице'],
  'tone-check':['как это звучит: КТО СЛОМАЛ БИЛД?!','смягчи сообщение: опять забыли обновить доку','проверь тон ответа игроку','не слишком резко: ревью нужно до пятницы, без вариантов','перепиши помягче: опять забыли обновить доку'],
@@ -69,6 +72,8 @@ const own={
  monitoring:['что с серверами','всё ли живое','какие алерты горят','аптайм за неделю','почему лежит api','инциденты за неделю','что в Prometheus','найди все адреса серваков в проекте','какие сервера использует игра'],
  subscriptions:['за что я плачу каждый месяц','что продлится на этой неделе','сколько уходит на сервисы','какие у меня подписки','когда истекает домен'],
  'time-tracking':['на что ушёл день','сколько я сидел в Unity на этой неделе','время по задачам','куда ушло время на этой неделе','запиши время в Jira'],
+ absences:['кто в отпуске на этой неделе','кто у нас на больничном','отпуска команды','график отпусков','когда Маша вернётся из отпуска'],
+ 'one-on-one':['подготовь 1:1 с Олегом','запиши итоги 1:1 с Машей','что обсудить на встрече один на один','что я обещал на 1:1','повестка на one-on-one с Ваней'],
 };
 // phrases that must not offer a given app (neighbours' subjects and ordinary talk)
 const not={
@@ -97,16 +102,20 @@ const not={
  zoom:['зум фото','увеличь картинку','сделай zoom in на графике','приблизь изображение','зум камеры','запиши встречу','слушай встречу','сводка встречи','созвон в Meet','встреча в тимсе'],
  // Meet and Teams by name only: «meeting», «митинг», «митап», meetings in general, the calendar and Zoom are not them.
  'google-meet':['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','what is the meeting about','meetup в пятницу','что у меня сегодня в календаре','встреча в Teams','тимлид на встрече'],
- teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке'],
+ teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке','что нового в VK Teams','перескажи тред в вк тимс'],
  // Discord by name: the user's own client, coding with discord.js, other messengers and support tickets are not it.
  discord:['дискорд не работает','как подключить discord.js','напиши бота для дискорда','что нового в слаке','что пишут в телеграме','тикеты про оплату','что жалуются в поддержку'],
+ // Mattermost by name: Slack, Telegram, Discord and VK Teams requests, building plugins and running the server are not it.
+ mattermost:['что нового в слаке','что пишут в телеграме','что нового в дискорде','что нового в VK Teams','отправь в Slack: билд готов','напиши плагин для mattermost','mattermost не работает','установи mattermost','webhook в mattermost','что обсуждали в канале dev','найди везде про оплату'],
+ // VK Teams by name: ВКонтакте posts and ads (marketing), Microsoft Teams, other messengers and building bots are not it.
+ 'vk-teams':['опубликуй пост во вконтакте','что пишут в группе вконтакте про акцию','реклама вконтакте за неделю','таргет в вк','встреча в тимс','что было на звонке в Microsoft Teams','что нового в слаке','что пишут в телеграме','что нового в Mattermost','отправь в Discord: сервер перезапустится','напиши бота для vk teams','vk teams не работает'],
  // Player tickets: vendors' support, Petya's help, cheering up, store reviews and tracker tickets are not it.
  support:['поддержка Unity','техподдержка Пети','отзывы в сторах','поддержи меня','создай тикет в Jira','частые вопросы игроков в дискорде','поддерживает ли Unity webp'],
  // Sprint planning: running sprints, weekend plans, a task's work plan and team workload right now are not it.
  'sprint-planning':['спринт в беге','планы на выходные','план работ по задаче','загрузка команды','кто перегружен','какая скорость интернета'],
  // Standup: comedy, getting up, meeting summaries and the meeting in the calendar are not it.
  standup:['стенд-ап комедия','встань','сводка встречи','во сколько стендап','сходим на стендап шоу'],
- teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке'],
+ teams:['митинг протеста','митап по Unity','сводка встречи','Zoom','запиши встречу в Zoom','поставь встречу с Олегом завтра','созвон в Meet','тимлид сказал','тимбилдинг в пятницу','команда в Slack','teams в слаке','что нового в VK Teams','перескажи тред в вк тимс'],
  // Ad revenue is earnings from ads shown in our games: buying users, turning ads off and purchases are not it.
  'ad-revenue':['что необычного вчера','есть аномалии за неделю?','реклама игры','маркетинговые кампании','запусти рекламу в TikTok','сколько потратили на рекламу','отключи рекламу','покупки в приложении','выручка от покупок в приложении','падение продаж за неделю'],
  // Competitor games: a contest, a chess opponent, devices and our own store rating are not it.
@@ -155,6 +164,8 @@ const not={
  'release-checklist':['напиши патчноут к версии 1.5','новые крэши после релиза 1.4.2','плохие отзывы после обновления','когда релиз?','чек-лист переезда','статус CI','готов ли отчёт'],
  // Unusual days in the data: weather, gifts, ad revenue drops (the ad app's view) and plain metrics are not it.
  anomalies:['аномальная жара','необычный подарок','придумай необычное имя','упала выручка с рекламы','аномалии eCPM','DAU за неделю','какие крэши за неделю','странный сон'],
+ // Google Drive by name or a Docs/Slides/Drive link only: spreadsheets, the computer's disk, local files, «search everything» and other Google products are not it.
+ 'google-drive':['что в гугл таблице баланса','покажи https://docs.google.com/spreadsheets/d/1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789/edit#gid=0','чем забит диск','сколько места на диске','найди скрипт сохранения','документы про монетизацию','найди везде про релиз','что у меня сегодня в календаре','сохрани файл на диск','крэши в Google Play','найди документ про онбординг'],
  // Google Sheets by name or link only: tables in answers, Excel/CSV files, reconciling with configs and localization are not it.
  'google-sheets':['таблица умножения','сделай таблицу сравнения тарифов','открой csv с продажами','сверь баланс в гугл таблице с конфигами','что не переведено в локализации','что в таблице'],
  // Game balance against configs only: CI/server configs, Petya's settings and money balance are not it.
@@ -171,6 +182,10 @@ const not={
  'ua-campaigns':['сколько заработали на рекламе вчера','eCPM по сетям','выручка с рекламы за неделю','запусти рекламу в TikTok','отключи рекламу','маркетинговые кампании','покупки в приложении','расходы на обед','что в Unity'],
  // Server health only: competitors / mentions monitoring, the screen, this computer's uptime, a calendar alert, logs,
  // Kubernetes objects, Docker containers, office or computer addresses and API requests belong to others.
+ // The user's own leave and HR questions, travel, the calendar's meetings and sprint capacity are not the team's absences.
+ absences:['отпуск в Турции','куда поехать в отпуск','сколько дней отпуска осталось','как оформить отпуск','я в отпуске','хочу в отпуск на море','что у меня сегодня в календаре','спланируй спринт','ёмкость спринта с учётом отпусков','кто перегружен'],
+ // Games and sports, scores, scale, promises about tasks and other meetings' prep or summaries are not 1:1s.
+ 'one-on-one':['1 на 1 в игре','бой один на один','счёт 1:1','масштаб 1:1','мои обещания','мои обещания по задачам','подготовь встречу с заказчиком','сводка встречи','что решили на встрече','подготовь вопросы к собеседованию'],
  monitoring:['мониторинг конкурентов','мониторинг упоминаний бренда','второй монитор не работает','настрой яркость монитора','аптайм компьютера','поставь алерт в календаре','логи сервиса api за последний час','что с подами в kubernetes','почему падает контейнер postgres','что запущено в докере','адрес офиса','IP моего компьютера','проверь, отвечает ли staging','какие эндпоинты в openapi проекта','что нового у конкурентов','метрики команды']
 };
 const problems=[];
@@ -190,7 +205,7 @@ console.log('Extension offers matrix: '+all.length+' offers, own requests offer 
 // Installed but not connected: each app's request is claimed by that app only (it answers with the question
 // where to connect); no other app's chat turn takes it. Service apps only — local apps would scan the disk.
 (async()=>{
- const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring'].filter(id=>ids.has(id));
+ const apps=['crashes','store-reviews','calendar','ci-builds','pull-requests','regex-cron','discord','support','sprint-planning','standup','ad-revenue','competitors','metrics','ab-test','meeting-prep','patch-notes','grafana','reminders','journal','code-review','mentor','profiler','playtest','release-checklist','anomalies','sql','search-all','google-drive','google-sheets','config-balance','meeting-hints','tone-check','file-search','logs','ua-campaigns','monitoring','absences','one-on-one','mattermost','vk-teams'].filter(id=>ids.has(id));
  const features=Object.fromEntries(apps.map(id=>[id,require('../src/extensions/'+id+'/feature.cjs')]));
  const wrong=[];
  for(const id of apps)for(const phrase of own[id]){

@@ -3,7 +3,8 @@
 // offer; Grafana being down or a login problem is support talk; PromQL without Grafana and «нарисуй график» are not
 // this app.
 const q=require('./query.cjs');
-const LINK=/https?:\/\/[^\s]+\/d(?:-solo)?\/[A-Za-z0-9_-]{1,64}(?:[/?#\s]|$)/iu;
+// Google Docs/Sheets/Drive links have the same /d/<id>/ shape and are not dashboards.
+const LINK=/https?:\/\/(?!(?:docs|drive)\.google\.com\/)[^\s]+\/d(?:-solo)?\/[A-Za-z0-9_-]{1,64}(?:[/?#\s]|$)/iu;
 module.exports={
  id:'grafana',name:'Grafana',
  pitch:'покажу дашборды Grafana прямо в чате: графики, плитки и таблицы панелей за нужный период, поиск дашбордов и ссылки «Открыть в Grafana»; только чтение',

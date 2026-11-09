@@ -1,0 +1,23 @@
+{
+  "id": "google-drive",
+  "name": "Google Диск",
+  "description": "Файлы Google Диска в чате: поиск по названию и тексту, последние файлы, Google Документ с оглавлением и ответы по нему с цитатами, сохранение ответа Пети в новый документ — только после подтверждения",
+  "category": "docs",
+  "icon": "icon.svg",
+  "examples": ["Найди в гугл диске план релиза","Последние файлы в Google Drive","По документу: какие сроки у бета-теста?","Сохрани это в Google Docs"],
+  "connects": "Google",
+  "setting": "extension_google-drive",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["drive-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "driveCard": "renderDriveCard"
+  },
+  "provides": {
+    "document-export": "document-export.cjs",
+    "index-collection": "collection.cjs"
+  }
+}

@@ -162,6 +162,10 @@ How to use them:
   and quote `text` with its chat title (`meta.title`) as the source. Not wired yet.
 - Any app: check `s.semanticIndex?.enabled(id)` first; `search` answers `{hits:[]}` at once when nothing is on.
 
+Extension collections so far: `files` («Поиск файлов по смыслу») and `google-drive` (the text of Google Docs the
+«Google Диск» connection can read, Markdown by headings, ≤ 500 newest; docs/apps/google-drive.md). «Google Диск»
+merges its hits into Drive searches when it is on.
+
 ## Tests
 
 `node tests/semantic-index.cjs` — store (add/replace/remove/touch, prefilter, sketch candidates on a 300-item

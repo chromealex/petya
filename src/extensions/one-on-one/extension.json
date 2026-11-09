@@ -1,0 +1,18 @@
+{
+  "id": "one-on-one",
+  "name": "Встречи 1:1",
+  "description": "Подготовка к встрече 1:1 с коллегой: прошлые заметки, открытые договорённости, его задачи и PR, черновик повестки; итоги встречи с договорённостями — после подтверждения, только на этом компьютере",
+  "category": "team",
+  "icon": "icon.svg",
+  "examples": ["Подготовь 1:1 с Олегом","Запиши итоги 1:1 с Олегом: я обещал выбить бюджет на курсы до пятницы","Что я обещал Маше?","Что Олег обещал?"],
+  "setting": "extension_one-on-one",
+  "settings": true,
+  "feature": "feature.cjs",
+  "scripts": [
+    ["one-cards.js", "message-format.js"],
+    ["settings.js", "notifications.js"]
+  ],
+  "results": {
+    "oneOnOneCard": "renderOneOnOneCard"
+  }
+}
