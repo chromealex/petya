@@ -1,0 +1,44 @@
+{
+  "check": {
+    "total": 30,
+    "exact": 27,
+    "passed": 27,
+    "failures": [
+      "v22-new-sort-1-1",
+      "v22-new-sort-2-0",
+      "v22-new-sort-3-1"
+    ]
+  },
+  "drafts": {
+    "total": 12,
+    "exact": 0,
+    "passed": 5,
+    "failures": [
+      "v22-new-cancel-one",
+      "v22-new-revoke-send",
+      "v22-new-exact-name",
+      "v22-new-screen-only",
+      "v22-new-add-separate",
+      "v22-new-quote",
+      "v22-new-recipient-open"
+    ]
+  },
+  "baseline": {
+    "check": 27,
+    "drafts": 6
+  },
+  "lost_baseline_successes": [
+    "v22-new-sort-3-1",
+    "v22-new-screen-only",
+    "v22-new-add-separate",
+    "v22-new-quote"
+  ],
+  "gained": [
+    "v22-new-sort-0-1",
+    "v22-new-two-recipients",
+    "v22-new-open-duration"
+  ],
+  "gate": "rejected: baseline successes lost and the total did not improve",
+  "total": 32,
+  "baseline_total": 33
+}

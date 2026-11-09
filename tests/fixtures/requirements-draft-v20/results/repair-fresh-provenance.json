@@ -1,0 +1,14 @@
+{
+  "files": {
+    "repair-check.jsonl": "e1f83cbb572ecc3f560de30c09dc8ed836f9a294135c689b2ed036f1235af266",
+    "repair-check.manifest.json": "ce729c1b6be87feb36075114dd5aeef4e53de9c0350054308f18a4e3cc7e6508",
+    "repair-drafts.jsonl": "5f9efca7877e940d0c20fd88dd9be7d0ad29ae18c4ff187152b671e237306b7c",
+    "repair-drafts.manifest.json": "d9a8b7bb7d3c4c974336a3ef878b39d1c3f878e6ac56e3a32e40f0f0d95e4d57",
+    "repair-drafts-review.json": "ca64906b06f14b3f5f8d98aa39dc20a471427cee90133d1b9da48535f9ab78e1",
+    "repair-fresh-summary.json": "8b3b7164891f74ca1d2f1c715d1c09f0bdac460f1964c22bf43c42a20d8d5993"
+  },
+  "adapter_sha256": "9d6ff318cafa9466fdee69a36f7fac3e4c640352cf203e058d0a0f139b0bc4d7",
+  "selection_sha256": "904da06cdfc2d8c2e396980174a8a70d36ce73d2e6c507d466e6030391fbadec",
+  "selection_commit": "e9efdbd",
+  "limits": "Authored synthetic non-blind semantic review. Complete raw results retained; no release qualification."
+}

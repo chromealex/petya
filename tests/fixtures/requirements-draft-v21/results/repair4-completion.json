@@ -1,0 +1,20 @@
+{
+  "status": "training_completed_not_qualified",
+  "steps": 1397,
+  "adapter_sha256": "e4750435ed3c09b138b0cb735c227ce074e9377612b3b147a657a885531a12d0",
+  "parent_sha256": "99a053b1d537c4b88cbb2b55fe599999fcd9f13dd94cd9bc98c42171a0bac25f",
+  "training_sha256": "71ac132c6f893b668a24cbf8a1bc35176477743c17b9ecd6bf147015fa66fd64",
+  "elapsed_successful_training_seconds": 4074.61437499999,
+  "peak_memory_bytes": 40257773888,
+  "resume_boundaries": [
+    16
+  ],
+  "final_checkpoint_sha256": "016416b960e4f282f38119455f1aaff8396a92096e1d2a2e190cff42b7543be3",
+  "environment_override": {
+    "AGX_RELAX_CDM_CTXSTORE_TIMEOUT": "1"
+  },
+  "training_exit_code": 0,
+  "retention_status": "Started separately; no score or qualification claimed.",
+  "holdout_status": "Not evaluated on this candidate.",
+  "limits": "Artifact verification proves integrity and completed training, not answer quality or release readiness. The process-only override does not establish the cause or permanent repair of earlier GPU failures."
+}

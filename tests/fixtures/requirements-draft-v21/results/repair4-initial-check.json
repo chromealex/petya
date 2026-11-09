@@ -1,0 +1,13 @@
+{
+  "step": 16,
+  "checkpoint_sha256": "0de26c962c64e311eb31bec389ef64bc1a4f01a4296cea78f6d7779c2279f976",
+  "tensor_count": 771,
+  "finite_tensors": true,
+  "adam_step": 16,
+  "parent_sha256": "99a053b1d537c4b88cbb2b55fe599999fcd9f13dd94cd9bc98c42171a0bac25f",
+  "training_sha256": "71ac132c6f893b668a24cbf8a1bc35176477743c17b9ecd6bf147015fa66fd64",
+  "mean_loss": 0.0024463816369859614,
+  "planned_steps": 1397,
+  "scope": "Actual checkpoint integrity before continuation; no quality claim.",
+  "resume_observed": true
+}

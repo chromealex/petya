@@ -1,0 +1,47 @@
+{
+  "v19-repeat": {
+    "passed": true,
+    "reason": "Preserves processed-request count, final 257-second interval and hidden performer names. Corrects grammatical inflection and uses an accurate specific heading; no requirements or questions are added.",
+    "answer_sha256": "40f0ea4468b34928fe4dd91083cc7ce98a2c7ae96769f315bc4fdd534c2794a1"
+  },
+  "v19-inclusive-prose": {
+    "passed": true,
+    "reason": "Description and questions match the reference exactly. The alternative temperature heading is accurate; inclusive -24, exclusive -8 and unrounded fractional values are all retained.",
+    "answer_sha256": "62be4eba22183e6ab1be3a2fed297f4f5564e9b78642c83e1e1a4f538de63c14"
+  },
+  "v20-scope": {
+    "passed": true,
+    "reason": "Description and questions match exactly. The heading correctly names the conclusion discussed by the user instead of the erroneous act in the reference. Recipient, date format, hidden author and excluded keyboard purchase remain intact.",
+    "answer_sha256": "25b56ae1e0cebaf50c6e462287467110f2b529393e5c0992159971a430fe5a96"
+  },
+  "v20-repeat": {
+    "passed": true,
+    "reason": "Preserves agreed-act count, final 293-second interval and hidden reviewer names. Corrects grammatical inflection and uses an accurate heading without restoring canceled settings.",
+    "answer_sha256": "27a929e9fd62b76b1494083c900935ca4554bfee2843279ecdf56ea6abf3b4c4"
+  },
+  "v20-withdrawn-latest": {
+    "passed": true,
+    "reason": "Preserves the invoice draft and delivery-number substitution, with explicit supplier sending cancellation and revoked prior consent. Extra wording repeats the same cancellation without changing scope.",
+    "answer_sha256": "7e11330633d1bb3a8100dc74e9f261bc579b537c76bd85432fddad337015d5aa"
+  },
+  "v20-only-one-recipient": {
+    "passed": true,
+    "reason": "Retains two identical memos, permission for the master only, no sending to the apprentice and no added exercise. Identical memos together with the excluded exercise preserve the shared-content restriction.",
+    "answer_sha256": "32985e5f1f93370ee7ad2d35b8e831e1ff5d1e91e4545264de278c7e17d2479d"
+  },
+  "v20-verbatim-name": {
+    "passed": true,
+    "reason": "Preserves both exact literals and explicitly requires character-for-character task naming, unchanged filename and no normalization. Character-for-character preservation includes case, ё and zeroes without listing them separately.",
+    "answer_sha256": "66610f0992247e7adebf3b0485dffa01cbdf8cafb593f7fda8989aedacdb9ce0"
+  },
+  "v20-sort-with-rule": {
+    "passed": true,
+    "reason": "Retains descending order and duplicate preservation, with the complete correct list -8, -8, -16, -27. Only the synonym for duplicates changes.",
+    "answer_sha256": "de0adb4b1be487a16376e8b77e4bbc59c1a7924cfdf6f48242f1e37ce8ca52e3"
+  },
+  "v20-service-unselected": {
+    "passed": true,
+    "reason": "Description and heading match exactly. The sole question asks the same unresolved communication-method choice; no service is selected or extra question introduced.",
+    "answer_sha256": "4d266cff07161c702d27fe6254a3bce443b79b13856a9dc42b0baa51839e81d3"
+  }
+}

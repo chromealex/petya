@@ -1,0 +1,17 @@
+{
+  "protocol": "tests/fixtures/requirements-draft-v22/repair2-protocol.json",
+  "python": "/tmp/peter-v10/eval-env/bin/python",
+  "base": "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+  "work": "/tmp/peter-v22-repair2",
+  "trainer": "tests/fixtures/requirements-draft-v21/train_checkpointed.py",
+  "helper": "tests/fixtures/requirements-draft-v21/checkpoint.py",
+  "data": "tests/fixtures/requirements-draft-v22/repair2-train.jsonl",
+  "parent": "tests/fixtures/requirements-draft-v22/repair-adapter",
+  "initial_stop_after": 16,
+  "resume_retries": 4,
+  "familiar": "tests/fixtures/requirements-draft-v22/acquisition.jsonl",
+  "evaluator": "tests/fixtures/requirements-draft-v8/evaluate.py",
+  "verify_artifact": "tests/fixtures/requirements-draft-v21/verify_artifact.py",
+  "verify_continuation": "tests/fixtures/requirements-draft-v21/verify_continuation.py",
+  "limits": "Trains the frozen second repair and captures the 801 familiar cases only. No holdout inference and no candidate selection: semantic review and the all-case gate come next."
+}

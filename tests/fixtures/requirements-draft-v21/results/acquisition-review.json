@@ -1,0 +1,162 @@
+{
+  "v18-separate-names": {
+    "passed": true,
+    "reason": "Only the heading changes; the description preserves the section replacement and unchanged filename verbatim.",
+    "answer_sha256": "8cc33a14ecb8d8104f5485705b46ce6464998fbc7b06def07920a51d5a5142ab"
+  },
+  "v19-repeat": {
+    "passed": true,
+    "reason": "Corrects grammatical agreement and makes the heading specific; 257 seconds and hidden performer names remain intact.",
+    "answer_sha256": "40f0ea4468b34928fe4dd91083cc7ce98a2c7ae96769f315bc4fdd534c2794a1"
+  },
+  "v19-quoted-permission": {
+    "passed": true,
+    "reason": "Equivalent explanation: the retained quote is not consent and consultant transmission remains forbidden.",
+    "answer_sha256": "27cadf086dde68538154ada8b09f71698176648d6029db306f2f39ff686382f3"
+  },
+  "v20-repeat": {
+    "passed": true,
+    "reason": "Corrects grammatical agreement and heading; 293 seconds and hidden reviewer names are preserved.",
+    "answer_sha256": "27a929e9fd62b76b1494083c900935ca4554bfee2843279ecdf56ea6abf3b4c4"
+  },
+  "v20-withdrawn-latest": {
+    "passed": true,
+    "reason": "Consent versus permission is synonymous here; supply number replaces order number and supplier transmission remains revoked.",
+    "answer_sha256": "ec7c5d373b0beea47051e82b7a36ac48dfd6f1b393542165604c7e9b83c3b365"
+  },
+  "v20-only-one-recipient": {
+    "passed": true,
+    "reason": "Identical copies, master permission, pupil prohibition and no added exercises are retained.",
+    "answer_sha256": "137e6e59934f2e8891953c45ff3b7ced983109ca1b3a864999460dcecc366b38"
+  },
+  "v20-verbatim-name": {
+    "passed": true,
+    "reason": "Both exact names and character-for-character preservation with no normalization remain; listing case and zeros separately is unnecessary.",
+    "answer_sha256": "66610f0992247e7adebf3b0485dffa01cbdf8cafb593f7fda8989aedacdb9ce0"
+  },
+  "v20-no-invented-columns": {
+    "passed": false,
+    "reason": "Turns a ban on unapproved additions into unconditional exclusion of price and stock, and says to preserve unspecified fields. The open question does not repair this imposed choice.",
+    "answer_sha256": "046ac6e9510474d2e82092aa80cb5d900674f059e1c9c01db76e03e06eaad5fe"
+  },
+  "v20-sort-with-rule": {
+    "passed": true,
+    "reason": "Equivalent duplicate-preservation wording and full correct descending list with both -8 entries.",
+    "answer_sha256": "9b7e127e528742d7ce4f9e18e62013b3f4011fd61826091d488159273f5445e8"
+  },
+  "v20-quoted-ban-not-action": {
+    "passed": true,
+    "reason": "Retains the complete quote and editor transmission permission; the pronoun clearly refers to that permission.",
+    "answer_sha256": "5bc89e418388de5571bd2a5ab90a13dcbbf2d2def96c65332d7bfedf46410728"
+  },
+  "v20-reversed-undo": {
+    "passed": true,
+    "reason": "Equivalent word order; pager is deleted and mobile retained after the cancellation is withdrawn.",
+    "answer_sha256": "ac8d7736428e947b0fae2b5e0a9e0238494efeb2f0703a428d4650e3ec3890ce"
+  },
+  "v20-single-use-scope": {
+    "passed": true,
+    "reason": "Only the heading is shortened; description retains single-use parcel code, 135-second lifetime and login exclusion.",
+    "answer_sha256": "460eccd15e0f48c9091fc99494e1a66cf2d0d1083172c4f31be78210e0bb07a7"
+  },
+  "v21-previous-draft-payment": {
+    "passed": false,
+    "reason": "Lists the desired new field and sum but omits that contract code replaces application code. Does not reliably encode removal of the old field.",
+    "answer_sha256": "882fba25b1dc5d0e01092b72440fca81c9589a2debe9a99ad9a9b41eacc861e1"
+  },
+  "v21-previous-draft-copies": {
+    "passed": false,
+    "reason": "Says the geodesist is permitted to prepare and transmit, changing the intended recipient into an authorized actor; recipient permission must remain unambiguous.",
+    "answer_sha256": "b6e7918f7a8286308253d0cca85dfef90a7572fe58518521342f462bf65d8537"
+  },
+  "v21-previous-draft-two-edits": {
+    "passed": false,
+    "reason": "Contradictorily preserves owner_tag while replacing it with holder_tag. Independent cancellation decisions are not represented consistently.",
+    "answer_sha256": "eaa8df24a87b7c03cea33b79c0838643cf90f18f4ed884784e6709cc6f886685"
+  },
+  "v21-previous-draft-addition": {
+    "passed": true,
+    "reason": "Preserves Region and District, adds Oblast as a separate field without replacing Region, and forbids abbreviation; all exact names occur.",
+    "answer_sha256": "dbf514682a3d160c6f359085053acd1bd8f30d273a5ebdee472ea9d571f8cd5b"
+  },
+  "v21-previous-draft-literal": {
+    "passed": true,
+    "reason": "Preserves both original literal names with no normalization or removed zeros; no rename is introduced.",
+    "answer_sha256": "2f756940cddddc191f73c47b14760eb5516090c0ea82e31d48c7a0b333a680f3"
+  },
+  "v21-previous-draft-export": {
+    "passed": false,
+    "reason": "Invents a default Name field and excludes unspecified agreed additions. No field list or default was approved; asking about defaults does not undo the invented requirement.",
+    "answer_sha256": "59092619a80f6440556bba59b28abf3ff0dbb02199a7057862708453ee491a5b"
+  },
+  "v21-previous-draft-sort": {
+    "passed": true,
+    "reason": "Includes the entire correct descending list with both -11 entries and explicitly preserves duplicates and count; no different result is proposed.",
+    "answer_sha256": "68c86d2884c61731ec646fcb24d5c0f5e3e265a77cd6015caf8205b6a3fc0cd3"
+  },
+  "v21-previous-draft-pressure": {
+    "passed": false,
+    "reason": "Description says strictly greater than -17 instead of strictly less; the correct interval in the heading cannot fix that contradiction.",
+    "answer_sha256": "de6654e8307dfa49af6412850f058d859e7405c03cc4072763fc8242df83d244"
+  },
+  "v21-previous-draft-quote": {
+    "passed": true,
+    "reason": "Retains the complete quoted example and explicitly permits sending the manual to the reviewer; the quote is not treated as an action prohibition.",
+    "answer_sha256": "66a3a7cac93dd31f5b1a1bc8cb953f4b1e4f9ce90d2044622a28dc700d2714f1"
+  },
+  "v21-previous-draft-display": {
+    "passed": true,
+    "reason": "Instead of expresses replacement of the displayed value; database, migration and data-transfer prohibitions remain intact.",
+    "answer_sha256": "a11536f3a195ce6752165f6c5a1ad4886a13984b61886339f8b94d51130b4ff5"
+  },
+  "v21-previous-draft-versions": {
+    "passed": true,
+    "reason": "Both content variants and opposite permissions are preserved; the shared student recipient is clear from the adjacent clauses.",
+    "answer_sha256": "4e9f0058469f0a462271746e517afd58896040f233d8ad4d36b71fabf9c4a316"
+  },
+  "v21-previous-draft-reallow": {
+    "passed": true,
+    "reason": "The final instruction permits the requested curator transfer and retains both attributes; it does not restore the former ban.",
+    "answer_sha256": "6f83deb47f0b04c40b0056013a2a92882decaad1c36d79615517b5fc3d4a7b2a"
+  },
+  "v21-previous-draft-token": {
+    "passed": false,
+    "reason": "Moves single-use scope from the code to receipt of the key and attaches lifetime ambiguously to the key. The requested code lifetime and reuse restriction are not stated reliably.",
+    "answer_sha256": "07a8259b199cffe90ffea0b1ec8871a20681ffe3f87447d6f8a72df14013b1a3"
+  },
+  "v21-previous-draft-answered-format": {
+    "passed": true,
+    "reason": "Retains manual ODS export, rejects automation and does not reopen the resolved format question; PDF was explicitly rejected.",
+    "answer_sha256": "8c1547ab227121811dc78aad1ce6b646435bad10fb289458050ddac7889c2a06"
+  },
+  "v21-previous-draft-recipient": {
+    "passed": false,
+    "reason": "Omits the explicit no-send and no-automatic-previous-recipient restrictions. Preparing a draft and asking the recipient does not preserve both prohibitions.",
+    "answer_sha256": "067c8fc473088b253876c5f41092d39902875532b27bc36632ccc8bc52f68582"
+  },
+  "v21-previous-draft-delete-undo": {
+    "passed": true,
+    "reason": "Deletes only fax_line and retains work_line and home_line after the scoped cancellation.",
+    "answer_sha256": "3227595cd3b373ba95af94aff666658cf4908a2ed3b08e89607445e1b6010f64"
+  },
+  "v21-previous-draft-return": {
+    "passed": true,
+    "reason": "Retains returned-book count and hidden reader names and excludes the separate chair project.",
+    "answer_sha256": "0e74d1911fca119fbc45032bda8590b3961330c91dc70645906a9170e7177959"
+  },
+  "v21-previous-draft-label-colour": {
+    "passed": false,
+    "reason": "Omits the required exact section name and adds an unrequested content-preservation requirement. Color and address alone are insufficient.",
+    "answer_sha256": "ef6c5d5f7152c0293ab3e91223df9810dae49556a7ab87d52c37b2fc4705257f"
+  },
+  "v21-previous-draft-proposal": {
+    "passed": true,
+    "reason": "Retains city display and hidden phone, rejects the proposed INN, and introduces no additional fields.",
+    "answer_sha256": "8c1de9c11440575631357f0a5d39b1ac0f39a2607f7d5928ca8ebf7c28055081"
+  },
+  "v21-previous-draft-unset-lifetime": {
+    "passed": true,
+    "reason": "Retains single use, equipment-receipt purpose, login exclusion and the unresolved lifetime question; correctly states 45 seconds was not selected.",
+    "answer_sha256": "b08503eb39c0485b387d4dc621443639f67e7b72ce6ed714c61594134c780647"
+  }
+}

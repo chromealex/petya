@@ -1,0 +1,25 @@
+{
+  "status": "failed_infrastructure",
+  "process_exit_code": 1,
+  "last_logged_step": 112,
+  "planned_steps": 1361,
+  "failure": "METAL command buffer discarded: victim of GPU error/recovery",
+  "macos_diagnostic": {
+    "timestamp": "2026-11-06 02:45:04 +0300",
+    "os_version": "macOS 15.6 (24G84)",
+    "process_name": "Python",
+    "signature": 579,
+    "restart_reason": 4,
+    "restart_reason_desc": "firmware-detected lockup"
+  },
+  "cause": "Underlying cause unconfirmed. The OS report does not establish memory exhaustion, bad training examples or a model-quality regression.",
+  "last_checkpoint_step": 16,
+  "checkpoint_sha256": "5a1f13c61f2565ee9f84c07efc95629bea39302834714d84596b80310cb2b4d4",
+  "checkpoint_hash_reverified": true,
+  "final_adapter_saved": false,
+  "retention_evaluation_started": false,
+  "training_protocol_sha256": "fdb54b04481650f0dde8115b86ba6d3bdedf4914aaab2def0cf4d84e5b486c30",
+  "log_sha256": "c23987b1e1462323ab7ea8723764313f8bb72d0c4434d955ae370763df4d2fb2",
+  "related_upstream_issue": "https://github.com/ml-explore/mlx/issues/3267",
+  "upstream_limit": "The report concerns ImpactingInteractivity on different OS/MLX versions; it is not a confirmed diagnosis or validated mitigation for this firmware lockup. No environment workaround has been applied."
+}

@@ -1,0 +1,68 @@
+{
+  "training_lock": "/tmp/peter-v22-repair/checkpoints/writer.lock",
+  "source_hashes": {
+    "tests/fixtures/requirements-draft-v22/repair-protocol.json": "d483f9846a7e64589bc014cd878ec45fc70cb3ec821f11bd7139fc7c8b7ae4a8",
+    "tests/fixtures/requirements-draft-v22/queue_repair_retention.py": "49295b4533242a3efae4bfd7039592357b46c6a9085ac5c6f118109056bf40c4",
+    "tests/fixtures/requirements-draft-v21/verify_artifact.py": "b51d0f2538d11d1178a31ff2ee486fe6140d3911a6b55f47ffea30ca26c9cb7b",
+    "tests/fixtures/requirements-draft-v21/verify_continuation.py": "17480f3214d906adb195c1ecb385cb6b4d4309ad86f3cd1ea39faa40be5a6330",
+    "tests/fixtures/requirements-draft-v21/train_checkpointed.py": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+    "tests/fixtures/requirements-draft-v21/checkpoint.py": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549",
+    "tests/fixtures/requirements-draft-v8/evaluate.py": "6b8c01a05adc5fea462de4c090d0a4ac9d376007124ee6d396c3c39d3c72e287",
+    "tests/fixtures/requirements-draft-v8/scoring.py": "c11b8e892cdb7402b5d23edf5f787dd209a103109f78eb2607cf251e067dce7c"
+  },
+  "new_outputs": [
+    "/tmp/peter-v22-repair/adapter-verification.json",
+    "/tmp/peter-v22-repair/continuation-verification.json",
+    "/tmp/peter-v22-repair/acquisition.jsonl",
+    "/tmp/peter-v22-repair/acquisition.manifest.json"
+  ],
+  "stages": [
+    {
+      "name": "Verify completed artifact",
+      "arguments": [
+        "-B",
+        "tests/fixtures/requirements-draft-v21/verify_artifact.py",
+        "/tmp/peter-v22-repair/adapter",
+        "--protocol",
+        "tests/fixtures/requirements-draft-v22/repair-protocol.json",
+        "--output",
+        "/tmp/peter-v22-repair/adapter-verification.json"
+      ]
+    },
+    {
+      "name": "Bind final checkpoint and Adam state",
+      "arguments": [
+        "-B",
+        "tests/fixtures/requirements-draft-v21/verify_continuation.py",
+        "--adapter",
+        "/tmp/peter-v22-repair/adapter",
+        "--checkpoints",
+        "/tmp/peter-v22-repair/checkpoints",
+        "--trainer",
+        "tests/fixtures/requirements-draft-v21/train_checkpointed.py",
+        "--helper",
+        "tests/fixtures/requirements-draft-v21/checkpoint.py",
+        "--data",
+        "tests/fixtures/requirements-draft-v22/repair-train.jsonl",
+        "--parent",
+        "tests/fixtures/requirements-draft-v22/adapter",
+        "--output",
+        "/tmp/peter-v22-repair/continuation-verification.json"
+      ]
+    },
+    {
+      "name": "Capture 801 familiar cases",
+      "arguments": [
+        "-B",
+        "-u",
+        "tests/fixtures/requirements-draft-v8/evaluate.py",
+        "/Users/aleksandrfeer/.cache/huggingface/hub/models--mlx-community--Qwen3.5-9B-4bit/snapshots/8b2b98c00a6b4d291155e4890773ca8f769aee53",
+        "tests/fixtures/requirements-draft-v22/acquisition.jsonl",
+        "/tmp/peter-v22-repair/acquisition.jsonl",
+        "--adapter",
+        "/tmp/peter-v22-repair/adapter"
+      ]
+    }
+  ],
+  "limits": "Waits on the existing trainer lock; never starts or restarts training. No candidate selection or independent holdout inference. Full semantic review still required."
+}

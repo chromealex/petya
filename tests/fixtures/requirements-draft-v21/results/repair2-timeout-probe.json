@@ -1,0 +1,19 @@
+{
+  "status": "bounded_probe_passed",
+  "completed_step": 128,
+  "checkpoint_sha256": "06a8c9ec212aff1950f1167d46dbee94aceda201b77d1694dc027dc7d3c6a547",
+  "previous_checkpoint": "step-00000016.safetensors",
+  "tensor_count": 771,
+  "adapter_tensor_count": 256,
+  "optimizer_step": 128,
+  "finite_tensors": true,
+  "training_identity_unchanged": true,
+  "initial_16_losses_unchanged": true,
+  "log_sha256": "c8f5b19b692840b711ca6daa0a797d6762907e58618ba074fa9e8f880b272b43",
+  "elapsed_training_seconds": 388.52543795801466,
+  "peak_memory_bytes": 40257804380,
+  "environment_override": {
+    "AGX_RELAX_CDM_CTXSTORE_TIMEOUT": "1"
+  },
+  "limits": "One bounded continuation succeeded. No causal fix, sustained stability or model quality claim. Final training and all retention and independent checks remain required."
+}

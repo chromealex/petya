@@ -1,0 +1,25 @@
+{
+  "adapter_sha256": "f0f9bc277c9c6f3fc96d0e741ac9611fbadf928c56dcab700c9b1fcacf45e3c5",
+  "files": {
+    "repair2-acquisition.jsonl": "a07c1dffd5431886546c5274184debd2fb07ef1324ead04db4a65d889111fb1e",
+    "repair2-acquisition.manifest.json": "7ac714f64699a673f51827f95d51f1ecc224ca7331ccf2bd6411f8cfa555987b",
+    "repair2-acquisition-review.json": "464a170619cca254fcb4ca6d2d34e24c84ac13efb9ec0f77b278e1226f87315f",
+    "repair2-acquisition-summary.json": "8c8b5fea814b82bcafaa50363ce72c687e7299f9c561761aea67ddebb2beeeb1"
+  },
+  "result": {
+    "total": 737,
+    "exact": 725,
+    "passed": 735,
+    "failures": [
+      "v21-previous-draft-literal",
+      "v21-previous-draft-unset-lifetime"
+    ]
+  },
+  "targeted_previous_failures_recovered": [
+    "v21-previous-draft-sort",
+    "v21-previous-draft-answered-format",
+    "v21-previous-draft-proposal"
+  ],
+  "selection": "Rejected: two familiar regressions remain. Do not run candidate holdout.",
+  "scope": "Non-blind retention assessment; not independent improvement or release qualification."
+}

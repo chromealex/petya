@@ -1,0 +1,40 @@
+{
+  "parent": "adapter",
+  "parent_sha256": "dd9f7986513c53b05994abf0e48d2a2ca6ed0bc5e5fa46ee764b1fb61c7dda85",
+  "training_file": "repair-train.jsonl",
+  "steps": 1085,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 1e-06,
+  "hashes": {
+    "repair-train.jsonl": "fa1176e605e2e74df4c56a0fd4f6ce8d512b2e01d49fd996a452b95a03f508de",
+    "train.jsonl": "acd7a084e651e325e6f0f424b671a851c6af32190ad904089ebd2d460920623f",
+    "acquisition.jsonl": "5eb24b2456249661f08651b53b5614fb72746781d42689ce32ecb0f35e42a9bf",
+    "fresh-drafts.jsonl": "df6255986015fb4ed6eacd284f036998fecc54b49a3e6a49e5472473736b0516",
+    "check.jsonl": "1c0237125f907cb95e3078406b981782c39535396148df297ce8b6c150a60a27"
+  },
+  "inspected_failure_ids": [
+    "v19-revoked-all",
+    "v19-cancel-second",
+    "v19-exact-identifier",
+    "v20-independent-field-cancels",
+    "v20-return-from-other-topic",
+    "v20-destination-not-guessed",
+    "v20-quoted-ban-not-action",
+    "v20-restricted-version"
+  ],
+  "exposures": {
+    "v19-revoked-all": 13,
+    "v19-cancel-second": 13,
+    "v19-exact-identifier": 13,
+    "v20-independent-field-cancels": 16,
+    "v20-return-from-other-topic": 16,
+    "v20-destination-not-guessed": 16,
+    "v20-quoted-ban-not-action": 16,
+    "v20-restricted-version": 16
+  },
+  "recipe": "Unchanged 989-presentation rehearsal plus 12 extra copies of each of eight inspected failure targets; no reference rewriting.",
+  "gate": "All 669 familiar cases must pass before committed selection and any candidate fresh inference. The original 68 independent cases remain untouched.",
+  "limits": "Synthetic non-blind repair. Additional training and exposure weights change together; no isolated causal claim or release qualification."
+}

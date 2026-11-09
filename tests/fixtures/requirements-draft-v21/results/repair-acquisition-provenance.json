@@ -1,0 +1,14 @@
+{
+  "artifact_commit": "285d7e6",
+  "artifact_sha256": "1828551b4a06eea7d38475a098daeebd07f27124a149e8c076f67747b9bda3da",
+  "protocol_sha256": "d8de7868e525c0406bed4860658307e472b65ad20d180ecc15a893144c795d00",
+  "data_sha256": "01b1345b2c67b80205c1f76e3436c114f0c84b5cf99ce60c479ac34b9ee5ba9c",
+  "files": {
+    "repair-acquisition.jsonl": "3e4cf4e0c0c85cfa182432cf0438b53d25c35bd8c09d7e13c3213a5cffa9bcd5",
+    "repair-acquisition.manifest.json": "242f9cd3dccf4df6118170b0c6f97fd5d46ebb639c1289e4abe08a0798d013db",
+    "repair-acquisition-review.json": "363cd791ef790e122cfb94c9951da7bf2fbc142eba2aac17044dbb97cf03e1d4",
+    "repair-acquisition-summary.json": "56bbac9b0b04143a294b60e5e340f628e5288d3af18fea856b8d95d0cb704aa1"
+  },
+  "review": "Non-blind semantic review of all 21 nonexact drafts against their complete source dialogue. Numeric/general exact scoring and literal checks are recomputed.",
+  "decision": "Retention failed: no selection or candidate fresh inference. Nine repaired cases and three regressions; no release qualification."
+}

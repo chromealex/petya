@@ -1,0 +1,9 @@
+Resumed 16 steps with Adam state
+Step 32 loss 0.01823
+Step 48 loss 0.03231
+Step 64 loss 0.05143
+Step 80 loss 0.01166
+Step 96 loss 0.0134
+Step 112 loss 0.01288
+Step 128 loss 0.01009
+Checkpoint 128 saved

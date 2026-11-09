@@ -1,0 +1,22 @@
+{
+  "adapter": "repair-adapter",
+  "adapter_sha256": "9d6ff318cafa9466fdee69a36f7fac3e4c640352cf203e058d0a0f139b0bc4d7",
+  "retention": {
+    "total": 669,
+    "exact": 660,
+    "passed": 669,
+    "failures": []
+  },
+  "evidence_sha256": {
+    "results/repair-acquisition.jsonl": "e513a859b7c70f3913b3c8209739e00bbaffe452524c6f81cf9ef3bff8aba266",
+    "results/repair-acquisition.manifest.json": "ac01b4feb44474df809447b8e416b255823d78ad0789e5f887b7200ba45f743f",
+    "results/repair-acquisition-review.json": "e3059f2cde6c54af9f397b7e297c6b32710e4dba57f33ad238587f399d3afd44",
+    "results/repair-acquisition-summary.json": "5cc643614ba94b86990df7fbf7ab6c361cdb2c5eb36e541b53714d7777ae1bc5",
+    "check.jsonl": "1c0237125f907cb95e3078406b981782c39535396148df297ce8b6c150a60a27",
+    "fresh-drafts.jsonl": "df6255986015fb4ed6eacd284f036998fecc54b49a3e6a49e5472473736b0516",
+    "repair-protocol.json": "16d809b1beec1066482a535e819f2f70da392713c513c154c151927775faa307"
+  },
+  "candidate_fresh_inference_started": false,
+  "release_ready": false,
+  "decision": "Selected for frozen independent evaluation only; not released or installed. No candidate fresh answers have been inspected."
+}

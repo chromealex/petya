@@ -1,0 +1,12 @@
+{
+  "files": {
+    "base-check.jsonl": "1498f15b0c73ae4ee1f9b8681afb18511d3311e7ba1a7511e769a33faa60b9b1",
+    "base-check.manifest.json": "2189f83f6bb5dffecc6481699c5cc5323811c6e96b122b931be9cd62e77a126f",
+    "base-drafts.jsonl": "c270c67ab699b5586ece2aeff9dc15c517618b6d489286c8d5b47557a21c7b47",
+    "base-drafts.manifest.json": "3239b8fda9320cf7a453a8df1d0652cdd3e53b7d7004a3fca2541e7fe1ffec06",
+    "base-drafts-review.json": "0078e24ab15bd2e43982f4ead0b5fc5dcbe8427006844af5c12fb1ab1eaf4b1e",
+    "base-diagnostic-summary.json": "24cc999084f82c5830b5b595b1ca03a2f6d43047ac8187e8fabadca07e82f194"
+  },
+  "adapter": null,
+  "base_provenance_sha256": "86fb5cab5327a014de6eae2d62c565c63b16b6fcb194a57123fd8b400994d000"
+}

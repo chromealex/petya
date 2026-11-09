@@ -1,0 +1,14 @@
+{
+  "artifact_commit": "08472a0",
+  "artifact_sha256": "655079664b43830a2a64254f2647f10f0d5d9ec7322932fbf4f32f12a56e6008",
+  "protocol_sha256": "975a3c31b3cb3e17e75d50a0c57b901a36e56041102dadf7dc47cdac9a93f3ca",
+  "data_sha256": "01b1345b2c67b80205c1f76e3436c114f0c84b5cf99ce60c479ac34b9ee5ba9c",
+  "files": {
+    "acquisition.jsonl": "9254561c39d232f3b1121a01fa93470be550e692107a0d302b5423f35d3af05d",
+    "acquisition.manifest.json": "2425729cb846169400946ae0d3a5411cc778661e175e3ee934c2fb754ae604c2",
+    "acquisition-review.json": "496a81332c69431595d14c414caa6d87cfebb4c3f1de917f347d849741bef0ea",
+    "acquisition-summary.json": "abbd161da917a7ce4d51038e17b66dda1568ad7c2efbe5b515afe122a0665b41"
+  },
+  "review": "Non-blind semantic review of all 32 nonexact drafts against the complete source dialogue. Numeric and general answers require exact scoring. Literal checks apply to every answer.",
+  "decision": "Retention failed: do not select this adapter for the frozen fresh holdout. No candidate holdout inference performed."
+}

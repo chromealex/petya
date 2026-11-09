@@ -1,0 +1,116 @@
+Resumed 16 steps with Adam state
+Step 32 loss 0.00138
+Step 48 loss 0.00387
+Step 64 loss 0.00278
+Step 80 loss 0.00071
+Step 96 loss 0.00816
+Step 112 loss 0.001
+Step 128 loss 0.00091
+Checkpoint 128 saved
+Step 144 loss 0.00086
+Step 160 loss 0.03081
+Step 176 loss 0.00517
+Step 192 loss 0.00289
+Step 208 loss 0.00298
+Step 224 loss 0.00436
+Step 240 loss 0.00071
+Step 256 loss 0.00081
+Checkpoint 256 saved
+Step 272 loss 0.00066
+Step 288 loss 0.00191
+Step 304 loss 0.00111
+Step 320 loss 0.00364
+Step 336 loss 0.0015
+Step 352 loss 0.00067
+Step 368 loss 0.00044
+Step 384 loss 0.00059
+Checkpoint 384 saved
+Step 400 loss 0.0007
+Step 416 loss 0.01034
+Step 432 loss 0.00046
+Step 448 loss 0.00098
+Step 464 loss 0.00083
+Step 480 loss 0.00726
+Step 496 loss 0.00138
+Step 512 loss 0.00148
+Checkpoint 512 saved
+Step 528 loss 0.00058
+Step 544 loss 0.00189
+Step 560 loss 0.00467
+Step 576 loss 0.00201
+Step 592 loss 0.00054
+Step 608 loss 0.00041
+Step 624 loss 0.0012
+Step 640 loss 0.00082
+Checkpoint 640 saved
+Step 656 loss 0.0007
+Step 672 loss 0.00079
+Step 688 loss 0.00044
+Step 704 loss 0.0005
+Step 720 loss 0.00105
+Step 736 loss 0.00234
+Step 752 loss 0.00095
+Step 768 loss 0.00073
+Checkpoint 768 saved
+Step 784 loss 0.00113
+Step 800 loss 0.00329
+Step 816 loss 0.00274
+Step 832 loss 0.00323
+Step 848 loss 0.00037
+Step 864 loss 0.00144
+Step 880 loss 0.00103
+Step 896 loss 0.00168
+Checkpoint 896 saved
+Step 912 loss 0.00079
+Step 928 loss 0.00077
+Step 944 loss 0.00059
+Step 960 loss 0.00084
+Step 976 loss 0.00109
+Step 992 loss 0.0009
+Step 1008 loss 0.0021
+Step 1024 loss 0.00187
+Checkpoint 1024 saved
+Step 1040 loss 0.00215
+Step 1056 loss 0.00032
+Step 1072 loss 0.00151
+Step 1088 loss 0.00012
+Step 1104 loss 0.00052
+Step 1120 loss 0.00068
+Step 1136 loss 0.00082
+Step 1152 loss 0.00558
+Checkpoint 1152 saved
+Step 1168 loss 0.00159
+Step 1184 loss 0.00114
+Step 1200 loss 0.00104
+Step 1216 loss 0.00224
+Step 1232 loss 0.01922
+Step 1248 loss 0.00244
+Step 1264 loss 0.00117
+Step 1280 loss 0.00026
+Checkpoint 1280 saved
+Step 1296 loss 0.00076
+Step 1312 loss 0.00272
+Step 1328 loss 0.00034
+Step 1344 loss 0.00061
+Step 1360 loss 0.00072
+Step 1376 loss 0.00035
+Step 1392 loss 0.00866
+Step 1408 loss 0.00319
+Checkpoint 1408 saved
+Step 1424 loss 0.00106
+Step 1440 loss 0.00075
+Step 1456 loss 0.00048
+Step 1472 loss 0.00207
+Step 1488 loss 0.00122
+Step 1504 loss 0.00074
+Step 1520 loss 0.00073
+Step 1536 loss 0.00099
+Checkpoint 1536 saved
+Step 1552 loss 0.00093
+Step 1568 loss 0.00074
+Step 1584 loss 0.00134
+Step 1600 loss 0.00079
+Step 1616 loss 0.00077
+Step 1632 loss 0.00083
+Step 1648 loss 0.00232
+Checkpoint 1653 saved

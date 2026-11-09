@@ -1,0 +1,102 @@
+{
+  "draft-payment": {
+    "passed": false,
+    "reason": "Conflates the revoked sending permission with a replaced field: code and amount are said to replace request code and permission. The payment document identity is also lost; correct no-send wording does not repair this invented field substitution.",
+    "answer_sha256": "3cb10e81446c24d39f72c4d06d5ef1b947c831b34a2e6d3bb3a916d7f54718bf"
+  },
+  "draft-copies": {
+    "passed": false,
+    "reason": "Invents differentiation by explanatory fields despite required identical schemes, and changes permission to transmit to the surveyor into permission for the surveyor to prepare and accept.",
+    "answer_sha256": "66948077ff9899c117c84bf0829097144760c96ab7508ba2095e2d9a9b021ad8"
+  },
+  "draft-two-edits": {
+    "passed": false,
+    "reason": "Reverses both independent decisions: applies canceled incoming_tag to accepted_tag replacement and cancels still-approved owner_tag to holder_tag replacement.",
+    "answer_sha256": "373a86a1582134b87bbc31b0e134ce6d972bc2a70610ac18ca2e4ba2901de2be"
+  },
+  "draft-addition": {
+    "passed": false,
+    "reason": "Contradicts retained Region by saying the separate Area field is added instead of Region. Keeping Region in the preceding sentence does not remove the contradiction.",
+    "answer_sha256": "21e8e4b9697f244e69cd1610eef9d6374842dcabec710e2381343429dea4df01"
+  },
+  "draft-literal": {
+    "passed": true,
+    "reason": "Preserves both exact identifiers and forbids normalization, ё substitution and zero removal. This retains the original menu and document names without inventing changes.",
+    "answer_sha256": "253410580a243507acc0a2e5f90e5f56d082e8dd414be9b0d1e89f4c94150e96"
+  },
+  "draft-export": {
+    "passed": true,
+    "reason": "Preserves manual XML machine-list export without ZIP and explicitly says fields are unselected. The sole field-selection question uses default wording but actually selects no defaults or proposed age/cost fields; the unresolved decision is preserved.",
+    "answer_sha256": "6e991609e04ceb63313966b625db0577bb13580e310932e3343689417aba9a3a"
+  },
+  "draft-sort": {
+    "passed": true,
+    "reason": "Includes the complete correct four-element descending result -11, -11, -28, -46, the descending rule and no duplicate removal. The result is present in parentheses rather than a separately labeled result sentence.",
+    "answer_sha256": "3feb36fd6ecba279b1e12a411aba09d331b732eb130edf71bec871f15e2adc88"
+  },
+  "draft-pressure": {
+    "passed": false,
+    "reason": "Malformed JSON with unescaped newlines and repeated text, and incorrectly excludes the lower -52 boundary which the user explicitly retains.",
+    "answer_sha256": "b012c75cef958200d0f5148c3a129027e33c2b9ce197e2a09168d6aac999d551"
+  },
+  "draft-quote": {
+    "passed": true,
+    "reason": "Preserves the quoted example and explicitly permits transmitting the manual to the reviewer. Awkward final wording still says not to delete the example; it creates no ban on transmitting the manual.",
+    "answer_sha256": "ca89053aec37db04b9cdd662aeb3e4ddc11c88c9eba047d3a7d0c483066f352d"
+  },
+  "draft-display": {
+    "passed": true,
+    "reason": "Uses delivery_ref instead of booking_ref in the interface and preserves database structure, no migration and no data transfer. Instead-of preserves replacement rather than displaying both.",
+    "answer_sha256": "709c650eff9639b369ad1a299894c14ea46d0c13dd51c2628a001c49e7948f11"
+  },
+  "draft-versions": {
+    "passed": true,
+    "reason": "Retains full version with commission number and comments, its prohibition for the student, and shortened version with only number and allowed sending. The shared recipient remains the student; no competing recipient is introduced.",
+    "answer_sha256": "cc55dca2dd050110fbd6ee2d0b4aa786156fb4ce27dd7514a220e3c99d05f02c"
+  },
+  "draft-reallow": {
+    "passed": true,
+    "reason": "Explicitly allows transfer to the curator and retains group number and period. The superseded ban is not restored; the heading is broad but consistent.",
+    "answer_sha256": "b362c30de10ed6da9dbb26893cfffb17e8d980f8cd043cd407646829b7bd9cc4"
+  },
+  "draft-token": {
+    "passed": false,
+    "reason": "Changes one-use code into a ban on repeated key acquisition and attaches the 190-second lifetime ambiguously to the key. The request forbids code reuse, not all repeated acquisition of a key; the authorization separation does not fix the scope change.",
+    "answer_sha256": "043c18dad9adad9ba138ef32c94a00761f4fe3076af2c22693b022333ac25c2b"
+  },
+  "draft-answered-format": {
+    "passed": true,
+    "reason": "Preserves manual contract-list export in ODS without automation and correctly omits resolved format questions.",
+    "answer_sha256": "b8fd484b2ded4cb791af03a52bd71020c2bb7ac13870837538e55bedea030823"
+  },
+  "draft-recipient": {
+    "passed": false,
+    "reason": "Omits the explicit no-send limitation and no automatic choice of previous customer. The recipient question restricts choice to two assistant proposals without user agreement; saying draft and unselected does not preserve all explicit restrictions.",
+    "answer_sha256": "e153eb6ffcab349ef178dc621eb06318fbff3407cdefd08b260ef9b0d39c4ed1"
+  },
+  "draft-delete-undo": {
+    "passed": true,
+    "reason": "Deletes fax_line only and keeps home_line and work_line. Correctly respects the independent deletion cancellation.",
+    "answer_sha256": "1af16b72af261ab65806ae5e0e51fd457e36f2c9854ebd274e6d9b8673954767"
+  },
+  "draft-return": {
+    "passed": true,
+    "reason": "Preserves returned-book count and hidden reader names, and excludes chairs and the other project. Does not reverse project scope or add requirements.",
+    "answer_sha256": "40a82aa82f10bf26a7d37e05f1e353e815066198a2a92c0e8acbeb6c09299cfa"
+  },
+  "draft-label-colour": {
+    "passed": false,
+    "reason": "Required exact name appears only in the heading, not the description under the frozen literal rule. Also invents preservation of content, which was not discussed; orange icon and unchanged address alone are insufficient.",
+    "answer_sha256": "0e5972509b31cdc867ed185ecaae0f47fce48d011eec695024fe876cfd737c54"
+  },
+  "draft-proposal": {
+    "passed": true,
+    "reason": "Preserves city display, hidden phone and excluded unapproved tax-ID field. Introduces no other fields or questions.",
+    "answer_sha256": "8c1de9c11440575631357f0a5d39b1ac0f39a2607f7d5928ca8ebf7c28055081"
+  },
+  "draft-unset-lifetime": {
+    "passed": true,
+    "reason": "Preserves single-use equipment-receipt code, excludes profile login, leaves duration unagreed and asks only that unresolved question. Does not invent 45 seconds or an indefinite lifetime.",
+    "answer_sha256": "220c3672d1dc6aaad920abf8205e0243d1dcc3422b496e573b1ad6cc3c42430d"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "draft-payment": {
+    "passed": true,
+    "reason": "Preserves replacement code and amount in an unsent draft for the contractor; generic heading does not contradict the document.",
+    "answer_sha256": "5a9582586e4fd8519bfd65bc8914a0e6f783201368f9b1115c1e021e0a096b82"
+  },
+  "draft-copies": {
+    "passed": true,
+    "reason": "Preserves identical schemes, delivery to the surveyor and the ban on delivery to the foreman.",
+    "answer_sha256": "d0163bed8800998599507d2d3374bd54e473a4f286f255efe5404b39156e20d3"
+  },
+  "draft-two-edits": {
+    "passed": false,
+    "reason": "Preserves the wrong old field and invents an accepted_tag to holder_tag replacement; does not retain the approved second replacement.",
+    "answer_sha256": "5d3a7226bcfd8de386890a87bb2b2d375016cfbf53740e37e6a07c6ea51f43db"
+  },
+  "draft-addition": {
+    "passed": true,
+    "reason": "Keeps Region and District and adds Area separately, retaining literal field names and no shortening.",
+    "answer_sha256": "971c133bbc29a9caf3636124950e3744f6b13dcf5baf6ef9ee0b0078057807ee"
+  },
+  "draft-literal": {
+    "passed": true,
+    "reason": "Keeps both exact identifiers and the no-normalization/no-renaming requirement.",
+    "answer_sha256": "69a0146545877a388e5939660d53e2dc80bbac9a4527acc14188eece3fc37af5"
+  },
+  "draft-export": {
+    "passed": false,
+    "reason": "Keeps unapproved proposed columns as defaults despite the explicit rejection.",
+    "answer_sha256": "473738d36baba888b471b7c3b3c39c75b30a44afd732e59795ac32f9b7a5f344"
+  },
+  "draft-sort": {
+    "passed": false,
+    "reason": "Repeats the unsorted input and omits the explicitly requested sorted result.",
+    "answer_sha256": "4f748f0e9a9faa79acaafc3abbfbd834bddde8e3a65618793883ab163044fe3c"
+  },
+  "draft-pressure": {
+    "passed": false,
+    "reason": "Contradicts itself on whether -52 is included and switches the required Russian draft to English.",
+    "answer_sha256": "6589ce689a51ed64543db80e4c029c9db90d3b6e2b8bef86b16e9e323cd9bbcc"
+  },
+  "draft-quote": {
+    "passed": true,
+    "reason": "Preserves the quoted example while explicitly allowing delivery of the manual to the reviewer.",
+    "answer_sha256": "c8821d0eb65c01bd9711c8e3d60f51e1cfc4b4494a168cdab6f86f785b56c111"
+  },
+  "draft-display": {
+    "passed": true,
+    "reason": "Preserves display-field replacement and bans on database changes, migration and transfer.",
+    "answer_sha256": "1fbc20b2bcedccf682581d77f42963925dd79491bd70fa6f085b4f500916605a"
+  },
+  "draft-versions": {
+    "passed": true,
+    "reason": "Preserves the full-version ban, short-version permission and correct content; same recipient is inherited in the paired statement.",
+    "answer_sha256": "74527a31613a4bed910a2ea5704403c67219e6864c5fda65a253c91991240422"
+  },
+  "draft-reallow": {
+    "passed": true,
+    "reason": "Preserves the curator delivery permission and both fields; awkward verb form does not change permission.",
+    "answer_sha256": "d300e16aa1c67ed3aa264b3f01981b2b4807259ce9db9237348c7a1c3ab182be"
+  },
+  "draft-token": {
+    "passed": true,
+    "reason": "Retains 190 seconds, single use, key-only scope and exclusion of authorization.",
+    "answer_sha256": "ff621884b47f69afcd241af1c027435413f3f42e00dd05b956a287daeca1dec6"
+  },
+  "draft-answered-format": {
+    "passed": false,
+    "reason": "The heading is the incomplete word Exportir rather than a meaningful task title; description is also awkward, although ODS and manual mode survive.",
+    "answer_sha256": "c928ea6e2b35fdbf32b453c2dd28f5ac8ce902d7d97c7b6b7382195debc996ce"
+  },
+  "draft-recipient": {
+    "passed": false,
+    "reason": "Replaces the explicit restriction on automatically choosing the previous customer with a restriction on the inspector; the agreed exclusion is not preserved.",
+    "answer_sha256": "e1544de027145c6947c5378bfbde3df7c6b6e7312ca58042bdee7906fb9af545"
+  },
+  "draft-delete-undo": {
+    "passed": true,
+    "reason": "Correctly deletes fax_line and preserves home_line and work_line.",
+    "answer_sha256": "cddfd867112ea57c1378bbfdb1372bf25233c7f69a70657216bf83fd938df1b1"
+  },
+  "draft-return": {
+    "passed": false,
+    "reason": "Reverses the scope exclusion: says not to include furniture tasks in the other project instead of excluding that other project from the panel task.",
+    "answer_sha256": "6d886b161c7a66830eb396206a117ca07524c9174f8ae9e95be51a16ab2ab74e"
+  },
+  "draft-label-colour": {
+    "passed": false,
+    "reason": "Performs the explicitly revoked rename, although color and address are correct.",
+    "answer_sha256": "9b532b8ef95601808b234fa9cecf528787919750cd9e5a5f6998ecc0c2021bdc"
+  },
+  "draft-proposal": {
+    "passed": true,
+    "reason": "Shows city, hides phone and excludes unapproved INN; no new fields invented.",
+    "answer_sha256": "4303ff39feb7914df52389830a624a26ca714a5d65d88f8a46ed74b9ee423f7c"
+  },
+  "draft-unset-lifetime": {
+    "passed": false,
+    "reason": "Correct unresolved lifetime but adds the false statement that indefinite lifetime was not discussed; it was explicitly proposed and rejected.",
+    "answer_sha256": "eb68e5f1346ad4e0467f3ac7a42e7265ab66b96cf99f49bbbc70a1301e8966e1"
+  }
+}

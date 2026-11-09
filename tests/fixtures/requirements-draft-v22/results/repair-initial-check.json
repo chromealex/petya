@@ -1,0 +1,12 @@
+{
+  "steps": 16,
+  "checkpoint_sha256": "76bd184b457683ae231b7ee5627c41bad9c7cd4084469316c4bafa192362287f",
+  "finite_tensors": 771,
+  "adam_step": 16,
+  "training_sha256": "72b9fd47c7840fc386d3deec55311b5d7f5ca9dba02ef46f1d1aef27beb0a3e9",
+  "parent_sha256": "88525c608fd5beb1ea56892152b880b841f9eda500c0974927a4de051f86d128",
+  "deterministic_order_verified": true,
+  "protocol_and_source_hashes_verified": true,
+  "parent_shapes_and_dtypes_verified": true,
+  "scope": "Initial checkpoint integrity only, not answer quality."
+}

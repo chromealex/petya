@@ -1,0 +1,102 @@
+{
+  "draft-payment": {
+    "passed": false,
+    "reason": "Invents interface, linkage and planned-payment questions; changes the requested payment draft into a task in a particular draft status.",
+    "answer_sha256": "7eb495b280d4b0ecbbd55fc0475ef92f644dedffcdcd1a72f11e7f2a4a685bdb"
+  },
+  "draft-copies": {
+    "passed": false,
+    "reason": "Contradicts active transmission permission in the heading, invents access blocking and reopens rejected explanation content.",
+    "answer_sha256": "bc8f4c1024ba815fd4646f0b738ad11bd3204b926b78fbb711d6247f008c3a30"
+  },
+  "draft-two-edits": {
+    "passed": false,
+    "reason": "Still orders the canceled first replacement, invents that it was already implemented and reopens resolved decisions.",
+    "answer_sha256": "4fc8608ce3475ca96381779d2b311b404f0937858b6fda623d0e9b0f3879fcd4"
+  },
+  "draft-addition": {
+    "passed": false,
+    "reason": "Replaces Region with Area despite explicit rejection and invents field-link validation.",
+    "answer_sha256": "7c08b2b07e8c7c37fe445b6f0fb648f94f424b8b7dc3d11abe21889286bcf7e9"
+  },
+  "draft-literal": {
+    "passed": false,
+    "reason": "Explicitly changes ё to е and asks to confirm that incorrect change despite exact-name preservation.",
+    "answer_sha256": "33117496f6763f2057d0493a623c1bd0b82b64326e5cda8d9f8522bcff82a24c"
+  },
+  "draft-export": {
+    "passed": false,
+    "reason": "Invents an already agreed XML schema and default storage destination.",
+    "answer_sha256": "5e5c2e081400e0b389bd07455902995decfdc87ecaf627d5aebf830ed866ff6b"
+  },
+  "draft-sort": {
+    "passed": false,
+    "reason": "Includes the correct ordered list but adds unresolved implementation and output-format questions absent from the agreed request.",
+    "answer_sha256": "828d302e91832fab8b9388f09183abf68c4938b5f05b7f5b7c2842351dc5ab09"
+  },
+  "draft-pressure": {
+    "passed": false,
+    "reason": "Truncated malformed JSON, contradictory admissible -52.5 example below the lower bound, and invented uncertainty over an explicit lower bound.",
+    "answer_sha256": "8116fe2cee7da080c24a19d4ca0c1d6325169096f13265dec2b5a46a1a21efc0"
+  },
+  "draft-quote": {
+    "passed": false,
+    "reason": "Treats the quoted prohibition as an instruction to remove or hide the example from the transmitted manual, contrary to the user.",
+    "answer_sha256": "5198c442f2b1150a52748f01d8ba44f6cd720a889d60d30058b1db5a4a4f0bb9"
+  },
+  "draft-display": {
+    "passed": true,
+    "reason": "Preserves replacement by delivery_ref only and explicit no database change, migration or transfer; no invented questions.",
+    "answer_sha256": "e62e94c2c77140e3c3ca7924a89647e331bb9ce4bf103a8af450609ef95928ad"
+  },
+  "draft-versions": {
+    "passed": false,
+    "reason": "Adds database, role, channel and confirmation questions despite a request to record the two already specified versions; recipient/sender wording is also ambiguous.",
+    "answer_sha256": "5ea33361242a18f141c05552ae1da71cddfc733deb8bb94aa3d9107f241b7c32"
+  },
+  "draft-reallow": {
+    "passed": true,
+    "reason": "Retains group number and period and explicitly removes the transmission ban for the curator without reopening it.",
+    "answer_sha256": "1ff6d0091e40b5a2c7c35816b979fba10759702ceb559810056e01758516caf7"
+  },
+  "draft-token": {
+    "passed": false,
+    "reason": "Changes the code for receiving a key into a single-use key, invents server generation and error behavior, and adds many implementation questions.",
+    "answer_sha256": "3b405e50621c1ae16f1888af48c339574d932c140fe1bde2d7b9549f1d660635"
+  },
+  "draft-answered-format": {
+    "passed": true,
+    "reason": "Preserves agreed ODS export, manual initiation and no automatic runs, with no resolved question reopened. Interface wording is consistent with manual application initiation.",
+    "answer_sha256": "1f6748c214710aa325551e39587984b268456505d11515e0f957bcda11008946"
+  },
+  "draft-recipient": {
+    "passed": false,
+    "reason": "Omits explicit no sending and no automatic previous-customer selection, invents exclusion of recipient names and adds an extra content question.",
+    "answer_sha256": "e018eaffbb4cfe379987fa42c3d23f9d512c9087bd8b1ade421f07da8f1e22c5"
+  },
+  "draft-delete-undo": {
+    "passed": false,
+    "reason": "Deletes the explicitly retained home_line, contradicts fax_line deletion and reopens resolved decisions.",
+    "answer_sha256": "45781ce53810b4196e4642a41c15ff440bcfc4129c8f6a47b39ec153e30f0a57"
+  },
+  "draft-return": {
+    "passed": false,
+    "reason": "Retains book count and hidden reader names but invents a reader list and masking implementation and omits explicit exclusion of the chair task.",
+    "answer_sha256": "1f021e8d46779d799e1000c630fafe7bc55a752e6a1cf2e29233b632ac0f3fb8"
+  },
+  "draft-label-colour": {
+    "passed": false,
+    "reason": "Applies the revoked rename to Получение-07.",
+    "answer_sha256": "f535bb74ca83b9491ca1d05ac2bd1aab5ff7ff4906863b5176660239a45f74ad"
+  },
+  "draft-proposal": {
+    "passed": false,
+    "reason": "Invents preservation of all other existing fields and values and does not retain the explicit exclusion of the proposed tax-ID field.",
+    "answer_sha256": "47b2d6727c549390ab7b26045611c560f53288710e1b444aae69e07c45015065"
+  },
+  "draft-unset-lifetime": {
+    "passed": false,
+    "reason": "Invents SMS delivery and an extra format/length question; only purpose, one-use and the unresolved duration were requested.",
+    "answer_sha256": "59a38fed676f9e2443739af54ead9b0b7959e468b2a892a0d97ed1640c68fa18"
+  }
+}

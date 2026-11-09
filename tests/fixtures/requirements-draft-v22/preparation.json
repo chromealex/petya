@@ -1,0 +1,36 @@
+{
+  "status": "data_prepared_training_not_started",
+  "parent": "../requirements-draft-v21/repair4-adapter",
+  "parent_sha256": "e4750435ed3c09b138b0cb735c227ce074e9377612b3b147a657a885531a12d0",
+  "inspected_failure_ids": [
+    "fresh-sort-1-1-1",
+    "fresh-sort-3-1-0",
+    "fresh-sort-3-1-1",
+    "fresh-cancel-first",
+    "fresh-cancel-second",
+    "fresh-copy-scope",
+    "fresh-code-versus-item",
+    "fresh-duration-open",
+    "fresh-exact-caption",
+    "fresh-display-only"
+  ],
+  "target_repairs": {
+    "v19-repeat": [
+      "257 \u0441\u0435\u043a\u0443\u043d\u0434\u0443",
+      "257 \u0441\u0435\u043a\u0443\u043d\u0434"
+    ],
+    "v20-repeat": [
+      "293 \u0441\u0435\u043a\u0443\u043d\u0434\u0443",
+      "293 \u0441\u0435\u043a\u0443\u043d\u0434\u044b"
+    ]
+  },
+  "presentations": 1581,
+  "familiar_cases": 801,
+  "hashes": {
+    "corrections.jsonl": "767cf798d95dd0487d11c07299f85b5dfa3a6c9badcb9aedd645d6d47f7c2577",
+    "acquisition.jsonl": "246201ced7d97426682c1e010d83e93151313ad9d683b6863fed955a99c60fdc",
+    "train.jsonl": "83e652e5fb204c39ae148a47a3167c55cee01d17e48d302bd1b5f0c7ca45ece8"
+  },
+  "pending": "Freeze a new historically prompt-disjoint holdout, its parent baseline and training protocol before any training. The 64 inspected v21 cases are now familiar development evidence.",
+  "limits": "Repeated correction targets and full rehearsal do not establish generalization. No model or release qualification."
+}

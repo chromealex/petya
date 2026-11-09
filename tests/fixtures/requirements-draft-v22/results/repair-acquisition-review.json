@@ -1,0 +1,32 @@
+{
+  "v14-repeat": {
+    "passed": true,
+    "reason": "Description is exact: closed-request count, hidden author names, 181-second refresh. Only the short summary says «записей» for «заявок»; no requirement changes.",
+    "answer_sha256": "01621e9825e1cea8b77cc959303a872c2a4526098b4d8908d3c097c1c49e2152"
+  },
+  "v21-previous-draft-quote": {
+    "passed": true,
+    "reason": "Same decision: the quote stays as an example and sending the manual to the reviewer is allowed; «не запрещает» equals «не является запретом».",
+    "answer_sha256": "a515c7af52460b9222682be49a693a2e1d16f39c55cb0167e3008eb4380dadba"
+  },
+  "fresh-undo-ban": {
+    "passed": true,
+    "reason": "Allowed transfer with both fields kept; «прежний запрет не налагать» keeps the withdrawn ban out, same as «не восстанавливать».",
+    "answer_sha256": "b043f2bf87f8858b1710e7537ba10baa1769cbf34c1922b1744d90855501e12c"
+  },
+  "fresh-add-not-replace": {
+    "passed": false,
+    "reason": "Addition lost: says to keep three fields «Порт», «Причал» and «Терминал» as if all existed, instead of keeping two and adding a separate new «Терминал»; summary invents an English word «Locations». Same addition-versus-replacement regression as the fourth v21 repair.",
+    "answer_sha256": "bce5226078ca5fa69e7e714a20ae7d46d1c26cd8b26ea7b2ea04f759141c4ddb"
+  },
+  "fresh-quoted-instruction": {
+    "passed": true,
+    "reason": "Keeps the quote whole as an example and allows sending the text to the teacher; the quote does not forbid it. Same two decisions, not mixed.",
+    "answer_sha256": "63e0612cb676ef262e5796611428bb5deea772d3dda26c0a1e52a75e9e1d504e"
+  },
+  "fresh-negative-order": {
+    "passed": true,
+    "reason": "Descending order with all five values and the repeat: -9, -9, -21, -38, -64; wording differs only.",
+    "answer_sha256": "3fc23428dbbaed41f99ec7d7e3ef4d9fa96aace9a7b4a6a589e8df2c057f349c"
+  }
+}

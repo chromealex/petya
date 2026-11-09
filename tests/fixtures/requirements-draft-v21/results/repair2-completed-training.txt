@@ -1,0 +1,88 @@
+Resumed 128 steps with Adam state
+Step 144 loss 0.01303
+Step 160 loss 0.01506
+Step 176 loss 0.03116
+Step 192 loss 0.00815
+Step 208 loss 0.00365
+Step 224 loss 0.00383
+Step 240 loss 0.03641
+Step 256 loss 0.02154
+Checkpoint 256 saved
+Step 272 loss 0.01696
+Step 288 loss 0.03524
+Step 304 loss 0.0124
+Step 320 loss 0.04417
+Step 336 loss 0.05307
+Step 352 loss 0.01055
+Step 368 loss 0.00606
+Step 384 loss 0.01886
+Checkpoint 384 saved
+Step 400 loss 0.02664
+Step 416 loss 0.0216
+Step 432 loss 0.01672
+Step 448 loss 0.01062
+Step 464 loss 0.00488
+Step 480 loss 0.00658
+Step 496 loss 0.00061
+Step 512 loss 0.0165
+Checkpoint 512 saved
+Step 528 loss 0.0032
+Step 544 loss 0.01591
+Step 560 loss 0.00713
+Step 576 loss 0.00422
+Step 592 loss 0.00806
+Step 608 loss 0.0048
+Step 624 loss 0.0059
+Step 640 loss 0.0199
+Checkpoint 640 saved
+Step 656 loss 0.03297
+Step 672 loss 0.02438
+Step 688 loss 0.00439
+Step 704 loss 0.00408
+Step 720 loss 0.00393
+Step 736 loss 0.01419
+Step 752 loss 0.01439
+Step 768 loss 0.01682
+Checkpoint 768 saved
+Step 784 loss 0.00605
+Step 800 loss 0.0024
+Step 816 loss 0.00723
+Step 832 loss 0.00186
+Step 848 loss 0.00951
+Step 864 loss 0.00718
+Step 880 loss 0.02039
+Step 896 loss 0.00082
+Checkpoint 896 saved
+Step 912 loss 0.00367
+Step 928 loss 0.00431
+Step 944 loss 0.00521
+Step 960 loss 0.0019
+Step 976 loss 0.00188
+Step 992 loss 0.00701
+Step 1008 loss 0.00513
+Step 1024 loss 0.00562
+Checkpoint 1024 saved
+Step 1040 loss 0.0057
+Step 1056 loss 0.00215
+Step 1072 loss 0.00093
+Step 1088 loss 0.01258
+Step 1104 loss 0.0129
+Step 1120 loss 0.00666
+Step 1136 loss 0.00365
+Step 1152 loss 0.05513
+Checkpoint 1152 saved
+Step 1168 loss 0.00681
+Step 1184 loss 0.00283
+Step 1200 loss 0.00343
+Step 1216 loss 0.00893
+Step 1232 loss 0.00498
+Step 1248 loss 0.00416
+Step 1264 loss 0.00666
+Step 1280 loss 0.00648
+Checkpoint 1280 saved
+Step 1296 loss 0.0123
+Step 1312 loss 0.00873
+Step 1328 loss 0.00303
+Step 1344 loss 0.00445
+Step 1360 loss 0.00631
+Checkpoint 1361 saved

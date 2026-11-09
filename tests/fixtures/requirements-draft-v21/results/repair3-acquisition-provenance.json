@@ -1,0 +1,23 @@
+{
+  "adapter_sha256": "99a053b1d537c4b88cbb2b55fe599999fcd9f13dd94cd9bc98c42171a0bac25f",
+  "files": {
+    "repair3-acquisition.jsonl": "8f1ab4e5a156f0fc38024ace600ef2b3482ea07d39a0065903e93425e272cefb",
+    "repair3-acquisition.manifest.json": "e329b7d05a08fa6b7c4f6c418010742659ef325e9a1b3c25cbfc2eea32af59cb",
+    "repair3-acquisition-review.json": "cfff0397bacd6169290a48fe6cbf4c2962faaef44ee46f7d37f664494fbbd5e8",
+    "repair3-acquisition-summary.json": "572684ca173a3e0faa9af714bf216d0dcb6713e01030dcb22e313801e2b9fd1f"
+  },
+  "result": {
+    "total": 737,
+    "exact": 727,
+    "passed": 736,
+    "failures": [
+      "v21-previous-draft-addition"
+    ]
+  },
+  "targeted_previous_failures_recovered": [
+    "v21-previous-draft-literal",
+    "v21-previous-draft-unset-lifetime"
+  ],
+  "selection": "Rejected: one familiar regression remains. Do not run candidate holdout.",
+  "scope": "Non-blind retention assessment; not independent improvement or release qualification."
+}

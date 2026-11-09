@@ -1,0 +1,27 @@
+{
+  "parent": "repair3-adapter",
+  "parent_sha256": "99a053b1d537c4b88cbb2b55fe599999fcd9f13dd94cd9bc98c42171a0bac25f",
+  "training_file": "repair4-train.jsonl",
+  "steps": 1397,
+  "layers": 32,
+  "epochs": 1,
+  "seed": 42,
+  "learning_rate": 1e-06,
+  "hashes": {
+    "repair4-train.jsonl": "71ac132c6f893b668a24cbf8a1bc35176477743c17b9ecd6bf147015fa66fd64",
+    "repair3-train.jsonl": "f4493f6f395e09d8c5341f25395b6472052e898e79f0dcb5ccdcca4234092966",
+    "train.jsonl": "6f1fbe80695afc6dc20e6f468f0f2c87d6976a8e9a8974b33fac44c787ae090e",
+    "acquisition.jsonl": "01b1345b2c67b80205c1f76e3436c114f0c84b5cf99ce60c479ac34b9ee5ba9c",
+    "fresh-drafts.jsonl": "d1d77f59c8f91df1d735d5c1d19a6d5e67caa80681574fc9eda6e3f7f6d4cc9a",
+    "check.jsonl": "813c63718b1a4136e38989d83efeff06cfe39ef51c472e8edc82f24c14531ae5"
+  },
+  "inspected_failure_ids": [
+    "v21-previous-draft-addition"
+  ],
+  "exposures": {
+    "v21-previous-draft-addition": 13
+  },
+  "recipe": "Unchanged 1385-presentation rehearsal plus 12 extra copies of the inspected regression target; no reference rewriting.",
+  "gate": "All 737 familiar cases must pass before committed selection and any candidate fresh inference. The original 64 independent cases remain untouched.",
+  "limits": "Synthetic non-blind repair. Additional training and exposure weights change together; no isolated causal claim or release qualification."
+}

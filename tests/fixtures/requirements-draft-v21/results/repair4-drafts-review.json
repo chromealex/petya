@@ -1,0 +1,82 @@
+{
+  "fresh-cancel-first": {
+    "answer_sha256": "593747dbf0e749b3185b911f0117b8409a2e2072503294d416d936ba84717185",
+    "passed": false,
+    "reason": "Preserves both field names and the remaining replacement, but adds an unrequested prohibition on changing the value of in_mark; canceling a rename does not freeze its value."
+  },
+  "fresh-cancel-second": {
+    "answer_sha256": "27f825dc23a95bcb0077f646f67b9498d68fc7f0eb4795be2e826e015039fd67",
+    "passed": false,
+    "reason": "Incorrectly forbids the first replacement and loses result_no, although only box_no to shelf_no was canceled."
+  },
+  "fresh-revoke-transmit": {
+    "answer_sha256": "cd4c870cf9ff721600aa7cf105cf45480cc9be899a77af822befab7f93f588e8",
+    "passed": true,
+    "reason": "Preserves the draft, replacement with conclusion number, cost and prohibition on sending to the evaluator."
+  },
+  "fresh-unchanged-field-send": {
+    "answer_sha256": "b9383a27f3a9c62b4fc4dfbba1a7dd44474b0ad7c0055ca3a00d8be811c998f0",
+    "passed": true,
+    "reason": "Preserves case number and date, rejects the proposed application-number field and permits sending to the notary, using the same interpretation as the frozen parent review."
+  },
+  "fresh-copy-scope": {
+    "answer_sha256": "4166fff9fbe22606b49b6705ebff39af0562cf613d833919518cedc14a256f5b",
+    "passed": false,
+    "reason": "The blanket instruction to prepare without transmission contradicts permission for the economist, as in the frozen parent failure."
+  },
+  "fresh-undo-ban": {
+    "answer_sha256": "9aed28b0a1a5d8a0bf02c7d6c00d337cf07f8ca22f5d0f926c1d9eea4fb19ec6",
+    "passed": true,
+    "reason": "Retains inventory number and room and permitted transfer to the custodian; explicitly cancels the old ban."
+  },
+  "fresh-add-not-replace": {
+    "answer_sha256": "2e996a0dc302c61982977a2f8cdfa901dbe290bbf59f40d73cc50f5cbc1f5384",
+    "passed": true,
+    "reason": "Adds Terminal while retaining Port and Pier with full exact names. The broad address heading follows the same acceptable interpretation as the parent."
+  },
+  "fresh-code-versus-item": {
+    "answer_sha256": "0ef98676229cf24c2296579046100f6f2e82c4224cfe71701a615aeb3fc1868a",
+    "passed": false,
+    "reason": "Invents ignoring repeated code input as an implementation requirement and omits the explicit distinction permitting another badge with a new code; the heading is also poor."
+  },
+  "fresh-duration-open": {
+    "answer_sha256": "2252f6194082b78dc0dccc175c5316c23e093633a0c3e314e71e5309536910a3",
+    "passed": false,
+    "reason": "Retains one-use container receipt code and open duration question but omits the explicit ban on login use, as in the parent."
+  },
+  "fresh-exact-caption": {
+    "answer_sha256": "bd5c3f2c7ca9f1b76824becae0563b018004ec850f1dc426a61708fdbeb6b826",
+    "passed": false,
+    "reason": "Preserves both exact names and normalization restrictions but invents a broader prohibition on changing other names."
+  },
+  "fresh-display-only": {
+    "answer_sha256": "d2283f1fb1a192a29d7e0d0789eee61576ee2485231cf6dc7a6b642d0bda47ff",
+    "passed": false,
+    "reason": "Keeps display replacement but omits the explicit prohibition on value transfer and uses malformed wording for the unchanged-storage restriction."
+  },
+  "fresh-quoted-instruction": {
+    "answer_sha256": "42f3896f4d3e9b8e307168a12b0a7bcd06944c962a668233553bf32671307ce1",
+    "passed": true,
+    "reason": "Keeps the complete quote as an example and permits text transmission with the teacher identified. The same recipient typo and awkward dative phrasing were accepted in the frozen parent review; no quoted ban is applied."
+  },
+  "fresh-negative-order": {
+    "answer_sha256": "2a68d8ec59274cdb473617d1e7e469f34b7c50ae32b6ecaed072b119690dd98a",
+    "passed": true,
+    "reason": "Provides the correct complete descending five-element result and preserves duplicates."
+  },
+  "fresh-interval-prose": {
+    "answer_sha256": "63aed85961b01c82963e17e0ba162346b45c887b9f2503e8118688a1c5b66285",
+    "passed": true,
+    "reason": "Exactly preserves inclusive -63, exclusive -26 and the ban on rounding."
+  },
+  "fresh-recipient-pending": {
+    "answer_sha256": "108d4257f9d1b03f6c97d5557456f7d0d856966d28cf25aa0ce70804900764b5",
+    "passed": true,
+    "reason": "The heading retains the room-change topic; recipient remains unselected, all sending is prohibited and the required recipient question remains open."
+  },
+  "fresh-rename-withdrawn": {
+    "answer_sha256": "b9dbdc9e0b18516fcabe523b39c7d666048c4d5c76fe6b4009db035c9ff3e6e5",
+    "passed": true,
+    "reason": "Preserves the exact old name, rejects the withdrawn rename and retains purple icon and unchanged link."
+  }
+}

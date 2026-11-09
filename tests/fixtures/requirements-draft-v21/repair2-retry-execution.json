@@ -1,0 +1,14 @@
+{
+  "training_protocol": "repair2-protocol.json",
+  "training_protocol_sha256": "fdb54b04481650f0dde8115b86ba6d3bdedf4914aaab2def0cf4d84e5b486c30",
+  "trainer": "train_checkpointed.py",
+  "trainer_sha256": "e03d87ded4e18c243abd3724d0b8f273c52c2292c5be0abe4faae1cbacf1b6f9",
+  "checkpoint_helper_sha256": "93373b315a10eecd7a0b0d9a64a0b99bb4c5957aea6af2ce238253e9c7d34549",
+  "checkpoint_interval": 128,
+  "initial_resume_check_stop_after": 16,
+  "recipe_changes": false,
+  "resume_policy": "Restore weights, Adam moments and step, loss history and deterministic order; reject changed run identity or random-state advancement. Zero dropout only.",
+  "publication": "Atomic tensor snapshot and hash-bound latest pointer; retain two committed generations. Final adapter is separate from checkpoints.",
+  "validation": "CPU real-MLX small-model cross-process equality passed; full-model continuation still needs execution.",
+  "gpu_failure": "Recovery checkpointing does not establish or repair the underlying Metal hang cause."
+}

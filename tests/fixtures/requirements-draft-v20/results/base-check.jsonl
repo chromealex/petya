@@ -1,0 +1,48 @@
+{"id": "numeric-0-equal", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": -83,\n  \"upper\": -83,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-0-lower", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": -83,\n  \"upper\": null,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": null\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-0-upper", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": -83,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-0-open", "task": "bounds", "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-1-equal", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": -54,\n  \"upper\": -54,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-1-lower", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": -54,\n  \"upper\": null,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": null\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-1-upper", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": -54,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-1-open", "task": "bounds", "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-2-equal", "task": "bounds", "answer": "{\"status\": \"final\", \"lower\": 11, \"upper\": 11, \"lowerInclusive\": true, \"upperInclusive\": true}", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-2-lower", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 11,\n  \"upper\": null,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": null\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-2-upper", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 11,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-2-open", "task": "bounds", "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-3-equal", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 47,\n  \"upper\": 47,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-3-lower", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 47,\n  \"upper\": null,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": null\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-3-upper", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 47,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-3-open", "task": "bounds", "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-4-equal", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 96,\n  \"upper\": 96,\n  \"lowerInclusive\": true,\n  \"upperInclusive\": true\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-4-lower", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": 96,\n  \"upper\": null,\n  \"lowerInclusive\": false,\n  \"upperInclusive\": null\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-4-upper", "task": "bounds", "answer": "```json\n{\n  \"status\": \"final\",\n  \"lower\": null,\n  \"upper\": 96,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": true\n}\n```", "exactJSON": true, "schemaValid": true}
+{"id": "numeric-4-open", "task": "bounds", "answer": "{\n  \"status\": \"open\",\n  \"lower\": null,\n  \"upper\": null,\n  \"lowerInclusive\": null,\n  \"upperInclusive\": null\n}", "exactJSON": true, "schemaValid": true}
+{"id": "sort-0-0-0", "task": "general", "answer": "[-87, -51, -19, -19]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-0-0-1", "task": "general", "answer": "```json\n[-87, -51, -19, -19]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-0-1-0", "task": "general", "answer": "[-87, -51, -19, -19]", "exactJSON": false, "schemaValid": true}
+{"id": "sort-0-1-1", "task": "general", "answer": "```json\n[-19, -19, -51, -87]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-1-0-0", "task": "general", "answer": "[-92, -68, -31, -31]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-1-0-1", "task": "general", "answer": "```json\n[-92, -68, -31, -31]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-1-1-0", "task": "general", "answer": "[-31, -31, -68, -92]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-1-1-1", "task": "general", "answer": "```json\n[-31, -31, -68, -92]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-2-0-0", "task": "general", "answer": "[-79, -47, -22, -22]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-2-0-1", "task": "general", "answer": "```json\n[-79, -47, -22, -22]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-2-1-0", "task": "general", "answer": "[-22, -22, -47, -79]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-2-1-1", "task": "general", "answer": "```json\n[-22, -22, -47, -79]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-3-0-0", "task": "general", "answer": "[-58, -16, -16, -101]", "exactJSON": false, "schemaValid": true}
+{"id": "sort-3-0-1", "task": "general", "answer": "```json\n[-101, -58, -16, -16]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-3-1-0", "task": "general", "answer": "[-16, -16, -58, -101]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-3-1-1", "task": "general", "answer": "```json\n[-16, -16, -58, -101]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-4-0-0", "task": "general", "answer": "[-66, -39, -13, -13]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-4-0-1", "task": "general", "answer": "```json\n[-66, -39, -13, -13]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-4-1-0", "task": "general", "answer": "[-66, -39, -13, -13]", "exactJSON": false, "schemaValid": true}
+{"id": "sort-4-1-1", "task": "general", "answer": "```json\n[-13, -13, -39, -66]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-5-0-0", "task": "general", "answer": "[-95, -72, -24, -24]", "exactJSON": true, "schemaValid": true}
+{"id": "sort-5-0-1", "task": "general", "answer": "```json\n[-95, -72, -24, -24]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "sort-5-1-0", "task": "general", "answer": "[-72, -24, -24, -95]", "exactJSON": false, "schemaValid": true}
+{"id": "sort-5-1-1", "task": "general", "answer": "```json\n[-24, -24, -72, -95]\n```", "exactJSON": true, "schemaValid": true}
+{"id": "general-0", "task": "general", "answer": "6", "exactJSON": true, "schemaValid": true}
+{"id": "general-1", "task": "general", "answer": "182", "exactJSON": true, "schemaValid": true}
+{"id": "general-2", "task": "general", "answer": "3", "exactJSON": true, "schemaValid": true}
+{"id": "general-3", "task": "general", "answer": "60", "exactJSON": true, "schemaValid": true}

@@ -1,0 +1,13 @@
+{
+  "status": "frozen_before_parent_inference_and_training",
+  "drafts": 12,
+  "checks": 30,
+  "hashes": {
+    "fresh-drafts.jsonl": "c7443cd7847af2fc3d9ff390c7eafa0c10e3be8807bd9874e44518fe3d692ea5",
+    "check.jsonl": "45f1372e7ce30327e9edd99ea1807c508c2e4a7c2064a03d8548f9157946ed09",
+    "train.jsonl": "83e652e5fb204c39ae148a47a3167c55cee01d17e48d302bd1b5f0c7ca45ece8",
+    "acquisition.jsonl": "246201ced7d97426682c1e010d83e93151313ad9d683b6863fed955a99c60fdc"
+  },
+  "review": "Review every draft against all user turns. Require all explicit constraints, no invented restrictions, consistent recipient scope, usable Russian, correct literals, and only unresolved questions. Equivalent wording is allowed. Numeric checks require exact JSON. Preserve every parent success and improve total after full familiar retention and committed candidate selection.",
+  "limits": "Authored synthetic cases with fixed assistant history; prompt disjointness is not distributional independence or live-dialogue qualification. Never train on these cases before candidate evaluation."
+}

@@ -1,0 +1,117 @@
+{
+  "check": {
+    "total": 48,
+    "exact": 43,
+    "passed": 43,
+    "failures": [
+      "sort-0-1-0",
+      "sort-0-1-1",
+      "sort-2-1-0",
+      "sort-5-1-0",
+      "sort-5-1-1"
+    ],
+    "decisions": {
+      "numeric-0-equal": true,
+      "numeric-0-lower": true,
+      "numeric-0-upper": true,
+      "numeric-0-open": true,
+      "numeric-1-equal": true,
+      "numeric-1-lower": true,
+      "numeric-1-upper": true,
+      "numeric-1-open": true,
+      "numeric-2-equal": true,
+      "numeric-2-lower": true,
+      "numeric-2-upper": true,
+      "numeric-2-open": true,
+      "numeric-3-equal": true,
+      "numeric-3-lower": true,
+      "numeric-3-upper": true,
+      "numeric-3-open": true,
+      "numeric-4-equal": true,
+      "numeric-4-lower": true,
+      "numeric-4-upper": true,
+      "numeric-4-open": true,
+      "sort-0-0-0": true,
+      "sort-0-0-1": true,
+      "sort-0-1-0": false,
+      "sort-0-1-1": false,
+      "sort-1-0-0": true,
+      "sort-1-0-1": true,
+      "sort-1-1-0": true,
+      "sort-1-1-1": true,
+      "sort-2-0-0": true,
+      "sort-2-0-1": true,
+      "sort-2-1-0": false,
+      "sort-2-1-1": true,
+      "sort-3-0-0": true,
+      "sort-3-0-1": true,
+      "sort-3-1-0": true,
+      "sort-3-1-1": true,
+      "sort-4-0-0": true,
+      "sort-4-0-1": true,
+      "sort-4-1-0": true,
+      "sort-4-1-1": true,
+      "sort-5-0-0": true,
+      "sort-5-0-1": true,
+      "sort-5-1-0": false,
+      "sort-5-1-1": false,
+      "general-0": true,
+      "general-1": true,
+      "general-2": true,
+      "general-3": true
+    },
+    "literal_checks": {}
+  },
+  "drafts": {
+    "total": 20,
+    "exact": 0,
+    "passed": 11,
+    "failures": [
+      "draft-two-edits",
+      "draft-export",
+      "draft-sort",
+      "draft-pressure",
+      "draft-answered-format",
+      "draft-recipient",
+      "draft-return",
+      "draft-label-colour",
+      "draft-unset-lifetime"
+    ],
+    "decisions": {
+      "draft-payment": true,
+      "draft-copies": true,
+      "draft-two-edits": false,
+      "draft-addition": true,
+      "draft-literal": true,
+      "draft-export": false,
+      "draft-sort": false,
+      "draft-pressure": false,
+      "draft-quote": true,
+      "draft-display": true,
+      "draft-versions": true,
+      "draft-reallow": true,
+      "draft-token": true,
+      "draft-answered-format": false,
+      "draft-recipient": false,
+      "draft-delete-undo": true,
+      "draft-return": false,
+      "draft-label-colour": false,
+      "draft-proposal": true,
+      "draft-unset-lifetime": false
+    },
+    "literal_checks": {
+      "draft-addition": {
+        "passed": true,
+        "missing": []
+      },
+      "draft-literal": {
+        "passed": true,
+        "missing": []
+      },
+      "draft-label-colour": {
+        "passed": true,
+        "missing": []
+      }
+    }
+  }
+}

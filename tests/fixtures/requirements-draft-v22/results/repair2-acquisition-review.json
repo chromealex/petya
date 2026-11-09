@@ -1,0 +1,17 @@
+{
+  "v21-previous-draft-quote": {
+    "passed": true,
+    "reason": "Same decision: the quote stays as an example and sending the manual to the reviewer is allowed; «не запрещает» equals «не является запретом».",
+    "answer_sha256": "a515c7af52460b9222682be49a693a2e1d16f39c55cb0167e3008eb4380dadba"
+  },
+  "fresh-revoke-transmit": {
+    "passed": false,
+    "reason": "Prohibition lost: «Оценщику не отправка разрешена» is ungrammatical and reads as permission; the reason «разрешение отозвано» is dropped. The draft must say not to send it to the appraiser because the permission was withdrawn.",
+    "answer_sha256": "ca17c16089a582047afc1bcd347de0989bf8f186f317dd62e0aa4e1b22a3de8b"
+  },
+  "fresh-quoted-instruction": {
+    "passed": false,
+    "reason": "Requirements are kept (quote whole, sending to the teacher allowed, the quote is not a ban), but the description has a broken word «сохранитьась», so the text shown to the user is not well-formed Russian.",
+    "answer_sha256": "74d853543ca8d17f662df41d3384bf1e6576072c482a1fc5a34082b1a9d0287b"
+  }
+}

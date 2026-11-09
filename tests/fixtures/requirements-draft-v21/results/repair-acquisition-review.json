@@ -1,0 +1,107 @@
+{
+  "v18-revoke-after-grant": {
+    "passed": true,
+    "reason": "Only grammatical case differs. The act number replaces the contract number; draft retention and revoked customer sending remain explicit.",
+    "answer_sha256": "fe78483919fd0bbccdeab015cec6118521588a974d3c9084360c70ce6bb34e8b"
+  },
+  "v18-regrant-limited": {
+    "passed": true,
+    "reason": "Only the heading is shortened. Full report remains forbidden for the buyer; the short version with the same check code and without the result is authorized.",
+    "answer_sha256": "20ded61c335bfa73b947820c8d3c967533f1d6e605f902a5878ec0bdf26b3d0d"
+  },
+  "v19-repeat": {
+    "passed": true,
+    "reason": "Grammatical correction and a more specific heading preserve the final 257-second interval, application count and hidden executor names.",
+    "answer_sha256": "40f0ea4468b34928fe4dd91083cc7ce98a2c7ae96769f315bc4fdd534c2794a1"
+  },
+  "v20-repeat": {
+    "passed": true,
+    "reason": "Grammatical correction and a more specific heading preserve the final 293-second interval, agreed-act count and hidden reviewer names.",
+    "answer_sha256": "27a929e9fd62b76b1494083c900935ca4554bfee2843279ecdf56ea6abf3b4c4"
+  },
+  "v20-withdrawn-latest": {
+    "passed": true,
+    "reason": "Consent is a synonym for permission here. Supply number replaces order number, the draft is retained, and supplier sending is revoked.",
+    "answer_sha256": "ec7c5d373b0beea47051e82b7a36ac48dfd6f1b393542165604c7e9b83c3b365"
+  },
+  "v20-only-one-recipient": {
+    "passed": true,
+    "reason": "Despite a heading typo, identical master/student memos without exercises and separate sending permissions are preserved. The student prohibition is explicit.",
+    "answer_sha256": "8ce4050903a8fb95cc0c23f54e9ca18a06594a5fc611743c99e9dff67241ac21"
+  },
+  "v20-verbatim-name": {
+    "passed": true,
+    "reason": "Both exact literals and the prohibition on normalization are explicit; character preservation is expressed compactly.",
+    "answer_sha256": "ebaac412e5ffbc51635545b871501fcf088330eb8a060a330881700bfe7100bd"
+  },
+  "v20-sort-with-rule": {
+    "passed": true,
+    "reason": "Duplicates is equivalent to repetitions. Descending order and the complete correct four-element result are present.",
+    "answer_sha256": "de0adb4b1be487a16376e8b77e4bbc59c1a7924cfdf6f48242f1e37ce8ca52e3"
+  },
+  "v21-previous-draft-copies": {
+    "passed": true,
+    "reason": "Only the heading differs. Identical schemes, no extra explanations, geodesist permission and foreman prohibition match the source.",
+    "answer_sha256": "a6e45fd618b387ff4994365e54c29c5678c48ea50305dc59d4a7aa97b2797df0"
+  },
+  "v21-previous-draft-addition": {
+    "passed": true,
+    "reason": "Region and district remain, Oblast is a separate addition rather than a replacement, and full uns abbreviated field names are retained.",
+    "answer_sha256": "650edf3e59c4b4c4c2eb5018aa391837651b937aa86dc8639b00886b8b3400df"
+  },
+  "v21-previous-draft-literal": {
+    "passed": true,
+    "reason": "Both original names, including case, yo and zeros, are preserved with no normalization or document renaming.",
+    "answer_sha256": "8504d6fc8c8ca8786903d3f07fe660217af2fe71999eebe7b53c574212377813"
+  },
+  "v21-previous-draft-sort": {
+    "passed": false,
+    "reason": "The user explicitly requests the full sorted result inside the task. The answer only repeats the unsorted input and instructs someone to sort it; -11, -11, -28, -46 is missing.",
+    "answer_sha256": "f52c097ec9fabb45393ff7a1d3917b5b657151c06e83156fc92b484644600790"
+  },
+  "v21-previous-draft-quote": {
+    "passed": true,
+    "reason": "The quoted example remains intact; sending the manual to the reviewer is explicitly allowed and distinguished from the quoted instruction.",
+    "answer_sha256": "214766ded5d5846170af51defd427bddb9ace851d8482a294a00d0384a8cb0b4"
+  },
+  "v21-previous-draft-display": {
+    "passed": true,
+    "reason": "Delivery reference instead of booking reference expresses the display replacement; database changes, migration and data transfer remain prohibited.",
+    "answer_sha256": "3e1dcc31ddb874b53f0e2e27c771dc95cbeffde58ec905d8477fbd1621a40728"
+  },
+  "v21-previous-draft-reallow": {
+    "passed": true,
+    "reason": "Curator sending is explicitly allowed with both group number and period. The previous prohibition is not restored.",
+    "answer_sha256": "f65bb9d7591134e867b9140be8f2c4a6c88e9f9a0f617c7becc03478d1b8546e"
+  },
+  "v21-previous-draft-answered-format": {
+    "passed": false,
+    "reason": "Manual ODS and no automation are retained, but the specified object is a list of contracts. Exporting contracts omits the list scope and can instead describe document export.",
+    "answer_sha256": "228c2e550486dd388916ea42d9dfb3b6704ea0dd94573a2a02666ac9937366d8"
+  },
+  "v21-previous-draft-recipient": {
+    "passed": true,
+    "reason": "The open recipient question is paraphrased; draft-only, no sending, and no automatic previous-customer selection remain explicit.",
+    "answer_sha256": "a242951c4862fea4baa7dffb35c542aefcfb3cd2568f733df0da5fce06738832"
+  },
+  "v21-previous-draft-delete-undo": {
+    "passed": true,
+    "reason": "Only fax_line is deleted; home_line is retained and work_line left unchanged. The heading is broader but does not contradict the fields.",
+    "answer_sha256": "1b25cfab40d33a80017bc10acef0296ccf047eda0e4f474f0a659c314fb2ae45"
+  },
+  "v21-previous-draft-return": {
+    "passed": true,
+    "reason": "Returned-book count, hidden reader names and exclusion of the unrelated chair project are preserved.",
+    "answer_sha256": "40a82aa82f10bf26a7d37e05f1e353e815066198a2a92c0e8acbeb6c09299cfa"
+  },
+  "v21-previous-draft-proposal": {
+    "passed": false,
+    "reason": "The phrase INN without a field must not be added is malformed and conditional; it does not preserve the unconditional rejection of INN and other unapproved fields.",
+    "answer_sha256": "66a90ba573507ee92ae34572ea98c3fda645709a0f94582f89d5315bd51ec5ea"
+  },
+  "v21-previous-draft-unset-lifetime": {
+    "passed": true,
+    "reason": "Single use, equipment receipt purpose, exclusion of profile login and the unresolved lifetime question remain explicit; no proposed lifetime is adopted.",
+    "answer_sha256": "6647b78c6123e3c4f01423d3662dd1ceaadd16f9605c0502dcbdbd90f5134ef5"
+  }
+}
