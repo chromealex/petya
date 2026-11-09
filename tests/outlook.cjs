@@ -18,6 +18,6 @@ const json=v=>new Response(JSON.stringify(v));
  const m=new MailAccounts({google:opts(()=>google,v=>google=v),microsoft:opts(()=>microsoft,v=>microsoft=v)});assert.deepEqual(m.accounts().map(a=>a.id),['same','microsoft:same']);
  m.rename('microsoft:same','Work');assert.equal(google.accounts[0].label,undefined);assert.equal(microsoft.accounts[0].label,'Work');
  let reads=[];m.google.read=async r=>{reads.push(['google',r.accounts]);return {results:[{account:'Google',messages:[]}]};};m.microsoft.read=async r=>{reads.push(['ms',r.accounts]);return {results:[{account:'Microsoft',error:'expired'}]};};
- await assert.rejects(()=>m.read({}),/Выберите/);assert.equal((await m.read({allAccounts:true})).results.length,2);assert.deepEqual(reads,[['google',['same']],['ms',['same']]]);m.disconnect('microsoft:same');assert.equal(google.accounts.length,1);m.stop();
+ await assert.rejects(()=>m.read({}),/выберите/i);assert.equal((await m.read({allAccounts:true})).results.length,2);assert.deepEqual(reads,[['google',['same']],['ms',['same']]]);m.disconnect('microsoft:same');assert.equal(google.accounts.length,1);m.stop();
  console.log('Outlook: PKCE, state, consent denial, refresh single flight, read-only Graph, account isolation and mixed-provider reads passed');
 })().catch(e=>{console.error(e);process.exitCode=1;});
