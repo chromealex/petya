@@ -8,6 +8,14 @@ Desktop MVP 0.5 of a voice assistant for macOS and Windows: tray, notifications,
 
 OAuth registration package: [oauth/REGISTRATION.md](../oauth/REGISTRATION.md).
 
+## 0.12.2 — «Важное» as a popover, steadier materials, «Реализовать» fixed
+
+- «Важное» opens as a popover (it was cut off inside the header); each mark has «Убрать», and there is «Убрать все»; the star on a message removes its mark.
+- Materials: a meeting recording no longer redraws the whole page every few seconds; an open transcript keeps its scroll.
+- «Реализовать» no longer fails with «Чат изменился»; the card opens the plan's new chat.
+- A chip above the input shows what the chat is about («Про: Jira · BW-4569»); errors under the input go away by themselves.
+- The chat browser shows why a page did not load instead of a white screen.
+
 ## 0.12.1 — a meeting keeps recording when you switch company
 
 - The company can be switched during a meeting: the recording goes on in the background for its own company, whose tab shows a red dot; another company sees it and can stop it, and starts no recording of its own meanwhile. Recognition waits until the recording company is open again and uses its speech settings and memory.
